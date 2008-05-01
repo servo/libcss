@@ -32,7 +32,7 @@ typedef union css_lexer_optparams {
 /**
  * Token type
  */
-typedef enum css_token_type{ 
+typedef enum css_token_type { 
 	CSS_TOKEN_IDENT, CSS_TOKEN_ATKEYWORD, CSS_TOKEN_STRING,
 	CSS_TOKEN_HASH, CSS_TOKEN_NUMBER, CSS_TOKEN_PERCENTAGE, 
 	CSS_TOKEN_DIMENSION, CSS_TOKEN_URI, CSS_TOKEN_UNICODE_RANGE, 
