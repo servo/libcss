@@ -1,0 +1,10 @@
+# Index of testcases
+#
+# Test		Description				DataDir
+
+libcss		Library initialisation/finalisation
+csdetect	Character set detection			csdetect
+lex		Lexing					css
+
+# Regression tests
+
