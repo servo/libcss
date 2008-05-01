@@ -5,6 +5,7 @@
 libcss		Library initialisation/finalisation
 csdetect	Character set detection			csdetect
 lex		Lexing					css
+lex-auto	Automated lexer tests			lex
 
 # Regression tests
 

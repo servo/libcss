@@ -33,6 +33,7 @@ void __assert2(const char *expr, const char *function,
 typedef bool (*line_func)(const char *data, size_t datalen, void *pw);
 
 static size_t parse_strlen(const char *str, size_t limit);
+char *parse_strnchr(const char *str, size_t len, int chr);
 bool parse_testfile(const char *filename, line_func callback, void *pw);
 size_t parse_filesize(const char *filename);
 
@@ -92,6 +93,32 @@ size_t parse_strlen(const char *str, size_t limit)
 	len++;
 
 	return len;
+}
+
+/**
+ * Length-limited strchr
+ *
+ * \param str  String to search in
+ * \param len  Length of string
+ * \param chr  Character to search for
+ * \return Pointer to character in string, or NULL if not found
+ */
+char *parse_strnchr(const char *str, size_t len, int chr)
+{
+	size_t i;
+
+	if (str == NULL)
+		return NULL;
+
+	for (i = 0; i < len; i++) {
+		if (str[i] == chr)
+			break;
+	}
+
+	if (i == len)
+		return NULL;
+
+	return (char *) str + i;
 }
 
 /**

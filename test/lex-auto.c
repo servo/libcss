@@ -1,0 +1,260 @@
+#include <inttypes.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <parserutils/input/inputstream.h>
+
+#include <libcss/libcss.h>
+
+#include "charset/detect.h"
+#include "lex/lex.h"
+#include "utils/utils.h"
+
+#include "testutils.h"
+
+typedef struct exp_entry {
+	css_token_type type;
+} exp_entry;
+
+typedef struct line_ctx {
+	size_t buflen;
+	size_t bufused;
+	uint8_t *buf;
+
+	size_t explen;
+	size_t expused;
+	exp_entry *exp;
+
+	bool indata;
+	bool inexp;
+} line_ctx;
+
+static bool handle_line(const char *data, size_t datalen, void *pw);
+static void parse_expected(line_ctx *ctx, const char *data, size_t len);
+static const char *string_from_type(css_token_type type);
+static css_token_type string_to_type(const char *data, size_t len);
+static void run_test(const uint8_t *data, size_t len, 
+		exp_entry *exp, size_t explen);
+
+static void *myrealloc(void *ptr, size_t len, void *pw)
+{
+	UNUSED(pw);
+
+	return realloc(ptr, len);
+}
+
+int main(int argc, char **argv)
+{
+	line_ctx ctx;
+
+	if (argc != 3) {
+		printf("Usage: %s <aliases_file> <filename>\n", argv[0]);
+		return 1;
+	}
+
+	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
+
+	ctx.buflen = parse_filesize(argv[2]);
+	if (ctx.buflen == 0)
+		return 1;
+
+	ctx.buf = malloc(ctx.buflen);
+	if (ctx.buf == NULL) {
+		printf("Failed allocating %u bytes\n",
+				(unsigned int) ctx.buflen);
+		return 1;
+	}
+
+	ctx.buf[0] = '\0';
+	ctx.bufused = 0;
+	ctx.explen = 0;
+	ctx.expused = 0;
+	ctx.exp = NULL;
+	ctx.indata = false;
+	ctx.inexp = false;
+
+	assert(parse_testfile(argv[2], handle_line, &ctx) == true);
+
+	/* and run final test */
+	if (ctx.bufused > 0)
+		run_test(ctx.buf, ctx.bufused, ctx.exp, ctx.expused);
+
+	free(ctx.buf);
+
+	assert(css_finalise(myrealloc, NULL) == CSS_OK);
+
+	printf("PASS\n");
+
+	return 0;
+}
+
+bool handle_line(const char *data, size_t datalen, void *pw)
+{
+	line_ctx *ctx = (line_ctx *) pw;
+
+	if (data[0] == '#') {
+		if (ctx->inexp) {
+			/* This marks end of testcase, so run it */
+
+			run_test(ctx->buf, ctx->bufused, 
+					ctx->exp, ctx->expused);
+
+			ctx->buf[0] = '\0';
+			ctx->bufused = 0;
+
+			ctx->expused = 0;
+		}
+
+		ctx->indata = (strncasecmp(data+1, "data", 4) == 0);
+		ctx->inexp  = (strncasecmp(data+1, "expected", 8) == 0);
+	} else {
+		if (ctx->indata) {
+			memcpy(ctx->buf + ctx->bufused, data, datalen);
+			ctx->bufused += datalen;
+		}
+		if (ctx->inexp) {
+			if (data[datalen - 1] == '\n')
+				datalen -= 1;
+
+			parse_expected(ctx, data, datalen);
+		}
+	}
+
+	return true;
+}
+
+void parse_expected(line_ctx *ctx, const char *data, size_t len)
+{
+	const char *colon = parse_strnchr(data, len, ':');
+	if (colon == NULL)
+		colon = data + len;
+
+	css_token_type type = string_to_type(data, colon - data);
+
+	/** \todo expected token data */
+
+	/* Append to list of expected tokens */
+	if (ctx->expused == ctx->explen) {
+		exp_entry *temp = realloc(ctx->exp, 
+				ctx->explen * 2 * sizeof(exp_entry));
+		if (temp == NULL)
+			assert(0 && "No memory for expected tokens");
+
+		ctx->exp = temp;
+		ctx->explen *= 2;
+	}
+
+	ctx->exp[ctx->expused].type = type;
+	ctx->expused++;
+}
+
+const char *string_from_type(css_token_type type)
+{
+	const char *names[] =
+	{
+		"IDENT", "ATKEYWORD", "STRING", "HASH", "NUMBER",
+		"PERCENTAGE", "DIMENSION", "URI", "UNICODE-RANGE", "CDO",
+		"CDC", "S", "COMMENT", "FUNCTION", "INCLUDES",
+		"DASHMATCH", "PREFIXMATCH", "SUFFIXMATCH", "SUBSTRINGMATCH",
+		"CHAR", "EOF"
+	};
+
+	return names[type];
+}
+
+css_token_type string_to_type(const char *data, size_t len)
+{
+	if (len == 5 && strncasecmp(data, "IDENT", len) == 0)
+		return CSS_TOKEN_IDENT;
+	else if (len == 9 && strncasecmp(data, "ATKEYWORD", len) == 0)
+		return CSS_TOKEN_ATKEYWORD;
+	else if (len == 6 && strncasecmp(data, "STRING", len) == 0)
+		return CSS_TOKEN_STRING;
+	else if (len == 4 && strncasecmp(data, "HASH", len) == 0)
+		return CSS_TOKEN_HASH;
+	else if (len == 6 && strncasecmp(data, "NUMBER", len) == 0)
+		return CSS_TOKEN_NUMBER;
+	else if (len == 10 && strncasecmp(data, "PERCENTAGE", len) == 0)
+		return CSS_TOKEN_PERCENTAGE;
+	else if (len == 9 && strncasecmp(data, "DIMENSION", len) == 0)
+		return CSS_TOKEN_DIMENSION;
+	else if (len == 3 && strncasecmp(data, "URI", len) == 0)
+		return CSS_TOKEN_URI;
+	else if (len == 13 && strncasecmp(data, "UNICODE-RANGE", len) == 0)
+		return CSS_TOKEN_UNICODE_RANGE;
+	else if (len == 3 && strncasecmp(data, "CDO", len) == 0)
+		return CSS_TOKEN_CDO;
+	else if (len == 3 && strncasecmp(data, "CDC", len) == 0)
+		return CSS_TOKEN_CDC;
+	else if (len == 1 && strncasecmp(data, "S", len) == 0)
+		return CSS_TOKEN_S;
+	else if (len == 7 && strncasecmp(data, "COMMENT", len) == 0)
+		return CSS_TOKEN_COMMENT;
+	else if (len == 8 && strncasecmp(data, "FUNCTION", len) == 0)
+		return CSS_TOKEN_FUNCTION;
+	else if (len == 8 && strncasecmp(data, "INCLUDES", len) == 0)
+		return CSS_TOKEN_INCLUDES;
+	else if (len == 9 && strncasecmp(data, "DASHMATCH", len) == 0)
+		return CSS_TOKEN_DASHMATCH;
+	else if (len == 11 && strncasecmp(data, "PREFIXMATCH", len) == 0)
+		return CSS_TOKEN_PREFIXMATCH;
+	else if (len == 11 && strncasecmp(data, "SUFFIXMATCH", len) == 0)
+		return CSS_TOKEN_SUFFIXMATCH;
+	else if (len == 14 && strncasecmp(data, "SUBSTRINGMATCH", len) == 0)
+		return CSS_TOKEN_SUBSTRINGMATCH;
+	else if (len == 4 && strncasecmp(data, "CHAR", len) == 0)
+		return CSS_TOKEN_CHAR;
+	else
+		return CSS_TOKEN_EOF;
+}
+
+void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
+{
+	parserutils_inputstream *input;
+	css_lexer *lexer;
+	css_error error;
+	const css_token *tok;
+	size_t e;
+	static int testnum;
+
+	input = parserutils_inputstream_create("UTF-8", CSS_CHARSET_DICTATED,
+			css_charset_extract, myrealloc, NULL);
+	assert(input != NULL);
+
+	lexer = css_lexer_create(input, myrealloc, NULL);
+	assert(lexer != NULL);
+
+	assert(parserutils_inputstream_append(input, data, len) == 
+			PARSERUTILS_OK);
+
+	assert(parserutils_inputstream_append(input, NULL, 0) == 
+			PARSERUTILS_OK);
+
+	e = 0;
+	testnum++;
+
+	while ((error = css_lexer_get_token(lexer, &tok)) == CSS_OK) {
+		if (tok->type != exp[e].type) {
+			printf("%d: Got token %s, Expected %s [%d, %d]\n",
+				testnum, string_from_type(tok->type), 
+				string_from_type(exp[e].type),
+				tok->line, tok->col);
+			assert(0);
+		}
+
+		e++;
+
+		if (tok->type == CSS_TOKEN_EOF)
+			break;
+	}
+
+	assert(e == explen);
+
+	css_lexer_destroy(lexer);
+
+	parserutils_inputstream_destroy(input);
+
+	printf("Test %d: PASS\n", testnum);
+}
