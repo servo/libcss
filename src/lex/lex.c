@@ -281,7 +281,8 @@ css_error css_lexer_get_token(css_lexer *lexer, const css_token **token)
 		return S(lexer, token);
 	case sCOMMENT:
 		error = Comment(lexer, token);
-		if (!lexer->emit_comments && error == CSS_OK)
+		if (!lexer->emit_comments && error == CSS_OK && 
+				(*token)->type == CSS_TOKEN_COMMENT)
 			goto start;
 		return error;
 	case sMATCH:
@@ -1192,7 +1193,8 @@ start:
 		lexer->context.lastWasStar = false;
 		lexer->context.lastWasCR = false;
 		error = Comment(lexer, token);
-		if (!lexer->emit_comments && error == CSS_OK)
+		if (!lexer->emit_comments && error == CSS_OK &&
+				(*token)->type == CSS_TOKEN_COMMENT)
 			goto start;
 		return error;
 	case '~': case '|': case '^': case '$': case '*':

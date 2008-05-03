@@ -107,8 +107,16 @@ bool handle_line(const char *data, size_t datalen, void *pw)
 			ctx->expused = 0;
 		}
 
-		ctx->indata = (strncasecmp(data+1, "data", 4) == 0);
-		ctx->inexp  = (strncasecmp(data+1, "expected", 8) == 0);
+		if (ctx->indata && strncasecmp(data+1, "expected", 8) == 0) {
+			ctx->indata = false;
+			ctx->inexp = true;
+		} else if (!ctx->indata) {
+			ctx->indata = (strncasecmp(data+1, "data", 4) == 0);
+			ctx->inexp  = (strncasecmp(data+1, "expected", 8) == 0);
+		} else {
+			memcpy(ctx->buf + ctx->bufused, data, datalen);
+			ctx->bufused += datalen;
+		}
 	} else {
 		if (ctx->indata) {
 			memcpy(ctx->buf + ctx->bufused, data, datalen);
@@ -137,13 +145,16 @@ void parse_expected(line_ctx *ctx, const char *data, size_t len)
 
 	/* Append to list of expected tokens */
 	if (ctx->expused == ctx->explen) {
+		size_t num = ctx->explen == 0 ? 4 : ctx->explen;
+
 		exp_entry *temp = realloc(ctx->exp, 
-				ctx->explen * 2 * sizeof(exp_entry));
-		if (temp == NULL)
+				num * 2 * sizeof(exp_entry));
+		if (temp == NULL) {
 			assert(0 && "No memory for expected tokens");
+		}
 
 		ctx->exp = temp;
-		ctx->explen *= 2;
+		ctx->explen = num * 2;
 	}
 
 	ctx->exp[ctx->expused].type = type;
