@@ -16,6 +16,9 @@
 
 typedef struct exp_entry {
 	css_token_type type;
+#define EXP_ENTRY_TEXT_LEN (128)
+	char text[EXP_ENTRY_TEXT_LEN];
+	size_t textLen;
 } exp_entry;
 
 typedef struct line_ctx {
@@ -141,8 +144,6 @@ void parse_expected(line_ctx *ctx, const char *data, size_t len)
 
 	css_token_type type = string_to_type(data, colon - data);
 
-	/** \todo expected token data */
-
 	/* Append to list of expected tokens */
 	if (ctx->expused == ctx->explen) {
 		size_t num = ctx->explen == 0 ? 4 : ctx->explen;
@@ -158,6 +159,44 @@ void parse_expected(line_ctx *ctx, const char *data, size_t len)
 	}
 
 	ctx->exp[ctx->expused].type = type;
+	ctx->exp[ctx->expused].textLen = 0;
+	if (colon != data + len) {
+		const char *p = colon + 1;
+		bool escape = false;
+
+		for (len = len - (colon + 1 - data); len > 0; len--, p++) {
+			char c;
+
+			if (*p == '\\') {
+				escape = true;
+				continue;
+			}
+
+			if (escape) {
+				switch (*p) {
+				case 'n':
+					c = 0xa;
+					break;
+				case 't':
+					c = 0x9;
+					break;
+				default:
+					c = *p;
+					break;
+				}
+				escape = false;
+			} else {
+				c = *p;
+			}
+
+			ctx->exp[ctx->expused].text[
+					ctx->exp[ctx->expused].textLen] = c;
+			ctx->exp[ctx->expused].textLen++;
+
+			assert(ctx->exp[ctx->expused].textLen < 
+					EXP_ENTRY_TEXT_LEN);
+		}
+	}
 	ctx->expused++;
 }
 
@@ -252,7 +291,23 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 				testnum, string_from_type(tok->type), 
 				string_from_type(exp[e].type),
 				tok->line, tok->col);
-			assert(0);
+			assert(0 && "Types differ");
+		}
+
+		if (exp[e].textLen > 0) {
+			if (tok->data.len != exp[e].textLen) {
+				printf("%d: Got length %d, Expected %d\n",
+					testnum, tok->data.len, exp[e].textLen);
+				assert(0 && "Text lengths differ");
+			}
+
+			if (strncmp((char *) tok->data.ptr, exp[e].text, 
+					tok->data.len) != 0) {
+				printf("%d: Got data '%.*s', Expected '%.*s'\n",
+					testnum, tok->data.len, tok->data.ptr,
+					exp[e].textLen, exp[e].text);
+				assert(0 && "Text differs");
+			}
 		}
 
 		e++;
