@@ -1,0 +1,29 @@
+#data
+p[example="public class foo\
+{\
+    private int x;\
+\
+    foo(int x) {\
+        this.x = x;\
+    }\
+\
+}"] { color: red }
+#expected
+IDENT:p
+CHAR:[
+IDENT:example
+CHAR:=
+STRING:public class foo\n{\n    private int x;\n\n    foo(int x) {\n        this.x = x;\n    }\n\n}
+CHAR:]
+S
+CHAR:{
+S
+IDENT:color
+CHAR::
+S
+IDENT:red
+S
+CHAR:}
+S
+EOF
+#reset
