@@ -36,8 +36,8 @@
 #include "utils/parserutilserror.h"
 
 /** \todo Optimisation -- we're currently revisiting a bunch of input 
- *	  characters (Currently, we're calling parserutils_inputstream_peek about
- *	  1.5x the number of characters in the input stream). Ideally, 
+ *	  characters (Currently, we're calling parserutils_inputstream_peek 
+ *	  about 1.5x the number of characters in the input stream). Ideally, 
  *	  we'll visit each character in the input exactly once. In reality, 
  *	  the upper bound is twice, due to the need, in some cases, to read 
  *	  one character beyond the end of a token's input to detect the end 
@@ -1794,6 +1794,12 @@ css_error consumeString(css_lexer *lexer)
 	 * The open quote has been consumed.
 	 */
 
+	/** \todo Handle unexpected end of string correctly - CSS 2.1 $4.2 
+	 * Need to flag the string as being in error (within token, so the
+	 * parser can discard the construct in which the string was found).
+	 * This does not apply in the EOF case. In that case, we must act
+	 * as described in "Unexpected end of style sheet" and simply close
+	 * the string */
 	do {
 		cptr = parserutils_inputstream_peek(lexer->input, 
 				lexer->bytesReadForToken, &clen);
