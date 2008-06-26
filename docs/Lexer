@@ -10,6 +10,7 @@ First sets
 IDENT 		[a-zA-Z] | '-' | '_' | [^#x0-#x7F] | '\'
 ATKEYWORD	'@'
 STRING		'"' | "'"
+INVALID_STRING	'"' | "'"
 HASH		'#'
 NUMBER		[0-9] | '.'
 PERCENTAGE	[0-9] | '.'

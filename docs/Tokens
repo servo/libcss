@@ -28,6 +28,7 @@ Tokens
 IDENT          ::= ident
 ATKEYWORD      ::= '@' ident
 STRING         ::= string
+INVALID_STRING ::= '"' (stringchar | "'")* [^"] | "'" (stringchar | '"')* [^']
 HASH           ::= '#' name
 NUMBER         ::= num
 PERCENTAGE     ::= num '%'
