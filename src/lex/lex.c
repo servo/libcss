@@ -34,6 +34,7 @@
 
 #include "lex/lex.h"
 #include "utils/parserutilserror.h"
+#include "utils/utils.h"
 
 /** \todo Optimisation -- we're currently revisiting a bunch of input 
  *	  characters (Currently, we're calling parserutils_inputstream_peek 
@@ -379,7 +380,15 @@ css_error emitToken(css_lexer *lexer, css_token_type type,
 		t->data.ptr += 1;
 		t->data.len -= 1;
 
-		/* Strip the trailing quote */
+		/* Strip the trailing quote, iff it exists (may have hit EOF) */
+		if (t->data.ptr[t->data.len - 1] == '"' ||
+				t->data.ptr[t->data.len - 1] == '\'') {
+			t->data.len -= 1;
+		}
+		break;
+	case CSS_TOKEN_INVALID_STRING:
+		/* Strip the leading quote */
+		t->data.ptr += 1;
 		t->data.len -= 1;
 		break;
 	case CSS_TOKEN_HASH:
@@ -396,8 +405,8 @@ css_error emitToken(css_lexer *lexer, css_token_type type,
 		break;
 	case CSS_TOKEN_URI:
 		/* Strip the "url(" from the start */
-		t->data.ptr += sizeof("url(") - 1;
-		t->data.len -= sizeof("url(") - 1;
+		t->data.ptr += SLEN("url(");
+		t->data.len -= SLEN("url(");
 
 		/* Strip any leading whitespace */
 		while (isSpace(t->data.ptr[0])) {
@@ -427,16 +436,16 @@ css_error emitToken(css_lexer *lexer, css_token_type type,
 		break;
 	case CSS_TOKEN_UNICODE_RANGE:
 		/* Remove "U+" from the start */
-		t->data.ptr += sizeof("U+") - 1;
-		t->data.len -= sizeof("U+") - 1;
+		t->data.ptr += SLEN("U+");
+		t->data.len -= SLEN("U+");
 		break;
 	case CSS_TOKEN_COMMENT:
 		/* Strip the leading '/' and '*' */
-		t->data.ptr += sizeof("/*") - 1;
-		t->data.len -= sizeof("/*") - 1;
+		t->data.ptr += SLEN("/*");
+		t->data.len -= SLEN("/*");
 
 		/* Strip the trailing '*' and '/' */
-		t->data.len -= sizeof("*/") - 1;
+		t->data.len -= SLEN("*/");
 		break;
 	case CSS_TOKEN_FUNCTION:
 		/* Strip the trailing '(' */
@@ -1239,11 +1248,13 @@ css_error String(css_lexer *lexer, const css_token **token)
 	 */
 
 	error = consumeString(lexer);
-	if (error != CSS_OK && error != CSS_EOF)
+	if (error != CSS_OK && error != CSS_EOF && error != CSS_INVALID)
 		return error;
 
+	/* EOF will be reprocessed in Start() */
 	return emitToken(lexer, 
-			error == CSS_EOF ? CSS_TOKEN_EOF : CSS_TOKEN_STRING, 
+			error == CSS_INVALID ? CSS_TOKEN_INVALID_STRING 
+					     : CSS_TOKEN_STRING, 
 			token);
 }
 
@@ -1450,8 +1461,14 @@ css_error URI(css_lexer *lexer, const css_token **token)
 		lexer->substate = String;
 
 		error = consumeString(lexer);
-		if (error != CSS_OK && error != CSS_EOF)
+		if (error == CSS_INVALID) {
+			/* Rewind to "url(" */
+			lexer->bytesReadForToken = lexer->context.bytesForURL;
+			lexer->token.data.len = lexer->context.dataLenForURL;
+			return emitToken(lexer, CSS_TOKEN_FUNCTION, token);
+		} else if (error != CSS_OK && error != CSS_EOF) {
 			return error;
+		}
 
 		/* EOF gets handled in RParen */
 
@@ -1794,12 +1811,6 @@ css_error consumeString(css_lexer *lexer)
 	 * The open quote has been consumed.
 	 */
 
-	/** \todo Handle unexpected end of string correctly - CSS 2.1 $4.2 
-	 * Need to flag the string as being in error (within token, so the
-	 * parser can discard the construct in which the string was found).
-	 * This does not apply in the EOF case. In that case, we must act
-	 * as described in "Unexpected end of style sheet" and simply close
-	 * the string */
 	do {
 		cptr = parserutils_inputstream_peek(lexer->input, 
 				lexer->bytesReadForToken, &clen);
@@ -1818,8 +1829,8 @@ css_error consumeString(css_lexer *lexer)
 			if (error != CSS_OK)
 				return error;
 		} else if (c != quote) {
-			/* Invalid character in string -- skip */
-			lexer->bytesReadForToken += clen;
+			/* Invalid character in string */
+			return CSS_INVALID;
 		}
 	} while(c != quote);
 

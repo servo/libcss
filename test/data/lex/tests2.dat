@@ -27,3 +27,89 @@ CHAR:}
 S
 EOF
 #reset
+
+#data
+@import url("abcde
+);
+#expected
+ATKEYWORD:import
+S
+FUNCTION:url
+INVALID:abcde
+S
+CHAR:)
+CHAR:;
+S
+EOF
+#reset
+
+#data
+body {
+	font-family: "Bitstream Vera Sans;
+}
+.one { width: 10em; }
+#expected
+IDENT:body
+S
+CHAR:{
+S
+IDENT:font-family
+CHAR::
+S
+INVALID:Bitstream Vera Sans;
+S
+CHAR:}
+S
+CHAR:.
+IDENT:one
+S
+CHAR:{
+S
+IDENT:width
+CHAR::
+S
+DIMENSION:10em
+CHAR:;
+S
+CHAR:}
+S
+EOF
+#reset
+
+#data
+body { font-family: "Bitstream Vera Sans; }
+.two { width: 10em; }
+#expected
+IDENT:body
+S
+CHAR:{
+S
+IDENT:font-family
+CHAR::
+S
+INVALID:Bitstream Vera Sans; }
+S
+CHAR:.
+IDENT:two
+S
+CHAR:{
+S
+IDENT:width
+CHAR::
+S
+DIMENSION:10em
+CHAR:;
+S
+CHAR:}
+S
+EOF
+#reset
+
+#data
+"abcde
+#expected
+INVALID:abcde
+S
+EOF
+#reset
+

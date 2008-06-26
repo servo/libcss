@@ -204,7 +204,7 @@ const char *string_from_type(css_token_type type)
 {
 	const char *names[] =
 	{
-		"IDENT", "ATKEYWORD", "STRING", "HASH", "NUMBER",
+		"IDENT", "ATKEYWORD", "STRING", "INVALID", "HASH", "NUMBER",
 		"PERCENTAGE", "DIMENSION", "URI", "UNICODE-RANGE", "CDO",
 		"CDC", "S", "COMMENT", "FUNCTION", "INCLUDES",
 		"DASHMATCH", "PREFIXMATCH", "SUFFIXMATCH", "SUBSTRINGMATCH",
@@ -222,6 +222,8 @@ css_token_type string_to_type(const char *data, size_t len)
 		return CSS_TOKEN_ATKEYWORD;
 	else if (len == 6 && strncasecmp(data, "STRING", len) == 0)
 		return CSS_TOKEN_STRING;
+	else if (len == 7 && strncasecmp(data, "INVALID", len) == 0)
+		return CSS_TOKEN_INVALID_STRING;
 	else if (len == 4 && strncasecmp(data, "HASH", len) == 0)
 		return CSS_TOKEN_HASH;
 	else if (len == 6 && strncasecmp(data, "NUMBER", len) == 0)
