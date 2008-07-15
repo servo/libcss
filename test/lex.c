@@ -37,6 +37,9 @@ static void printToken(const css_token *token)
 	case CSS_TOKEN_STRING:
 		printf("STRING(%.*s)", token->data.len, token->data.ptr);
 		break;
+	case CSS_TOKEN_INVALID_STRING:
+		printf("INVALID(%.*s)", token->data.len, token->data.ptr);
+		break;
 	case CSS_TOKEN_HASH:
 		printf("HASH(%.*s)", token->data.len, token->data.ptr);
 		break;
