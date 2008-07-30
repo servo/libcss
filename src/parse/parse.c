@@ -58,7 +58,8 @@ enum {
 	sValue = 16,
 	sAny0 = 17,
 	sAny1 = 18,
-	sAny = 19
+	sAny = 19,
+	sMalformedDecl = 20
 };
 
 /**
@@ -90,6 +91,8 @@ struct css_parser
 	parserutils_vector *tokens;	/**< Vector of pending tokens */
 
 	const css_token *pushback;	/**< Push back buffer */
+
+	bool parseError;		/**< A parse error has occurred */
 
 	uint8_t match_char;		/**< Close bracket type for parseAny */
 
@@ -126,6 +129,7 @@ static inline css_error parseValue(css_parser *parser);
 static inline css_error parseAny0(css_parser *parser);
 static inline css_error parseAny1(css_parser *parser);
 static inline css_error parseAny(css_parser *parser);
+static inline css_error parseMalformedDeclaration(css_parser *parser);
 
 /**
  * Dispatch table for parsing, indexed by major state number
@@ -150,7 +154,8 @@ static css_error (*parseFuncs[])(css_parser *parser) = {
 	parseValue,
 	parseAny0,
 	parseAny1,
-	parseAny
+	parseAny,
+	parseMalformedDeclaration
 };
 
 /**
@@ -235,6 +240,8 @@ css_parser *css_parser_create(css_stylesheet *sheet, const char *charset,
 	parser->sheet = sheet;
 	parser->quirks = false;
 	parser->pushback = NULL;
+	parser->parseError = false;
+	parser->match_char = 0;
 	parser->alloc = alloc;
 	parser->pw = pw;
 
@@ -400,6 +407,9 @@ css_error transition(css_parser *parser, parser_state to,
 #if !defined(NDEBUG) && defined(DEBUG_STACK)
 	parserutils_stack_dump(parser->states, __func__, printer);
 #endif
+
+	/* Clear the error flag */
+	parser->parseError = false;
 
 	return CSS_OK;
 }
@@ -639,6 +649,8 @@ css_error parseStylesheet(css_parser *parser)
 				error = pushBack(parser, token);
 				if (error != CSS_OK)
 					return error;
+
+				parserutils_vector_clear(parser->tokens);
 
 				return done(parser);
 			case CSS_TOKEN_CDO:
@@ -1154,8 +1166,14 @@ css_error parseDeclaration(css_parser *parser)
 
 		if (token->type != CSS_TOKEN_CHAR || token->data.len != 1 ||
 				token->data.ptr[0] != ':') {
-			/** \todo parse error */
-			assert(0 && "Expected :");
+			/* parse error -- expected : */
+			parser_state to = { sMalformedDecl, Initial };
+
+			error = pushBack(parser, token);
+			if (error != CSS_OK)
+				return error;
+
+			return transitionNoRet(parser, to);
 		}
 
 		state->substate = WS;
@@ -1172,6 +1190,14 @@ css_error parseDeclaration(css_parser *parser)
 		return transition(parser, to, subsequent);
 	}
 	case AfterValue1:
+		if (parser->parseError) {
+			parser_state to = { sMalformedDecl, Initial };
+
+			parser->parseError = false;
+
+			return transitionNoRet(parser, to);
+		}
+
 #if !defined(NDEBUG) && defined(DEBUG_EVENTS)
 		parserutils_vector_dump(parser->tokens, __func__, tprinter);
 #endif
@@ -1296,8 +1322,10 @@ css_error parseProperty(css_parser *parser)
 			return error;
 
 		if (token->type != CSS_TOKEN_IDENT) {
-			/** \todo parse error */
-			assert(0 && "Expected IDENT");
+			/* parse error */
+			parser->parseError = true;
+
+			return done(parser);
 		}
 
 		state->substate = WS;
@@ -1317,6 +1345,8 @@ css_error parseValue1(css_parser *parser)
 {
 	enum { Initial = 0, AfterValue = 1 };
 	parser_state *state = parserutils_stack_get_current(parser->states);
+	const css_token *token;
+	css_error error;
 
 	/* value1 -> value value0 */
 
@@ -1325,6 +1355,25 @@ css_error parseValue1(css_parser *parser)
 	{
 		parser_state to = { sValue, Initial };
 		parser_state subsequent = { sValue1, AfterValue };
+
+		error = getToken(parser, &token);
+		if (error != CSS_OK)
+			return error;
+
+		error = pushBack(parser, token);
+		if (error != CSS_OK)
+			return error;
+
+		/* Grammar ambiguity -- assume ';' or '}' mark end */
+		if (token->type == CSS_TOKEN_CHAR && 
+				token->data.len == 1 &&
+				(token->data.ptr[0] == ';' ||
+				token->data.ptr[0] == '}')) {
+			/* Parse error */
+			parser->parseError = true;
+
+			return done(parser);
+		}
 
 		return transition(parser, to, subsequent);
 	}
@@ -1476,6 +1525,9 @@ css_error parseAny0(css_parser *parser)
 			return transition(parser, to, subsequent);
 		}
 		case AfterAny:
+			if (parser->parseError)
+				return done(parser);
+
 			state->substate = Initial;
 
 			break;
@@ -1507,9 +1559,15 @@ css_error parseAny1(css_parser *parser)
 		parser_state to = { sAny0, Initial };
 		parser_state subsequent = { sAny1, AfterAny0 };
 
+		if (parser->parseError)
+			return done(parser);
+
 		return transition(parser, to, subsequent);
 	}
 	case AfterAny0:
+		if (parser->parseError)
+			return done(parser);
+
 		error = getToken(parser, &token);
 		if (error != CSS_OK)
 			return error;
@@ -1529,12 +1587,12 @@ css_error parseAny1(css_parser *parser)
 
 				return transition(parser, to, subsequent);
 			} else if (token->data.ptr[0] != '{') {
-				/** \todo parse error */
-				assert(0 && "Expected {, ;, ), or ]");
+				/* parse error */
+				parser->parseError = true;
 			}
 		} else {
-			/** \todo parse error */
-			assert(0 && "Expected {, ;, ), or ]");
+			/* parse error */
+			parser->parseError = true;
 		}
 	}
 
@@ -1588,8 +1646,10 @@ css_error parseAny(css_parser *parser)
 				token->type != CSS_TOKEN_SUFFIXMATCH && 
 				token->type != CSS_TOKEN_SUBSTRINGMATCH && 
 				token->type != CSS_TOKEN_FUNCTION) {
-			/** \todo parse error */
-			assert(0 && "Invalid any");
+			/* parse error */
+			parser->parseError = true;
+
+			return done(parser);
 		}
 
 		if (token->type == CSS_TOKEN_FUNCTION) {
@@ -1645,6 +1705,110 @@ css_error parseAny(css_parser *parser)
 	return done(parser);
 }
 
+css_error parseMalformedDeclaration(css_parser *parser)
+{
+	enum { Initial = 0 };
+	const css_token *token = NULL;
+	css_error error;
+
+	/* Malformed declaration: read everything up to the next ; or } 
+	 * We must ensure that pairs of {}, (), [], are balanced */
+
+	int brackets = 0;
+	int braces = 0;
+	int parens = 0;
+
+	int32_t ctx = 0;
+	
+	do {
+		token = parserutils_vector_iterate(parser->tokens, &ctx);
+
+		if (token != NULL && token->type == CSS_TOKEN_CHAR &&
+				token->data.len == 1) {
+			switch (token->data.ptr[0]) {
+			case '{':
+				brackets++;
+				break;
+			case '}':
+				brackets--;
+				break;
+			case '[':
+				braces++;
+				break;
+			case ']':
+				braces--;
+				break;
+			case '(':
+				parens++;
+				break;
+			case ')':
+				parens--;
+				break;
+			default:
+				break;
+			}
+		}
+	} while (token != NULL);
+
+	while (1) {
+		error = getToken(parser, &token);
+		if (error != CSS_OK)
+			return error;
+
+		if (token->type == CSS_TOKEN_CHAR && token->data.len == 1) {
+			switch (token->data.ptr[0]) {
+			case '{':
+				brackets++;
+				break;
+			case '}':
+				brackets--;
+				break;
+			case '[':
+				braces++;
+				break;
+			case ']':
+				braces--;
+				break;
+			case '(':
+				parens++;
+				break;
+			case ')':
+				parens--;
+				break;
+			default:
+				break;
+			}
+
+			/* If we've closed enough braces/parens/brackets
+			 * (too many is fine, too) */
+			if (braces <= 0 && parens <= 0 && brackets <= 0) {
+				if (token->data.ptr[0] == '}' && brackets < 0) {
+				/* then, if this token is a close bracket, and
+				 * we've closed more brackets than we need to,
+				 * we're done. */
+					error = pushBack(parser, token);
+					if (error != CSS_OK)
+						return error;
+
+					break;
+				} else if (token->data.ptr[0] == ';') {
+				/* or, if this token is a semicolon, 
+				 * we're done */
+					error = pushBack(parser, token);
+					if (error != CSS_OK)
+						return error;
+
+					break;
+				}
+			}
+		}
+	}
+
+	/* Discard the tokens we've read */
+	parserutils_vector_clear(parser->tokens);
+
+	return done(parser);
+}
 
 #ifndef NDEBUG
 #ifdef DEBUG_STACK
