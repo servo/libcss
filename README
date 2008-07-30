@@ -14,8 +14,8 @@ Requirements
 
     + A C99 capable C compiler
     + GNU make or compatible
+    + Pkg-config
     + Perl (for the testcases)
-    + Pkg-config (for the testcases)
 
   LibCSS also requires the following libraries to be installed:
 

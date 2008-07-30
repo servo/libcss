@@ -30,4 +30,6 @@ typedef struct css_string {
 	size_t len;			/**< Byte length of string */
 } css_string;
 
+typedef struct css_stylesheet css_stylesheet;
+
 #endif
