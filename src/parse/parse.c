@@ -96,6 +96,9 @@ struct css_parser
 
 	uint8_t match_char;		/**< Close bracket type for parseAny */
 
+	css_parser_event_handler event;	/**< Client's event handler */
+	void *event_pw;			/**< Client data for event handler */
+
 	css_alloc alloc;		/**< Memory (de)allocation function */
 	void *pw;			/**< Client-specific private data */
 };
@@ -242,6 +245,8 @@ css_parser *css_parser_create(css_stylesheet *sheet, const char *charset,
 	parser->pushback = NULL;
 	parser->parseError = false;
 	parser->match_char = 0;
+	parser->event = NULL;
+	parser->event_pw = NULL;
 	parser->alloc = alloc;
 	parser->pw = pw;
 
@@ -288,6 +293,10 @@ css_error css_parser_setopt(css_parser *parser, css_parser_opttype type,
 	switch (type) {
 	case CSS_PARSER_QUIRKS:
 		parser->quirks = params->quirks;
+		break;
+	case CSS_PARSER_EVENT_HANDLER:
+		parser->event = params->event_handler.handler;
+		parser->event_pw = params->event_handler.pw;
 		break;
 	}
 
@@ -596,6 +605,11 @@ css_error parseStart(css_parser *parser)
 #if !defined(NDEBUG) && defined(DEBUG_EVENTS)
 		printf("Begin stylesheet\n");
 #endif
+		if (parser->event != NULL) {
+			parser->event(CSS_PARSER_START_STYLESHEET, NULL, 
+					parser->event_pw);
+		}
+
 		error = eatWS(parser);
 		if (error != CSS_OK)
 			return error;
@@ -620,6 +634,11 @@ css_error parseStart(css_parser *parser)
 	parserutils_vector_dump(parser->tokens, __func__, tprinter);
 	printf("End stylesheet\n");
 #endif
+	if (parser->event != NULL) {
+		parser->event(CSS_PARSER_END_STYLESHEET, NULL, 
+				parser->event_pw);
+	}
+
 	parserutils_vector_clear(parser->tokens);
 
 	return done(parser);
@@ -722,6 +741,11 @@ css_error parseRuleset(css_parser *parser)
 #if !defined(NDEBUG) && defined(DEBUG_EVENTS)
 		printf("Begin ruleset\n");
 #endif
+		if (parser->event != NULL) {
+			parser->event(CSS_PARSER_START_RULESET, NULL, 
+					parser->event_pw);
+		}
+
 		parserutils_vector_clear(parser->tokens);
 
 		error = getToken(parser, &token);
@@ -834,6 +858,9 @@ css_error parseRulesetEnd(css_parser *parser)
 #if !defined(NDEBUG) && defined(DEBUG_EVENTS)
 	printf("End ruleset\n");
 #endif
+	if (parser->event != NULL) {
+		parser->event(CSS_PARSER_END_RULESET, NULL, parser->event_pw);
+	}
 
 	return done(parser);
 }
@@ -901,6 +928,13 @@ css_error parseAtRuleEnd(css_parser *parser)
 #if !defined(NDEBUG) && defined(DEBUG_EVENTS)
 		parserutils_vector_dump(parser->tokens, __func__, tprinter);
 #endif
+		if (parser->event != NULL) {
+			if (parser->event(CSS_PARSER_START_ATRULE, 
+					parser->tokens, parser->event_pw) ==
+					false) {
+				/** \todo parse error */
+			}
+		}
 
 		error = getToken(parser, &token);
 		if (error != CSS_OK)
@@ -940,6 +974,9 @@ css_error parseAtRuleEnd(css_parser *parser)
 #if !defined(NDEBUG) && defined(DEBUG_EVENTS)
 	printf("End at-rule\n");
 #endif
+	if (parser->event != NULL) {
+		parser->event(CSS_PARSER_END_ATRULE, NULL, parser->event_pw);
+	}
 
 	return done(parser);
 }
@@ -962,6 +999,11 @@ css_error parseBlock(css_parser *parser)
 #if !defined(NDEBUG) && defined(DEBUG_EVENTS)
 		printf("Begin block\n");
 #endif
+		if (parser->event != NULL) {
+			parser->event(CSS_PARSER_START_BLOCK, NULL,
+					parser->event_pw);
+		}
+
 		parserutils_vector_clear(parser->tokens);
 
 		if (token->type != CSS_TOKEN_CHAR || token->data.len != 1 ||
@@ -1010,6 +1052,10 @@ css_error parseBlock(css_parser *parser)
 #if !defined(NDEBUG) && defined(DEBUG_EVENTS)
 	printf("End block\n");
 #endif
+	if (parser->event != NULL) {
+		parser->event(CSS_PARSER_END_BLOCK, NULL, parser->event_pw);
+	}
+
 	parserutils_vector_clear(parser->tokens);
 
 	return done(parser);
@@ -1054,6 +1100,15 @@ css_error parseBlockContent(css_parser *parser)
 					parserutils_vector_dump(parser->tokens,
 							__func__, tprinter);
 #endif
+					if (parser->event != NULL) {
+						if (parser->event(
+							CSS_PARSER_BLOCK_CONTENT,
+							parser->tokens,
+							parser->event_pw) ==
+								false) {
+							/** \todo parse error */
+						}
+					}
 
 					return transition(parser, to, 
 							subsequent);
@@ -1072,6 +1127,15 @@ css_error parseBlockContent(css_parser *parser)
 					parserutils_vector_dump(parser->tokens,
 							__func__, tprinter);
 #endif
+					if (parser->event != NULL) {
+						if (parser->event(
+							CSS_PARSER_BLOCK_CONTENT,
+							parser->tokens,
+							parser->event_pw) ==
+								false) {
+							/** \todo parse error */
+						}
+					}
 
 					return done(parser);
 				}
@@ -1086,6 +1150,15 @@ css_error parseBlockContent(css_parser *parser)
 				parserutils_vector_dump(parser->tokens,
 						__func__, tprinter);
 #endif
+				if (parser->event != NULL) {
+					if (parser->event(
+						CSS_PARSER_BLOCK_CONTENT,
+							parser->tokens,
+							parser->event_pw) ==
+							false) {
+						/** \todo parse error */
+					}
+				}
 
 				return done(parser);
 			}
@@ -1134,6 +1207,11 @@ css_error parseSelector(css_parser *parser)
 #if !defined(NDEBUG) && defined(DEBUG_EVENTS)
 		parserutils_vector_dump(parser->tokens, __func__, tprinter);
 #endif
+		if (parser->event != NULL) {
+			parser->event(CSS_PARSER_SELECTOR, parser->tokens,
+					parser->event_pw);
+		}
+
 		break;
 	}
 
@@ -1201,6 +1279,10 @@ css_error parseDeclaration(css_parser *parser)
 #if !defined(NDEBUG) && defined(DEBUG_EVENTS)
 		parserutils_vector_dump(parser->tokens, __func__, tprinter);
 #endif
+		if (parser->event != NULL) {
+			parser->event(CSS_PARSER_DECLARATION, parser->tokens,
+					parser->event_pw);
+		}
 		break;
 	}
 

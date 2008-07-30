@@ -8,16 +8,39 @@
 #ifndef css_parse_parse_h_
 #define css_parse_parse_h_
 
+#include <parserutils/utils/vector.h>
+
 #include <libcss/functypes.h>
 #include <libcss/types.h>
 
 typedef struct css_parser css_parser;
 
 /**
+ * Parser event types
+ */
+typedef enum css_parser_event {
+	CSS_PARSER_START_STYLESHEET,
+	CSS_PARSER_END_STYLESHEET,
+	CSS_PARSER_START_RULESET,
+	CSS_PARSER_END_RULESET,
+	CSS_PARSER_START_ATRULE,
+	CSS_PARSER_END_ATRULE,
+	CSS_PARSER_START_BLOCK,
+	CSS_PARSER_END_BLOCK,
+	CSS_PARSER_BLOCK_CONTENT,
+	CSS_PARSER_SELECTOR,
+	CSS_PARSER_DECLARATION,
+} css_parser_event;
+
+typedef bool (*css_parser_event_handler)(css_parser_event type, 
+		const parserutils_vector *tokens, void *pw);
+
+/**
  * Parser option types
  */
 typedef enum css_parser_opttype {
 	CSS_PARSER_QUIRKS,
+	CSS_PARSER_EVENT_HANDLER,
 } css_parser_opttype;
 
 /**
@@ -25,6 +48,11 @@ typedef enum css_parser_opttype {
  */
 typedef union css_parser_optparams {
 	bool quirks;
+
+	struct {
+		css_parser_event_handler handler;
+		void *pw;
+	} event_handler;
 } css_parser_optparams;
 
 css_parser *css_parser_create(css_stylesheet *sheet, const char *charset,

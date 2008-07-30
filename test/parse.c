@@ -6,6 +6,7 @@
 #include "charset/detect.h"
 #include "utils/utils.h"
 
+#include "lex/lex.h"
 #include "parse/parse.h"
 
 #include "testutils.h"
@@ -17,8 +18,40 @@ static void *myrealloc(void *ptr, size_t len, void *pw)
 	return realloc(ptr, len);
 }
 
+static bool event_handler(css_parser_event type, 
+		const parserutils_vector *tokens, void *pw)
+{
+	int32_t ctx = 0;
+	const css_token *token;
+
+	UNUSED(pw);
+
+	printf("%s%d", tokens != NULL ? "  " : "", type);
+
+	if (tokens == NULL) {
+		printf("\n");
+		return true;
+	}
+
+	do {
+		token = parserutils_vector_iterate(tokens, &ctx);
+		if (token == NULL)
+			break;
+
+		printf("\n    %d", token->type);
+
+		if (token->data.ptr != NULL)
+			printf(" %.*s", token->data.len, token->data.ptr);
+	} while (token != NULL);
+
+	printf("\n");
+
+	return true;
+}
+
 int main(int argc, char **argv)
 {
+	css_parser_optparams params;
 	css_parser *parser;
 	FILE *fp;
 	size_t len, origlen;
@@ -37,6 +70,11 @@ int main(int argc, char **argv)
 	parser = css_parser_create((css_stylesheet *) 10, 
 			"UTF-8", CSS_CHARSET_DICTATED, myrealloc, NULL);
 	assert(parser != NULL);
+
+	params.event_handler.handler = event_handler;
+	params.event_handler.pw = NULL;
+	assert(css_parser_setopt(parser, CSS_PARSER_EVENT_HANDLER, 
+			&params) == CSS_OK);
 
 	fp = fopen(argv[2], "rb");
 	if (fp == NULL) {
