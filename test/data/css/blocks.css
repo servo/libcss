@@ -2,6 +2,10 @@
 
 @import "simple.css";
 
+@foo rgb(255,255,255);
+
+@bar (a,b,c);
+
 @media screen
 {
 	body { background-color: green; }

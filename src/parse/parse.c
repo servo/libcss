@@ -917,9 +917,6 @@ css_error parseAtRule(css_parser *parser)
 
 	switch (state->substate) {
 	case Initial:
-#if !defined(NDEBUG) && defined(DEBUG_EVENTS)
-		printf("Begin at-rule\n");
-#endif
 		parserutils_vector_clear(parser->tokens);
 
 		error = getToken(parser, &token);
@@ -955,10 +952,6 @@ css_error parseAtRule(css_parser *parser)
 		if (error != CSS_OK)
 			return error;
 
-		error = pushBack(parser, token);
-		if (error != CSS_OK)
-			return error;
-
 		/* Grammar ambiguity: any0 can be followed by '{',';',')',']'. 
 		 * at-rule can only be followed by '{' and ';'. */
 		if (token->type == CSS_TOKEN_CHAR && token->data.len == 1) {
@@ -970,6 +963,10 @@ css_error parseAtRule(css_parser *parser)
 				return transition(parser, to, subsequent);
 			}
 		}
+
+		error = pushBack(parser, token);
+		if (error != CSS_OK)
+			return error;
 
 		break;
 	}
@@ -993,6 +990,7 @@ css_error parseAtRuleEnd(css_parser *parser)
 	switch (state->substate) {
 	case Initial:
 #if !defined(NDEBUG) && defined(DEBUG_EVENTS)
+		printf("Begin at-rule\n");
 		parserutils_vector_dump(parser->tokens, __func__, tprinter);
 #endif
 		if (parser->event != NULL) {
