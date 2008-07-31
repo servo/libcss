@@ -60,7 +60,8 @@ enum {
 	sAny1 = 18,
 	sAny = 19,
 	sMalformedDecl = 20,
-	sMalformedSelector = 21
+	sMalformedSelector = 21,
+	sMalformedAtRule = 22
 };
 
 /**
@@ -136,6 +137,7 @@ static inline css_error parseAny1(css_parser *parser);
 static inline css_error parseAny(css_parser *parser);
 static inline css_error parseMalformedDeclaration(css_parser *parser);
 static inline css_error parseMalformedSelector(css_parser *parser);
+static inline css_error parseMalformedAtRule(css_parser *parser);
 
 /**
  * Dispatch table for parsing, indexed by major state number
@@ -162,7 +164,8 @@ static css_error (*parseFuncs[])(css_parser *parser) = {
 	parseAny1,
 	parseAny,
 	parseMalformedDeclaration,
-	parseMalformedSelector
+	parseMalformedSelector,
+	parseMalformedAtRule
 };
 
 /**
@@ -942,6 +945,32 @@ css_error parseAtRule(css_parser *parser)
 		return transition(parser, to, subsequent);
 	}
 	case AfterAny:
+		if (parser->parseError) {
+			parser_state to = { sMalformedAtRule, Initial };
+
+			return transitionNoRet(parser, to);
+		}
+
+		error = getToken(parser, &token);
+		if (error != CSS_OK)
+			return error;
+
+		error = pushBack(parser, token);
+		if (error != CSS_OK)
+			return error;
+
+		/* Grammar ambiguity: any0 can be followed by '{',';',')',']'. 
+		 * at-rule can only be followed by '{' and ';'. */
+		if (token->type == CSS_TOKEN_CHAR && token->data.len == 1) {
+			if (token->data.ptr[0] == ')' ||
+					token->data.ptr[0] == ']') {
+				parser_state to = { sAny0, Initial };
+				parser_state subsequent = { sAtRule, AfterAny };
+
+				return transition(parser, to, subsequent);
+			}
+		}
+
 		break;
 	}
 
@@ -970,7 +999,9 @@ css_error parseAtRuleEnd(css_parser *parser)
 			if (parser->event(CSS_PARSER_START_ATRULE, 
 					parser->tokens, parser->event_pw) ==
 					false) {
-				/** \todo parse error */
+				parser_state to = { sMalformedAtRule, Initial };
+
+				return transitionNoRet(parser, to);
 			}
 		}
 
@@ -979,7 +1010,7 @@ css_error parseAtRuleEnd(css_parser *parser)
 			return error;
 
 		if (token->type != CSS_TOKEN_CHAR || token->data.len != 1) {
-			/** \todo parse error */
+			/* Should never happen FOLLOW(at-rule) == '{', ';'*/
 			assert(0 && "Expected { or ;");
 		}
 		
@@ -993,8 +1024,8 @@ css_error parseAtRuleEnd(css_parser *parser)
 
 			return transition(parser, to, subsequent);
 		} else if (token->data.ptr[0] != ';') {
-			/** \todo parse error */
-			assert(0 && "Expected { or ;");
+			/* Again, should never happen */
+			assert(0 && "Expected ;");
 		}
 
 		state->substate = WS;
@@ -2017,6 +2048,110 @@ css_error parseMalformedSelector(css_parser *parser)
 
 	return done(parser);
 }
+
+css_error parseMalformedAtRule(css_parser *parser)
+{
+	enum { Initial = 0, Go = 1 };
+	parser_state *state = parserutils_stack_get_current(parser->states);
+	const css_token *token = NULL;
+	css_error error;
+
+	/* Malformed at-rule: read everything up to the next ; or the next
+	 * block, whichever is first.
+	 * We must ensure that pairs of {}, (), [], are balanced */
+
+	switch (state->substate) {
+	case Initial:
+	{
+		/* Clear stack of open items */
+		while (parserutils_stack_pop(parser->open_items, NULL) == 
+				PARSERUTILS_OK)
+			;
+
+		state->substate = Go;
+		/* Fall through */
+	}
+	case Go:
+		while (1) {
+			error = getToken(parser, &token);
+			if (error != CSS_OK)
+				return error;
+
+			if (token->type == CSS_TOKEN_EOF)
+				break;
+
+			if (token->type != CSS_TOKEN_CHAR || 
+					token->data.len != 1 ||
+					(token->data.ptr[0] != '{' &&
+					token->data.ptr[0] != '}' &&
+					token->data.ptr[0] != '[' &&
+					token->data.ptr[0] != ']' &&
+					token->data.ptr[0] != '(' &&
+					token->data.ptr[0] != ')' &&
+					token->data.ptr[0] != ';'))
+				continue;
+
+			char want;
+			char *match = parserutils_stack_get_current(
+					parser->open_items);
+
+			/* If we have a semicolon, then we're either done or
+			 * need to ignore it */
+			if (token->data.ptr[0] == ';') {
+				if (match == NULL)
+					break;
+				else
+					continue;
+			}
+
+			/* Get corresponding start tokens for end tokens */
+			switch (token->data.ptr[0]) {
+			case '}':
+				want = '{';
+				break;
+			case ']':
+				want = '[';
+				break;
+			case ')':
+				want = '(';
+				break;
+			default:
+				want = 0;
+				break;
+			}
+
+			/* Either pop off the stack, if we've matched the 
+			 * current item, or push the start token on */
+			if (match != NULL && *match == want) {
+				parserutils_stack_pop(
+					parser->open_items, NULL);
+			} else if (want == 0) {
+				parserutils_stack_push(parser->open_items, 
+						&token->data.ptr[0]);
+			}
+
+			/* If we encountered a '}', there was data on the stack
+			 * before, and the stack's now empty, then we've popped
+			 * a '{' off the stack. That means we've found the end 
+			 * of the block, so we're done here. */
+			if (want == '{' && match != NULL && 
+					parserutils_stack_get_current(
+					parser->open_items) == NULL)
+				break;
+		}
+	}
+
+	/* Consume any trailing whitespace after the at-rule */
+	error = eatWS(parser);
+	if (error != CSS_OK)
+		return error;
+
+	/* Discard the tokens we've read */
+	parserutils_vector_clear(parser->tokens);
+
+	return done(parser);
+}
+
 
 #ifndef NDEBUG
 #ifdef DEBUG_STACK
