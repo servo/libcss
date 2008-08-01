@@ -23,6 +23,28 @@ struct css_css21 {
 
 static bool css21_handle_event(css_parser_event type, 
 		const parserutils_vector *tokens, void *pw);
+static inline bool handleStartStylesheet(css_css21 *c, 
+		const parserutils_vector *vector);
+static inline bool handleEndStylesheet(css_css21 *c, 
+		const parserutils_vector *vector);
+static inline bool handleStartRuleset(css_css21 *c, 
+		const parserutils_vector *vector);
+static inline bool handleEndRuleset(css_css21 *c, 
+		const parserutils_vector *vector);
+static inline bool handleStartAtRule(css_css21 *c, 
+		const parserutils_vector *vector);
+static inline bool handleEndAtRule(css_css21 *c, 
+		const parserutils_vector *vector);
+static inline bool handleStartBlock(css_css21 *c, 
+		const parserutils_vector *vector);
+static inline bool handleEndBlock(css_css21 *c, 
+		const parserutils_vector *vector);
+static inline bool handleBlockContent(css_css21 *c, 
+		const parserutils_vector *vector);
+static inline bool handleSelector(css_css21 *c, 
+		const parserutils_vector *vector);
+static inline bool handleDeclaration(css_css21 *c, 
+		const parserutils_vector *vector);
 
 /**
  * Create a CSS 2.1 parser
@@ -87,9 +109,124 @@ void css_css21_destroy(css_css21 *css21)
 bool css21_handle_event(css_parser_event type, const parserutils_vector *tokens,
 		void *pw)
 {
-	UNUSED(type);
-	UNUSED(tokens);
-	UNUSED(pw);
+	css_css21 *css21 = (css_css21 *) pw;
+
+	switch (type) {
+	case CSS_PARSER_START_STYLESHEET:
+		return handleStartStylesheet(css21, tokens);
+	case CSS_PARSER_END_STYLESHEET:
+		return handleEndStylesheet(css21, tokens);
+	case CSS_PARSER_START_RULESET:
+		return handleStartRuleset(css21, tokens);
+	case CSS_PARSER_END_RULESET:
+		return handleEndRuleset(css21, tokens);
+	case CSS_PARSER_START_ATRULE:
+		return handleStartAtRule(css21, tokens);
+	case CSS_PARSER_END_ATRULE:
+		return handleEndAtRule(css21, tokens);
+	case CSS_PARSER_START_BLOCK:
+		return handleStartBlock(css21, tokens);
+	case CSS_PARSER_END_BLOCK:
+		return handleEndBlock(css21, tokens);
+	case CSS_PARSER_BLOCK_CONTENT:
+		return handleBlockContent(css21, tokens);
+	case CSS_PARSER_SELECTOR:
+		return handleSelector(css21, tokens);
+	case CSS_PARSER_DECLARATION:
+		return handleDeclaration(css21, tokens);
+	}
+
+	return true;
+}
+
+/******************************************************************************
+ * Parser stages                                                              *
+ ******************************************************************************/
+
+bool handleStartStylesheet(css_css21 *c, const parserutils_vector *vector)
+{
+	UNUSED(c);
+	UNUSED(vector);
+
+	return true;
+}
+
+bool handleEndStylesheet(css_css21 *c, const parserutils_vector *vector)
+{
+	UNUSED(c);
+	UNUSED(vector);
+
+	return true;
+}
+
+bool handleStartRuleset(css_css21 *c, const parserutils_vector *vector)
+{
+	UNUSED(c);
+	UNUSED(vector);
+
+	return true;
+}
+
+bool handleEndRuleset(css_css21 *c, const parserutils_vector *vector)
+{
+	UNUSED(c);
+	UNUSED(vector);
+
+	return true;
+}
+
+bool handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
+{
+	UNUSED(c);
+	UNUSED(vector);
+
+	return true;
+}
+
+bool handleEndAtRule(css_css21 *c, const parserutils_vector *vector)
+{
+	UNUSED(c);
+	UNUSED(vector);
+
+	return true;
+}
+
+bool handleStartBlock(css_css21 *c, const parserutils_vector *vector)
+{
+	UNUSED(c);
+	UNUSED(vector);
+
+	return true;
+}
+
+bool handleEndBlock(css_css21 *c, const parserutils_vector *vector)
+{
+	UNUSED(c);
+	UNUSED(vector);
+
+	return true;
+}
+
+bool handleBlockContent(css_css21 *c, const parserutils_vector *vector)
+{
+	UNUSED(c);
+	UNUSED(vector);
+
+	return true;
+}
+
+bool handleSelector(css_css21 *c, const parserutils_vector *vector)
+{
+	UNUSED(c);
+	UNUSED(vector);
+
+	return true;
+}
+
+bool handleDeclaration(css_css21 *c, const parserutils_vector *vector)
+{
+	UNUSED(c);
+	UNUSED(vector);
 
 	return true;
 }
