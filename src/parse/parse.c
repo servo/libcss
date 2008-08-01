@@ -1202,8 +1202,6 @@ css_error parseBlockContent(css_parser *parser)
 					return done(parser);
 				}
 			} else if (token->type == CSS_TOKEN_EOF) {
-				/** \todo parse error */
-
 				error = pushBack(parser, token);
 				if (error != CSS_OK)
 					return error;
