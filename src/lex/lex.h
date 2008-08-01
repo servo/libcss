@@ -61,7 +61,7 @@ void css_lexer_destroy(css_lexer *lexer);
 css_error css_lexer_setopt(css_lexer *lexer, css_lexer_opttype type, 
 		css_lexer_optparams *params);
 
-css_error css_lexer_get_token(css_lexer *lexer, const css_token **token);
+css_error css_lexer_get_token(css_lexer *lexer, css_token **token);
 
 #endif
 

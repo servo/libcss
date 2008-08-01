@@ -108,7 +108,7 @@ int main(int argc, char **argv)
 	size_t len, origlen;
 #define CHUNK_SIZE (4096)
 	uint8_t buf[CHUNK_SIZE];
-	const css_token *tok;
+	css_token *tok;
 	css_error error;
 
 	if (argc != 3) {

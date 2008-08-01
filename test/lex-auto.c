@@ -267,7 +267,7 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 	parserutils_inputstream *input;
 	css_lexer *lexer;
 	css_error error;
-	const css_token *tok;
+	css_token *tok;
 	size_t e;
 	static int testnum;
 

@@ -127,28 +127,28 @@ do {									\
 static inline css_error appendToTokenData(css_lexer *lexer, 
 		const uint8_t *data, size_t len);
 static inline css_error emitToken(css_lexer *lexer, css_token_type type,
-		const css_token **token);
+		css_token **token);
 
-static inline css_error AtKeyword(css_lexer *lexer, const css_token **token);
+static inline css_error AtKeyword(css_lexer *lexer, css_token **token);
 static inline css_error CDCOrIdentOrFunction(css_lexer *lexer,
-		const css_token **token);
-static inline css_error CDO(css_lexer *lexer, const css_token **token);
-static inline css_error Comment(css_lexer *lexer, const css_token **token);
+		css_token **token);
+static inline css_error CDO(css_lexer *lexer, css_token **token);
+static inline css_error Comment(css_lexer *lexer, css_token **token);
 static inline css_error EscapedIdentOrFunction(css_lexer *lexer,
-		const css_token **token);
-static inline css_error Hash(css_lexer *lexer, const css_token **token);
+		css_token **token);
+static inline css_error Hash(css_lexer *lexer, css_token **token);
 static inline css_error IdentOrFunction(css_lexer *lexer,
-		const css_token **token);
-static inline css_error Match(css_lexer *lexer, const css_token **token);
+		css_token **token);
+static inline css_error Match(css_lexer *lexer, css_token **token);
 static inline css_error NumberOrPercentageOrDimension(css_lexer *lexer,
-		const css_token **token);
-static inline css_error S(css_lexer *lexer, const css_token **token);
-static inline css_error Start(css_lexer *lexer, const css_token **token);
-static inline css_error String(css_lexer *lexer, const css_token **token);
+		css_token **token);
+static inline css_error S(css_lexer *lexer, css_token **token);
+static inline css_error Start(css_lexer *lexer, css_token **token);
+static inline css_error String(css_lexer *lexer, css_token **token);
 static inline css_error URIOrUnicodeRangeOrIdentOrFunction(
-		css_lexer *lexer, const css_token **token);
-static inline css_error URI(css_lexer *lexer, const css_token **token);
-static inline css_error UnicodeRange(css_lexer *lexer, const css_token **token);
+		css_lexer *lexer, css_token **token);
+static inline css_error URI(css_lexer *lexer, css_token **token);
+static inline css_error UnicodeRange(css_lexer *lexer, css_token **token);
 
 static inline css_error consumeDigits(css_lexer *lexer);
 static inline css_error consumeEscape(css_lexer *lexer, bool nl);
@@ -253,8 +253,16 @@ css_error css_lexer_setopt(css_lexer *lexer, css_lexer_opttype type,
  * \param lexer  The lexer instance to read from
  * \param token  Pointer to location to receive pointer to token
  * \return CSS_OK on success, appropriate error otherwise
+ *
+ * The returned token object is owned by the lexer. However, the client is
+ * permitted to modify the data members of the token. The token must not be
+ * freed by the client (it may not have been allocated in the first place),
+ * nor may any of the pointers contained within it. The client may, if they
+ * wish, overwrite any data member of the returned token object -- the lexer
+ * does not depend on these remaining constant. This allows the client code
+ * to efficiently implement a push-back buffer with interned string data.
  */
-css_error css_lexer_get_token(css_lexer *lexer, const css_token **token)
+css_error css_lexer_get_token(css_lexer *lexer, css_token **token)
 {
 	css_error error;
 
@@ -347,7 +355,7 @@ css_error appendToTokenData(css_lexer *lexer, const uint8_t *data, size_t len)
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error emitToken(css_lexer *lexer, css_token_type type,
-		const css_token **token)
+		css_token **token)
 {
 	css_token *t = &lexer->token;
 
@@ -468,7 +476,7 @@ css_error emitToken(css_lexer *lexer, css_token_type type,
  * State machine components                                                   *
  ******************************************************************************/
 
-css_error AtKeyword(css_lexer *lexer, const css_token **token)
+css_error AtKeyword(css_lexer *lexer, css_token **token)
 {
 	uintptr_t cptr;
 	uint8_t c;
@@ -533,7 +541,7 @@ css_error AtKeyword(css_lexer *lexer, const css_token **token)
 	return emitToken(lexer, CSS_TOKEN_ATKEYWORD, token);
 }
 
-css_error CDCOrIdentOrFunction(css_lexer *lexer, const css_token **token)
+css_error CDCOrIdentOrFunction(css_lexer *lexer, css_token **token)
 {
 	css_token *t = &lexer->token;
 	uintptr_t cptr;
@@ -641,7 +649,7 @@ css_error CDCOrIdentOrFunction(css_lexer *lexer, const css_token **token)
 	return emitToken(lexer, t->type, token);
 }
 
-css_error CDO(css_lexer *lexer, const css_token **token)
+css_error CDO(css_lexer *lexer, css_token **token)
 {
 	css_token *t = &lexer->token;
 	uintptr_t cptr;
@@ -737,7 +745,7 @@ css_error CDO(css_lexer *lexer, const css_token **token)
 	return emitToken(lexer, CSS_TOKEN_CDO, token);
 }
 
-css_error Comment(css_lexer *lexer, const css_token **token)
+css_error Comment(css_lexer *lexer, css_token **token)
 {
 	uintptr_t cptr;
 	uint8_t c;
@@ -806,7 +814,7 @@ css_error Comment(css_lexer *lexer, const css_token **token)
 	return emitToken(lexer, CSS_TOKEN_COMMENT, token);
 }
 
-css_error EscapedIdentOrFunction(css_lexer *lexer, const css_token **token)
+css_error EscapedIdentOrFunction(css_lexer *lexer, css_token **token)
 {
 	css_error error;
 
@@ -833,7 +841,7 @@ css_error EscapedIdentOrFunction(css_lexer *lexer, const css_token **token)
 	return IdentOrFunction(lexer, token);
 }
 
-css_error Hash(css_lexer *lexer, const css_token **token)
+css_error Hash(css_lexer *lexer, css_token **token)
 {	
 	css_error error;
 	
@@ -853,7 +861,7 @@ css_error Hash(css_lexer *lexer, const css_token **token)
 	return emitToken(lexer, CSS_TOKEN_CHAR, token);
 }
 
-css_error IdentOrFunction(css_lexer *lexer, const css_token **token)
+css_error IdentOrFunction(css_lexer *lexer, css_token **token)
 {
 	css_token *t = &lexer->token;
 	uintptr_t cptr;
@@ -903,7 +911,7 @@ css_error IdentOrFunction(css_lexer *lexer, const css_token **token)
 	return emitToken(lexer, t->type, token);
 }
 
-css_error Match(css_lexer *lexer, const css_token **token)
+css_error Match(css_lexer *lexer, css_token **token)
 {
 	uintptr_t cptr;
 	uint8_t c;
@@ -957,8 +965,7 @@ css_error Match(css_lexer *lexer, const css_token **token)
 	return emitToken(lexer, type, token);
 }
 
-css_error NumberOrPercentageOrDimension(css_lexer *lexer, 
-		const css_token **token)
+css_error NumberOrPercentageOrDimension(css_lexer *lexer, css_token **token)
 {
 	css_token *t = &lexer->token;
 	uintptr_t cptr;
@@ -1097,7 +1104,7 @@ css_error NumberOrPercentageOrDimension(css_lexer *lexer,
 	return emitToken(lexer, CSS_TOKEN_DIMENSION, token);
 }
 
-css_error S(css_lexer *lexer, const css_token **token)
+css_error S(css_lexer *lexer, css_token **token)
 {
 	css_error error;
 
@@ -1113,7 +1120,7 @@ css_error S(css_lexer *lexer, const css_token **token)
 	return emitToken(lexer, CSS_TOKEN_S, token);
 }
 
-css_error Start(css_lexer *lexer, const css_token **token)
+css_error Start(css_lexer *lexer, css_token **token)
 {
 	css_token *t = &lexer->token;
 	uintptr_t cptr;
@@ -1238,7 +1245,7 @@ start:
 	}
 }
 
-css_error String(css_lexer *lexer, const css_token **token)
+css_error String(css_lexer *lexer, css_token **token)
 {
 	css_error error;
 
@@ -1259,7 +1266,7 @@ css_error String(css_lexer *lexer, const css_token **token)
 }
 
 css_error URIOrUnicodeRangeOrIdentOrFunction(css_lexer *lexer, 
-		const css_token **token)
+		css_token **token)
 {
 	uintptr_t cptr;
 	uint8_t c;
@@ -1306,7 +1313,7 @@ css_error URIOrUnicodeRangeOrIdentOrFunction(css_lexer *lexer,
 	return IdentOrFunction(lexer, token);
 }
 
-css_error URI(css_lexer *lexer, const css_token **token)
+css_error URI(css_lexer *lexer, css_token **token)
 {
 	uintptr_t cptr;
 	uint8_t c;
@@ -1480,7 +1487,7 @@ css_error URI(css_lexer *lexer, const css_token **token)
 	return emitToken(lexer, CSS_TOKEN_URI, token);
 }
 
-css_error UnicodeRange(css_lexer *lexer, const css_token **token)
+css_error UnicodeRange(css_lexer *lexer, css_token **token)
 {
 	css_token *t = &lexer->token;
 	uintptr_t cptr = PARSERUTILS_INPUTSTREAM_OOD; /* GCC: shush */

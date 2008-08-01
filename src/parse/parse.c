@@ -521,7 +521,6 @@ css_error expect(css_parser *parser, css_token_type type)
  */
 css_error getToken(css_parser *parser, const css_token **token)
 {
-	css_token temp;
 	parserutils_error perror;
 	css_error error;
 
@@ -531,28 +530,31 @@ css_error getToken(css_parser *parser, const css_token **token)
 		parser->pushback = NULL;
 	} else {
 		/* Otherwise, ask the lexer */
-		error = css_lexer_get_token(parser->lexer, token);
+		css_token *t;
+
+		error = css_lexer_get_token(parser->lexer, &t);
 		if (error != CSS_OK)
 			return error;
-	}
 
-	temp = *(*token);
+		if (t->data.ptr != NULL && t->data.len > 0) {
+			/* Insert token text into the dictionary */
+			const parserutils_dict_entry *interned;
 
-	if (temp.data.ptr != NULL && temp.data.len > 0) {
-		/* Insert token text into the dictionary */
-		const parserutils_dict_entry *interned;
+			perror = parserutils_dict_insert(parser->dictionary,
+					t->data.ptr, t->data.len, &interned);
+			if (perror != PARSERUTILS_OK)
+				return css_error_from_parserutils_error(perror);
 
-		perror = parserutils_dict_insert(parser->dictionary,
-				temp.data.ptr, temp.data.len, &interned);
-		if (perror != PARSERUTILS_OK)
-			return css_error_from_parserutils_error(perror);
+			t->data.ptr = interned->data;
+			t->data.len = interned->len;
+		}
 
-		temp.data.ptr = interned->data;
-		temp.data.len = interned->len;
+		*token = t;
 	}
 
 	/* Append token to vector */
-	perror = parserutils_vector_append(parser->tokens, &temp);
+	perror = parserutils_vector_append(parser->tokens, 
+			(css_token *) (*token));
 	if (perror != PARSERUTILS_OK)
 		return css_error_from_parserutils_error(perror);
 
