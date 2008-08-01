@@ -543,7 +543,7 @@ css_error getToken(css_parser *parser, const css_token **token)
 
 	temp = *(*token);
 
-	if (temp.data.ptr != NULL) {
+	if (temp.data.ptr != NULL && temp.data.len > 0) {
 		/* Insert token text into the dictionary */
 		perror = parserutils_dict_insert(parser->dictionary,
 				temp.data.ptr, temp.data.len, &interned);
@@ -1075,7 +1075,7 @@ css_error parseBlock(css_parser *parser)
 
 		if (token->type != CSS_TOKEN_CHAR || token->data.len != 1 ||
 				token->data.ptr[0] != '{') {
-			/** \todo parse error */
+			/* This should never happen, as FIRST(block) == '{' */
 			assert(0 && "Expected {");
 		}
 
@@ -1102,7 +1102,8 @@ css_error parseBlock(css_parser *parser)
 
 		if (token->type != CSS_TOKEN_CHAR || token->data.len != 1 ||
 				token->data.ptr[0] != '}') {
-			/** \todo parse error */
+			/* This should never happen, as 
+			 * FOLLOW(block-content) == '}' */
 			assert(0 && "Expected }");
 		}
 
@@ -1168,13 +1169,10 @@ css_error parseBlockContent(css_parser *parser)
 							__func__, tprinter);
 #endif
 					if (parser->event != NULL) {
-						if (parser->event(
+						parser->event(
 							CSS_PARSER_BLOCK_CONTENT,
 							parser->tokens,
-							parser->event_pw) ==
-								false) {
-							/** \todo parse error */
-						}
+							parser->event_pw);
 					}
 
 					return transition(parser, to, 
@@ -1195,13 +1193,10 @@ css_error parseBlockContent(css_parser *parser)
 							__func__, tprinter);
 #endif
 					if (parser->event != NULL) {
-						if (parser->event(
+						parser->event(
 							CSS_PARSER_BLOCK_CONTENT,
 							parser->tokens,
-							parser->event_pw) ==
-								false) {
-							/** \todo parse error */
-						}
+							parser->event_pw);
 					}
 
 					return done(parser);
@@ -1218,13 +1213,9 @@ css_error parseBlockContent(css_parser *parser)
 						__func__, tprinter);
 #endif
 				if (parser->event != NULL) {
-					if (parser->event(
-						CSS_PARSER_BLOCK_CONTENT,
+					parser->event(CSS_PARSER_BLOCK_CONTENT,
 							parser->tokens,
-							parser->event_pw) ==
-							false) {
-						/** \todo parse error */
-					}
+							parser->event_pw);
 				}
 
 				return done(parser);
@@ -1381,7 +1372,7 @@ css_error parseDeclList(css_parser *parser)
 			return error;
 
 		if (token->type != CSS_TOKEN_CHAR || token->data.len != 1) {
-			/** \todo parse error */
+			/* Should never happen */
 			assert(0 && "Expected ; or  }");
 		}
 
@@ -1394,7 +1385,7 @@ css_error parseDeclList(css_parser *parser)
 		} else if (token->data.ptr[0] == ';') {
 			state->substate = WS;
 		} else {
-			/** \todo parse error */
+			/* Should never happen */
 			assert(0 && "Expected ; or }");
 		}
 
@@ -1429,7 +1420,10 @@ css_error parseDeclListEnd(css_parser *parser)
 		if (error != CSS_OK)
 			return error;
 
-		if (token->type == CSS_TOKEN_IDENT) {
+		if (token->type != CSS_TOKEN_CHAR || 
+				token->data.len != 1 || 
+				(token->data.ptr[0] != ';' &&
+				token->data.ptr[0] != '}')) {
 			parser_state to = { sDeclaration, Initial };
 			parser_state subsequent = 
 					{ sDeclListEnd, AfterDeclaration };
@@ -1439,12 +1433,6 @@ css_error parseDeclListEnd(css_parser *parser)
 				return error;
 
 			return transition(parser, to, subsequent);
-		} else if (token->type != CSS_TOKEN_CHAR || 
-				token->data.len != 1 || 
-				(token->data.ptr[0] != ';' &&
-				token->data.ptr[0] != '}')) {
-			/** \todo parse error */
-			assert(0 && "Expected ; or }");
 		} else {
 			error = pushBack(parser, token);
 			if (error != CSS_OK)

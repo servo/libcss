@@ -91,6 +91,8 @@ int main(int argc, char **argv)
 
 		error = css_parser_parse_chunk(parser, buf, CHUNK_SIZE);
 		assert(error == CSS_OK || error == CSS_NEEDDATA);
+
+		len -= CHUNK_SIZE;
 	}
 
 	if (len > 0) {
