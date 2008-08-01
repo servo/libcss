@@ -526,7 +526,6 @@ css_error expect(css_parser *parser, css_token_type type)
 css_error getToken(css_parser *parser, const css_token **token)
 {
 	css_token temp;
-	const parserutils_dict_entry *interned;
 	parserutils_error perror;
 	css_error error;
 
@@ -545,6 +544,8 @@ css_error getToken(css_parser *parser, const css_token **token)
 
 	if (temp.data.ptr != NULL && temp.data.len > 0) {
 		/* Insert token text into the dictionary */
+		const parserutils_dict_entry *interned;
+
 		perror = parserutils_dict_insert(parser->dictionary,
 				temp.data.ptr, temp.data.len, &interned);
 		if (perror != PARSERUTILS_OK)

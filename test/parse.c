@@ -21,6 +21,11 @@ static void *myrealloc(void *ptr, size_t len, void *pw)
 static bool event_handler(css_parser_event type, 
 		const parserutils_vector *tokens, void *pw)
 {
+#if 0
+	UNUSED(type);
+	UNUSED(tokens);
+	UNUSED(pw);
+#else
 	int32_t ctx = 0;
 	const css_token *token;
 
@@ -45,6 +50,7 @@ static bool event_handler(css_parser_event type,
 	} while (token != NULL);
 
 	printf("\n");
+#endif
 
 	return true;
 }
