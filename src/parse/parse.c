@@ -19,7 +19,7 @@
 #include "utils/utils.h"
 
 #undef DEBUG_STACK
-#define DEBUG_EVENTS
+#undef DEBUG_EVENTS
 
 #ifndef NDEBUG
 #include <stdio.h>
