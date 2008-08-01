@@ -6,7 +6,9 @@ libcss		Library initialisation/finalisation
 csdetect	Character set detection			csdetect
 lex		Lexing					css
 lex-auto	Automated lexer tests			lex
-parse		Parsing					css
+parse		Parsing (core syntax)			css
+css21		Parsing (CSS2.1 specifics)		css
+
 
 # Regression tests
 

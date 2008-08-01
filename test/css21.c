@@ -8,6 +8,7 @@
 
 #include "lex/lex.h"
 #include "parse/parse.h"
+#include "parse/css21.h"
 
 #include "testutils.h"
 
@@ -18,47 +19,10 @@ static void *myrealloc(void *ptr, size_t len, void *pw)
 	return realloc(ptr, len);
 }
 
-static bool event_handler(css_parser_event type, 
-		const parserutils_vector *tokens, void *pw)
-{
-#if 0
-	UNUSED(type);
-	UNUSED(tokens);
-	UNUSED(pw);
-#else
-	int32_t ctx = 0;
-	const css_token *token;
-
-	UNUSED(pw);
-
-	printf("%s%d", tokens != NULL ? "  " : "", type);
-
-	if (tokens == NULL) {
-		printf("\n");
-		return true;
-	}
-
-	do {
-		token = parserutils_vector_iterate(tokens, &ctx);
-		if (token == NULL)
-			break;
-
-		printf("\n    %d", token->type);
-
-		if (token->data.ptr != NULL)
-			printf(" %.*s", token->data.len, token->data.ptr);
-	} while (token != NULL);
-
-	printf("\n");
-#endif
-
-	return true;
-}
-
 int main(int argc, char **argv)
 {
-	css_parser_optparams params;
 	css_parser *parser;
+	css_css21 *css21;
 	FILE *fp;
 	size_t len, origlen;
 #define CHUNK_SIZE (4096)
@@ -77,10 +41,9 @@ int main(int argc, char **argv)
 			myrealloc, NULL);
 	assert(parser != NULL);
 
-	params.event_handler.handler = event_handler;
-	params.event_handler.pw = NULL;
-	assert(css_parser_setopt(parser, CSS_PARSER_EVENT_HANDLER, 
-			&params) == CSS_OK);
+	css21 = css_css21_create((css_stylesheet *) 10, parser, 
+			myrealloc, NULL);
+	assert(css21 != NULL);
 
 	fp = fopen(argv[2], "rb");
 	if (fp == NULL) {
@@ -113,6 +76,8 @@ int main(int argc, char **argv)
 	fclose(fp);
 
 	assert(css_parser_completed(parser) == CSS_OK);
+
+	css_css21_destroy(css21);
 
 	css_parser_destroy(parser);
 

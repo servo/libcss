@@ -78,8 +78,6 @@ typedef struct parser_state
  */
 struct css_parser
 {
-	css_stylesheet *sheet;		/**< The sheet we're parsing */
-
 	parserutils_inputstream *stream;	/**< The inputstream */
 	css_lexer *lexer;		/**< The lexer to use */
 
@@ -171,21 +169,20 @@ static css_error (*parseFuncs[])(css_parser *parser) = {
 /**
  * Create a CSS parser
  *
- * \param sheet      The sheet to parse data for
  * \param charset    Charset of data, if known, or NULL
  * \param cs_source  Source of charset information, or CSS_CHARSET_DEFAULT
  * \param alloc      Memory (de)allocation function
  * \param pw         Pointer to client-specific private data
  * \return Pointer to parser instance, or NULL on memory exhaustion
  */
-css_parser *css_parser_create(css_stylesheet *sheet, const char *charset,
-		css_charset_source cs_source, css_alloc alloc, void *pw)
+css_parser *css_parser_create(const char *charset, css_charset_source cs_source,
+		css_alloc alloc, void *pw)
 {
 	css_parser *parser;
 	parser_state initial = { sStart, 0 };
 	parserutils_error perror;
 
-	if (sheet == NULL || alloc == NULL)
+	if (alloc == NULL)
 		return NULL;
 
 	parser = alloc(NULL, sizeof(css_parser), pw);
@@ -259,7 +256,6 @@ css_parser *css_parser_create(css_stylesheet *sheet, const char *charset,
 		return NULL;
 	}
 
-	parser->sheet = sheet;
 	parser->quirks = false;
 	parser->pushback = NULL;
 	parser->parseError = false;

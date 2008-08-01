@@ -10,6 +10,7 @@
 
 #include <parserutils/utils/vector.h>
 
+#include <libcss/errors.h>
 #include <libcss/functypes.h>
 #include <libcss/types.h>
 
@@ -55,8 +56,8 @@ typedef union css_parser_optparams {
 	} event_handler;
 } css_parser_optparams;
 
-css_parser *css_parser_create(css_stylesheet *sheet, const char *charset,
-		css_charset_source cs_source, css_alloc alloc, void *pw);
+css_parser *css_parser_create(const char *charset, css_charset_source cs_source,
+		css_alloc alloc, void *pw);
 void css_parser_destroy(css_parser *parser);
 
 css_error css_parser_setopt(css_parser *parser, css_parser_opttype type,

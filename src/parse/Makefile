@@ -35,7 +35,7 @@ d              := $(DIR)
 CFLAGS := $(CFLAGS) -I$(d)
 
 # Sources
-SRCS_$(d) := parse.c
+SRCS_$(d) := parse.c css21.c
 
 # Append to sources for component
 SOURCES += $(addprefix $(d), $(SRCS_$(d)))
