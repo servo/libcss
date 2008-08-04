@@ -45,7 +45,7 @@ struct css_css21 {
 
 	enum {
 		BEFORE_CHARSET,
-		AFTER_CHARSET,
+		BEFORE_RULES,
 		HAD_RULE,
 	} state;			/**< State flag, for at-rule handling */
 
@@ -327,13 +327,38 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 			if (token != NULL)
 				return CSS_INVALID;
 
-			c->state = AFTER_CHARSET;
+			c->state = BEFORE_RULES;
 		} else {
 			return CSS_INVALID;
 		}
 	} else if (atkeyword->data.ptr == c->strings[IMPORT]) {
-		/** \todo any0 = (STRING | URI) ws 
-		 *               (IDENT ws (',' ws IDENT ws)* )? */
+		if (c->state != HAD_RULE) {
+			/* any0 = (STRING | URI) ws 
+			 *        (IDENT ws (',' ws IDENT ws)* )? */
+			const css_token *uri = 
+				parserutils_vector_iterate(vector, &any);
+			if (uri == NULL || (token->type != CSS_TOKEN_STRING && 
+					token->type != CSS_TOKEN_URI))
+				return CSS_INVALID;
+
+			/* Whitespace */
+			do {
+				token = parserutils_vector_iterate(vector, 
+						&any);
+				if (token == NULL || token->type != CSS_TOKEN_S)
+					break;
+			} while (token != NULL);
+
+			/** \todo Media list */
+			if (token != NULL) {
+			}
+
+			/** \todo trigger fetch of imported sheet */
+
+			c->state = BEFORE_RULES;
+		} else {
+			return CSS_INVALID;
+		}
 	} else if (atkeyword->data.ptr == c->strings[MEDIA]) {
 		/** \todo any0 = IDENT ws (',' ws IDENT ws)* */
 	} else if (atkeyword->data.ptr == c->strings[PAGE]) {
