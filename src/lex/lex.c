@@ -1141,6 +1141,8 @@ start:
 	t->type = CSS_TOKEN_EOF;
 	t->data.ptr = NULL;
 	t->data.len = 0;
+	t->lower.ptr = NULL;
+	t->lower.len = 0;
 	t->col = lexer->currentCol;
 	t->line = lexer->currentLine;
 	lexer->escapeSeen = false;

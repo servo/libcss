@@ -51,6 +51,8 @@ typedef struct css_token {
 
 	css_string data;
 
+	css_string lower;
+
 	uint32_t col;
 	uint32_t line;
 } css_token;
