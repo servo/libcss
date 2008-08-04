@@ -18,7 +18,7 @@ static void *myrealloc(void *ptr, size_t len, void *pw)
 	return realloc(ptr, len);
 }
 
-static bool event_handler(css_parser_event type, 
+static css_error event_handler(css_parser_event type, 
 		const parserutils_vector *tokens, void *pw)
 {
 #if 0
@@ -35,7 +35,7 @@ static bool event_handler(css_parser_event type,
 
 	if (tokens == NULL) {
 		printf("\n");
-		return true;
+		return CSS_OK;
 	}
 
 	do {
@@ -52,7 +52,7 @@ static bool event_handler(css_parser_event type,
 	printf("\n");
 #endif
 
-	return true;
+	return CSS_OK;
 }
 
 int main(int argc, char **argv)

@@ -33,7 +33,7 @@ typedef enum css_parser_event {
 	CSS_PARSER_DECLARATION,
 } css_parser_event;
 
-typedef bool (*css_parser_event_handler)(css_parser_event type, 
+typedef css_error (*css_parser_event_handler)(css_parser_event type, 
 		const parserutils_vector *tokens, void *pw);
 
 /**

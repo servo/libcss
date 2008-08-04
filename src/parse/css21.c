@@ -5,9 +5,14 @@
  * Copyright 2008 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
+#include <assert.h>
+
+#include <parserutils/utils/stack.h>
+
 #include "parse/css21.h"
 #include "parse/parse.h"
 
+#include "utils/parserutilserror.h"
 #include "utils/utils.h"
 
 /**
@@ -17,33 +22,36 @@ struct css_css21 {
 	css_stylesheet *sheet;		/**< The stylesheet to parse for */
 	css_parser *parser;		/**< The underlying core parser */
 
+#define STACK_CHUNK 32
+	parserutils_stack *context;	/**< Context stack */
+
 	css_alloc alloc;		/**< Memory (de)allocation function */
 	void *pw;			/**< Client's private data */
 };
 
-static bool css21_handle_event(css_parser_event type, 
+static css_error css21_handle_event(css_parser_event type, 
 		const parserutils_vector *tokens, void *pw);
-static inline bool handleStartStylesheet(css_css21 *c, 
+static inline css_error handleStartStylesheet(css_css21 *c, 
 		const parserutils_vector *vector);
-static inline bool handleEndStylesheet(css_css21 *c, 
+static inline css_error handleEndStylesheet(css_css21 *c, 
 		const parserutils_vector *vector);
-static inline bool handleStartRuleset(css_css21 *c, 
+static inline css_error handleStartRuleset(css_css21 *c, 
 		const parserutils_vector *vector);
-static inline bool handleEndRuleset(css_css21 *c, 
+static inline css_error handleEndRuleset(css_css21 *c, 
 		const parserutils_vector *vector);
-static inline bool handleStartAtRule(css_css21 *c, 
+static inline css_error handleStartAtRule(css_css21 *c, 
 		const parserutils_vector *vector);
-static inline bool handleEndAtRule(css_css21 *c, 
+static inline css_error handleEndAtRule(css_css21 *c, 
 		const parserutils_vector *vector);
-static inline bool handleStartBlock(css_css21 *c, 
+static inline css_error handleStartBlock(css_css21 *c, 
 		const parserutils_vector *vector);
-static inline bool handleEndBlock(css_css21 *c, 
+static inline css_error handleEndBlock(css_css21 *c, 
 		const parserutils_vector *vector);
-static inline bool handleBlockContent(css_css21 *c, 
+static inline css_error handleBlockContent(css_css21 *c, 
 		const parserutils_vector *vector);
-static inline bool handleSelector(css_css21 *c, 
+static inline css_error handleSelector(css_css21 *c, 
 		const parserutils_vector *vector);
-static inline bool handleDeclaration(css_css21 *c, 
+static inline css_error handleDeclaration(css_css21 *c, 
 		const parserutils_vector *vector);
 
 /**
@@ -69,10 +77,18 @@ css_css21 *css_css21_create(css_stylesheet *sheet, css_parser *parser,
 	if (css21 == NULL)
 		return NULL;
 
+	css21->context = parserutils_stack_create(sizeof(css_parser_event), 
+			STACK_CHUNK, (parserutils_alloc) alloc, pw);
+	if (css21->context == NULL) {
+		alloc(css21, 0, pw);
+		return NULL;
+	}
+
 	params.event_handler.handler = css21_handle_event;
 	params.event_handler.pw = css21;
 	error = css_parser_setopt(parser, CSS_PARSER_EVENT_HANDLER, &params);
 	if (error != CSS_OK) {
+		parserutils_stack_destroy(css21->context);
 		alloc(css21, 0, pw);
 		return NULL;
 	}
@@ -95,6 +111,8 @@ void css_css21_destroy(css_css21 *css21)
 	if (css21 == NULL)
 		return;
 
+	parserutils_stack_destroy(css21->context);
+
 	css21->alloc(css21, 0, css21->pw);
 }
 
@@ -104,10 +122,11 @@ void css_css21_destroy(css_css21 *css21)
  * \param type    The event type
  * \param tokens  Vector of tokens read since last event, or NULL
  * \param pw      Pointer to handler context
- * \return False to signal parse error, true otherwise
+ * \return CSS_OK on success, CSS_INVALID to indicate parse error, 
+ *         appropriate error otherwise.
  */
-bool css21_handle_event(css_parser_event type, const parserutils_vector *tokens,
-		void *pw)
+css_error css21_handle_event(css_parser_event type, 
+		const parserutils_vector *tokens, void *pw)
 {
 	css_css21 *css21 = (css_css21 *) pw;
 
@@ -136,98 +155,188 @@ bool css21_handle_event(css_parser_event type, const parserutils_vector *tokens,
 		return handleDeclaration(css21, tokens);
 	}
 
-	return true;
+	return CSS_OK;
 }
 
 /******************************************************************************
  * Parser stages                                                              *
  ******************************************************************************/
 
-bool handleStartStylesheet(css_css21 *c, const parserutils_vector *vector)
+css_error handleStartStylesheet(css_css21 *c, const parserutils_vector *vector)
 {
-	UNUSED(c);
+	parserutils_error perror;
+	css_parser_event type = CSS_PARSER_START_STYLESHEET;
+
 	UNUSED(vector);
 
-	return true;
+	assert(c != NULL);
+
+	perror = parserutils_stack_push(c->context, (void *) &type);
+	if (perror != PARSERUTILS_OK) {
+		return css_error_from_parserutils_error(perror);
+	}
+
+	return CSS_OK;
 }
 
-bool handleEndStylesheet(css_css21 *c, const parserutils_vector *vector)
+css_error handleEndStylesheet(css_css21 *c, const parserutils_vector *vector)
 {
-	UNUSED(c);
+	parserutils_error perror;
+	css_parser_event *type;
+
 	UNUSED(vector);
 
-	return true;
+	assert(c != NULL);
+
+	type = parserutils_stack_get_current(c->context);
+	if (type == NULL || *type != CSS_PARSER_START_STYLESHEET)
+		return CSS_INVALID;
+
+	perror = parserutils_stack_pop(c->context, NULL);
+	if (perror != PARSERUTILS_OK) {
+		return css_error_from_parserutils_error(perror);
+	}
+
+	return CSS_OK;
 }
 
-bool handleStartRuleset(css_css21 *c, const parserutils_vector *vector)
+css_error handleStartRuleset(css_css21 *c, const parserutils_vector *vector)
 {
-	UNUSED(c);
+	parserutils_error perror;
+	css_parser_event type = CSS_PARSER_START_RULESET;
+
 	UNUSED(vector);
 
-	return true;
+	assert(c != NULL);
+
+	perror = parserutils_stack_push(c->context, (void *) &type);
+	if (perror != PARSERUTILS_OK) {
+		return css_error_from_parserutils_error(perror);
+	}
+
+	return CSS_OK;
 }
 
-bool handleEndRuleset(css_css21 *c, const parserutils_vector *vector)
+css_error handleEndRuleset(css_css21 *c, const parserutils_vector *vector)
 {
-	UNUSED(c);
+	parserutils_error perror;
+	css_parser_event *type;
+
 	UNUSED(vector);
 
-	return true;
+	assert(c != NULL);
+
+	type = parserutils_stack_get_current(c->context);
+	if (type == NULL || *type != CSS_PARSER_START_RULESET)
+		return CSS_INVALID;
+
+	perror = parserutils_stack_pop(c->context, NULL);
+	if (perror != PARSERUTILS_OK) {
+		return css_error_from_parserutils_error(perror);
+	}
+
+	return CSS_OK;
 }
 
-bool handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
+css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 {
-	UNUSED(c);
+	parserutils_error perror;
+	css_parser_event type = CSS_PARSER_START_ATRULE;
+
 	UNUSED(vector);
 
-	return true;
+	assert(c != NULL);
+
+	perror = parserutils_stack_push(c->context, (void *) &type);
+	if (perror != PARSERUTILS_OK) {
+		return css_error_from_parserutils_error(perror);
+	}
+
+	/** \todo handle tokens */
+
+	return CSS_OK;
 }
 
-bool handleEndAtRule(css_css21 *c, const parserutils_vector *vector)
+css_error handleEndAtRule(css_css21 *c, const parserutils_vector *vector)
 {
-	UNUSED(c);
+	parserutils_error perror;
+	css_parser_event *type;
+
 	UNUSED(vector);
 
-	return true;
+	assert(c != NULL);
+
+	type = parserutils_stack_get_current(c->context);
+	if (type == NULL || *type != CSS_PARSER_START_ATRULE)
+		return CSS_INVALID;
+
+	perror = parserutils_stack_pop(c->context, NULL);
+	if (perror != PARSERUTILS_OK) {
+		return css_error_from_parserutils_error(perror);
+	}
+
+	return CSS_OK;
 }
 
-bool handleStartBlock(css_css21 *c, const parserutils_vector *vector)
+css_error handleStartBlock(css_css21 *c, const parserutils_vector *vector)
 {
-	UNUSED(c);
+	parserutils_error perror;
+	css_parser_event type = CSS_PARSER_START_BLOCK;
+
 	UNUSED(vector);
 
-	return true;
+	assert(c != NULL);
+
+	perror = parserutils_stack_push(c->context, (void *) &type);
+	if (perror != PARSERUTILS_OK) {
+		return css_error_from_parserutils_error(perror);
+	}
+
+	return CSS_OK;
 }
 
-bool handleEndBlock(css_css21 *c, const parserutils_vector *vector)
+css_error handleEndBlock(css_css21 *c, const parserutils_vector *vector)
 {
-	UNUSED(c);
+	parserutils_error perror;
+	css_parser_event *type;
+
 	UNUSED(vector);
 
-	return true;
+	assert(c != NULL);
+
+	type = parserutils_stack_get_current(c->context);
+	if (type == NULL || *type != CSS_PARSER_START_BLOCK)
+		return CSS_INVALID;
+
+	perror = parserutils_stack_pop(c->context, NULL);
+	if (perror != PARSERUTILS_OK) {
+		return css_error_from_parserutils_error(perror);
+	}
+
+	return CSS_OK;
 }
 
-bool handleBlockContent(css_css21 *c, const parserutils_vector *vector)
+css_error handleBlockContent(css_css21 *c, const parserutils_vector *vector)
 {
 	UNUSED(c);
 	UNUSED(vector);
 
-	return true;
+	return CSS_OK;
 }
 
-bool handleSelector(css_css21 *c, const parserutils_vector *vector)
+css_error handleSelector(css_css21 *c, const parserutils_vector *vector)
 {
 	UNUSED(c);
 	UNUSED(vector);
 
-	return true;
+	return CSS_OK;
 }
 
-bool handleDeclaration(css_css21 *c, const parserutils_vector *vector)
+css_error handleDeclaration(css_css21 *c, const parserutils_vector *vector)
 {
 	UNUSED(c);
 	UNUSED(vector);
 
-	return true;
+	return CSS_OK;
 }
 

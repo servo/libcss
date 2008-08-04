@@ -995,7 +995,7 @@ css_error parseAtRuleEnd(css_parser *parser)
 		if (parser->event != NULL) {
 			if (parser->event(CSS_PARSER_START_ATRULE, 
 					parser->tokens, parser->event_pw) ==
-					false) {
+					CSS_INVALID) {
 				parser_state to = { sMalformedAtRule, Initial };
 
 				return transitionNoRet(parser, to);
@@ -1267,7 +1267,8 @@ css_error parseSelector(css_parser *parser)
 			if (parser->event != NULL) {
 				if (parser->event(CSS_PARSER_SELECTOR, 
 						parser->tokens,
-						parser->event_pw) == false) {
+						parser->event_pw) == 
+						CSS_INVALID) {
 					/* parse error */
 					parser->parseError = true;
 				}
