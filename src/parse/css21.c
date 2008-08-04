@@ -17,6 +17,22 @@
 #include "utils/parserutilserror.h"
 #include "utils/utils.h"
 
+enum {
+	CHARSET, IMPORT, MEDIA, PAGE,
+
+	LAST_KNOWN
+};
+
+static struct {
+	const char *ptr;
+	size_t len;
+} stringmap[] = {
+	{ "charset", SLEN("charset") },
+	{ "import", SLEN("import") },
+	{ "media", SLEN("media") },
+	{ "page", SLEN("page") },
+};
+
 /**
  * Context for a CSS 2.1 parser
  */
@@ -32,6 +48,8 @@ struct css_css21 {
 		AFTER_CHARSET,
 		HAD_RULE,
 	} state;			/**< State flag, for at-rule handling */
+
+	const uint8_t *strings[LAST_KNOWN];	/**< Interned strings */
 
 	css_alloc alloc;		/**< Memory (de)allocation function */
 	void *pw;			/**< Client's private data */
@@ -90,6 +108,17 @@ css_css21 *css_css21_create(css_stylesheet *sheet, css_parser *parser,
 	if (css21->context == NULL) {
 		alloc(css21, 0, pw);
 		return NULL;
+	}
+
+	for (int i = 0; i < LAST_KNOWN; i++) {
+		css21->strings[i] = css_parser_dict_add(parser,
+				(const uint8_t *) stringmap[i].ptr, 
+				stringmap[i].len);
+		if (css21->strings[i] == NULL) {
+			parserutils_stack_destroy(css21->context);
+			alloc(css21, 0, pw);
+			return NULL;
+		}
 	}
 
 	params.event_handler.handler = css21_handle_event;
@@ -284,10 +313,7 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 	 * there is one */
 	assert(atkeyword != NULL && atkeyword->type == CSS_TOKEN_ATKEYWORD);
 
-	/** \todo Erm. Strings are interned now. Stop looking at their data */
-	if (atkeyword->data.len == SLEN("charset") && 
-			strncasecmp((const char *) atkeyword->data.ptr, 
-				"charset", SLEN("charset")) == 0) {
+	if (atkeyword->lower.ptr == c->strings[CHARSET]) {
 		if (c->state == BEFORE_CHARSET) {
 			/* any0 = STRING */
 			if (any == 0)
@@ -305,18 +331,12 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 		} else {
 			return CSS_INVALID;
 		}
-	} else if (atkeyword->data.len == SLEN("import") &&
-			strncasecmp((const char *) atkeyword->data.ptr,
-				"import", SLEN("import")) == 0) {
+	} else if (atkeyword->data.ptr == c->strings[IMPORT]) {
 		/** \todo any0 = (STRING | URI) ws 
 		 *               (IDENT ws (',' ws IDENT ws)* )? */
-	} else if (atkeyword->data.len == SLEN("media") &&
-			strncasecmp((const char *) atkeyword->data.ptr,
-				"media", SLEN("media")) == 0) {
+	} else if (atkeyword->data.ptr == c->strings[MEDIA]) {
 		/** \todo any0 = IDENT ws (',' ws IDENT ws)* */
-	} else if (atkeyword->data.len == SLEN("page") &&
-			strncasecmp((const char *) atkeyword->data.ptr,
-				"page", SLEN("page")) == 0) {
+	} else if (atkeyword->data.ptr == c->strings[PAGE]) {
 		/** \todo any0 = (':' IDENT)? ws */
 	} else {
 		return CSS_INVALID;

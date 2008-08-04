@@ -403,6 +403,31 @@ const char *css_parser_read_charset(css_parser *parser,
 	return parserutils_inputstream_read_charset(parser->stream, source);
 }
 
+/**
+ * Add an entry to the parser dictionary
+ *
+ * \param parser  The parser instance
+ * \param ptr     Pointer to data
+ * \param len     Length, in bytes, of data
+ * \return Pointer to data in dictionary, or NULL on memory exhaustion
+ */
+const uint8_t *css_parser_dict_add(css_parser *parser, const uint8_t *ptr,
+		size_t len)
+{
+	const parserutils_dict_entry *interned;
+	parserutils_error perror;
+
+	if (parser == NULL || ptr == NULL || len == 0)
+		return NULL;
+
+	perror = parserutils_dict_insert(parser->dictionary, ptr, len, 
+			&interned);
+	if (perror != PARSERUTILS_OK)
+		return NULL;
+
+	return interned->data;
+}
+
 /******************************************************************************
  * Helper functions                                                           *
  ******************************************************************************/
