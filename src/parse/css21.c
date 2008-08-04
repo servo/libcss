@@ -6,9 +6,11 @@
  */
 
 #include <assert.h>
+#include <string.h>
 
 #include <parserutils/utils/stack.h>
 
+#include "lex/lex.h"
 #include "parse/css21.h"
 #include "parse/parse.h"
 
@@ -252,7 +254,50 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 		return css_error_from_parserutils_error(perror);
 	}
 
-	/** \todo handle tokens */
+	/* vector contains: ATKEYWORD ws any0 */
+	const css_token *token = NULL;
+	const css_token *atkeyword = NULL;
+	int32_t any = 0;
+	int32_t ctx = 0;
+
+	do {
+		any = ctx;
+
+		token = parserutils_vector_iterate(vector, &ctx);
+		if (token == NULL)
+			break;
+
+		if (atkeyword == NULL)
+			atkeyword = token;
+		else if (token->type != CSS_TOKEN_S)
+			break;
+	} while (token != NULL);
+
+	/* We now have an ATKEYWORD and the context for the start of any0, if 
+	 * there is one */
+	assert(atkeyword != NULL && atkeyword->type == CSS_TOKEN_ATKEYWORD);
+
+	/** \todo Erm. Strings are interned now. Stop looking at their data */
+	if (atkeyword->data.len == SLEN("charset") && 
+			strncasecmp((const char *) atkeyword->data.ptr, 
+				"charset", SLEN("charset")) == 0) {
+		/** \todo any0 = STRING */
+	} else if (atkeyword->data.len == SLEN("import") &&
+			strncasecmp((const char *) atkeyword->data.ptr,
+				"import", SLEN("import")) == 0) {
+		/** \todo any0 = (STRING | URI) ws 
+		 *               (IDENT ws (',' ws IDENT ws)* )? */
+	} else if (atkeyword->data.len == SLEN("media") &&
+			strncasecmp((const char *) atkeyword->data.ptr,
+				"media", SLEN("media")) == 0) {
+		/** \todo any0 = IDENT ws (',' ws IDENT ws)* */
+	} else if (atkeyword->data.len == SLEN("page") &&
+			strncasecmp((const char *) atkeyword->data.ptr,
+				"page", SLEN("page")) == 0) {
+		/** \todo any0 = (':' IDENT)? ws */
+	} else {
+		return CSS_INVALID;
+	}
 
 	return CSS_OK;
 }

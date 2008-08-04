@@ -8,6 +8,7 @@
 #ifndef css_lex_lex_h_
 #define css_lex_lex_h_
 
+#include <libcss/errors.h>
 #include <libcss/functypes.h>
 #include <libcss/types.h>
 
