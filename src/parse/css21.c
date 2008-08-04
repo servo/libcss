@@ -27,6 +27,12 @@ struct css_css21 {
 #define STACK_CHUNK 32
 	parserutils_stack *context;	/**< Context stack */
 
+	enum {
+		BEFORE_CHARSET,
+		AFTER_CHARSET,
+		HAD_RULE,
+	} state;			/**< State flag, for at-rule handling */
+
 	css_alloc alloc;		/**< Memory (de)allocation function */
 	void *pw;			/**< Client's private data */
 };
@@ -97,6 +103,7 @@ css_css21 *css_css21_create(css_stylesheet *sheet, css_parser *parser,
 
 	css21->sheet = sheet;
 	css21->parser = parser;
+	css21->state = BEFORE_CHARSET;
 	css21->alloc = alloc;
 	css21->pw = pw;
 
@@ -281,7 +288,23 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 	if (atkeyword->data.len == SLEN("charset") && 
 			strncasecmp((const char *) atkeyword->data.ptr, 
 				"charset", SLEN("charset")) == 0) {
-		/** \todo any0 = STRING */
+		if (c->state == BEFORE_CHARSET) {
+			/* any0 = STRING */
+			if (any == 0)
+				return CSS_INVALID;
+
+			token = parserutils_vector_iterate(vector, &any);
+			if (token == NULL || token->type != CSS_TOKEN_STRING)
+				return CSS_INVALID;
+
+			token = parserutils_vector_iterate(vector, &any);
+			if (token != NULL)
+				return CSS_INVALID;
+
+			c->state = AFTER_CHARSET;
+		} else {
+			return CSS_INVALID;
+		}
 	} else if (atkeyword->data.len == SLEN("import") &&
 			strncasecmp((const char *) atkeyword->data.ptr,
 				"import", SLEN("import")) == 0) {
