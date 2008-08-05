@@ -29,7 +29,6 @@ typedef enum css_parser_event {
 	CSS_PARSER_START_BLOCK,
 	CSS_PARSER_END_BLOCK,
 	CSS_PARSER_BLOCK_CONTENT,
-	CSS_PARSER_SELECTOR,
 	CSS_PARSER_DECLARATION,
 } css_parser_event;
 

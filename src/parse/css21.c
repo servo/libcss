@@ -33,6 +33,11 @@ static struct {
 	{ "page", SLEN("page") },
 };
 
+typedef struct context_entry {
+	css_parser_event type;		/**< Type of entry */
+	const uint8_t *data;		/**< Pointer to interned string */
+} context_entry;
+
 /**
  * Context for a CSS 2.1 parser
  */
@@ -103,13 +108,14 @@ css_css21 *css_css21_create(css_stylesheet *sheet, css_parser *parser,
 	if (css21 == NULL)
 		return NULL;
 
-	css21->context = parserutils_stack_create(sizeof(css_parser_event), 
+	css21->context = parserutils_stack_create(sizeof(context_entry), 
 			STACK_CHUNK, (parserutils_alloc) alloc, pw);
 	if (css21->context == NULL) {
 		alloc(css21, 0, pw);
 		return NULL;
 	}
 
+	/* Intern all known strings */
 	for (int i = 0; i < LAST_KNOWN; i++) {
 		css21->strings[i] = css_parser_dict_add(parser,
 				(const uint8_t *) stringmap[i].ptr, 
@@ -187,8 +193,6 @@ css_error css21_handle_event(css_parser_event type,
 		return handleEndBlock(css21, tokens);
 	case CSS_PARSER_BLOCK_CONTENT:
 		return handleBlockContent(css21, tokens);
-	case CSS_PARSER_SELECTOR:
-		return handleSelector(css21, tokens);
 	case CSS_PARSER_DECLARATION:
 		return handleDeclaration(css21, tokens);
 	}
@@ -203,13 +207,13 @@ css_error css21_handle_event(css_parser_event type,
 css_error handleStartStylesheet(css_css21 *c, const parserutils_vector *vector)
 {
 	parserutils_error perror;
-	css_parser_event type = CSS_PARSER_START_STYLESHEET;
+	context_entry entry = { CSS_PARSER_START_STYLESHEET, NULL };
 
 	UNUSED(vector);
 
 	assert(c != NULL);
 
-	perror = parserutils_stack_push(c->context, (void *) &type);
+	perror = parserutils_stack_push(c->context, (void *) &entry);
 	if (perror != PARSERUTILS_OK) {
 		return css_error_from_parserutils_error(perror);
 	}
@@ -220,14 +224,14 @@ css_error handleStartStylesheet(css_css21 *c, const parserutils_vector *vector)
 css_error handleEndStylesheet(css_css21 *c, const parserutils_vector *vector)
 {
 	parserutils_error perror;
-	css_parser_event *type;
+	context_entry *entry;
 
 	UNUSED(vector);
 
 	assert(c != NULL);
 
-	type = parserutils_stack_get_current(c->context);
-	if (type == NULL || *type != CSS_PARSER_START_STYLESHEET)
+	entry = parserutils_stack_get_current(c->context);
+	if (entry == NULL || entry->type != CSS_PARSER_START_STYLESHEET)
 		return CSS_INVALID;
 
 	perror = parserutils_stack_pop(c->context, NULL);
@@ -241,13 +245,16 @@ css_error handleEndStylesheet(css_css21 *c, const parserutils_vector *vector)
 css_error handleStartRuleset(css_css21 *c, const parserutils_vector *vector)
 {
 	parserutils_error perror;
-	css_parser_event type = CSS_PARSER_START_RULESET;
-
-	UNUSED(vector);
+	css_error error;
+	context_entry entry = { CSS_PARSER_START_RULESET, NULL };
 
 	assert(c != NULL);
 
-	perror = parserutils_stack_push(c->context, (void *) &type);
+	error = handleSelector(c, vector);
+	if (error != CSS_OK)
+		return error;
+
+	perror = parserutils_stack_push(c->context, (void *) &entry);
 	if (perror != PARSERUTILS_OK) {
 		return css_error_from_parserutils_error(perror);
 	}
@@ -258,14 +265,14 @@ css_error handleStartRuleset(css_css21 *c, const parserutils_vector *vector)
 css_error handleEndRuleset(css_css21 *c, const parserutils_vector *vector)
 {
 	parserutils_error perror;
-	css_parser_event *type;
+	context_entry *entry;
 
 	UNUSED(vector);
 
 	assert(c != NULL);
 
-	type = parserutils_stack_get_current(c->context);
-	if (type == NULL || *type != CSS_PARSER_START_RULESET)
+	entry = parserutils_stack_get_current(c->context);
+	if (entry == NULL || entry->type != CSS_PARSER_START_RULESET)
 		return CSS_INVALID;
 
 	perror = parserutils_stack_pop(c->context, NULL);
@@ -279,16 +286,11 @@ css_error handleEndRuleset(css_css21 *c, const parserutils_vector *vector)
 css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 {
 	parserutils_error perror;
-	css_parser_event type = CSS_PARSER_START_ATRULE;
+	context_entry entry = { CSS_PARSER_START_ATRULE, NULL };
 
 	UNUSED(vector);
 
 	assert(c != NULL);
-
-	perror = parserutils_stack_push(c->context, (void *) &type);
-	if (perror != PARSERUTILS_OK) {
-		return css_error_from_parserutils_error(perror);
-	}
 
 	/* vector contains: ATKEYWORD ws any0 */
 	const css_token *token = NULL;
@@ -331,7 +333,7 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 		} else {
 			return CSS_INVALID;
 		}
-	} else if (atkeyword->data.ptr == c->strings[IMPORT]) {
+	} else if (atkeyword->lower.ptr == c->strings[IMPORT]) {
 		if (c->state != HAD_RULE) {
 			/* any0 = (STRING | URI) ws 
 			 *        (IDENT ws (',' ws IDENT ws)* )? */
@@ -359,12 +361,19 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 		} else {
 			return CSS_INVALID;
 		}
-	} else if (atkeyword->data.ptr == c->strings[MEDIA]) {
+	} else if (atkeyword->lower.ptr == c->strings[MEDIA]) {
 		/** \todo any0 = IDENT ws (',' ws IDENT ws)* */
-	} else if (atkeyword->data.ptr == c->strings[PAGE]) {
+	} else if (atkeyword->lower.ptr == c->strings[PAGE]) {
 		/** \todo any0 = (':' IDENT)? ws */
 	} else {
 		return CSS_INVALID;
+	}
+
+	entry.data = atkeyword->lower.ptr;
+
+	perror = parserutils_stack_push(c->context, (void *) &entry);
+	if (perror != PARSERUTILS_OK) {
+		return css_error_from_parserutils_error(perror);
 	}
 
 	return CSS_OK;
@@ -373,14 +382,14 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 css_error handleEndAtRule(css_css21 *c, const parserutils_vector *vector)
 {
 	parserutils_error perror;
-	css_parser_event *type;
+	context_entry *entry;
 
 	UNUSED(vector);
 
 	assert(c != NULL);
 
-	type = parserutils_stack_get_current(c->context);
-	if (type == NULL || *type != CSS_PARSER_START_ATRULE)
+	entry = parserutils_stack_get_current(c->context);
+	if (entry == NULL || entry->type != CSS_PARSER_START_ATRULE)
 		return CSS_INVALID;
 
 	perror = parserutils_stack_pop(c->context, NULL);
@@ -393,38 +402,22 @@ css_error handleEndAtRule(css_css21 *c, const parserutils_vector *vector)
 
 css_error handleStartBlock(css_css21 *c, const parserutils_vector *vector)
 {
-	parserutils_error perror;
-	css_parser_event type = CSS_PARSER_START_BLOCK;
-
+	UNUSED(c);
 	UNUSED(vector);
 
-	assert(c != NULL);
-
-	perror = parserutils_stack_push(c->context, (void *) &type);
-	if (perror != PARSERUTILS_OK) {
-		return css_error_from_parserutils_error(perror);
-	}
+	/* We don't care about blocks. In CSS2.1 they're always attached to 
+	 * rulesets or at-rules. */
 
 	return CSS_OK;
 }
 
 css_error handleEndBlock(css_css21 *c, const parserutils_vector *vector)
 {
-	parserutils_error perror;
-	css_parser_event *type;
-
+	UNUSED(c);
 	UNUSED(vector);
 
-	assert(c != NULL);
-
-	type = parserutils_stack_get_current(c->context);
-	if (type == NULL || *type != CSS_PARSER_START_BLOCK)
-		return CSS_INVALID;
-
-	perror = parserutils_stack_pop(c->context, NULL);
-	if (perror != PARSERUTILS_OK) {
-		return css_error_from_parserutils_error(perror);
-	}
+	/* We don't care about blocks. In CSS 2.1 they're always attached to 
+	 * rulesets or at-rules. */
 
 	return CSS_OK;
 }
@@ -434,6 +427,10 @@ css_error handleBlockContent(css_css21 *c, const parserutils_vector *vector)
 	UNUSED(c);
 	UNUSED(vector);
 
+	/* In CSS 2.1, block content comprises either declarations (if the 
+	 * current block is associated with @page or a selector), or rulesets 
+	 * (if the current block is associated with @media). */
+
 	return CSS_OK;
 }
 
@@ -442,6 +439,21 @@ css_error handleSelector(css_css21 *c, const parserutils_vector *vector)
 	UNUSED(c);
 	UNUSED(vector);
 
+	/* CSS 2.1 selector syntax:
+	 *
+	 * selector_list   -> selector [ ',' ws selector ]*
+	 * selector        -> simple_selector [ combinator simple_selector ]*
+	 * simple_selector -> element_name [ HASH | class | attrib | pseudo ]*
+	 *                 -> [ HASH | class | attrib | pseudo ]+
+	 * combinator      -> '+' ws | '>' ws | ws1
+	 * element_name    -> IDENT | '*'
+	 * class           -> '.' IDENT
+	 * attrib          -> '[' ws IDENT ws [ 
+	 *                           [ '=' | INCLUDES | DASHMATCH ] ws 
+	 *                           [ IDENT | STRING ] ws ]? ']' 
+	 * pseudo          -> ':' [ IDENT | FUNCTION ws IDENT? ws ')' ]
+	 */
+
 	return CSS_OK;
 }
 
@@ -449,6 +461,17 @@ css_error handleDeclaration(css_css21 *c, const parserutils_vector *vector)
 {
 	UNUSED(c);
 	UNUSED(vector);
+
+	/* Locations where declarations are permitted:
+	 *
+	 * + In @page
+	 * + In ruleset
+	 */
+
+	/* IDENT ws ':' ws value 
+	 * 
+	 * In CSS 2.1, value is any1, so '{' or ATKEYWORD => parse error
+	 */
 
 	return CSS_OK;
 }

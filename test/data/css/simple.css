@@ -48,4 +48,4 @@ foo }
 
 blah { baz: bat; foo: bar !important; }
 
-foo { bar: ""; }
+foo { bar: ""; }{ color: green; }

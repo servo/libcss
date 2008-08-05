@@ -833,14 +833,6 @@ css_error parseRuleset(css_parser *parser)
 
 	switch (state->substate) {
 	case Initial:
-#if !defined(NDEBUG) && defined(DEBUG_EVENTS)
-		printf("Begin ruleset\n");
-#endif
-		if (parser->event != NULL) {
-			parser->event(CSS_PARSER_START_RULESET, NULL, 
-					parser->event_pw);
-		}
-
 		parserutils_vector_clear(parser->tokens);
 
 		error = getToken(parser, &token);
@@ -852,6 +844,20 @@ css_error parseRuleset(css_parser *parser)
 		 * however. */
 		if (token->type == CSS_TOKEN_CHAR && token->lower.len == 1 && 
 				token->lower.ptr[0] == '{') {
+#if !defined(NDEBUG) && defined(DEBUG_EVENTS)
+			printf("Begin ruleset\n");
+#endif
+			if (parser->event != NULL) {
+				if (parser->event(CSS_PARSER_START_RULESET, 
+						NULL, parser->event_pw) == 
+						CSS_INVALID) {
+					parser_state to = 
+						{ sMalformedSelector, Initial };
+
+					return transitionNoRet(parser, to);
+				}
+			}
+
 			state->substate = WS;
 			goto ws;
 		} else {
@@ -866,17 +872,19 @@ css_error parseRuleset(css_parser *parser)
 		}
 		break;
 	case Brace:
-		if (parser->parseError) {
-			parser_state to = { sMalformedSelector, Initial };
-
-			/* Still need to announce end of ruleset */
 #if !defined(NDEBUG) && defined(DEBUG_EVENTS)
-			printf("End ruleset\n");
+		printf("Begin ruleset\n");
+		parserutils_vector_dump(parser->tokens, __func__, tprinter);
 #endif
-			if (parser->event != NULL) {
-				parser->event(CSS_PARSER_END_RULESET, 
-						NULL, parser->event_pw);
-			}
+		if (parser->parseError == false && parser->event != NULL) {
+			if (parser->event(CSS_PARSER_START_RULESET, 
+					parser->tokens, parser->event_pw) ==
+					CSS_INVALID)
+				parser->parseError = true;
+		}
+
+		if (parser->parseError == true) {
+			parser_state to = { sMalformedSelector, Initial };
 
 			return transitionNoRet(parser, to);
 		}
@@ -1331,22 +1339,6 @@ css_error parseSelector(css_parser *parser)
 		return transition(parser, to, subsequent);
 	}
 	case AfterAny1:
-		if (!parser->parseError) {
-#if !defined(NDEBUG) && defined(DEBUG_EVENTS)
-			parserutils_vector_dump(parser->tokens, 
-					__func__, tprinter);
-#endif
-			if (parser->event != NULL) {
-				if (parser->event(CSS_PARSER_SELECTOR, 
-						parser->tokens,
-						parser->event_pw) == 
-						CSS_INVALID) {
-					/* parse error */
-					parser->parseError = true;
-				}
-			}
-		}
-
 		break;
 	}
 
