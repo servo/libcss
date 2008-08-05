@@ -80,7 +80,7 @@ static inline css_error handleEndBlock(css_css21 *c,
 		const parserutils_vector *vector);
 static inline css_error handleBlockContent(css_css21 *c, 
 		const parserutils_vector *vector);
-static inline css_error handleSelector(css_css21 *c, 
+static inline css_error handleSelectorList(css_css21 *c, 
 		const parserutils_vector *vector);
 static inline css_error handleDeclaration(css_css21 *c, 
 		const parserutils_vector *vector);
@@ -250,7 +250,7 @@ css_error handleStartRuleset(css_css21 *c, const parserutils_vector *vector)
 
 	assert(c != NULL);
 
-	error = handleSelector(c, vector);
+	error = handleSelectorList(c, vector);
 	if (error != CSS_OK)
 		return error;
 
@@ -441,7 +441,7 @@ css_error handleBlockContent(css_css21 *c, const parserutils_vector *vector)
 	return CSS_OK;
 }
 
-css_error handleSelector(css_css21 *c, const parserutils_vector *vector)
+css_error handleSelectorList(css_css21 *c, const parserutils_vector *vector)
 {
 	UNUSED(c);
 	UNUSED(vector);
