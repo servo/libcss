@@ -361,10 +361,15 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 		} else {
 			return CSS_INVALID;
 		}
+#if 0
+	/** \todo these depend on nested block support, so we'll disable them
+	 * until we have such a thing. This means that we'll ignore the entire
+	 * at-rule until then */
 	} else if (atkeyword->lower.ptr == c->strings[MEDIA]) {
 		/** \todo any0 = IDENT ws (',' ws IDENT ws)* */
 	} else if (atkeyword->lower.ptr == c->strings[PAGE]) {
 		/** \todo any0 = (':' IDENT)? ws */
+#endif
 	} else {
 		return CSS_INVALID;
 	}
@@ -430,6 +435,8 @@ css_error handleBlockContent(css_css21 *c, const parserutils_vector *vector)
 	/* In CSS 2.1, block content comprises either declarations (if the 
 	 * current block is associated with @page or a selector), or rulesets 
 	 * (if the current block is associated with @media). */
+
+	/** \todo implement nested blocks */
 
 	return CSS_OK;
 }
