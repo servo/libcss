@@ -14,6 +14,8 @@ struct selector {
 		size_t value_len;
 	} data;					/**< Selector data */
 
+	struct selector *specifics;		/**< Selector specifics */
+
 	combinator combinator_type;		/**< Type of combinator */
 	struct selector *combinator;		/**< Combining selector */
 
@@ -21,8 +23,8 @@ struct selector {
 
 	struct style *style;			/**< Applicable style */
 
-	struct selector *chain_next;		/**< Next in hash chain */
-	struct selector *chain_prev;		/**< Previous in hash chain */
+	struct selector *next;			/**< Next selector in list */
+	struct selector *prev;			/**< Previous selector */
 };
 
 Rule:
