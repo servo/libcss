@@ -10,6 +10,7 @@
 
 #include <parserutils/utils/stack.h>
 
+#include "stylesheet.h"
 #include "lex/lex.h"
 #include "parse/css21.h"
 #include "parse/parse.h"
