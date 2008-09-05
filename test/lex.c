@@ -29,34 +29,43 @@ static void printToken(const css_token *token)
 
 	switch (token->type) {
 	case CSS_TOKEN_IDENT:
-		printf("IDENT(%.*s)", token->data.len, token->data.ptr);
+		printf("IDENT(%.*s)", 
+				(int) token->data.len, token->data.ptr);
 		break;
 	case CSS_TOKEN_ATKEYWORD:
-		printf("ATKEYWORD(%.*s)", token->data.len, token->data.ptr);
+		printf("ATKEYWORD(%.*s)", 
+				(int) token->data.len, token->data.ptr);
 		break;
 	case CSS_TOKEN_STRING:
-		printf("STRING(%.*s)", token->data.len, token->data.ptr);
+		printf("STRING(%.*s)", 
+				(int) token->data.len, token->data.ptr);
 		break;
 	case CSS_TOKEN_INVALID_STRING:
-		printf("INVALID(%.*s)", token->data.len, token->data.ptr);
+		printf("INVALID(%.*s)", 
+				(int) token->data.len, token->data.ptr);
 		break;
 	case CSS_TOKEN_HASH:
-		printf("HASH(%.*s)", token->data.len, token->data.ptr);
+		printf("HASH(%.*s)", 
+				(int) token->data.len, token->data.ptr);
 		break;
 	case CSS_TOKEN_NUMBER:
-		printf("NUMBER(%.*s)", token->data.len, token->data.ptr);
+		printf("NUMBER(%.*s)", 
+				(int) token->data.len, token->data.ptr);
 		break;
 	case CSS_TOKEN_PERCENTAGE:
-		printf("PERCENTAGE(%.*s)", token->data.len, token->data.ptr);
+		printf("PERCENTAGE(%.*s)", 
+				(int) token->data.len, token->data.ptr);
 		break;
 	case CSS_TOKEN_DIMENSION:
-		printf("DIMENSION(%.*s)", token->data.len, token->data.ptr);
+		printf("DIMENSION(%.*s)", 
+				(int) token->data.len, token->data.ptr);
 		break;
 	case CSS_TOKEN_URI:
-		printf("URI(%.*s)", token->data.len, token->data.ptr);
+		printf("URI(%.*s)", (int) token->data.len, token->data.ptr);
 		break;
 	case CSS_TOKEN_UNICODE_RANGE:
-		printf("UNICODE-RANGE(%.*s)", token->data.len, token->data.ptr);
+		printf("UNICODE-RANGE(%.*s)", 
+				(int) token->data.len, token->data.ptr);
 		break;
 	case CSS_TOKEN_CDO:
 		printf("CDO");
@@ -68,10 +77,11 @@ static void printToken(const css_token *token)
 		printf("S");
 		break;
 	case CSS_TOKEN_COMMENT:
-		printf("COMMENT(%.*s)", token->data.len, token->data.ptr);
+		printf("COMMENT(%.*s)", (int) token->data.len, token->data.ptr);
 		break;
 	case CSS_TOKEN_FUNCTION:
-		printf("FUNCTION(%.*s)", token->data.len, token->data.ptr);
+		printf("FUNCTION(%.*s)", 
+				(int) token->data.len, token->data.ptr);
 		break;
 	case CSS_TOKEN_INCLUDES:
 		printf("INCLUDES");
@@ -89,7 +99,7 @@ static void printToken(const css_token *token)
 		printf("SUBSTRINGMATCH");
 		break;
 	case CSS_TOKEN_CHAR:
-		printf("CHAR(%.*s)", token->data.len, token->data.ptr);
+		printf("CHAR(%.*s)", (int) token->data.len, token->data.ptr);
 		break;
 	case CSS_TOKEN_EOF:
 		printf("EOF");

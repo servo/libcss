@@ -59,7 +59,7 @@ static css_error event_handler(css_parser_event type,
 		printf("\n    %d", token->type);
 
 		if (token->data.ptr != NULL)
-			printf(" %.*s", token->data.len, token->data.ptr);
+			printf(" %.*s", (int) token->data.len, token->data.ptr);
 	} while (token != NULL);
 
 	printf("\n");

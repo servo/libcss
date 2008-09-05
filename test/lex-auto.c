@@ -298,7 +298,7 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 
 		if (exp[e].textLen > 0) {
 			if (tok->data.len != exp[e].textLen) {
-				printf("%d: Got length %d, Expected %d\n",
+				printf("%d: Got length %zd, Expected %zd\n",
 					testnum, tok->data.len, exp[e].textLen);
 				assert(0 && "Text lengths differ");
 			}
@@ -306,8 +306,9 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 			if (strncmp((char *) tok->data.ptr, exp[e].text, 
 					tok->data.len) != 0) {
 				printf("%d: Got data '%.*s', Expected '%.*s'\n",
-					testnum, tok->data.len, tok->data.ptr,
-					exp[e].textLen, exp[e].text);
+					testnum, 
+					(int) tok->data.len, tok->data.ptr,
+					(int) exp[e].textLen, exp[e].text);
 				assert(0 && "Text differs");
 			}
 		}
