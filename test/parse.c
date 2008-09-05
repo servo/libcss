@@ -11,6 +11,19 @@
 
 #include "testutils.h"
 
+static const char *event_names[] = {
+	"START_STYLESHEET",
+	"END_STYLESHEET",
+	"START_RULESET",
+	"END_RULESET",
+	"START_ATRULE",
+	"END_ATRULE",
+	"START_BLOCK",
+	"END_BLOCK",
+	"BLOCK_CONTENT",
+	"DECLARATION"
+};
+
 static void *myrealloc(void *ptr, size_t len, void *pw)
 {
 	UNUSED(pw);
@@ -31,7 +44,7 @@ static css_error event_handler(css_parser_event type,
 
 	UNUSED(pw);
 
-	printf("%s%d", tokens != NULL ? "  " : "", type);
+	printf("%s%s", tokens != NULL ? "  " : "", event_names[type]);
 
 	if (tokens == NULL) {
 		printf("\n");

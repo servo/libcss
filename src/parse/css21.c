@@ -289,8 +289,6 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 	parserutils_error perror;
 	context_entry entry = { CSS_PARSER_START_ATRULE, NULL };
 
-	UNUSED(vector);
-
 	assert(c != NULL);
 
 	/* vector contains: ATKEYWORD ws any0 */
