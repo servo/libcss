@@ -84,10 +84,9 @@ setup:
 	@$(MKDIR) $(MKDIRFLAGS) $(DEBUGDIR)
 	@$(MKDIR) $(MKDIRFLAGS) $(COVERAGEDIR)
 
-export: release
-	@$(MKDIR) $(MKDIRFLAGS) $(TOP)/dist/lib
-	@$(CP) $(CPFLAGS) -r include $(EXPORT)/
-	@${CP} ${CPFLAGS} $(COMPONENT).a ${EXPORT}/lib/
+export:
+	@$(MKDIR) $(MKDIRFLAGS) -p $(TOP)/dist
+	@$(MAKE) install PREFIX="$(TOP)/dist"
 
 install: release
 	@$(MKDIR) $(MKDIRFLAGS) -p $(PREFIX)/lib/pkgconfig
