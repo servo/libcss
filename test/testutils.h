@@ -60,7 +60,7 @@ bool parse_testfile(const char *filename, line_func callback, void *pw)
 		if (buf[0] == '\n')
 			continue;
 
-		if (!callback(buf, parse_strlen(buf, sizeof buf), pw)) {
+		if (!callback(buf, parse_strlen(buf, sizeof buf - 1), pw)) {
 			fclose(fp);
 			return false;
 		}
