@@ -16,6 +16,7 @@ PERL := perl
 PKGCONFIG := pkg-config
 INSTALL := install
 SED := sed
+TOUCH := touch
 LCOV := echo
 GENHTML := echo
 
@@ -37,6 +38,7 @@ MVFLAGS :=
 ECHOFLAGS := 
 MAKEFLAGS :=
 PKGCONFIGFLAGS :=
+TOUCHFLAGS :=
 
 EXEEXT := ,ff8
 

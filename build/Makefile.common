@@ -43,10 +43,11 @@ OBJECTS := $(subst /,_,$(subst .c,.o,$(SOURCES)))
 
 # Rules
 release: setup $(addprefix $(RELEASEDIR)/,$(OBJECTS))
-	@$(AR) $(ARFLAGS) $(COMPONENT).a $(RELEASEDIR)/*
+	@$(AR) $(ARFLAGS) $(COMPONENT).a $(addprefix $(RELEASEDIR)/,$(OBJECTS))
 
 debug: setup $(addprefix $(DEBUGDIR)/,$(OBJECTS))
-	@$(AR) $(ARFLAGS) $(COMPONENT)-debug.a $(DEBUGDIR)/*
+	@$(AR) $(ARFLAGS) $(COMPONENT)-debug.a \
+			$(addprefix $(DEBUGDIR)/,$(OBJECTS))
 
 test: debug $(TARGET_TESTS)
 
@@ -80,8 +81,8 @@ distclean: clean
 	-@$(RM) $(RMFLAGS) -r $(TOP)/dist
 
 setup:
-	@$(MKDIR) $(MKDIRFLAGS) $(RELEASEDIR)
-	@$(MKDIR) $(MKDIRFLAGS) $(DEBUGDIR)
+	@$(MKDIR) $(MKDIRFLAGS) $(RELEASEDIR)/deps
+	@$(MKDIR) $(MKDIRFLAGS) $(DEBUGDIR)/deps
 	@$(MKDIR) $(MKDIRFLAGS) $(COVERAGEDIR)
 
 export:
@@ -101,6 +102,34 @@ uninstall:
 	@$(RM) $(RMFLAGS) $(PREFIX)/lib/pkgconfig/$(COMPONENT).pc
 	@$(RM) $(RMFLAGS) -r $(PREFIX)/include/libcss
 
+$(RELEASEDIR)/deps/created:
+	@$(MKDIR) $(MKDIRFLAGS) $(RELEASEDIR)/deps
+	@$(TOUCH) $(TOUCHFLAGS) $(RELEASEDIR)/deps/created
+
+$(DEBUGDIR)/deps/created:
+	@$(MKDIR) $(MKDIRFLAGS) $(DEBUGDIR)/deps
+	@$(TOUCH) $(TOUCHFLAGS) $(DEBUGDIR)/deps/created
+
+DEPFILES :=
+
+define do_dep
+DEPFILES += $(2)
+$$(RELEASEDIR)/deps/$(2): $$(RELEASEDIR)/deps/created $(1)
+	@$$(ECHO) $$(ECHOFLAGS) "DEP $(1)"
+	@$$(RM) $$(RMFLAGS) $$(RELEASEDIR)/deps/$(2)
+	@$$(CC) $$(RELEASECFLAGS) -MM -MT \
+		'$$(RELEASEDIR)/deps/$(2) $$(RELEASEDIR)/$(3)' \
+		-MF $$(RELEASEDIR)/deps/$(2) $(1)
+
+$$(DEBUGDIR)/deps/$(2): $$(DEBUGDIR)/deps/created $(1)
+	@$$(ECHO) $$(ECHOFLAGS) "DEP $(1)"
+	@$$(RM) $$(RMFLAGS) $$(DEBUGDIR)/deps/$(2)
+	@$$(CC) $$(DEBUGCFLAGS) -MM -MT \
+		'$$(DEBUGDIR)/deps/$(2) $$(DEBUGDIR)/$(3)' \
+		-MF $$(DEBUGDIR)/deps/$(2) $(1)
+
+endef
+
 # Finally, build rules for compilation
 define do_compile
 $$(RELEASEDIR)/$(2): $(1)
@@ -112,6 +141,14 @@ $$(DEBUGDIR)/$(2): $(1)
 	@$$(CC) -c $$(DEBUGCFLAGS) -o $$@ $(1)
 
 endef
+
+$(eval $(foreach SOURCE,$(filter %.c,$(SOURCES)), \
+	$(call do_dep,$(SOURCE),$(subst /,_,$(SOURCE:.c=.d)),$(subst /,_,$(SOURCE:.c=.o)))))
+
+ifneq ($(findstring clean,$(MAKECMDGOALS)),clean)
+-include $(sort $(addprefix $(RELEASEDIR)/deps/,$(DEPFILES)))
+-include $(sort $(addprefix $(DEBUGDIR)/deps/,$(DEPFILES)))
+endif
 
 $(eval $(foreach SOURCE,$(filter %.c,$(SOURCES)), \
 	$(call do_compile,$(SOURCE),$(subst /,_,$(SOURCE:.c=.o)))))
