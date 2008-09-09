@@ -90,17 +90,17 @@ export:
 	@$(MAKE) install PREFIX="$(TOP)/dist"
 
 install: release
-	@$(MKDIR) $(MKDIRFLAGS) -p $(PREFIX)/lib/pkgconfig
-	@$(MKDIR) $(MKDIRFLAGS) -p $(PREFIX)/include/libcss
+	@$(MKDIR) $(MKDIRFLAGS) -p $(DESTDIR)$(PREFIX)/lib/pkgconfig
+	@$(MKDIR) $(MKDIRFLAGS) -p $(DESTDIR)$(PREFIX)/include/libcss
 	@$(SED) -e 's#PREFIX#$(PREFIX)#' $(COMPONENT).pc.in >$(COMPONENT).pc
-	@$(INSTALL) --mode=644 -t $(PREFIX)/lib $(COMPONENT).a
-	@$(INSTALL) --mode=644 -t $(PREFIX)/lib/pkgconfig $(COMPONENT).pc
-	@$(INSTALL) --mode=644 -t $(PREFIX)/include/libcss $(filter %.h, $(wildcard include/libcss/*))
+	@$(INSTALL) --mode=644 -t $(DESTDIR)$(PREFIX)/lib $(COMPONENT).a
+	@$(INSTALL) --mode=644 -t $(DESTDIR)$(PREFIX)/lib/pkgconfig $(COMPONENT).pc
+	@$(INSTALL) --mode=644 -t $(DESTDIR)$(PREFIX)/include/libcss $(filter %.h, $(wildcard include/libcss/*))
 
 uninstall:
-	@$(RM) $(RMFLAGS) $(PREFIX)/lib/$(COMPONENT).a
-	@$(RM) $(RMFLAGS) $(PREFIX)/lib/pkgconfig/$(COMPONENT).pc
-	@$(RM) $(RMFLAGS) -r $(PREFIX)/include/libcss
+	@$(RM) $(RMFLAGS) $(DESTDIR)$(PREFIX)/lib/$(COMPONENT).a
+	@$(RM) $(RMFLAGS) $(DESTDIR)$(PREFIX)/lib/pkgconfig/$(COMPONENT).pc
+	@$(RM) $(RMFLAGS) -r $(DESTDIR)$(PREFIX)/include/libcss
 
 $(RELEASEDIR)/deps/created:
 	@$(MKDIR) $(MKDIRFLAGS) $(RELEASEDIR)/deps
