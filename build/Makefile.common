@@ -93,9 +93,9 @@ install: release
 	@$(MKDIR) $(MKDIRFLAGS) -p $(DESTDIR)$(PREFIX)/lib/pkgconfig
 	@$(MKDIR) $(MKDIRFLAGS) -p $(DESTDIR)$(PREFIX)/include/libcss
 	@$(SED) -e 's#PREFIX#$(PREFIX)#' $(COMPONENT).pc.in >$(COMPONENT).pc
-	$(INSTALL) --mode=644 -t $(DESTDIR)$(PREFIX)/lib $(COMPONENT).a
-	$(INSTALL) --mode=644 -t $(DESTDIR)$(PREFIX)/lib/pkgconfig $(COMPONENT).pc
-	$(INSTALL) --mode=644 -t $(DESTDIR)$(PREFIX)/include/libcss $(filter %.h, $(wildcard include/libcss/*))
+	$(INSTALL) -m 644 $(COMPONENT).a $(DESTDIR)$(PREFIX)/lib
+	$(INSTALL) -m 644 $(COMPONENT).pc $(DESTDIR)$(PREFIX)/lib/pkgconfig
+	$(INSTALL) -m 644 $(filter %.h, $(wildcard include/libcss/*)) $(DESTDIR)$(PREFIX)/include/libcss
 
 uninstall:
 	$(RM) $(RMFLAGS) $(DESTDIR)$(PREFIX)/lib/$(COMPONENT).a
