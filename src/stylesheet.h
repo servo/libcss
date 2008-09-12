@@ -10,6 +10,7 @@
 
 #include <inttypes.h>
 
+#include <libcss/errors.h>
 #include <libcss/types.h>
 
 typedef struct css_rule css_rule;
@@ -38,11 +39,8 @@ struct css_selector {
 	css_selector_type type;			/**< Type of selector */
 
 	struct {
-		const uint8_t *name;
-		size_t name_len;
-
-		const uint8_t *value;
-		size_t value_len;
+		css_string name;
+		css_string value;
 	} data;					/**< Selector data */
 
 	uint32_t specificity;			/**< Specificity of selector */
@@ -80,7 +78,8 @@ struct css_rule {
 		struct {
 			uint32_t media;
 			uint32_t rule_count;
-			css_rule **rules;
+			css_rule **rules;	/** \todo why this? isn't the 
+						 * child list sufficient? */
 		} media;
 		struct {
 			css_style *style;
@@ -94,7 +93,7 @@ struct css_rule {
 			css_stylesheet *sheet;
 		} import;
 		struct {
-			char *encoding;
+			char *encoding;		/** \todo use MIB enum? */
 		} charset;
 	} data;					/**< Rule data */
 
@@ -133,6 +132,27 @@ struct css_stylesheet {
 	css_stylesheet *next;			/**< Next in sibling list */
 	css_stylesheet *prev;			/**< Previous in sibling list */
 };
+
+css_selector *css_stylesheet_selector_create(css_stylesheet *sheet,
+		css_selector_type type, css_string *name, css_string *value);
+void css_stylesheet_selector_destroy(css_stylesheet *sheet,
+		css_selector *selector);
+
+css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
+		css_selector *parent, css_selector *specific);
+
+css_error css_stylesheet_selector_combine(css_stylesheet *sheet,
+		css_combinator type, css_selector *a, css_selector *b);
+
+/** \todo something about adding style declarations to a selector */
+
+css_rule *css_stylesheet_rule_create(css_stylesheet *sheet, css_rule_type type);
+void css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule);
+
+css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet, 
+		css_rule *rule, css_selector *selector);
+
+/** \todo registering other rule-type data with css_rules */
 
 #endif
 
