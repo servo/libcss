@@ -35,7 +35,7 @@ d              := $(DIR)
 CFLAGS := $(CFLAGS) -I$(d)
 
 # Sources
-SRCS_$(d) := libcss.c
+SRCS_$(d) := libcss.c stylesheet.c
 
 # Append to sources for component
 SOURCES += $(addprefix $(d), $(SRCS_$(d)))

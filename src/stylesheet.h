@@ -154,5 +154,8 @@ css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet,
 
 /** \todo registering other rule-type data with css_rules */
 
+css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule);
+css_error css_stylesheet_remove_rule(css_stylesheet *sheet, css_rule *rule);
+
 #endif
 
