@@ -11,6 +11,7 @@
 #include <inttypes.h>
 
 #include <libcss/errors.h>
+#include <libcss/functypes.h>
 #include <libcss/types.h>
 
 typedef struct css_rule css_rule;
@@ -131,6 +132,9 @@ struct css_stylesheet {
 	css_stylesheet *last_child;		/**< Last in child list */
 	css_stylesheet *next;			/**< Next in sibling list */
 	css_stylesheet *prev;			/**< Previous in sibling list */
+
+	css_alloc alloc;			/**< Allocation function */
+	void *pw;				/**< Private word */
 };
 
 css_selector *css_stylesheet_selector_create(css_stylesheet *sheet,

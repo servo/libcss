@@ -5,6 +5,8 @@
  * Copyright 2008 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
+#include <string.h>
+
 #include "stylesheet.h"
 #include "utils/utils.h"
 
@@ -20,12 +22,27 @@
 css_selector *css_stylesheet_selector_create(css_stylesheet *sheet,
 		css_selector_type type, css_string *name, css_string *value)
 {
-	UNUSED(sheet);
-	UNUSED(type);
-	UNUSED(name);
-	UNUSED(value);
+	css_selector *sel;
 
-	return NULL;
+	if (sheet == NULL || name == NULL)
+		return NULL;
+
+	sel = sheet->alloc(NULL, sizeof(css_selector), sheet->pw);
+	if (sel == NULL)
+		return NULL;
+
+	memset(sel, 0, sizeof(css_selector));
+
+	sel->type = type;
+	sel->data.name = *name;
+	if (value != NULL) {
+		sel->data.value = *value;
+	}
+	/** \todo specificity */
+	sel->specificity = 0;
+	sel->combinator_type = CSS_COMBINATOR_NONE;
+
+	return sel;
 }
 
 /**
@@ -56,9 +73,22 @@ void css_stylesheet_selector_destroy(css_stylesheet *sheet,
 css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
 		css_selector *parent, css_selector *specific)
 {
-	UNUSED(sheet);
-	UNUSED(parent);
-	UNUSED(specific);
+	css_selector *s;
+
+	if (sheet == NULL || parent == NULL || specific == NULL)
+		return CSS_BADPARM;
+
+	/** \todo this may want optimising */
+	for (s = parent->specifics; s != NULL && s->next != NULL; s = s->next)
+		/* do nothing */;
+	if (s == NULL) {
+		specific->prev = specific->next = NULL;
+		parent->specifics = specific;
+	} else {
+		s->next = specific;
+		specific->prev = s;
+		specific->next = NULL;
+	}
 
 	return CSS_OK;
 }
@@ -81,12 +111,15 @@ css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
 css_error css_stylesheet_selector_combine(css_stylesheet *sheet,
 		css_combinator type, css_selector *a, css_selector *b)
 {
-	UNUSED(sheet);
-	UNUSED(type);
-	UNUSED(a);
-	UNUSED(b);
+	if (sheet == NULL || a == NULL || b == NULL)
+		return CSS_BADPARM;
 
-	/** \todo Need to ensure that there is no existing combinator on B */
+	/* Ensure that there is no existing combinator on B */
+	if (b->combinator != NULL)
+		return CSS_INVALID;
+
+	b->combinator = a;
+	b->combinator_type = type;
 
 	return CSS_OK;
 }
@@ -100,10 +133,20 @@ css_error css_stylesheet_selector_combine(css_stylesheet *sheet,
  */
 css_rule *css_stylesheet_rule_create(css_stylesheet *sheet, css_rule_type type)
 {
-	UNUSED(sheet);
-	UNUSED(type);
+	css_rule *rule;
 
-	return NULL;
+	if (sheet == NULL)
+		return NULL;
+
+	rule = sheet->alloc(NULL, sizeof(css_rule), sheet->pw);
+	if (rule == NULL)
+		return NULL;
+
+	memset(rule, 0, sizeof(css_rule));
+
+	rule->type = type;
+
+	return rule;
 }
 
 /**
@@ -132,12 +175,29 @@ void css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet, 
 		css_rule *rule, css_selector *selector)
 {
-	UNUSED(sheet);
-	UNUSED(rule);
-	UNUSED(selector);
+	css_selector **sels;
 
-	/** \todo Ensure rule is a CSS_RULE_SELECTOR */
-	/** \todo Set selector's rule field */
+	if (sheet == NULL || rule == NULL || selector == NULL)
+		return CSS_BADPARM;
+
+	/* Ensure rule is a CSS_RULE_SELECTOR */
+	if (rule->type != CSS_RULE_SELECTOR)
+		return CSS_INVALID;
+
+	sels = sheet->alloc(rule->data.selector.selectors, 
+			(rule->data.selector.selector_count + 1) * 
+				sizeof(css_selector *), 
+			sheet->pw);
+	if (sels == NULL)
+		return CSS_NOMEM;
+
+	/* Insert into rule's selector list */
+	sels[rule->data.selector.selector_count] = selector;
+	rule->data.selector.selector_count++;
+	rule->data.selector.selectors = sels;
+
+	/* Set selector's rule field */
+	selector->rule = rule;
 	
 	return CSS_OK;
 }
@@ -151,10 +211,29 @@ css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet,
  */
 css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule)
 {
-	UNUSED(sheet);
-	UNUSED(rule);
+	css_rule *r;
 
-	/** \todo Fill in rule's index and owner fields */
+	if (sheet == NULL || rule == NULL)
+		return CSS_BADPARM;
+
+	/* Fill in rule's index and owner fields */
+	rule->index = sheet->rule_count;
+	rule->owner = sheet;
+
+	/* Add rule to sheet */
+	sheet->rule_count++;
+	/** \todo this may need optimising */
+	for (r = sheet->rule_list; r != NULL && r->next != NULL; r = r->next)
+		/* do nothing */;
+	if (r == NULL) {
+		rule->prev = rule->next = NULL;
+		sheet->rule_list = rule;
+	} else {
+		r->next = rule;
+		rule->prev = r;
+		rule->next = NULL;
+	}
+
 	/** \todo If there are selectors in the rule, add them to the hash 
 	 * (this needs to recurse over child rules, too) */
 
