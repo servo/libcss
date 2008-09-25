@@ -28,16 +28,52 @@ css_stylesheet *css_stylesheet_create(const char *url, const char *title,
 		css_import_handler import_callback, void *import_pw,
 		css_alloc alloc, void *alloc_pw)
 {
-	UNUSED(url);
-	UNUSED(title);
-	UNUSED(origin);
-	UNUSED(media);
-	UNUSED(import_callback);
-	UNUSED(import_pw);
-	UNUSED(alloc);
-	UNUSED(alloc_pw);
+	css_stylesheet *sheet;
+	size_t len;
 
-	return NULL;
+	if (url == NULL || alloc == NULL)
+		return NULL;
+
+	sheet = alloc(NULL, sizeof(css_stylesheet), alloc_pw);
+	if (sheet == NULL)
+		return NULL;
+
+	memset(sheet, 0, sizeof(css_stylesheet));
+
+	/** \todo need a parser instance */
+	/** \todo need way of letting client select language level */
+
+	/** \todo create selector hash */
+
+	len = strlen(url) + 1;
+	sheet->url = alloc(NULL, len, alloc_pw);
+	if (sheet->url == NULL) {
+		alloc(sheet, 0, alloc_pw);
+		return NULL;
+	}
+	memcpy(sheet->url, url, len);
+
+	if (title != NULL) {
+		len = strlen(title) + 1;
+		sheet->title = alloc(NULL, len, alloc_pw);
+		if (sheet->title == NULL) {
+			alloc(sheet->url, 0, alloc_pw);
+			alloc(sheet, 0, alloc_pw);
+			return NULL;
+		}
+		memcpy(sheet->title, title, len);
+	}
+
+	sheet->origin = origin;
+	sheet->media = media;
+
+	sheet->import = import_callback;
+	sheet->import_pw = import_pw;
+
+	sheet->alloc = alloc;
+	sheet->pw = alloc_pw;
+
+	return sheet;
 }
 
 /**
@@ -47,7 +83,17 @@ css_stylesheet *css_stylesheet_create(const char *url, const char *title,
  */
 void css_stylesheet_destroy(css_stylesheet *sheet)
 {
-	UNUSED(sheet);
+	if (sheet == NULL)
+		return;
+
+	if (sheet->title != NULL)
+		sheet->alloc(sheet->title, 0, sheet->pw);
+
+	sheet->alloc(sheet->url, 0, sheet->pw);
+
+	/** \todo destroy selector hash + other data */
+
+	sheet->alloc(sheet, 0, sheet->pw);
 }
 
 /**
@@ -65,6 +111,8 @@ css_error css_stylesheet_append_data(css_stylesheet *sheet,
 	UNUSED(data);
 	UNUSED(len);
 
+	/** \todo parse data */
+
 	return CSS_OK;
 }
 
@@ -78,6 +126,8 @@ css_error css_stylesheet_data_done(css_stylesheet *sheet)
 {
 	UNUSED(sheet);
 
+	/** \todo flag completion to the parser */
+
 	return CSS_OK;
 }
 
@@ -90,8 +140,10 @@ css_error css_stylesheet_data_done(css_stylesheet *sheet)
  */
 css_error css_stylesheet_get_url(css_stylesheet *sheet, const char **url)
 {
-	UNUSED(sheet);
-	UNUSED(url);
+	if (sheet == NULL || url == NULL)
+		return CSS_BADPARM;
+
+	*url = sheet->url;
 
 	return CSS_OK;
 }
@@ -105,8 +157,10 @@ css_error css_stylesheet_get_url(css_stylesheet *sheet, const char **url)
  */
 css_error css_stylesheet_get_title(css_stylesheet *sheet, const char **title)
 {
-	UNUSED(sheet);
-	UNUSED(title);
+	if (sheet == NULL || title == NULL)
+		return CSS_BADPARM;
+
+	*title = sheet->title;
 
 	return CSS_OK;
 }
@@ -120,8 +174,10 @@ css_error css_stylesheet_get_title(css_stylesheet *sheet, const char **title)
  */
 css_error css_stylesheet_get_origin(css_stylesheet *sheet, css_origin *origin)
 {
-	UNUSED(sheet);
-	UNUSED(origin);
+	if (sheet == NULL || origin == NULL)
+		return CSS_BADPARM;
+
+	*origin = sheet->origin;
 
 	return CSS_OK;
 }
@@ -135,8 +191,10 @@ css_error css_stylesheet_get_origin(css_stylesheet *sheet, css_origin *origin)
  */
 css_error css_stylesheet_get_media(css_stylesheet *sheet, uint32_t *media)
 {
-	UNUSED(sheet);
-	UNUSED(media);
+	if (sheet == NULL || media == NULL)
+		return CSS_BADPARM;
+
+	*media = sheet->media;
 
 	return CSS_OK;
 }

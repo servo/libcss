@@ -27,6 +27,8 @@ css_error css_stylesheet_append_data(css_stylesheet *sheet,
 		const uint8_t *data, size_t len);
 css_error css_stylesheet_data_done(css_stylesheet *sheet);
 
+/** \todo Need api for setting/clearing disabled flag */
+
 css_error css_stylesheet_get_url(css_stylesheet *sheet, const char **url);
 css_error css_stylesheet_get_title(css_stylesheet *sheet, const char **title);
 css_error css_stylesheet_get_origin(css_stylesheet *sheet, css_origin *origin);
