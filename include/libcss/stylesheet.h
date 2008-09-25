@@ -18,7 +18,7 @@ typedef css_error (*css_import_handler)(void *pw, const char *url,
 		css_stylesheet *sheet);
 
 css_stylesheet *css_stylesheet_create(css_language_level level,
-		const char *url, const char *title,
+		const char *charset, const char *url, const char *title,
 		css_origin origin, uint32_t media,
 		css_import_handler import_callback, void *import_pw,
 		css_alloc alloc, void *alloc_pw);

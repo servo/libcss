@@ -8,12 +8,14 @@
 #include <string.h>
 
 #include "stylesheet.h"
+#include "parse/css21.h"
 #include "utils/utils.h"
 
 /**
  * Create a stylesheet
  *
  * \param level            The language level of the stylesheet
+ * \param charset          The charset of the stylesheet data, or NULL to detect
  * \param url              URL of stylesheet
  * \param title            Title of stylesheet
  * \param origin           Origin of stylesheet
@@ -25,7 +27,7 @@
  * \return Pointer to stylesheet on success, NULL otherwise
  */
 css_stylesheet *css_stylesheet_create(css_language_level level,
-		const char *url, const char *title,
+		const char *charset, const char *url, const char *title,
 		css_origin origin, uint32_t media,
 		css_import_handler import_callback, void *import_pw,
 		css_alloc alloc, void *alloc_pw)
@@ -42,13 +44,37 @@ css_stylesheet *css_stylesheet_create(css_language_level level,
 
 	memset(sheet, 0, sizeof(css_stylesheet));
 
-	/** \todo need a parser instance */
+	sheet->parser = css_parser_create(charset, 
+			charset ? CSS_CHARSET_DICTATED : CSS_CHARSET_DEFAULT,
+			alloc, alloc_pw);
+	if (sheet->parser == NULL) {
+		alloc(sheet, 0, alloc_pw);
+		return NULL;
+	}
+
+	/* We only support CSS 2.1 */
+	if (level != CSS_LEVEL_21) {
+		css_parser_destroy(sheet->parser);
+		alloc(sheet, 0, alloc_pw);
+		return NULL;
+	}
+
+	sheet->level = level;
+	sheet->parser_frontend = 
+			css_css21_create(sheet, sheet->parser, alloc, alloc_pw);
+	if (sheet->parser_frontend == NULL) {
+		css_parser_destroy(sheet->parser);
+		alloc(sheet, 0, alloc_pw);
+		return NULL;
+	}
 
 	/** \todo create selector hash */
 
 	len = strlen(url) + 1;
 	sheet->url = alloc(NULL, len, alloc_pw);
 	if (sheet->url == NULL) {
+		css_css21_destroy(sheet->parser_frontend);
+		css_parser_destroy(sheet->parser);
 		alloc(sheet, 0, alloc_pw);
 		return NULL;
 	}
@@ -58,6 +84,8 @@ css_stylesheet *css_stylesheet_create(css_language_level level,
 		len = strlen(title) + 1;
 		sheet->title = alloc(NULL, len, alloc_pw);
 		if (sheet->title == NULL) {
+			css_css21_destroy(sheet->parser_frontend);
+			css_parser_destroy(sheet->parser);
 			alloc(sheet->url, 0, alloc_pw);
 			alloc(sheet, 0, alloc_pw);
 			return NULL;
@@ -93,6 +121,10 @@ void css_stylesheet_destroy(css_stylesheet *sheet)
 	sheet->alloc(sheet->url, 0, sheet->pw);
 
 	/** \todo destroy selector hash + other data */
+
+	css_css21_destroy(sheet->parser_frontend);
+
+	css_parser_destroy(sheet->parser);
 
 	sheet->alloc(sheet, 0, sheet->pw);
 }

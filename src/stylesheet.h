@@ -15,6 +15,8 @@
 #include <libcss/stylesheet.h>
 #include <libcss/types.h>
 
+#include "parse/parse.h"
+
 typedef struct css_rule css_rule;
 typedef struct css_selector css_selector;
 typedef struct css_style css_style;
@@ -137,6 +139,10 @@ struct css_stylesheet {
 
 	css_import_handler import;		/**< Import callback */
 	void *import_pw;			/**< Import handler data */
+
+	css_language_level level;		/**< Language level of sheet */
+	css_parser *parser;			/**< Core parser for sheet */
+	void *parser_frontend;			/**< Frontend parser */
 
 	css_alloc alloc;			/**< Allocation function */
 	void *pw;				/**< Private word */
