@@ -199,6 +199,42 @@ css_error css_stylesheet_get_media(css_stylesheet *sheet, uint32_t *media)
 	return CSS_OK;
 }
 
+/**
+ * Get disabled status of a stylesheet
+ *
+ * \param sheet     The stylesheet to consider
+ * \param disabled  Pointer to location to receive disabled state
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_get_disabled(css_stylesheet *sheet, bool *disabled)
+{
+	if (sheet == NULL || disabled == NULL)
+		return CSS_BADPARM;
+
+	*disabled = sheet->disabled;
+
+	return CSS_OK;
+}
+
+/**
+ * Set a stylesheet's disabled state
+ *
+ * \param sheet     The stylesheet to modify
+ * \param disabled  The new disabled state
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_set_disabled(css_stylesheet *sheet, bool disabled)
+{
+	if (sheet == NULL)
+		return CSS_BADPARM;
+
+	sheet->disabled = disabled;
+
+	/** \todo needs to trigger some event announcing styles have changed */
+
+	return CSS_OK;
+}
+
 /******************************************************************************
  * Private API below here                                                     *
  ******************************************************************************/

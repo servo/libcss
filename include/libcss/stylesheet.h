@@ -27,12 +27,13 @@ css_error css_stylesheet_append_data(css_stylesheet *sheet,
 		const uint8_t *data, size_t len);
 css_error css_stylesheet_data_done(css_stylesheet *sheet);
 
-/** \todo Need api for setting/clearing disabled flag */
-
 css_error css_stylesheet_get_url(css_stylesheet *sheet, const char **url);
 css_error css_stylesheet_get_title(css_stylesheet *sheet, const char **title);
 css_error css_stylesheet_get_origin(css_stylesheet *sheet, css_origin *origin);
 css_error css_stylesheet_get_media(css_stylesheet *sheet, uint32_t *media);
+
+css_error css_stylesheet_get_disabled(css_stylesheet *sheet, bool *disabled);
+css_error css_stylesheet_set_disabled(css_stylesheet *sheet, bool disabled);
 
 #endif
 
