@@ -13,6 +13,7 @@
 /**
  * Create a stylesheet
  *
+ * \param level            The language level of the stylesheet
  * \param url              URL of stylesheet
  * \param title            Title of stylesheet
  * \param origin           Origin of stylesheet
@@ -23,7 +24,8 @@
  * \param alloc_pw         Client private data for alloc
  * \return Pointer to stylesheet on success, NULL otherwise
  */
-css_stylesheet *css_stylesheet_create(const char *url, const char *title,
+css_stylesheet *css_stylesheet_create(css_language_level level,
+		const char *url, const char *title,
 		css_origin origin, uint32_t media,
 		css_import_handler import_callback, void *import_pw,
 		css_alloc alloc, void *alloc_pw)
@@ -41,7 +43,6 @@ css_stylesheet *css_stylesheet_create(const char *url, const char *title,
 	memset(sheet, 0, sizeof(css_stylesheet));
 
 	/** \todo need a parser instance */
-	/** \todo need way of letting client select language level */
 
 	/** \todo create selector hash */
 

@@ -23,14 +23,15 @@ typedef enum css_charset_source {
 } css_charset_source;
 
 /**
- * String type
+ * Stylesheet language level -- defines parsing rules and supported properties
  */
-typedef struct css_string {
-	uint8_t *ptr;			/**< Pointer to data */
-	size_t len;			/**< Byte length of string */
-} css_string;
-
-typedef struct css_stylesheet css_stylesheet;
+typedef enum css_language_level {
+	CSS_LEVEL_1                 = 0,	/**< CSS 1 */
+	CSS_LEVEL_2                 = 1,	/**< CSS 2 */
+	CSS_LEVEL_21                = 2,	/**< CSS 2.1 */
+	CSS_LEVEL_3                 = 3,	/**< CSS 3 */
+	CSS_LEVEL_DEFAULT           = CSS_LEVEL_21	/**< Default level */
+} css_language_level;
 
 /**
  * Stylesheet origin
@@ -40,5 +41,15 @@ typedef enum css_origin {
 	CSS_ORIGIN_USER              = 1,	/**< User stylesheet */
 	CSS_ORIGIN_AUTHOR            = 2	/**< Author stylesheet */
 } css_origin;
+
+/**
+ * String type
+ */
+typedef struct css_string {
+	uint8_t *ptr;			/**< Pointer to data */
+	size_t len;			/**< Byte length of string */
+} css_string;
+
+typedef struct css_stylesheet css_stylesheet;
 
 #endif
