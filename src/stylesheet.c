@@ -11,6 +11,141 @@
 #include "utils/utils.h"
 
 /**
+ * Create a stylesheet
+ *
+ * \param url              URL of stylesheet
+ * \param title            Title of stylesheet
+ * \param origin           Origin of stylesheet
+ * \param media            Media stylesheet applies to
+ * \param import_callback  Handler for imported stylesheets
+ * \param import_pw        Client private data for import_callback
+ * \param alloc            Memory (de)allocation function
+ * \param alloc_pw         Client private data for alloc
+ * \return Pointer to stylesheet on success, NULL otherwise
+ */
+css_stylesheet *css_stylesheet_create(const char *url, const char *title,
+		css_origin origin, uint32_t media,
+		css_import_handler import_callback, void *import_pw,
+		css_alloc alloc, void *alloc_pw)
+{
+	UNUSED(url);
+	UNUSED(title);
+	UNUSED(origin);
+	UNUSED(media);
+	UNUSED(import_callback);
+	UNUSED(import_pw);
+	UNUSED(alloc);
+	UNUSED(alloc_pw);
+
+	return NULL;
+}
+
+/**
+ * Destroy a stylesheet
+ *
+ * \param sheet  The stylesheet to destroy
+ */
+void css_stylesheet_destroy(css_stylesheet *sheet)
+{
+	UNUSED(sheet);
+}
+
+/**
+ * Append source data to a stylesheet
+ *
+ * \param sheet  The stylesheet to append data to
+ * \param data   Pointer to data to append
+ * \param len    Length, in bytes, of data to append
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_append_data(css_stylesheet *sheet,
+		const uint8_t *data, size_t len)
+{
+	UNUSED(sheet);
+	UNUSED(data);
+	UNUSED(len);
+
+	return CSS_OK;
+}
+
+/**
+ * Flag that the last of a stylesheet's data has been seen
+ *
+ * \param sheet  The stylesheet in question
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_data_done(css_stylesheet *sheet)
+{
+	UNUSED(sheet);
+
+	return CSS_OK;
+}
+
+/**
+ * Retrieve the URL associated with a stylesheet
+ *
+ * \param sheet  The stylesheet to retrieve the URL from
+ * \param url    Pointer to location to receive pointer to URL
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_get_url(css_stylesheet *sheet, const char **url)
+{
+	UNUSED(sheet);
+	UNUSED(url);
+
+	return CSS_OK;
+}
+
+/**
+ * Retrieve the title associated with a stylesheet
+ *
+ * \param sheet  The stylesheet to retrieve the title from
+ * \param title  Pointer to location to receive pointer to title
+ * \return CSS_Ok on success, appropriate error otherwise
+ */
+css_error css_stylesheet_get_title(css_stylesheet *sheet, const char **title)
+{
+	UNUSED(sheet);
+	UNUSED(title);
+
+	return CSS_OK;
+}
+
+/**
+ * Retrieve the origin of a stylesheet
+ *
+ * \param sheet   The stylesheet to retrieve the origin of
+ * \param origin  Pointer to location to receive origin
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_get_origin(css_stylesheet *sheet, css_origin *origin)
+{
+	UNUSED(sheet);
+	UNUSED(origin);
+
+	return CSS_OK;
+}
+
+/**
+ * Retrieve the media types associated with a stylesheet
+ *
+ * \param sheet  The stylesheet to retrieve the media types for
+ * \param media  Pointer to location to receive media types
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_get_media(css_stylesheet *sheet, uint32_t *media)
+{
+	UNUSED(sheet);
+	UNUSED(media);
+
+	return CSS_OK;
+}
+
+/******************************************************************************
+ * Private API below here                                                     *
+ ******************************************************************************/
+
+/**
  * Create a selector
  *
  * \param sheet  The stylesheet context

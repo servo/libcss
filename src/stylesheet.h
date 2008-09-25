@@ -12,6 +12,7 @@
 
 #include <libcss/errors.h>
 #include <libcss/functypes.h>
+#include <libcss/stylesheet.h>
 #include <libcss/types.h>
 
 typedef struct css_rule css_rule;
@@ -122,6 +123,7 @@ struct css_stylesheet {
 	char *url;				/**< URL of this sheet */
 	char *title;				/**< Title of this sheet */
 
+	css_origin origin;			/**< Origin of stylesheet */
 	uint32_t media;				/**< Bitfield of media types */
 
 	void *ownerNode;			/**< Owning node in document */
@@ -132,6 +134,9 @@ struct css_stylesheet {
 	css_stylesheet *last_child;		/**< Last in child list */
 	css_stylesheet *next;			/**< Next in sibling list */
 	css_stylesheet *prev;			/**< Previous in sibling list */
+
+	css_import_handler import;		/**< Import callback */
+	void *import_pw;			/**< Import handler data */
 
 	css_alloc alloc;			/**< Allocation function */
 	void *pw;				/**< Private word */

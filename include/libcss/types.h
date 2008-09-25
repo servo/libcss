@@ -5,8 +5,8 @@
  * Copyright 2007 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
-#ifndef css_types_h_
-#define css_types_h_
+#ifndef libcss_types_h_
+#define libcss_types_h_
 
 #include <stdbool.h>
 #include <inttypes.h>
@@ -31,5 +31,14 @@ typedef struct css_string {
 } css_string;
 
 typedef struct css_stylesheet css_stylesheet;
+
+/**
+ * Stylesheet origin
+ */
+typedef enum css_origin {
+	CSS_ORIGIN_UA                = 0,	/**< User agent stylesheet */
+	CSS_ORIGIN_USER              = 1,	/**< User stylesheet */
+	CSS_ORIGIN_AUTHOR            = 2	/**< Author stylesheet */
+} css_origin;
 
 #endif

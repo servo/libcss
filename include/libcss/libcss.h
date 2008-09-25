@@ -5,8 +5,8 @@
  * Copyright 2007 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
-#ifndef css_h_
-#define css_h_
+#ifndef libcss_h_
+#define libcss_h_
 
 #include <libcss/errors.h>
 #include <libcss/functypes.h>

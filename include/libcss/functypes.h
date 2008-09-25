@@ -5,8 +5,8 @@
  * Copyright 2007-8 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
-#ifndef css_functypes_h_
-#define css_functypes_h_
+#ifndef libcss_functypes_h_
+#define libcss_functypes_h_
 
 #include <stdbool.h>
 #include <stdint.h>
