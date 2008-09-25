@@ -140,13 +140,10 @@ void css_stylesheet_destroy(css_stylesheet *sheet)
 css_error css_stylesheet_append_data(css_stylesheet *sheet,
 		const uint8_t *data, size_t len)
 {
-	UNUSED(sheet);
-	UNUSED(data);
-	UNUSED(len);
+	if (sheet == NULL || data == NULL)
+		return CSS_BADPARM;
 
-	/** \todo parse data */
-
-	return CSS_OK;
+	return css_parser_parse_chunk(sheet->parser, data, len);
 }
 
 /**
@@ -157,11 +154,10 @@ css_error css_stylesheet_append_data(css_stylesheet *sheet,
  */
 css_error css_stylesheet_data_done(css_stylesheet *sheet)
 {
-	UNUSED(sheet);
+	if (sheet == NULL)
+		return CSS_BADPARM;
 
-	/** \todo flag completion to the parser */
-
-	return CSS_OK;
+	return css_parser_completed(sheet->parser);
 }
 
 /**
