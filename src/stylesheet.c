@@ -20,7 +20,7 @@
  * \param title            Title of stylesheet
  * \param origin           Origin of stylesheet
  * \param media            Media stylesheet applies to
- * \param import_callback  Handler for imported stylesheets
+ * \param import_callback  Handler for imported stylesheets, or NULL
  * \param import_pw        Client private data for import_callback
  * \param alloc            Memory (de)allocation function
  * \param alloc_pw         Client private data for alloc

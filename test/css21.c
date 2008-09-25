@@ -2,13 +2,7 @@
 #include <stdio.h>
 
 #include <libcss/libcss.h>
-
-#include "charset/detect.h"
-#include "utils/utils.h"
-
-#include "lex/lex.h"
-#include "parse/parse.h"
-#include "parse/css21.h"
+#include <libcss/stylesheet.h>
 
 #include "testutils.h"
 
@@ -21,8 +15,7 @@ static void *myrealloc(void *ptr, size_t len, void *pw)
 
 int main(int argc, char **argv)
 {
-	css_parser *parser;
-	css_css21 *css21;
+	css_stylesheet *sheet;
 	FILE *fp;
 	size_t len, origlen;
 #define CHUNK_SIZE (4096)
@@ -37,13 +30,10 @@ int main(int argc, char **argv)
 	/* Initialise library */
 	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
 
-	parser = css_parser_create("UTF-8", CSS_CHARSET_DICTATED, 
+	sheet = css_stylesheet_create(CSS_LEVEL_21, "UTF-8", argv[2], NULL,
+			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, NULL, NULL,
 			myrealloc, NULL);
-	assert(parser != NULL);
-
-	css21 = css_css21_create((css_stylesheet *) 10, parser, 
-			myrealloc, NULL);
-	assert(css21 != NULL);
+	assert(sheet != NULL);
 
 	fp = fopen(argv[2], "rb");
 	if (fp == NULL) {
@@ -58,7 +48,7 @@ int main(int argc, char **argv)
 	while (len >= CHUNK_SIZE) {
 		fread(buf, 1, CHUNK_SIZE, fp);
 
-		error = css_parser_parse_chunk(parser, buf, CHUNK_SIZE);
+		error = css_stylesheet_append_data(sheet, buf, CHUNK_SIZE);
 		assert(error == CSS_OK || error == CSS_NEEDDATA);
 
 		len -= CHUNK_SIZE;
@@ -67,7 +57,7 @@ int main(int argc, char **argv)
 	if (len > 0) {
 		fread(buf, 1, len, fp);
 
-		error = css_parser_parse_chunk(parser, buf, len);
+		error = css_stylesheet_append_data(sheet, buf, len);
 		assert(error == CSS_OK || error == CSS_NEEDDATA);
 
 		len = 0;
@@ -75,11 +65,9 @@ int main(int argc, char **argv)
 
 	fclose(fp);
 
-	assert(css_parser_completed(parser) == CSS_OK);
+	assert(css_stylesheet_data_done(sheet) == CSS_OK);
 
-	css_css21_destroy(css21);
-
-	css_parser_destroy(parser);
+	css_stylesheet_destroy(sheet);
 
 	assert(css_finalise(myrealloc, NULL) == CSS_OK);
 

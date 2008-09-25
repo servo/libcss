@@ -34,6 +34,14 @@ typedef enum css_language_level {
 } css_language_level;
 
 /**
+ * Stylesheet media types
+ */
+typedef enum css_media_type {
+	CSS_MEDIA_SCREEN            = (1<<0),
+	CSS_MEDIA_ALL               = CSS_MEDIA_SCREEN
+} css_media_type;
+
+/**
  * Stylesheet origin
  */
 typedef enum css_origin {
