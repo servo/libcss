@@ -297,18 +297,13 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 	int32_t any = 0;
 	int32_t ctx = 0;
 
+	atkeyword = parserutils_vector_iterate(vector, &ctx);
+
+	/* Skip whitespace */	
 	do {
 		any = ctx;
-
 		token = parserutils_vector_iterate(vector, &ctx);
-		if (token == NULL)
-			break;
-
-		if (atkeyword == NULL)
-			atkeyword = token;
-		else if (token->type != CSS_TOKEN_S)
-			break;
-	} while (token != NULL);
+	} while (token != NULL && token->type == CSS_TOKEN_S);
 
 	/* We now have an ATKEYWORD and the context for the start of any0, if 
 	 * there is one */
@@ -440,18 +435,18 @@ css_error handleBlockContent(css_css21 *c, const parserutils_vector *vector)
 	return CSS_OK;
 }
 
-css_error handleSelectorList(css_css21 *c, const parserutils_vector *vector)
+static bool tokenIsChar(const css_token *token, uint8_t c)
 {
-	UNUSED(c);
-	UNUSED(vector);
+	return token != NULL && token->type == CSS_TOKEN_CHAR && 
+			token->lower.len == 1 && token->lower.ptr[0] == c;
+}
 
-	/* CSS 2.1 selector syntax:
-	 *
-	 * selector_list   -> selector [ ',' ws selector ]*
-	 * selector        -> simple_selector [ combinator simple_selector ]*
-	 * simple_selector -> element_name [ HASH | class | attrib | pseudo ]*
+static css_error parseSimpleSelector(css_css21 *c, const parserutils_vector *vector,
+		int *ctx, css_selector **result)
+{
+
+	/* simple_selector -> element_name [ HASH | class | attrib | pseudo ]*
 	 *                 -> [ HASH | class | attrib | pseudo ]+
-	 * combinator      -> '+' ws | '>' ws | ws1
 	 * element_name    -> IDENT | '*'
 	 * class           -> '.' IDENT
 	 * attrib          -> '[' ws IDENT ws [ 
@@ -459,6 +454,92 @@ css_error handleSelectorList(css_css21 *c, const parserutils_vector *vector)
 	 *                           [ IDENT | STRING ] ws ]? ']' 
 	 * pseudo          -> ':' [ IDENT | FUNCTION ws IDENT? ws ')' ]
 	 */
+
+	UNUSED(c);
+	UNUSED(vector);
+	UNUSED(ctx);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
+static css_error parseCombinator(css_css21 *c, const parserutils_vector *vector,
+		int *ctx, css_combinator *result)
+{
+	/* combinator      -> '+' ws | '>' ws | ws1 */
+
+	UNUSED(c);
+	UNUSED(vector);
+	UNUSED(ctx);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
+static css_error parseSelector(css_css21 *c, const parserutils_vector *vector, 
+		int *ctx, css_selector **result)
+{
+	css_error error;
+	const css_token *token = NULL;
+	css_selector *selector = NULL;
+
+	/* selector -> simple_selector [ combinator simple_selector ]* */
+
+	error = parseSimpleSelector(c, vector, ctx, &selector);
+	if (error != CSS_OK)
+		return error;
+	*result = selector;
+
+	do {
+		css_combinator comb = CSS_COMBINATOR_NONE;
+		css_selector *other = NULL;
+
+		error = parseCombinator(c, vector, ctx, &comb);
+		if (error != CSS_OK)
+			return error;
+
+		error = parseSimpleSelector(c, vector, ctx, &other);
+		if (error != CSS_OK)
+			return error;
+
+		*result = other;
+
+		error = css_stylesheet_selector_combine(c->sheet,
+				comb, selector, other);
+		if (error != CSS_OK)
+			return error;
+
+		selector = other;
+		
+		token = parserutils_vector_peek(vector, *ctx);
+	} while (token != NULL && tokenIsChar(token, ',') == false);
+
+	return CSS_OK;
+}
+
+css_error handleSelectorList(css_css21 *c, const parserutils_vector *vector)
+{
+	css_error error;
+	const css_token *token = NULL;
+	css_selector *selector = NULL;
+	int ctx = 0;
+
+	UNUSED(c);
+	UNUSED(vector);
+
+	/* CSS 2.1 selector syntax:
+	 *
+	 * selector_list   -> selector [ ',' ws selector ]*
+	 */
+	do {
+		error = parseSelector(c, vector, &ctx, &selector);
+		if (error != CSS_OK)
+			return error;
+
+		/** \todo Finish this */
+
+		token = parserutils_vector_peek(vector, ctx);
+	} while(token != NULL);
 
 	return CSS_OK;
 }
