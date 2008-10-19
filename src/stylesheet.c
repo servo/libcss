@@ -278,7 +278,8 @@ css_error css_stylesheet_set_disabled(css_stylesheet *sheet, bool disabled)
  * \return Pointer to selector object, or NULL on failure
  */
 css_selector *css_stylesheet_selector_create(css_stylesheet *sheet,
-		css_selector_type type, css_string *name, css_string *value)
+		css_selector_type type, const css_string *name, 
+		const css_string *value)
 {
 	css_selector *sel;
 

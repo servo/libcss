@@ -61,6 +61,7 @@ struct css_css21 {
 	void *pw;			/**< Client's private data */
 };
 
+/* Event handlers */
 static css_error css21_handle_event(css_parser_event type, 
 		const parserutils_vector *tokens, void *pw);
 static inline css_error handleStartStylesheet(css_css21 *c, 
@@ -81,10 +82,41 @@ static inline css_error handleEndBlock(css_css21 *c,
 		const parserutils_vector *vector);
 static inline css_error handleBlockContent(css_css21 *c, 
 		const parserutils_vector *vector);
-static inline css_error handleSelectorList(css_css21 *c, 
-		const parserutils_vector *vector);
 static inline css_error handleDeclaration(css_css21 *c, 
 		const parserutils_vector *vector);
+
+/* Selector list parsing */
+static inline css_error parseClass(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		css_selector **specific);
+static inline css_error parseAttrib(css_css21 *c, 
+		const parserutils_vector *vector, int *ctx,
+		css_selector **specific);
+static inline css_error parsePseudo(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		css_selector **specific);
+static inline css_error parseSpecific(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		css_selector *parent);
+static inline css_error parseSelectorSpecifics(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		css_selector *parent);
+static inline css_error parseSimpleSelector(css_css21 *c, 
+		const parserutils_vector *vector, int *ctx, 
+		css_selector **result);
+static inline css_error parseCombinator(css_css21 *c, 
+		const parserutils_vector *vector, int *ctx, 
+		css_combinator *result);
+static inline css_error parseSelector(css_css21 *c, 
+		const parserutils_vector *vector, int *ctx, 
+		css_selector **result);
+static inline css_error parseSelectorList(css_css21 *c, 
+		const parserutils_vector *vector, css_rule *rule);
+
+/* Helpers */
+static inline void consumeWhitespace(const parserutils_vector *vector, 
+		int *ctx);
+static inline bool tokenIsChar(const css_token *token, uint8_t c);
 
 /**
  * Create a CSS 2.1 parser
@@ -248,17 +280,34 @@ css_error handleStartRuleset(css_css21 *c, const parserutils_vector *vector)
 	parserutils_error perror;
 	css_error error;
 	context_entry entry = { CSS_PARSER_START_RULESET, NULL };
+	css_rule *rule = NULL;
 
 	assert(c != NULL);
 
-	error = handleSelectorList(c, vector);
-	if (error != CSS_OK)
+	rule = css_stylesheet_rule_create(c->sheet, CSS_RULE_SELECTOR);
+	if (rule == NULL)
+		return CSS_NOMEM;
+
+	error = parseSelectorList(c, vector, rule);
+	if (error != CSS_OK) {
+		css_stylesheet_rule_destroy(c->sheet, rule);
 		return error;
+	}
 
 	perror = parserutils_stack_push(c->context, (void *) &entry);
 	if (perror != PARSERUTILS_OK) {
+		css_stylesheet_rule_destroy(c->sheet, rule);
 		return css_error_from_parserutils_error(perror);
 	}
+
+	error = css_stylesheet_add_rule(c->sheet, rule);
+	if (error != CSS_OK) {
+		parserutils_stack_pop(c->context, NULL);
+		css_stylesheet_rule_destroy(c->sheet, rule);
+		return error;
+	}
+
+	/* Rule is now owned by the sheet, so no need to destroy it */
 
 	return CSS_OK;
 }
@@ -294,16 +343,11 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 	/* vector contains: ATKEYWORD ws any0 */
 	const css_token *token = NULL;
 	const css_token *atkeyword = NULL;
-	int32_t any = 0;
 	int32_t ctx = 0;
 
 	atkeyword = parserutils_vector_iterate(vector, &ctx);
 
-	/* Skip whitespace */	
-	do {
-		any = ctx;
-		token = parserutils_vector_iterate(vector, &ctx);
-	} while (token != NULL && token->type == CSS_TOKEN_S);
+	consumeWhitespace(vector, &ctx);
 
 	/* We now have an ATKEYWORD and the context for the start of any0, if 
 	 * there is one */
@@ -312,14 +356,14 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 	if (atkeyword->lower.ptr == c->strings[CHARSET]) {
 		if (c->state == BEFORE_CHARSET) {
 			/* any0 = STRING */
-			if (any == 0)
+			if (ctx == 0)
 				return CSS_INVALID;
 
-			token = parserutils_vector_iterate(vector, &any);
+			token = parserutils_vector_iterate(vector, &ctx);
 			if (token == NULL || token->type != CSS_TOKEN_STRING)
 				return CSS_INVALID;
 
-			token = parserutils_vector_iterate(vector, &any);
+			token = parserutils_vector_iterate(vector, &ctx);
 			if (token != NULL)
 				return CSS_INVALID;
 
@@ -332,21 +376,15 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 			/* any0 = (STRING | URI) ws 
 			 *        (IDENT ws (',' ws IDENT ws)* )? */
 			const css_token *uri = 
-				parserutils_vector_iterate(vector, &any);
-			if (uri == NULL || (token->type != CSS_TOKEN_STRING && 
-					token->type != CSS_TOKEN_URI))
+				parserutils_vector_iterate(vector, &ctx);
+			if (uri == NULL || (uri->type != CSS_TOKEN_STRING && 
+					uri->type != CSS_TOKEN_URI))
 				return CSS_INVALID;
 
-			/* Whitespace */
-			do {
-				token = parserutils_vector_iterate(vector, 
-						&any);
-				if (token == NULL || token->type != CSS_TOKEN_S)
-					break;
-			} while (token != NULL);
+			consumeWhitespace(vector, &ctx);
 
 			/** \todo Media list */
-			if (token != NULL) {
+			if (parserutils_vector_peek(vector, ctx) != NULL) {
 			}
 
 			/** \todo trigger fetch of imported sheet */
@@ -435,48 +473,304 @@ css_error handleBlockContent(css_css21 *c, const parserutils_vector *vector)
 	return CSS_OK;
 }
 
-static bool tokenIsChar(const css_token *token, uint8_t c)
+css_error handleDeclaration(css_css21 *c, const parserutils_vector *vector)
 {
-	return token != NULL && token->type == CSS_TOKEN_CHAR && 
-			token->lower.len == 1 && token->lower.ptr[0] == c;
-}
-
-static css_error parseSimpleSelector(css_css21 *c, const parserutils_vector *vector,
-		int *ctx, css_selector **result)
-{
-
-	/* simple_selector -> element_name [ HASH | class | attrib | pseudo ]*
-	 *                 -> [ HASH | class | attrib | pseudo ]+
-	 * element_name    -> IDENT | '*'
-	 * class           -> '.' IDENT
-	 * attrib          -> '[' ws IDENT ws [ 
-	 *                           [ '=' | INCLUDES | DASHMATCH ] ws 
-	 *                           [ IDENT | STRING ] ws ]? ']' 
-	 * pseudo          -> ':' [ IDENT | FUNCTION ws IDENT? ws ')' ]
-	 */
-
 	UNUSED(c);
 	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+
+	/* Locations where declarations are permitted:
+	 *
+	 * + In @page
+	 * + In ruleset
+	 */
+
+	/* IDENT ws ':' ws value 
+	 * 
+	 * In CSS 2.1, value is any1, so '{' or ATKEYWORD => parse error
+	 */
 
 	return CSS_OK;
 }
 
-static css_error parseCombinator(css_css21 *c, const parserutils_vector *vector,
+/******************************************************************************
+ * Selector list parsing functions                                            *
+ ******************************************************************************/
+
+css_error parseClass(css_css21 *c, const parserutils_vector *vector, int *ctx,
+		css_selector **specific)
+{
+	const css_token *token;
+
+	/* class     -> '.' IDENT */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || tokenIsChar(token, '.') == false)
+		return CSS_INVALID;
+
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || token->type != CSS_TOKEN_IDENT)
+		return CSS_INVALID;
+
+	*specific = css_stylesheet_selector_create(c->sheet, 
+			CSS_SELECTOR_CLASS, &token->data, NULL);
+	if (*specific == NULL)
+		return CSS_NOMEM;
+
+	return CSS_OK;
+}
+
+css_error parseAttrib(css_css21 *c, const parserutils_vector *vector, int *ctx,
+		css_selector **specific)
+{
+	const css_token *token, *name, *value = NULL;
+	css_selector_type type = CSS_SELECTOR_ATTRIBUTE;
+
+	/* attrib    -> '[' ws IDENT ws [
+	 *                     [ '=' | INCLUDES | DASHMATCH ] ws
+	 *                     [ IDENT | STRING ] ws ]? ']'
+	 */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || tokenIsChar(token, '[') == false)
+		return CSS_INVALID;
+
+	consumeWhitespace(vector, ctx);
+
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || token->type != CSS_TOKEN_IDENT)
+		return CSS_INVALID;
+
+	name = token;
+
+	consumeWhitespace(vector, ctx);
+
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (tokenIsChar(token, ']') == false) {
+		if (tokenIsChar(token, '='))
+			type = CSS_SELECTOR_ATTRIBUTE_EQUAL;
+		else if (token->type == CSS_TOKEN_INCLUDES)
+			type = CSS_SELECTOR_ATTRIBUTE_INCLUDES;
+		else if (token->type == CSS_TOKEN_DASHMATCH)
+			type = CSS_SELECTOR_ATTRIBUTE_DASHMATCH;
+		else
+			return CSS_INVALID;
+
+		consumeWhitespace(vector, ctx);
+
+		token = parserutils_vector_iterate(vector, ctx);
+		if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+				token->type != CSS_TOKEN_STRING))
+			return CSS_INVALID;
+
+		value = token;
+
+		consumeWhitespace(vector, ctx);
+
+		token = parserutils_vector_iterate(vector, ctx);
+		if (token == NULL || tokenIsChar(token, ']') == false)
+			return CSS_INVALID;
+	}
+
+	*specific = css_stylesheet_selector_create(c->sheet, type, 
+			&name->data, value != NULL ? &value->data : NULL);
+	if (*specific == NULL)
+		return CSS_NOMEM;
+
+	return CSS_OK;
+}
+
+css_error parsePseudo(css_css21 *c, const parserutils_vector *vector, int *ctx,
+		css_selector **specific)
+{
+	const css_token *token, *name, *value = NULL;
+
+	/* pseudo    -> ':' [ IDENT | FUNCTION ws IDENT? ws ')' ] */
+
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || tokenIsChar(token, ':') == false)
+		return CSS_INVALID;
+
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT && 
+			token->type != CSS_TOKEN_FUNCTION))
+		return CSS_INVALID;
+
+	name = token;
+
+	if (token->type == CSS_TOKEN_FUNCTION) {
+		consumeWhitespace(vector, ctx);
+
+		token = parserutils_vector_iterate(vector, ctx);
+
+		if (token != NULL && token->type == CSS_TOKEN_IDENT) {
+			value = token;
+
+			consumeWhitespace(vector, ctx);
+
+			token = parserutils_vector_iterate(vector, ctx);
+		}
+
+		if (token == NULL || tokenIsChar(token, ')') == false)
+			return CSS_INVALID;
+	}
+
+	*specific = css_stylesheet_selector_create(c->sheet, 
+			CSS_SELECTOR_PSEUDO, &name->data, 
+			value != NULL ? &value->data : NULL);
+	if (*specific == NULL)
+		return CSS_NOMEM;
+
+	return CSS_OK;
+}
+
+css_error parseSpecific(css_css21 *c, 
+		const parserutils_vector *vector, int *ctx,
+		css_selector *parent)
+{
+	css_error error;
+	const css_token *token;
+	css_selector *specific = NULL;
+
+	/* specific  -> [ HASH | class | attrib | pseudo ] */
+
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_HASH) {
+		specific = css_stylesheet_selector_create(c->sheet,
+				CSS_SELECTOR_ID, &token->data, NULL);
+		if (specific == NULL)
+			return CSS_NOMEM;
+
+		parserutils_vector_iterate(vector, ctx);
+	} else if (tokenIsChar(token, '.')) {
+		error = parseClass(c, vector, ctx, &specific);
+		if (error != CSS_OK)
+			return error;
+	} else if (tokenIsChar(token, '[')) {
+		error = parseAttrib(c, vector, ctx, &specific);
+		if (error != CSS_OK)
+			return error;
+	} else if (tokenIsChar(token, ':')) {
+		error = parsePseudo(c, vector, ctx, &specific);
+		if (error != CSS_OK)
+			return error;
+	} else {
+		return CSS_INVALID;
+	}
+
+	error = css_stylesheet_selector_append_specific(c->sheet, parent, 
+			specific);
+	if (error != CSS_OK) {
+		css_stylesheet_selector_destroy(c->sheet, specific);
+		return error;
+	}
+
+	return CSS_OK;
+}
+
+css_error parseSelectorSpecifics(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		css_selector *parent)
+{
+	css_error error;
+	const css_token *token;
+
+	/* specifics -> specific* */
+	while ((token = parserutils_vector_peek(vector, *ctx)) != NULL &&
+			token->type != CSS_TOKEN_S && 
+			tokenIsChar(token, '+') == false &&
+			tokenIsChar(token, '>') == false &&
+			tokenIsChar(token, ',') == false) {
+		error = parseSpecific(c, vector, ctx, parent);
+		if (error != CSS_OK)
+			return error;
+	}
+
+	return CSS_OK;
+}
+
+css_error parseSimpleSelector(css_css21 *c, 
+		const parserutils_vector *vector, int *ctx, 
+		css_selector **result)
+{
+	css_error error;
+	const css_token *token;
+	css_selector *selector;
+
+	/* simple_selector -> element_name specifics
+	 *                 -> specific specifics
+	 * element_name    -> IDENT | '*'
+	 */
+
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT || tokenIsChar(token, '*')) {
+		/* Have element name */
+		selector = css_stylesheet_selector_create(c->sheet,
+				CSS_SELECTOR_ELEMENT, &token->data, NULL);
+		if (selector == NULL)
+			return CSS_NOMEM;
+
+		parserutils_vector_iterate(vector, ctx);
+	} else {
+		/* Universal selector */
+		css_string name = { (uint8_t *) "*", 1 };
+
+		selector = css_stylesheet_selector_create(c->sheet,
+				CSS_SELECTOR_ELEMENT, &name, NULL);
+		if (selector == NULL)
+			return CSS_NOMEM;
+
+		/* Ensure we have at least one specific selector */
+		error = parseSpecific(c, vector, ctx, selector);
+		if (error != CSS_OK) {
+			css_stylesheet_selector_destroy(c->sheet, selector);
+			return error;
+		}
+	}
+
+	*result = selector;
+
+	error = parseSelectorSpecifics(c, vector, ctx, selector);
+	if (error != CSS_OK)
+		return error;
+
+	return CSS_OK;
+}
+
+css_error parseCombinator(css_css21 *c, const parserutils_vector *vector,
 		int *ctx, css_combinator *result)
 {
+	const css_token *token;
+
 	/* combinator      -> '+' ws | '>' ws | ws1 */
 
 	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (tokenIsChar(token, '+'))
+		*result = CSS_COMBINATOR_SIBLING;
+	else if (tokenIsChar(token, '>'))
+		*result = CSS_COMBINATOR_PARENT;
+	else if (token->type == CSS_TOKEN_S)
+		*result = CSS_COMBINATOR_ANCESTOR;
+	else
+		return CSS_INVALID;
+
+	consumeWhitespace(vector, ctx);
 
 	return CSS_OK;
 }
 
-static css_error parseSelector(css_css21 *c, const parserutils_vector *vector, 
+css_error parseSelector(css_css21 *c, const parserutils_vector *vector, 
 		int *ctx, css_selector **result)
 {
 	css_error error;
@@ -490,7 +784,8 @@ static css_error parseSelector(css_css21 *c, const parserutils_vector *vector,
 		return error;
 	*result = selector;
 
-	do {
+	while ((token = parserutils_vector_peek(vector, *ctx)) != NULL &&
+			tokenIsChar(token, ',') == false) {
 		css_combinator comb = CSS_COMBINATOR_NONE;
 		css_selector *other = NULL;
 
@@ -510,56 +805,97 @@ static css_error parseSelector(css_css21 *c, const parserutils_vector *vector,
 			return error;
 
 		selector = other;
-		
-		token = parserutils_vector_peek(vector, *ctx);
-	} while (token != NULL && tokenIsChar(token, ',') == false);
+	}
 
 	return CSS_OK;
 }
 
-css_error handleSelectorList(css_css21 *c, const parserutils_vector *vector)
+css_error parseSelectorList(css_css21 *c, const parserutils_vector *vector,
+		css_rule *rule)
 {
 	css_error error;
 	const css_token *token = NULL;
 	css_selector *selector = NULL;
 	int ctx = 0;
 
-	UNUSED(c);
-	UNUSED(vector);
+	/* selector_list   -> selector [ ',' ws selector ]* */
 
-	/* CSS 2.1 selector syntax:
-	 *
-	 * selector_list   -> selector [ ',' ws selector ]*
-	 */
-	do {
+	error = parseSelector(c, vector, &ctx, &selector);
+	if (error != CSS_OK) {
+		if (selector != NULL)
+			css_stylesheet_selector_destroy(c->sheet, selector);
+		return error;
+	}
+
+	assert(selector != NULL);
+
+	error = css_stylesheet_rule_add_selector(c->sheet, rule, selector);
+	if (error != CSS_OK) {
+		css_stylesheet_selector_destroy(c->sheet, selector);
+		return error;
+	}
+
+	while ((token = parserutils_vector_peek(vector, ctx)) != NULL) {
+		token = parserutils_vector_iterate(vector, &ctx);
+		if (tokenIsChar(token, ',') == false)
+			return CSS_INVALID;
+
+		consumeWhitespace(vector, &ctx);
+
+		selector = NULL;
+
 		error = parseSelector(c, vector, &ctx, &selector);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			if (selector != NULL) {
+				css_stylesheet_selector_destroy(c->sheet, 
+						selector);
+			}
 			return error;
+		}
 
-		/** \todo Finish this */
+		assert(selector != NULL);
 
-		token = parserutils_vector_peek(vector, ctx);
-	} while(token != NULL);
+		error = css_stylesheet_rule_add_selector(c->sheet, rule, 
+				selector);
+		if (error != CSS_OK) {
+			css_stylesheet_selector_destroy(c->sheet, selector);
+			return error;
+		}
+	}
 
 	return CSS_OK;
 }
 
-css_error handleDeclaration(css_css21 *c, const parserutils_vector *vector)
+/******************************************************************************
+ * Helper functions                                                           *
+ ******************************************************************************/
+
+/**
+ * Consume all leading whitespace tokens
+ *
+ * \param vector  The vector to consume from
+ * \param ctx     The vector's context
+ */
+void consumeWhitespace(const parserutils_vector *vector, int *ctx)
 {
-	UNUSED(c);
-	UNUSED(vector);
+	const css_token *token = NULL;
 
-	/* Locations where declarations are permitted:
-	 *
-	 * + In @page
-	 * + In ruleset
-	 */
-
-	/* IDENT ws ':' ws value 
-	 * 
-	 * In CSS 2.1, value is any1, so '{' or ATKEYWORD => parse error
-	 */
-
-	return CSS_OK;
+	while ((token = parserutils_vector_peek(vector, *ctx)) != NULL &&
+			token->type == CSS_TOKEN_S)
+		token = parserutils_vector_iterate(vector, ctx);
 }
+
+/**
+ * Determine if a token is a character
+ *
+ * \param token  The token to consider
+ * \param c      The character to match (lowercase ASCII only)
+ * \return True if the token matches, false otherwise
+ */
+bool tokenIsChar(const css_token *token, uint8_t c)
+{
+	return token != NULL && token->type == CSS_TOKEN_CHAR && 
+			token->lower.len == 1 && token->lower.ptr[0] == c;
+}
+
 
