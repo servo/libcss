@@ -789,7 +789,14 @@ css_error parseSelector(css_css21 *c, const parserutils_vector *vector,
 	const css_token *token = NULL;
 	css_selector *selector = NULL;
 
-	/* selector -> simple_selector [ combinator simple_selector ]* */
+	/* selector -> simple_selector [ combinator simple_selector ]* ws
+	 * 
+	 * Note, however, that, as combinator can be wholly whitespace,
+	 * there's an ambiguity as to whether "ws" has been reached. We 
+	 * resolve this by attempting to extract a combinator, then 
+	 * recovering when we detect that we've reached the end of the
+	 * selector.
+	 */
 
 	error = parseSimpleSelector(c, vector, ctx, &selector);
 	if (error != CSS_OK)
