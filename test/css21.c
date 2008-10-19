@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 #include <libcss/libcss.h>
-#include <libcss/stylesheet.h>
+#include "stylesheet.h"
 
 #include "testutils.h"
 
@@ -66,6 +66,8 @@ int main(int argc, char **argv)
 	fclose(fp);
 
 	assert(css_stylesheet_data_done(sheet) == CSS_OK);
+
+	css_stylesheet_dump(sheet, stdout);
 
 	css_stylesheet_destroy(sheet);
 

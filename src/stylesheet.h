@@ -9,6 +9,7 @@
 #define css_stylesheet_h_
 
 #include <inttypes.h>
+#include <stdio.h>
 
 #include <libcss/errors.h>
 #include <libcss/functypes.h>
@@ -172,6 +173,8 @@ css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet,
 
 css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule);
 css_error css_stylesheet_remove_rule(css_stylesheet *sheet, css_rule *rule);
+
+void css_stylesheet_dump(css_stylesheet *sheet, FILE *target);
 
 #endif
 

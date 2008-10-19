@@ -521,4 +521,176 @@ css_error css_stylesheet_remove_rule(css_stylesheet *sheet, css_rule *rule)
 	return CSS_OK;
 }
 
+static void css_stylesheet_dump_rule(css_rule *rule, FILE *target);
+static void css_stylesheet_dump_selector_list(css_selector *list, FILE *target);
+static void css_stylesheet_dump_selector(css_selector *selector, FILE *target);
+static void css_stylesheet_dump_string(css_string *string, FILE *target);
+
+/**
+ * Dump a stylesheet
+ *
+ * \param sheet   The stylesheet to dump
+ * \param target  The file handle to output to
+ */
+void css_stylesheet_dump(css_stylesheet *sheet, FILE *target)
+{
+	css_rule *r;
+
+	if (sheet == NULL || target == NULL)
+		return;
+
+	fprintf(target, "%s (%s) %sabled origin: %d media: %d\n",
+			sheet->url, sheet->title ? sheet->title : "",
+			sheet->disabled ? "dis" : "en", sheet->origin,
+			sheet->media);
+
+	fprintf(target, "Rules:\n");
+
+	for (r = sheet->rule_list; r != NULL; r = r->next)
+		css_stylesheet_dump_rule(r, target);
+}
+
+/**
+ * Dump a CSS rule
+ *
+ * \param rule    The rule to dump
+ * \param target  The file handle to output to
+ */
+void css_stylesheet_dump_rule(css_rule *rule, FILE *target)
+{
+	fprintf(target, "  Rule %d (type %d):\n",
+			rule->index, rule->type);
+
+	fprintf(target, "    ");
+
+	switch (rule->type) {
+	case CSS_RULE_UNKNOWN:
+		break;
+	case CSS_RULE_SELECTOR:
+		for (uint32_t i = 0; i < rule->data.selector.selector_count;
+				i++) {
+			css_stylesheet_dump_selector_list(
+				rule->data.selector.selectors[i], target);
+			if (i != rule->data.selector.selector_count - 1)
+				fprintf(target, ", ");
+		}
+		break;
+	case CSS_RULE_CHARSET:
+	case CSS_RULE_IMPORT:
+	case CSS_RULE_MEDIA:
+	case CSS_RULE_FONT_FACE:
+	case CSS_RULE_PAGE:
+		break;
+	}
+
+	fprintf(target, "\n");
+}
+
+/**
+ * Dump a CSS selector list
+ *
+ * \param list    The selector list to dump
+ * \param target  The file handle to output to
+ */
+void css_stylesheet_dump_selector_list(css_selector *list, FILE *target)
+{
+	if (list->combinator != NULL)
+		css_stylesheet_dump_selector_list(list->combinator, target);
+
+	switch (list->combinator_type) {
+	case CSS_COMBINATOR_NONE:
+		break;
+	case CSS_COMBINATOR_ANCESTOR:
+		fprintf(target, " ");
+		break;
+	case CSS_COMBINATOR_PARENT:
+		fprintf(target, " > ");
+		break;
+	case CSS_COMBINATOR_SIBLING:
+		fprintf(target, " + ");
+		break;
+	}
+
+	css_stylesheet_dump_selector(list, target);
+}
+
+/**
+ * Dump a CSS selector
+ *
+ * \param selector  The selector to dump
+ * \param target    The file handle to output to
+ */
+void css_stylesheet_dump_selector(css_selector *selector, FILE *target)
+{
+	css_selector *s;
+
+	switch (selector->type) {
+	case CSS_SELECTOR_ELEMENT:
+		if (selector->specifics != NULL &&
+				(selector->data.name.len != 1 || 
+				selector->data.name.ptr[0] != '*')) {
+			css_stylesheet_dump_string(&selector->data.name, 
+					target);
+		}
+		break;
+	case CSS_SELECTOR_CLASS:
+		fprintf(target, ".");
+		css_stylesheet_dump_string(&selector->data.name, target);
+		break;
+	case CSS_SELECTOR_ID:
+		fprintf(target, "#");
+		css_stylesheet_dump_string(&selector->data.name, target);
+		break;
+	case CSS_SELECTOR_PSEUDO:
+		fprintf(target, ":");
+		css_stylesheet_dump_string(&selector->data.name, target);
+		if (selector->data.value.len > 0) {
+			fprintf(target, "(");
+			css_stylesheet_dump_string(&selector->data.value, 
+					target);
+			fprintf(target, ")");
+		}
+		break;
+	case CSS_SELECTOR_ATTRIBUTE:
+		fprintf(target, "[");
+		css_stylesheet_dump_string(&selector->data.name, target);
+		fprintf(target, "]");
+		break;
+	case CSS_SELECTOR_ATTRIBUTE_EQUAL:
+		fprintf(target, "[");
+		css_stylesheet_dump_string(&selector->data.name, target);
+		fprintf(target, "=\"");
+		css_stylesheet_dump_string(&selector->data.value, target);
+		fprintf(target, "\"]");
+		break;
+	case CSS_SELECTOR_ATTRIBUTE_DASHMATCH:
+		fprintf(target, "[");
+		css_stylesheet_dump_string(&selector->data.name, target);
+		fprintf(target, "|=\"");
+		css_stylesheet_dump_string(&selector->data.value, target);
+		fprintf(target, "\"]");
+		break;
+	case CSS_SELECTOR_ATTRIBUTE_INCLUDES:
+		fprintf(target, "[");
+		css_stylesheet_dump_string(&selector->data.name, target);
+		fprintf(target, "~=\"");
+		css_stylesheet_dump_string(&selector->data.value, target);
+		fprintf(target, "\"]");
+		break;
+	}
+
+	for (s = selector->specifics; s != NULL; s = s->next)
+		css_stylesheet_dump_selector(s, target);
+}
+
+/**
+ * Dump a CSS string
+ *
+ * \param string  The string to dump
+ * \param target  The file handle to output to
+ */
+void css_stylesheet_dump_string(css_string *string, FILE *target)
+{
+	fprintf(target, "%.*s", string->len, string->ptr);
+}
 
