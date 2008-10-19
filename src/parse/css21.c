@@ -747,25 +747,37 @@ css_error parseCombinator(css_css21 *c, const parserutils_vector *vector,
 		int *ctx, css_combinator *result)
 {
 	const css_token *token;
+	css_combinator comb = CSS_COMBINATOR_NONE;
 
-	/* combinator      -> '+' ws | '>' ws | ws1 */
+	/* combinator      -> ws '+' ws | ws '>' ws | ws1 */
 
 	UNUSED(c);
 
-	token = parserutils_vector_iterate(vector, ctx);
-	if (token == NULL)
+	while ((token = parserutils_vector_peek(vector, *ctx)) != NULL) {
+		if (tokenIsChar(token, '+'))
+			comb = CSS_COMBINATOR_SIBLING;
+		else if (tokenIsChar(token, '>'))
+			comb = CSS_COMBINATOR_PARENT;
+		else if (token->type == CSS_TOKEN_S)
+			comb = CSS_COMBINATOR_ANCESTOR;
+		else
+			break;
+
+		parserutils_vector_iterate(vector, ctx);
+
+		/* If we've seen a '+' or '>', we're done. */
+		if (comb != CSS_COMBINATOR_ANCESTOR)
+			break;
+	}
+
+	/* No valid combinator found */
+	if (comb == CSS_COMBINATOR_NONE)
 		return CSS_INVALID;
 
-	if (tokenIsChar(token, '+'))
-		*result = CSS_COMBINATOR_SIBLING;
-	else if (tokenIsChar(token, '>'))
-		*result = CSS_COMBINATOR_PARENT;
-	else if (token->type == CSS_TOKEN_S)
-		*result = CSS_COMBINATOR_ANCESTOR;
-	else
-		return CSS_INVALID;
-
+	/* Consume any trailing whitespace */
 	consumeWhitespace(vector, ctx);
+
+	*result = comb;
 
 	return CSS_OK;
 }
@@ -792,6 +804,18 @@ css_error parseSelector(css_css21 *c, const parserutils_vector *vector,
 		error = parseCombinator(c, vector, ctx, &comb);
 		if (error != CSS_OK)
 			return error;
+
+		/* In the case of "html , body { ... }", the whitespace after
+		 * "html" and "body" will be considered an ancestor combinator.
+		 * This clearly is not the case, however. Therefore, as a 
+		 * special case, if we've got an ancestor combinator and there 
+		 * are no further tokens, or if the next token is a comma,
+		 * we ignore the supposed combinator and continue. */
+		if (comb == CSS_COMBINATOR_ANCESTOR && 
+				((token = parserutils_vector_peek(vector, 
+					*ctx)) == NULL || 
+				tokenIsChar(token, ',')))
+			continue;
 
 		error = parseSimpleSelector(c, vector, ctx, &other);
 		if (error != CSS_OK)
