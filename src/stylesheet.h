@@ -56,8 +56,6 @@ struct css_selector {
 
 	css_rule *rule;				/**< Owning rule */
 
-	css_style *style;			/**< Applicable style */
-
 	css_selector *next;			/**< Next selector in list */
 	css_selector *prev;			/**< Previous selector */
 };
@@ -79,6 +77,7 @@ struct css_rule {
 		struct {
 			uint32_t selector_count;
 			css_selector **selectors;
+			css_style *style;
 		} selector;
 		struct {
 			uint32_t media;
