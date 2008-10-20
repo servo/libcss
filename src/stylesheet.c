@@ -691,6 +691,6 @@ void css_stylesheet_dump_selector(css_selector *selector, FILE *target)
  */
 void css_stylesheet_dump_string(css_string *string, FILE *target)
 {
-	fprintf(target, "%.*s", string->len, string->ptr);
+	fprintf(target, "%.*s", (int) string->len, string->ptr);
 }
 
