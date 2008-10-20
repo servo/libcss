@@ -626,10 +626,14 @@ void css_stylesheet_dump_selector(css_selector *selector, FILE *target)
 
 	switch (selector->type) {
 	case CSS_SELECTOR_ELEMENT:
-		if (selector->specifics != NULL &&
-				(selector->data.name.len != 1 || 
-				selector->data.name.ptr[0] != '*')) {
-			css_stylesheet_dump_string(&selector->data.name, 
+		if (selector->data.name.len == 1 && 
+				selector->data.name.ptr[0] == '*' &&
+				selector->specifics == NULL) {
+			css_stylesheet_dump_string(&selector->data.name,
+					target);
+		} else if (selector->data.name.len != 1 ||
+				selector->data.name.ptr[0] != '*') {
+			css_stylesheet_dump_string(&selector->data.name,
 					target);
 		}
 		break;
