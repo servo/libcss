@@ -92,6 +92,38 @@ CSS shapes are stored as one 32bit value followed by n CSS dimensions:
 
 	TODO: how to handle "auto"?
 
+Shorthand properties
+--------------------
+
+The CSS shorthand properties are handled by decomposing them to their
+component parts, and then creating bytecode for these.
+
+For example, "background: red none no-repeat scroll left top !important;" would
+be decomposed to:
+
+  background-color: red !important;
+  background-image: none !important;
+  background-repeat: no-repeat !important;
+  background-attachment: scroll !important;
+  background-position: left top !important;
+
+and bytecode generated for each of these properties.
+
+The full list of CSS 2.1 shorthand properties is:
+
+  background
+  border-color
+  border-style
+  border-{top,right,bottom,left}
+  border-width
+  border
+  cue
+  font
+  list-style
+  margin
+  outline
+  padding
+  pause
 
 Opcodes
 -------
