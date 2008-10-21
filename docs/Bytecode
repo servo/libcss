@@ -331,6 +331,15 @@ Opcodes
 	declares the type of the next item. The list is terminated by a
 	word with all bits set to zero (the encoding for "normal").
 
+	For example, 
+		content: open-quote url('http://example.com/') 
+			 " : " attr(name) close-quote;"
+	would result in the following bytecode:
+
+	<00080010> <00000081> <00000013> "http://example.com/" <00>
+	<00000080> <00000003> " : " <00> <00000083> <00000004> "name"
+	<00000003> <00000000>
+
 11 - counter-increment
 	<value> (14bits) :
 		bits 8-13: MBZ
