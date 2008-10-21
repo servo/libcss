@@ -1,0 +1,318 @@
+CSS style declaration bytecode
+==============================
+
+Format
+------
+
+<opcode+flags> [<parameters>]
+
+<opcode+flags> is 32 bits wide. 
+The bottom 16 bits contain the opcode and the top 16 bits contain flags. 
+
+The 16 bits of flag data are defined as follows:
+	bit 0   : !important
+	bit 1-15: MBZ
+
+Parameters are opcode-specific. Each parameter must begin on a 4 byte boundary.
+
+Datatype storage
+----------------
+
+8 and 16 bit integers are stored as 32bit values.
+
+32 and 64 bit integers are stored in their natural format.
+
+Floats and doubles are stored in their natural format.
+
+Strings are stored unterminated UTF8, preceded by 32bits of byte length, and 
+followed by 0-3 bytes of padding for alignment. The padding bytes must be 
+zero. The padding is not included in the byte length.
+
+CSS dimensions are stored as two 32bit values: <length, units>. 
+Length is a 32bit integer and unit is as follows:
+
+	bit 8 clear => length unit
+		bits 9-31: MBZ
+		bits 0-7 :
+			00000000 => px
+			00000001 => ex
+			00000010 => em
+			00000011 => in
+			00000100 => cm
+			00000101 => mm
+			00000110 => pt
+			00000111 => pc
+
+	bit 8 set => percentage unit
+		bits 9-31: MBZ
+		bits 0-7 : MBZ
+
+	bit 9 set => angle unit
+		bits 10-31: MBZ
+		bit 8     : MBZ
+		bits 0-7  :
+			00000000 => deg
+			00000001 => grad
+			00000010 => rad
+
+	bit 10 set => time unit
+		bits 11-31: MBZ
+		bits 8-9  : MBZ
+		bits 0-7  :
+			00000000 => ms
+			00000001 => s
+
+	bit 11 set => frequency unit
+		bits 12-31: MBZ
+		bits 8-10 : MBZ
+		bits 0-7  :
+			00000000 => Hz
+			00000001 => kHz
+
+CSS colours are stored as one 32bit value:
+
+	bits 24-31: Red component
+	bits 16-23: Green component
+	bits 8-15 : Blue component
+	bits 0-7  : Alpha component
+
+CSS shapes are stored as one 32bit value followed by n CSS dimensions:
+
+	bits 1-31: MBZ
+	bit 0    : clear => rect, 4 dimensions follow
+		   set   => reserved for future expansion
+
+	TODO: how to handle "auto"?
+
+
+Opcodes
+-------
+
+00 - azimuth
+	<value> (32bits) :
+		bits 8-31: MBZ
+		bit 7 set => angle or inherit:
+			bits 0-6: 0000000 => signed angle unit follows,
+				  1111111 => inherit,
+				  other   => Reserved for future expansion.
+		bit 6 set => relative movement:
+			bit 7   : MBZ
+			bits 1-5: MBZ
+			bit 0   : set => rightwards, clear => leftwards
+		bits 6 & 7 clear => keyword position:
+			bit 5   : set => behind, clear => in front
+			bits 0-4:
+				0000  => left-side
+				0001  => far-left
+				0010  => left
+				0011  => center-left
+				0100  => center
+				0101  => center-right
+				0110  => right
+				0111  => far-right
+				1000  => right-side
+				other => Reserved for future expansion.
+
+01 - background-attachment
+	<value> (32bits) :
+		0     => fixed
+		1     => scroll
+		0xff  => inherit
+		other => Reserved for future expansion.
+
+02 - background-color
+	<value> (32bits) :
+		bit 8-31: MBZ
+		bit 7 set => color or inherit:
+			bits 0-6: 0000000 => colour follows,
+				  1111111 => inherit,
+			          other   => Reserved for future expansion.
+		bit 7 clear => keyword color:
+			bits 1-6: MBZ
+			bit 0   : clear => transparent, set => rffe.
+
+03 - background-image
+	<value> (32bits) :
+		bits 8-31: MBZ
+		bit 7 set => uri or inherit:
+			bits 0-6: 0000000 => uri string follows,
+				  1111111 => inherit,
+				  other   => Reserved for future expansion.
+		bit 7 clear => keyword:
+			bits 1-6: MBZ
+			bit 0   : clear => none, set => rffe.
+
+04 - background-position
+	<value> (32bits) :
+		bits 8-31: MBZ
+		bits 0-7 : 
+			11111111 => inherit
+			otherwise:
+				bit 7: set => percentage or length unit follows
+						bits 4-6: MBZ
+				       clear => keywords:
+						bits 4-6:
+							000   => right
+							001   => center
+							010   => left
+							other => rffe
+				bit 3: set => percentage or length unit follows
+						bits 0-2: MBZ
+				       clear => keywords:
+						bits 0-2:
+							000   => bottom
+							001   => center
+							010   => top
+							other => rffe
+
+05 - background-repeat
+	<value> (32bits) :
+		0     => no-repeat
+		1     => repeat-x
+		2     => repeat-y
+		3     => repeat
+		0xff  => inherit
+		other => Reserved for future expansion.
+
+06 - border-collapse
+	<value> (32bits) :
+		0     => separate
+		1     => collapse
+		0xff  => inherit
+		other => Reserved for future expansion.
+
+07 - border-spacing
+	<value> (32bits) :
+		bits 8-31: MBZ
+		bits 0-7 : 00000000 => two lengths follow,
+			   11111111 => inherit,
+			   other    => Reserved for future expansion.	
+
+08 - border-{top,right,bottom,left}-color
+	<value> (32bits) :
+		bits 10-31: MBZ
+		bits 8-9  :
+			00 => top
+			01 => right
+			10 => bottom
+			11 => left
+		bits 0-7  : 00000000 => colour follows,
+			    00000001 => transparent,
+			    11111111 => inherit,
+			    other    => Reserved for future expansion.
+
+09 - border-{top,right,bottom,left}-style
+	<value> (32bits) :
+		bits 10-31: MBZ
+		bits 8-9 :
+			00 => top
+			01 => right
+			10 => bottom
+			11 => left
+		bits 0-7 :
+			00000000 => none,
+			00000001 => hidden,
+			00000010 => dotted,
+			00000011 => dashed,
+			00000100 => solid,
+			00000101 => double,
+			00000110 => groove,
+			00000111 => ridge,
+			00001000 => inset,
+			00001001 => outset,
+			11111111 => inherit,
+			other    => Reserved for future expansion.
+
+0a - border-{top,right,bottom,left}-width
+	<value> (32bits) :
+		bits 10-31: MBZ
+		bits 8-9 :
+			00 => top
+			01 => right
+			10 => bottom
+			11 => left
+		bits 0-7 :
+			11111111 => inherit,
+			otherwise:
+				bit 7 set => length follows
+					bits 0-6: MBZ
+				bit 7 clear => keywords:
+					bits 0-6: 0000000 => thin,
+						  0000001 => medium,
+						  0000010 => thick,
+						  other   => rffe.
+
+0b - bottom
+0c - caption-side
+0d - clear
+0e - clip
+0f - color
+10 - content
+11 - counter-increment
+12 - counter-reset
+13 - cue-after
+14 - cue-before
+15 - cursor
+16 - direction
+17 - display
+18 - elevation
+19 - empty-cells
+1a - float
+1b - font-family
+1c - font-size
+1d - font-style
+1e - font-variant
+1f - font-weight
+20 - height
+21 - left
+22 - letter-spacing
+23 - line-height
+24 - list-style-image
+25 - list-style-position
+26 - list-style-type
+27 - margin-{top,right,bottom,left}
+28 - max-height
+29 - max-width
+2a - min-height
+2b - min-width
+2c - orphans
+2d - outline-color
+2e - outline-style
+2f - outline-width
+30 - overflow
+31 - padding-{top,right,bottom,left}
+32 - page-break-after
+33 - page-break-before
+34 - page-break-inside
+35 - pause-after
+36 - pause-before
+37 - pitch-range
+38 - pitch
+39 - play-during
+3a - position
+3b - quotes
+3c - richness
+3d - speak-header
+3e - speak-numeral
+3f - speak-punctuation
+40 - speak
+41 - speech-rate
+42 - stress
+43 - table-layout
+44 - text-align
+45 - text-decoration
+46 - text-indent
+47 - text-transform
+48 - top
+49 - unicode-bidi
+4a - vertical-align
+4b - visibility
+4c - voice-family
+4d - volume
+4e - white-space
+4f - widows
+50 - width
+51 - word-spacing
+52 - z-index
+53-ffff - Reserved for future expansion.
+
