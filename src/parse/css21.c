@@ -21,6 +21,30 @@
 enum {
 	CHARSET, IMPORT, MEDIA, PAGE,
 
+	FIRST_PROP,
+
+	AZIMUTH = FIRST_PROP, BACKGROUND_ATTACHMENT, BACKGROUND_COLOR, 
+	BACKGROUND_IMAGE, BACKGROUND_POSITION, BACKGROUND_REPEAT, 
+	BORDER_BOTTOM_COLOR, BORDER_BOTTOM_STYLE, BORDER_BOTTOM_WIDTH, 
+	BORDER_COLLAPSE, BORDER_LEFT_COLOR, BORDER_LEFT_STYLE, 
+	BORDER_LEFT_WIDTH, BORDER_RIGHT_COLOR, BORDER_RIGHT_STYLE, 
+	BORDER_RIGHT_WIDTH, BORDER_SPACING, BORDER_TOP_COLOR, BORDER_TOP_STYLE, 
+	BORDER_TOP_WIDTH, BOTTOM, CAPTION_SIDE, CLEAR, CLIP, COLOR, CONTENT, 
+	COUNTER_INCREMENT, COUNTER_RESET, CUE_AFTER, CUE_BEFORE, CURSOR, 
+	DIRECTION, DISPLAY, ELEVATION, EMPTY_CELLS, FLOAT, FONT_FAMILY, 
+	FONT_SIZE, FONT_STYLE, FONT_VARIANT, FONT_WEIGHT, HEIGHT, LEFT, 
+	LETTER_SPACING, LINE_HEIGHT, LIST_STYLE_IMAGE, LIST_STYLE_POSITION, 
+	LIST_STYLE_TYPE, MARGIN_BOTTOM, MARGIN_LEFT, MARGIN_RIGHT, MARGIN_TOP, 
+	MAX_HEIGHT, MAX_WIDTH, MIN_HEIGHT, MIN_WIDTH, ORPHANS, OUTLINE_COLOR, 
+	OUTLINE_STYLE, OUTLINE_WIDTH, OVERFLOW, PADDING_BOTTOM, PADDING_LEFT, 
+	PADDING_RIGHT, PADDING_TOP, PAGE_BREAK_AFTER, PAGE_BREAK_BEFORE, 
+	PAGE_BREAK_INSIDE, PAUSE_AFTER, PAUSE_BEFORE, PITCH_RANGE, PITCH, 
+	PLAY_DURING, POSITION, QUOTES, RICHNESS, RIGHT, SPEAK_HEADER, 
+	SPEAK_NUMERAL, SPEAK_PUNCTUATION, SPEAK, SPEECH_RATE, STRESS, 
+	TABLE_LAYOUT, TEXT_ALIGN, TEXT_DECORATION, TEXT_INDENT, TEXT_TRANSFORM, 
+	TOP, UNICODE_BIDI, VERTICAL_ALIGN, VISIBILITY, VOICE_FAMILY, VOLUME, 
+	WHITE_SPACE, WIDOWS, WIDTH, WORD_SPACING, Z_INDEX,
+
 	LAST_KNOWN
 };
 
@@ -32,11 +56,111 @@ static struct {
 	{ "import", SLEN("import") },
 	{ "media", SLEN("media") },
 	{ "page", SLEN("page") },
+
+	{ "azimuth", SLEN("azimuth") },
+	{ "background-attachment", SLEN("background-attachment") },
+	{ "background-color", SLEN("background-color") },
+	{ "background-image", SLEN("background-image") },
+	{ "background-position", SLEN("background-position") },
+	{ "background-repeat", SLEN("background-repeat") },
+	{ "border-bottom-color", SLEN("border-bottom-color") },
+	{ "border-bottom-style", SLEN("border-bottom-style") },
+	{ "border-bottom-width", SLEN("border-bottom-width") },
+	{ "border-collapse", SLEN("border-collapse") },
+	{ "border-left-color", SLEN("border-left-color") },
+	{ "border-left-style", SLEN("border-left-style") },
+	{ "border-left-width", SLEN("border-left-width") },
+	{ "border-right-color", SLEN("border-right-color") },
+	{ "border-right-style", SLEN("border-right-style") },
+	{ "border-right-width", SLEN("border-right-width") },
+	{ "border-spacing", SLEN("border-spacing") },
+	{ "border-top-color", SLEN("border-top-color") },
+	{ "border-top-style", SLEN("border-top-style") },
+	{ "border-top-width", SLEN("border-top-width") },
+	{ "bottom", SLEN("bottom") },
+	{ "caption-side", SLEN("caption-side") },
+	{ "clear", SLEN("clear") },
+	{ "clip", SLEN("clip") },
+	{ "color", SLEN("color") },
+	{ "content", SLEN("content") },
+	{ "counter-increment", SLEN("counter-increment") },
+	{ "counter-reset", SLEN("counter-reset") },
+	{ "cue-after", SLEN("cue-after") },
+	{ "cue-before", SLEN("cue-before") },
+	{ "cursor", SLEN("cursor") },
+	{ "direction", SLEN("direction") },
+	{ "display", SLEN("display") },
+	{ "elevation", SLEN("elevation") },
+	{ "empty-cells", SLEN("empty-cells") },
+	{ "float", SLEN("float") },
+	{ "font-family", SLEN("font-family") },
+	{ "font-size", SLEN("font-size") },
+	{ "font-style", SLEN("font-style") },
+	{ "font-variant", SLEN("font-variant") },
+	{ "font-weight", SLEN("font-weight") },
+	{ "height", SLEN("height") },
+	{ "left", SLEN("left") },
+	{ "letter-spacing", SLEN("letter-spacing") },
+	{ "line-height", SLEN("line-height") },
+	{ "list-style-image", SLEN("list-style-image") },
+	{ "list-style-position", SLEN("list-style-position") },
+	{ "list-style-type", SLEN("list-style-type") },
+	{ "margin-bottom", SLEN("margin-bottom") },
+	{ "margin-left", SLEN("margin-left") },
+	{ "margin-right", SLEN("margin-right") },
+	{ "margin-top", SLEN("margin-top") },
+	{ "max-height", SLEN("max-height") },
+	{ "max-width", SLEN("max-width") },
+	{ "min-height", SLEN("min-height") },
+	{ "min-width", SLEN("min-width") },
+	{ "orphans", SLEN("orphans") },
+	{ "outline-color", SLEN("outline-color") },
+	{ "outline-style", SLEN("outline-style") },
+	{ "outline-width", SLEN("outline-width") },
+	{ "overflow", SLEN("overflow") },
+	{ "padding-bottom", SLEN("padding-bottom") },
+	{ "padding-left", SLEN("padding-left") },
+	{ "padding-right", SLEN("padding-right") },
+	{ "padding-top", SLEN("padding-top") },
+	{ "page-break-after", SLEN("page-break-after") },
+	{ "page-break-before", SLEN("page-break-before") },
+	{ "page-break-inside", SLEN("page-break-inside") },
+	{ "pause-after", SLEN("pause-after") },
+	{ "pause-before", SLEN("pause-before") },
+	{ "pitch-range", SLEN("pitch-range") },
+	{ "pitch", SLEN("pitch") },
+	{ "play-during", SLEN("play-during") },
+	{ "position", SLEN("position") },
+	{ "quotes", SLEN("quotes") },
+	{ "richness", SLEN("richness") },
+	{ "right", SLEN("right") },
+	{ "speak-header", SLEN("speak-header") },
+	{ "speak-numeral", SLEN("speak-numeral") },
+	{ "speak-punctuation", SLEN("speak-punctuation") },
+	{ "speak", SLEN("speak") },
+	{ "speech-rate", SLEN("speech-rate") },
+	{ "stress", SLEN("stress") },
+	{ "table-layout", SLEN("table-layout") },
+	{ "text-align", SLEN("text-align") },
+	{ "text-decoration", SLEN("text-decoration") },
+	{ "text-indent", SLEN("text-indent") },
+	{ "text-transform", SLEN("text-transform") },
+	{ "top", SLEN("top") },
+	{ "unicode-bidi", SLEN("unicode-bidi") },
+	{ "vertical-align", SLEN("vertical-align") },
+	{ "visibility", SLEN("visibility") },
+	{ "voice-family", SLEN("voice-family") },
+	{ "volume", SLEN("volume") },
+	{ "white-space", SLEN("white-space") },
+	{ "widows", SLEN("widows") },
+	{ "width", SLEN("width") },
+	{ "word-spacing", SLEN("word-spacing") },
+	{ "z-index", SLEN("z-index") }
 };
 
 typedef struct context_entry {
 	css_parser_event type;		/**< Type of entry */
-	const uint8_t *data;		/**< Pointer to interned string */
+	void *data;			/**< Data for context */
 } context_entry;
 
 /**
@@ -112,6 +236,11 @@ static inline css_error parseSelector(css_css21 *c,
 		css_selector **result);
 static inline css_error parseSelectorList(css_css21 *c, 
 		const parserutils_vector *vector, css_rule *rule);
+
+/* Declaration parsing */
+static inline css_error parseProperty(css_css21 *c,
+		const css_token *property, const parserutils_vector *vector,
+		int *ctx, css_rule *rule);
 
 /* Helpers */
 static inline void consumeWhitespace(const parserutils_vector *vector, 
@@ -294,6 +423,8 @@ css_error handleStartRuleset(css_css21 *c, const parserutils_vector *vector)
 		return error;
 	}
 
+	entry.data = rule;
+
 	perror = parserutils_stack_push(c->context, (void *) &entry);
 	if (perror != PARSERUTILS_OK) {
 		css_stylesheet_rule_destroy(c->sheet, rule);
@@ -475,19 +606,46 @@ css_error handleBlockContent(css_css21 *c, const parserutils_vector *vector)
 
 css_error handleDeclaration(css_css21 *c, const parserutils_vector *vector)
 {
-	UNUSED(c);
-	UNUSED(vector);
+	css_error error;
+	const css_token *token, *ident;
+	int ctx = 0;
+	context_entry *entry;
+	css_rule *rule;
 
 	/* Locations where declarations are permitted:
 	 *
 	 * + In @page
 	 * + In ruleset
 	 */
+	entry = parserutils_stack_get_current(c->context);
+	if (entry == NULL || (entry->type != CSS_PARSER_START_RULESET &&
+			entry->type != CSS_PARSER_START_ATRULE))
+		return CSS_INVALID;
+
+	rule = entry->data;
+	if (rule == NULL || (rule->type != CSS_RULE_SELECTOR && 
+			rule->type != CSS_RULE_PAGE))
+		return CSS_INVALID;
 
 	/* IDENT ws ':' ws value 
 	 * 
 	 * In CSS 2.1, value is any1, so '{' or ATKEYWORD => parse error
 	 */
+	ident = parserutils_vector_iterate(vector, &ctx);
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+		return CSS_INVALID;
+
+	consumeWhitespace(vector, &ctx);
+
+	token = parserutils_vector_iterate(vector, &ctx);
+	if (token == NULL || tokenIsChar(token, ':') == false)
+		return CSS_INVALID;
+
+	consumeWhitespace(vector, &ctx);
+
+	error = parseProperty(c, ident, vector, &ctx, rule);
+	if (error != CSS_OK)
+		return error;
 
 	return CSS_OK;
 }
@@ -893,6 +1051,44 @@ css_error parseSelectorList(css_css21 *c, const parserutils_vector *vector,
 			return error;
 		}
 	}
+
+	return CSS_OK;
+}
+
+/******************************************************************************
+ * Property parsing functions                                                 *
+ ******************************************************************************/
+
+#include "css21props.c"
+
+css_error parseProperty(css_css21 *c, const css_token *property, 
+		const parserutils_vector *vector, int *ctx, css_rule *rule)
+{
+	css_error error;
+	css_prop_handler handler = NULL;
+	int i = 0;
+	css_style *style;
+
+	/* Find property index */
+	/** \todo improve on this linear search */
+	for (i = FIRST_PROP; i < LAST_KNOWN; i++) {
+		if (property->lower.ptr == c->strings[i])
+			break;
+	}
+	if (i == LAST_KNOWN)
+		return CSS_INVALID;
+
+	/* Get handler */
+	handler = property_handlers[i - FIRST_PROP];
+	assert(handler != NULL);
+
+	/* Call it */
+	error = handler(c, vector, ctx, &style);
+	if (error != CSS_OK)
+		return error;
+
+	/** \todo append style to rule */
+	UNUSED(rule);
 
 	return CSS_OK;
 }

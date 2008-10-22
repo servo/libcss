@@ -20,7 +20,11 @@
 
 typedef struct css_rule css_rule;
 typedef struct css_selector css_selector;
-typedef struct css_style css_style;
+
+typedef struct css_style {
+	uint32_t length;		/**< Length, in bytes, of bytecode */
+	void *bytecode;			/**< Pointer to bytecode */
+} css_style;
 
 typedef enum css_selector_type {
 	CSS_SELECTOR_ELEMENT,
@@ -160,14 +164,13 @@ css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
 css_error css_stylesheet_selector_combine(css_stylesheet *sheet,
 		css_combinator type, css_selector *a, css_selector *b);
 
-/** \todo something about adding style declarations to a selector */
-
 css_rule *css_stylesheet_rule_create(css_stylesheet *sheet, css_rule_type type);
 void css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule);
 
 css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet, 
 		css_rule *rule, css_selector *selector);
 
+/** \todo something about adding style declarations to a rule */
 /** \todo registering other rule-type data with css_rules */
 
 css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule);
