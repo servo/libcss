@@ -8,11 +8,11 @@ Format
 
 <opcode+flags+value> is 32 bits wide:
 	bits 18-13: value
-	bits 8-17 : flags
-	bits 0-7  : opcode
+	bits 10-17 : flags
+	bits 0-9  : opcode
 
-The 10 bits of flag data are defined as follows:
-	bits 2-9: MBZ
+The 8 bits of flag data are defined as follows:
+	bits 2-7: MBZ
 	bit 1   : value is inherit
 	bit 0   : value is important
 
@@ -1062,5 +1062,5 @@ Opcodes
 				bits 0-6: 0000000 => auto,
 					  other   => rffe.
 
-54-ff - Reserved for future expansion.
+54-3ff - Reserved for future expansion.
 
