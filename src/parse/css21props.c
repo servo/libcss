@@ -9,6 +9,7 @@
 #define css_parse_css21props_c_
 
 #include "bytecode/bytecode.h"
+#include "bytecode/opcodes.h"
 
 static css_error parse_azimuth(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
