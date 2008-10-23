@@ -1067,7 +1067,7 @@ css_error parseProperty(css_css21 *c, const css_token *property,
 	css_error error;
 	css_prop_handler handler = NULL;
 	int i = 0;
-	css_style *style;
+	css_style *style = NULL;
 
 	/* Find property index */
 	/** \todo improve on this linear search */
@@ -1087,8 +1087,18 @@ css_error parseProperty(css_css21 *c, const css_token *property,
 	if (error != CSS_OK)
 		return error;
 
-	/** \todo append style to rule */
-	UNUSED(rule);
+	/** \todo we should probably assert this, but until we've implemented 
+	 * all the property parsers, this will have to suffice. */
+	if (style != NULL) {
+		/* Append style to rule */
+		error = css_stylesheet_rule_append_style(c->sheet, rule, style);
+		if (error != CSS_OK) {
+			css_stylesheet_style_destroy(c->sheet, style);
+			return error;
+		}
+	}
+
+	/* Style owned or destroyed by stylesheet, so forget about it */
 
 	return CSS_OK;
 }

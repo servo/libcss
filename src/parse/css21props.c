@@ -690,10 +690,64 @@ css_error parse_clear(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	const css_token *token, *ident;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+
+	/* IDENT (left, right, both, none, inherit) */
+	ident = parserutils_vector_iterate(vector, ctx);
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+		return CSS_INVALID;
+
+	/** \todo break this !important stuff into a utility function */
+	consumeWhitespace(vector, ctx);
+
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token != NULL && tokenIsChar(token, '!')) {
+		consumeWhitespace(vector, ctx);
+
+		token = parserutils_vector_iterate(vector, ctx);
+		if (token == NULL || token->type != CSS_TOKEN_IDENT)
+			return CSS_INVALID;
+
+		/** \todo compare pointer to interned version. */
+		if (token->lower.len == 9 &&
+				strncmp((char *) token->lower.ptr, 
+					"important", 9) == 0)
+			flags |= FLAG_IMPORTANT;
+	} else if (token != NULL)
+		return CSS_INVALID;
+
+
+	/** \todo ugh. compare pointers to interned versions, already */
+	if (ident->lower.len == 7 &&
+			strncmp((char *) ident->lower.ptr, "inherit", 7) == 0) {
+		flags |= FLAG_INHERIT;
+	} else if (ident->lower.len == 5 && 
+			strncmp((char *) ident->lower.ptr, "right", 5) == 0) {
+		value = CLEAR_RIGHT;
+	} else if (ident->lower.len == 4 &&
+			strncmp((char *) ident->lower.ptr, "left", 4) == 0) {
+		value = CLEAR_LEFT;
+	} else if (ident->lower.len == 4 &&
+			strncmp((char *) ident->lower.ptr, "both", 4) == 0) {
+		value = CLEAR_BOTH;
+	} else if (ident->lower.len == 4 &&
+			strncmp((char *) ident->lower.ptr, "none", 4) == 0) {
+		value = CLEAR_NONE;
+	} else
+		return CSS_INVALID;
+
+	opv = buildOPV(OP_CLEAR, flags, value);
+
+	/* Allocate result */
+	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
+	if (*result == NULL)
+		return CSS_NOMEM;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
 
 	return CSS_OK;
 }

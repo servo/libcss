@@ -269,6 +269,45 @@ css_error css_stylesheet_set_disabled(css_stylesheet *sheet, bool disabled)
  ******************************************************************************/
 
 /**
+ * Create a style
+ *
+ * \param sheet  The stylesheet context
+ * \param len    The required length of the style
+ * \return Pointer to style, or NULL on error
+ */
+css_style *css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len)
+{
+	css_style *style;
+
+	if (sheet == NULL || len == 0)
+		return NULL;
+
+	style = sheet->alloc(NULL, sizeof(css_style) + len, sheet->pw);
+	if (style == NULL)
+		return NULL;
+
+	/* DIY variable-sized data member */
+	style->bytecode = ((uint8_t *) style + sizeof(css_style));
+	style->length = len;
+
+	return style;
+}
+
+/**
+ * Destroy a style
+ *
+ * \param sheet  The stylesheet context
+ * \param style  The style to destroy
+ */
+void css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style)
+{
+	UNUSED(sheet);
+	UNUSED(style);
+
+	/** \todo destroy style */
+}
+
+/**
  * Create a selector
  *
  * \param sheet  The stylesheet context
@@ -458,6 +497,59 @@ css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet,
 	/* Set selector's rule field */
 	selector->rule = rule;
 	
+	return CSS_OK;
+}
+
+/**
+ * Append a style to a CSS rule
+ *
+ * \param sheet  The stylesheet context
+ * \param rule   The rule to add to (must be CSS_RULE_SELECTOR or CSS_RULE_PAGE)
+ * \param style  The style to add
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
+		css_rule *rule, css_style *style)
+{
+	css_style *cur;
+
+	if (sheet == NULL || rule == NULL || style == NULL)
+		return CSS_BADPARM;
+
+	if (rule->type != CSS_RULE_SELECTOR && rule->type != CSS_RULE_PAGE)
+		return CSS_INVALID;
+
+	if (rule->type == CSS_RULE_SELECTOR)
+		cur = rule->data.selector.style;
+	else
+		cur = rule->data.page.style;
+
+	if (cur != NULL) {
+		/* Already have a style, so append to the end of the bytecode */
+		css_style *temp = sheet->alloc(cur, 
+				cur->length + style->length, sheet->pw);
+		if (temp == NULL)
+			return CSS_NOMEM;
+
+		/** \todo Can we optimise the bytecode here? */
+		memcpy((uint8_t *) temp->bytecode + temp->length, 
+				style->bytecode, style->length);
+
+		cur = temp;
+		cur->length += style->length;
+
+		/* Done with style */
+		css_stylesheet_style_destroy(sheet, style);
+	} else {
+		/* No current style, so use this one */
+		cur = style;
+	}
+
+	if (rule->type == CSS_RULE_SELECTOR)
+		rule->data.selector.style = cur;
+	else
+		rule->data.page.style = cur;
+
 	return CSS_OK;
 }
 

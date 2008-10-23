@@ -99,6 +99,11 @@ typedef enum opcode {
 	OP_Z_INDEX			= 0x053,
 } opcode;
 
+enum flag {
+	FLAG_IMPORTANT			= (1<<0),
+	FLAG_INHERIT			= (1<<1),
+};
+
 typedef enum unit {
 	UNIT_PX   = 0,
 	UNIT_EX   = 1,
