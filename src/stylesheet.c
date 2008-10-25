@@ -535,7 +535,8 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 	if (cur != NULL) {
 		/* Already have a style, so append to the end of the bytecode */
 		css_style *temp = sheet->alloc(cur, 
-				cur->length + style->length, sheet->pw);
+				sizeof(css_style) + cur->length + style->length,
+				sheet->pw);
 		if (temp == NULL)
 			return CSS_NOMEM;
 
