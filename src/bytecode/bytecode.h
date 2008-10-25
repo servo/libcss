@@ -9,6 +9,7 @@
 #define css_bytecode_bytecode_h_
 
 #include <inttypes.h>
+#include <stdio.h>
 
 #include <libcss/types.h>
 
@@ -162,6 +163,8 @@ static inline bool isInherit(uint32_t OPV)
 {
 	return getFlags(OPV) & 0x2;
 }
+
+void css_bytecode_dump(void *bytecode, uint32_t length, FILE *fp);
 
 #endif
 

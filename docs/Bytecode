@@ -32,9 +32,9 @@ Floats are stored in their natural format.
 Integers wider than 32 bits are not supported.
 Doubles are not supported.
 
-Strings are stored unterminated UTF8, preceded by 32bits of byte length, and 
-followed by 0-3 bytes of padding for alignment. The padding bytes must be 
-zero. The padding is not included in the byte length.
+Strings are stored as <pointer,length> pairs, as per css_string.
+Pointer's width is the native width of a pointer on the platform.
+Length's width is the native width of a size_t on the platform.
 
 CSS dimensions are stored as two 32bit values: <length, units>. 
 Length is a 32bit integer and unit is as follows:

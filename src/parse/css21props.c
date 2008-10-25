@@ -309,6 +309,13 @@ static css_error parse_z_index(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
 
+static inline css_error parse_important(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		uint8_t *result);
+static inline css_error parse_colour_specifier(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		uint32_t *result);
+
 /**
  * Type of property handler function
  */
@@ -319,7 +326,7 @@ typedef css_error (*css_prop_handler)(css_css21 *c,
 /**
  * Dispatch table of property handlers, indexed by property enum
  */
-static const css_prop_handler property_handlers[LAST_KNOWN - FIRST_PROP] =
+static const css_prop_handler property_handlers[LAST_PROP + 1 - FIRST_PROP] =
 {
 	parse_azimuth,
 	parse_background_attachment,
@@ -426,6 +433,7 @@ css_error parse_azimuth(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	/** \todo azimuth */
 	UNUSED(c);
 	UNUSED(vector);
 	UNUSED(ctx);
@@ -438,10 +446,39 @@ css_error parse_background_attachment(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *ident;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+
+	/* IDENT (fixed, scroll, inherit) */
+	ident = parserutils_vector_iterate(vector, ctx);
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+		return CSS_INVALID;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	if (ident->lower.ptr == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (ident->lower.ptr == c->strings[FIXED]) {
+		value = BACKGROUND_ATTACHMENT_FIXED;
+	} else if (ident->lower.ptr == c->strings[SCROLL]) {
+		value = BACKGROUND_ATTACHMENT_SCROLL;
+	} else
+		return CSS_INVALID;
+
+	opv = buildOPV(OP_BACKGROUND_ATTACHMENT, flags, value);
+
+	/* Allocate result */
+	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
+	if (*result == NULL)
+		return CSS_NOMEM;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
 
 	return CSS_OK;
 }
@@ -450,10 +487,56 @@ css_error parse_background_color(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	uint32_t colour = 0;
+	uint32_t required_size;
+
+	/* colour | IDENT (transparent, inherit) */
+	token= parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT && 
+			token->lower.ptr == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags |= FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[TRANSPARENT]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = BACKGROUND_COLOR_TRANSPARENT;
+	} else {
+		error = parse_colour_specifier(c, vector, ctx, &colour);
+		if (error != CSS_OK)
+			return CSS_INVALID;
+
+		value = BACKGROUND_COLOR_SET;
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_BACKGROUND_COLOR, flags, value);
+
+	required_size = sizeof(opv);
+	if (value == BACKGROUND_COLOR_SET)
+		required_size += sizeof(colour);
+
+	/* Allocate result */
+	*result = css_stylesheet_style_create(c->sheet, required_size);
+	if (*result == NULL)
+		return CSS_NOMEM;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if (value == BACKGROUND_COLOR_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&colour, sizeof(colour));
+	}
 
 	return CSS_OK;
 }
@@ -462,10 +545,54 @@ css_error parse_background_image(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	uint32_t required_size;
+
+	/* URI | IDENT (none, inherit) */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			token->type != CSS_TOKEN_URI))
+		return CSS_INVALID;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	if (token->type == CSS_TOKEN_IDENT && 
+			token->lower.ptr == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT && 
+			token->lower.ptr == c->strings[NONE]) {
+		value = BACKGROUND_IMAGE_NONE;
+	} else if (token->type == CSS_TOKEN_URI) {
+		value = BACKGROUND_IMAGE_URI;
+	} else
+		return CSS_INVALID;
+
+	opv = buildOPV(OP_BACKGROUND_IMAGE, flags, value);
+
+	required_size = sizeof(opv);
+	if (value == BACKGROUND_IMAGE_URI)
+		required_size += sizeof(uint8_t *) + sizeof(size_t);
+
+	/* Allocate result */
+	*result = css_stylesheet_style_create(c->sheet, required_size);
+	if (*result == NULL)
+		return CSS_NOMEM;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if (value == BACKGROUND_IMAGE_URI) {
+		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
+				&token->data.ptr, sizeof(uint8_t *));
+		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv) + 
+					sizeof(uint8_t *),
+				&token->data.len, sizeof(size_t));
+	}
 
 	return CSS_OK;
 }
@@ -474,6 +601,7 @@ css_error parse_background_position(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	/** \todo background-position */
 	UNUSED(c);
 	UNUSED(vector);
 	UNUSED(ctx);
@@ -486,10 +614,43 @@ css_error parse_background_repeat(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *ident;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+
+	/* IDENT (no-repeat, repeat-x, repeat-y, repeat, inherit) */
+	ident = parserutils_vector_iterate(vector, ctx);
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+		return CSS_INVALID;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	if (ident->lower.ptr == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (ident->lower.ptr == c->strings[NO_REPEAT]) {
+		value = BACKGROUND_REPEAT_NO_REPEAT;
+	} else if (ident->lower.ptr == c->strings[REPEAT_X]) {
+		value = BACKGROUND_REPEAT_REPEAT_X;
+	} else if (ident->lower.ptr == c->strings[REPEAT_Y]) {
+		value = BACKGROUND_REPEAT_REPEAT_Y;
+	} else if (ident->lower.ptr == c->strings[REPEAT]) {
+		value = BACKGROUND_REPEAT_REPEAT;
+	} else
+		return CSS_INVALID;
+
+	opv = buildOPV(OP_BACKGROUND_REPEAT, flags, value);
+
+	/* Allocate result */
+	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
+	if (*result == NULL)
+		return CSS_NOMEM;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
 
 	return CSS_OK;
 }
@@ -690,7 +851,8 @@ css_error parse_clear(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	const css_token *token, *ident;
+	css_error error;
+	const css_token *ident;
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
@@ -700,41 +862,19 @@ css_error parse_clear(css_css21 *c,
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
 
-	/** \todo break this !important stuff into a utility function */
-	consumeWhitespace(vector, ctx);
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
 
-	token = parserutils_vector_iterate(vector, ctx);
-	if (token != NULL && tokenIsChar(token, '!')) {
-		consumeWhitespace(vector, ctx);
-
-		token = parserutils_vector_iterate(vector, ctx);
-		if (token == NULL || token->type != CSS_TOKEN_IDENT)
-			return CSS_INVALID;
-
-		/** \todo compare pointer to interned version. */
-		if (token->lower.len == 9 &&
-				strncmp((char *) token->lower.ptr, 
-					"important", 9) == 0)
-			flags |= FLAG_IMPORTANT;
-	} else if (token != NULL)
-		return CSS_INVALID;
-
-
-	/** \todo ugh. compare pointers to interned versions, already */
-	if (ident->lower.len == 7 &&
-			strncmp((char *) ident->lower.ptr, "inherit", 7) == 0) {
+	if (ident->lower.ptr == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.len == 5 && 
-			strncmp((char *) ident->lower.ptr, "right", 5) == 0) {
+	} else if (ident->lower.ptr == c->strings[RIGHT]) {
 		value = CLEAR_RIGHT;
-	} else if (ident->lower.len == 4 &&
-			strncmp((char *) ident->lower.ptr, "left", 4) == 0) {
+	} else if (ident->lower.ptr == c->strings[LEFT]) {
 		value = CLEAR_LEFT;
-	} else if (ident->lower.len == 4 &&
-			strncmp((char *) ident->lower.ptr, "both", 4) == 0) {
+	} else if (ident->lower.ptr == c->strings[BOTH]) {
 		value = CLEAR_BOTH;
-	} else if (ident->lower.len == 4 &&
-			strncmp((char *) ident->lower.ptr, "none", 4) == 0) {
+	} else if (ident->lower.ptr == c->strings[NONE]) {
 		value = CLEAR_NONE;
 	} else
 		return CSS_INVALID;
@@ -1660,6 +1800,50 @@ css_error parse_z_index(css_css21 *c,
 	UNUSED(vector);
 	UNUSED(ctx);
 	UNUSED(result);
+
+	return CSS_OK;
+}
+
+css_error parse_important(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		uint8_t *result)
+{
+	const css_token *token;
+
+	consumeWhitespace(vector, ctx);
+
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token != NULL && tokenIsChar(token, '!')) {
+		consumeWhitespace(vector, ctx);
+
+		token = parserutils_vector_iterate(vector, ctx);
+		if (token == NULL || token->type != CSS_TOKEN_IDENT)
+			return CSS_INVALID;
+
+		if (token->lower.ptr == c->strings[IMPORTANT])
+			*result |= FLAG_IMPORTANT;
+	} else if (token != NULL)
+		return CSS_INVALID;
+
+	return CSS_OK;
+}
+
+css_error parse_colour_specifier(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		uint32_t *result)
+{
+	const css_token *token;
+
+	UNUSED(c);
+	UNUSED(result);
+
+	/** \todo Parse colours */
+
+	/* For now, consume everything up to the end of the declaration or !, 
+ 	 * whichever comes first */
+	while ((token = parserutils_vector_peek(vector, *ctx)) != NULL &&
+			tokenIsChar(token, '!') == false)
+		parserutils_vector_iterate(vector, ctx);
 
 	return CSS_OK;
 }

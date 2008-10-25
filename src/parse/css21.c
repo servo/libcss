@@ -19,8 +19,10 @@
 #include "utils/utils.h"
 
 enum {
+	/* At-rules */
 	CHARSET, IMPORT, MEDIA, PAGE,
 
+	/* Properties */
 	FIRST_PROP,
 
 	AZIMUTH = FIRST_PROP, BACKGROUND_ATTACHMENT, BACKGROUND_COLOR, 
@@ -45,13 +47,20 @@ enum {
 	TOP, UNICODE_BIDI, VERTICAL_ALIGN, VISIBILITY, VOICE_FAMILY, VOLUME, 
 	WHITE_SPACE, WIDOWS, WIDTH, WORD_SPACING, Z_INDEX,
 
+	LAST_PROP = Z_INDEX,
+
+	/* Other keywords */
+	INHERIT, IMPORTANT, NONE, BOTH, FIXED, SCROLL, TRANSPARENT,
+	NO_REPEAT, REPEAT_X, REPEAT_Y, REPEAT,
+
 	LAST_KNOWN
 };
 
+/* Must be synchronised with above enum */
 static struct {
 	const char *ptr;
 	size_t len;
-} stringmap[] = {
+} stringmap[LAST_KNOWN] = {
 	{ "charset", SLEN("charset") },
 	{ "import", SLEN("import") },
 	{ "media", SLEN("media") },
@@ -155,7 +164,19 @@ static struct {
 	{ "widows", SLEN("widows") },
 	{ "width", SLEN("width") },
 	{ "word-spacing", SLEN("word-spacing") },
-	{ "z-index", SLEN("z-index") }
+	{ "z-index", SLEN("z-index") },
+
+	{ "inherit", SLEN("inherit") },
+	{ "important", SLEN("important") },
+	{ "none", SLEN("none") },
+	{ "both", SLEN("both") },
+	{ "fixed", SLEN("fixed") },
+	{ "scroll", SLEN("scroll") },
+	{ "transparent", SLEN("transparent") },
+	{ "no-repeat", SLEN("no-repeat") },
+	{ "repeat-x", SLEN("repeat-x") },
+	{ "repeat-y", SLEN("repeat-y") },
+	{ "repeat", SLEN("repeat") },
 };
 
 typedef struct context_entry {
@@ -1071,11 +1092,11 @@ css_error parseProperty(css_css21 *c, const css_token *property,
 
 	/* Find property index */
 	/** \todo improve on this linear search */
-	for (i = FIRST_PROP; i < LAST_KNOWN; i++) {
+	for (i = FIRST_PROP; i <= LAST_PROP; i++) {
 		if (property->lower.ptr == c->strings[i])
 			break;
 	}
-	if (i == LAST_KNOWN)
+	if (i == LAST_PROP + 1)
 		return CSS_INVALID;
 
 	/* Get handler */

@@ -8,6 +8,7 @@
 #include <string.h>
 
 #include "stylesheet.h"
+#include "bytecode/bytecode.h"
 #include "parse/css21.h"
 #include "utils/utils.h"
 
@@ -158,6 +159,13 @@ css_error css_stylesheet_data_done(css_stylesheet *sheet)
 		return CSS_BADPARM;
 
 	return css_parser_completed(sheet->parser);
+
+	/** \todo We can destroy the parser here as it won't be needed
+	 * Note, however, that, if we do so, then the dictionary of
+	 * strings created by the parser *must* be preserved (and, ideally,
+	 * created by us in the first place) because our stylesheet 
+	 * datastructures contain pointers to strings stored in this
+	 * dictionary. */
 }
 
 /**
@@ -531,6 +539,9 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 		if (temp == NULL)
 			return CSS_NOMEM;
 
+		/* Ensure bytecode pointer is correct */
+		temp->bytecode = ((uint8_t *) temp + sizeof(css_style));
+
 		/** \todo Can we optimise the bytecode here? */
 		memcpy((uint8_t *) temp->bytecode + temp->length, 
 				style->bytecode, style->length);
@@ -666,6 +677,12 @@ void css_stylesheet_dump_rule(css_rule *rule, FILE *target)
 			if (i != rule->data.selector.selector_count - 1)
 				fprintf(target, ", ");
 		}
+		fprintf(target, " { ");
+		if (rule->data.selector.style != NULL) {
+			css_bytecode_dump(rule->data.selector.style->bytecode,
+				rule->data.selector.style->length, target);
+		}
+		fprintf(target, "}");
 		break;
 	case CSS_RULE_CHARSET:
 	case CSS_RULE_IMPORT:
