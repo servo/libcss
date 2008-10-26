@@ -315,7 +315,17 @@ static inline css_error parse_important(css_css21 *c,
 static inline css_error parse_colour_specifier(css_css21 *c,
 		const parserutils_vector *vector, int *ctx,
 		uint32_t *result);
+static inline css_error parse_length_specifier(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		uint32_t *length, uint32_t *unit);
+
 static inline css_error parse_border_side_color(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t side, css_style **result);
+static inline css_error parse_border_side_style(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t side, css_style **result);
+static inline css_error parse_border_side_width(css_css21 *c,
 		const parserutils_vector *vector, int *ctx,
 		uint16_t side, css_style **result);
 
@@ -669,24 +679,14 @@ css_error parse_border_bottom_style(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
-
-	return CSS_OK;
+	return parse_border_side_style(c, vector, ctx, SIDE_BOTTOM, result);
 }
 
 css_error parse_border_bottom_width(css_css21 *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
-
-	return CSS_OK;
+	return parse_border_side_width(c, vector, ctx, SIDE_BOTTOM, result);
 }
 
 css_error parse_border_collapse(css_css21 *c, 
@@ -712,24 +712,14 @@ css_error parse_border_left_style(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
-
-	return CSS_OK;
+	return parse_border_side_style(c, vector, ctx, SIDE_LEFT, result);
 }
 
 css_error parse_border_left_width(css_css21 *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
-
-	return CSS_OK;
+	return parse_border_side_width(c, vector, ctx, SIDE_LEFT, result);
 }
 
 css_error parse_border_right_color(css_css21 *c, 
@@ -743,24 +733,14 @@ css_error parse_border_right_style(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
-
-	return CSS_OK;
+	return parse_border_side_style(c, vector, ctx, SIDE_RIGHT, result);
 }
 
 css_error parse_border_right_width(css_css21 *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
-
-	return CSS_OK;
+	return parse_border_side_width(c, vector, ctx, SIDE_RIGHT, result);
 }
 
 css_error parse_border_spacing(css_css21 *c, 
@@ -786,24 +766,14 @@ css_error parse_border_top_style(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
-
-	return CSS_OK;
+	return parse_border_side_style(c, vector, ctx, SIDE_TOP, result);
 }
 
 css_error parse_border_top_width(css_css21 *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
-
-	return CSS_OK;
+	return parse_border_side_width(c, vector, ctx, SIDE_TOP, result);
 }
 
 css_error parse_bottom(css_css21 *c, 
@@ -1831,6 +1801,27 @@ css_error parse_colour_specifier(css_css21 *c,
 	return CSS_OK;
 }
 
+css_error parse_length_specifier(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		uint32_t *length, uint32_t *unit)
+{
+	const css_token *token;
+
+	UNUSED(c);
+	UNUSED(length);
+	UNUSED(unit);
+
+	/** \todo Parse lengths */
+
+	/* For now, consume everything up to the end of the declaration or !, 
+ 	 * whichever comes first */
+	while ((token = parserutils_vector_peek(vector, *ctx)) != NULL &&
+			tokenIsChar(token, '!') == false)
+		parserutils_vector_iterate(vector, ctx);
+
+	return CSS_OK;
+}
+
 css_error parse_border_side_color(css_css21 *c,
 		const parserutils_vector *vector, int *ctx,
 		uint16_t side, css_style **result)
@@ -1889,6 +1880,138 @@ css_error parse_border_side_color(css_css21 *c,
 	}
 
 	return CSS_OK;
+}
+
+css_error parse_border_side_style(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t side, css_style **result)
+{
+	css_error error;
+	const css_token *ident;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+
+	/* IDENT (none, hidden, dotted, dashed, solid, double, groove, 
+	 * ridge, inset, outset, inherit) */
+	ident = parserutils_vector_iterate(vector, ctx);
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+		return CSS_INVALID;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	if (ident->lower.ptr == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (ident->lower.ptr == c->strings[NONE]) {
+		value = BORDER_STYLE_NONE;
+	} else if (ident->lower.ptr == c->strings[HIDDEN]) {
+		value = BORDER_STYLE_HIDDEN;
+	} else if (ident->lower.ptr == c->strings[DOTTED]) {
+		value = BORDER_STYLE_DOTTED;
+	} else if (ident->lower.ptr == c->strings[DASHED]) {
+		value = BORDER_STYLE_DASHED;
+	} else if (ident->lower.ptr == c->strings[SOLID]) {
+		value = BORDER_STYLE_SOLID;
+	} else if (ident->lower.ptr == c->strings[DOUBLE]) {
+		value = BORDER_STYLE_DOUBLE;
+	} else if (ident->lower.ptr == c->strings[GROOVE]) {
+		value = BORDER_STYLE_GROOVE;
+	} else if (ident->lower.ptr == c->strings[RIDGE]) {
+		value = BORDER_STYLE_RIDGE;
+	} else if (ident->lower.ptr == c->strings[INSET]) {
+		value = BORDER_STYLE_INSET;
+	} else if (ident->lower.ptr == c->strings[OUTSET]) {
+		value = BORDER_STYLE_OUTSET;
+	} else
+		return CSS_INVALID;
+
+	value |= side;
+
+	opv = buildOPV(OP_BORDER_TRBL_STYLE, flags, value);
+
+	/* Allocate result */
+	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
+	if (*result == NULL)
+		return CSS_NOMEM;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+
+	return CSS_OK;
+}
+
+css_error parse_border_side_width(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t side, css_style **result)
+{
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	uint32_t length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+
+	/* length | IDENT(thin, medium, thick, inherit) */
+	token= parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT && 
+			token->lower.ptr == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags |= FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[THIN]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = BORDER_WIDTH_THIN;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[MEDIUM]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = BORDER_WIDTH_MEDIUM;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[THICK]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = BORDER_WIDTH_THICK;
+	} else {
+		error = parse_length_specifier(c, vector, ctx, &length, &unit);
+		if (error != CSS_OK)
+			return CSS_INVALID;
+
+		value = BORDER_WIDTH_SET;
+	}
+
+	value |= side;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_BORDER_TRBL_WIDTH, flags, value);
+
+	required_size = sizeof(opv);
+	if (value == BORDER_WIDTH_SET)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	*result = css_stylesheet_style_create(c->sheet, required_size);
+	if (*result == NULL)
+		return CSS_NOMEM;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if (value == BORDER_WIDTH_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
+	}
+
+	return CSS_OK;
+
 }
 
 #endif

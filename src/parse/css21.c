@@ -51,7 +51,8 @@ enum {
 
 	/* Other keywords */
 	INHERIT, IMPORTANT, NONE, BOTH, FIXED, SCROLL, TRANSPARENT,
-	NO_REPEAT, REPEAT_X, REPEAT_Y, REPEAT,
+	NO_REPEAT, REPEAT_X, REPEAT_Y, REPEAT, HIDDEN, DOTTED, DASHED,
+	SOLID, DOUBLE, GROOVE, RIDGE, INSET, OUTSET, THIN, MEDIUM, THICK,
 
 	LAST_KNOWN
 };
@@ -177,6 +178,18 @@ static struct {
 	{ "repeat-x", SLEN("repeat-x") },
 	{ "repeat-y", SLEN("repeat-y") },
 	{ "repeat", SLEN("repeat") },
+	{ "hidden", SLEN("hidden") },
+	{ "dotted", SLEN("dotted") },
+	{ "dashed", SLEN("dashed") },
+	{ "solid", SLEN("solid") },
+	{ "double", SLEN("double") },
+	{ "groove", SLEN("groove") },
+	{ "ridge", SLEN("ridge") },
+	{ "inset", SLEN("inset") },
+	{ "outset", SLEN("outset") },
+	{ "thin", SLEN("thin") },
+	{ "medium", SLEN("medium") },
+	{ "thick", SLEN("thick") },
 };
 
 typedef struct context_entry {
