@@ -1304,10 +1304,78 @@ css_error parse_elevation(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	uint32_t length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+
+	/* angle | IDENT(below, level, above, higher, lower, inherit) */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[BELOW]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = ELEVATION_BELOW;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[LEVEL]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = ELEVATION_LEVEL;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[ABOVE]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = ELEVATION_ABOVE;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[HIGHER]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = ELEVATION_HIGHER;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[LOWER]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = ELEVATION_LOWER;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		if (error != CSS_OK)
+			return error;
+
+		if ((unit & UNIT_ANGLE) == false)
+			return CSS_INVALID;
+
+		value = ELEVATION_ANGLE;
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_ELEVATION, flags, value);
+
+	required_size = sizeof(opv);
+	if (value == ELEVATION_ANGLE)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	*result = css_stylesheet_style_create(c->sheet, required_size);
+	if (*result == NULL)
+		return CSS_NOMEM;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if (value == ELEVATION_ANGLE) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
+	}
 
 	return CSS_OK;
 }
