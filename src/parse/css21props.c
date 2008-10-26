@@ -1468,6 +1468,8 @@ css_error parse_font_family(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	/** \todo font-family */
+
 	UNUSED(c);
 	UNUSED(vector);
 	UNUSED(ctx);
@@ -1480,10 +1482,95 @@ css_error parse_font_size(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	uint32_t length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+
+	/* length | percentage | IDENT(xx-small, x-small, small, medium,
+	 * large, x-large, xx-large, larger, smaller, inherit) */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[XX_SMALL]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = FONT_SIZE_XX_SMALL;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[X_SMALL]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = FONT_SIZE_X_SMALL;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[SMALL]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = FONT_SIZE_SMALL;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[MEDIUM]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = FONT_SIZE_MEDIUM;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[LARGE]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = FONT_SIZE_LARGE;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[X_LARGE]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = FONT_SIZE_X_LARGE;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[XX_LARGE]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = FONT_SIZE_XX_LARGE;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[LARGER]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = FONT_SIZE_LARGER;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[SMALLER]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = FONT_SIZE_SMALLER;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		if (error != CSS_OK)
+			return error;
+
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+			return CSS_INVALID;
+
+		value = FONT_SIZE_DIMENSION;
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_FONT_SIZE, flags, value);
+
+	required_size = sizeof(opv);
+	if (value == FONT_SIZE_DIMENSION)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	*result = css_stylesheet_style_create(c->sheet, required_size);
+	if (*result == NULL)
+		return CSS_NOMEM;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if (value == FONT_SIZE_DIMENSION) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
+	}
 
 	return CSS_OK;
 }

@@ -57,7 +57,8 @@ enum {
 	INLINE_BLOCK, TABLE, INLINE_TABLE, TABLE_ROW_GROUP, TABLE_HEADER_GROUP,
 	TABLE_FOOTER_GROUP, TABLE_ROW, TABLE_COLUMN_GROUP, TABLE_COLUMN,
 	TABLE_CELL, TABLE_CAPTION, BELOW, LEVEL, ABOVE, HIGHER, LOWER,
-	SHOW, HIDE,
+	SHOW, HIDE, XX_SMALL, X_SMALL, SMALL, LARGE, X_LARGE, XX_LARGE,
+	LARGER, SMALLER,
 
 	LAST_KNOWN
 };
@@ -222,6 +223,14 @@ static struct {
 	{ "lower", SLEN("lower") },
 	{ "show", SLEN("show") },
 	{ "hide", SLEN("hide") },
+	{ "xx-small", SLEN("xx-small") },
+	{ "x-small", SLEN("x-small") },
+	{ "small", SLEN("small") },
+	{ "large", SLEN("large") },
+	{ "x-large", SLEN("x-large") },
+	{ "xx-large", SLEN("xx-large") },
+	{ "larger", SLEN("larger") },
+	{ "smaller", SLEN("smaller") },
 };
 
 typedef struct context_entry {
