@@ -53,6 +53,7 @@ enum {
 	INHERIT, IMPORTANT, NONE, BOTH, FIXED, SCROLL, TRANSPARENT,
 	NO_REPEAT, REPEAT_X, REPEAT_Y, REPEAT, HIDDEN, DOTTED, DASHED,
 	SOLID, DOUBLE, GROOVE, RIDGE, INSET, OUTSET, THIN, MEDIUM, THICK,
+	COLLAPSE, SEPARATE, AUTO,
 
 	LAST_KNOWN
 };
@@ -190,6 +191,9 @@ static struct {
 	{ "thin", SLEN("thin") },
 	{ "medium", SLEN("medium") },
 	{ "thick", SLEN("thick") },
+	{ "collapse", SLEN("collapse") },
+	{ "separate", SLEN("separate") },
+	{ "auto", SLEN("auto") },
 };
 
 typedef struct context_entry {

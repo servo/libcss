@@ -117,13 +117,16 @@ typedef enum unit {
 
 	UNIT_PCT  = (1 << 8),
 
+	UNIT_ANGLE = (1 << 9),
 	UNIT_DEG  = (1 << 9) + 0,
 	UNIT_GRAD = (1 << 9) + 1,
 	UNIT_RAD  = (1 << 9) + 2,
 
+	UNIT_TIME = (1 << 10),
 	UNIT_MS   = (1 << 10) + 0,
 	UNIT_S    = (1 << 10) + 1,
 
+	UNIT_FREQ = (1 << 11),
 	UNIT_HZ   = (1 << 11) + 0,
 	UNIT_KHZ  = (1 << 11) + 1
 } unit;
