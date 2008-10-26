@@ -1178,6 +1178,7 @@ css_error parse_cursor(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	/** \todo cursor */
 	UNUSED(c);
 	UNUSED(vector);
 	UNUSED(ctx);
@@ -1190,10 +1191,39 @@ css_error parse_direction(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *ident;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+
+	/* IDENT (ltr, rtl, inherit) */
+	ident = parserutils_vector_iterate(vector, ctx);
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+		return CSS_INVALID;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	if (ident->lower.ptr == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (ident->lower.ptr == c->strings[LTR]) {
+		value = DIRECTION_LTR;
+	} else if (ident->lower.ptr == c->strings[RTL]) {
+		value = DIRECTION_RTL;
+	} else
+		return CSS_INVALID;
+
+	opv = buildOPV(OP_DIRECTION, flags, value);
+
+	/* Allocate result */
+	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
+	if (*result == NULL)
+		return CSS_NOMEM;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
 
 	return CSS_OK;
 }
@@ -1202,10 +1232,70 @@ css_error parse_display(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *ident;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+
+	/* IDENT (inline, block, list-item, run-in, inline-block, table,
+	 * inline-table, table-row-group, table-header-group, 
+	 * table-footer-group, table-row, table-column-group, table-column,
+	 * table-cell, table-caption, none, inherit) */
+	ident = parserutils_vector_iterate(vector, ctx);
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+		return CSS_INVALID;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	if (ident->lower.ptr == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (ident->lower.ptr == c->strings[INLINE]) {
+		value = DISPLAY_INLINE;
+	} else if (ident->lower.ptr == c->strings[BLOCK]) {
+		value = DISPLAY_BLOCK;
+	} else if (ident->lower.ptr == c->strings[LIST_ITEM]) {
+		value = DISPLAY_LIST_ITEM;
+	} else if (ident->lower.ptr == c->strings[RUN_IN]) {
+		value = DISPLAY_RUN_IN;
+	} else if (ident->lower.ptr == c->strings[INLINE_BLOCK]) {
+		value = DISPLAY_INLINE_BLOCK;
+	} else if (ident->lower.ptr == c->strings[TABLE]) {
+		value = DISPLAY_TABLE;
+	} else if (ident->lower.ptr == c->strings[INLINE_TABLE]) {
+		value = DISPLAY_INLINE_TABLE;
+	} else if (ident->lower.ptr == c->strings[TABLE_ROW_GROUP]) {
+		value = DISPLAY_TABLE_ROW_GROUP;
+	} else if (ident->lower.ptr == c->strings[TABLE_HEADER_GROUP]) {
+		value = DISPLAY_TABLE_HEADER_GROUP;
+	} else if (ident->lower.ptr == c->strings[TABLE_FOOTER_GROUP]) {
+		value = DISPLAY_TABLE_FOOTER_GROUP;
+	} else if (ident->lower.ptr == c->strings[TABLE_ROW]) {
+		value = DISPLAY_TABLE_ROW;
+	} else if (ident->lower.ptr == c->strings[TABLE_COLUMN_GROUP]) {
+		value = DISPLAY_TABLE_COLUMN_GROUP;
+	} else if (ident->lower.ptr == c->strings[TABLE_COLUMN]) {
+		value = DISPLAY_TABLE_COLUMN;
+	} else if (ident->lower.ptr == c->strings[TABLE_CELL]) {
+		value = DISPLAY_TABLE_CELL;
+	} else if (ident->lower.ptr == c->strings[TABLE_CAPTION]) {
+		value = DISPLAY_TABLE_CAPTION;
+	} else if (ident->lower.ptr == c->strings[NONE]) {
+		value = DISPLAY_NONE;
+	} else
+		return CSS_INVALID;
+
+	opv = buildOPV(OP_DISPLAY, flags, value);
+
+	/* Allocate result */
+	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
+	if (*result == NULL)
+		return CSS_NOMEM;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
 
 	return CSS_OK;
 }

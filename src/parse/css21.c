@@ -53,7 +53,10 @@ enum {
 	INHERIT, IMPORTANT, NONE, BOTH, FIXED, SCROLL, TRANSPARENT,
 	NO_REPEAT, REPEAT_X, REPEAT_Y, REPEAT, HIDDEN, DOTTED, DASHED,
 	SOLID, DOUBLE, GROOVE, RIDGE, INSET, OUTSET, THIN, MEDIUM, THICK,
-	COLLAPSE, SEPARATE, AUTO,
+	COLLAPSE, SEPARATE, AUTO, LTR, RTL, INLINE, BLOCK, LIST_ITEM, RUN_IN,
+	INLINE_BLOCK, TABLE, INLINE_TABLE, TABLE_ROW_GROUP, TABLE_HEADER_GROUP,
+	TABLE_FOOTER_GROUP, TABLE_ROW, TABLE_COLUMN_GROUP, TABLE_COLUMN,
+	TABLE_CELL, TABLE_CAPTION,
 
 	LAST_KNOWN
 };
@@ -194,6 +197,23 @@ static struct {
 	{ "collapse", SLEN("collapse") },
 	{ "separate", SLEN("separate") },
 	{ "auto", SLEN("auto") },
+	{ "ltr", SLEN("ltr") },
+	{ "rtl", SLEN("rtl") },
+	{ "inline", SLEN("inline") },
+	{ "block", SLEN("block") },
+	{ "list-item", SLEN("list-item") },
+	{ "run-in", SLEN("run-in") },
+	{ "inline-block", SLEN("inline-block") },
+	{ "table", SLEN("table") },
+	{ "inline-table", SLEN("inline-table") },
+	{ "table-row-group", SLEN("table-row-group") },
+	{ "table-header-group", SLEN("table-header-group") },
+	{ "table-footer-group", SLEN("table-footer-group") },
+	{ "table-row", SLEN("table-row") },
+	{ "table-column-group", SLEN("table-column-group") },
+	{ "table-column", SLEN("table-column") },
+	{ "table-cell", SLEN("table-cell") },
+	{ "table-caption", SLEN("table-caption") },
 };
 
 typedef struct context_entry {
