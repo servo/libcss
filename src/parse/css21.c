@@ -58,7 +58,8 @@ enum {
 	TABLE_FOOTER_GROUP, TABLE_ROW, TABLE_COLUMN_GROUP, TABLE_COLUMN,
 	TABLE_CELL, TABLE_CAPTION, BELOW, LEVEL, ABOVE, HIGHER, LOWER,
 	SHOW, HIDE, XX_SMALL, X_SMALL, SMALL, LARGE, X_LARGE, XX_LARGE,
-	LARGER, SMALLER, NORMAL, ITALIC, OBLIQUE,
+	LARGER, SMALLER, NORMAL, ITALIC, OBLIQUE, SMALL_CAPS, BOLD, BOLDER,
+	LIGHTER,
 
 	LAST_KNOWN
 };
@@ -234,6 +235,10 @@ static struct {
 	{ "normal", SLEN("normal") },
 	{ "italic", SLEN("italic") },
 	{ "oblique", SLEN("oblique") },
+	{ "small-caps", SLEN("small-caps") },
+	{ "bold", SLEN("bold") },
+	{ "bolder", SLEN("bolder") },
+	{ "lighter", SLEN("lighter") },
 };
 
 typedef struct context_entry {

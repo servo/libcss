@@ -1622,10 +1622,39 @@ css_error parse_font_variant(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *ident;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+
+	/* IDENT (normal, small-caps, inherit) */
+	ident = parserutils_vector_iterate(vector, ctx);
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+		return CSS_INVALID;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	if (ident->lower.ptr == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (ident->lower.ptr == c->strings[NORMAL]) {
+		value = FONT_VARIANT_NORMAL;
+	} else if (ident->lower.ptr == c->strings[SMALL_CAPS]) {
+		value = FONT_VARIANT_SMALL_CAPS;
+	} else
+		return CSS_INVALID;
+
+	opv = buildOPV(OP_FONT_VARIANT, flags, value);
+
+	/* Allocate result */
+	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
+	if (*result == NULL)
+		return CSS_NOMEM;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
 
 	return CSS_OK;
 }
@@ -1634,10 +1663,59 @@ css_error parse_font_weight(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+
+	/* NUMBER (100, 200, 300, 400, 500, 600, 700, 800, 900) | 
+	 * IDENT (normal, bold, bolder, lighter, inherit) */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			token->type != CSS_TOKEN_NUMBER))
+		return CSS_INVALID;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	if (token->lower.ptr == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_NUMBER) {
+		int32_t num = 100; /** \todo strntol */
+		switch (num) {
+		case 100: value = FONT_WEIGHT_100; break;
+		case 200: value = FONT_WEIGHT_200; break;
+		case 300: value = FONT_WEIGHT_300; break;
+		case 400: value = FONT_WEIGHT_400; break;
+		case 500: value = FONT_WEIGHT_500; break;
+		case 600: value = FONT_WEIGHT_600; break;
+		case 700: value = FONT_WEIGHT_700; break;
+		case 800: value = FONT_WEIGHT_800; break;
+		case 900: value = FONT_WEIGHT_900; break;
+		default: return CSS_INVALID;
+		}
+	} else if (token->lower.ptr == c->strings[NORMAL]) {
+		value = FONT_WEIGHT_NORMAL;
+	} else if (token->lower.ptr == c->strings[BOLD]) {
+		value = FONT_WEIGHT_BOLD;
+	} else if (token->lower.ptr == c->strings[BOLDER]) {
+		value = FONT_WEIGHT_BOLDER;
+	} else if (token->lower.ptr == c->strings[LIGHTER]) {
+		value = FONT_WEIGHT_LIGHTER;
+	} else
+		return CSS_INVALID;
+
+	opv = buildOPV(OP_FONT_WEIGHT, flags, value);
+
+	/* Allocate result */
+	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
+	if (*result == NULL)
+		return CSS_NOMEM;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
 
 	return CSS_OK;
 }
