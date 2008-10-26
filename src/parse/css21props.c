@@ -1683,7 +1683,7 @@ css_error parse_font_weight(css_css21 *c,
 	if (token->lower.ptr == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
-		int32_t num = 100; /** \todo strntol */
+		int32_t num = integer_from_css_string(&token->lower);
 		switch (num) {
 		case 100: value = FONT_WEIGHT_100; break;
 		case 200: value = FONT_WEIGHT_200; break;
