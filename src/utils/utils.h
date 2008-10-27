@@ -55,7 +55,7 @@ static inline int32_t integer_from_css_string(const css_string *string)
 	/* Now extract value, assuming base 10 */
 	while (len > 0) {
 		/* Stop on first non-digit */
-		if (ptr[0] <= '0' || '9' <= ptr[0])
+		if (ptr[0] < '0' || '9' < ptr[0])
 			break;
 
 		val *= 10;
