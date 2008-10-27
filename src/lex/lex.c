@@ -130,7 +130,7 @@ static inline css_error emitToken(css_lexer *lexer, css_token_type type,
 		css_token **token);
 
 static inline css_error AtKeyword(css_lexer *lexer, css_token **token);
-static inline css_error CDCOrIdentOrFunction(css_lexer *lexer,
+static inline css_error CDCOrIdentOrFunctionOrNPD(css_lexer *lexer,
 		css_token **token);
 static inline css_error CDO(css_lexer *lexer, css_token **token);
 static inline css_error Comment(css_lexer *lexer, css_token **token);
@@ -285,7 +285,7 @@ css_error css_lexer_get_token(css_lexer *lexer, css_token **token)
 	case sCDO:
 		return CDO(lexer, token);
 	case sCDC:
-		return CDCOrIdentOrFunction(lexer, token);
+		return CDCOrIdentOrFunctionOrNPD(lexer, token);
 	case sS:
 		return S(lexer, token);
 	case sCOMMENT:
@@ -541,7 +541,7 @@ css_error AtKeyword(css_lexer *lexer, css_token **token)
 	return emitToken(lexer, CSS_TOKEN_ATKEYWORD, token);
 }
 
-css_error CDCOrIdentOrFunction(css_lexer *lexer, css_token **token)
+css_error CDCOrIdentOrFunctionOrNPD(css_lexer *lexer, css_token **token)
 {
 	css_token *t = &lexer->token;
 	uintptr_t cptr;
@@ -553,10 +553,14 @@ css_error CDCOrIdentOrFunction(css_lexer *lexer, css_token **token)
 	/* CDC = "-->"
 	 * IDENT = [-]? nmstart nmchar*
 	 * FUNCTION = [-]? nmstart nmchar* '('
+	 * NUMBER = num = [-+]? ([0-9]+ | [0-9]* '.' [0-9]+)
+	 * PERCENTAGE = num '%'
+	 * DIMENSION = num ident
 	 *
 	 * The first dash has been consumed. Thus, we must consume the next 
 	 * character in the stream. If it's a dash, then we're dealing with 
-	 * CDC. Otherwise, we're dealing with IDENT/FUNCTION.
+	 * CDC. If it's a digit or dot, then we're dealing with NPD. 
+	 * Otherwise, we're dealing with IDENT/FUNCTION.
 	 */
 
 	switch (lexer->substate) {
@@ -572,6 +576,16 @@ css_error CDCOrIdentOrFunction(css_lexer *lexer, css_token **token)
 		}
 
 		c = *((uint8_t *) cptr);
+
+		if (isDigit(c) || c == '.') {
+			/* NPD */
+			APPEND(lexer, cptr, clen);
+			lexer->state = sNUMBER;
+			lexer->substate = 0;
+			/* Abuse "first" to store first non-sign character */
+			lexer->context.first = c;
+			return NumberOrPercentageOrDimension(lexer, token);
+		}
 
 		if (c != '-' && !startNMStart(c)) {
 			/* Can only be CHAR */
@@ -975,11 +989,12 @@ css_error NumberOrPercentageOrDimension(css_lexer *lexer, css_token **token)
 	enum { Initial = 0, Dot = 1, MoreDigits = 2, 
 		Suffix = 3, NMChars = 4, Escape = 5 };
 
-	/* NUMBER = num = [0-9]+ | [0-9]* '.' [0-9]+
+	/* NUMBER = num = [-+]? ([0-9]+ | [0-9]* '.' [0-9]+)
 	 * PERCENTAGE = num '%'
 	 * DIMENSION = num ident
 	 *
-	 * The first digit, or '.' has been consumed.
+	 * The sign, or sign and first digit or dot, 
+	 * or first digit, or '.' has been consumed.
 	 */
 
 	switch (lexer->substate) {
@@ -998,7 +1013,8 @@ css_error NumberOrPercentageOrDimension(css_lexer *lexer, css_token **token)
 			return CSS_NEEDDATA;
 
 		if (cptr == PARSERUTILS_INPUTSTREAM_EOF) {
-			if (t->data.len == 1 && lexer->context.first == '.')
+			if (t->data.len == 1 && (lexer->context.first == '.' ||
+					lexer->context.first == '+'))
 				return emitToken(lexer, CSS_TOKEN_CHAR, token);
 			else
 				return emitToken(lexer, CSS_TOKEN_NUMBER, 
@@ -1042,7 +1058,8 @@ css_error NumberOrPercentageOrDimension(css_lexer *lexer, css_token **token)
 			return CSS_NEEDDATA;
 
 		if (cptr == PARSERUTILS_INPUTSTREAM_EOF) {
-			if (t->data.len == 1 && lexer->context.first == '.')
+			if (t->data.len == 1 && (lexer->context.first == '.' ||
+					lexer->context.first == '+'))
 				return emitToken(lexer, CSS_TOKEN_CHAR, token);
 			else
 				return emitToken(lexer, CSS_TOKEN_NUMBER, 
@@ -1051,8 +1068,9 @@ css_error NumberOrPercentageOrDimension(css_lexer *lexer, css_token **token)
 
 		c = *((uint8_t *) cptr);
 
-		/* A solitary '.' is a CHAR, not numeric */
-		if (t->data.len == 1 && lexer->context.first == '.')
+		/* A solitary '.' or '+' is a CHAR, not numeric */
+		if (t->data.len == 1 && (lexer->context.first == '.' ||
+				lexer->context.first == '+'))
 			return emitToken(lexer, CSS_TOKEN_CHAR, token);
 
 		if (c == '%') {
@@ -1183,7 +1201,7 @@ start:
 		return Hash(lexer, token);
 	case '0': case '1': case '2': case '3': case '4': 
 	case '5': case '6': case '7': case '8': case '9':
-	case '.':
+	case '.': case '+':
 		lexer->state = sNUMBER;
 		lexer->substate = 0;
 		lexer->context.first = c;
@@ -1195,7 +1213,7 @@ start:
 	case '-':
 		lexer->state = sCDC;
 		lexer->substate = 0;
-		return CDCOrIdentOrFunction(lexer, token);
+		return CDCOrIdentOrFunctionOrNPD(lexer, token);
 	case ' ': case '\t': case '\r': case '\n': case '\f':
 		lexer->state = sS;
 		lexer->substate = 0;
