@@ -12,8 +12,8 @@ ATKEYWORD	'@'
 STRING		'"' | "'"
 INVALID_STRING	'"' | "'"
 HASH		'#'
-NUMBER		[0-9] | '.'
-PERCENTAGE	[0-9] | '.'
+NUMBER		[0-9] | '.' | '-' | '+'
+PERCENTAGE	[0-9] | '.' | '-' | '+'
 DIMENSION	[0-9] | '.'
 URI		[Uu]
 UNICODE-RANGE	[Uu]
