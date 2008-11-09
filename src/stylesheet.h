@@ -153,13 +153,14 @@ struct css_stylesheet {
 	void *pw;				/**< Private word */
 };
 
-css_style *css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len);
-void css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style);
+css_error css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len,
+		css_style **style);
+css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style);
 
-css_selector *css_stylesheet_selector_create(css_stylesheet *sheet,
+css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 		css_selector_type type, const css_string *name, 
-		const css_string *value);
-void css_stylesheet_selector_destroy(css_stylesheet *sheet,
+		const css_string *value, css_selector **selector);
+css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 		css_selector *selector);
 
 css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
@@ -168,8 +169,9 @@ css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
 css_error css_stylesheet_selector_combine(css_stylesheet *sheet,
 		css_combinator type, css_selector *a, css_selector *b);
 
-css_rule *css_stylesheet_rule_create(css_stylesheet *sheet, css_rule_type type);
-void css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule);
+css_error css_stylesheet_rule_create(css_stylesheet *sheet, css_rule_type type,
+		css_rule **rule);
+css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule);
 
 css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet, 
 		css_rule *rule, css_selector *selector);

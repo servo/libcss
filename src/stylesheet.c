@@ -25,24 +25,27 @@
  * \param import_pw        Client private data for import_callback
  * \param alloc            Memory (de)allocation function
  * \param alloc_pw         Client private data for alloc
- * \return Pointer to stylesheet on success, NULL otherwise
+ * \param stylesheet       Pointer to location to receive stylesheet
+ * \return CSS_OK on success,
+ *         CSS_BADPARM on bad parameters,
+ *         CSS_NOMEM on memory exhaustion
  */
-css_stylesheet *css_stylesheet_create(css_language_level level,
+css_error css_stylesheet_create(css_language_level level,
 		const char *charset, const char *url, const char *title,
 		css_origin origin, uint32_t media,
 		css_import_handler import_callback, void *import_pw,
-		css_alloc alloc, void *alloc_pw)
+		css_alloc alloc, void *alloc_pw, css_stylesheet **stylesheet)
 {
 	css_error error;
 	css_stylesheet *sheet;
 	size_t len;
 
-	if (url == NULL || alloc == NULL)
-		return NULL;
+	if (url == NULL || alloc == NULL || stylesheet == NULL)
+		return CSS_BADPARM;
 
 	sheet = alloc(NULL, sizeof(css_stylesheet), alloc_pw);
 	if (sheet == NULL)
-		return NULL;
+		return CSS_NOMEM;
 
 	memset(sheet, 0, sizeof(css_stylesheet));
 
@@ -51,14 +54,14 @@ css_stylesheet *css_stylesheet_create(css_language_level level,
 			alloc, alloc_pw, &sheet->parser);
 	if (error != CSS_OK) {
 		alloc(sheet, 0, alloc_pw);
-		return NULL;
+		return error;
 	}
 
 	/* We only support CSS 2.1 */
 	if (level != CSS_LEVEL_21) {
 		css_parser_destroy(sheet->parser);
 		alloc(sheet, 0, alloc_pw);
-		return NULL;
+		return CSS_INVALID; /** \todo better error */
 	}
 
 	sheet->level = level;
@@ -67,7 +70,7 @@ css_stylesheet *css_stylesheet_create(css_language_level level,
 	if (error != CSS_OK) {
 		css_parser_destroy(sheet->parser);
 		alloc(sheet, 0, alloc_pw);
-		return NULL;
+		return error;
 	}
 
 	/** \todo create selector hash */
@@ -78,7 +81,7 @@ css_stylesheet *css_stylesheet_create(css_language_level level,
 		css_css21_destroy(sheet->parser_frontend);
 		css_parser_destroy(sheet->parser);
 		alloc(sheet, 0, alloc_pw);
-		return NULL;
+		return CSS_NOMEM;
 	}
 	memcpy(sheet->url, url, len);
 
@@ -90,7 +93,7 @@ css_stylesheet *css_stylesheet_create(css_language_level level,
 			css_parser_destroy(sheet->parser);
 			alloc(sheet->url, 0, alloc_pw);
 			alloc(sheet, 0, alloc_pw);
-			return NULL;
+			return CSS_NOMEM;
 		}
 		memcpy(sheet->title, title, len);
 	}
@@ -104,18 +107,21 @@ css_stylesheet *css_stylesheet_create(css_language_level level,
 	sheet->alloc = alloc;
 	sheet->pw = alloc_pw;
 
-	return sheet;
+	*stylesheet = sheet;
+
+	return CSS_OK;
 }
 
 /**
  * Destroy a stylesheet
  *
  * \param sheet  The stylesheet to destroy
+ * \return CSS_OK on success, appropriate error otherwise
  */
-void css_stylesheet_destroy(css_stylesheet *sheet)
+css_error css_stylesheet_destroy(css_stylesheet *sheet)
 {
 	if (sheet == NULL)
-		return;
+		return CSS_BADPARM;
 
 	if (sheet->title != NULL)
 		sheet->alloc(sheet->title, 0, sheet->pw);
@@ -129,6 +135,8 @@ void css_stylesheet_destroy(css_stylesheet *sheet)
 	css_parser_destroy(sheet->parser);
 
 	sheet->alloc(sheet, 0, sheet->pw);
+
+	return CSS_OK;
 }
 
 /**
@@ -282,24 +290,30 @@ css_error css_stylesheet_set_disabled(css_stylesheet *sheet, bool disabled)
  *
  * \param sheet  The stylesheet context
  * \param len    The required length of the style
- * \return Pointer to style, or NULL on error
+ * \param style  Pointer to location to receive style
+ * \return CSS_OK on success,
+ *         CSS_BADPARM on bad parameters,
+ *         CSS_NOMEM on memory exhaustion
  */
-css_style *css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len)
+css_error css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len,
+		css_style **style)
 {
-	css_style *style;
+	css_style *s;
 
-	if (sheet == NULL || len == 0)
-		return NULL;
+	if (sheet == NULL || len == 0 || style == NULL)
+		return CSS_BADPARM;
 
-	style = sheet->alloc(NULL, sizeof(css_style) + len, sheet->pw);
-	if (style == NULL)
-		return NULL;
+	s = sheet->alloc(NULL, sizeof(css_style) + len, sheet->pw);
+	if (s == NULL)
+		return CSS_NOMEM;
 
 	/* DIY variable-sized data member */
-	style->bytecode = ((uint8_t *) style + sizeof(css_style));
-	style->length = len;
+	s->bytecode = ((uint8_t *) s + sizeof(css_style));
+	s->length = len;
 
-	return style;
+	*style = s;
+
+	return CSS_OK;
 }
 
 /**
@@ -307,36 +321,42 @@ css_style *css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len)
  *
  * \param sheet  The stylesheet context
  * \param style  The style to destroy
+ * \return CSS_OK on success, appropriate error otherwise
  */
-void css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style)
+css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style)
 {
 	UNUSED(sheet);
 	UNUSED(style);
 
 	/** \todo destroy style */
+
+	return CSS_OK;
 }
 
 /**
  * Create a selector
  *
- * \param sheet  The stylesheet context
- * \param type   The type of selector to create
- * \param name   Name of selector
- * \param value  Value of selector, or NULL
- * \return Pointer to selector object, or NULL on failure
+ * \param sheet     The stylesheet context
+ * \param type      The type of selector to create
+ * \param name      Name of selector
+ * \param value     Value of selector, or NULL
+ * \param selector  Pointer to location to receive selector object
+ * \return CSS_OK on success,
+ *         CSS_BADPARM on bad parameters,
+ *         CSS_NOMEM on memory exhaustion
  */
-css_selector *css_stylesheet_selector_create(css_stylesheet *sheet,
+css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 		css_selector_type type, const css_string *name, 
-		const css_string *value)
+		const css_string *value, css_selector **selector)
 {
 	css_selector *sel;
 
-	if (sheet == NULL || name == NULL)
-		return NULL;
+	if (sheet == NULL || name == NULL || selector == NULL)
+		return CSS_BADPARM;
 
 	sel = sheet->alloc(NULL, sizeof(css_selector), sheet->pw);
 	if (sel == NULL)
-		return NULL;
+		return CSS_NOMEM;
 
 	memset(sel, 0, sizeof(css_selector));
 
@@ -349,7 +369,9 @@ css_selector *css_stylesheet_selector_create(css_stylesheet *sheet,
 	sel->specificity = 0;
 	sel->combinator_type = CSS_COMBINATOR_NONE;
 
-	return sel;
+	*selector = sel;
+
+	return CSS_OK;
 }
 
 /**
@@ -357,8 +379,9 @@ css_selector *css_stylesheet_selector_create(css_stylesheet *sheet,
  *
  * \param sheet     The stylesheet context
  * \param selector  The selector to destroy
+ * \return CSS_OK on success, appropriate error otherwise
  */
-void css_stylesheet_selector_destroy(css_stylesheet *sheet,
+css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 		css_selector *selector)
 {
 	UNUSED(sheet);
@@ -367,6 +390,8 @@ void css_stylesheet_selector_destroy(css_stylesheet *sheet,
 	/** \todo Need to ensure that selector is removed from whatever it's 
 	 * attached to (be that the parent selector, parent rule, or the 
 	 * hashtable of selectors (or any combination of these) */
+
+	return CSS_OK;
 }
 
 /**
@@ -436,24 +461,30 @@ css_error css_stylesheet_selector_combine(css_stylesheet *sheet,
  *
  * \param sheet  The stylesheet context
  * \param type   The rule type
- * \return Pointer to rule object, or NULL on failure.
+ * \param rule   Pointer to location to receive rule object
+ * \return CSS_OK on success,
+ *         CSS_BADPARM on bad parameters,
+ *         CSS_NOMEM on memory exhaustion
  */
-css_rule *css_stylesheet_rule_create(css_stylesheet *sheet, css_rule_type type)
+css_error css_stylesheet_rule_create(css_stylesheet *sheet, css_rule_type type,
+		css_rule **rule)
 {
-	css_rule *rule;
+	css_rule *r;
 
-	if (sheet == NULL)
-		return NULL;
+	if (sheet == NULL || rule == NULL)
+		return CSS_BADPARM;
 
-	rule = sheet->alloc(NULL, sizeof(css_rule), sheet->pw);
-	if (rule == NULL)
-		return NULL;
+	r = sheet->alloc(NULL, sizeof(css_rule), sheet->pw);
+	if (r == NULL)
+		return CSS_NOMEM;
 
-	memset(rule, 0, sizeof(css_rule));
+	memset(r, 0, sizeof(css_rule));
 
-	rule->type = type;
+	r->type = type;
 
-	return rule;
+	*rule = r;
+
+	return CSS_OK;
 }
 
 /**
@@ -461,14 +492,17 @@ css_rule *css_stylesheet_rule_create(css_stylesheet *sheet, css_rule_type type)
  *
  * \param sheet  The stylesheet context
  * \param rule   The rule to destroy
+ * \return CSS_OK on success, appropriate error otherwise
  */
-void css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
+css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 {
 	UNUSED(sheet);
 	UNUSED(rule);
 
 	/** \todo should this be recursive? */
 	/** \todo what happens to non-rule objects owned by this rule? */
+
+	return CSS_OK;
 }
 
 /**
