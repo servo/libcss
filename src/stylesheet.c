@@ -33,6 +33,7 @@ css_stylesheet *css_stylesheet_create(css_language_level level,
 		css_import_handler import_callback, void *import_pw,
 		css_alloc alloc, void *alloc_pw)
 {
+	css_error error;
 	css_stylesheet *sheet;
 	size_t len;
 
@@ -45,10 +46,10 @@ css_stylesheet *css_stylesheet_create(css_language_level level,
 
 	memset(sheet, 0, sizeof(css_stylesheet));
 
-	sheet->parser = css_parser_create(charset, 
+	error = css_parser_create(charset, 
 			charset ? CSS_CHARSET_DICTATED : CSS_CHARSET_DEFAULT,
-			alloc, alloc_pw);
-	if (sheet->parser == NULL) {
+			alloc, alloc_pw, &sheet->parser);
+	if (error != CSS_OK) {
 		alloc(sheet, 0, alloc_pw);
 		return NULL;
 	}
@@ -61,9 +62,9 @@ css_stylesheet *css_stylesheet_create(css_language_level level,
 	}
 
 	sheet->level = level;
-	sheet->parser_frontend = 
-			css_css21_create(sheet, sheet->parser, alloc, alloc_pw);
-	if (sheet->parser_frontend == NULL) {
+	error = css_css21_create(sheet, sheet->parser, alloc, alloc_pw,
+			&sheet->parser_frontend);
+	if (error != CSS_OK) {
 		css_parser_destroy(sheet->parser);
 		alloc(sheet, 0, alloc_pw);
 		return NULL;

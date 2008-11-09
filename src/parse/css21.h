@@ -17,9 +17,9 @@
 
 typedef struct css_css21 css_css21;
 
-css_css21 *css_css21_create(css_stylesheet *sheet, css_parser *parser,
-		css_alloc alloc, void *pw);
-void css_css21_destroy(css_css21 *css21);
+css_error css_css21_create(css_stylesheet *sheet, css_parser *parser,
+		css_alloc alloc, void *pw, void **css21);
+css_error css_css21_destroy(css_css21 *css21);
 
 #endif
 

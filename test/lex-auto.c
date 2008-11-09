@@ -271,12 +271,11 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 	size_t e;
 	static int testnum;
 
-	input = parserutils_inputstream_create("UTF-8", CSS_CHARSET_DICTATED,
-			css_charset_extract, myrealloc, NULL);
-	assert(input != NULL);
+	assert(parserutils_inputstream_create("UTF-8", CSS_CHARSET_DICTATED,
+			css_charset_extract, myrealloc, NULL, &input) ==
+			PARSERUTILS_OK);
 
-	lexer = css_lexer_create(input, myrealloc, NULL);
-	assert(lexer != NULL);
+	assert(css_lexer_create(input, myrealloc, NULL, &lexer) == CSS_OK);
 
 	assert(parserutils_inputstream_append(input, data, len) == 
 			PARSERUTILS_OK);

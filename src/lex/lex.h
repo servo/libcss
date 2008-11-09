@@ -57,9 +57,9 @@ typedef struct css_token {
 	uint32_t line;
 } css_token;
 
-css_lexer *css_lexer_create(parserutils_inputstream *input, 
-		css_alloc alloc, void *pw);
-void css_lexer_destroy(css_lexer *lexer);
+css_error css_lexer_create(parserutils_inputstream *input, 
+		css_alloc alloc, void *pw, css_lexer **lexer);
+css_error css_lexer_destroy(css_lexer *lexer);
 
 css_error css_lexer_setopt(css_lexer *lexer, css_lexer_opttype type, 
 		css_lexer_optparams *params);

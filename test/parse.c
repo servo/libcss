@@ -86,9 +86,8 @@ int main(int argc, char **argv)
 	/* Initialise library */
 	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
 
-	parser = css_parser_create("UTF-8", CSS_CHARSET_DICTATED, 
-			myrealloc, NULL);
-	assert(parser != NULL);
+	assert(css_parser_create("UTF-8", CSS_CHARSET_DICTATED, 
+			myrealloc, NULL, &parser) == CSS_OK);
 
 	params.event_handler.handler = event_handler;
 	params.event_handler.pw = NULL;

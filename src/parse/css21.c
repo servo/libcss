@@ -337,72 +337,82 @@ static inline bool tokenIsChar(const css_token *token, uint8_t c);
  * \param parser  The core parser object to use
  * \param alloc   Memory (de)allocation function
  * \param pw      Pointer to client-specific private data
- * \return Pointer to parser object, or NULL on failure
+ * \param css21   Pointer to location to receive parser object
+ * \return CSS_OK on success,
+ *         CSS_BADPARM on bad parameters,
+ *         CSS_NOMEM on memory exhaustion
  */
-css_css21 *css_css21_create(css_stylesheet *sheet, css_parser *parser,
-		css_alloc alloc, void *pw)
+css_error css_css21_create(css_stylesheet *sheet, css_parser *parser,
+		css_alloc alloc, void *pw, void **css21)
 {
-	css_css21 *css21;
+	css_css21 *c;
 	css_parser_optparams params;
+	parserutils_error perror;
 	css_error error;
 
-	if (sheet == NULL || parser == NULL || alloc == NULL)
-		return NULL;
+	if (sheet == NULL || parser == NULL || alloc == NULL || css21 == NULL)
+		return CSS_BADPARM;
 
-	css21 = alloc(NULL, sizeof(css_css21), pw);
-	if (css21 == NULL)
-		return NULL;
+	c = alloc(NULL, sizeof(css_css21), pw);
+	if (c == NULL)
+		return CSS_NOMEM;
 
-	css21->context = parserutils_stack_create(sizeof(context_entry), 
-			STACK_CHUNK, (parserutils_alloc) alloc, pw);
-	if (css21->context == NULL) {
-		alloc(css21, 0, pw);
-		return NULL;
+	perror = parserutils_stack_create(sizeof(context_entry), 
+			STACK_CHUNK, (parserutils_alloc) alloc, pw, 
+			&c->context);
+	if (perror != PARSERUTILS_OK) {
+		alloc(c, 0, pw);
+		return css_error_from_parserutils_error(perror);
 	}
 
 	/* Intern all known strings */
 	for (int i = 0; i < LAST_KNOWN; i++) {
-		css21->strings[i] = css_parser_dict_add(parser,
+		c->strings[i] = css_parser_dict_add(parser,
 				(const uint8_t *) stringmap[i].ptr, 
 				stringmap[i].len);
-		if (css21->strings[i] == NULL) {
-			parserutils_stack_destroy(css21->context);
-			alloc(css21, 0, pw);
-			return NULL;
+		if (c->strings[i] == NULL) {
+			parserutils_stack_destroy(c->context);
+			alloc(c, 0, pw);
+			return CSS_NOMEM;
 		}
 	}
 
 	params.event_handler.handler = css21_handle_event;
-	params.event_handler.pw = css21;
+	params.event_handler.pw = c;
 	error = css_parser_setopt(parser, CSS_PARSER_EVENT_HANDLER, &params);
 	if (error != CSS_OK) {
-		parserutils_stack_destroy(css21->context);
-		alloc(css21, 0, pw);
-		return NULL;
+		parserutils_stack_destroy(c->context);
+		alloc(c, 0, pw);
+		return error;
 	}
 
-	css21->sheet = sheet;
-	css21->parser = parser;
-	css21->state = BEFORE_CHARSET;
-	css21->alloc = alloc;
-	css21->pw = pw;
+	c->sheet = sheet;
+	c->parser = parser;
+	c->state = BEFORE_CHARSET;
+	c->alloc = alloc;
+	c->pw = pw;
 
-	return css21;
+	*css21 = c;
+
+	return CSS_OK;
 }
 
 /**
  * Destroy a CSS 2.1 parser
  *
  * \param css21  The parser to destroy
+ * \return CSS_OK on success, appropriate error otherwise
  */
-void css_css21_destroy(css_css21 *css21)
+css_error css_css21_destroy(css_css21 *css21)
 {
 	if (css21 == NULL)
-		return;
+		return CSS_BADPARM;
 
 	parserutils_stack_destroy(css21->context);
 
 	css21->alloc(css21, 0, css21->pw);
+
+	return CSS_OK;
 }
 
 /**

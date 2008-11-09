@@ -129,13 +129,12 @@ int main(int argc, char **argv)
 	/* Initialise library */
 	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
 
-	stream = parserutils_inputstream_create("UTF-8", CSS_CHARSET_DICTATED,
+	assert(parserutils_inputstream_create("UTF-8", CSS_CHARSET_DICTATED,
 			css_charset_extract, 
-			(parserutils_alloc) myrealloc, NULL);
-	assert(stream != NULL);
+			(parserutils_alloc) myrealloc, NULL, &stream) == 
+			PARSERUTILS_OK);
 
-	lexer = css_lexer_create(stream, myrealloc, NULL);
-	assert(lexer != NULL);
+	assert(css_lexer_create(stream, myrealloc, NULL, &lexer) == CSS_OK);
 
 	fp = fopen(argv[2], "rb");
 	if (fp == NULL) {

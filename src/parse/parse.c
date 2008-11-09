@@ -178,110 +178,121 @@ static css_error (*parseFuncs[])(css_parser *parser) = {
  * \param cs_source  Source of charset information, or CSS_CHARSET_DEFAULT
  * \param alloc      Memory (de)allocation function
  * \param pw         Pointer to client-specific private data
- * \return Pointer to parser instance, or NULL on memory exhaustion
+ * \param parser     Pointer to location to receive parser instance
+ * \return CSS_OK on success,
+ *         CSS_BADPARM on bad parameters,
+ *         CSS_NOMEM on memory exhaustion
  */
-css_parser *css_parser_create(const char *charset, css_charset_source cs_source,
-		css_alloc alloc, void *pw)
+css_error css_parser_create(const char *charset, css_charset_source cs_source,
+		css_alloc alloc, void *pw, css_parser **parser)
 {
-	css_parser *parser;
+	css_parser *p;
 	parser_state initial = { sStart, 0 };
 	parserutils_error perror;
+	css_error error;
 
-	if (alloc == NULL)
-		return NULL;
+	if (alloc == NULL || parser == NULL)
+		return CSS_BADPARM;
 
-	parser = alloc(NULL, sizeof(css_parser), pw);
-	if (parser == NULL)
-		return NULL;
+	p = alloc(NULL, sizeof(css_parser), pw);
+	if (p == NULL)
+		return CSS_NOMEM;
 
-	parser->stream = parserutils_inputstream_create(charset, cs_source,
-			css_charset_extract, (parserutils_alloc) alloc, pw);
-	if (parser->stream == NULL) {
-		alloc(parser, 0, pw);
-		return NULL;
-	}
-
-	parser->lexer = css_lexer_create(parser->stream, alloc, pw);
-	if (parser->lexer == NULL) {
-		parserutils_inputstream_destroy(parser->stream);
-		alloc(parser, 0, pw);
-		return NULL;
-	}
-
-	parser->states = parserutils_stack_create(sizeof(parser_state), 
-			STACK_CHUNK, (parserutils_alloc) alloc, pw);
-	if (parser->states == NULL) {
-		css_lexer_destroy(parser->lexer);
-		parserutils_inputstream_destroy(parser->stream);
-		alloc(parser, 0, pw);
-		return NULL;
-	}
-
-	parser->dictionary = parserutils_dict_create(
-			(parserutils_alloc) alloc, pw);
-	if (parser->dictionary == NULL) {
-		parserutils_stack_destroy(parser->states);
-		css_lexer_destroy(parser->lexer);
-		parserutils_inputstream_destroy(parser->stream);
-		alloc(parser, 0, pw);
-		return NULL;
-	}
-
-	parser->tokens = parserutils_vector_create(sizeof(css_token), 
-			STACK_CHUNK, (parserutils_alloc) alloc, pw);
-	if (parser->tokens == NULL) {
-		parserutils_dict_destroy(parser->dictionary);
-		parserutils_stack_destroy(parser->states);
-		css_lexer_destroy(parser->lexer);
-		parserutils_inputstream_destroy(parser->stream);
-		alloc(parser, 0, pw);
-		return NULL;
-	}
-
-	parser->open_items = parserutils_stack_create(sizeof(char), 
-			STACK_CHUNK, (parserutils_alloc) alloc, pw);
-	if (parser->open_items == NULL) {
-		parserutils_vector_destroy(parser->tokens);
-		parserutils_stack_destroy(parser->states);
-		css_lexer_destroy(parser->lexer);
-		parserutils_inputstream_destroy(parser->stream);
-		alloc(parser, 0, pw);
-		return NULL;
-	}
-
-	perror = parserutils_stack_push(parser->states, (void *) &initial);
+	perror = parserutils_inputstream_create(charset, cs_source,
+			css_charset_extract, (parserutils_alloc) alloc, pw,
+			&p->stream);
 	if (perror != PARSERUTILS_OK) {
-		parserutils_stack_destroy(parser->open_items);
-		parserutils_vector_destroy(parser->tokens);
-		parserutils_dict_destroy(parser->dictionary);
-		parserutils_stack_destroy(parser->states);
-		css_lexer_destroy(parser->lexer);
-		parserutils_inputstream_destroy(parser->stream);
-		alloc(parser, 0, pw);
-		return NULL;
+		alloc(p, 0, pw);
+		return css_error_from_parserutils_error(perror);
 	}
 
-	parser->quirks = false;
-	parser->pushback = NULL;
-	parser->parseError = false;
-	parser->match_char = 0;
-	parser->event = NULL;
-	parser->event_pw = NULL;
-	parser->alloc = alloc;
-	parser->pw = pw;
+	error = css_lexer_create(p->stream, alloc, pw, &p->lexer);
+	if (error != CSS_OK) {
+		parserutils_inputstream_destroy(p->stream);
+		alloc(p, 0, pw);
+		return error;
+	}
 
-	return parser;
+	perror = parserutils_stack_create(sizeof(parser_state), 
+			STACK_CHUNK, (parserutils_alloc) alloc, pw,
+			&p->states);
+	if (perror != PARSERUTILS_OK) {
+		css_lexer_destroy(p->lexer);
+		parserutils_inputstream_destroy(p->stream);
+		alloc(p, 0, pw);
+		return css_error_from_parserutils_error(perror);
+	}
+
+	perror = parserutils_dict_create((parserutils_alloc) alloc, pw,
+			&p->dictionary);
+	if (perror != PARSERUTILS_OK) {
+		parserutils_stack_destroy(p->states);
+		css_lexer_destroy(p->lexer);
+		parserutils_inputstream_destroy(p->stream);
+		alloc(p, 0, pw);
+		return css_error_from_parserutils_error(perror);
+	}
+
+	perror = parserutils_vector_create(sizeof(css_token), 
+			STACK_CHUNK, (parserutils_alloc) alloc, pw,
+			&p->tokens);
+	if (perror != PARSERUTILS_OK) {
+		parserutils_dict_destroy(p->dictionary);
+		parserutils_stack_destroy(p->states);
+		css_lexer_destroy(p->lexer);
+		parserutils_inputstream_destroy(p->stream);
+		alloc(p, 0, pw);
+		return css_error_from_parserutils_error(perror);
+	}
+
+	perror = parserutils_stack_create(sizeof(char), 
+			STACK_CHUNK, (parserutils_alloc) alloc, pw,
+			&p->open_items);
+	if (perror != PARSERUTILS_OK) {
+		parserutils_vector_destroy(p->tokens);
+		parserutils_stack_destroy(p->states);
+		css_lexer_destroy(p->lexer);
+		parserutils_inputstream_destroy(p->stream);
+		alloc(p, 0, pw);
+		return css_error_from_parserutils_error(perror);
+	}
+
+	perror = parserutils_stack_push(p->states, (void *) &initial);
+	if (perror != PARSERUTILS_OK) {
+		parserutils_stack_destroy(p->open_items);
+		parserutils_vector_destroy(p->tokens);
+		parserutils_dict_destroy(p->dictionary);
+		parserutils_stack_destroy(p->states);
+		css_lexer_destroy(p->lexer);
+		parserutils_inputstream_destroy(p->stream);
+		alloc(p, 0, pw);
+		return css_error_from_parserutils_error(perror);
+	}
+
+	p->quirks = false;
+	p->pushback = NULL;
+	p->parseError = false;
+	p->match_char = 0;
+	p->event = NULL;
+	p->event_pw = NULL;
+	p->alloc = alloc;
+	p->pw = pw;
+
+	*parser = p;
+
+	return CSS_OK;
 }
 
 /**
  * Destroy a CSS parser
  *
  * \param parser  The parser instance to destroy
+ * \return CSS_OK on success, appropriate error otherwise
  */
-void css_parser_destroy(css_parser *parser)
+css_error css_parser_destroy(css_parser *parser)
 {
 	if (parser == NULL)
-		return;
+		return CSS_BADPARM;
 
 	parserutils_stack_destroy(parser->open_items);
 
@@ -296,6 +307,8 @@ void css_parser_destroy(css_parser *parser)
 	parserutils_inputstream_destroy(parser->stream);
 
 	parser->alloc(parser, 0, parser->pw);
+
+	return CSS_OK;
 }
 
 /**

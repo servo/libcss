@@ -174,19 +174,22 @@ static inline bool isSpace(uint8_t c);
  * \param input  The inputstream to read from
  * \param alloc  Memory (de)allocation function
  * \param pw     Pointer to client-specific private data
- * \return Pointer to instance, or NULL on memory exhaustion
+ * \param lexer  Pointer to location to receive lexer instance
+ * \return CSS_OK on success,
+ *         CSS_BADPARM on bad parameters,
+ *         CSS_NOMEM on memory exhaustion
  */
-css_lexer *css_lexer_create(parserutils_inputstream *input, 
-		css_alloc alloc, void *pw)
+css_error css_lexer_create(parserutils_inputstream *input, 
+		css_alloc alloc, void *pw, css_lexer **lexer)
 {
 	css_lexer *lex;
 
-	if (input == NULL || alloc == NULL)
-		return NULL;
+	if (input == NULL || alloc == NULL || lexer == NULL)
+		return CSS_BADPARM;
 
 	lex = alloc(NULL, sizeof(css_lexer), pw);
 	if (lex == NULL)
-		return NULL;
+		return CSS_NOMEM;
 
 	lex->input = input;
 	lex->bytesReadForToken = 0;
@@ -203,23 +206,28 @@ css_lexer *css_lexer_create(parserutils_inputstream *input,
 	lex->alloc = alloc;
 	lex->pw = pw;
 
-	return lex;
+	*lexer = lex;
+
+	return CSS_OK;
 }
 
 /**
  * Destroy a lexer instance
  *
  * \param lexer  The instance to destroy
+ * \return CSS_OK on success, appropriate error otherwise
  */
-void css_lexer_destroy(css_lexer *lexer)
+css_error css_lexer_destroy(css_lexer *lexer)
 {
 	if (lexer == NULL)
-		return;
+		return CSS_BADPARM;
 
 	if (lexer->unescapedTokenData != NULL)
 		parserutils_buffer_destroy(lexer->unescapedTokenData);
 
 	lexer->alloc(lexer, 0, lexer->pw);
+
+	return CSS_OK;
 }
 
 /**
@@ -1689,10 +1697,11 @@ css_error consumeEscape(css_lexer *lexer, bool nl)
 
 	/* Create unescaped buffer, if it doesn't already exist */
 	if (lexer->unescapedTokenData == NULL) {
-		lexer->unescapedTokenData = 
-			parserutils_buffer_create(lexer->alloc, lexer->pw);
-		if (lexer->unescapedTokenData == NULL)
-			return CSS_NOMEM;
+		parserutils_error err =
+			parserutils_buffer_create(lexer->alloc, lexer->pw,
+			&lexer->unescapedTokenData);
+		if (err != PARSERUTILS_OK)
+			return css_error_from_parserutils_error(err);
 	}
 
 	/* If this is the first escaped character we've seen for this token,
