@@ -506,9 +506,9 @@ css_error handleStartRuleset(css_css21 *c, const parserutils_vector *vector)
 
 	assert(c != NULL);
 
-	rule = css_stylesheet_rule_create(c->sheet, CSS_RULE_SELECTOR);
-	if (rule == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_rule_create(c->sheet, CSS_RULE_SELECTOR, &rule);
+	if (error != CSS_OK)
+		return error;
 
 	error = parseSelectorList(c, vector, rule);
 	if (error != CSS_OK) {
@@ -761,12 +761,8 @@ css_error parseClass(css_css21 *c, const parserutils_vector *vector, int *ctx,
 	if (token == NULL || token->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
 
-	*specific = css_stylesheet_selector_create(c->sheet, 
-			CSS_SELECTOR_CLASS, &token->data, NULL);
-	if (*specific == NULL)
-		return CSS_NOMEM;
-
-	return CSS_OK;
+	return css_stylesheet_selector_create(c->sheet, 
+			CSS_SELECTOR_CLASS, &token->data, NULL, specific);
 }
 
 css_error parseAttrib(css_css21 *c, const parserutils_vector *vector, int *ctx,
@@ -823,12 +819,9 @@ css_error parseAttrib(css_css21 *c, const parserutils_vector *vector, int *ctx,
 			return CSS_INVALID;
 	}
 
-	*specific = css_stylesheet_selector_create(c->sheet, type, 
-			&name->data, value != NULL ? &value->data : NULL);
-	if (*specific == NULL)
-		return CSS_NOMEM;
-
-	return CSS_OK;
+	return css_stylesheet_selector_create(c->sheet, type, 
+			&name->data, value != NULL ? &value->data : NULL,
+			specific);
 }
 
 css_error parsePseudo(css_css21 *c, const parserutils_vector *vector, int *ctx,
@@ -866,13 +859,9 @@ css_error parsePseudo(css_css21 *c, const parserutils_vector *vector, int *ctx,
 			return CSS_INVALID;
 	}
 
-	*specific = css_stylesheet_selector_create(c->sheet, 
+	return css_stylesheet_selector_create(c->sheet, 
 			CSS_SELECTOR_PSEUDO, &name->data, 
-			value != NULL ? &value->data : NULL);
-	if (*specific == NULL)
-		return CSS_NOMEM;
-
-	return CSS_OK;
+			value != NULL ? &value->data : NULL, specific);
 }
 
 css_error parseSpecific(css_css21 *c, 
@@ -890,10 +879,10 @@ css_error parseSpecific(css_css21 *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_HASH) {
-		specific = css_stylesheet_selector_create(c->sheet,
-				CSS_SELECTOR_ID, &token->data, NULL);
-		if (specific == NULL)
-			return CSS_NOMEM;
+		error = css_stylesheet_selector_create(c->sheet,
+				CSS_SELECTOR_ID, &token->data, NULL, &specific);
+		if (error != CSS_OK)
+			return error;
 
 		parserutils_vector_iterate(vector, ctx);
 	} else if (tokenIsChar(token, '.')) {
@@ -962,20 +951,21 @@ css_error parseSimpleSelector(css_css21 *c,
 
 	if (token->type == CSS_TOKEN_IDENT || tokenIsChar(token, '*')) {
 		/* Have element name */
-		selector = css_stylesheet_selector_create(c->sheet,
-				CSS_SELECTOR_ELEMENT, &token->data, NULL);
-		if (selector == NULL)
-			return CSS_NOMEM;
+		error = css_stylesheet_selector_create(c->sheet,
+				CSS_SELECTOR_ELEMENT, &token->data, NULL,
+				&selector);
+		if (error != CSS_OK)
+			return error;
 
 		parserutils_vector_iterate(vector, ctx);
 	} else {
 		/* Universal selector */
 		css_string name = { (uint8_t *) "*", 1 };
 
-		selector = css_stylesheet_selector_create(c->sheet,
-				CSS_SELECTOR_ELEMENT, &name, NULL);
-		if (selector == NULL)
-			return CSS_NOMEM;
+		error = css_stylesheet_selector_create(c->sheet,
+				CSS_SELECTOR_ELEMENT, &name, NULL, &selector);
+		if (error != CSS_OK)
+			return error;
 
 		/* Ensure we have at least one specific selector */
 		error = parseSpecific(c, vector, ctx, selector);
@@ -987,11 +977,7 @@ css_error parseSimpleSelector(css_css21 *c,
 
 	*result = selector;
 
-	error = parseSelectorSpecifics(c, vector, ctx, selector);
-	if (error != CSS_OK)
-		return error;
-
-	return CSS_OK;
+	return parseSelectorSpecifics(c, vector, ctx, selector);
 }
 
 css_error parseCombinator(css_css21 *c, const parserutils_vector *vector,

@@ -30,10 +30,9 @@ int main(int argc, char **argv)
 	/* Initialise library */
 	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
 
-	sheet = css_stylesheet_create(CSS_LEVEL_21, "UTF-8", argv[2], NULL,
+	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", argv[2], NULL,
 			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, NULL, NULL,
-			myrealloc, NULL);
-	assert(sheet != NULL);
+			myrealloc, NULL, &sheet) == CSS_OK);
 
 	fp = fopen(argv[2], "rb");
 	if (fp == NULL) {

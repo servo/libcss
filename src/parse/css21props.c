@@ -486,9 +486,9 @@ css_error parse_background_attachment(css_css21 *c,
 	opv = buildOPV(OP_BACKGROUND_ATTACHMENT, flags, value);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -540,9 +540,9 @@ css_error parse_background_color(css_css21 *c,
 		required_size += sizeof(colour);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, required_size);
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -593,9 +593,9 @@ css_error parse_background_image(css_css21 *c,
 		required_size += sizeof(uint8_t *) + sizeof(size_t);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, required_size);
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -658,9 +658,9 @@ css_error parse_background_repeat(css_css21 *c,
 	opv = buildOPV(OP_BACKGROUND_REPEAT, flags, value);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -720,9 +720,9 @@ css_error parse_border_collapse(css_css21 *c,
 	opv = buildOPV(OP_BORDER_COLLAPSE, flags, value);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -854,9 +854,9 @@ css_error parse_bottom(css_css21 *c,
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, required_size);
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -901,9 +901,9 @@ css_error parse_caption_side(css_css21 *c,
 	opv = buildOPV(OP_CAPTION_SIDE, flags, value);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -946,9 +946,9 @@ css_error parse_clear(css_css21 *c,
 	opv = buildOPV(OP_CLEAR, flags, value);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -1009,9 +1009,9 @@ css_error parse_color(css_css21 *c,
 		required_size += sizeof(colour);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, required_size);
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -1101,9 +1101,9 @@ css_error parse_cue_after(css_css21 *c,
 		required_size += sizeof(uint8_t *) + sizeof(size_t);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, required_size);
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -1157,9 +1157,9 @@ css_error parse_cue_before(css_css21 *c,
 		required_size += sizeof(uint8_t *) + sizeof(size_t);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, required_size);
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -1218,9 +1218,9 @@ css_error parse_direction(css_css21 *c,
 	opv = buildOPV(OP_DIRECTION, flags, value);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -1290,9 +1290,9 @@ css_error parse_display(css_css21 *c,
 	opv = buildOPV(OP_DISPLAY, flags, value);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -1364,9 +1364,9 @@ css_error parse_elevation(css_css21 *c,
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, required_size);
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -1411,9 +1411,9 @@ css_error parse_empty_cells(css_css21 *c,
 	opv = buildOPV(OP_EMPTY_CELLS, flags, value);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -1454,9 +1454,9 @@ css_error parse_float(css_css21 *c,
 	opv = buildOPV(OP_FLOAT, flags, value);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -1559,9 +1559,9 @@ css_error parse_font_size(css_css21 *c,
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, required_size);
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -1608,9 +1608,9 @@ css_error parse_font_style(css_css21 *c,
 	opv = buildOPV(OP_FONT_STYLE, flags, value);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -1649,9 +1649,9 @@ css_error parse_font_variant(css_css21 *c,
 	opv = buildOPV(OP_FONT_VARIANT, flags, value);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -1710,9 +1710,9 @@ css_error parse_font_weight(css_css21 *c,
 	opv = buildOPV(OP_FONT_WEIGHT, flags, value);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -1780,9 +1780,9 @@ css_error parse_left(css_css21 *c,
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, required_size);
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -2240,9 +2240,9 @@ css_error parse_right(css_css21 *c,
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, required_size);
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -2436,9 +2436,9 @@ css_error parse_top(css_css21 *c,
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, required_size);
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -2683,9 +2683,9 @@ css_error parse_border_side_color(css_css21 *c,
 		required_size += sizeof(colour);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, required_size);
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -2747,9 +2747,9 @@ css_error parse_border_side_style(css_css21 *c,
 	opv = buildOPV(OP_BORDER_TRBL_STYLE, flags, value);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, sizeof(opv));
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -2816,9 +2816,9 @@ css_error parse_border_side_width(css_css21 *c,
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
-	*result = css_stylesheet_style_create(c->sheet, required_size);
-	if (*result == NULL)
-		return CSS_NOMEM;
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
