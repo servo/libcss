@@ -27,14 +27,15 @@
 #define UNUSED(x) ((x)=(x))
 #endif
 
-static inline int32_t integer_from_css_string(const css_string *string)
+static inline int32_t integer_from_css_string(const css_string *string,
+		size_t *consumed)
 {
 	size_t len;
 	const uint8_t *ptr;
 	int sign = 1;
 	int32_t val = 0;
 
-	if (string == NULL || string->len == 0)
+	if (string == NULL || string->len == 0 || consumed == NULL)
 		return 0;
 
 	len = string->len;
@@ -63,6 +64,8 @@ static inline int32_t integer_from_css_string(const css_string *string)
 		ptr++;
 		len--;
 	}
+
+	*consumed = ptr - string->ptr;
 
 	return val * sign;
 }
