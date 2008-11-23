@@ -317,7 +317,7 @@ static inline css_error parse_colour_specifier(css_css21 *c,
 		uint32_t *result);
 static inline css_error parse_unit_specifier(css_css21 *c,
 		const parserutils_vector *vector, int *ctx,
-		uint32_t *length, uint32_t *unit);
+		fixed *length, uint32_t *unit);
 
 static inline css_error parse_border_side_color(css_css21 *c,
 		const parserutils_vector *vector, int *ctx,
@@ -815,7 +815,7 @@ css_error parse_bottom(css_css21 *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	uint32_t length = 0;
+	fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -1309,7 +1309,7 @@ css_error parse_elevation(css_css21 *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	uint32_t length = 0;
+	fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -1487,7 +1487,7 @@ css_error parse_font_size(css_css21 *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	uint32_t length = 0;
+	fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -1684,10 +1684,12 @@ css_error parse_font_weight(css_css21 *c,
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		int32_t num = integer_from_css_string(&token->lower, &consumed);
-		if (consumed != token->lower.len)
+		fixed num = number_from_css_string(&token->lower, &consumed);
+		int32_t intpart = FIXTOINT(num);
+		/* Invalid if there are trailing characters or it was a float */
+		if (consumed != token->lower.len || num != intpart)
 			return CSS_INVALID;
-		switch (num) {
+		switch (intpart) {
 		case 100: value = FONT_WEIGHT_100; break;
 		case 200: value = FONT_WEIGHT_200; break;
 		case 300: value = FONT_WEIGHT_300; break;
@@ -1732,7 +1734,7 @@ css_error parse_height(css_css21 *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	uint32_t length = 0;
+	fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -1796,7 +1798,7 @@ css_error parse_left(css_css21 *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	uint32_t length = 0;
+	fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -1860,7 +1862,7 @@ css_error parse_letter_spacing(css_css21 *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	uint32_t length = 0;
+	fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -1925,7 +1927,7 @@ css_error parse_line_height(css_css21 *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	uint32_t length = 0;
+	fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -1943,9 +1945,8 @@ css_error parse_line_height(css_css21 *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = LINE_HEIGHT_NORMAL;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
-		/** \todo length should be a float */
 		size_t consumed = 0;
-		length = integer_from_css_string(&token->lower, &consumed);
+		length = number_from_css_string(&token->lower, &consumed);
 		if (consumed != token->lower.len)
 			return CSS_INVALID;
 
@@ -2371,7 +2372,7 @@ css_error parse_right(css_css21 *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	uint32_t length = 0;
+	fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -2567,7 +2568,7 @@ css_error parse_top(css_css21 *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	uint32_t length = 0;
+	fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -2788,7 +2789,7 @@ css_error parse_colour_specifier(css_css21 *c,
 
 css_error parse_unit_specifier(css_css21 *c,
 		const parserutils_vector *vector, int *ctx,
-		uint32_t *length, uint32_t *unit)
+		fixed *length, uint32_t *unit)
 {
 	const css_token *token;
 
@@ -2936,7 +2937,7 @@ css_error parse_border_side_width(css_css21 *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	uint32_t length = 0;
+	fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 

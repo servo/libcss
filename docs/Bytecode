@@ -23,21 +23,16 @@ Parameters are opcode-specific. Each parameter must begin on a 4 byte boundary.
 Datatype storage
 ----------------
 
-8 and 16 bit integers are stored as 32bit values.
-
-32 bit integers are stored in their natural format.
-
-Floats are stored in their natural format.
-
-Integers wider than 32 bits are not supported.
-Doubles are not supported.
+All numeric values are stored in a 32bit wide field. This field contains
+a fixed point value with 22 bits assigned to the integer part and 10 bits
+assigned to the fractional part.
 
 Strings are stored as <pointer,length> pairs, as per css_string.
 Pointer's width is the native width of a pointer on the platform.
 Length's width is the native width of a size_t on the platform.
 
 CSS dimensions are stored as two 32bit values: <length, units>. 
-Length is a 32bit integer and unit is as follows:
+Length is a 32bit numeric value (as described above) and unit is as follows:
 
 	bit 8 clear => length unit
 		bits 9-31: MBZ

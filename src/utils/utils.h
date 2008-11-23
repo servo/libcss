@@ -10,6 +10,8 @@
 
 #include <libcss/types.h>
 
+#include "utils/fpmath.h"
+
 #ifndef max
 #define max(a,b) ((a)>(b)?(a):(b))
 #endif
@@ -27,19 +29,23 @@
 #define UNUSED(x) ((x)=(x))
 #endif
 
-static inline int32_t integer_from_css_string(const css_string *string,
+static inline fixed number_from_css_string(const css_string *string,
 		size_t *consumed)
 {
 	size_t len;
 	const uint8_t *ptr;
 	int sign = 1;
-	int32_t val = 0;
+	int32_t intpart = 0;
+	int32_t fracpart = 0;
+	int32_t pwr = 1;
 
 	if (string == NULL || string->len == 0 || consumed == NULL)
 		return 0;
 
 	len = string->len;
 	ptr = string->ptr;
+
+	/* number = [+-]? ([0-9]+ | [0-9]* '.' [0-9]+) */
 
 	/* Extract sign, if any */
 	if (ptr[0] == '-') {
@@ -51,23 +57,69 @@ static inline int32_t integer_from_css_string(const css_string *string,
 		ptr++;
 	}
 
-	/** \todo check for overflow */
+	/* Ensure we have either a digit or a '.' followed by a digit */
+	if (len == 0) {
+		*consumed = 0;
+		return 0;
+	} else {
+		if (ptr[0] == '.') {
+			if (len == 1 || ptr[1] < '0' || '9' < ptr[1]) {
+				*consumed = 0;
+				return 0;
+			}
+		} else if (ptr[0] < '0' || '9' < ptr[0]) {
+			*consumed = 0;
+			return 0;
+		}
+	}
 
-	/* Now extract value, assuming base 10 */
+	/* Now extract intpart, assuming base 10 */
 	while (len > 0) {
 		/* Stop on first non-digit */
 		if (ptr[0] < '0' || '9' < ptr[0])
 			break;
 
-		val *= 10;
-		val += ptr[0] - '0';
+		/* Clamp to a max of 2^22 - 1 */
+		if (intpart < (1 << 22)) {
+			intpart *= 10;
+			intpart += ptr[0] - '0';
+		}
 		ptr++;
 		len--;
 	}
 
+	/* And fracpart, again, assuming base 10 */
+	if (len > 1 && ptr[0] == '.' && ('0' <= ptr[1] && ptr[1] <= '9')) {
+		ptr++;
+		len--;
+
+		while (len > 0) {
+			if (ptr[0] < '0' || '9' < ptr[0])
+				break;
+
+			if (pwr < 1000000) {
+				pwr *= 10;
+				fracpart *= 10;
+				fracpart += ptr[0] - '0';
+			}
+			ptr++;
+			len--;
+		}
+		fracpart = ((1 << 10) * fracpart + pwr/2) / pwr;
+		if (fracpart >= (1 << 10))
+			fracpart = (1 << 10) - 1;
+	}
+
+	/* If the intpart is larger than we can represent, 
+	 * then clamp to the maximum value we can store. */
+	if (intpart >= (1 << 21)) {
+		intpart = (sign == -1) ? (1 << 21) : (1 << 21) - 1;
+		fracpart = (1 << 10) - 1;
+	}
+
 	*consumed = ptr - string->ptr;
 
-	return val * sign;
+	return FMULI((intpart << 10) | fracpart, sign);
 }
 
 #endif
