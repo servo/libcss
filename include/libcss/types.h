@@ -9,7 +9,8 @@
 #define libcss_types_h_
 
 #include <stdbool.h>
-#include <inttypes.h>
+#include <stdint.h>
+#include <stdlib.h>
 
 /** Source of charset information, in order of importance
  * A client-dictated charset will override all others.

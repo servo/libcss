@@ -106,6 +106,7 @@ static inline fixed number_from_css_string(const css_string *string,
 			len--;
 		}
 		fracpart = ((1 << 10) * fracpart + pwr/2) / pwr;
+		/* Extra paranoid clamp to maximum fractional part */
 		if (fracpart >= (1 << 10))
 			fracpart = (1 << 10) - 1;
 	}
@@ -113,13 +114,13 @@ static inline fixed number_from_css_string(const css_string *string,
 	/* If the intpart is larger than we can represent, 
 	 * then clamp to the maximum value we can store. */
 	if (intpart >= (1 << 21)) {
-		intpart = (sign == -1) ? (1 << 21) : (1 << 21) - 1;
 		fracpart = (1 << 10) - 1;
+		intpart = (1 << 21) - 1;
 	}
 
 	*consumed = ptr - string->ptr;
 
-	return FMULI((intpart << 10) | fracpart, sign);
+	return FMULI(((intpart << 10) | fracpart), sign);
 }
 
 #endif

@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 
 	/* and run final test */
 	if (ctx.bufused > 0)
-		run_test(ctx.buf, ctx.bufused, ctx.exp, ctx.explen);
+		run_test(ctx.buf, ctx.bufused - 1, ctx.exp, ctx.explen);
 
 	free(ctx.buf);
 
@@ -69,7 +69,7 @@ bool handle_line(const char *data, size_t datalen, void *pw)
 		if (ctx->inexp) {
 			/* This marks end of testcase, so run it */
 
-			run_test(ctx->buf, ctx->bufused, 
+			run_test(ctx->buf, ctx->bufused - 1, 
 					ctx->exp, ctx->explen);
 
 			ctx->buf[0] = '\0';
@@ -110,13 +110,17 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 	css_string in = { (uint8_t *) data, len };
 	size_t consumed;
 	fixed result;
+	char buf[256];
 
 	UNUSED(exp);
 	UNUSED(explen);
 
 	result = number_from_css_string(&in, &consumed);
 
-	/** \todo some kind of verification of the result */
-	printf("%d\n", result);
+	snprintf(buf, sizeof buf, "%.3f", FIXTOFLT(result));
+
+	printf("got: %s expected: %.*s\n", buf, (int) explen, exp);
+
+	assert(strncmp(buf, exp, explen) == 0);
 }
 
