@@ -106,9 +106,10 @@ static inline fixed number_from_css_string(const css_string *string,
 			len--;
 		}
 		fracpart = ((1 << 10) * fracpart + pwr/2) / pwr;
-		/* Extra paranoid clamp to maximum fractional part */
-		if (fracpart >= (1 << 10))
-			fracpart = (1 << 10) - 1;
+		if (fracpart >= (1 << 10)) {
+			intpart++;
+			fracpart &= (1 << 10) - 1;
+		}
 	}
 
 	/* If the intpart is larger than we can represent, 

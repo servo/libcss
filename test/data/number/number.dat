@@ -132,3 +132,9 @@ x
 0.124
 #reset
 
+#data
+0.999512
+#expected
+1.000
+#reset
+
