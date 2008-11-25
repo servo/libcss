@@ -539,7 +539,7 @@ css_error parse_background_color(css_css21 *c,
 	opv = buildOPV(OP_BACKGROUND_COLOR, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == BACKGROUND_COLOR_SET)
+	if ((flags & FLAG_INHERIT) == false && value == BACKGROUND_COLOR_SET)
 		required_size += sizeof(colour);
 
 	/* Allocate result */
@@ -549,7 +549,7 @@ css_error parse_background_color(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == BACKGROUND_COLOR_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == BACKGROUND_COLOR_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&colour, sizeof(colour));
 	}
@@ -592,7 +592,7 @@ css_error parse_background_image(css_css21 *c,
 	opv = buildOPV(OP_BACKGROUND_IMAGE, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == BACKGROUND_IMAGE_URI)
+	if ((flags & FLAG_INHERIT) == false && value == BACKGROUND_IMAGE_URI)
 		required_size += sizeof(uint8_t *) + sizeof(size_t);
 
 	/* Allocate result */
@@ -602,7 +602,7 @@ css_error parse_background_image(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == BACKGROUND_IMAGE_URI) {
+	if ((flags & FLAG_INHERIT) == false && value == BACKGROUND_IMAGE_URI) {
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&token->data.ptr, sizeof(uint8_t *));
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv) + 
@@ -853,7 +853,7 @@ css_error parse_bottom(css_css21 *c,
 	opv = buildOPV(OP_BOTTOM, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == BOTTOM_SET)
+	if ((flags & FLAG_INHERIT) == false && value == BOTTOM_SET)
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
@@ -863,7 +863,7 @@ css_error parse_bottom(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == BOTTOM_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == BOTTOM_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
@@ -1008,7 +1008,7 @@ css_error parse_color(css_css21 *c,
 	opv = buildOPV(OP_COLOR, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == COLOR_SET)
+	if ((flags & FLAG_INHERIT) == false && value == COLOR_SET)
 		required_size += sizeof(colour);
 
 	/* Allocate result */
@@ -1018,7 +1018,7 @@ css_error parse_color(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == COLOR_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == COLOR_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&colour, sizeof(colour));
 	}
@@ -1100,7 +1100,7 @@ css_error parse_cue_after(css_css21 *c,
 	opv = buildOPV(OP_CUE_AFTER, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == CUE_AFTER_URI)
+	if ((flags & FLAG_INHERIT) == false && value == CUE_AFTER_URI)
 		required_size += sizeof(uint8_t *) + sizeof(size_t);
 
 	/* Allocate result */
@@ -1110,7 +1110,7 @@ css_error parse_cue_after(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == CUE_AFTER_URI) {
+	if ((flags & FLAG_INHERIT) == false && value == CUE_AFTER_URI) {
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&token->data.ptr, sizeof(uint8_t *));
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv) + 
@@ -1156,7 +1156,7 @@ css_error parse_cue_before(css_css21 *c,
 	opv = buildOPV(OP_CUE_BEFORE, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == CUE_BEFORE_URI)
+	if ((flags & FLAG_INHERIT) == false && value == CUE_BEFORE_URI)
 		required_size += sizeof(uint8_t *) + sizeof(size_t);
 
 	/* Allocate result */
@@ -1166,7 +1166,7 @@ css_error parse_cue_before(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == CUE_BEFORE_URI) {
+	if ((flags & FLAG_INHERIT) == false && value == CUE_BEFORE_URI) {
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&token->data.ptr, sizeof(uint8_t *));
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv) + 
@@ -1363,7 +1363,7 @@ css_error parse_elevation(css_css21 *c,
 	opv = buildOPV(OP_ELEVATION, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == ELEVATION_ANGLE)
+	if ((flags & FLAG_INHERIT) == false && value == ELEVATION_ANGLE)
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
@@ -1373,7 +1373,7 @@ css_error parse_elevation(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == ELEVATION_ANGLE) {
+	if ((flags & FLAG_INHERIT) == false && value == ELEVATION_ANGLE) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
@@ -1558,7 +1558,7 @@ css_error parse_font_size(css_css21 *c,
 	opv = buildOPV(OP_FONT_SIZE, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == FONT_SIZE_DIMENSION)
+	if ((flags & FLAG_INHERIT) == false && value == FONT_SIZE_DIMENSION)
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
@@ -1568,7 +1568,7 @@ css_error parse_font_size(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == FONT_SIZE_DIMENSION) {
+	if ((flags & FLAG_INHERIT) == false && value == FONT_SIZE_DIMENSION) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
@@ -1772,7 +1772,7 @@ css_error parse_height(css_css21 *c,
 	opv = buildOPV(OP_HEIGHT, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == HEIGHT_SET)
+	if ((flags & FLAG_INHERIT) == false && value == HEIGHT_SET)
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
@@ -1782,7 +1782,7 @@ css_error parse_height(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == HEIGHT_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == HEIGHT_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
@@ -1836,7 +1836,7 @@ css_error parse_left(css_css21 *c,
 	opv = buildOPV(OP_LEFT, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == LEFT_SET)
+	if ((flags & FLAG_INHERIT) == false && value == LEFT_SET)
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
@@ -1846,7 +1846,7 @@ css_error parse_left(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == LEFT_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == LEFT_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
@@ -1901,7 +1901,7 @@ css_error parse_letter_spacing(css_css21 *c,
 	opv = buildOPV(OP_LETTER_SPACING, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == LETTER_SPACING_SET)
+	if ((flags & FLAG_INHERIT) == false && value == LETTER_SPACING_SET)
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
@@ -1911,7 +1911,7 @@ css_error parse_letter_spacing(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == LETTER_SPACING_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == LETTER_SPACING_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
@@ -1972,9 +1972,10 @@ css_error parse_line_height(css_css21 *c,
 	opv = buildOPV(OP_LINE_HEIGHT, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == LINE_HEIGHT_NUMBER)
+	if ((flags & FLAG_INHERIT) == false && value == LINE_HEIGHT_NUMBER)
 		required_size += sizeof(length);
-	else if (value == LINE_HEIGHT_DIMENSION)
+	else if ((flags & FLAG_INHERIT) == false && 
+			value == LINE_HEIGHT_DIMENSION)
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
@@ -1984,10 +1985,11 @@ css_error parse_line_height(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == LINE_HEIGHT_NUMBER || value == LINE_HEIGHT_DIMENSION)
+	if ((flags & FLAG_INHERIT) == false && (value == LINE_HEIGHT_NUMBER || 
+			value == LINE_HEIGHT_DIMENSION))
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
-	if (value == LINE_HEIGHT_DIMENSION)
+	if ((flags & FLAG_INHERIT) == false && value == LINE_HEIGHT_DIMENSION)
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
 				sizeof(length), &unit, sizeof(unit));
 
@@ -2029,7 +2031,7 @@ css_error parse_list_style_image(css_css21 *c,
 	opv = buildOPV(OP_LIST_STYLE_IMAGE, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == LIST_STYLE_IMAGE_URI)
+	if ((flags & FLAG_INHERIT) == false && value == LIST_STYLE_IMAGE_URI)
 		required_size += sizeof(uint8_t *) + sizeof(size_t);
 
 	/* Allocate result */
@@ -2039,7 +2041,7 @@ css_error parse_list_style_image(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == LIST_STYLE_IMAGE_URI) {
+	if ((flags & FLAG_INHERIT) == false && value == LIST_STYLE_IMAGE_URI) {
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&token->data.ptr, sizeof(uint8_t *));
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv) + 
@@ -2234,7 +2236,7 @@ css_error parse_max_height(css_css21 *c,
 	opv = buildOPV(OP_MAX_HEIGHT, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == MAX_HEIGHT_SET)
+	if ((flags & FLAG_INHERIT) == false && value == MAX_HEIGHT_SET)
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
@@ -2244,7 +2246,7 @@ css_error parse_max_height(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == MAX_HEIGHT_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == MAX_HEIGHT_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
@@ -2298,7 +2300,7 @@ css_error parse_max_width(css_css21 *c,
 	opv = buildOPV(OP_MAX_WIDTH, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == MAX_WIDTH_SET)
+	if ((flags & FLAG_INHERIT) == false && value == MAX_WIDTH_SET)
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
@@ -2308,7 +2310,7 @@ css_error parse_max_width(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == MAX_WIDTH_SET) {
+	if ((flags && FLAG_INHERIT) == false && value == MAX_WIDTH_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
@@ -2358,7 +2360,7 @@ css_error parse_min_height(css_css21 *c,
 	opv = buildOPV(OP_MIN_HEIGHT, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == MIN_HEIGHT_SET)
+	if ((flags & FLAG_INHERIT) == false && value == MIN_HEIGHT_SET)
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
@@ -2368,7 +2370,7 @@ css_error parse_min_height(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == MIN_HEIGHT_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == MIN_HEIGHT_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
@@ -2418,7 +2420,7 @@ css_error parse_min_width(css_css21 *c,
 	opv = buildOPV(OP_MIN_WIDTH, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == MIN_WIDTH_SET)
+	if ((flags & FLAG_INHERIT) == false && value == MIN_WIDTH_SET)
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
@@ -2428,7 +2430,7 @@ css_error parse_min_width(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == MIN_WIDTH_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == MIN_WIDTH_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
@@ -2477,7 +2479,7 @@ css_error parse_orphans(css_css21 *c,
 	opv = buildOPV(OP_ORPHANS, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == ORPHANS_SET)
+	if ((flags & FLAG_INHERIT) == false && value == ORPHANS_SET)
 		required_size += sizeof(num);
 
 	/* Allocate result */
@@ -2487,7 +2489,7 @@ css_error parse_orphans(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == ORPHANS_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == ORPHANS_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv), 
 				&num, sizeof(num));
 	}
@@ -2535,7 +2537,7 @@ css_error parse_outline_color(css_css21 *c,
 	opv = buildOPV(OP_OUTLINE_COLOR, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == OUTLINE_COLOR_SET)
+	if ((flags & FLAG_INHERIT) == false && value == OUTLINE_COLOR_SET)
 		required_size += sizeof(colour);
 
 	/* Allocate result */
@@ -2545,7 +2547,7 @@ css_error parse_outline_color(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == OUTLINE_COLOR_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == OUTLINE_COLOR_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&colour, sizeof(colour));
 	}
@@ -2876,7 +2878,7 @@ css_error parse_right(css_css21 *c,
 	opv = buildOPV(OP_RIGHT, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == RIGHT_SET)
+	if ((flags & FLAG_INHERIT) == false && value == RIGHT_SET)
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
@@ -2886,7 +2888,7 @@ css_error parse_right(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == RIGHT_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == RIGHT_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
@@ -3072,7 +3074,7 @@ css_error parse_top(css_css21 *c,
 	opv = buildOPV(OP_TOP, flags, value);
 
 	required_size = sizeof(opv);
-	if (value == TOP_SET)
+	if ((flags & FLAG_INHERIT) == false && value == TOP_SET)
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
@@ -3082,7 +3084,7 @@ css_error parse_top(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == TOP_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == TOP_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
@@ -3317,7 +3319,7 @@ css_error parse_border_side_color(css_css21 *c,
 	opv = buildOPV(OP_BORDER_TRBL_COLOR, flags, value | side);
 
 	required_size = sizeof(opv);
-	if (value == BORDER_COLOR_SET)
+	if ((flags & FLAG_INHERIT) == false && value == BORDER_COLOR_SET)
 		required_size += sizeof(colour);
 
 	/* Allocate result */
@@ -3327,7 +3329,7 @@ css_error parse_border_side_color(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == BORDER_COLOR_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == BORDER_COLOR_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&colour, sizeof(colour));
 	}
@@ -3446,7 +3448,7 @@ css_error parse_border_side_width(css_css21 *c,
 	opv = buildOPV(OP_BORDER_TRBL_WIDTH, flags, value | side);
 
 	required_size = sizeof(opv);
-	if (value == BORDER_WIDTH_SET)
+	if ((flags & FLAG_INHERIT) == false && value == BORDER_WIDTH_SET)
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
@@ -3456,7 +3458,7 @@ css_error parse_border_side_width(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == BORDER_WIDTH_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == BORDER_WIDTH_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
@@ -3510,7 +3512,7 @@ css_error parse_margin_side(css_css21 *c,
 	opv = buildOPV(OP_MARGIN_TRBL, flags, value | side);
 
 	required_size = sizeof(opv);
-	if (value == MARGIN_SET)
+	if ((flags & FLAG_INHERIT) == false && value == MARGIN_SET)
 		required_size += sizeof(length) + sizeof(unit);
 
 	/* Allocate result */
@@ -3520,7 +3522,7 @@ css_error parse_margin_side(css_css21 *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if (value == MARGIN_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == MARGIN_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
