@@ -331,6 +331,9 @@ static inline css_error parse_border_side_width(css_css21 *c,
 static inline css_error parse_margin_side(css_css21 *c,
 		const parserutils_vector *vector, int *ctx,
 		uint16_t side, css_style **result);
+static inline css_error parse_padding_side(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t side, css_style **result);
 
 /**
  * Type of property handler function
@@ -2658,48 +2661,28 @@ css_error parse_padding_bottom(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
-
-	return CSS_OK;
+	return parse_padding_side(c, vector, ctx, SIDE_BOTTOM, result);
 }
 
 css_error parse_padding_left(css_css21 *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
-
-	return CSS_OK;
+	return parse_padding_side(c, vector, ctx, SIDE_LEFT, result);
 }
 
 css_error parse_padding_right(css_css21 *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
-
-	return CSS_OK;
+	return parse_padding_side(c, vector, ctx, SIDE_RIGHT, result);
 }
 
 css_error parse_padding_top(css_css21 *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
-
-	return CSS_OK;
+	return parse_padding_side(c, vector, ctx, SIDE_TOP, result);
 }
 
 css_error parse_page_break_after(css_css21 *c, 
@@ -3531,5 +3514,66 @@ css_error parse_margin_side(css_css21 *c,
 
 	return CSS_OK;
 }
+
+css_error parse_padding_side(css_css21 *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t side, css_style **result)
+{
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	fixed length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+
+	/* length | percentage | IDENT(inherit) */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		if (error != CSS_OK)
+			return error;
+
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+			return CSS_INVALID;
+
+		value = PADDING_SET;
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_PADDING_TRBL, flags, value | side);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == PADDING_SET)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == PADDING_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
+	}
+
+	return CSS_OK;
+}
+
 
 #endif
