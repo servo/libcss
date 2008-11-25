@@ -62,7 +62,7 @@ enum {
 	LIGHTER, INSIDE, OUTSIDE, DISC, CIRCLE, SQUARE, DECIMAL, 
 	DECIMAL_LEADING_ZERO, LOWER_ROMAN, UPPER_ROMAN, LOWER_GREEK,
 	LOWER_LATIN, UPPER_LATIN, ARMENIAN, GEORGIAN, LOWER_ALPHA, UPPER_ALPHA,
-	INVERT,
+	INVERT, VISIBLE,
 
 	LAST_KNOWN
 };
@@ -259,6 +259,7 @@ static struct {
 	{ "lower-alpha", SLEN("lower-alpha") },
 	{ "upper-alpha", SLEN("upper-alpha") },
 	{ "invert", SLEN("invert") },
+	{ "visible", SLEN("visible") },
 };
 
 typedef struct context_entry {
