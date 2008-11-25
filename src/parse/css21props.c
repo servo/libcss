@@ -2847,7 +2847,7 @@ css_error parse_pause_after(css_css21 *c,
 		if (error != CSS_OK)
 			return error;
 
-		if (unit & UNIT_ANGLE || unit & UNIT_PCT || unit & UNIT_FREQ)
+		if ((unit & UNIT_TIME) == false && (unit & UNIT_PCT) == false)
 			return CSS_INVALID;
 
 		value = PAUSE_AFTER_SET;
