@@ -59,7 +59,9 @@ enum {
 	TABLE_CELL, TABLE_CAPTION, BELOW, LEVEL, ABOVE, HIGHER, LOWER,
 	SHOW, HIDE, XX_SMALL, X_SMALL, SMALL, LARGE, X_LARGE, XX_LARGE,
 	LARGER, SMALLER, NORMAL, ITALIC, OBLIQUE, SMALL_CAPS, BOLD, BOLDER,
-	LIGHTER, INSIDE, OUTSIDE,
+	LIGHTER, INSIDE, OUTSIDE, DISC, CIRCLE, SQUARE, DECIMAL, 
+	DECIMAL_LEADING_ZERO, LOWER_ROMAN, UPPER_ROMAN, LOWER_GREEK,
+	LOWER_LATIN, UPPER_LATIN, ARMENIAN, GEORGIAN, LOWER_ALPHA, UPPER_ALPHA,
 
 	LAST_KNOWN
 };
@@ -241,6 +243,20 @@ static struct {
 	{ "lighter", SLEN("lighter") },
 	{ "inside", SLEN("inside") },
 	{ "outside", SLEN("outside") },
+	{ "disc", SLEN("disc") },
+	{ "circle", SLEN("circle") },
+	{ "square", SLEN("square") },
+	{ "decimal", SLEN("decimal") },
+	{ "decimal-leading-zero", SLEN("decimal-leading-zero") },
+	{ "lower-roman", SLEN("lower-roman") },
+	{ "upper-roman", SLEN("upper-roman") },
+	{ "lower-greek", SLEN("lower-greek") },
+	{ "lower-latin", SLEN("lower-latin") },
+	{ "upper-latin", SLEN("upper-latin") },
+	{ "armenian", SLEN("armenian") },
+	{ "georgian", SLEN("georgian") },
+	{ "lower-alpha", SLEN("lower-alpha") },
+	{ "upper-alpha", SLEN("upper-alpha") },
 };
 
 typedef struct context_entry {
