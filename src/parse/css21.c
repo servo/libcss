@@ -63,7 +63,7 @@ enum {
 	DECIMAL_LEADING_ZERO, LOWER_ROMAN, UPPER_ROMAN, LOWER_GREEK,
 	LOWER_LATIN, UPPER_LATIN, ARMENIAN, GEORGIAN, LOWER_ALPHA, UPPER_ALPHA,
 	INVERT, VISIBLE, ALWAYS, AVOID, X_LOW, LOW, HIGH, X_HIGH, STATIC,
-	RELATIVE, ABSOLUTE,
+	RELATIVE, ABSOLUTE, ONCE,
 
 	LAST_KNOWN
 };
@@ -270,6 +270,7 @@ static struct {
 	{ "static", SLEN("static") },
 	{ "relative", SLEN("relative") },
 	{ "absolute", SLEN("absolute") },
+	{ "once", SLEN("once") },
 };
 
 typedef struct context_entry {
