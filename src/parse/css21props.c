@@ -2194,10 +2194,62 @@ css_error parse_max_height(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	fixed length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+
+	/* length | percentage | IDENT(none, inherit) */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[NONE]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = MAX_HEIGHT_NONE;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		if (error != CSS_OK)
+			return error;
+
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+			return CSS_INVALID;
+
+		value = MAX_HEIGHT_SET;
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_MAX_HEIGHT, flags, value);
+
+	required_size = sizeof(opv);
+	if (value == MAX_HEIGHT_SET)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if (value == MAX_HEIGHT_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
+	}
 
 	return CSS_OK;
 }
@@ -2206,10 +2258,62 @@ css_error parse_max_width(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	fixed length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+
+	/* length | percentage | IDENT(none, inherit) */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[NONE]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = MAX_WIDTH_NONE;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		if (error != CSS_OK)
+			return error;
+
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+			return CSS_INVALID;
+
+		value = MAX_WIDTH_SET;
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_MAX_WIDTH, flags, value);
+
+	required_size = sizeof(opv);
+	if (value == MAX_WIDTH_SET)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if (value == MAX_WIDTH_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
+	}
 
 	return CSS_OK;
 }
@@ -2218,10 +2322,58 @@ css_error parse_min_height(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	fixed length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+
+	/* length | percentage | IDENT(inherit) */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		if (error != CSS_OK)
+			return error;
+
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+			return CSS_INVALID;
+
+		value = MIN_HEIGHT_SET;
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_MIN_HEIGHT, flags, value);
+
+	required_size = sizeof(opv);
+	if (value == MIN_HEIGHT_SET)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if (value == MIN_HEIGHT_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
+	}
 
 	return CSS_OK;
 }
@@ -2230,10 +2382,58 @@ css_error parse_min_width(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	fixed length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+
+	/* length | percentage | IDENT(inherit) */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		if (error != CSS_OK)
+			return error;
+
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+			return CSS_INVALID;
+
+		value = MIN_WIDTH_SET;
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_MIN_WIDTH, flags, value);
+
+	required_size = sizeof(opv);
+	if (value == MIN_WIDTH_SET)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if (value == MIN_WIDTH_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
+	}
 
 	return CSS_OK;
 }
@@ -2242,10 +2442,55 @@ css_error parse_orphans(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	fixed num = 0;
+	uint32_t required_size;
+
+	/* <integer> | IDENT (inherit) */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			token->type != CSS_TOKEN_NUMBER))
+		return CSS_INVALID;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	if (token->lower.ptr == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_NUMBER) {
+		size_t consumed = 0;
+		num = number_from_css_string(&token->lower, &consumed);
+		int32_t intpart = FIXTOINT(num);
+		/* Invalid if there are trailing characters or it was a float */
+		if (consumed != token->lower.len || num != intpart)
+			return CSS_INVALID;
+
+		value = ORPHANS_SET;
+	} else
+		return CSS_INVALID;
+
+	opv = buildOPV(OP_ORPHANS, flags, value);
+
+	required_size = sizeof(opv);
+	if (value == ORPHANS_SET)
+		required_size += sizeof(num);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if (value == ORPHANS_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv), 
+				&num, sizeof(num));
+	}
 
 	return CSS_OK;
 }
@@ -2254,10 +2499,56 @@ css_error parse_outline_color(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	uint32_t colour = 0;
+	uint32_t required_size;
+
+	/* colour | IDENT (invert, inherit) */
+	token= parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT && 
+			token->lower.ptr == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags |= FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[INVERT]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = OUTLINE_COLOR_INVERT;
+	} else {
+		error = parse_colour_specifier(c, vector, ctx, &colour);
+		if (error != CSS_OK)
+			return error;
+
+		value = OUTLINE_COLOR_SET;
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_OUTLINE_COLOR, flags, value);
+
+	required_size = sizeof(opv);
+	if (value == OUTLINE_COLOR_SET)
+		required_size += sizeof(colour);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if (value == OUTLINE_COLOR_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&colour, sizeof(colour));
+	}
 
 	return CSS_OK;
 }
@@ -2266,10 +2557,25 @@ css_error parse_outline_style(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	uint32_t opv;
+	uint8_t flags;
+	uint16_t value;
+
+	/* Fake as border-left-style */
+	error = parse_border_side_style(c, vector, ctx, SIDE_LEFT, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Then change the opcode to outline-style, and clear the side bits */
+	opv = *((uint32_t *) (*result)->bytecode);
+
+	flags = getFlags(opv);
+	value = getValue(opv) & ~SIDE_LEFT;
+
+	opv = buildOPV(OP_OUTLINE_STYLE, flags, value);
+
+	*((uint32_t *) (*result)->bytecode) = opv;
 
 	return CSS_OK;
 }
@@ -3110,7 +3416,6 @@ css_error parse_border_side_width(css_css21 *c,
 	}
 
 	return CSS_OK;
-
 }
 
 css_error parse_margin_side(css_css21 *c,
