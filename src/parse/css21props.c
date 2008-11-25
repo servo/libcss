@@ -3839,10 +3839,41 @@ css_error parse_unicode_bidi(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *ident;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+
+	/* IDENT (normal, embed, bidi-override, inherit) */
+	ident = parserutils_vector_iterate(vector, ctx);
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+		return CSS_INVALID;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	if (ident->lower.ptr == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (ident->lower.ptr == c->strings[NORMAL]) {
+		value = UNICODE_BIDI_NORMAL;
+	} else if (ident->lower.ptr == c->strings[EMBED]) {
+		value = UNICODE_BIDI_EMBED;
+	} else if (ident->lower.ptr == c->strings[BIDI_OVERRIDE]) {
+		value = UNICODE_BIDI_BIDI_OVERRIDE;
+	} else
+		return CSS_INVALID;
+
+	opv = buildOPV(OP_UNICODE_BIDI, flags, value);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
 
 	return CSS_OK;
 }

@@ -65,7 +65,7 @@ enum {
 	INVERT, VISIBLE, ALWAYS, AVOID, X_LOW, LOW, HIGH, X_HIGH, STATIC,
 	RELATIVE, ABSOLUTE, ONCE, DIGITS, CONTINUOUS, CODE, SPELL_OUT, X_SLOW,
 	SLOW, FAST, X_FAST, FASTER, SLOWER, CENTER, JUSTIFY, CAPITALIZE,
-	UPPERCASE, LOWERCASE,
+	UPPERCASE, LOWERCASE, EMBED, BIDI_OVERRIDE,
 
 	LAST_KNOWN
 };
@@ -288,6 +288,8 @@ static struct {
 	{ "capitalize", SLEN("capitalize") },
 	{ "uppercase", SLEN("uppercase") },
 	{ "lowercase", SLEN("lowercase") },
+	{ "embed", SLEN("embed") },
+	{ "bidi-override", SLEN("bidi-override") },
 };
 
 typedef struct context_entry {
