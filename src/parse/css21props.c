@@ -3075,6 +3075,8 @@ css_error parse_play_during(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	/** \todo play-during */
+
 	UNUSED(c);
 	UNUSED(vector);
 	UNUSED(ctx);
@@ -3087,10 +3089,43 @@ css_error parse_position(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *ident;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+
+	/* IDENT (static, relative, absolute, fixed, inherit) */
+	ident = parserutils_vector_iterate(vector, ctx);
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+		return CSS_INVALID;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	if (ident->lower.ptr == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (ident->lower.ptr == c->strings[STATIC]) {
+		value = POSITION_STATIC;
+	} else if (ident->lower.ptr == c->strings[RELATIVE]) {
+		value = POSITION_RELATIVE;
+	} else if (ident->lower.ptr == c->strings[ABSOLUTE]) {
+		value = POSITION_ABSOLUTE;
+	} else if (ident->lower.ptr == c->strings[FIXED]) {
+		value = POSITION_FIXED;
+	} else
+		return CSS_INVALID;
+
+	opv = buildOPV(OP_POSITION, flags, value);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
 
 	return CSS_OK;
 }

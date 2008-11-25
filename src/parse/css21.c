@@ -62,7 +62,8 @@ enum {
 	LIGHTER, INSIDE, OUTSIDE, DISC, CIRCLE, SQUARE, DECIMAL, 
 	DECIMAL_LEADING_ZERO, LOWER_ROMAN, UPPER_ROMAN, LOWER_GREEK,
 	LOWER_LATIN, UPPER_LATIN, ARMENIAN, GEORGIAN, LOWER_ALPHA, UPPER_ALPHA,
-	INVERT, VISIBLE, ALWAYS, AVOID, X_LOW, LOW, HIGH, X_HIGH,
+	INVERT, VISIBLE, ALWAYS, AVOID, X_LOW, LOW, HIGH, X_HIGH, STATIC,
+	RELATIVE, ABSOLUTE,
 
 	LAST_KNOWN
 };
@@ -266,6 +267,9 @@ static struct {
 	{ "low", SLEN("low") },
 	{ "high", SLEN("high") },
 	{ "x-high", SLEN("x-high") },
+	{ "static", SLEN("static") },
+	{ "relative", SLEN("relative") },
+	{ "absolute", SLEN("absolute") },
 };
 
 typedef struct context_entry {
