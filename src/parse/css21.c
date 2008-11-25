@@ -59,7 +59,7 @@ enum {
 	TABLE_CELL, TABLE_CAPTION, BELOW, LEVEL, ABOVE, HIGHER, LOWER,
 	SHOW, HIDE, XX_SMALL, X_SMALL, SMALL, LARGE, X_LARGE, XX_LARGE,
 	LARGER, SMALLER, NORMAL, ITALIC, OBLIQUE, SMALL_CAPS, BOLD, BOLDER,
-	LIGHTER,
+	LIGHTER, INSIDE, OUTSIDE,
 
 	LAST_KNOWN
 };
@@ -239,6 +239,8 @@ static struct {
 	{ "bold", SLEN("bold") },
 	{ "bolder", SLEN("bolder") },
 	{ "lighter", SLEN("lighter") },
+	{ "inside", SLEN("inside") },
+	{ "outside", SLEN("outside") },
 };
 
 typedef struct context_entry {
