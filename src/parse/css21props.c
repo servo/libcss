@@ -1995,10 +1995,54 @@ css_error parse_list_style_image(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	uint32_t required_size;
+
+	/* URI | IDENT (none, inherit) */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			token->type != CSS_TOKEN_URI))
+		return CSS_INVALID;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	if (token->type == CSS_TOKEN_IDENT && 
+			token->lower.ptr == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT && 
+			token->lower.ptr == c->strings[NONE]) {
+		value = LIST_STYLE_IMAGE_NONE;
+	} else if (token->type == CSS_TOKEN_URI) {
+		value = LIST_STYLE_IMAGE_URI;
+	} else
+		return CSS_INVALID;
+
+	opv = buildOPV(OP_LIST_STYLE_IMAGE, flags, value);
+
+	required_size = sizeof(opv);
+	if (value == LIST_STYLE_IMAGE_URI)
+		required_size += sizeof(uint8_t *) + sizeof(size_t);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if (value == LIST_STYLE_IMAGE_URI) {
+		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
+				&token->data.ptr, sizeof(uint8_t *));
+		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv) + 
+					sizeof(uint8_t *),
+				&token->data.len, sizeof(size_t));
+	}
 
 	return CSS_OK;
 }
