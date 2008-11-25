@@ -3391,10 +3391,41 @@ css_error parse_speak(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *ident;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+
+	/* IDENT (normal, none, spell-out, inherit) */
+	ident = parserutils_vector_iterate(vector, ctx);
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+		return CSS_INVALID;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	if (ident->lower.ptr == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (ident->lower.ptr == c->strings[NORMAL]) {
+		value = SPEAK_NORMAL;
+	} else if (ident->lower.ptr == c->strings[NONE]) {
+		value = SPEAK_NONE;
+	} else if (ident->lower.ptr == c->strings[SPELL_OUT]) {
+		value = SPEAK_SPELL_OUT;
+	} else
+		return CSS_INVALID;
+
+	opv = buildOPV(OP_SPEAK, flags, value);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
 
 	return CSS_OK;
 }
