@@ -3434,10 +3434,78 @@ css_error parse_speech_rate(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	fixed num = 0;
+	uint32_t required_size;
+
+	/* number | IDENT (x-slow, slow, medium, fast, x-fast, faster, slower, 
+	 *                 inherit)
+	 */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			token->type != CSS_TOKEN_NUMBER))
+		return CSS_INVALID;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[X_SLOW]) {
+		value = SPEECH_RATE_X_SLOW;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[SLOW]) {
+		value = SPEECH_RATE_SLOW;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[MEDIUM]) {
+		value = SPEECH_RATE_MEDIUM;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[FAST]) {
+		value = SPEECH_RATE_FAST;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[X_FAST]) {
+		value = SPEECH_RATE_X_FAST;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[FASTER]) {
+		value = SPEECH_RATE_FASTER;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[SLOWER]) {
+		value = SPEECH_RATE_SLOWER;
+	} else if (token->type == CSS_TOKEN_NUMBER) {
+		size_t consumed = 0;
+		num = number_from_css_string(&token->lower, &consumed);
+		/* Invalid if there are trailing characters */
+		if (consumed != token->lower.len)
+			return CSS_INVALID;
+
+		value = SPEECH_RATE_SET;
+	} else
+		return CSS_INVALID;
+
+	opv = buildOPV(OP_SPEECH_RATE, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == SPEECH_RATE_SET)
+		required_size += sizeof(num);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == SPEECH_RATE_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv), 
+				&num, sizeof(num));
+	}
 
 	return CSS_OK;
 }

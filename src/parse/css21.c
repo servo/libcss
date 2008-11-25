@@ -63,7 +63,8 @@ enum {
 	DECIMAL_LEADING_ZERO, LOWER_ROMAN, UPPER_ROMAN, LOWER_GREEK,
 	LOWER_LATIN, UPPER_LATIN, ARMENIAN, GEORGIAN, LOWER_ALPHA, UPPER_ALPHA,
 	INVERT, VISIBLE, ALWAYS, AVOID, X_LOW, LOW, HIGH, X_HIGH, STATIC,
-	RELATIVE, ABSOLUTE, ONCE, DIGITS, CONTINUOUS, CODE, SPELL_OUT,
+	RELATIVE, ABSOLUTE, ONCE, DIGITS, CONTINUOUS, CODE, SPELL_OUT, X_SLOW,
+	SLOW, FAST, X_FAST, FASTER, SLOWER,
 
 	LAST_KNOWN
 };
@@ -275,6 +276,12 @@ static struct {
 	{ "continuous", SLEN("continuous") },
 	{ "code", SLEN("code") },
 	{ "spell-out", SLEN("spell-out") },
+	{ "x-slow", SLEN("x-slow") },
+	{ "slow", SLEN("slow") },
+	{ "fast", SLEN("fast") },
+	{ "x-fast", SLEN("x-fast") },
+	{ "faster", SLEN("faster") },
+	{ "slower", SLEN("slower") },
 };
 
 typedef struct context_entry {
