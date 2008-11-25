@@ -2584,10 +2584,25 @@ css_error parse_outline_width(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	uint32_t opv;
+	uint8_t flags;
+	uint16_t value;
+
+	/* Fake as border-left-width */
+	error = parse_border_side_width(c, vector, ctx, SIDE_LEFT, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Then change the opcode to outline-width, and clear the side bits */
+	opv = *((uint32_t *) (*result)->bytecode);
+
+	flags = getFlags(opv);
+	value = getValue(opv) & ~SIDE_LEFT;
+
+	opv = buildOPV(OP_OUTLINE_WIDTH, flags, value);
+
+	*((uint32_t *) (*result)->bytecode) = opv;
 
 	return CSS_OK;
 }
