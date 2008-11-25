@@ -417,7 +417,7 @@ enum op_page_break_before {
 
 enum op_page_break_inside {
 	PAGE_BREAK_INSIDE_AUTO		= 0x0000,
-	PAGE_BREAK_INSIDE_ALWAYS	= 0x0001,
+	PAGE_BREAK_INSIDE_AVOID		= 0x0001,
 };
 
 enum op_pause_after {
