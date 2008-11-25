@@ -3000,10 +3000,73 @@ css_error parse_pitch(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	fixed length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+
+	/* frequency | IDENT(x-low, low, medium, high, x-high, inherit) */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[X_LOW]) {
+		value = PITCH_X_LOW;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[LOW]) {
+		value = PITCH_LOW;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[MEDIUM]) {
+		value = PITCH_MEDIUM;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[HIGH]) {
+		value = PITCH_HIGH;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[X_HIGH]) {
+		value = PITCH_X_HIGH;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		if (error != CSS_OK)
+			return error;
+
+		if ((unit & UNIT_FREQ) == false)
+			return CSS_INVALID;
+
+		value = PITCH_FREQUENCY;
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_PITCH, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == PITCH_FREQUENCY)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == PITCH_FREQUENCY) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
+	}
 
 	return CSS_OK;
 }
