@@ -67,6 +67,7 @@ enum {
 	SLOW, FAST, X_FAST, FASTER, SLOWER, CENTER, JUSTIFY, CAPITALIZE,
 	UPPERCASE, LOWERCASE, EMBED, BIDI_OVERRIDE, BASELINE, SUB, SUPER,
 	TEXT_TOP, MIDDLE, TEXT_BOTTOM, SILENT, X_SOFT, SOFT, LOUD, X_LOUD,
+	PRE, NOWRAP, PRE_WRAP, PRE_LINE,
 
 	LAST_KNOWN
 };
@@ -302,6 +303,10 @@ static struct {
 	{ "soft", SLEN("soft") },
 	{ "loud", SLEN("loud") },
 	{ "x-loud", SLEN("x-loud") },
+	{ "pre", SLEN("pre") },
+	{ "nowrap", SLEN("nowrap") },
+	{ "pre-wrap", SLEN("pre-wrap") },
+	{ "pre-line", SLEN("pre-line") },
 };
 
 typedef struct context_entry {
