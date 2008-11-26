@@ -66,7 +66,7 @@ enum {
 	RELATIVE, ABSOLUTE, ONCE, DIGITS, CONTINUOUS, CODE, SPELL_OUT, X_SLOW,
 	SLOW, FAST, X_FAST, FASTER, SLOWER, CENTER, JUSTIFY, CAPITALIZE,
 	UPPERCASE, LOWERCASE, EMBED, BIDI_OVERRIDE, BASELINE, SUB, SUPER,
-	TEXT_TOP, MIDDLE, TEXT_BOTTOM,
+	TEXT_TOP, MIDDLE, TEXT_BOTTOM, SILENT, X_SOFT, SOFT, LOUD, X_LOUD,
 
 	LAST_KNOWN
 };
@@ -297,6 +297,11 @@ static struct {
 	{ "text-top", SLEN("text-top") },
 	{ "middle", SLEN("middle") },
 	{ "text-bottom", SLEN("text-bottom") },
+	{ "silent", SLEN("silent") },
+	{ "x-soft", SLEN("x-soft") },
+	{ "soft", SLEN("soft") },
+	{ "loud", SLEN("loud") },
+	{ "x-loud", SLEN("x-loud") },
 };
 
 typedef struct context_entry {

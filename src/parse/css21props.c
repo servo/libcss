@@ -4019,6 +4019,8 @@ css_error parse_voice_family(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	/** \todo voice-family */
+
 	UNUSED(c);
 	UNUSED(vector);
 	UNUSED(ctx);
@@ -4031,10 +4033,94 @@ css_error parse_volume(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	fixed length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+
+	/* number | percentage | IDENT(silent, x-soft, soft, medium, loud, 
+	 *                             x-loud, inherit)
+	 */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[SILENT]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = VOLUME_SILENT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[X_SOFT]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = VOLUME_X_SOFT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[SOFT]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = VOLUME_SOFT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[MEDIUM]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = VOLUME_MEDIUM;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[LOUD]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = VOLUME_LOUD;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[X_LOUD]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = VOLUME_X_LOUD;
+	} else if (token->type == CSS_TOKEN_NUMBER) {
+		size_t consumed = 0;
+		length = number_from_css_string(&token->lower, &consumed);
+		if (consumed != token->lower.len)
+			return CSS_INVALID;
+
+		value = VOLUME_NUMBER;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		if (error != CSS_OK)
+			return error;
+
+		if ((unit & UNIT_PCT) == false)
+			return CSS_INVALID;
+
+		value = VOLUME_DIMENSION;
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_VOLUME, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == VOLUME_NUMBER)
+		required_size += sizeof(length);
+	else if ((flags & FLAG_INHERIT) == false && value == VOLUME_DIMENSION)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && (value == VOLUME_NUMBER || 
+			value == VOLUME_DIMENSION))
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+	if ((flags & FLAG_INHERIT) == false && value == VOLUME_DIMENSION)
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
 
 	return CSS_OK;
 }
