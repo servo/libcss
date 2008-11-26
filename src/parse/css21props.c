@@ -3882,10 +3882,92 @@ css_error parse_vertical_align(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	fixed length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+
+	/* length | percentage | IDENT(baseline, sub, super, top, text-top,
+	 *                             middle, bottom, text-bottom, inherit)
+	 */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[BASELINE]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = VERTICAL_ALIGN_BASELINE;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[SUB]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = VERTICAL_ALIGN_SUB;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[SUPER]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = VERTICAL_ALIGN_SUPER;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[TOP]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = VERTICAL_ALIGN_TOP;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[TEXT_TOP]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = VERTICAL_ALIGN_TEXT_TOP;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[MIDDLE]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = VERTICAL_ALIGN_MIDDLE;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[BOTTOM]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = VERTICAL_ALIGN_BOTTOM;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->lower.ptr == c->strings[TEXT_BOTTOM]) {
+		parserutils_vector_iterate(vector, ctx);
+		value = VERTICAL_ALIGN_TEXT_BOTTOM;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		if (error != CSS_OK)
+			return error;
+
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+			return CSS_INVALID;
+
+		value = VERTICAL_ALIGN_SET;
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_VERTICAL_ALIGN, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == VERTICAL_ALIGN_SET)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == VERTICAL_ALIGN_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
+	}
 
 	return CSS_OK;
 }
