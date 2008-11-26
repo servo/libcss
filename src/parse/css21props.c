@@ -4176,10 +4176,55 @@ css_error parse_widows(css_css21 *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	fixed num = 0;
+	uint32_t required_size;
+
+	/* <integer> | IDENT (inherit) */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			token->type != CSS_TOKEN_NUMBER))
+		return CSS_INVALID;
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	if (token->lower.ptr == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_NUMBER) {
+		size_t consumed = 0;
+		num = number_from_css_string(&token->lower, &consumed);
+		int32_t intpart = FIXTOINT(num);
+		/* Invalid if there are trailing characters or it was a float */
+		if (consumed != token->lower.len || num != intpart)
+			return CSS_INVALID;
+
+		value = WIDOWS_SET;
+	} else
+		return CSS_INVALID;
+
+	opv = buildOPV(OP_WIDOWS, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == WIDOWS_SET)
+		required_size += sizeof(num);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == WIDOWS_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv), 
+				&num, sizeof(num));
+	}
 
 	return CSS_OK;
 }
