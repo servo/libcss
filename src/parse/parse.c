@@ -579,7 +579,8 @@ css_error getToken(css_parser *parser, const css_token **token)
 		if (error != CSS_OK)
 			return error;
 
-		if (t->data.ptr != NULL && t->data.len > 0) {
+		if (t->type != CSS_TOKEN_S &&
+				t->data.ptr != NULL && t->data.len > 0) {
 			/* Insert token text into the dictionary */
 			const parserutils_dict_entry *interned;
 			uint8_t temp[t->data.len];
@@ -635,6 +636,9 @@ css_error getToken(css_parser *parser, const css_token **token)
 
 			t->data.ptr = interned->data;
 			t->data.len = interned->len;
+		} else if (t->type == CSS_TOKEN_S) {
+			t->data.ptr = t->lower.ptr = NULL;
+			t->data.len = t->lower.len = 0;
 		}
 
 		*token = t;
