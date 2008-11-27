@@ -660,9 +660,12 @@ css_error css_stylesheet_remove_rule(css_stylesheet *sheet, css_rule *rule)
 	return CSS_OK;
 }
 
-static void css_stylesheet_dump_rule(css_rule *rule, FILE *target);
-static void css_stylesheet_dump_selector_list(css_selector *list, FILE *target);
-static void css_stylesheet_dump_selector(css_selector *selector, FILE *target);
+static void css_stylesheet_dump_rule(css_rule *rule, FILE *target, 
+		size_t *size);
+static void css_stylesheet_dump_selector_list(css_selector *list, FILE *target,
+		size_t *size);
+static void css_stylesheet_dump_selector(css_selector *selector, FILE *target,
+		size_t *size);
 static void css_stylesheet_dump_string(css_string *string, FILE *target);
 
 /**
@@ -674,6 +677,7 @@ static void css_stylesheet_dump_string(css_string *string, FILE *target);
 void css_stylesheet_dump(css_stylesheet *sheet, FILE *target)
 {
 	css_rule *r;
+	size_t size = sizeof(css_stylesheet);
 
 	if (sheet == NULL || target == NULL)
 		return;
@@ -686,7 +690,9 @@ void css_stylesheet_dump(css_stylesheet *sheet, FILE *target)
 	fprintf(target, "Rules:\n");
 
 	for (r = sheet->rule_list; r != NULL; r = r->next)
-		css_stylesheet_dump_rule(r, target);
+		css_stylesheet_dump_rule(r, target, &size);
+
+	fprintf(target, "Total size: %zu bytes\n", size);
 }
 
 /**
@@ -694,9 +700,12 @@ void css_stylesheet_dump(css_stylesheet *sheet, FILE *target)
  *
  * \param rule    The rule to dump
  * \param target  The file handle to output to
+ * \param size    Pointer to current size of sheet, updated on exit
  */
-void css_stylesheet_dump_rule(css_rule *rule, FILE *target)
+void css_stylesheet_dump_rule(css_rule *rule, FILE *target, size_t *size)
 {
+	*size += sizeof(css_rule);
+
 	fprintf(target, "  Rule %d (type %d):\n",
 			rule->index, rule->type);
 
@@ -709,12 +718,14 @@ void css_stylesheet_dump_rule(css_rule *rule, FILE *target)
 		for (uint32_t i = 0; i < rule->data.selector.selector_count;
 				i++) {
 			css_stylesheet_dump_selector_list(
-				rule->data.selector.selectors[i], target);
+				rule->data.selector.selectors[i], target, size);
 			if (i != rule->data.selector.selector_count - 1)
 				fprintf(target, ", ");
 		}
 		fprintf(target, " { ");
 		if (rule->data.selector.style != NULL) {
+			*size += rule->data.selector.style->length;
+
 			css_bytecode_dump(rule->data.selector.style->bytecode,
 				rule->data.selector.style->length, target);
 		}
@@ -736,11 +747,15 @@ void css_stylesheet_dump_rule(css_rule *rule, FILE *target)
  *
  * \param list    The selector list to dump
  * \param target  The file handle to output to
+ * \param size    Pointer to current size of sheet, updated on exit
  */
-void css_stylesheet_dump_selector_list(css_selector *list, FILE *target)
+void css_stylesheet_dump_selector_list(css_selector *list, FILE *target, 
+		size_t *size)
 {
-	if (list->combinator != NULL)
-		css_stylesheet_dump_selector_list(list->combinator, target);
+	if (list->combinator != NULL) {
+		css_stylesheet_dump_selector_list(list->combinator, target, 
+				size);
+	}
 
 	switch (list->combinator_type) {
 	case CSS_COMBINATOR_NONE:
@@ -756,7 +771,7 @@ void css_stylesheet_dump_selector_list(css_selector *list, FILE *target)
 		break;
 	}
 
-	css_stylesheet_dump_selector(list, target);
+	css_stylesheet_dump_selector(list, target, size);
 }
 
 /**
@@ -764,10 +779,14 @@ void css_stylesheet_dump_selector_list(css_selector *list, FILE *target)
  *
  * \param selector  The selector to dump
  * \param target    The file handle to output to
+ * \param size      Pointer to current size of sheet, updated on exit
  */
-void css_stylesheet_dump_selector(css_selector *selector, FILE *target)
+void css_stylesheet_dump_selector(css_selector *selector, FILE *target,
+		size_t *size)
 {
 	css_selector *s;
+
+	*size += sizeof(css_selector);
 
 	switch (selector->type) {
 	case CSS_SELECTOR_ELEMENT:
@@ -829,7 +848,7 @@ void css_stylesheet_dump_selector(css_selector *selector, FILE *target)
 	}
 
 	for (s = selector->specifics; s != NULL; s = s->next)
-		css_stylesheet_dump_selector(s, target);
+		css_stylesheet_dump_selector(s, target, size);
 }
 
 /**
