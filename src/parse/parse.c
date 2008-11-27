@@ -174,17 +174,19 @@ static css_error (*parseFuncs[])(css_parser *parser) = {
 /**
  * Create a CSS parser
  *
- * \param charset    Charset of data, if known, or NULL
- * \param cs_source  Source of charset information, or CSS_CHARSET_DEFAULT
- * \param alloc      Memory (de)allocation function
- * \param pw         Pointer to client-specific private data
- * \param parser     Pointer to location to receive parser instance
+ * \param charset     Charset of data, if known, or NULL
+ * \param cs_source   Source of charset information, or CSS_CHARSET_DEFAULT
+ * \param dictionary  Dictionary in which to intern strings (not copied)
+ * \param alloc       Memory (de)allocation function
+ * \param pw          Pointer to client-specific private data
+ * \param parser      Pointer to location to receive parser instance
  * \return CSS_OK on success,
  *         CSS_BADPARM on bad parameters,
  *         CSS_NOMEM on memory exhaustion
  */
 css_error css_parser_create(const char *charset, css_charset_source cs_source,
-		css_alloc alloc, void *pw, css_parser **parser)
+		parserutils_dict *dictionary, css_alloc alloc, void *pw, 
+		css_parser **parser)
 {
 	css_parser *p;
 	parser_state initial = { sStart, 0 };
@@ -223,21 +225,12 @@ css_error css_parser_create(const char *charset, css_charset_source cs_source,
 		return css_error_from_parserutils_error(perror);
 	}
 
-	perror = parserutils_dict_create((parserutils_alloc) alloc, pw,
-			&p->dictionary);
-	if (perror != PARSERUTILS_OK) {
-		parserutils_stack_destroy(p->states);
-		css_lexer_destroy(p->lexer);
-		parserutils_inputstream_destroy(p->stream);
-		alloc(p, 0, pw);
-		return css_error_from_parserutils_error(perror);
-	}
+	p->dictionary = dictionary;
 
 	perror = parserutils_vector_create(sizeof(css_token), 
 			STACK_CHUNK, (parserutils_alloc) alloc, pw,
 			&p->tokens);
 	if (perror != PARSERUTILS_OK) {
-		parserutils_dict_destroy(p->dictionary);
 		parserutils_stack_destroy(p->states);
 		css_lexer_destroy(p->lexer);
 		parserutils_inputstream_destroy(p->stream);
@@ -261,7 +254,6 @@ css_error css_parser_create(const char *charset, css_charset_source cs_source,
 	if (perror != PARSERUTILS_OK) {
 		parserutils_stack_destroy(p->open_items);
 		parserutils_vector_destroy(p->tokens);
-		parserutils_dict_destroy(p->dictionary);
 		parserutils_stack_destroy(p->states);
 		css_lexer_destroy(p->lexer);
 		parserutils_inputstream_destroy(p->stream);
@@ -297,8 +289,6 @@ css_error css_parser_destroy(css_parser *parser)
 	parserutils_stack_destroy(parser->open_items);
 
 	parserutils_vector_destroy(parser->tokens);
-
-	parserutils_dict_destroy(parser->dictionary);
 
 	parserutils_stack_destroy(parser->states);
 
@@ -423,20 +413,20 @@ const char *css_parser_read_charset(css_parser *parser,
  * Add an entry to the parser dictionary
  *
  * \param parser  The parser instance
- * \param ptr     Pointer to data
+ * \param data     Pointer to data
  * \param len     Length, in bytes, of data
  * \return Pointer to data in dictionary, or NULL on memory exhaustion
  */
-const uint8_t *css_parser_dict_add(css_parser *parser, const uint8_t *ptr,
+const uint8_t *css_parser_dict_add(css_parser *parser, const uint8_t *data,
 		size_t len)
 {
 	const parserutils_dict_entry *interned;
 	parserutils_error perror;
 
-	if (parser == NULL || ptr == NULL || len == 0)
+	if (parser == NULL || data == NULL || len == 0)
 		return NULL;
 
-	perror = parserutils_dict_insert(parser->dictionary, ptr, len, 
+	perror = parserutils_dict_insert(parser->dictionary, data, len, 
 			&interned);
 	if (perror != PARSERUTILS_OK)
 		return NULL;
@@ -580,7 +570,7 @@ css_error getToken(css_parser *parser, const css_token **token)
 			return error;
 
 		if (t->type != CSS_TOKEN_S &&
-				t->data.ptr != NULL && t->data.len > 0) {
+				t->data.data != NULL && t->data.len > 0) {
 			/* Insert token text into the dictionary */
 			const parserutils_dict_entry *interned;
 			uint8_t temp[t->data.len];
@@ -592,8 +582,8 @@ css_error getToken(css_parser *parser, const css_token **token)
 			case CSS_TOKEN_HASH:
 			case CSS_TOKEN_FUNCTION:
 				for (size_t i = 0; i < t->data.len; i++) {
-					temp[i] = tolower(t->data.ptr[i]);
-					if (temp[i] != t->data.ptr[i])
+					temp[i] = tolower(t->data.data[i]);
+					if (temp[i] != t->data.data[i])
 						lower = true;
 				}
 				break;
@@ -614,30 +604,30 @@ css_error getToken(css_parser *parser, const css_token **token)
 							perror);
 				}
 
-				t->lower.ptr = interned->data;
+				t->lower.data = interned->data;
 				t->lower.len = interned->len;
 
 				perror = parserutils_dict_insert(
 						parser->dictionary,
-						t->data.ptr, t->data.len,
+						t->data.data, t->data.len,
 						&interned);
 			} else {
 				/* Otherwise, we're not interested in case */
 				perror = parserutils_dict_insert(
 						parser->dictionary,
-						t->data.ptr, t->data.len, 
+						t->data.data, t->data.len, 
 						&interned);
 
-				t->lower.ptr = interned->data;
+				t->lower.data = interned->data;
 				t->lower.len = interned->len;
 			}
 			if (perror != PARSERUTILS_OK)
 				return css_error_from_parserutils_error(perror);
 
-			t->data.ptr = interned->data;
+			t->data.data = interned->data;
 			t->data.len = interned->len;
 		} else if (t->type == CSS_TOKEN_S) {
-			t->data.ptr = t->lower.ptr = NULL;
+			t->data.data = t->lower.data = NULL;
 			t->data.len = t->lower.len = 0;
 		}
 
@@ -863,7 +853,7 @@ css_error parseRuleset(css_parser *parser)
 		 * brace. We're going to assume that that won't happen, 
 		 * however. */
 		if (token->type == CSS_TOKEN_CHAR && token->lower.len == 1 && 
-				token->lower.ptr[0] == '{') {
+				token->lower.data[0] == '{') {
 #if !defined(NDEBUG) && defined(DEBUG_EVENTS)
 			printf("Begin ruleset\n");
 #endif
@@ -914,7 +904,7 @@ css_error parseRuleset(css_parser *parser)
 			return error;
 
 		if (token->type != CSS_TOKEN_CHAR || token->lower.len != 1 ||
-				token->lower.ptr[0] != '{') {
+				token->lower.data[0] != '{') {
 			/* This should never happen, as FOLLOW(selector) 
 			 * contains only '{' */
 			assert(0 && "Expected {");
@@ -979,7 +969,7 @@ css_error parseRulesetEnd(css_parser *parser)
 			return error;
 
 		if (token->type != CSS_TOKEN_CHAR || token->lower.len != 1 ||
-				token->lower.ptr[0] != '}') {
+				token->lower.data[0] != '}') {
 			/* This should never happen, as FOLLOW(decl-list)
 			 * contains only '}' */
 			assert(0 && "Expected }");
@@ -1054,8 +1044,8 @@ css_error parseAtRule(css_parser *parser)
 		/* Grammar ambiguity: any0 can be followed by '{',';',')',']'. 
 		 * at-rule can only be followed by '{' and ';'. */
 		if (token->type == CSS_TOKEN_CHAR && token->lower.len == 1) {
-			if (token->lower.ptr[0] == ')' ||
-					token->lower.ptr[0] == ']') {
+			if (token->lower.data[0] == ')' ||
+					token->lower.data[0] == ']') {
 				parser_state to = { sAny0, Initial };
 				parser_state subsequent = { sAtRule, AfterAny };
 
@@ -1111,7 +1101,7 @@ css_error parseAtRuleEnd(css_parser *parser)
 			assert(0 && "Expected { or ;");
 		}
 		
-		if (token->lower.ptr[0] == '{') {
+		if (token->lower.data[0] == '{') {
 			parser_state to = { sBlock, Initial };
 			parser_state subsequent = { sAtRuleEnd, AfterBlock };
 
@@ -1120,7 +1110,7 @@ css_error parseAtRuleEnd(css_parser *parser)
 				return error;
 
 			return transition(parser, to, subsequent);
-		} else if (token->lower.ptr[0] != ';') {
+		} else if (token->lower.data[0] != ';') {
 			/* Again, should never happen */
 			assert(0 && "Expected ;");
 		}
@@ -1173,7 +1163,7 @@ css_error parseBlock(css_parser *parser)
 		parserutils_vector_clear(parser->tokens);
 
 		if (token->type != CSS_TOKEN_CHAR || token->lower.len != 1 ||
-				token->lower.ptr[0] != '{') {
+				token->lower.data[0] != '{') {
 			/* This should never happen, as FIRST(block) == '{' */
 			assert(0 && "Expected {");
 		}
@@ -1200,7 +1190,7 @@ css_error parseBlock(css_parser *parser)
 			return error;
 
 		if (token->type != CSS_TOKEN_CHAR || token->lower.len != 1 ||
-				token->lower.ptr[0] != '}') {
+				token->lower.data[0] != '}') {
 			/* This should never happen, as 
 			 * FOLLOW(block-content) == '}' */
 			assert(0 && "Expected }");
@@ -1253,7 +1243,7 @@ css_error parseBlockContent(css_parser *parser)
 				state->substate = WS;
 			} else if (token->type == CSS_TOKEN_CHAR) {
 				if (token->lower.len == 1 && 
-						token->lower.ptr[0] == '{') {
+						token->lower.data[0] == '{') {
 					/* Grammar ambiguity. Assume block */
 					parser_state to = { sBlock, Initial };
 					parser_state subsequent = 
@@ -1277,11 +1267,11 @@ css_error parseBlockContent(css_parser *parser)
 					return transition(parser, to, 
 							subsequent);
 				} else if (token->lower.len == 1 &&
-						token->lower.ptr[0] == ';') {
+						token->lower.data[0] == ';') {
 					/* Grammar ambiguity. Assume semi */
 					state->substate = WS;
 				} else if (token->lower.len == 1 &&
-						token->lower.ptr[0] == '}') {
+						token->lower.data[0] == '}') {
 					/* Grammar ambiguity. Assume end */
 					error = pushBack(parser, token);
 					if (error != CSS_OK)
@@ -1390,7 +1380,7 @@ css_error parseDeclaration(css_parser *parser)
 			return error;
 
 		if (token->type != CSS_TOKEN_CHAR || token->lower.len != 1 ||
-				token->lower.ptr[0] != ':') {
+				token->lower.data[0] != ':') {
 			/* parse error -- expected : */
 			parser_state to = { sMalformedDecl, Initial };
 
@@ -1458,13 +1448,13 @@ css_error parseDeclList(css_parser *parser)
 			assert(0 && "Expected ; or  }");
 		}
 
-		if (token->lower.ptr[0] == '}') {
+		if (token->lower.data[0] == '}') {
 			error = pushBack(parser, token);
 			if (error != CSS_OK)
 				return error;
 
 			return done(parser);
-		} else if (token->lower.ptr[0] == ';') {
+		} else if (token->lower.data[0] == ';') {
 			state->substate = WS;
 		} else {
 			/* Should never happen */
@@ -1504,8 +1494,8 @@ css_error parseDeclListEnd(css_parser *parser)
 
 		if (token->type != CSS_TOKEN_CHAR || 
 				token->lower.len != 1 || 
-				(token->lower.ptr[0] != ';' &&
-				token->lower.ptr[0] != '}')) {
+				(token->lower.data[0] != ';' &&
+				token->lower.data[0] != '}')) {
 			parser_state to = { sDeclaration, Initial };
 			parser_state subsequent = 
 					{ sDeclListEnd, AfterDeclaration };
@@ -1593,8 +1583,8 @@ css_error parseValue1(css_parser *parser)
 		/* Grammar ambiguity -- assume ';' or '}' mark end */
 		if (token->type == CSS_TOKEN_CHAR && 
 				token->lower.len == 1 &&
-				(token->lower.ptr[0] == ';' ||
-				token->lower.ptr[0] == '}')) {
+				(token->lower.data[0] == ';' ||
+				token->lower.data[0] == '}')) {
 			/* Parse error */
 			parser->parseError = true;
 
@@ -1641,8 +1631,8 @@ css_error parseValue0(css_parser *parser)
 			/* Grammar ambiguity -- assume ';' or '}' mark end */
 			if (token->type == CSS_TOKEN_CHAR && 
 					token->lower.len == 1 &&
-					(token->lower.ptr[0] == ';' ||
-					token->lower.ptr[0] == '}')) {
+					(token->lower.data[0] == ';' ||
+					token->lower.data[0] == '}')) {
 				return done(parser);
 			}
 
@@ -1680,7 +1670,7 @@ css_error parseValue(css_parser *parser)
 			state->substate = WS;
 		} else if (token->type == CSS_TOKEN_CHAR && 
 				token->lower.len == 1 && 
-				token->lower.ptr[0] == '{') {
+				token->lower.data[0] == '{') {
 			/* Grammar ambiguity. Assume block. */
 			parser_state to = { sBlock, Initial };
 
@@ -1741,10 +1731,10 @@ css_error parseAny0(css_parser *parser)
 			 * assume '{', ';', ')', ']' mark end */
 			if (token->type == CSS_TOKEN_CHAR && 
 					token->lower.len == 1 &&
-					(token->lower.ptr[0] == '{' ||
-					token->lower.ptr[0] == ';' ||
-					token->lower.ptr[0] == ')' ||
-					token->lower.ptr[0] == ']')) {
+					(token->lower.data[0] == '{' ||
+					token->lower.data[0] == ';' ||
+					token->lower.data[0] == ')' ||
+					token->lower.data[0] == ']')) {
 				return done(parser);
 			}
 
@@ -1805,14 +1795,14 @@ css_error parseAny1(css_parser *parser)
 		/* Grammar ambiguity: any0 can be followed by 
 		 * '{', ';', ')', ']'. any1 can only be followed by '{'. */
 		if (token->type == CSS_TOKEN_CHAR && token->lower.len == 1) {
-			if (token->lower.ptr[0] == ';' ||
-					token->lower.ptr[0] == ')' ||
-					token->lower.ptr[0] == ']') {
+			if (token->lower.data[0] == ';' ||
+					token->lower.data[0] == ')' ||
+					token->lower.data[0] == ']') {
 				parser_state to = { sAny, Initial };
 				parser_state subsequent = { sAny1, AfterAny };
 
 				return transition(parser, to, subsequent);
-			} else if (token->lower.ptr[0] != '{') {
+			} else if (token->lower.data[0] != '{') {
 				/* parse error */
 				parser->parseError = true;
 			}
@@ -1883,10 +1873,10 @@ css_error parseAny(css_parser *parser)
 			state->substate = WS;
 		} else if (token->type == CSS_TOKEN_CHAR && 
 				token->lower.len == 1 && 
-				(token->lower.ptr[0] == '(' || 
-				token->lower.ptr[0] == '[')) {
+				(token->lower.data[0] == '(' || 
+				token->lower.data[0] == '[')) {
 			parser->match_char = 
-					token->lower.ptr[0] == '(' ? ')' : ']';
+					token->lower.data[0] == '(' ? ')' : ']';
 			state->substate = WS;
 		} 
 
@@ -1919,7 +1909,7 @@ css_error parseAny(css_parser *parser)
 
 		/* Match correct close bracket (grammar ambiguity) */
 		if (token->type == CSS_TOKEN_CHAR && token->lower.len == 1 &&
-				token->lower.ptr[0] == parser->match_char) {
+				token->lower.data[0] == parser->match_char) {
 			state->substate = WS2;
 			goto ws2;
 		}
@@ -1963,13 +1953,13 @@ css_error parseMalformedDeclaration(css_parser *parser)
 
 			if (token->type != CSS_TOKEN_CHAR || 
 					token->lower.len != 1 ||
-					(token->lower.ptr[0] != '{' &&
-					token->lower.ptr[0] != '}' &&
-					token->lower.ptr[0] != '[' &&
-					token->lower.ptr[0] != ']' &&
-					token->lower.ptr[0] != '(' &&
-					token->lower.ptr[0] != ')' &&
-					token->lower.ptr[0] != ';'))
+					(token->lower.data[0] != '{' &&
+					token->lower.data[0] != '}' &&
+					token->lower.data[0] != '[' &&
+					token->lower.data[0] != ']' &&
+					token->lower.data[0] != '(' &&
+					token->lower.data[0] != ')' &&
+					token->lower.data[0] != ';'))
 				continue;
 
 			char want;
@@ -1979,17 +1969,17 @@ css_error parseMalformedDeclaration(css_parser *parser)
 			/* If the stack is empty, then we're done if we've got
 			 * either a ';' or '}' */
 			if (match == NULL) {
-				if (token->lower.ptr[0] == ';' ||
-						token->lower.ptr[0] == '}')
+				if (token->lower.data[0] == ';' ||
+						token->lower.data[0] == '}')
 					break;
 			}
 
 			/* Regardless, if we've got a semicolon, ignore it */
-			if (token->lower.ptr[0] == ';')
+			if (token->lower.data[0] == ';')
 				continue;
 
 			/* Get corresponding start tokens for end tokens */
-			switch (token->lower.ptr[0]) {
+			switch (token->lower.data[0]) {
 			case '}':
 				want = '{';
 				break;
@@ -2011,7 +2001,7 @@ css_error parseMalformedDeclaration(css_parser *parser)
 					parser->open_items, NULL);
 			} else if (want == 0) {
 				parserutils_stack_push(parser->open_items, 
-						&token->lower.ptr[0]);
+						&token->lower.data[0]);
 			}
 		}
 	}
@@ -2057,12 +2047,12 @@ css_error parseMalformedSelector(css_parser *parser)
 
 			if (token->type != CSS_TOKEN_CHAR || 
 					token->lower.len != 1 ||
-					(token->lower.ptr[0] != '{' &&
-					token->lower.ptr[0] != '}' &&
-					token->lower.ptr[0] != '[' &&
-					token->lower.ptr[0] != ']' &&
-					token->lower.ptr[0] != '(' &&
-					token->lower.ptr[0] != ')'))
+					(token->lower.data[0] != '{' &&
+					token->lower.data[0] != '}' &&
+					token->lower.data[0] != '[' &&
+					token->lower.data[0] != ']' &&
+					token->lower.data[0] != '(' &&
+					token->lower.data[0] != ')'))
 				continue;
 
 			char want;
@@ -2070,7 +2060,7 @@ css_error parseMalformedSelector(css_parser *parser)
 					parser->open_items);
 
 			/* Get corresponding start tokens for end tokens */
-			switch (token->lower.ptr[0]) {
+			switch (token->lower.data[0]) {
 			case '}':
 				want = '{';
 				break;
@@ -2092,7 +2082,7 @@ css_error parseMalformedSelector(css_parser *parser)
 					parser->open_items, NULL);
 			} else if (want == 0) {
 				parserutils_stack_push(parser->open_items, 
-						&token->lower.ptr[0]);
+						&token->lower.data[0]);
 			}
 
 			/* If we encountered a '}', there was data on the stack
@@ -2150,13 +2140,13 @@ css_error parseMalformedAtRule(css_parser *parser)
 
 			if (token->type != CSS_TOKEN_CHAR || 
 					token->lower.len != 1 ||
-					(token->lower.ptr[0] != '{' &&
-					token->lower.ptr[0] != '}' &&
-					token->lower.ptr[0] != '[' &&
-					token->lower.ptr[0] != ']' &&
-					token->lower.ptr[0] != '(' &&
-					token->lower.ptr[0] != ')' &&
-					token->lower.ptr[0] != ';'))
+					(token->lower.data[0] != '{' &&
+					token->lower.data[0] != '}' &&
+					token->lower.data[0] != '[' &&
+					token->lower.data[0] != ']' &&
+					token->lower.data[0] != '(' &&
+					token->lower.data[0] != ')' &&
+					token->lower.data[0] != ';'))
 				continue;
 
 			char want;
@@ -2165,7 +2155,7 @@ css_error parseMalformedAtRule(css_parser *parser)
 
 			/* If we have a semicolon, then we're either done or
 			 * need to ignore it */
-			if (token->lower.ptr[0] == ';') {
+			if (token->lower.data[0] == ';') {
 				if (match == NULL)
 					break;
 				else
@@ -2173,7 +2163,7 @@ css_error parseMalformedAtRule(css_parser *parser)
 			}
 
 			/* Get corresponding start tokens for end tokens */
-			switch (token->lower.ptr[0]) {
+			switch (token->lower.data[0]) {
 			case '}':
 				want = '{';
 				break;
@@ -2195,7 +2185,7 @@ css_error parseMalformedAtRule(css_parser *parser)
 					parser->open_items, NULL);
 			} else if (want == 0) {
 				parserutils_stack_push(parser->open_items, 
-						&token->lower.ptr[0]);
+						&token->lower.data[0]);
 			}
 
 			/* If we encountered a '}', there was data on the stack
@@ -2236,8 +2226,8 @@ static void tprinter(void *token)
 {
 	css_token *t = token;
 
-	if (t->data.ptr)
-		printf("%d: %.*s", t->type, t->data.len, t->data.ptr);
+	if (t->data.data)
+		printf("%d: %.*s", t->type, t->data.len, t->data.data);
 	else
 		printf("%d", t->type);
 }

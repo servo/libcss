@@ -74,7 +74,7 @@ enum {
 
 /* Must be synchronised with above enum */
 static struct {
-	const char *ptr;
+	const char *data;
 	size_t len;
 } stringmap[LAST_KNOWN] = {
 	{ "charset", SLEN("charset") },
@@ -363,19 +363,19 @@ static inline css_error handleDeclaration(css_css21 *c,
 /* Selector list parsing */
 static inline css_error parseClass(css_css21 *c,
 		const parserutils_vector *vector, int *ctx,
-		css_selector **specific);
+		css_selector_detail **specific);
 static inline css_error parseAttrib(css_css21 *c, 
 		const parserutils_vector *vector, int *ctx,
-		css_selector **specific);
+		css_selector_detail **specific);
 static inline css_error parsePseudo(css_css21 *c,
 		const parserutils_vector *vector, int *ctx,
-		css_selector **specific);
+		css_selector_detail **specific);
 static inline css_error parseSpecific(css_css21 *c,
 		const parserutils_vector *vector, int *ctx,
-		css_selector *parent);
+		css_selector **parent);
 static inline css_error parseSelectorSpecifics(css_css21 *c,
 		const parserutils_vector *vector, int *ctx,
-		css_selector *parent);
+		css_selector **parent);
 static inline css_error parseSimpleSelector(css_css21 *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_selector **result);
@@ -436,7 +436,7 @@ css_error css_css21_create(css_stylesheet *sheet, css_parser *parser,
 	/* Intern all known strings */
 	for (int i = 0; i < LAST_KNOWN; i++) {
 		c->strings[i] = css_parser_dict_add(parser,
-				(const uint8_t *) stringmap[i].ptr, 
+				(const uint8_t *) stringmap[i].data, 
 				stringmap[i].len);
 		if (c->strings[i] == NULL) {
 			parserutils_stack_destroy(c->context);
@@ -645,7 +645,7 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 	 * there is one */
 	assert(atkeyword != NULL && atkeyword->type == CSS_TOKEN_ATKEYWORD);
 
-	if (atkeyword->lower.ptr == c->strings[CHARSET]) {
+	if (atkeyword->lower.data == c->strings[CHARSET]) {
 		if (c->state == BEFORE_CHARSET) {
 			/* any0 = STRING */
 			if (ctx == 0)
@@ -663,7 +663,7 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 		} else {
 			return CSS_INVALID;
 		}
-	} else if (atkeyword->lower.ptr == c->strings[IMPORT]) {
+	} else if (atkeyword->lower.data == c->strings[IMPORT]) {
 		if (c->state != HAD_RULE) {
 			/* any0 = (STRING | URI) ws 
 			 *        (IDENT ws (',' ws IDENT ws)* )? */
@@ -689,16 +689,16 @@ css_error handleStartAtRule(css_css21 *c, const parserutils_vector *vector)
 	/** \todo these depend on nested block support, so we'll disable them
 	 * until we have such a thing. This means that we'll ignore the entire
 	 * at-rule until then */
-	} else if (atkeyword->lower.ptr == c->strings[MEDIA]) {
+	} else if (atkeyword->lower.data == c->strings[MEDIA]) {
 		/** \todo any0 = IDENT ws (',' ws IDENT ws)* */
-	} else if (atkeyword->lower.ptr == c->strings[PAGE]) {
+	} else if (atkeyword->lower.data == c->strings[PAGE]) {
 		/** \todo any0 = (':' IDENT)? ws */
 #endif
 	} else {
 		return CSS_INVALID;
 	}
 
-	entry.data = atkeyword->lower.ptr;
+	entry.data = atkeyword->lower.data;
 
 	perror = parserutils_stack_push(c->context, (void *) &entry);
 	if (perror != PARSERUTILS_OK) {
@@ -816,7 +816,7 @@ css_error handleDeclaration(css_css21 *c, const parserutils_vector *vector)
  ******************************************************************************/
 
 css_error parseClass(css_css21 *c, const parserutils_vector *vector, int *ctx,
-		css_selector **specific)
+		css_selector_detail **specific)
 {
 	const css_token *token;
 
@@ -829,12 +829,12 @@ css_error parseClass(css_css21 *c, const parserutils_vector *vector, int *ctx,
 	if (token == NULL || token->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
 
-	return css_stylesheet_selector_create(c->sheet, 
+	return css_stylesheet_selector_detail_create(c->sheet, 
 			CSS_SELECTOR_CLASS, &token->data, NULL, specific);
 }
 
 css_error parseAttrib(css_css21 *c, const parserutils_vector *vector, int *ctx,
-		css_selector **specific)
+		css_selector_detail **specific)
 {
 	const css_token *token, *name, *value = NULL;
 	css_selector_type type = CSS_SELECTOR_ATTRIBUTE;
@@ -887,13 +887,13 @@ css_error parseAttrib(css_css21 *c, const parserutils_vector *vector, int *ctx,
 			return CSS_INVALID;
 	}
 
-	return css_stylesheet_selector_create(c->sheet, type, 
+	return css_stylesheet_selector_detail_create(c->sheet, type, 
 			&name->data, value != NULL ? &value->data : NULL,
 			specific);
 }
 
 css_error parsePseudo(css_css21 *c, const parserutils_vector *vector, int *ctx,
-		css_selector **specific)
+		css_selector_detail **specific)
 {
 	const css_token *token, *name, *value = NULL;
 
@@ -927,18 +927,18 @@ css_error parsePseudo(css_css21 *c, const parserutils_vector *vector, int *ctx,
 			return CSS_INVALID;
 	}
 
-	return css_stylesheet_selector_create(c->sheet, 
+	return css_stylesheet_selector_detail_create(c->sheet, 
 			CSS_SELECTOR_PSEUDO, &name->data, 
 			value != NULL ? &value->data : NULL, specific);
 }
 
 css_error parseSpecific(css_css21 *c, 
 		const parserutils_vector *vector, int *ctx,
-		css_selector *parent)
+		css_selector **parent)
 {
 	css_error error;
 	const css_token *token;
-	css_selector *specific = NULL;
+	css_selector_detail *specific = NULL;
 
 	/* specific  -> [ HASH | class | attrib | pseudo ] */
 
@@ -947,7 +947,7 @@ css_error parseSpecific(css_css21 *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_HASH) {
-		error = css_stylesheet_selector_create(c->sheet,
+		error = css_stylesheet_selector_detail_create(c->sheet,
 				CSS_SELECTOR_ID, &token->data, NULL, &specific);
 		if (error != CSS_OK)
 			return error;
@@ -972,7 +972,7 @@ css_error parseSpecific(css_css21 *c,
 	error = css_stylesheet_selector_append_specific(c->sheet, parent, 
 			specific);
 	if (error != CSS_OK) {
-		css_stylesheet_selector_destroy(c->sheet, specific);
+		css_stylesheet_selector_detail_destroy(c->sheet, specific);
 		return error;
 	}
 
@@ -981,7 +981,7 @@ css_error parseSpecific(css_css21 *c,
 
 css_error parseSelectorSpecifics(css_css21 *c,
 		const parserutils_vector *vector, int *ctx,
-		css_selector *parent)
+		css_selector **parent)
 {
 	css_error error;
 	const css_token *token;
@@ -1028,7 +1028,7 @@ css_error parseSimpleSelector(css_css21 *c,
 		parserutils_vector_iterate(vector, ctx);
 	} else {
 		/* Universal selector */
-		css_string name = { (uint8_t *) "*", 1 };
+		static css_string name = { 1, (uint8_t *) "*" };
 
 		error = css_stylesheet_selector_create(c->sheet,
 				CSS_SELECTOR_ELEMENT, &name, NULL, &selector);
@@ -1036,16 +1036,22 @@ css_error parseSimpleSelector(css_css21 *c,
 			return error;
 
 		/* Ensure we have at least one specific selector */
-		error = parseSpecific(c, vector, ctx, selector);
+		error = parseSpecific(c, vector, ctx, &selector);
 		if (error != CSS_OK) {
 			css_stylesheet_selector_destroy(c->sheet, selector);
 			return error;
 		}
 	}
 
+	error = parseSelectorSpecifics(c, vector, ctx, &selector);
+	if (error != CSS_OK) {
+		css_stylesheet_selector_destroy(c->sheet, selector);
+		return error;
+	}
+
 	*result = selector;
 
-	return parseSelectorSpecifics(c, vector, ctx, selector);
+	return CSS_OK;
 }
 
 css_error parseCombinator(css_css21 *c, const parserutils_vector *vector,
@@ -1219,7 +1225,7 @@ css_error parseProperty(css_css21 *c, const css_token *property,
 	/* Find property index */
 	/** \todo improve on this linear search */
 	for (i = FIRST_PROP; i <= LAST_PROP; i++) {
-		if (property->lower.ptr == c->strings[i])
+		if (property->lower.data == c->strings[i])
 			break;
 	}
 	if (i == LAST_PROP + 1)
@@ -1279,7 +1285,7 @@ void consumeWhitespace(const parserutils_vector *vector, int *ctx)
 bool tokenIsChar(const css_token *token, uint8_t c)
 {
 	return token != NULL && token->type == CSS_TOKEN_CHAR && 
-			token->lower.len == 1 && token->lower.ptr[0] == c;
+			token->lower.len == 1 && token->lower.data[0] == c;
 }
 
 

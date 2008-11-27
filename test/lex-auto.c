@@ -41,11 +41,11 @@ static css_token_type string_to_type(const char *data, size_t len);
 static void run_test(const uint8_t *data, size_t len, 
 		exp_entry *exp, size_t explen);
 
-static void *myrealloc(void *ptr, size_t len, void *pw)
+static void *myrealloc(void *data, size_t len, void *pw)
 {
 	UNUSED(pw);
 
-	return realloc(ptr, len);
+	return realloc(data, len);
 }
 
 int main(int argc, char **argv)
@@ -302,11 +302,11 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 				assert(0 && "Text lengths differ");
 			}
 
-			if (strncmp((char *) tok->data.ptr, exp[e].text, 
+			if (strncmp((char *) tok->data.data, exp[e].text, 
 					tok->data.len) != 0) {
 				printf("%d: Got data '%.*s', Expected '%.*s'\n",
 					testnum, 
-					(int) tok->data.len, tok->data.ptr,
+					(int) tok->data.len, tok->data.data,
 					(int) exp[e].textLen, exp[e].text);
 				assert(0 && "Text differs");
 			}

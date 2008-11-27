@@ -11,6 +11,8 @@
 #include <inttypes.h>
 #include <stdio.h>
 
+#include <parserutils/utils/dict.h>
+
 #include <libcss/errors.h>
 #include <libcss/functypes.h>
 #include <libcss/stylesheet.h>
@@ -45,24 +47,24 @@ typedef enum css_combinator {
 	CSS_COMBINATOR_SIBLING
 } css_combinator;
 
+typedef struct css_selector_detail {
+	const css_string *name;			/**< Interned name */
+	const css_string *value;		/**< Interned value, or NULL */
+
+	uint32_t type : 4,			/**< Type of selector */
+	         comb : 2,			/**< Type of combinator */
+	         next : 1;			/**< Another selector detail 
+						 * follows */
+} css_selector_detail;
+
 struct css_selector {
-	css_selector_type type;			/**< Type of selector */
-
-	struct {
-		css_string name;
-		css_string value;
-	} data;					/**< Selector data */
-
-	uint32_t specificity;			/**< Specificity of selector */
-	css_selector *specifics;		/**< Selector specifics */
-
-	css_combinator combinator_type;		/**< Type of combinator */
 	css_selector *combinator;		/**< Combining selector */
 
 	css_rule *rule;				/**< Owning rule */
 
-	css_selector *next;			/**< Next selector in list */
-	css_selector *prev;			/**< Previous selector */
+	uint32_t specificity;			/**< Specificity of selector */
+
+	css_selector_detail data;		/**< Selector data */
 };
 
 typedef enum css_rule_type {
@@ -149,6 +151,8 @@ struct css_stylesheet {
 	css_parser *parser;			/**< Core parser for sheet */
 	void *parser_frontend;			/**< Frontend parser */
 
+	parserutils_dict *dictionary;		/**< String dictionary */
+
 	css_alloc alloc;			/**< Allocation function */
 	void *pw;				/**< Private word */
 };
@@ -163,8 +167,14 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 		css_selector *selector);
 
+css_error css_stylesheet_selector_detail_create(css_stylesheet *sheet,
+		css_selector_type type, const css_string *name,
+		const css_string *value, css_selector_detail **detail);
+css_error css_stylesheet_selector_detail_destroy(css_stylesheet *sheet,
+		css_selector_detail *detail);
+
 css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
-		css_selector *parent, css_selector *specific);
+		css_selector **parent, css_selector_detail *specific);
 
 css_error css_stylesheet_selector_combine(css_stylesheet *sheet,
 		css_combinator type, css_selector *a, css_selector *b);

@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <parserutils/utils/dict.h>
+
 /** Source of charset information, in order of importance
  * A client-dictated charset will override all others.
  * A document-specified charset will override autodetection or the default */
@@ -53,11 +55,11 @@ typedef enum css_origin {
 
 /**
  * String type
+ *
+ * \todo It might be better to define parserutils_string, and use that.
+ *       (where parserutils_string is identical to parserutils_dict_entry)
  */
-typedef struct css_string {
-	uint8_t *ptr;			/**< Pointer to data */
-	size_t len;			/**< Byte length of string */
-} css_string;
+typedef parserutils_dict_entry css_string;
 
 typedef struct css_stylesheet css_stylesheet;
 

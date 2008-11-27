@@ -43,7 +43,7 @@ static inline fixed number_from_css_string(const css_string *string,
 		return 0;
 
 	len = string->len;
-	ptr = string->ptr;
+	ptr = string->data;
 
 	/* number = [+-]? ([0-9]+ | [0-9]* '.' [0-9]+) */
 
@@ -119,7 +119,7 @@ static inline fixed number_from_css_string(const css_string *string,
 		intpart = (1 << 21) - 1;
 	}
 
-	*consumed = ptr - string->ptr;
+	*consumed = ptr - string->data;
 
 	return FMULI(((intpart << 10) | fracpart), sign);
 }

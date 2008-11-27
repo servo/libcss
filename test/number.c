@@ -107,7 +107,7 @@ bool handle_line(const char *data, size_t datalen, void *pw)
 
 void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 {
-	css_string in = { (uint8_t *) data, len };
+	css_string in = { len, (uint8_t *) data };
 	size_t consumed;
 	fixed result;
 	char buf[256];

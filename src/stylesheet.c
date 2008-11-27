@@ -10,6 +10,7 @@
 #include "stylesheet.h"
 #include "bytecode/bytecode.h"
 #include "parse/css21.h"
+#include "utils/parserutilserror.h"
 #include "utils/utils.h"
 
 /**
@@ -36,6 +37,7 @@ css_error css_stylesheet_create(css_language_level level,
 		css_import_handler import_callback, void *import_pw,
 		css_alloc alloc, void *alloc_pw, css_stylesheet **stylesheet)
 {
+	parserutils_error perror;
 	css_error error;
 	css_stylesheet *sheet;
 	size_t len;
@@ -49,10 +51,18 @@ css_error css_stylesheet_create(css_language_level level,
 
 	memset(sheet, 0, sizeof(css_stylesheet));
 
+	perror = parserutils_dict_create((parserutils_alloc) alloc, alloc_pw,
+			&sheet->dictionary);
+	if (perror != PARSERUTILS_OK) {
+		alloc(sheet, 0, alloc_pw);
+		return css_error_from_parserutils_error(perror);
+	}
+
 	error = css_parser_create(charset, 
 			charset ? CSS_CHARSET_DICTATED : CSS_CHARSET_DEFAULT,
-			alloc, alloc_pw, &sheet->parser);
+			sheet->dictionary, alloc, alloc_pw, &sheet->parser);
 	if (error != CSS_OK) {
+		parserutils_dict_destroy(sheet->dictionary);
 		alloc(sheet, 0, alloc_pw);
 		return error;
 	}
@@ -60,6 +70,7 @@ css_error css_stylesheet_create(css_language_level level,
 	/* We only support CSS 2.1 */
 	if (level != CSS_LEVEL_21) {
 		css_parser_destroy(sheet->parser);
+		parserutils_dict_destroy(sheet->dictionary);
 		alloc(sheet, 0, alloc_pw);
 		return CSS_INVALID; /** \todo better error */
 	}
@@ -69,6 +80,7 @@ css_error css_stylesheet_create(css_language_level level,
 			&sheet->parser_frontend);
 	if (error != CSS_OK) {
 		css_parser_destroy(sheet->parser);
+		parserutils_dict_destroy(sheet->dictionary);
 		alloc(sheet, 0, alloc_pw);
 		return error;
 	}
@@ -80,6 +92,7 @@ css_error css_stylesheet_create(css_language_level level,
 	if (sheet->url == NULL) {
 		css_css21_destroy(sheet->parser_frontend);
 		css_parser_destroy(sheet->parser);
+		parserutils_dict_destroy(sheet->dictionary);
 		alloc(sheet, 0, alloc_pw);
 		return CSS_NOMEM;
 	}
@@ -89,9 +102,10 @@ css_error css_stylesheet_create(css_language_level level,
 		len = strlen(title) + 1;
 		sheet->title = alloc(NULL, len, alloc_pw);
 		if (sheet->title == NULL) {
+			alloc(sheet->url, 0, alloc_pw);
 			css_css21_destroy(sheet->parser_frontend);
 			css_parser_destroy(sheet->parser);
-			alloc(sheet->url, 0, alloc_pw);
+			parserutils_dict_destroy(sheet->dictionary);
 			alloc(sheet, 0, alloc_pw);
 			return CSS_NOMEM;
 		}
@@ -122,6 +136,8 @@ css_error css_stylesheet_destroy(css_stylesheet *sheet)
 {
 	if (sheet == NULL)
 		return CSS_BADPARM;
+
+	parserutils_dict_destroy(sheet->dictionary);
 
 	if (sheet->title != NULL)
 		sheet->alloc(sheet->title, 0, sheet->pw);
@@ -349,7 +365,9 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 		css_selector_type type, const css_string *name, 
 		const css_string *value, css_selector **selector)
 {
+	const css_string *iname, *ivalue;
 	css_selector *sel;
+	parserutils_error perror;
 
 	if (sheet == NULL || name == NULL || selector == NULL)
 		return CSS_BADPARM;
@@ -360,14 +378,33 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 
 	memset(sel, 0, sizeof(css_selector));
 
-	sel->type = type;
-	sel->data.name = *name;
-	if (value != NULL) {
-		sel->data.value = *value;
+	sel->data.type = type;
+
+	/** \todo Given that this information is already guaranteed to be in 
+	 * the dictionary, it would be more efficient to pass a pointer to the 
+	 * dictionary entry around rather than re-discovering it here. The same
+	 * applies for value, and in css_stylesheet_selector_detail_create() */
+	perror = parserutils_dict_insert(sheet->dictionary, name->data, 
+			name->len, &iname);
+	if (perror != PARSERUTILS_OK) {
+		sheet->alloc(sel, 0, sheet->pw);
+		return css_error_from_parserutils_error(perror);
 	}
+	sel->data.name = iname;
+
+	if (value != NULL) {
+		perror = parserutils_dict_insert(sheet->dictionary, 
+				value->data, value->len, &ivalue);
+		if (perror != PARSERUTILS_OK) {
+			sheet->alloc(sel, 0, sheet->pw);
+			return css_error_from_parserutils_error(perror);
+		}
+		sel->data.value = ivalue;
+	}
+
 	/** \todo specificity */
 	sel->specificity = 0;
-	sel->combinator_type = CSS_COMBINATOR_NONE;
+	sel->data.comb = CSS_COMBINATOR_NONE;
 
 	*selector = sel;
 
@@ -395,32 +432,120 @@ css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 }
 
 /**
+ * Create a selector detail
+ *
+ * \param sheet   The stylesheet context
+ * \param type    The type of selector to create
+ * \param name    Name of selector
+ * \param value   Value of selector, or NULL
+ * \param detail  Pointer to location to receive detail object
+ * \return CSS_OK on success,
+ *         CSS_BADPARM on bad parameters,
+ *         CSS_NOMEM on memory exhaustion
+ */
+css_error css_stylesheet_selector_detail_create(css_stylesheet *sheet,
+		css_selector_type type, const css_string *name, 
+		const css_string *value, css_selector_detail **detail)
+{
+	parserutils_error perror;
+	const css_string *iname, *ivalue;
+	css_selector_detail *det;
+
+	if (sheet == NULL || name == NULL || detail == NULL)
+		return CSS_BADPARM;
+
+	det = sheet->alloc(NULL, sizeof(css_selector_detail), sheet->pw);
+	if (det == NULL)
+		return CSS_NOMEM;
+
+	memset(det, 0, sizeof(css_selector_detail));
+
+	det->type = type;
+
+	perror = parserutils_dict_insert(sheet->dictionary, name->data, 
+			name->len, &iname);
+	if (perror != PARSERUTILS_OK) {
+		sheet->alloc(det, 0, sheet->pw);
+		return css_error_from_parserutils_error(perror);
+	}
+	det->name = iname;
+
+	if (value != NULL) {
+		perror = parserutils_dict_insert(sheet->dictionary, 
+				value->data, value->len, &ivalue);
+		if (perror != PARSERUTILS_OK) {
+			sheet->alloc(det, 0, sheet->pw);
+			return css_error_from_parserutils_error(perror);
+		}
+		det->value = ivalue;
+	}
+
+	*detail = det;
+
+	return CSS_OK;
+}
+
+/**
+ * Destroy a selector detail
+ *
+ * \param sheet   The stylesheet context
+ * \param detail  The detail to destroy
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_selector_detail_destroy(css_stylesheet *sheet,
+		css_selector_detail *detail)
+{
+	if (sheet == NULL || detail == NULL)
+		return CSS_BADPARM;
+
+	sheet->alloc(detail, 0, sheet->pw);
+
+	return CSS_OK;
+}
+
+
+/**
  * Append a selector to the specifics chain of another selector
  *
  * \param sheet     The stylesheet context
- * \param parent    The parent selector
- * \param specific  The selector to append
+ * \param parent    Pointer to pointer to the parent selector (updated on exit)
+ * \param specific  The selector to append (destroyed)
  * \return CSS_OK on success, appropriate error otherwise.
  */
 css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
-		css_selector *parent, css_selector *specific)
+		css_selector **parent, css_selector_detail *detail)
 {
-	css_selector *s;
+	css_selector *temp;
+	css_selector_detail *d;
+	size_t num_details = 0;
 
-	if (sheet == NULL || parent == NULL || specific == NULL)
+	if (sheet == NULL || parent == NULL || 
+			*parent == NULL || detail == NULL)
 		return CSS_BADPARM;
 
-	/** \todo this may want optimising */
-	for (s = parent->specifics; s != NULL && s->next != NULL; s = s->next)
-		/* do nothing */;
-	if (s == NULL) {
-		specific->prev = specific->next = NULL;
-		parent->specifics = specific;
-	} else {
-		s->next = specific;
-		specific->prev = s;
-		specific->next = NULL;
-	}
+	/** \todo this may want optimising -- counting blocks is O(n) 
+	 * In practice, however, n isn't likely to be large, so may be fine
+	 */
+
+	/* Count current number of detail blocks */
+	for (d = &(*parent)->data; d->next != 0; d++)
+		num_details++;
+
+	/* Grow selector by one detail block */
+	temp = sheet->alloc((*parent), sizeof(css_selector) + 
+			(num_details + 1) * sizeof(css_selector_detail), 
+			sheet->pw);
+	if (temp == NULL)
+		return CSS_NOMEM;
+
+	/* Copy detail into empty block */
+	(&temp->data)[num_details + 1] = *detail;
+	/* Flag that there's another block */
+	(&temp->data)[num_details].next = 1;
+
+	css_stylesheet_selector_detail_destroy(sheet, detail);
+
+	(*parent) = temp;
 
 	return CSS_OK;
 }
@@ -451,7 +576,7 @@ css_error css_stylesheet_selector_combine(css_stylesheet *sheet,
 		return CSS_INVALID;
 
 	b->combinator = a;
-	b->combinator_type = type;
+	b->data.comb = type;
 
 	return CSS_OK;
 }
@@ -666,7 +791,9 @@ static void css_stylesheet_dump_selector_list(css_selector *list, FILE *target,
 		size_t *size);
 static void css_stylesheet_dump_selector(css_selector *selector, FILE *target,
 		size_t *size);
-static void css_stylesheet_dump_string(css_string *string, FILE *target);
+static void css_stylesheet_dump_selector_detail(css_selector_detail *detail,
+		FILE *target, size_t *size);
+static void css_stylesheet_dump_string(const css_string *string, FILE *target);
 
 /**
  * Dump a stylesheet
@@ -757,7 +884,7 @@ void css_stylesheet_dump_selector_list(css_selector *list, FILE *target,
 				size);
 	}
 
-	switch (list->combinator_type) {
+	switch (list->data.comb) {
 	case CSS_COMBINATOR_NONE:
 		break;
 	case CSS_COMBINATOR_ANCESTOR:
@@ -784,71 +911,87 @@ void css_stylesheet_dump_selector_list(css_selector *list, FILE *target,
 void css_stylesheet_dump_selector(css_selector *selector, FILE *target,
 		size_t *size)
 {
-	css_selector *s;
+	css_selector_detail *d = &selector->data;
 
-	*size += sizeof(css_selector);
+	*size += sizeof(css_selector) - sizeof(css_selector_detail);
 
-	switch (selector->type) {
+	while (true) {
+		css_stylesheet_dump_selector_detail(d, target, size);
+
+		if (d->next == 0)
+			break;
+
+		d++;
+	}
+}
+
+/**
+ * Dump a CSS selector detail
+ *
+ * \param detail  The detail to dump
+ * \param target  The file handle to output to
+ * \param size    Pointer to current size of sheet, updated on exit
+ */
+void css_stylesheet_dump_selector_detail(css_selector_detail *detail,
+		FILE *target, size_t *size)
+{
+
+	*size += sizeof(css_selector_detail);
+
+	switch (detail->type) {
 	case CSS_SELECTOR_ELEMENT:
-		if (selector->data.name.len == 1 && 
-				selector->data.name.ptr[0] == '*' &&
-				selector->specifics == NULL) {
-			css_stylesheet_dump_string(&selector->data.name,
-					target);
-		} else if (selector->data.name.len != 1 ||
-				selector->data.name.ptr[0] != '*') {
-			css_stylesheet_dump_string(&selector->data.name,
-					target);
+		if (detail->name->len == 1 && detail->name->data[0] == '*' &&
+				detail->next == 0) {
+			css_stylesheet_dump_string(detail->name, target);
+		} else if (detail->name->len != 1 ||
+				detail->name->data[0] != '*') {
+			css_stylesheet_dump_string(detail->name, target);
 		}
 		break;
 	case CSS_SELECTOR_CLASS:
 		fprintf(target, ".");
-		css_stylesheet_dump_string(&selector->data.name, target);
+		css_stylesheet_dump_string(detail->name, target);
 		break;
 	case CSS_SELECTOR_ID:
 		fprintf(target, "#");
-		css_stylesheet_dump_string(&selector->data.name, target);
+		css_stylesheet_dump_string(detail->name, target);
 		break;
 	case CSS_SELECTOR_PSEUDO:
 		fprintf(target, ":");
-		css_stylesheet_dump_string(&selector->data.name, target);
-		if (selector->data.value.len > 0) {
+		css_stylesheet_dump_string(detail->name, target);
+		if (detail->value != NULL) {
 			fprintf(target, "(");
-			css_stylesheet_dump_string(&selector->data.value, 
-					target);
+			css_stylesheet_dump_string(detail->value, target);
 			fprintf(target, ")");
 		}
 		break;
 	case CSS_SELECTOR_ATTRIBUTE:
 		fprintf(target, "[");
-		css_stylesheet_dump_string(&selector->data.name, target);
+		css_stylesheet_dump_string(detail->name, target);
 		fprintf(target, "]");
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_EQUAL:
 		fprintf(target, "[");
-		css_stylesheet_dump_string(&selector->data.name, target);
+		css_stylesheet_dump_string(detail->name, target);
 		fprintf(target, "=\"");
-		css_stylesheet_dump_string(&selector->data.value, target);
+		css_stylesheet_dump_string(detail->value, target);
 		fprintf(target, "\"]");
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_DASHMATCH:
 		fprintf(target, "[");
-		css_stylesheet_dump_string(&selector->data.name, target);
+		css_stylesheet_dump_string(detail->name, target);
 		fprintf(target, "|=\"");
-		css_stylesheet_dump_string(&selector->data.value, target);
+		css_stylesheet_dump_string(detail->value, target);
 		fprintf(target, "\"]");
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_INCLUDES:
 		fprintf(target, "[");
-		css_stylesheet_dump_string(&selector->data.name, target);
+		css_stylesheet_dump_string(detail->name, target);
 		fprintf(target, "~=\"");
-		css_stylesheet_dump_string(&selector->data.value, target);
+		css_stylesheet_dump_string(detail->value, target);
 		fprintf(target, "\"]");
 		break;
 	}
-
-	for (s = selector->specifics; s != NULL; s = s->next)
-		css_stylesheet_dump_selector(s, target, size);
 }
 
 /**
@@ -857,8 +1000,8 @@ void css_stylesheet_dump_selector(css_selector *selector, FILE *target,
  * \param string  The string to dump
  * \param target  The file handle to output to
  */
-void css_stylesheet_dump_string(css_string *string, FILE *target)
+void css_stylesheet_dump_string(const css_string *string, FILE *target)
 {
-	fprintf(target, "%.*s", (int) string->len, string->ptr);
+	fprintf(target, "%.*s", (int) string->len, string->data);
 }
 

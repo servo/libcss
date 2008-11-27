@@ -194,7 +194,7 @@ css_error css_lexer_create(parserutils_inputstream *input,
 	lex->input = input;
 	lex->bytesReadForToken = 0;
 	lex->token.type = CSS_TOKEN_EOF;
-	lex->token.data.ptr = NULL;
+	lex->token.data.data = NULL;
 	lex->token.data.len = 0;
 	lex->escapeSeen = false;
 	lex->unescapedTokenData = NULL;
@@ -372,44 +372,44 @@ css_error emitToken(css_lexer *lexer, css_token_type type,
 	/* Calculate token data start pointer. We have to do this here as 
 	 * the inputstream's buffer may have moved under us. */
 	if (lexer->escapeSeen) {
-		t->data.ptr = lexer->unescapedTokenData->data;
+		t->data.data = lexer->unescapedTokenData->data;
 	} else {
 		size_t clen;
-		uintptr_t ptr = parserutils_inputstream_peek(
+		uintptr_t data = parserutils_inputstream_peek(
 				lexer->input, 0, &clen);
 
 		assert(type == CSS_TOKEN_EOF || 
-				(ptr != PARSERUTILS_INPUTSTREAM_EOF && 
-				ptr != PARSERUTILS_INPUTSTREAM_OOD));
+				(data != PARSERUTILS_INPUTSTREAM_EOF && 
+				data != PARSERUTILS_INPUTSTREAM_OOD));
 
-		t->data.ptr = (type == CSS_TOKEN_EOF) ? NULL : (uint8_t *) ptr;
+		t->data.data = (type == CSS_TOKEN_EOF) ? NULL : (uint8_t *) data;
 	}
 
 	switch (type) {
 	case CSS_TOKEN_ATKEYWORD:
 		/* Strip the '@' from the front */
-		t->data.ptr += 1;
+		t->data.data += 1;
 		t->data.len -= 1;
 		break;
 	case CSS_TOKEN_STRING:
 		/* Strip the leading quote */
-		t->data.ptr += 1;
+		t->data.data += 1;
 		t->data.len -= 1;
 
 		/* Strip the trailing quote, iff it exists (may have hit EOF) */
-		if (t->data.len > 0 && (t->data.ptr[t->data.len - 1] == '"' ||
-				t->data.ptr[t->data.len - 1] == '\'')) {
+		if (t->data.len > 0 && (t->data.data[t->data.len - 1] == '"' ||
+				t->data.data[t->data.len - 1] == '\'')) {
 			t->data.len -= 1;
 		}
 		break;
 	case CSS_TOKEN_INVALID_STRING:
 		/* Strip the leading quote */
-		t->data.ptr += 1;
+		t->data.data += 1;
 		t->data.len -= 1;
 		break;
 	case CSS_TOKEN_HASH:
 		/* Strip the '#' from the front */
-		t->data.ptr += 1;
+		t->data.data += 1;
 		t->data.len -= 1;
 		break;
 	case CSS_TOKEN_PERCENTAGE:
@@ -421,18 +421,18 @@ css_error emitToken(css_lexer *lexer, css_token_type type,
 		break;
 	case CSS_TOKEN_URI:
 		/* Strip the "url(" from the start */
-		t->data.ptr += SLEN("url(");
+		t->data.data += SLEN("url(");
 		t->data.len -= SLEN("url(");
 
 		/* Strip any leading whitespace */
-		while (isSpace(t->data.ptr[0])) {
-			t->data.ptr++;
+		while (isSpace(t->data.data[0])) {
+			t->data.data++;
 			t->data.len--;
 		}
 
 		/* Strip any leading quote */
-		if (t->data.ptr[0] == '"' || t->data.ptr[0] == '\'') {
-			t->data.ptr += 1;
+		if (t->data.data[0] == '"' || t->data.data[0] == '\'') {
+			t->data.data += 1;
 			t->data.len -= 1;
 		}
 
@@ -441,24 +441,24 @@ css_error emitToken(css_lexer *lexer, css_token_type type,
 
 		/* Strip any trailing whitespace */
 		while (t->data.len > 0 &&
-				isSpace(t->data.ptr[t->data.len - 1])) {
+				isSpace(t->data.data[t->data.len - 1])) {
 			t->data.len--;
 		}
 
 		/* Strip any trailing quote */
-		if (t->data.len > 0 && (t->data.ptr[t->data.len - 1] == '"' || 
-				t->data.ptr[t->data.len - 1] == '\'')) {
+		if (t->data.len > 0 && (t->data.data[t->data.len - 1] == '"' || 
+				t->data.data[t->data.len - 1] == '\'')) {
 			t->data.len -= 1;
 		}
 		break;
 	case CSS_TOKEN_UNICODE_RANGE:
 		/* Remove "U+" from the start */
-		t->data.ptr += SLEN("U+");
+		t->data.data += SLEN("U+");
 		t->data.len -= SLEN("U+");
 		break;
 	case CSS_TOKEN_COMMENT:
 		/* Strip the leading '/' and '*' */
-		t->data.ptr += SLEN("/*");
+		t->data.data += SLEN("/*");
 		t->data.len -= SLEN("/*");
 
 		/* Strip the trailing '*' and '/' */
@@ -1166,9 +1166,9 @@ start:
 
 	/* Reset in preparation for the next token */
 	t->type = CSS_TOKEN_EOF;
-	t->data.ptr = NULL;
+	t->data.data = NULL;
 	t->data.len = 0;
-	t->lower.ptr = NULL;
+	t->lower.data = NULL;
 	t->lower.len = 0;
 	t->col = lexer->currentCol;
 	t->line = lexer->currentLine;
@@ -1671,7 +1671,7 @@ css_error consumeDigits(css_lexer *lexer)
 
 css_error consumeEscape(css_lexer *lexer, bool nl)
 {
-	uintptr_t cptr, sptr;
+	uintptr_t cptr, sdata;
 	uint8_t c;
 	size_t clen, slen;
 	css_error error;
@@ -1709,17 +1709,17 @@ css_error consumeEscape(css_lexer *lexer, bool nl)
 	 * we must copy the characters we've read to the unescaped buffer */
 	if (!lexer->escapeSeen) {
 		if (lexer->bytesReadForToken > 1) {
-			sptr = parserutils_inputstream_peek(
+			sdata = parserutils_inputstream_peek(
 					lexer->input, 0, &slen);
 
-			assert(sptr != PARSERUTILS_INPUTSTREAM_EOF && 
-					sptr != PARSERUTILS_INPUTSTREAM_OOD);
+			assert(sdata != PARSERUTILS_INPUTSTREAM_EOF && 
+					sdata != PARSERUTILS_INPUTSTREAM_OOD);
 
 			/* -1 to skip '\\' */
 			error = css_error_from_parserutils_error(
 				parserutils_buffer_append(
 					lexer->unescapedTokenData, 
-					(const uint8_t *) sptr, 
+					(const uint8_t *) sdata, 
 					lexer->bytesReadForToken - 1));
 			if (error != CSS_OK)
 				return error;
@@ -1932,7 +1932,7 @@ css_error consumeUnicode(css_lexer *lexer, uint32_t ucs)
 	uint8_t c = 0;
 	size_t clen;
 	uint8_t utf8[6];
-	uint8_t *utf8ptr = utf8;
+	uint8_t *utf8data = utf8;
 	size_t utf8len = sizeof(utf8);
 	size_t bytesReadInit = lexer->bytesReadForToken;
 	int count;
@@ -1968,7 +1968,7 @@ css_error consumeUnicode(css_lexer *lexer, uint32_t ucs)
 	}
 
 	/* Convert our UCS4 character to UTF-8 */
-	error = parserutils_charset_utf8_from_ucs4(ucs, &utf8ptr, &utf8len);
+	error = parserutils_charset_utf8_from_ucs4(ucs, &utf8data, &utf8len);
 	assert(error == PARSERUTILS_OK);
 
 	/* Append it to the token data (unescaped buffer already set up) */
