@@ -397,8 +397,8 @@ css_error emitToken(css_lexer *lexer, css_token_type type,
 		t->data.len -= 1;
 
 		/* Strip the trailing quote, iff it exists (may have hit EOF) */
-		if (t->data.ptr[t->data.len - 1] == '"' ||
-				t->data.ptr[t->data.len - 1] == '\'') {
+		if (t->data.len > 0 && (t->data.ptr[t->data.len - 1] == '"' ||
+				t->data.ptr[t->data.len - 1] == '\'')) {
 			t->data.len -= 1;
 		}
 		break;
@@ -440,13 +440,14 @@ css_error emitToken(css_lexer *lexer, css_token_type type,
 		t->data.len -= 1;
 
 		/* Strip any trailing whitespace */
-		while (isSpace(t->data.ptr[t->data.len - 1])) {
+		while (t->data.len > 0 &&
+				isSpace(t->data.ptr[t->data.len - 1])) {
 			t->data.len--;
 		}
 
 		/* Strip any trailing quote */
-		if (t->data.ptr[t->data.len - 1] == '"' || 
-				t->data.ptr[t->data.len - 1] == '\'') {
+		if (t->data.len > 0 && (t->data.ptr[t->data.len - 1] == '"' || 
+				t->data.ptr[t->data.len - 1] == '\'')) {
 			t->data.len -= 1;
 		}
 		break;
