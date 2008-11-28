@@ -9,7 +9,7 @@
 
 #include "stylesheet.h"
 #include "bytecode/bytecode.h"
-#include "parse/css21.h"
+#include "parse/language.h"
 #include "utils/parserutilserror.h"
 #include "utils/utils.h"
 
@@ -67,16 +67,8 @@ css_error css_stylesheet_create(css_language_level level,
 		return error;
 	}
 
-	/* We only support CSS 2.1 */
-	if (level != CSS_LEVEL_21) {
-		css_parser_destroy(sheet->parser);
-		parserutils_dict_destroy(sheet->dictionary);
-		alloc(sheet, 0, alloc_pw);
-		return CSS_INVALID; /** \todo better error */
-	}
-
 	sheet->level = level;
-	error = css_css21_create(sheet, sheet->parser, alloc, alloc_pw,
+	error = css_language_create(sheet, sheet->parser, alloc, alloc_pw,
 			&sheet->parser_frontend);
 	if (error != CSS_OK) {
 		css_parser_destroy(sheet->parser);
@@ -90,7 +82,7 @@ css_error css_stylesheet_create(css_language_level level,
 	len = strlen(url) + 1;
 	sheet->url = alloc(NULL, len, alloc_pw);
 	if (sheet->url == NULL) {
-		css_css21_destroy(sheet->parser_frontend);
+		css_language_destroy(sheet->parser_frontend);
 		css_parser_destroy(sheet->parser);
 		parserutils_dict_destroy(sheet->dictionary);
 		alloc(sheet, 0, alloc_pw);
@@ -103,7 +95,7 @@ css_error css_stylesheet_create(css_language_level level,
 		sheet->title = alloc(NULL, len, alloc_pw);
 		if (sheet->title == NULL) {
 			alloc(sheet->url, 0, alloc_pw);
-			css_css21_destroy(sheet->parser_frontend);
+			css_language_destroy(sheet->parser_frontend);
 			css_parser_destroy(sheet->parser);
 			parserutils_dict_destroy(sheet->dictionary);
 			alloc(sheet, 0, alloc_pw);
@@ -146,7 +138,7 @@ css_error css_stylesheet_destroy(css_stylesheet *sheet)
 
 	/** \todo destroy selector hash + other data */
 
-	css_css21_destroy(sheet->parser_frontend);
+	css_language_destroy(sheet->parser_frontend);
 
 	css_parser_destroy(sheet->parser);
 
