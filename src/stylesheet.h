@@ -142,6 +142,7 @@ struct css_stylesheet {
 
 	uint32_t rule_count;			/**< Number of rules in sheet */
 	css_rule *rule_list;			/**< List of rules in sheet */
+	css_rule *last_rule;			/**< Last rule in list */
 
 	bool disabled;				/**< Whether this sheet is 
 						 * disabled */

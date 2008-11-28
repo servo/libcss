@@ -759,8 +759,6 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
  */
 css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule)
 {
-	css_rule *r;
-
 	if (sheet == NULL || rule == NULL)
 		return CSS_BADPARM;
 
@@ -771,16 +769,15 @@ css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule)
 
 	/* Add rule to sheet */
 	sheet->rule_count++;
-	/** \todo this may need optimising */
-	for (r = sheet->rule_list; r != NULL && r->next != NULL; r = r->next)
-		/* do nothing */;
-	if (r == NULL) {
+
+	if (sheet->last_rule == NULL) {
 		rule->prev = rule->next = NULL;
-		sheet->rule_list = rule;
+		sheet->rule_list = sheet->last_rule = rule;
 	} else {
-		r->next = rule;
-		rule->prev = r;
+		sheet->last_rule->next = rule;
+		rule->prev = sheet->last_rule;
 		rule->next = NULL;
+		sheet->last_rule = rule;
 	}
 
 	/** \todo If there are selectors in the rule, add them to the hash 
