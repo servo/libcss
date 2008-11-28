@@ -77,47 +77,64 @@ typedef enum css_rule_type {
 	CSS_RULE_PAGE
 } css_rule_type;
 
+typedef enum css_rule_parent_type {
+	CSS_RULE_PARENT_STYLESHEET,
+	CSS_RULE_PARENT_RULE
+} css_rule_parent_type;
+
 struct css_rule {
-	css_rule_type type;			/**< Type of rule */
+	void *parent;				/**< containing rule or owning 
+						 * stylesheet (defined by ptype)
+						 */
+	css_rule *next;				/**< next in list */
+	css_rule *prev;				/**< previous in list */
 
-	union {
-		struct {
-			uint32_t selector_count;
-			css_selector **selectors;
-			css_style *style;
-		} selector;
-		struct {
-			uint32_t media;
-			uint32_t rule_count;
-			css_rule **rules;	/** \todo why this? isn't the 
-						 * child list sufficient? */
-		} media;
-		struct {
-			css_style *style;
-		} font_face;
-		struct {
-			uint32_t selector_count;
-			css_selector **selectors;
-			css_style *style;
-		} page;
-		struct {
-			css_stylesheet *sheet;
-		} import;
-		struct {
-			char *encoding;		/** \todo use MIB enum? */
-		} charset;
-	} data;					/**< Rule data */
-
-	uint32_t index;				/**< Index of rule in sheet */
-
-	css_stylesheet *owner;			/**< Owning sheet */
-
-	css_rule *parent;			/**< Parent rule */
-	css_rule *first_child;			/**< First in child list */
-	css_rule *last_child;			/**< Last in child list */
-	css_rule *next;				/**< Next rule */
-	css_rule *prev;				/**< Previous rule */
+	uint32_t type  :  4,			/**< css_rule_type */
+	         index : 16,			/**< index in sheet */
+	         items :  8,			/**< # items in rule */
+	         ptype :  1;			/**< css_rule_parent_type */
 };
+
+typedef struct css_rule_selector {
+	css_rule base;
+
+	css_selector **selectors;
+	css_style *style;
+} css_rule_selector;
+
+typedef struct css_rule_media {
+	css_rule base;
+
+	uint32_t media;
+
+	css_rule *first_child;
+	css_rule *last_child;
+} css_rule_media;
+
+typedef struct css_rule_font_face {
+	css_rule base;
+
+	css_style *style;
+} css_rule_font_face;
+
+typedef struct css_rule_page {
+	css_rule base;
+
+	css_selector **selectors;
+	css_style *style;
+} css_rule_page;
+
+typedef struct css_rule_import {
+	css_rule base;
+
+	css_stylesheet *sheet;
+} css_rule_import;
+
+typedef struct css_rule_charset {
+	css_rule base;
+
+	char *encoding;				/** \todo use MIB enum? */
+} css_rule_charset;
 
 struct css_stylesheet {
 #define HASH_SIZE (37)

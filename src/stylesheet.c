@@ -595,15 +595,40 @@ css_error css_stylesheet_rule_create(css_stylesheet *sheet, css_rule_type type,
 		css_rule **rule)
 {
 	css_rule *r;
+	size_t required = 0;
 
 	if (sheet == NULL || rule == NULL)
 		return CSS_BADPARM;
 
-	r = sheet->alloc(NULL, sizeof(css_rule), sheet->pw);
+	switch (type) {
+	case CSS_RULE_UNKNOWN:
+		required = sizeof(css_rule);
+		break;
+	case CSS_RULE_SELECTOR:
+		required = sizeof(css_rule_selector);
+		break;
+	case CSS_RULE_CHARSET:
+		required = sizeof(css_rule_charset);
+		break;
+	case CSS_RULE_IMPORT:
+		required = sizeof(css_rule_import);
+		break;
+	case CSS_RULE_MEDIA:
+		required = sizeof(css_rule_media);
+		break;
+	case CSS_RULE_FONT_FACE:
+		required = sizeof(css_rule_font_face);
+		break;
+	case CSS_RULE_PAGE:
+		required = sizeof(css_rule_page);
+		break;
+	}
+
+	r = sheet->alloc(NULL, required, sheet->pw);
 	if (r == NULL)
 		return CSS_NOMEM;
 
-	memset(r, 0, sizeof(css_rule));
+	memset(r, 0, required);
 
 	r->type = type;
 
@@ -641,6 +666,7 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet, 
 		css_rule *rule, css_selector *selector)
 {
+	css_rule_selector *r = (css_rule_selector *) rule;
 	css_selector **sels;
 
 	if (sheet == NULL || rule == NULL || selector == NULL)
@@ -650,17 +676,16 @@ css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet,
 	if (rule->type != CSS_RULE_SELECTOR)
 		return CSS_INVALID;
 
-	sels = sheet->alloc(rule->data.selector.selectors, 
-			(rule->data.selector.selector_count + 1) * 
-				sizeof(css_selector *), 
+	sels = sheet->alloc(r->selectors, 
+			(r->base.items + 1) * sizeof(css_selector *), 
 			sheet->pw);
 	if (sels == NULL)
 		return CSS_NOMEM;
 
 	/* Insert into rule's selector list */
-	sels[rule->data.selector.selector_count] = selector;
-	rule->data.selector.selector_count++;
-	rule->data.selector.selectors = sels;
+	sels[r->base.items] = selector;
+	r->base.items++;
+	r->selectors = sels;
 
 	/* Set selector's rule field */
 	selector->rule = rule;
@@ -688,9 +713,9 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 		return CSS_INVALID;
 
 	if (rule->type == CSS_RULE_SELECTOR)
-		cur = rule->data.selector.style;
+		cur = ((css_rule_selector *) rule)->style;
 	else
-		cur = rule->data.page.style;
+		cur = ((css_rule_page *) rule)->style;
 
 	if (cur != NULL) {
 		/* Already have a style, so append to the end of the bytecode */
@@ -718,9 +743,9 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 	}
 
 	if (rule->type == CSS_RULE_SELECTOR)
-		rule->data.selector.style = cur;
+		((css_rule_selector *) rule)->style = cur;
 	else
-		rule->data.page.style = cur;
+		((css_rule_page *) rule)->style = cur;
 
 	return CSS_OK;
 }
@@ -739,9 +764,10 @@ css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule)
 	if (sheet == NULL || rule == NULL)
 		return CSS_BADPARM;
 
-	/* Fill in rule's index and owner fields */
+	/* Fill in rule's index and parent fields */
 	rule->index = sheet->rule_count;
-	rule->owner = sheet;
+	rule->ptype = CSS_RULE_PARENT_STYLESHEET;
+	rule->parent = sheet;
 
 	/* Add rule to sheet */
 	sheet->rule_count++;
@@ -831,8 +857,6 @@ void css_stylesheet_dump(css_stylesheet *sheet, FILE *target)
  */
 void css_stylesheet_dump_rule(css_rule *rule, FILE *target, size_t *size)
 {
-	*size += sizeof(css_rule);
-
 	fprintf(target, "  Rule %d (type %d):\n",
 			rule->index, rule->type);
 
@@ -840,29 +864,42 @@ void css_stylesheet_dump_rule(css_rule *rule, FILE *target, size_t *size)
 
 	switch (rule->type) {
 	case CSS_RULE_UNKNOWN:
+		*size += sizeof(css_rule);
 		break;
 	case CSS_RULE_SELECTOR:
-		for (uint32_t i = 0; i < rule->data.selector.selector_count;
-				i++) {
+		*size += sizeof(css_rule_selector);
+		for (uint32_t i = 0; i < rule->items; i++) {
 			css_stylesheet_dump_selector_list(
-				rule->data.selector.selectors[i], target, size);
-			if (i != rule->data.selector.selector_count - 1)
+				((css_rule_selector *) rule)->selectors[i], 
+				target, size);
+			if (i != (uint32_t) (rule->items - 1))
 				fprintf(target, ", ");
 		}
 		fprintf(target, " { ");
-		if (rule->data.selector.style != NULL) {
-			*size += rule->data.selector.style->length;
+		if (((css_rule_selector *) rule)->style != NULL) {
+			*size += ((css_rule_selector *) rule)->style->length;
 
-			css_bytecode_dump(rule->data.selector.style->bytecode,
-				rule->data.selector.style->length, target);
+			css_bytecode_dump(
+				((css_rule_selector *) rule)->style->bytecode,
+				((css_rule_selector *) rule)->style->length, 
+				target);
 		}
 		fprintf(target, "}");
 		break;
 	case CSS_RULE_CHARSET:
+		*size += sizeof(css_rule_charset);
+		break;
 	case CSS_RULE_IMPORT:
+		*size += sizeof(css_rule_import);
+		break;
 	case CSS_RULE_MEDIA:
+		*size += sizeof(css_rule_media);
+		break;
 	case CSS_RULE_FONT_FACE:
+		*size += sizeof(css_rule_font_face);
+		break;
 	case CSS_RULE_PAGE:
+		*size += sizeof(css_rule_page);
 		break;
 	}
 
@@ -935,7 +972,6 @@ void css_stylesheet_dump_selector(css_selector *selector, FILE *target,
 void css_stylesheet_dump_selector_detail(css_selector_detail *detail,
 		FILE *target, size_t *size)
 {
-
 	*size += sizeof(css_selector_detail);
 
 	switch (detail->type) {
