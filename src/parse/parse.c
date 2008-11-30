@@ -102,6 +102,8 @@ struct css_parser
 
 	uint8_t match_char;		/**< Close bracket type for parseAny */
 
+	bool last_was_ws;		/**< Last token was whitespace */
+
 	css_parser_event_handler event;	/**< Client's event handler */
 	void *event_pw;			/**< Client data for event handler */
 
@@ -266,6 +268,7 @@ css_error css_parser_create(const char *charset, css_charset_source cs_source,
 	p->parseError = false;
 	p->match_char = 0;
 	p->event = NULL;
+	p->last_was_ws = false;
 	p->event_pw = NULL;
 	p->alloc = alloc;
 	p->pw = pw;
@@ -569,6 +572,14 @@ css_error getToken(css_parser *parser, const css_token **token)
 		if (error != CSS_OK)
 			return error;
 
+		/* If the last token read was whitespace, keep reading
+		 * tokens until we encounter one that isn't whitespace */
+		while (parser->last_was_ws && t->type == CSS_TOKEN_S) {
+			error = css_lexer_get_token(parser->lexer, &t);
+			if (error != CSS_OK)
+				return error;
+		}
+
 		/** \todo We need only intern for the following token types:
 		 *
 		 * CSS_TOKEN_IDENT, CSS_TOKEN_ATKEYWORD, CSS_TOKEN_STRING,
@@ -662,6 +673,8 @@ css_error getToken(css_parser *parser, const css_token **token)
 	if (perror != PARSERUTILS_OK)
 		return css_error_from_parserutils_error(perror);
 
+	parser->last_was_ws = ((*token)->type == CSS_TOKEN_S);
+
 	return CSS_OK;
 }
 
@@ -699,17 +712,14 @@ css_error eatWS(css_parser *parser)
 	const css_token *token;
 	css_error error;
 
-	while (1) {
-		error = getToken(parser, &token);
+	error = getToken(parser, &token);
+	if (error != CSS_OK)
+		return error;
+
+	if (token->type != CSS_TOKEN_S) {
+		error = pushBack(parser, token);
 		if (error != CSS_OK)
 			return error;
-
-		if (token->type != CSS_TOKEN_S) {
-			error = pushBack(parser, token);
-			if (error != CSS_OK)
-				return error;
-			break;
-		}
 	}
 
 	return CSS_OK;
