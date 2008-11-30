@@ -59,7 +59,7 @@ enum {
 	SLOW, FAST, X_FAST, FASTER, SLOWER, CENTER, JUSTIFY, CAPITALIZE,
 	UPPERCASE, LOWERCASE, EMBED, BIDI_OVERRIDE, BASELINE, SUB, SUPER,
 	TEXT_TOP, MIDDLE, TEXT_BOTTOM, SILENT, X_SOFT, SOFT, LOUD, X_LOUD,
-	PRE, NOWRAP, PRE_WRAP, PRE_LINE,
+	PRE, NOWRAP, PRE_WRAP, PRE_LINE, LEFTWARDS, RIGHTWARDS,
 
 	LAST_KNOWN
 };
@@ -299,6 +299,8 @@ static struct {
 	{ "nowrap", SLEN("nowrap") },
 	{ "pre-wrap", SLEN("pre-wrap") },
 	{ "pre-line", SLEN("pre-line") },
+	{ "leftwards", SLEN("leftwards") },
+	{ "rightwards", SLEN("rightwards") },
 };
 
 #endif
