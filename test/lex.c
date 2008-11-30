@@ -13,6 +13,10 @@
 
 #include "testutils.h"
 
+#define ITERATIONS (10)
+#define DUMP_TOKENS (0)
+
+
 static void *myrealloc(void *data, size_t len, void *pw)
 {
 	UNUSED(pw);
@@ -22,7 +26,7 @@ static void *myrealloc(void *data, size_t len, void *pw)
 
 static void printToken(const css_token *token)
 {
-#if 0
+#if !DUMP_TOKENS
 	UNUSED(token);
 #else
 	printf("[%d, %d] : ", token->line, token->col);
@@ -129,30 +133,55 @@ int main(int argc, char **argv)
 	/* Initialise library */
 	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
 
-	assert(parserutils_inputstream_create("UTF-8", CSS_CHARSET_DICTATED,
-			css_charset_extract, 
+	for (int i = 0; i < ITERATIONS; i++) {
+		assert(parserutils_inputstream_create("UTF-8", 
+			CSS_CHARSET_DICTATED,css_charset_extract, 
 			(parserutils_alloc) myrealloc, NULL, &stream) == 
 			PARSERUTILS_OK);
 
-	assert(css_lexer_create(stream, myrealloc, NULL, &lexer) == CSS_OK);
+		assert(css_lexer_create(stream, myrealloc, NULL, &lexer) == 
+			CSS_OK);
 
-	fp = fopen(argv[2], "rb");
-	if (fp == NULL) {
-		printf("Failed opening %s\n", argv[2]);
-		return 1;
-	}
+		fp = fopen(argv[2], "rb");
+		if (fp == NULL) {
+			printf("Failed opening %s\n", argv[2]);
+			return 1;
+		}
 
-	fseek(fp, 0, SEEK_END);
-	origlen = len = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
+		fseek(fp, 0, SEEK_END);
+		origlen = len = ftell(fp);
+		fseek(fp, 0, SEEK_SET);
 
-	while (len >= CHUNK_SIZE) {
-		fread(buf, 1, CHUNK_SIZE, fp);
+		while (len >= CHUNK_SIZE) {
+			fread(buf, 1, CHUNK_SIZE, fp);
 
-		assert(parserutils_inputstream_append(stream,
-				buf, CHUNK_SIZE) == PARSERUTILS_OK);
+			assert(parserutils_inputstream_append(stream,
+					buf, CHUNK_SIZE) == PARSERUTILS_OK);
 
-		len -= CHUNK_SIZE;
+			len -= CHUNK_SIZE;
+
+			while ((error = css_lexer_get_token(lexer, &tok)) == 
+					CSS_OK) {
+				printToken(tok);
+
+				if (tok->type == CSS_TOKEN_EOF)
+					break;
+			}
+		}
+
+		if (len > 0) {
+			fread(buf, 1, len, fp);
+
+			assert(parserutils_inputstream_append(stream,
+					buf, len) == PARSERUTILS_OK);
+
+			len = 0;
+		}
+
+		fclose(fp);
+
+		assert(parserutils_inputstream_append(stream, NULL, 0) == 
+				PARSERUTILS_OK);
 
 		while ((error = css_lexer_get_token(lexer, &tok)) == CSS_OK) {
 			printToken(tok);
@@ -160,32 +189,11 @@ int main(int argc, char **argv)
 			if (tok->type == CSS_TOKEN_EOF)
 				break;
 		}
+
+		css_lexer_destroy(lexer);
+
+		parserutils_inputstream_destroy(stream);
 	}
-
-	if (len > 0) {
-		fread(buf, 1, len, fp);
-
-		assert(parserutils_inputstream_append(stream,
-				buf, len) == PARSERUTILS_OK);
-
-		len = 0;
-	}
-
-	fclose(fp);
-
-	assert(parserutils_inputstream_append(stream, NULL, 0) == 
-			PARSERUTILS_OK);
-
-	while ((error = css_lexer_get_token(lexer, &tok)) == CSS_OK) {
-		printToken(tok);
-
-		if (tok->type == CSS_TOKEN_EOF)
-			break;
-	}
-
-	css_lexer_destroy(lexer);
-
-	parserutils_inputstream_destroy(stream);
 
 	assert(css_finalise(myrealloc, NULL) == CSS_OK);
 

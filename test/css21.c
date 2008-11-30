@@ -6,9 +6,9 @@
 
 #include "testutils.h"
 
-#define ITERATIONS (1)
+#define ITERATIONS (10)
 #define DUMP_HASH (0)
-#define DUMP_CSS (1)
+#define DUMP_CSS (0)
 
 extern void parserutils_hash_dump(parserutils_hash *hash);
 

@@ -11,6 +11,10 @@
 
 #include "testutils.h"
 
+#define ITERATIONS (10)
+#define DUMP_EVENTS (0)
+
+#if DUMP_EVENTS
 static const char *event_names[] = {
 	"START_STYLESHEET",
 	"END_STYLESHEET",
@@ -23,6 +27,7 @@ static const char *event_names[] = {
 	"BLOCK_CONTENT",
 	"DECLARATION"
 };
+#endif
 
 static void *myrealloc(void *data, size_t len, void *pw)
 {
@@ -34,7 +39,7 @@ static void *myrealloc(void *data, size_t len, void *pw)
 static css_error event_handler(css_parser_event type, 
 		const parserutils_vector *tokens, void *pw)
 {
-#if 0
+#if !DUMP_EVENTS
 	UNUSED(type);
 	UNUSED(tokens);
 	UNUSED(pw);
@@ -87,52 +92,54 @@ int main(int argc, char **argv)
 	/* Initialise library */
 	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
 
-	assert(parserutils_hash_create(myrealloc, NULL, &dict) == 
-			PARSERUTILS_OK);
+	for (int i = 0; i < ITERATIONS; i++) {
+		assert(parserutils_hash_create(myrealloc, NULL, &dict) == 
+				PARSERUTILS_OK);
 
-	assert(css_parser_create("UTF-8", CSS_CHARSET_DICTATED, dict,
-			myrealloc, NULL, &parser) == CSS_OK);
+		assert(css_parser_create("UTF-8", CSS_CHARSET_DICTATED, dict,
+				myrealloc, NULL, &parser) == CSS_OK);
 
-	params.event_handler.handler = event_handler;
-	params.event_handler.pw = NULL;
-	assert(css_parser_setopt(parser, CSS_PARSER_EVENT_HANDLER, 
-			&params) == CSS_OK);
+		params.event_handler.handler = event_handler;
+		params.event_handler.pw = NULL;
+		assert(css_parser_setopt(parser, CSS_PARSER_EVENT_HANDLER, 
+				&params) == CSS_OK);
 
-	fp = fopen(argv[2], "rb");
-	if (fp == NULL) {
-		printf("Failed opening %s\n", argv[2]);
-		return 1;
+		fp = fopen(argv[2], "rb");
+		if (fp == NULL) {
+			printf("Failed opening %s\n", argv[2]);
+			return 1;
+		}
+
+		fseek(fp, 0, SEEK_END);
+		origlen = len = ftell(fp);
+		fseek(fp, 0, SEEK_SET);
+
+		while (len >= CHUNK_SIZE) {
+			fread(buf, 1, CHUNK_SIZE, fp);
+
+			error = css_parser_parse_chunk(parser, buf, CHUNK_SIZE);
+			assert(error == CSS_OK || error == CSS_NEEDDATA);
+
+			len -= CHUNK_SIZE;
+		}
+
+		if (len > 0) {
+			fread(buf, 1, len, fp);
+
+			error = css_parser_parse_chunk(parser, buf, len);
+			assert(error == CSS_OK || error == CSS_NEEDDATA);
+
+			len = 0;
+		}
+
+		fclose(fp);
+
+		assert(css_parser_completed(parser) == CSS_OK);
+
+		css_parser_destroy(parser);
+
+		parserutils_hash_destroy(dict);
 	}
-
-	fseek(fp, 0, SEEK_END);
-	origlen = len = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-
-	while (len >= CHUNK_SIZE) {
-		fread(buf, 1, CHUNK_SIZE, fp);
-
-		error = css_parser_parse_chunk(parser, buf, CHUNK_SIZE);
-		assert(error == CSS_OK || error == CSS_NEEDDATA);
-
-		len -= CHUNK_SIZE;
-	}
-
-	if (len > 0) {
-		fread(buf, 1, len, fp);
-
-		error = css_parser_parse_chunk(parser, buf, len);
-		assert(error == CSS_OK || error == CSS_NEEDDATA);
-
-		len = 0;
-	}
-
-	fclose(fp);
-
-	assert(css_parser_completed(parser) == CSS_OK);
-
-	css_parser_destroy(parser);
-
-	parserutils_hash_destroy(dict);
 
 	assert(css_finalise(myrealloc, NULL) == CSS_OK);
 
