@@ -569,6 +569,18 @@ css_error getToken(css_parser *parser, const css_token **token)
 		if (error != CSS_OK)
 			return error;
 
+		/** \todo We need only intern for the following token types:
+		 *
+		 * CSS_TOKEN_IDENT, CSS_TOKEN_ATKEYWORD, CSS_TOKEN_STRING,
+		 * CSS_TOKEN_INVALID_STRING, CSS_TOKEN_HASH, CSS_TOKEN_URI,
+		 * CSS_TOKEN_UNICODE_RANGE?, CSS_TOKEN_FUNCTION
+		 *
+		 * It would be better if we didn't intern the text for these
+		 * token types:
+		 *
+		 * CSS_TOKEN_NUMBER, CSS_TOKEN_PERCENTAGE, CSS_TOKEN_DIMENSION
+		 */
+
 		if (t->type != CSS_TOKEN_S &&
 				t->data.data != NULL && t->data.len > 0) {
 			/* Insert token text into the dictionary */
