@@ -51,7 +51,7 @@ css_error css_stylesheet_create(css_language_level level,
 
 	memset(sheet, 0, sizeof(css_stylesheet));
 
-	perror = parserutils_dict_create((parserutils_alloc) alloc, alloc_pw,
+	perror = parserutils_hash_create((parserutils_alloc) alloc, alloc_pw,
 			&sheet->dictionary);
 	if (perror != PARSERUTILS_OK) {
 		alloc(sheet, 0, alloc_pw);
@@ -62,7 +62,7 @@ css_error css_stylesheet_create(css_language_level level,
 			charset ? CSS_CHARSET_DICTATED : CSS_CHARSET_DEFAULT,
 			sheet->dictionary, alloc, alloc_pw, &sheet->parser);
 	if (error != CSS_OK) {
-		parserutils_dict_destroy(sheet->dictionary);
+		parserutils_hash_destroy(sheet->dictionary);
 		alloc(sheet, 0, alloc_pw);
 		return error;
 	}
@@ -72,7 +72,7 @@ css_error css_stylesheet_create(css_language_level level,
 			&sheet->parser_frontend);
 	if (error != CSS_OK) {
 		css_parser_destroy(sheet->parser);
-		parserutils_dict_destroy(sheet->dictionary);
+		parserutils_hash_destroy(sheet->dictionary);
 		alloc(sheet, 0, alloc_pw);
 		return error;
 	}
@@ -84,7 +84,7 @@ css_error css_stylesheet_create(css_language_level level,
 	if (sheet->url == NULL) {
 		css_language_destroy(sheet->parser_frontend);
 		css_parser_destroy(sheet->parser);
-		parserutils_dict_destroy(sheet->dictionary);
+		parserutils_hash_destroy(sheet->dictionary);
 		alloc(sheet, 0, alloc_pw);
 		return CSS_NOMEM;
 	}
@@ -97,7 +97,7 @@ css_error css_stylesheet_create(css_language_level level,
 			alloc(sheet->url, 0, alloc_pw);
 			css_language_destroy(sheet->parser_frontend);
 			css_parser_destroy(sheet->parser);
-			parserutils_dict_destroy(sheet->dictionary);
+			parserutils_hash_destroy(sheet->dictionary);
 			alloc(sheet, 0, alloc_pw);
 			return CSS_NOMEM;
 		}
@@ -129,7 +129,7 @@ css_error css_stylesheet_destroy(css_stylesheet *sheet)
 	if (sheet == NULL)
 		return CSS_BADPARM;
 
-	parserutils_dict_destroy(sheet->dictionary);
+	parserutils_hash_destroy(sheet->dictionary);
 
 	if (sheet->title != NULL)
 		sheet->alloc(sheet->title, 0, sheet->pw);
@@ -376,7 +376,7 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 	 * the dictionary, it would be more efficient to pass a pointer to the 
 	 * dictionary entry around rather than re-discovering it here. The same
 	 * applies for value, and in css_stylesheet_selector_detail_create() */
-	perror = parserutils_dict_insert(sheet->dictionary, name->data, 
+	perror = parserutils_hash_insert(sheet->dictionary, name->data, 
 			name->len, &iname);
 	if (perror != PARSERUTILS_OK) {
 		sheet->alloc(sel, 0, sheet->pw);
@@ -385,7 +385,7 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 	sel->data.name = iname;
 
 	if (value != NULL) {
-		perror = parserutils_dict_insert(sheet->dictionary, 
+		perror = parserutils_hash_insert(sheet->dictionary, 
 				value->data, value->len, &ivalue);
 		if (perror != PARSERUTILS_OK) {
 			sheet->alloc(sel, 0, sheet->pw);
@@ -454,7 +454,7 @@ css_error css_stylesheet_selector_detail_create(css_stylesheet *sheet,
 
 	det->type = type;
 
-	perror = parserutils_dict_insert(sheet->dictionary, name->data, 
+	perror = parserutils_hash_insert(sheet->dictionary, name->data, 
 			name->len, &iname);
 	if (perror != PARSERUTILS_OK) {
 		sheet->alloc(det, 0, sheet->pw);
@@ -463,7 +463,7 @@ css_error css_stylesheet_selector_detail_create(css_stylesheet *sheet,
 	det->name = iname;
 
 	if (value != NULL) {
-		perror = parserutils_dict_insert(sheet->dictionary, 
+		perror = parserutils_hash_insert(sheet->dictionary, 
 				value->data, value->len, &ivalue);
 		if (perror != PARSERUTILS_OK) {
 			sheet->alloc(det, 0, sheet->pw);

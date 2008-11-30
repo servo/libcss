@@ -409,7 +409,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 		return CSS_INVALID;
 	}
 
-	entry.data = atkeyword->lower.data;
+	entry.data = (void *) atkeyword->lower.data;
 
 	perror = parserutils_stack_push(c->context, (void *) &entry);
 	if (perror != PARSERUTILS_OK) {

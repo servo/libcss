@@ -11,7 +11,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-#include <parserutils/utils/dict.h>
+#include <parserutils/utils/hash.h>
 
 #include <libcss/errors.h>
 #include <libcss/functypes.h>
@@ -169,7 +169,7 @@ struct css_stylesheet {
 	css_parser *parser;			/**< Core parser for sheet */
 	void *parser_frontend;			/**< Frontend parser */
 
-	parserutils_dict *dictionary;		/**< String dictionary */
+	parserutils_hash *dictionary;		/**< String dictionary */
 
 	css_alloc alloc;			/**< Allocation function */
 	void *pw;				/**< Private word */

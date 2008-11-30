@@ -71,7 +71,7 @@ static css_error event_handler(css_parser_event type,
 int main(int argc, char **argv)
 {
 	css_parser_optparams params;
-	parserutils_dict *dict;
+	parserutils_hash *dict;
 	css_parser *parser;
 	FILE *fp;
 	size_t len, origlen;
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
 	/* Initialise library */
 	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
 
-	assert(parserutils_dict_create(myrealloc, NULL, &dict) == 
+	assert(parserutils_hash_create(myrealloc, NULL, &dict) == 
 			PARSERUTILS_OK);
 
 	assert(css_parser_create("UTF-8", CSS_CHARSET_DICTATED, dict,
@@ -132,7 +132,7 @@ int main(int argc, char **argv)
 
 	css_parser_destroy(parser);
 
-	parserutils_dict_destroy(dict);
+	parserutils_hash_destroy(dict);
 
 	assert(css_finalise(myrealloc, NULL) == CSS_OK);
 

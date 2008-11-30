@@ -10,7 +10,7 @@
 #include <stdbool.h>
 
 #include <parserutils/input/inputstream.h>
-#include <parserutils/utils/dict.h>
+#include <parserutils/utils/hash.h>
 #include <parserutils/utils/stack.h>
 #include <parserutils/utils/vector.h>
 
@@ -91,7 +91,7 @@ struct css_parser
 #define STACK_CHUNK 32
 	parserutils_stack *states;	/**< Stack of states */
 
-	parserutils_dict *dictionary;	/**< Dictionary for interned strings */
+	parserutils_hash *dictionary;	/**< Dictionary for interned strings */
 
 	parserutils_vector *tokens;	/**< Vector of pending tokens */
 
@@ -185,7 +185,7 @@ static css_error (*parseFuncs[])(css_parser *parser) = {
  *         CSS_NOMEM on memory exhaustion
  */
 css_error css_parser_create(const char *charset, css_charset_source cs_source,
-		parserutils_dict *dictionary, css_alloc alloc, void *pw, 
+		parserutils_hash *dictionary, css_alloc alloc, void *pw, 
 		css_parser **parser)
 {
 	css_parser *p;
@@ -420,13 +420,13 @@ const char *css_parser_read_charset(css_parser *parser,
 const uint8_t *css_parser_dict_add(css_parser *parser, const uint8_t *data,
 		size_t len)
 {
-	const parserutils_dict_entry *interned;
+	const parserutils_hash_entry *interned;
 	parserutils_error perror;
 
 	if (parser == NULL || data == NULL || len == 0)
 		return NULL;
 
-	perror = parserutils_dict_insert(parser->dictionary, data, len, 
+	perror = parserutils_hash_insert(parser->dictionary, data, len, 
 			&interned);
 	if (perror != PARSERUTILS_OK)
 		return NULL;
@@ -584,7 +584,7 @@ css_error getToken(css_parser *parser, const css_token **token)
 		if (t->type != CSS_TOKEN_S &&
 				t->data.data != NULL && t->data.len > 0) {
 			/* Insert token text into the dictionary */
-			const parserutils_dict_entry *interned;
+			const parserutils_hash_entry *interned;
 			uint8_t temp[t->data.len];
 			bool lower = false;
 
@@ -607,7 +607,7 @@ css_error getToken(css_parser *parser, const css_token **token)
 				/* We get to insert it twice - once for the raw
 				 * data, and once for a lowercased version that
 				 * we need internally. */
-				perror = parserutils_dict_insert(
+				perror = parserutils_hash_insert(
 						parser->dictionary,
 						temp, t->data.len, 
 						&interned);
@@ -619,13 +619,13 @@ css_error getToken(css_parser *parser, const css_token **token)
 				t->lower.data = interned->data;
 				t->lower.len = interned->len;
 
-				perror = parserutils_dict_insert(
+				perror = parserutils_hash_insert(
 						parser->dictionary,
 						t->data.data, t->data.len,
 						&interned);
 			} else {
 				/* Otherwise, we're not interested in case */
-				perror = parserutils_dict_insert(
+				perror = parserutils_hash_insert(
 						parser->dictionary,
 						t->data.data, t->data.len, 
 						&interned);

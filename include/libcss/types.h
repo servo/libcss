@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include <parserutils/utils/dict.h>
+#include <parserutils/utils/hash.h>
 
 /** Source of charset information, in order of importance
  * A client-dictated charset will override all others.
@@ -57,9 +57,9 @@ typedef enum css_origin {
  * String type
  *
  * \todo It might be better to define parserutils_string, and use that.
- *       (where parserutils_string is identical to parserutils_dict_entry)
+ *       (where parserutils_string is identical to parserutils_hash_entry)
  */
-typedef parserutils_dict_entry css_string;
+typedef parserutils_hash_entry css_string;
 
 typedef struct css_stylesheet css_stylesheet;
 

@@ -8,7 +8,7 @@
 #ifndef css_parse_parse_h_
 #define css_parse_parse_h_
 
-#include <parserutils/utils/dict.h>
+#include <parserutils/utils/hash.h>
 #include <parserutils/utils/vector.h>
 
 #include <libcss/errors.h>
@@ -57,7 +57,7 @@ typedef union css_parser_optparams {
 } css_parser_optparams;
 
 css_error css_parser_create(const char *charset, css_charset_source cs_source,
-		parserutils_dict *dict, css_alloc alloc, void *pw, 
+		parserutils_hash *dict, css_alloc alloc, void *pw, 
 		css_parser **parser);
 css_error css_parser_destroy(css_parser *parser);
 
