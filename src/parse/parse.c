@@ -573,7 +573,7 @@ css_error getToken(css_parser *parser, const css_token **token)
 		 *
 		 * CSS_TOKEN_IDENT, CSS_TOKEN_ATKEYWORD, CSS_TOKEN_STRING,
 		 * CSS_TOKEN_INVALID_STRING, CSS_TOKEN_HASH, CSS_TOKEN_URI,
-		 * CSS_TOKEN_UNICODE_RANGE?, CSS_TOKEN_FUNCTION
+		 * CSS_TOKEN_UNICODE_RANGE?, CSS_TOKEN_FUNCTION, CSS_TOKEN_CHAR
 		 *
 		 * It would be better if we didn't intern the text for these
 		 * token types:
@@ -581,64 +581,74 @@ css_error getToken(css_parser *parser, const css_token **token)
 		 * CSS_TOKEN_NUMBER, CSS_TOKEN_PERCENTAGE, CSS_TOKEN_DIMENSION
 		 */
 
-		if (t->type != CSS_TOKEN_S &&
+		if ((t->type == CSS_TOKEN_IDENT || 
+				t->type == CSS_TOKEN_ATKEYWORD || 
+				t->type == CSS_TOKEN_STRING || 
+				t->type == CSS_TOKEN_INVALID_STRING || 
+				t->type == CSS_TOKEN_HASH || 
+				t->type == CSS_TOKEN_URI || 
+				t->type == CSS_TOKEN_UNICODE_RANGE || 
+				t->type == CSS_TOKEN_FUNCTION ||
+				t->type == CSS_TOKEN_CHAR || 
+				t->type == CSS_TOKEN_NUMBER || 
+				t->type == CSS_TOKEN_PERCENTAGE || 
+				t->type == CSS_TOKEN_DIMENSION) &&
 				t->data.data != NULL && t->data.len > 0) {
-			/* Insert token text into the dictionary */
 			const parserutils_hash_entry *interned;
-			uint8_t temp[t->data.len];
-			bool lower = false;
 
-			switch (t->type) {
-			case CSS_TOKEN_IDENT:
-			case CSS_TOKEN_ATKEYWORD:
-			case CSS_TOKEN_HASH:
-			case CSS_TOKEN_FUNCTION:
+			/* Invalidate lowercase data */
+			t->lower.data = NULL;
+
+			if (t->type == CSS_TOKEN_IDENT || 
+					t->type == CSS_TOKEN_ATKEYWORD || 
+					t->type == CSS_TOKEN_HASH ||
+					t->type == CSS_TOKEN_FUNCTION) {
+				uint8_t temp[t->data.len];
+				bool lower = false;
+
 				for (size_t i = 0; i < t->data.len; i++) {
-					temp[i] = tolower(t->data.data[i]);
-					if (temp[i] != t->data.data[i])
+					uint8_t c = t->data.data[i];
+
+					if ('A' <= c && c <= 'Z') {
 						lower = true;
+						c |= 0x20;
+					}
+
+					temp[i] = c;
 				}
-				break;
-			default:
-				break;
+
+				if (lower == true) {
+					/* Insert lowercase version */
+					perror = parserutils_hash_insert(
+							parser->dictionary,
+							temp, t->data.len, 
+							&interned);
+					if (perror != PARSERUTILS_OK) {
+						return css_error_from_parserutils_error(
+								perror);
+					}
+
+					t->lower.data = interned->data;
+					t->lower.len = interned->len;
+				}
 			}
 
-			if (lower == true) {
-				/* We get to insert it twice - once for the raw
-				 * data, and once for a lowercased version that
-				 * we need internally. */
-				perror = parserutils_hash_insert(
-						parser->dictionary,
-						temp, t->data.len, 
-						&interned);
-				if (perror != PARSERUTILS_OK) {
-					return css_error_from_parserutils_error(
-							perror);
-				}
+			/* Insert token text into the dictionary */
+			perror = parserutils_hash_insert(parser->dictionary,
+					t->data.data, t->data.len, 
+					&interned);
 
-				t->lower.data = interned->data;
-				t->lower.len = interned->len;
-
-				perror = parserutils_hash_insert(
-						parser->dictionary,
-						t->data.data, t->data.len,
-						&interned);
-			} else {
-				/* Otherwise, we're not interested in case */
-				perror = parserutils_hash_insert(
-						parser->dictionary,
-						t->data.data, t->data.len, 
-						&interned);
-
+			if (t->lower.data == NULL) {
 				t->lower.data = interned->data;
 				t->lower.len = interned->len;
 			}
+
 			if (perror != PARSERUTILS_OK)
 				return css_error_from_parserutils_error(perror);
 
 			t->data.data = interned->data;
 			t->data.len = interned->len;
-		} else if (t->type == CSS_TOKEN_S) {
+		} else {
 			t->data.data = t->lower.data = NULL;
 			t->data.len = t->lower.len = 0;
 		}
