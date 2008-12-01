@@ -55,11 +55,11 @@ typedef enum css_origin {
 
 /**
  * String type
- *
- * \todo It might be better to define parserutils_string, and use that.
- *       (where parserutils_string is identical to parserutils_hash_entry)
  */
-typedef parserutils_hash_entry css_string;
+typedef struct css_string {
+	size_t len;
+	uint8_t *data;
+} css_string;
 
 typedef struct css_stylesheet css_stylesheet;
 

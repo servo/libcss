@@ -48,8 +48,8 @@ typedef enum css_combinator {
 } css_combinator;
 
 typedef struct css_selector_detail {
-	const css_string *name;			/**< Interned name */
-	const css_string *value;		/**< Interned value, or NULL */
+	const parserutils_hash_entry *name;	/**< Interned name */
+	const parserutils_hash_entry *value;	/**< Interned value, or NULL */
 
 	uint32_t type : 4,			/**< Type of selector */
 	         comb : 2,			/**< Type of combinator */

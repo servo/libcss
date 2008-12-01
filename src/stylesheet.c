@@ -357,7 +357,7 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 		css_selector_type type, const css_string *name, 
 		const css_string *value, css_selector **selector)
 {
-	const css_string *iname, *ivalue;
+	const parserutils_hash_entry *iname, *ivalue;
 	css_selector *sel;
 	parserutils_error perror;
 
@@ -440,7 +440,7 @@ css_error css_stylesheet_selector_detail_create(css_stylesheet *sheet,
 		const css_string *value, css_selector_detail **detail)
 {
 	parserutils_error perror;
-	const css_string *iname, *ivalue;
+	const parserutils_hash_entry *iname, *ivalue;
 	css_selector_detail *det;
 
 	if (sheet == NULL || name == NULL || detail == NULL)
@@ -808,7 +808,8 @@ static void css_stylesheet_dump_selector(css_selector *selector, FILE *target,
 		size_t *size);
 static void css_stylesheet_dump_selector_detail(css_selector_detail *detail,
 		FILE *target, size_t *size);
-static void css_stylesheet_dump_string(const css_string *string, FILE *target);
+static void css_stylesheet_dump_string(const parserutils_hash_entry *string, 
+		FILE *target);
 
 /**
  * Dump a stylesheet
@@ -1025,7 +1026,8 @@ void css_stylesheet_dump_selector_detail(css_selector_detail *detail,
  * \param string  The string to dump
  * \param target  The file handle to output to
  */
-void css_stylesheet_dump_string(const css_string *string, FILE *target)
+void css_stylesheet_dump_string(const parserutils_hash_entry *string, 
+		FILE *target)
 {
 	fprintf(target, "%.*s", (int) string->len, string->data);
 }

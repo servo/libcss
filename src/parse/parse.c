@@ -639,7 +639,8 @@ css_error getToken(css_parser *parser, const css_token **token)
 								perror);
 					}
 
-					t->lower.data = interned->data;
+					t->lower.data = 
+						(uint8_t *) interned->data;
 					t->lower.len = interned->len;
 				}
 			}
@@ -650,14 +651,14 @@ css_error getToken(css_parser *parser, const css_token **token)
 					&interned);
 
 			if (t->lower.data == NULL) {
-				t->lower.data = interned->data;
+				t->lower.data = (uint8_t *) interned->data;
 				t->lower.len = interned->len;
 			}
 
 			if (perror != PARSERUTILS_OK)
 				return css_error_from_parserutils_error(perror);
 
-			t->data.data = interned->data;
+			t->data.data = (uint8_t *) interned->data;
 			t->data.len = interned->len;
 		} else {
 			t->data.data = t->lower.data = NULL;
