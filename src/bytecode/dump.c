@@ -166,14 +166,13 @@ void css_bytecode_dump(void *bytecode, uint32_t length, FILE *fp)
 					break;
 				case BACKGROUND_IMAGE_URI:
 				{
-					uint8_t *ptr = 
-						*((uint8_t **) bytecode);
+					parserutils_hash_entry *ptr = 
+						*((parserutils_hash_entry **) 
+						bytecode);
 					ADVANCE(sizeof(ptr));
-					size_t len =
-						*((size_t *) bytecode);
-					ADVANCE(sizeof(len));
-					fprintf(fp, "url('%.*s')", (int) len, 
-							(char *) ptr);
+					fprintf(fp, "url('%.*s')", 
+							(int) ptr->len, 
+							(char *) ptr->data);
 				}
 					break;
 				}

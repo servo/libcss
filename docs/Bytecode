@@ -27,9 +27,8 @@ All numeric values are stored in a 32bit wide field. This field contains
 a fixed point value with 22 bits assigned to the integer part and 10 bits
 assigned to the fractional part.
 
-Strings are stored as <pointer,length> pairs, as per css_string.
-Pointer's width is the native width of a pointer on the platform.
-Length's width is the native width of a size_t on the platform.
+Strings are stored as a pointer to an interned string.
+The pointer's width is the native width of a pointer on the platform.
 
 CSS dimensions are stored as two 32bit values: <length, units>. 
 Length is a 32bit numeric value (as described above) and unit is as follows:

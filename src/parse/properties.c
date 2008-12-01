@@ -658,7 +658,7 @@ css_error parse_background_image(css_language *c,
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == BACKGROUND_IMAGE_URI)
-		required_size += sizeof(uint8_t *) + sizeof(size_t);
+		required_size += sizeof(parserutils_hash_entry *);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -669,10 +669,8 @@ css_error parse_background_image(css_language *c,
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && value == BACKGROUND_IMAGE_URI) {
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
-				&token->data.data, sizeof(uint8_t *));
-		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv) + 
-					sizeof(uint8_t *),
-				&token->data.len, sizeof(size_t));
+				&token->idata, 
+				sizeof(parserutils_hash_entry *));
 	}
 
 	return CSS_OK;
@@ -1166,7 +1164,7 @@ css_error parse_cue_after(css_language *c,
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == CUE_AFTER_URI)
-		required_size += sizeof(uint8_t *) + sizeof(size_t);
+		required_size += sizeof(parserutils_hash_entry *);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -1177,10 +1175,8 @@ css_error parse_cue_after(css_language *c,
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && value == CUE_AFTER_URI) {
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
-				&token->data.data, sizeof(uint8_t *));
-		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv) + 
-					sizeof(uint8_t *),
-				&token->data.len, sizeof(size_t));
+				&token->idata, 
+				sizeof(parserutils_hash_entry *));
 	}
 
 	return CSS_OK;
@@ -1222,7 +1218,7 @@ css_error parse_cue_before(css_language *c,
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == CUE_BEFORE_URI)
-		required_size += sizeof(uint8_t *) + sizeof(size_t);
+		required_size += sizeof(parserutils_hash_entry *);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -1233,10 +1229,8 @@ css_error parse_cue_before(css_language *c,
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && value == CUE_BEFORE_URI) {
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
-				&token->data.data, sizeof(uint8_t *));
-		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv) + 
-					sizeof(uint8_t *),
-				&token->data.len, sizeof(size_t));
+				&token->idata, 
+				sizeof(parserutils_hash_entry *));
 	}
 
 	return CSS_OK;
@@ -2101,7 +2095,7 @@ css_error parse_list_style_image(css_language *c,
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == LIST_STYLE_IMAGE_URI)
-		required_size += sizeof(uint8_t *) + sizeof(size_t);
+		required_size += sizeof(parserutils_hash_entry *);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -2112,10 +2106,8 @@ css_error parse_list_style_image(css_language *c,
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && value == LIST_STYLE_IMAGE_URI) {
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
-				&token->data.data, sizeof(uint8_t *));
-		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv) + 
-					sizeof(uint8_t *),
-				&token->data.len, sizeof(size_t));
+				&token->idata, 
+				sizeof(parserutils_hash_entry *));
 	}
 
 	return CSS_OK;
