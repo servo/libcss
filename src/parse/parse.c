@@ -580,40 +580,25 @@ css_error getToken(css_parser *parser, const css_token **token)
 				return error;
 		}
 
-		/** \todo We need only intern for the following token types:
+		/* We need only intern for the following token types:
 		 *
 		 * CSS_TOKEN_IDENT, CSS_TOKEN_ATKEYWORD, CSS_TOKEN_STRING,
 		 * CSS_TOKEN_INVALID_STRING, CSS_TOKEN_HASH, CSS_TOKEN_URI,
-		 * CSS_TOKEN_UNICODE_RANGE?, CSS_TOKEN_FUNCTION, CSS_TOKEN_CHAR
-		 *
-		 * It would be better if we didn't intern the text for these
-		 * token types:
-		 *
+		 * CSS_TOKEN_UNICODE_RANGE?, CSS_TOKEN_FUNCTION, CSS_TOKEN_CHAR,
 		 * CSS_TOKEN_NUMBER, CSS_TOKEN_PERCENTAGE, CSS_TOKEN_DIMENSION
+		 *
+		 * These token types all appear before CSS_TOKEN_LAST_INTERN.
+		 * All other token types appear after this magic value.
 		 */
 
-		if ((t->type == CSS_TOKEN_IDENT || 
-				t->type == CSS_TOKEN_ATKEYWORD || 
-				t->type == CSS_TOKEN_STRING || 
-				t->type == CSS_TOKEN_INVALID_STRING || 
-				t->type == CSS_TOKEN_HASH || 
-				t->type == CSS_TOKEN_URI || 
-				t->type == CSS_TOKEN_UNICODE_RANGE || 
-				t->type == CSS_TOKEN_FUNCTION ||
-				t->type == CSS_TOKEN_CHAR || 
-				t->type == CSS_TOKEN_NUMBER || 
-				t->type == CSS_TOKEN_PERCENTAGE || 
-				t->type == CSS_TOKEN_DIMENSION) &&
+		if (t->type < CSS_TOKEN_LAST_INTERN &&
 				t->data.data != NULL && t->data.len > 0) {
 			const parserutils_hash_entry *interned;
 
 			/* Invalidate lowercase data */
 			t->lower.data = NULL;
 
-			if (t->type == CSS_TOKEN_IDENT || 
-					t->type == CSS_TOKEN_ATKEYWORD || 
-					t->type == CSS_TOKEN_HASH ||
-					t->type == CSS_TOKEN_FUNCTION) {
+			if (t->type < CSS_TOKEN_LAST_INTERN_LOWER) {
 				uint8_t temp[t->data.len];
 				bool lower = false;
 
