@@ -484,7 +484,71 @@ css_error parse_azimuth(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = AZIMUTH_RIGHTWARDS;
 	} else if (token->type == CSS_TOKEN_IDENT) {
-		/** \todo the rest. behind on its own isn't defined afaics */
+		parserutils_vector_iterate(vector, ctx);
+
+		/* Now, we may have one of the other keywords or behind,
+		 * potentially followed by behind or other keyword, 
+		 * respectively */
+		if (token->ilower == c->strings[LEFT_SIDE]) {
+			value = AZIMUTH_LEFT_SIDE;
+		} else if (token->ilower == c->strings[FAR_LEFT]) {
+			value = AZIMUTH_FAR_LEFT;
+		} else if (token->ilower == c->strings[LEFT]) {
+			value = AZIMUTH_LEFT;
+		} else if (token->ilower == c->strings[CENTER-LEFT]) {
+			value = AZIMUTH_CENTER_LEFT;
+		} else if (token->ilower == c->strings[CENTER]) {
+			value = AZIMUTH_CENTER;
+		} else if (token->ilower == c->strings[CENTER-RIGHT]) {
+			value = AZIMUTH_CENTER_RIGHT;
+		} else if (token->ilower == c->strings[RIGHT]) {
+			value = AZIMUTH_RIGHT;
+		} else if (token->ilower == c->strings[FAR_RIGHT]) {
+			value = AZIMUTH_FAR_RIGHT;
+		} else if (token->ilower == c->strings[RIGHT_SIDE]) {
+			value = AZIMUTH_RIGHT_SIDE;
+		} else if (token->ilower == c->strings[BEHIND]) {
+			value = AZIMUTH_BEHIND;
+		} else {
+			return CSS_INVALID;
+		}
+
+		consumeWhitespace(vector, ctx);
+
+		/* Get potential following token */
+		token = parserutils_vector_iterate(vector, ctx);
+		if (token != NULL && token->type != CSS_TOKEN_IDENT)
+			return CSS_INVALID;
+
+		if (token != NULL && value == AZIMUTH_BEHIND) {
+			if (token->ilower == c->strings[LEFT_SIDE]) {
+				value |= AZIMUTH_LEFT_SIDE;
+			} else if (token->ilower == c->strings[FAR_LEFT]) {
+				value |= AZIMUTH_FAR_LEFT;
+			} else if (token->ilower == c->strings[LEFT]) {
+				value |= AZIMUTH_LEFT;
+			} else if (token->ilower == c->strings[CENTER-LEFT]) {
+				value |= AZIMUTH_CENTER_LEFT;
+			} else if (token->ilower == c->strings[CENTER]) {
+				value |= AZIMUTH_CENTER;
+			} else if (token->ilower == c->strings[CENTER-RIGHT]) {
+				value |= AZIMUTH_CENTER_RIGHT;
+			} else if (token->ilower == c->strings[RIGHT]) {
+				value |= AZIMUTH_RIGHT;
+			} else if (token->ilower == c->strings[FAR_RIGHT]) {
+				value |= AZIMUTH_FAR_RIGHT;
+			} else if (token->ilower == c->strings[RIGHT_SIDE]) {
+				value |= AZIMUTH_RIGHT_SIDE;
+			} else {
+				return CSS_INVALID;
+			}
+		} else if (token != NULL && value != AZIMUTH_BEHIND) {
+			if (token->ilower == c->strings[BEHIND]) {
+				value |= AZIMUTH_BEHIND;
+			} else {
+				return CSS_INVALID;
+			}
+		}
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
 		if (error != CSS_OK)
