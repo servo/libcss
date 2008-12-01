@@ -402,71 +402,43 @@ css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 }
 
 /**
- * Create a selector detail
+ * Initialise a selector detail
  *
  * \param sheet   The stylesheet context
  * \param type    The type of selector to create
  * \param name    Name of selector
  * \param value   Value of selector, or NULL
- * \param detail  Pointer to location to receive detail object
+ * \param detail  Pointer to detail object to initialise
  * \return CSS_OK on success,
- *         CSS_BADPARM on bad parameters,
- *         CSS_NOMEM on memory exhaustion
+ *         CSS_BADPARM on bad parameters
  */
-css_error css_stylesheet_selector_detail_create(css_stylesheet *sheet,
+css_error css_stylesheet_selector_detail_init(css_stylesheet *sheet,
 		css_selector_type type, const parserutils_hash_entry *name, 
 		const parserutils_hash_entry *value, 
-		css_selector_detail **detail)
+		css_selector_detail *detail)
 {
-	css_selector_detail *det;
-
 	if (sheet == NULL || name == NULL || detail == NULL)
 		return CSS_BADPARM;
 
-	det = sheet->alloc(NULL, sizeof(css_selector_detail), sheet->pw);
-	if (det == NULL)
-		return CSS_NOMEM;
+	memset(detail, 0, sizeof(css_selector_detail));
 
-	memset(det, 0, sizeof(css_selector_detail));
-
-	det->type = type;
-	det->name = name;
-	det->value = value;
-
-	*detail = det;
+	detail->type = type;
+	detail->name = name;
+	detail->value = value;
 
 	return CSS_OK;
 }
-
-/**
- * Destroy a selector detail
- *
- * \param sheet   The stylesheet context
- * \param detail  The detail to destroy
- * \return CSS_OK on success, appropriate error otherwise
- */
-css_error css_stylesheet_selector_detail_destroy(css_stylesheet *sheet,
-		css_selector_detail *detail)
-{
-	if (sheet == NULL || detail == NULL)
-		return CSS_BADPARM;
-
-	sheet->alloc(detail, 0, sheet->pw);
-
-	return CSS_OK;
-}
-
 
 /**
  * Append a selector to the specifics chain of another selector
  *
  * \param sheet     The stylesheet context
  * \param parent    Pointer to pointer to the parent selector (updated on exit)
- * \param specific  The selector to append (destroyed)
+ * \param specific  The selector to append (copied)
  * \return CSS_OK on success, appropriate error otherwise.
  */
 css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
-		css_selector **parent, css_selector_detail *detail)
+		css_selector **parent, const css_selector_detail *detail)
 {
 	css_selector *temp;
 	css_selector_detail *d;
@@ -495,8 +467,6 @@ css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
 	(&temp->data)[num_details + 1] = *detail;
 	/* Flag that there's another block */
 	(&temp->data)[num_details].next = 1;
-
-	css_stylesheet_selector_detail_destroy(sheet, detail);
 
 	(*parent) = temp;
 

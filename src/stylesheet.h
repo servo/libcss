@@ -185,15 +185,13 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 		css_selector *selector);
 
-css_error css_stylesheet_selector_detail_create(css_stylesheet *sheet,
+css_error css_stylesheet_selector_detail_init(css_stylesheet *sheet,
 		css_selector_type type, const parserutils_hash_entry *name,
 		const parserutils_hash_entry *value, 
-		css_selector_detail **detail);
-css_error css_stylesheet_selector_detail_destroy(css_stylesheet *sheet,
 		css_selector_detail *detail);
 
 css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
-		css_selector **parent, css_selector_detail *specific);
+		css_selector **parent, const css_selector_detail *specific);
 
 css_error css_stylesheet_selector_combine(css_stylesheet *sheet,
 		css_combinator type, css_selector *a, css_selector *b);

@@ -74,13 +74,13 @@ static inline css_error handleDeclaration(css_language *c,
 /* Selector list parsing */
 static inline css_error parseClass(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		css_selector_detail **specific);
+		css_selector_detail *specific);
 static inline css_error parseAttrib(css_language *c, 
 		const parserutils_vector *vector, int *ctx,
-		css_selector_detail **specific);
+		css_selector_detail *specific);
 static inline css_error parsePseudo(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		css_selector_detail **specific);
+		css_selector_detail *specific);
 static inline css_error parseSpecific(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_selector **parent);
@@ -528,7 +528,7 @@ css_error handleDeclaration(css_language *c, const parserutils_vector *vector)
  ******************************************************************************/
 
 css_error parseClass(css_language *c, const parserutils_vector *vector, 
-		int *ctx, css_selector_detail **specific)
+		int *ctx, css_selector_detail *specific)
 {
 	const css_token *token;
 
@@ -541,12 +541,12 @@ css_error parseClass(css_language *c, const parserutils_vector *vector,
 	if (token == NULL || token->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
 
-	return css_stylesheet_selector_detail_create(c->sheet, 
+	return css_stylesheet_selector_detail_init(c->sheet, 
 			CSS_SELECTOR_CLASS, token->idata, NULL, specific);
 }
 
 css_error parseAttrib(css_language *c, const parserutils_vector *vector, 
-		int *ctx, css_selector_detail **specific)
+		int *ctx, css_selector_detail *specific)
 {
 	const css_token *token, *name, *value = NULL;
 	css_selector_type type = CSS_SELECTOR_ATTRIBUTE;
@@ -599,13 +599,13 @@ css_error parseAttrib(css_language *c, const parserutils_vector *vector,
 			return CSS_INVALID;
 	}
 
-	return css_stylesheet_selector_detail_create(c->sheet, type, 
+	return css_stylesheet_selector_detail_init(c->sheet, type, 
 			name->idata, value != NULL ? value->idata : NULL,
 			specific);
 }
 
 css_error parsePseudo(css_language *c, const parserutils_vector *vector, 
-		int *ctx, css_selector_detail **specific)
+		int *ctx, css_selector_detail *specific)
 {
 	const css_token *token, *name, *value = NULL;
 
@@ -639,7 +639,7 @@ css_error parsePseudo(css_language *c, const parserutils_vector *vector,
 			return CSS_INVALID;
 	}
 
-	return css_stylesheet_selector_detail_create(c->sheet, 
+	return css_stylesheet_selector_detail_init(c->sheet, 
 			CSS_SELECTOR_PSEUDO, name->idata, 
 			value != NULL ? value->idata : NULL, specific);
 }
@@ -650,7 +650,7 @@ css_error parseSpecific(css_language *c,
 {
 	css_error error;
 	const css_token *token;
-	css_selector_detail *specific = NULL;
+	css_selector_detail specific;
 
 	/* specific  -> [ HASH | class | attrib | pseudo ] */
 
@@ -659,7 +659,7 @@ css_error parseSpecific(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_HASH) {
-		error = css_stylesheet_selector_detail_create(c->sheet,
+		error = css_stylesheet_selector_detail_init(c->sheet,
 				CSS_SELECTOR_ID, token->idata, NULL, &specific);
 		if (error != CSS_OK)
 			return error;
@@ -681,14 +681,8 @@ css_error parseSpecific(css_language *c,
 		return CSS_INVALID;
 	}
 
-	error = css_stylesheet_selector_append_specific(c->sheet, parent, 
-			specific);
-	if (error != CSS_OK) {
-		css_stylesheet_selector_detail_destroy(c->sheet, specific);
-		return error;
-	}
-
-	return CSS_OK;
+	return css_stylesheet_selector_append_specific(c->sheet, parent, 
+			&specific);
 }
 
 css_error parseSelectorSpecifics(css_language *c,
