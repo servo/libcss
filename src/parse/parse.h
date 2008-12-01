@@ -71,7 +71,7 @@ css_error css_parser_completed(css_parser *parser);
 const char *css_parser_read_charset(css_parser *parser, 
 		css_charset_source *source);
 
-const uint8_t *css_parser_dict_add(css_parser *parser,
+const parserutils_hash_entry *css_parser_dict_add(css_parser *parser,
 		const uint8_t *ptr, size_t len);
 
 #endif

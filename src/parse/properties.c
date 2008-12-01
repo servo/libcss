@@ -472,15 +472,15 @@ css_error parse_azimuth(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[LEFTWARDS]) {
+			token->ilower == c->strings[LEFTWARDS]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = AZIMUTH_LEFTWARDS;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[RIGHTWARDS]) {
+			token->ilower == c->strings[RIGHTWARDS]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = AZIMUTH_RIGHTWARDS;
 	} else if (token->type == CSS_TOKEN_IDENT) {
@@ -542,11 +542,11 @@ css_error parse_background_attachment(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[FIXED]) {
+	} else if (ident->ilower == c->strings[FIXED]) {
 		value = BACKGROUND_ATTACHMENT_FIXED;
-	} else if (ident->lower.data == c->strings[SCROLL]) {
+	} else if (ident->ilower == c->strings[SCROLL]) {
 		value = BACKGROUND_ATTACHMENT_SCROLL;
 	} else
 		return CSS_INVALID;
@@ -582,11 +582,11 @@ css_error parse_background_color(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[TRANSPARENT]) {
+			token->ilower == c->strings[TRANSPARENT]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = BACKGROUND_COLOR_TRANSPARENT;
 	} else {
@@ -644,10 +644,10 @@ css_error parse_background_image(css_language *c,
 		return error;
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT && 
-			token->lower.data == c->strings[NONE]) {
+			token->ilower == c->strings[NONE]) {
 		value = BACKGROUND_IMAGE_NONE;
 	} else if (token->type == CSS_TOKEN_URI) {
 		value = BACKGROUND_IMAGE_URI;
@@ -710,15 +710,15 @@ css_error parse_background_repeat(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[NO_REPEAT]) {
+	} else if (ident->ilower == c->strings[NO_REPEAT]) {
 		value = BACKGROUND_REPEAT_NO_REPEAT;
-	} else if (ident->lower.data == c->strings[REPEAT_X]) {
+	} else if (ident->ilower == c->strings[REPEAT_X]) {
 		value = BACKGROUND_REPEAT_REPEAT_X;
-	} else if (ident->lower.data == c->strings[REPEAT_Y]) {
+	} else if (ident->ilower == c->strings[REPEAT_Y]) {
 		value = BACKGROUND_REPEAT_REPEAT_Y;
-	} else if (ident->lower.data == c->strings[REPEAT]) {
+	} else if (ident->ilower == c->strings[REPEAT]) {
 		value = BACKGROUND_REPEAT_REPEAT;
 	} else
 		return CSS_INVALID;
@@ -776,11 +776,11 @@ css_error parse_border_collapse(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[COLLAPSE]) {
+	} else if (ident->ilower == c->strings[COLLAPSE]) {
 		value = BORDER_COLLAPSE_COLLAPSE;
-	} else if (ident->lower.data == c->strings[SEPARATE]) {
+	} else if (ident->ilower == c->strings[SEPARATE]) {
 		value = BORDER_COLLAPSE_SEPARATE;
 	} else
 		return CSS_INVALID;
@@ -893,11 +893,11 @@ css_error parse_bottom(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[AUTO]) {
+			token->ilower == c->strings[AUTO]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = BOTTOM_AUTO;
 	} else {
@@ -957,11 +957,11 @@ css_error parse_caption_side(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[TOP]) {
+	} else if (ident->ilower == c->strings[TOP]) {
 		value = CAPTION_SIDE_TOP;
-	} else if (ident->lower.data == c->strings[BOTTOM]) {
+	} else if (ident->ilower == c->strings[BOTTOM]) {
 		value = CAPTION_SIDE_BOTTOM;
 	} else
 		return CSS_INVALID;
@@ -998,15 +998,15 @@ css_error parse_clear(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[RIGHT]) {
+	} else if (ident->ilower == c->strings[RIGHT]) {
 		value = CLEAR_RIGHT;
-	} else if (ident->lower.data == c->strings[LEFT]) {
+	} else if (ident->ilower == c->strings[LEFT]) {
 		value = CLEAR_LEFT;
-	} else if (ident->lower.data == c->strings[BOTH]) {
+	} else if (ident->ilower == c->strings[BOTH]) {
 		value = CLEAR_BOTH;
-	} else if (ident->lower.data == c->strings[NONE]) {
+	} else if (ident->ilower == c->strings[NONE]) {
 		value = CLEAR_NONE;
 	} else
 		return CSS_INVALID;
@@ -1055,7 +1055,7 @@ css_error parse_color(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags |= FLAG_INHERIT;
 	} else {
@@ -1152,10 +1152,10 @@ css_error parse_cue_after(css_language *c,
 		return error;
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT && 
-			token->lower.data == c->strings[NONE]) {
+			token->ilower == c->strings[NONE]) {
 		value = CUE_AFTER_NONE;
 	} else if (token->type == CSS_TOKEN_URI) {
 		value = CUE_AFTER_URI;
@@ -1208,10 +1208,10 @@ css_error parse_cue_before(css_language *c,
 		return error;
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT && 
-			token->lower.data == c->strings[NONE]) {
+			token->ilower == c->strings[NONE]) {
 		value = CUE_BEFORE_NONE;
 	} else if (token->type == CSS_TOKEN_URI) {
 		value = CUE_BEFORE_URI;
@@ -1274,11 +1274,11 @@ css_error parse_direction(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[LTR]) {
+	} else if (ident->ilower == c->strings[LTR]) {
 		value = DIRECTION_LTR;
-	} else if (ident->lower.data == c->strings[RTL]) {
+	} else if (ident->ilower == c->strings[RTL]) {
 		value = DIRECTION_RTL;
 	} else
 		return CSS_INVALID;
@@ -1318,39 +1318,39 @@ css_error parse_display(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[INLINE]) {
+	} else if (ident->ilower == c->strings[INLINE]) {
 		value = DISPLAY_INLINE;
-	} else if (ident->lower.data == c->strings[BLOCK]) {
+	} else if (ident->ilower == c->strings[BLOCK]) {
 		value = DISPLAY_BLOCK;
-	} else if (ident->lower.data == c->strings[LIST_ITEM]) {
+	} else if (ident->ilower == c->strings[LIST_ITEM]) {
 		value = DISPLAY_LIST_ITEM;
-	} else if (ident->lower.data == c->strings[RUN_IN]) {
+	} else if (ident->ilower == c->strings[RUN_IN]) {
 		value = DISPLAY_RUN_IN;
-	} else if (ident->lower.data == c->strings[INLINE_BLOCK]) {
+	} else if (ident->ilower == c->strings[INLINE_BLOCK]) {
 		value = DISPLAY_INLINE_BLOCK;
-	} else if (ident->lower.data == c->strings[TABLE]) {
+	} else if (ident->ilower == c->strings[TABLE]) {
 		value = DISPLAY_TABLE;
-	} else if (ident->lower.data == c->strings[INLINE_TABLE]) {
+	} else if (ident->ilower == c->strings[INLINE_TABLE]) {
 		value = DISPLAY_INLINE_TABLE;
-	} else if (ident->lower.data == c->strings[TABLE_ROW_GROUP]) {
+	} else if (ident->ilower == c->strings[TABLE_ROW_GROUP]) {
 		value = DISPLAY_TABLE_ROW_GROUP;
-	} else if (ident->lower.data == c->strings[TABLE_HEADER_GROUP]) {
+	} else if (ident->ilower == c->strings[TABLE_HEADER_GROUP]) {
 		value = DISPLAY_TABLE_HEADER_GROUP;
-	} else if (ident->lower.data == c->strings[TABLE_FOOTER_GROUP]) {
+	} else if (ident->ilower == c->strings[TABLE_FOOTER_GROUP]) {
 		value = DISPLAY_TABLE_FOOTER_GROUP;
-	} else if (ident->lower.data == c->strings[TABLE_ROW]) {
+	} else if (ident->ilower == c->strings[TABLE_ROW]) {
 		value = DISPLAY_TABLE_ROW;
-	} else if (ident->lower.data == c->strings[TABLE_COLUMN_GROUP]) {
+	} else if (ident->ilower == c->strings[TABLE_COLUMN_GROUP]) {
 		value = DISPLAY_TABLE_COLUMN_GROUP;
-	} else if (ident->lower.data == c->strings[TABLE_COLUMN]) {
+	} else if (ident->ilower == c->strings[TABLE_COLUMN]) {
 		value = DISPLAY_TABLE_COLUMN;
-	} else if (ident->lower.data == c->strings[TABLE_CELL]) {
+	} else if (ident->ilower == c->strings[TABLE_CELL]) {
 		value = DISPLAY_TABLE_CELL;
-	} else if (ident->lower.data == c->strings[TABLE_CAPTION]) {
+	} else if (ident->ilower == c->strings[TABLE_CAPTION]) {
 		value = DISPLAY_TABLE_CAPTION;
-	} else if (ident->lower.data == c->strings[NONE]) {
+	} else if (ident->ilower == c->strings[NONE]) {
 		value = DISPLAY_NONE;
 	} else
 		return CSS_INVALID;
@@ -1387,27 +1387,27 @@ css_error parse_elevation(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[BELOW]) {
+			token->ilower == c->strings[BELOW]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = ELEVATION_BELOW;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[LEVEL]) {
+			token->ilower == c->strings[LEVEL]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = ELEVATION_LEVEL;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[ABOVE]) {
+			token->ilower == c->strings[ABOVE]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = ELEVATION_ABOVE;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[HIGHER]) {
+			token->ilower == c->strings[HIGHER]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = ELEVATION_HIGHER;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[LOWER]) {
+			token->ilower == c->strings[LOWER]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = ELEVATION_LOWER;
 	} else {
@@ -1467,11 +1467,11 @@ css_error parse_empty_cells(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[SHOW]) {
+	} else if (ident->ilower == c->strings[SHOW]) {
 		value = EMPTY_CELLS_SHOW;
-	} else if (ident->lower.data == c->strings[HIDE]) {
+	} else if (ident->ilower == c->strings[HIDE]) {
 		value = EMPTY_CELLS_HIDE;
 	} else
 		return CSS_INVALID;
@@ -1508,13 +1508,13 @@ css_error parse_float(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[LEFT]) {
+	} else if (ident->ilower == c->strings[LEFT]) {
 		value = FLOAT_LEFT;
-	} else if (ident->lower.data == c->strings[RIGHT]) {
+	} else if (ident->ilower == c->strings[RIGHT]) {
 		value = FLOAT_RIGHT;
-	} else if (ident->lower.data == c->strings[NONE]) {
+	} else if (ident->ilower == c->strings[NONE]) {
 		value = FLOAT_NONE;
 	} else
 		return CSS_INVALID;
@@ -1566,43 +1566,43 @@ css_error parse_font_size(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[XX_SMALL]) {
+			token->ilower == c->strings[XX_SMALL]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_XX_SMALL;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[X_SMALL]) {
+			token->ilower == c->strings[X_SMALL]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_X_SMALL;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[SMALL]) {
+			token->ilower == c->strings[SMALL]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_SMALL;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[MEDIUM]) {
+			token->ilower == c->strings[MEDIUM]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_MEDIUM;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[LARGE]) {
+			token->ilower == c->strings[LARGE]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_LARGE;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[X_LARGE]) {
+			token->ilower == c->strings[X_LARGE]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_X_LARGE;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[XX_LARGE]) {
+			token->ilower == c->strings[XX_LARGE]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_XX_LARGE;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[LARGER]) {
+			token->ilower == c->strings[LARGER]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_LARGER;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[SMALLER]) {
+			token->ilower == c->strings[SMALLER]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_SMALLER;
 	} else {
@@ -1662,13 +1662,13 @@ css_error parse_font_style(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[NORMAL]) {
+	} else if (ident->ilower == c->strings[NORMAL]) {
 		value = FONT_STYLE_NORMAL;
-	} else if (ident->lower.data == c->strings[ITALIC]) {
+	} else if (ident->ilower == c->strings[ITALIC]) {
 		value = FONT_STYLE_ITALIC;
-	} else if (ident->lower.data == c->strings[OBLIQUE]) {
+	} else if (ident->ilower == c->strings[OBLIQUE]) {
 		value = FONT_STYLE_OBLIQUE;
 	} else
 		return CSS_INVALID;
@@ -1705,11 +1705,11 @@ css_error parse_font_variant(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[NORMAL]) {
+	} else if (ident->ilower == c->strings[NORMAL]) {
 		value = FONT_VARIANT_NORMAL;
-	} else if (ident->lower.data == c->strings[SMALL_CAPS]) {
+	} else if (ident->ilower == c->strings[SMALL_CAPS]) {
 		value = FONT_VARIANT_SMALL_CAPS;
 	} else
 		return CSS_INVALID;
@@ -1748,14 +1748,16 @@ css_error parse_font_weight(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (token->lower.data == c->strings[INHERIT]) {
+	if (token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		fixed num = number_from_css_string(&token->lower, &consumed);
+		css_string tmp = { token->ilower->len, 
+				(uint8_t *) token->ilower };
+		fixed num = number_from_css_string(&tmp, &consumed);
 		int32_t intpart = FIXTOINT(num);
 		/* Invalid if there are trailing characters or it was a float */
-		if (consumed != token->lower.len || num != intpart)
+		if (consumed != token->ilower->len || num != intpart)
 			return CSS_INVALID;
 		switch (intpart) {
 		case 100: value = FONT_WEIGHT_100; break;
@@ -1769,13 +1771,13 @@ css_error parse_font_weight(css_language *c,
 		case 900: value = FONT_WEIGHT_900; break;
 		default: return CSS_INVALID;
 		}
-	} else if (token->lower.data == c->strings[NORMAL]) {
+	} else if (token->ilower == c->strings[NORMAL]) {
 		value = FONT_WEIGHT_NORMAL;
-	} else if (token->lower.data == c->strings[BOLD]) {
+	} else if (token->ilower == c->strings[BOLD]) {
 		value = FONT_WEIGHT_BOLD;
-	} else if (token->lower.data == c->strings[BOLDER]) {
+	} else if (token->ilower == c->strings[BOLDER]) {
 		value = FONT_WEIGHT_BOLDER;
-	} else if (token->lower.data == c->strings[LIGHTER]) {
+	} else if (token->ilower == c->strings[LIGHTER]) {
 		value = FONT_WEIGHT_LIGHTER;
 	} else
 		return CSS_INVALID;
@@ -1812,11 +1814,11 @@ css_error parse_height(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[AUTO]) {
+			token->ilower == c->strings[AUTO]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = HEIGHT_AUTO;
 	} else {
@@ -1876,11 +1878,11 @@ css_error parse_left(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[AUTO]) {
+			token->ilower == c->strings[AUTO]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = LEFT_AUTO;
 	} else {
@@ -1940,11 +1942,11 @@ css_error parse_letter_spacing(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[NORMAL]) {
+			token->ilower == c->strings[NORMAL]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = LETTER_SPACING_NORMAL;
 	} else {
@@ -2005,17 +2007,19 @@ css_error parse_line_height(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[NORMAL]) {
+			token->ilower == c->strings[NORMAL]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = LINE_HEIGHT_NORMAL;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		length = number_from_css_string(&token->lower, &consumed);
-		if (consumed != token->lower.len)
+		css_string tmp = { token->ilower->len, 
+				(uint8_t *) token->ilower };
+		length = number_from_css_string(&tmp, &consumed);
+		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
 		value = LINE_HEIGHT_NUMBER;
@@ -2083,10 +2087,10 @@ css_error parse_list_style_image(css_language *c,
 		return error;
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT && 
-			token->lower.data == c->strings[NONE]) {
+			token->ilower == c->strings[NONE]) {
 		value = LIST_STYLE_IMAGE_NONE;
 	} else if (token->type == CSS_TOKEN_URI) {
 		value = LIST_STYLE_IMAGE_URI;
@@ -2136,11 +2140,11 @@ css_error parse_list_style_position(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[INSIDE]) {
+	} else if (ident->ilower == c->strings[INSIDE]) {
 		value = LIST_STYLE_POSITION_INSIDE;
-	} else if (ident->lower.data == c->strings[OUTSIDE]) {
+	} else if (ident->ilower == c->strings[OUTSIDE]) {
 		value = LIST_STYLE_POSITION_OUTSIDE;
 	} else
 		return CSS_INVALID;
@@ -2181,37 +2185,37 @@ css_error parse_list_style_type(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[DISC]) {
+	} else if (ident->ilower == c->strings[DISC]) {
 		value = LIST_STYLE_TYPE_DISC;
-	} else if (ident->lower.data == c->strings[CIRCLE]) {
+	} else if (ident->ilower == c->strings[CIRCLE]) {
 		value = LIST_STYLE_TYPE_CIRCLE;
-	} else if (ident->lower.data == c->strings[SQUARE]) {
+	} else if (ident->ilower == c->strings[SQUARE]) {
 		value = LIST_STYLE_TYPE_SQUARE;
-	} else if (ident->lower.data == c->strings[DECIMAL]) {
+	} else if (ident->ilower == c->strings[DECIMAL]) {
 		value = LIST_STYLE_TYPE_DECIMAL;
-	} else if (ident->lower.data == c->strings[DECIMAL_LEADING_ZERO]) {
+	} else if (ident->ilower == c->strings[DECIMAL_LEADING_ZERO]) {
 		value = LIST_STYLE_TYPE_DECIMAL_LEADING_ZERO;
-	} else if (ident->lower.data == c->strings[LOWER_ROMAN]) {
+	} else if (ident->ilower == c->strings[LOWER_ROMAN]) {
 		value = LIST_STYLE_TYPE_LOWER_ROMAN;
-	} else if (ident->lower.data == c->strings[UPPER_ROMAN]) {
+	} else if (ident->ilower == c->strings[UPPER_ROMAN]) {
 		value = LIST_STYLE_TYPE_UPPER_ROMAN;
-	} else if (ident->lower.data == c->strings[LOWER_GREEK]) {
+	} else if (ident->ilower == c->strings[LOWER_GREEK]) {
 		value = LIST_STYLE_TYPE_LOWER_GREEK;
-	} else if (ident->lower.data == c->strings[LOWER_LATIN]) {
+	} else if (ident->ilower == c->strings[LOWER_LATIN]) {
 		value = LIST_STYLE_TYPE_LOWER_LATIN;
-	} else if (ident->lower.data == c->strings[UPPER_LATIN]) {
+	} else if (ident->ilower == c->strings[UPPER_LATIN]) {
 		value = LIST_STYLE_TYPE_UPPER_LATIN;
-	} else if (ident->lower.data == c->strings[ARMENIAN]) {
+	} else if (ident->ilower == c->strings[ARMENIAN]) {
 		value = LIST_STYLE_TYPE_ARMENIAN;
-	} else if (ident->lower.data == c->strings[GEORGIAN]) {
+	} else if (ident->ilower == c->strings[GEORGIAN]) {
 		value = LIST_STYLE_TYPE_GEORGIAN;
-	} else if (ident->lower.data == c->strings[LOWER_ALPHA]) {
+	} else if (ident->ilower == c->strings[LOWER_ALPHA]) {
 		value = LIST_STYLE_TYPE_LOWER_ALPHA;
-	} else if (ident->lower.data == c->strings[UPPER_ALPHA]) {
+	} else if (ident->ilower == c->strings[UPPER_ALPHA]) {
 		value = LIST_STYLE_TYPE_UPPER_ALPHA;
-	} else if (ident->lower.data == c->strings[NONE]) {
+	} else if (ident->ilower == c->strings[NONE]) {
 		value = LIST_STYLE_TYPE_NONE;
 	} else
 		return CSS_INVALID;
@@ -2276,11 +2280,11 @@ css_error parse_max_height(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[NONE]) {
+			token->ilower == c->strings[NONE]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = MAX_HEIGHT_NONE;
 	} else {
@@ -2340,11 +2344,11 @@ css_error parse_max_width(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[NONE]) {
+			token->ilower == c->strings[NONE]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = MAX_WIDTH_NONE;
 	} else {
@@ -2404,7 +2408,7 @@ css_error parse_min_height(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {
@@ -2464,7 +2468,7 @@ css_error parse_min_width(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {
@@ -2527,14 +2531,16 @@ css_error parse_orphans(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (token->lower.data == c->strings[INHERIT]) {
+	if (token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		num = number_from_css_string(&token->lower, &consumed);
+		css_string tmp = { token->ilower->len,
+				(uint8_t *) token->ilower };
+		num = number_from_css_string(&tmp, &consumed);
 		int32_t intpart = FIXTOINT(num);
 		/* Invalid if there are trailing characters or it was a float */
-		if (consumed != token->lower.len || num != intpart)
+		if (consumed != token->ilower->len || num != intpart)
 			return CSS_INVALID;
 
 		value = ORPHANS_SET;
@@ -2580,11 +2586,11 @@ css_error parse_outline_color(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INVERT]) {
+			token->ilower == c->strings[INVERT]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = OUTLINE_COLOR_INVERT;
 	} else {
@@ -2693,15 +2699,15 @@ css_error parse_overflow(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[VISIBLE]) {
+	} else if (ident->ilower == c->strings[VISIBLE]) {
 		value = OVERFLOW_VISIBLE;
-	} else if (ident->lower.data == c->strings[HIDDEN]) {
+	} else if (ident->ilower == c->strings[HIDDEN]) {
 		value = OVERFLOW_HIDDEN;
-	} else if (ident->lower.data == c->strings[SCROLL]) {
+	} else if (ident->ilower == c->strings[SCROLL]) {
 		value = OVERFLOW_SCROLL;
-	} else if (ident->lower.data == c->strings[AUTO]) {
+	} else if (ident->ilower == c->strings[AUTO]) {
 		value = OVERFLOW_AUTO;
 	} else
 		return CSS_INVALID;
@@ -2766,17 +2772,17 @@ css_error parse_page_break_after(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[AUTO]) {
+	} else if (ident->ilower == c->strings[AUTO]) {
 		value = PAGE_BREAK_AFTER_AUTO;
-	} else if (ident->lower.data == c->strings[ALWAYS]) {
+	} else if (ident->ilower == c->strings[ALWAYS]) {
 		value = PAGE_BREAK_AFTER_ALWAYS;
-	} else if (ident->lower.data == c->strings[AVOID]) {
+	} else if (ident->ilower == c->strings[AVOID]) {
 		value = PAGE_BREAK_AFTER_AVOID;
-	} else if (ident->lower.data == c->strings[LEFT]) {
+	} else if (ident->ilower == c->strings[LEFT]) {
 		value = PAGE_BREAK_AFTER_LEFT;
-	} else if (ident->lower.data == c->strings[RIGHT]) {
+	} else if (ident->ilower == c->strings[RIGHT]) {
 		value = PAGE_BREAK_AFTER_RIGHT;
 	} else
 		return CSS_INVALID;
@@ -2813,17 +2819,17 @@ css_error parse_page_break_before(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[AUTO]) {
+	} else if (ident->ilower == c->strings[AUTO]) {
 		value = PAGE_BREAK_BEFORE_AUTO;
-	} else if (ident->lower.data == c->strings[ALWAYS]) {
+	} else if (ident->ilower == c->strings[ALWAYS]) {
 		value = PAGE_BREAK_BEFORE_ALWAYS;
-	} else if (ident->lower.data == c->strings[AVOID]) {
+	} else if (ident->ilower == c->strings[AVOID]) {
 		value = PAGE_BREAK_BEFORE_AVOID;
-	} else if (ident->lower.data == c->strings[LEFT]) {
+	} else if (ident->ilower == c->strings[LEFT]) {
 		value = PAGE_BREAK_BEFORE_LEFT;
-	} else if (ident->lower.data == c->strings[RIGHT]) {
+	} else if (ident->ilower == c->strings[RIGHT]) {
 		value = PAGE_BREAK_BEFORE_RIGHT;
 	} else
 		return CSS_INVALID;
@@ -2860,11 +2866,11 @@ css_error parse_page_break_inside(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[AUTO]) {
+	} else if (ident->ilower == c->strings[AUTO]) {
 		value = PAGE_BREAK_INSIDE_AUTO;
-	} else if (ident->lower.data == c->strings[AVOID]) {
+	} else if (ident->ilower == c->strings[AVOID]) {
 		value = PAGE_BREAK_INSIDE_AVOID;
 	} else
 		return CSS_INVALID;
@@ -2901,7 +2907,7 @@ css_error parse_pause_after(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {
@@ -2961,7 +2967,7 @@ css_error parse_pause_before(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {
@@ -3024,13 +3030,15 @@ css_error parse_pitch_range(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (token->lower.data == c->strings[INHERIT]) {
+	if (token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		num = number_from_css_string(&token->lower, &consumed);
+		css_string tmp = { token->ilower->len,
+				(uint8_t *) token->ilower };
+		num = number_from_css_string(&tmp, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != token->lower.len)
+		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
 		value = PITCH_RANGE_SET;
@@ -3077,23 +3085,23 @@ css_error parse_pitch(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[X_LOW]) {
+			token->ilower == c->strings[X_LOW]) {
 		value = PITCH_X_LOW;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[LOW]) {
+			token->ilower == c->strings[LOW]) {
 		value = PITCH_LOW;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[MEDIUM]) {
+			token->ilower == c->strings[MEDIUM]) {
 		value = PITCH_MEDIUM;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[HIGH]) {
+			token->ilower == c->strings[HIGH]) {
 		value = PITCH_HIGH;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[X_HIGH]) {
+			token->ilower == c->strings[X_HIGH]) {
 		value = PITCH_X_HIGH;
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
@@ -3166,15 +3174,15 @@ css_error parse_position(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[STATIC]) {
+	} else if (ident->ilower == c->strings[STATIC]) {
 		value = POSITION_STATIC;
-	} else if (ident->lower.data == c->strings[RELATIVE]) {
+	} else if (ident->ilower == c->strings[RELATIVE]) {
 		value = POSITION_RELATIVE;
-	} else if (ident->lower.data == c->strings[ABSOLUTE]) {
+	} else if (ident->ilower == c->strings[ABSOLUTE]) {
 		value = POSITION_ABSOLUTE;
-	} else if (ident->lower.data == c->strings[FIXED]) {
+	} else if (ident->ilower == c->strings[FIXED]) {
 		value = POSITION_FIXED;
 	} else
 		return CSS_INVALID;
@@ -3228,13 +3236,15 @@ css_error parse_richness(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (token->lower.data == c->strings[INHERIT]) {
+	if (token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		num = number_from_css_string(&token->lower, &consumed);
+		css_string tmp = { token->ilower->len,
+				(uint8_t *) token->ilower };
+		num = number_from_css_string(&tmp, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != token->lower.len)
+		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
 		value = RICHNESS_SET;
@@ -3281,11 +3291,11 @@ css_error parse_right(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[AUTO]) {
+			token->ilower == c->strings[AUTO]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = RIGHT_AUTO;
 	} else {
@@ -3345,11 +3355,11 @@ css_error parse_speak_header(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[ONCE]) {
+	} else if (ident->ilower == c->strings[ONCE]) {
 		value = SPEAK_HEADER_ONCE;
-	} else if (ident->lower.data == c->strings[ALWAYS]) {
+	} else if (ident->ilower == c->strings[ALWAYS]) {
 		value = SPEAK_HEADER_ALWAYS;
 	} else
 		return CSS_INVALID;
@@ -3386,11 +3396,11 @@ css_error parse_speak_numeral(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[DIGITS]) {
+	} else if (ident->ilower == c->strings[DIGITS]) {
 		value = SPEAK_NUMERAL_DIGITS;
-	} else if (ident->lower.data == c->strings[CONTINUOUS]) {
+	} else if (ident->ilower == c->strings[CONTINUOUS]) {
 		value = SPEAK_NUMERAL_CONTINUOUS;
 	} else
 		return CSS_INVALID;
@@ -3427,11 +3437,11 @@ css_error parse_speak_punctuation(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[CODE]) {
+	} else if (ident->ilower == c->strings[CODE]) {
 		value = SPEAK_PUNCTUATION_CODE;
-	} else if (ident->lower.data == c->strings[NONE]) {
+	} else if (ident->ilower == c->strings[NONE]) {
 		value = SPEAK_PUNCTUATION_NONE;
 	} else
 		return CSS_INVALID;
@@ -3468,13 +3478,13 @@ css_error parse_speak(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[NORMAL]) {
+	} else if (ident->ilower == c->strings[NORMAL]) {
 		value = SPEAK_NORMAL;
-	} else if (ident->lower.data == c->strings[NONE]) {
+	} else if (ident->ilower == c->strings[NONE]) {
 		value = SPEAK_NONE;
-	} else if (ident->lower.data == c->strings[SPELL_OUT]) {
+	} else if (ident->ilower == c->strings[SPELL_OUT]) {
 		value = SPEAK_SPELL_OUT;
 	} else
 		return CSS_INVALID;
@@ -3517,34 +3527,36 @@ css_error parse_speech_rate(css_language *c,
 		return error;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[X_SLOW]) {
+			token->ilower == c->strings[X_SLOW]) {
 		value = SPEECH_RATE_X_SLOW;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[SLOW]) {
+			token->ilower == c->strings[SLOW]) {
 		value = SPEECH_RATE_SLOW;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[MEDIUM]) {
+			token->ilower == c->strings[MEDIUM]) {
 		value = SPEECH_RATE_MEDIUM;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[FAST]) {
+			token->ilower == c->strings[FAST]) {
 		value = SPEECH_RATE_FAST;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[X_FAST]) {
+			token->ilower == c->strings[X_FAST]) {
 		value = SPEECH_RATE_X_FAST;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[FASTER]) {
+			token->ilower == c->strings[FASTER]) {
 		value = SPEECH_RATE_FASTER;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[SLOWER]) {
+			token->ilower == c->strings[SLOWER]) {
 		value = SPEECH_RATE_SLOWER;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		num = number_from_css_string(&token->lower, &consumed);
+		css_string tmp = { token->ilower->len,
+				(uint8_t *) token->ilower };
+		num = number_from_css_string(&tmp, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != token->lower.len)
+		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
 		value = SPEECH_RATE_SET;
@@ -3594,13 +3606,15 @@ css_error parse_stress(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (token->lower.data == c->strings[INHERIT]) {
+	if (token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		num = number_from_css_string(&token->lower, &consumed);
+		css_string tmp = { token->ilower->len,
+				(uint8_t *) token->ilower };
+		num = number_from_css_string(&tmp, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != token->lower.len)
+		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
 		value = STRESS_SET;
@@ -3647,11 +3661,11 @@ css_error parse_table_layout(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[AUTO]) {
+	} else if (ident->ilower == c->strings[AUTO]) {
 		value = TABLE_LAYOUT_AUTO;
-	} else if (ident->lower.data == c->strings[FIXED]) {
+	} else if (ident->ilower == c->strings[FIXED]) {
 		value = TABLE_LAYOUT_FIXED;
 	} else
 		return CSS_INVALID;
@@ -3688,15 +3702,15 @@ css_error parse_text_align(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[LEFT]) {
+	} else if (ident->ilower == c->strings[LEFT]) {
 		value = TEXT_ALIGN_LEFT;
-	} else if (ident->lower.data == c->strings[RIGHT]) {
+	} else if (ident->ilower == c->strings[RIGHT]) {
 		value = TEXT_ALIGN_RIGHT;
-	} else if (ident->lower.data == c->strings[CENTER]) {
+	} else if (ident->ilower == c->strings[CENTER]) {
 		value = TEXT_ALIGN_CENTER;
-	} else if (ident->lower.data == c->strings[JUSTIFY]) {
+	} else if (ident->ilower == c->strings[JUSTIFY]) {
 		value = TEXT_ALIGN_JUSTIFY;
 	} else
 		return CSS_INVALID;
@@ -3747,7 +3761,7 @@ css_error parse_text_indent(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {
@@ -3807,15 +3821,15 @@ css_error parse_text_transform(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[CAPITALIZE]) {
+	} else if (ident->ilower == c->strings[CAPITALIZE]) {
 		value = TEXT_TRANSFORM_CAPITALIZE;
-	} else if (ident->lower.data == c->strings[UPPERCASE]) {
+	} else if (ident->ilower == c->strings[UPPERCASE]) {
 		value = TEXT_TRANSFORM_UPPERCASE;
-	} else if (ident->lower.data == c->strings[LOWERCASE]) {
+	} else if (ident->ilower == c->strings[LOWERCASE]) {
 		value = TEXT_TRANSFORM_LOWERCASE;
-	} else if (ident->lower.data == c->strings[NONE]) {
+	} else if (ident->ilower == c->strings[NONE]) {
 		value = TEXT_TRANSFORM_NONE;
 	} else
 		return CSS_INVALID;
@@ -3852,11 +3866,11 @@ css_error parse_top(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[AUTO]) {
+			token->ilower == c->strings[AUTO]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = TOP_AUTO;
 	} else {
@@ -3916,13 +3930,13 @@ css_error parse_unicode_bidi(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[NORMAL]) {
+	} else if (ident->ilower == c->strings[NORMAL]) {
 		value = UNICODE_BIDI_NORMAL;
-	} else if (ident->lower.data == c->strings[EMBED]) {
+	} else if (ident->ilower == c->strings[EMBED]) {
 		value = UNICODE_BIDI_EMBED;
-	} else if (ident->lower.data == c->strings[BIDI_OVERRIDE]) {
+	} else if (ident->ilower == c->strings[BIDI_OVERRIDE]) {
 		value = UNICODE_BIDI_BIDI_OVERRIDE;
 	} else
 		return CSS_INVALID;
@@ -3961,39 +3975,39 @@ css_error parse_vertical_align(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[BASELINE]) {
+			token->ilower == c->strings[BASELINE]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VERTICAL_ALIGN_BASELINE;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[SUB]) {
+			token->ilower == c->strings[SUB]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VERTICAL_ALIGN_SUB;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[SUPER]) {
+			token->ilower == c->strings[SUPER]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VERTICAL_ALIGN_SUPER;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[TOP]) {
+			token->ilower == c->strings[TOP]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VERTICAL_ALIGN_TOP;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[TEXT_TOP]) {
+			token->ilower == c->strings[TEXT_TOP]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VERTICAL_ALIGN_TEXT_TOP;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[MIDDLE]) {
+			token->ilower == c->strings[MIDDLE]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VERTICAL_ALIGN_MIDDLE;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[BOTTOM]) {
+			token->ilower == c->strings[BOTTOM]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VERTICAL_ALIGN_BOTTOM;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[TEXT_BOTTOM]) {
+			token->ilower == c->strings[TEXT_BOTTOM]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VERTICAL_ALIGN_TEXT_BOTTOM;
 	} else {
@@ -4053,13 +4067,13 @@ css_error parse_visibility(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[VISIBLE]) {
+	} else if (ident->ilower == c->strings[VISIBLE]) {
 		value = VISIBILITY_VISIBLE;
-	} else if (ident->lower.data == c->strings[HIDDEN]) {
+	} else if (ident->ilower == c->strings[HIDDEN]) {
 		value = VISIBILITY_HIDDEN;
-	} else if (ident->lower.data == c->strings[COLLAPSE]) {
+	} else if (ident->ilower == c->strings[COLLAPSE]) {
 		value = VISIBILITY_COLLAPSE;
 	} else
 		return CSS_INVALID;
@@ -4112,37 +4126,39 @@ css_error parse_volume(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[SILENT]) {
+			token->ilower == c->strings[SILENT]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VOLUME_SILENT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[X_SOFT]) {
+			token->ilower == c->strings[X_SOFT]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VOLUME_X_SOFT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[SOFT]) {
+			token->ilower == c->strings[SOFT]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VOLUME_SOFT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[MEDIUM]) {
+			token->ilower == c->strings[MEDIUM]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VOLUME_MEDIUM;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[LOUD]) {
+			token->ilower == c->strings[LOUD]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VOLUME_LOUD;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[X_LOUD]) {
+			token->ilower == c->strings[X_LOUD]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VOLUME_X_LOUD;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		length = number_from_css_string(&token->lower, &consumed);
-		if (consumed != token->lower.len)
+		css_string tmp = { token->ilower->len,
+				(uint8_t *) token->ilower };
+		length = number_from_css_string(&tmp, &consumed);
+		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
 		value = VOLUME_NUMBER;
@@ -4206,17 +4222,17 @@ css_error parse_white_space(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[NORMAL]) {
+	} else if (ident->ilower == c->strings[NORMAL]) {
 		value = WHITE_SPACE_NORMAL;
-	} else if (ident->lower.data == c->strings[PRE]) {
+	} else if (ident->ilower == c->strings[PRE]) {
 		value = WHITE_SPACE_PRE;
-	} else if (ident->lower.data == c->strings[NOWRAP]) {
+	} else if (ident->ilower == c->strings[NOWRAP]) {
 		value = WHITE_SPACE_NOWRAP;
-	} else if (ident->lower.data == c->strings[PRE_WRAP]) {
+	} else if (ident->ilower == c->strings[PRE_WRAP]) {
 		value = WHITE_SPACE_PRE_WRAP;
-	} else if (ident->lower.data == c->strings[PRE_LINE]) {
+	} else if (ident->ilower == c->strings[PRE_LINE]) {
 		value = WHITE_SPACE_PRE_LINE;
 	} else
 		return CSS_INVALID;
@@ -4256,14 +4272,16 @@ css_error parse_widows(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (token->lower.data == c->strings[INHERIT]) {
+	if (token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		num = number_from_css_string(&token->lower, &consumed);
+		css_string tmp = { token->ilower->len,
+				(uint8_t *) token->ilower };
+		num = number_from_css_string(&tmp, &consumed);
 		int32_t intpart = FIXTOINT(num);
 		/* Invalid if there are trailing characters or it was a float */
-		if (consumed != token->lower.len || num != intpart)
+		if (consumed != token->ilower->len || num != intpart)
 			return CSS_INVALID;
 
 		value = WIDOWS_SET;
@@ -4310,11 +4328,11 @@ css_error parse_width(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[AUTO]) {
+			token->ilower == c->strings[AUTO]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = WIDTH_AUTO;
 	} else {
@@ -4374,11 +4392,11 @@ css_error parse_word_spacing(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[NORMAL]) {
+			token->ilower == c->strings[NORMAL]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = WORD_SPACING_NORMAL;
 	} else {
@@ -4443,17 +4461,19 @@ css_error parse_z_index(css_language *c,
 		return error;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[AUTO]) {
+			token->ilower == c->strings[AUTO]) {
 		value = Z_INDEX_AUTO;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		num = number_from_css_string(&token->lower, &consumed);
+		css_string tmp = { token->ilower->len,
+				(uint8_t *) token->ilower };
+		num = number_from_css_string(&tmp, &consumed);
 		int32_t intpart = FIXTOINT(num);
 		/* Invalid if there are trailing characters or it was a float */
-		if (consumed != token->lower.len || num != intpart)
+		if (consumed != token->ilower->len || num != intpart)
 			return CSS_INVALID;
 
 		value = Z_INDEX_SET;
@@ -4497,7 +4517,7 @@ css_error parse_important(css_language *c,
 		if (token == NULL || token->type != CSS_TOKEN_IDENT)
 			return CSS_INVALID;
 
-		if (token->lower.data == c->strings[IMPORTANT])
+		if (token->ilower == c->strings[IMPORTANT])
 			*result |= FLAG_IMPORTANT;
 	} else if (token != NULL)
 		return CSS_INVALID;
@@ -4564,11 +4584,11 @@ css_error parse_border_side_color(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[TRANSPARENT]) {
+			token->ilower == c->strings[TRANSPARENT]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = BORDER_COLOR_TRANSPARENT;
 	} else {
@@ -4624,27 +4644,27 @@ css_error parse_border_side_style(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	if (ident->lower.data == c->strings[INHERIT]) {
+	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->lower.data == c->strings[NONE]) {
+	} else if (ident->ilower == c->strings[NONE]) {
 		value = BORDER_STYLE_NONE;
-	} else if (ident->lower.data == c->strings[HIDDEN]) {
+	} else if (ident->ilower == c->strings[HIDDEN]) {
 		value = BORDER_STYLE_HIDDEN;
-	} else if (ident->lower.data == c->strings[DOTTED]) {
+	} else if (ident->ilower == c->strings[DOTTED]) {
 		value = BORDER_STYLE_DOTTED;
-	} else if (ident->lower.data == c->strings[DASHED]) {
+	} else if (ident->ilower == c->strings[DASHED]) {
 		value = BORDER_STYLE_DASHED;
-	} else if (ident->lower.data == c->strings[SOLID]) {
+	} else if (ident->ilower == c->strings[SOLID]) {
 		value = BORDER_STYLE_SOLID;
-	} else if (ident->lower.data == c->strings[DOUBLE]) {
+	} else if (ident->ilower == c->strings[DOUBLE]) {
 		value = BORDER_STYLE_DOUBLE;
-	} else if (ident->lower.data == c->strings[GROOVE]) {
+	} else if (ident->ilower == c->strings[GROOVE]) {
 		value = BORDER_STYLE_GROOVE;
-	} else if (ident->lower.data == c->strings[RIDGE]) {
+	} else if (ident->ilower == c->strings[RIDGE]) {
 		value = BORDER_STYLE_RIDGE;
-	} else if (ident->lower.data == c->strings[INSET]) {
+	} else if (ident->ilower == c->strings[INSET]) {
 		value = BORDER_STYLE_INSET;
-	} else if (ident->lower.data == c->strings[OUTSET]) {
+	} else if (ident->ilower == c->strings[OUTSET]) {
 		value = BORDER_STYLE_OUTSET;
 	} else
 		return CSS_INVALID;
@@ -4681,19 +4701,19 @@ css_error parse_border_side_width(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[THIN]) {
+			token->ilower == c->strings[THIN]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = BORDER_WIDTH_THIN;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[MEDIUM]) {
+			token->ilower == c->strings[MEDIUM]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = BORDER_WIDTH_MEDIUM;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[THICK]) {
+			token->ilower == c->strings[THICK]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = BORDER_WIDTH_THICK;
 	} else {
@@ -4754,11 +4774,11 @@ css_error parse_margin_side(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[AUTO]) {
+			token->ilower == c->strings[AUTO]) {
 		parserutils_vector_iterate(vector, ctx);
 		value = MARGIN_AUTO;
 	} else {
@@ -4818,7 +4838,7 @@ css_error parse_padding_side(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->lower.data == c->strings[INHERIT]) {
+			token->ilower == c->strings[INHERIT]) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {

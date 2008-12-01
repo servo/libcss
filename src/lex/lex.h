@@ -13,6 +13,7 @@
 #include <libcss/types.h>
 
 #include <parserutils/input/inputstream.h>
+#include <parserutils/utils/hash.h>
 
 typedef struct css_lexer css_lexer;
 
@@ -60,8 +61,9 @@ typedef struct css_token {
 
 	css_string data;
 
-	css_string lower;
-
+	const parserutils_hash_entry *idata;
+	const parserutils_hash_entry *ilower;
+	
 	uint32_t col;
 	uint32_t line;
 } css_token;

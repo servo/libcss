@@ -180,14 +180,15 @@ css_error css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len,
 css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style);
 
 css_error css_stylesheet_selector_create(css_stylesheet *sheet,
-		css_selector_type type, const css_string *name, 
-		const css_string *value, css_selector **selector);
+		css_selector_type type, const parserutils_hash_entry *name, 
+		const parserutils_hash_entry *value, css_selector **selector);
 css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 		css_selector *selector);
 
 css_error css_stylesheet_selector_detail_create(css_stylesheet *sheet,
-		css_selector_type type, const css_string *name,
-		const css_string *value, css_selector_detail **detail);
+		css_selector_type type, const parserutils_hash_entry *name,
+		const parserutils_hash_entry *value, 
+		css_selector_detail **detail);
 css_error css_stylesheet_selector_detail_destroy(css_stylesheet *sheet,
 		css_selector_detail *detail);
 

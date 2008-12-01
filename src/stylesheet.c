@@ -354,12 +354,10 @@ css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style)
  *         CSS_NOMEM on memory exhaustion
  */
 css_error css_stylesheet_selector_create(css_stylesheet *sheet,
-		css_selector_type type, const css_string *name, 
-		const css_string *value, css_selector **selector)
+		css_selector_type type, const parserutils_hash_entry *name, 
+		const parserutils_hash_entry *value, css_selector **selector)
 {
-	const parserutils_hash_entry *iname, *ivalue;
 	css_selector *sel;
-	parserutils_error perror;
 
 	if (sheet == NULL || name == NULL || selector == NULL)
 		return CSS_BADPARM;
@@ -371,28 +369,8 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 	memset(sel, 0, sizeof(css_selector));
 
 	sel->data.type = type;
-
-	/** \todo Given that this information is already guaranteed to be in 
-	 * the dictionary, it would be more efficient to pass a pointer to the 
-	 * dictionary entry around rather than re-discovering it here. The same
-	 * applies for value, and in css_stylesheet_selector_detail_create() */
-	perror = parserutils_hash_insert(sheet->dictionary, name->data, 
-			name->len, &iname);
-	if (perror != PARSERUTILS_OK) {
-		sheet->alloc(sel, 0, sheet->pw);
-		return css_error_from_parserutils_error(perror);
-	}
-	sel->data.name = iname;
-
-	if (value != NULL) {
-		perror = parserutils_hash_insert(sheet->dictionary, 
-				value->data, value->len, &ivalue);
-		if (perror != PARSERUTILS_OK) {
-			sheet->alloc(sel, 0, sheet->pw);
-			return css_error_from_parserutils_error(perror);
-		}
-		sel->data.value = ivalue;
-	}
+	sel->data.name = name;
+	sel->data.value = value;
 
 	/** \todo specificity */
 	sel->specificity = 0;
@@ -436,11 +414,10 @@ css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
  *         CSS_NOMEM on memory exhaustion
  */
 css_error css_stylesheet_selector_detail_create(css_stylesheet *sheet,
-		css_selector_type type, const css_string *name, 
-		const css_string *value, css_selector_detail **detail)
+		css_selector_type type, const parserutils_hash_entry *name, 
+		const parserutils_hash_entry *value, 
+		css_selector_detail **detail)
 {
-	parserutils_error perror;
-	const parserutils_hash_entry *iname, *ivalue;
 	css_selector_detail *det;
 
 	if (sheet == NULL || name == NULL || detail == NULL)
@@ -453,24 +430,8 @@ css_error css_stylesheet_selector_detail_create(css_stylesheet *sheet,
 	memset(det, 0, sizeof(css_selector_detail));
 
 	det->type = type;
-
-	perror = parserutils_hash_insert(sheet->dictionary, name->data, 
-			name->len, &iname);
-	if (perror != PARSERUTILS_OK) {
-		sheet->alloc(det, 0, sheet->pw);
-		return css_error_from_parserutils_error(perror);
-	}
-	det->name = iname;
-
-	if (value != NULL) {
-		perror = parserutils_hash_insert(sheet->dictionary, 
-				value->data, value->len, &ivalue);
-		if (perror != PARSERUTILS_OK) {
-			sheet->alloc(det, 0, sheet->pw);
-			return css_error_from_parserutils_error(perror);
-		}
-		det->value = ivalue;
-	}
+	det->name = name;
+	det->value = value;
 
 	*detail = det;
 

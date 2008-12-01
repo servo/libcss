@@ -11,6 +11,9 @@
 #include "utils/utils.h"
 
 enum {
+	/* Universal selector */
+	UNIVERSAL,
+
 	/* At-rules */
 	CHARSET, IMPORT, MEDIA, PAGE,
 
@@ -69,6 +72,8 @@ static struct {
 	const char *data;
 	size_t len;
 } stringmap[LAST_KNOWN] = {
+	{ "*", SLEN("*") },
+
 	{ "charset", SLEN("charset") },
 	{ "import", SLEN("import") },
 	{ "media", SLEN("media") },

@@ -40,7 +40,8 @@ struct css_language {
 	} state;			/**< State flag, for at-rule handling */
 
 	/** \todo These should be statically allocated */
-	const uint8_t *strings[LAST_KNOWN];	/**< Interned strings */
+	/** Interned strings */
+	const parserutils_hash_entry *strings[LAST_KNOWN];
 
 	css_alloc alloc;		/**< Memory (de)allocation function */
 	void *pw;			/**< Client's private data */
@@ -356,7 +357,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 	 * there is one */
 	assert(atkeyword != NULL && atkeyword->type == CSS_TOKEN_ATKEYWORD);
 
-	if (atkeyword->lower.data == c->strings[CHARSET]) {
+	if (atkeyword->ilower == c->strings[CHARSET]) {
 		if (c->state == BEFORE_CHARSET) {
 			/* any0 = STRING */
 			if (ctx == 0)
@@ -374,7 +375,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 		} else {
 			return CSS_INVALID;
 		}
-	} else if (atkeyword->lower.data == c->strings[IMPORT]) {
+	} else if (atkeyword->ilower == c->strings[IMPORT]) {
 		if (c->state != HAD_RULE) {
 			/* any0 = (STRING | URI) ws 
 			 *        (IDENT ws (',' ws IDENT ws)* )? */
@@ -400,16 +401,16 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 	/** \todo these depend on nested block support, so we'll disable them
 	 * until we have such a thing. This means that we'll ignore the entire
 	 * at-rule until then */
-	} else if (atkeyword->lower.data == c->strings[MEDIA]) {
+	} else if (atkeyword->ilower == c->strings[MEDIA]) {
 		/** \todo any0 = IDENT ws (',' ws IDENT ws)* */
-	} else if (atkeyword->lower.data == c->strings[PAGE]) {
+	} else if (atkeyword->ilower == c->strings[PAGE]) {
 		/** \todo any0 = (':' IDENT)? ws */
 #endif
 	} else {
 		return CSS_INVALID;
 	}
 
-	entry.data = (void *) atkeyword->lower.data;
+	entry.data = (void *) atkeyword->ilower;
 
 	perror = parserutils_stack_push(c->context, (void *) &entry);
 	if (perror != PARSERUTILS_OK) {
@@ -541,7 +542,7 @@ css_error parseClass(css_language *c, const parserutils_vector *vector,
 		return CSS_INVALID;
 
 	return css_stylesheet_selector_detail_create(c->sheet, 
-			CSS_SELECTOR_CLASS, &token->data, NULL, specific);
+			CSS_SELECTOR_CLASS, token->idata, NULL, specific);
 }
 
 css_error parseAttrib(css_language *c, const parserutils_vector *vector, 
@@ -599,7 +600,7 @@ css_error parseAttrib(css_language *c, const parserutils_vector *vector,
 	}
 
 	return css_stylesheet_selector_detail_create(c->sheet, type, 
-			&name->data, value != NULL ? &value->data : NULL,
+			name->idata, value != NULL ? value->idata : NULL,
 			specific);
 }
 
@@ -639,8 +640,8 @@ css_error parsePseudo(css_language *c, const parserutils_vector *vector,
 	}
 
 	return css_stylesheet_selector_detail_create(c->sheet, 
-			CSS_SELECTOR_PSEUDO, &name->data, 
-			value != NULL ? &value->data : NULL, specific);
+			CSS_SELECTOR_PSEUDO, name->idata, 
+			value != NULL ? value->idata : NULL, specific);
 }
 
 css_error parseSpecific(css_language *c, 
@@ -659,7 +660,7 @@ css_error parseSpecific(css_language *c,
 
 	if (token->type == CSS_TOKEN_HASH) {
 		error = css_stylesheet_selector_detail_create(c->sheet,
-				CSS_SELECTOR_ID, &token->data, NULL, &specific);
+				CSS_SELECTOR_ID, token->idata, NULL, &specific);
 		if (error != CSS_OK)
 			return error;
 
@@ -731,7 +732,7 @@ css_error parseSimpleSelector(css_language *c,
 	if (token->type == CSS_TOKEN_IDENT || tokenIsChar(token, '*')) {
 		/* Have element name */
 		error = css_stylesheet_selector_create(c->sheet,
-				CSS_SELECTOR_ELEMENT, &token->data, NULL,
+				CSS_SELECTOR_ELEMENT, token->idata, NULL,
 				&selector);
 		if (error != CSS_OK)
 			return error;
@@ -739,10 +740,9 @@ css_error parseSimpleSelector(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 	} else {
 		/* Universal selector */
-		static css_string name = { 1, (uint8_t *) "*" };
-
 		error = css_stylesheet_selector_create(c->sheet,
-				CSS_SELECTOR_ELEMENT, &name, NULL, &selector);
+				CSS_SELECTOR_ELEMENT, c->strings[UNIVERSAL], 
+				NULL, &selector);
 		if (error != CSS_OK)
 			return error;
 
@@ -936,7 +936,7 @@ css_error parseProperty(css_language *c, const css_token *property,
 	/* Find property index */
 	/** \todo improve on this linear search */
 	for (i = FIRST_PROP; i <= LAST_PROP; i++) {
-		if (property->lower.data == c->strings[i])
+		if (property->ilower == c->strings[i])
 			break;
 	}
 	if (i == LAST_PROP + 1)
@@ -996,7 +996,7 @@ void consumeWhitespace(const parserutils_vector *vector, int *ctx)
 bool tokenIsChar(const css_token *token, uint8_t c)
 {
 	return token != NULL && token->type == CSS_TOKEN_CHAR && 
-			token->lower.len == 1 && token->lower.data[0] == c;
+			token->ilower->len == 1 && token->ilower->data[0] == c;
 }
 
 
