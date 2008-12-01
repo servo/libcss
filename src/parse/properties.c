@@ -516,11 +516,15 @@ css_error parse_azimuth(css_language *c,
 		consumeWhitespace(vector, ctx);
 
 		/* Get potential following token */
-		token = parserutils_vector_iterate(vector, ctx);
-		if (token != NULL && token->type != CSS_TOKEN_IDENT)
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && token->type != CSS_TOKEN_IDENT &&
+				tokenIsChar(token, '!') == false)
 			return CSS_INVALID;
 
-		if (token != NULL && value == AZIMUTH_BEHIND) {
+		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				value == AZIMUTH_BEHIND) {
+			parserutils_vector_iterate(vector, ctx);
+
 			if (token->ilower == c->strings[LEFT_SIDE]) {
 				value |= AZIMUTH_LEFT_SIDE;
 			} else if (token->ilower == c->strings[FAR_LEFT]) {
@@ -542,7 +546,10 @@ css_error parse_azimuth(css_language *c,
 			} else {
 				return CSS_INVALID;
 			}
-		} else if (token != NULL && value != AZIMUTH_BEHIND) {
+		} else if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				value != AZIMUTH_BEHIND) {
+			parserutils_vector_iterate(vector, ctx);
+
 			if (token->ilower == c->strings[BEHIND]) {
 				value |= AZIMUTH_BEHIND;
 			} else {
@@ -744,11 +751,148 @@ css_error parse_background_position(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	/** \todo background-position */
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint32_t opv;
+	uint16_t value[2] = { 0 };
+	fixed length[2] = { 0 };
+	uint32_t unit[2] = { 0 };
+	uint32_t required_size;
+
+	/* [length | percentage | IDENT(left, right, top, bottom, center)]{1,2}
+	 * | IDENT(inherit) */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->ilower == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else {
+		int i;
+
+		for (i = 0; i < 2; i++) {
+			token = parserutils_vector_peek(vector, *ctx);
+			/* This can only occur on the second attempt */
+			/* Also detect start of !important on second attempt */
+			if (token == NULL || 
+					(i == 1 && tokenIsChar(token, '!')))
+				break;
+
+			if (token->type == CSS_TOKEN_IDENT) {
+				parserutils_vector_iterate(vector, ctx);
+
+				if (token->ilower == c->strings[LEFT]) {
+					value[i] = 
+						BACKGROUND_POSITION_HORZ_LEFT;
+				} else if (token->ilower == c->strings[RIGHT]) {
+					value[i] = 
+						BACKGROUND_POSITION_HORZ_RIGHT;
+				} else if (token->ilower == c->strings[TOP]) {
+					value[i] = BACKGROUND_POSITION_VERT_TOP;
+				} else if (token->ilower == 
+						c->strings[BOTTOM]) {
+					value[i] = 
+						BACKGROUND_POSITION_VERT_BOTTOM;
+				} else if (token->ilower == 
+						c->strings[CENTER]) {
+					/* We'll fix this up later */
+					value[i] = 
+						BACKGROUND_POSITION_VERT_CENTER;
+				} else {
+					return CSS_INVALID;
+				}
+			} else {
+				error = parse_unit_specifier(c, vector, ctx, 
+						&length[i], &unit[i]);
+				if (error != CSS_OK)
+					return error;
+
+				if (unit[i] & UNIT_ANGLE || 
+						unit[i] & UNIT_TIME || 
+						unit[i] & UNIT_FREQ)
+					return CSS_INVALID;
+
+				/* We'll fix this up later, too */
+				value[i] = BACKGROUND_POSITION_VERT_SET;
+			}
+
+			consumeWhitespace(vector, ctx);
+		}
+
+		/* Now, sort out the mess we've got */
+		if (i == 1) {
+			/* Only one (horizontal) value, so vertical is center */
+			switch (value[0]) {
+			case BACKGROUND_POSITION_HORZ_LEFT:
+			case BACKGROUND_POSITION_HORZ_RIGHT:
+			case BACKGROUND_POSITION_VERT_CENTER:
+				break;
+			case BACKGROUND_POSITION_VERT_SET:
+				value[0] = BACKGROUND_POSITION_HORZ_SET;
+				break;
+			default:
+				return CSS_INVALID;
+			}
+
+			value[1] = BACKGROUND_POSITION_VERT_CENTER;
+		} else if (value[0] != BACKGROUND_POSITION_VERT_SET &&
+				value[1] != BACKGROUND_POSITION_VERT_SET) {
+			/* Two keywords. Verify the axes differ */
+			if (((value[0] & 0xf) != 0 && (value[1] & 0xf) != 0) ||
+					((value[0] & 0xf0) != 0 && 
+						(value[1] & 0xf0) != 0))
+				return CSS_INVALID;
+		} else {
+			/* One or two non-keywords. First is horizontal */
+			if (value[0] == BACKGROUND_POSITION_VERT_SET)
+				value[0] = BACKGROUND_POSITION_HORZ_SET;
+
+			/* Verify the axes differ */
+			if (((value[0] & 0xf) != 0 && (value[1] & 0xf) != 0) ||
+					((value[0] & 0xf0) != 0 && 
+						(value[1] & 0xf0) != 0))
+				return CSS_INVALID;
+		}
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_BOTTOM, flags, value[0] | value[1]);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false) { 
+		if (value[0] == BACKGROUND_POSITION_HORZ_SET)
+			required_size += sizeof(length[0]) + sizeof(unit[0]);
+		if (value[1] == BACKGROUND_POSITION_VERT_SET)
+			required_size += sizeof(length[1]) + sizeof(unit[1]);
+	}
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false) {
+		if (value[0] == BACKGROUND_POSITION_HORZ_SET) {
+			memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+					&length[0], sizeof(length));
+			memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+					sizeof(length), &unit[0], sizeof(unit));
+		}
+		if (value[1] == BACKGROUND_POSITION_VERT_SET) {
+			memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+					&length[1], sizeof(length));
+			memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+					sizeof(length), &unit[1], sizeof(unit));
+		}
+	}
 
 	return CSS_OK;
 }
