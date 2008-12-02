@@ -1050,11 +1050,96 @@ css_error parse_border_spacing(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	/** \todo border-spacing */
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	fixed length[2] = { 0 };
+	uint32_t unit[2] = { 0 };
+	uint32_t required_size;
+
+	/* length length? | IDENT(inherit) */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->ilower == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else {
+		int num_lengths = 0;
+
+		error = parse_unit_specifier(c, vector, ctx, 
+				&length[0], &unit[0]);
+		if (error != CSS_OK)
+			return error;
+
+		if (unit[0] & UNIT_ANGLE || unit[0] & UNIT_TIME || 
+				unit[0] & UNIT_FREQ || unit[0] & UNIT_PCT)
+			return CSS_INVALID;
+
+		num_lengths = 1;
+
+		consumeWhitespace(vector, ctx);
+
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && tokenIsChar(token, '!') == false) {
+			error = parse_unit_specifier(c, vector, ctx, 
+					&length[1], &unit[1]);
+			if (error != CSS_OK)
+				return error;
+
+			if (unit[1] & UNIT_ANGLE || unit[1] & UNIT_TIME ||
+					unit[1] & UNIT_FREQ || 
+					unit[1] & UNIT_PCT)
+				return CSS_INVALID;
+
+			num_lengths = 2;
+		}
+
+		if (num_lengths == 1) {
+			/* Only one length specified. Use for both axes. */
+			length[1] = length[0];
+			unit[1] = unit[0];
+		}
+
+		/* Lengths must not be negative */
+		if (length[0] < 0 || length[1] < 0)
+			return CSS_INVALID;
+
+		value = BORDER_SPACING_SET;
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_BORDER_SPACING, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == BORDER_SPACING_SET)
+		required_size += 2 * (sizeof(length[0]) + sizeof(unit[0]));
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == BORDER_SPACING_SET) {
+		uint8_t *ptr = ((uint8_t *) (*result)->bytecode) + sizeof(opv);
+
+		memcpy(ptr, &length[0], sizeof(length[0]));
+		ptr += sizeof(length[0]);
+		memcpy(ptr, &unit[0], sizeof(unit[0]));
+		ptr += sizeof(unit[0]);
+		memcpy(ptr, &length[1], sizeof(length[1]));
+		ptr += sizeof(length[1]);
+		memcpy(ptr, &unit[1], sizeof(unit[1]));
+	}
 
 	return CSS_OK;
 }
