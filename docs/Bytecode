@@ -7,7 +7,7 @@ Format
 <opcode+flags+value> [<parameters>]
 
 <opcode+flags+value> is 32 bits wide:
-	bits 18-13: value
+	bits 18-31: value
 	bits 10-17 : flags
 	bits 0-9  : opcode
 
@@ -77,14 +77,6 @@ CSS colours are stored as one 32bit value:
 	bits 16-23: Green component
 	bits 8-15 : Blue component
 	bits 0-7  : Alpha component
-
-CSS shapes are stored as one 32bit value followed by n CSS dimensions:
-
-	bits 1-31: MBZ
-	bit 0    : clear => rect, 4 dimensions follow
-		   set   => reserved for future expansion
-
-	TODO: how to handle "auto"?
 
 Shorthand properties
 --------------------
@@ -289,10 +281,29 @@ Opcodes
 		bits 8-13: MBZ
 		bits 0-7: 
 			bit 7 set => shape follows
-				bits 0-6: MBZ
+				bits 0-2: 000   => rect,
+						   bit 3 => top auto
+						   bit 4 => right auto
+						   bit 5 => bottom auto
+						   bit 6 => left auto
+					  other => rffe.
+						   bits 3-6: MBZ.
+				
 			bit 7 clear => keywords:
 				bits 0-6: 0000000 => auto,
 					  other   => rffe.
+
+	If the value is rect(top, right, bottom, left), then bits 3-6 encode
+	which of <top>, <right>, <bottom>, <left> is set to auto. The 
+	subsequent parameter list is then 4 - <auto_side> entries long.
+	Each entry is a dimension. Entries are always ordered top, right, 
+	bottom, left.
+
+	For example,
+		clip: rect(10px, auto, auto, 10px) 
+	would produce the following bytecode:
+
+	<02c0000e> <0000000a> <00000000> <0000000a> <00000000>
 
 0f - color
 	<value> (14bits) :

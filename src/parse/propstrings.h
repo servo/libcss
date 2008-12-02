@@ -63,7 +63,7 @@ enum {
 	UPPERCASE, LOWERCASE, EMBED, BIDI_OVERRIDE, BASELINE, SUB, SUPER,
 	TEXT_TOP, MIDDLE, TEXT_BOTTOM, SILENT, X_SOFT, SOFT, LOUD, X_LOUD,
 	PRE, NOWRAP, PRE_WRAP, PRE_LINE, LEFTWARDS, RIGHTWARDS, LEFT_SIDE,
-	FAR_LEFT, FAR_RIGHT, RIGHT_SIDE, BEHIND,
+	FAR_LEFT, FAR_RIGHT, RIGHT_SIDE, BEHIND, RECT,
 
 	LAST_KNOWN
 };
@@ -312,6 +312,7 @@ static struct {
 	{ "far-right", SLEN("far-right") },
 	{ "right-side", SLEN("right-side") },
 	{ "behind", SLEN("behind") },
+	{ "rect", SLEN("rect") },
 };
 
 #endif

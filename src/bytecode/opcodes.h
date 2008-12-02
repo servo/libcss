@@ -122,7 +122,13 @@ enum op_clear {
 };
 
 enum op_clip {
-	CLIP_SHAPE			= 0x0080,
+	CLIP_SHAPE_RECT			= 0x0080,
+
+	CLIP_RECT_TOP_AUTO		= 0x0008,
+	CLIP_RECT_RIGHT_AUTO		= 0x0010,
+	CLIP_RECT_BOTTOM_AUTO		= 0x0020,
+	CLIP_RECT_LEFT_AUTO		= 0x0040,
+
 	CLIP_AUTO			= 0x0000,
 };
 

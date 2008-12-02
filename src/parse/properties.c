@@ -1319,11 +1319,114 @@ css_error parse_clip(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	/** \todo clip */
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	int num_lengths = 0;
+	fixed length[4] = { 0 };
+	uint32_t unit[4] = { 0 };
+	uint32_t required_size;
+
+	/* FUNCTION(rect) [ [ IDENT(auto) | length ] CHAR(,)? ]{3} 
+	 *                [ IDENT(auto) | length ] CHAR{)} |
+	 * IDENT(auto, inherit) */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->ilower == c->strings[INHERIT]) {
+		flags = FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			token->ilower == c->strings[AUTO]) {
+		value = CLIP_AUTO;
+	} else if (token->type == CSS_TOKEN_FUNCTION &&
+			token->ilower == c->strings[RECT]) {
+		value = CLIP_SHAPE_RECT;
+
+		consumeWhitespace(vector, ctx);
+
+		for (int i = 0; i < 4; i++) {
+			token = parserutils_vector_peek(vector, *ctx);
+			if (token == NULL)
+				return CSS_INVALID;
+
+			if (token->type == CSS_TOKEN_IDENT) {
+				/* Slightly magical way of generating the auto 
+				 * values. These are bits 3-6 of the value. */
+				if (token->ilower == c->strings[AUTO])
+					value |= (i+1) << 3;
+				else
+					return CSS_INVALID;
+			} else {
+				error = parse_unit_specifier(c, vector, ctx, 
+						&length[i], &unit[i]);
+				if (error != CSS_OK)
+					return error;
+
+				if (unit[i] & UNIT_ANGLE || 
+						unit[i] & UNIT_TIME || 
+						unit[i] & UNIT_FREQ || 
+						unit[i] & UNIT_PCT)
+					return CSS_INVALID;
+
+				num_lengths++;
+			}
+
+			consumeWhitespace(vector, ctx);
+
+			/* Consume optional comma after first 3 parameters */
+			if (i < 3) {
+				token = parserutils_vector_peek(vector, *ctx);
+				if (token == NULL)
+					return CSS_INVALID;
+
+				if (tokenIsChar(token, ','))
+					parserutils_vector_iterate(vector, ctx);
+			}
+		}
+
+		consumeWhitespace(vector, ctx);
+
+		/* Finally, consume closing parenthesis */
+		token = parserutils_vector_iterate(vector, ctx);
+		if (token == NULL || tokenIsChar(token, ')') == false)
+			return CSS_INVALID;
+	} else {
+		return CSS_INVALID;
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_CLIP, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == CLIP_SHAPE_RECT) {
+		required_size += 
+			num_lengths * (sizeof(length[0]) + sizeof(unit[0]));
+	}
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == CLIP_SHAPE_RECT) {
+		uint8_t *ptr = ((uint8_t *) (*result)->bytecode) + sizeof(opv);
+
+		for (int i = 0; i < num_lengths; i++) {
+			memcpy(ptr, &length[i], sizeof(length[i]));
+			ptr += sizeof(length[i]);
+			memcpy(ptr, &unit[i], sizeof(unit[i]));
+			ptr += sizeof(unit[i]);
+		}
+	}
 
 	return CSS_OK;
 }
