@@ -880,17 +880,17 @@ css_error parse_background_position(css_language *c,
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false) {
+		uint8_t *ptr = ((uint8_t *) (*result)->bytecode) + sizeof(opv);
 		if (value[0] == BACKGROUND_POSITION_HORZ_SET) {
-			memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
-					&length[0], sizeof(length));
-			memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
-					sizeof(length), &unit[0], sizeof(unit));
+			memcpy(ptr, &length[0], sizeof(length[0]));
+			ptr += sizeof(length[0]);
+			memcpy(ptr, &unit[0], sizeof(unit[0]));
+			ptr += sizeof(unit[0]);
 		}
 		if (value[1] == BACKGROUND_POSITION_VERT_SET) {
-			memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
-					&length[1], sizeof(length));
-			memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
-					sizeof(length), &unit[1], sizeof(unit));
+			memcpy(ptr, &length[1], sizeof(length[1]));
+			ptr += sizeof(length[1]);
+			memcpy(ptr, &unit[1], sizeof(unit[1]));
 		}
 	}
 
