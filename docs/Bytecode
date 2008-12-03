@@ -314,13 +314,18 @@ Opcodes
 
 10 - content
 	<value> (14bits) :
-		bits 8-13: MBZ
+		bits 8-13: MBZ (except counter & counters, see below)
 		bits 0-7 :
 			bit 7 set => string follows
 				bits 0-6: 0000000 => string,
 					  0000001 => uri,
 					  0000010 => counter,
-					  0000011 => attr,
+						     bits 12-13: MBZ
+						     bits 8-11 : list-style-type
+					  0000011 => counters,
+						     bits 12-13: MBZ
+						     bits 8-11 : list-style-type
+					  0000100 => attr,
 					  other   => rffe.
 			bit 7 clear => keywords:
 				bits 0-6: 0000000 => normal,
@@ -338,11 +343,18 @@ Opcodes
 
 	For example, 
 		content: open-quote url('http://example.com/') 
-			 " : " attr(name) close-quote;"
+			 " : " attr(name) " " counter(x) "." counters(y, ".")
+			 close-quote;"
 	would result in the following bytecode:
 
-	<00080010> <00000081> <00000013> "http://example.com/" <00>
-	<00000080> <00000003> " : " <00> <00000083> <00000004> "name"
+	<00080010>
+	<00000081> <ptr to "http://example.com">
+	<00000080> <ptr to " : ">
+	<00000084> <ptr to "name">
+	<00000080> <ptr to " "> 
+	<00000382> <ptr to "x">
+	<00000080> <ptr to "."> 
+	<00000383> <ptr to "y"> <ptr to ".">
 	<00000003> <00000000>
 
 11 - counter-increment

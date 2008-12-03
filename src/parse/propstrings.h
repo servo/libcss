@@ -63,7 +63,8 @@ enum {
 	UPPERCASE, LOWERCASE, EMBED, BIDI_OVERRIDE, BASELINE, SUB, SUPER,
 	TEXT_TOP, MIDDLE, TEXT_BOTTOM, SILENT, X_SOFT, SOFT, LOUD, X_LOUD,
 	PRE, NOWRAP, PRE_WRAP, PRE_LINE, LEFTWARDS, RIGHTWARDS, LEFT_SIDE,
-	FAR_LEFT, FAR_RIGHT, RIGHT_SIDE, BEHIND, RECT,
+	FAR_LEFT, FAR_RIGHT, RIGHT_SIDE, BEHIND, RECT, OPEN_QUOTE, CLOSE_QUOTE,
+	NO_OPEN_QUOTE, NO_CLOSE_QUOTE, ATTR, COUNTER, COUNTERS,
 
 	LAST_KNOWN
 };
@@ -313,6 +314,13 @@ static struct {
 	{ "right-side", SLEN("right-side") },
 	{ "behind", SLEN("behind") },
 	{ "rect", SLEN("rect") },
+	{ "open-quote", SLEN("open-quote") },
+	{ "close-quote", SLEN("close-quote") },
+	{ "no-open-quote", SLEN("no-open-quote") },
+	{ "no-close-quote", SLEN("no-close-quote") },
+	{ "attr", SLEN("attr") },
+	{ "counter", SLEN("counter") },
+	{ "counters", SLEN("counters") },
 };
 
 #endif
