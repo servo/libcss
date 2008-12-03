@@ -334,6 +334,8 @@ static inline css_error parse_margin_side(css_language *c,
 static inline css_error parse_padding_side(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint16_t side, css_style **result);
+static inline css_error parse_list_style_type_value(css_language *c,
+		const css_token *token, uint16_t *value);
 
 /**
  * Type of property handler function
@@ -1636,9 +1638,16 @@ css_error parse_content(css_language *c,
 					return CSS_INVALID;
 
 				if (token->type == CSS_TOKEN_IDENT) {
-					/** \todo validate list-style-type */
+					uint16_t v;
+
+					error = parse_list_style_type_value(c,
+							token, &v);
+					if (error != CSS_OK)
+						return error;
+
 					if (done_value == false) {
-						/** \todo or style into value */
+						value |= v << 
+						    CONTENT_COUNTER_STYLE_SHIFT;
 					}
 
 					parserutils_vector_iterate(vector, 
@@ -1695,9 +1704,16 @@ css_error parse_content(css_language *c,
 					return CSS_INVALID;
 
 				if (token->type == CSS_TOKEN_IDENT) {
-					/** \todo validate list-style-type */
+					uint16_t v;
+
+					error = parse_list_style_type_value(c,
+							token, &v);
+					if (error != CSS_OK)
+						return error;
+
 					if (done_value == false) {
-						/** \todo or style into value */
+						value |= v << 
+						   CONTENT_COUNTERS_STYLE_SHIFT;
 					}
 
 					parserutils_vector_iterate(vector, 
@@ -2824,38 +2840,11 @@ css_error parse_list_style_type(css_language *c,
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[DISC]) {
-		value = LIST_STYLE_TYPE_DISC;
-	} else if (ident->ilower == c->strings[CIRCLE]) {
-		value = LIST_STYLE_TYPE_CIRCLE;
-	} else if (ident->ilower == c->strings[SQUARE]) {
-		value = LIST_STYLE_TYPE_SQUARE;
-	} else if (ident->ilower == c->strings[DECIMAL]) {
-		value = LIST_STYLE_TYPE_DECIMAL;
-	} else if (ident->ilower == c->strings[DECIMAL_LEADING_ZERO]) {
-		value = LIST_STYLE_TYPE_DECIMAL_LEADING_ZERO;
-	} else if (ident->ilower == c->strings[LOWER_ROMAN]) {
-		value = LIST_STYLE_TYPE_LOWER_ROMAN;
-	} else if (ident->ilower == c->strings[UPPER_ROMAN]) {
-		value = LIST_STYLE_TYPE_UPPER_ROMAN;
-	} else if (ident->ilower == c->strings[LOWER_GREEK]) {
-		value = LIST_STYLE_TYPE_LOWER_GREEK;
-	} else if (ident->ilower == c->strings[LOWER_LATIN]) {
-		value = LIST_STYLE_TYPE_LOWER_LATIN;
-	} else if (ident->ilower == c->strings[UPPER_LATIN]) {
-		value = LIST_STYLE_TYPE_UPPER_LATIN;
-	} else if (ident->ilower == c->strings[ARMENIAN]) {
-		value = LIST_STYLE_TYPE_ARMENIAN;
-	} else if (ident->ilower == c->strings[GEORGIAN]) {
-		value = LIST_STYLE_TYPE_GEORGIAN;
-	} else if (ident->ilower == c->strings[LOWER_ALPHA]) {
-		value = LIST_STYLE_TYPE_LOWER_ALPHA;
-	} else if (ident->ilower == c->strings[UPPER_ALPHA]) {
-		value = LIST_STYLE_TYPE_UPPER_ALPHA;
-	} else if (ident->ilower == c->strings[NONE]) {
-		value = LIST_STYLE_TYPE_NONE;
-	} else
-		return CSS_INVALID;
+	} else {
+		error = parse_list_style_type_value(c, ident, &value);
+		if (error != CSS_OK)
+			return error;
+	}
 
 	opv = buildOPV(OP_LIST_STYLE_TYPE, flags, value);
 
@@ -5516,5 +5505,48 @@ css_error parse_padding_side(css_language *c,
 	return CSS_OK;
 }
 
+css_error parse_list_style_type_value(css_language *c, const css_token *ident,
+		uint16_t *value)
+{
+	/* IDENT (disc, circle, square, decimal, decimal-leading-zero,
+	 *        lower-roman, upper-roman, lower-greek, lower-latin,
+	 *        upper-latin, armenian, georgian, lower-alpha, upper-alpha,
+	 *        none)
+	 */
+	if (ident->ilower == c->strings[DISC]) {
+		*value = LIST_STYLE_TYPE_DISC;
+	} else if (ident->ilower == c->strings[CIRCLE]) {
+		*value = LIST_STYLE_TYPE_CIRCLE;
+	} else if (ident->ilower == c->strings[SQUARE]) {
+		*value = LIST_STYLE_TYPE_SQUARE;
+	} else if (ident->ilower == c->strings[DECIMAL]) {
+		*value = LIST_STYLE_TYPE_DECIMAL;
+	} else if (ident->ilower == c->strings[DECIMAL_LEADING_ZERO]) {
+		*value = LIST_STYLE_TYPE_DECIMAL_LEADING_ZERO;
+	} else if (ident->ilower == c->strings[LOWER_ROMAN]) {
+		*value = LIST_STYLE_TYPE_LOWER_ROMAN;
+	} else if (ident->ilower == c->strings[UPPER_ROMAN]) {
+		*value = LIST_STYLE_TYPE_UPPER_ROMAN;
+	} else if (ident->ilower == c->strings[LOWER_GREEK]) {
+		*value = LIST_STYLE_TYPE_LOWER_GREEK;
+	} else if (ident->ilower == c->strings[LOWER_LATIN]) {
+		*value = LIST_STYLE_TYPE_LOWER_LATIN;
+	} else if (ident->ilower == c->strings[UPPER_LATIN]) {
+		*value = LIST_STYLE_TYPE_UPPER_LATIN;
+	} else if (ident->ilower == c->strings[ARMENIAN]) {
+		*value = LIST_STYLE_TYPE_ARMENIAN;
+	} else if (ident->ilower == c->strings[GEORGIAN]) {
+		*value = LIST_STYLE_TYPE_GEORGIAN;
+	} else if (ident->ilower == c->strings[LOWER_ALPHA]) {
+		*value = LIST_STYLE_TYPE_LOWER_ALPHA;
+	} else if (ident->ilower == c->strings[UPPER_ALPHA]) {
+		*value = LIST_STYLE_TYPE_UPPER_ALPHA;
+	} else if (ident->ilower == c->strings[NONE]) {
+		*value = LIST_STYLE_TYPE_NONE;
+	} else
+		return CSS_INVALID;
+
+	return CSS_OK;
+}
 
 #endif
