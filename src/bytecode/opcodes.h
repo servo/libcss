@@ -244,6 +244,7 @@ enum op_float {
 
 enum op_font_family {
 	FONT_FAMILY_STRING		= 0x0080,
+	FONT_FAMILY_IDENT_LIST		= 0x0081,
 
 	FONT_FAMILY_END			= 0x0000,
 

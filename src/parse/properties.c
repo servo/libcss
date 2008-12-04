@@ -2561,17 +2561,203 @@ css_error parse_font_family(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	/* [ IDENT+ | STRING ] [ ','? [ IDENT+ | STRING ] ]* 
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	uint32_t required_size = sizeof(opv);
+	int temp_ctx = *ctx;
+	uint8_t *ptr;
+
+	/* [ IDENT+ | STRING ] [ ','? [ IDENT+ | STRING ] ]* | IDENT(inherit)
 	 * 
 	 * In the case of IDENT+, any whitespace between tokens is collapsed to
 	 * a single space
 	 */
-	/** \todo font-family */
 
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	/* Pass 1: validate input and calculate space */
+	token = parserutils_vector_iterate(vector, &temp_ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			token->type != CSS_TOKEN_STRING))
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->ilower == c->strings[INHERIT]) {
+		flags = FLAG_INHERIT;
+	} else {
+		bool first = true;
+
+		while (token != NULL) {
+			if (token->type == CSS_TOKEN_IDENT) {
+				if (first == false) {
+					required_size += sizeof(opv);
+				} else {
+					value = FONT_FAMILY_IDENT_LIST;
+				}
+
+				required_size +=
+					sizeof(parserutils_hash_entry *);
+
+				/* Skip past [ IDENT* S* ]* */
+				while (token != NULL) {
+					token = parserutils_vector_peek(
+							vector, temp_ctx);
+					if (token != NULL && 
+							token->type != 
+							CSS_TOKEN_IDENT &&
+							token->type != 
+							CSS_TOKEN_S) {
+						break;
+					}
+
+					token = parserutils_vector_iterate(
+							vector, &temp_ctx);
+				}
+			} else if (token->type == CSS_TOKEN_STRING) {
+				if (first == false) {
+					required_size += sizeof(opv);
+				} else {
+					value = FONT_FAMILY_STRING;
+				}
+
+				required_size += 
+					sizeof(parserutils_hash_entry *);
+			} else {
+				return CSS_INVALID;
+			}
+
+			consumeWhitespace(vector, &temp_ctx);
+
+			token = parserutils_vector_peek(vector, temp_ctx);
+			if (token != NULL && tokenIsChar(token, ',')) {
+				parserutils_vector_iterate(vector, &temp_ctx);
+
+				consumeWhitespace(vector, &temp_ctx);
+
+				token = parserutils_vector_peek(vector, 
+						temp_ctx);
+				if (token == NULL || tokenIsChar(token, '!'))
+					return CSS_INVALID;
+			}
+
+			first = false;
+
+			token = parserutils_vector_peek(vector, temp_ctx);
+			if (token != NULL && tokenIsChar(token, '!'))
+				break;
+
+			token = parserutils_vector_iterate(vector, &temp_ctx);
+		}
+
+		required_size += sizeof(opv);
+	}
+
+	error = parse_important(c, vector, &temp_ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_FONT_FAMILY, flags, value);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy OPV to bytecode */
+	ptr = (*result)->bytecode;
+	memcpy(ptr, &opv, sizeof(opv));
+	ptr += sizeof(opv);
+
+	/* Pass 2: populate bytecode */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			token->type != CSS_TOKEN_STRING))
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->ilower == c->strings[INHERIT]) {
+		/* Nothing to do */
+	} else {
+		bool first = true;
+
+		while (token != NULL) {
+			if (token->type == CSS_TOKEN_IDENT) {
+				/** \todo need to build string from idents */
+				const parserutils_hash_entry *name = 
+						token->idata;
+
+				opv = FONT_FAMILY_IDENT_LIST;
+
+				if (first == false) {
+					memcpy(ptr, &opv, sizeof(opv));
+					ptr += sizeof(opv);
+				}
+
+				/* Skip past [ IDENT* S* ]* */
+				while (token != NULL) {
+					token = parserutils_vector_peek(
+							vector, temp_ctx);
+					if (token != NULL && 
+							token->type != 
+							CSS_TOKEN_IDENT &&
+							token->type != 
+							CSS_TOKEN_S) {
+						break;
+					}
+
+					token = parserutils_vector_iterate(
+							vector, ctx);
+				}
+
+				memcpy(ptr, &name, sizeof(name));
+				ptr += sizeof(name);
+			} else if (token->type == CSS_TOKEN_STRING) {
+				opv = FONT_FAMILY_STRING;
+
+				if (first == false) {
+					memcpy(ptr, &opv, sizeof(opv));
+					ptr += sizeof(opv);
+				}
+
+				memcpy(ptr, &token->idata, 
+						sizeof(token->idata));
+				ptr += sizeof(token->idata);
+			} else {
+				return CSS_INVALID;
+			}
+
+			consumeWhitespace(vector, ctx);
+
+			token = parserutils_vector_peek(vector, temp_ctx);
+			if (token != NULL && tokenIsChar(token, ',')) {
+				parserutils_vector_iterate(vector, ctx);
+
+				consumeWhitespace(vector, ctx);
+
+				token = parserutils_vector_peek(vector, *ctx);
+				if (token == NULL || tokenIsChar(token, '!'))
+					return CSS_INVALID;
+			}
+
+			first = false;
+
+			token = parserutils_vector_peek(vector, *ctx);
+			if (token != NULL && tokenIsChar(token, '!'))
+				break;
+
+			token = parserutils_vector_iterate(vector, ctx);
+		}
+
+		/* Write terminator */
+		opv = FONT_FAMILY_END;
+		memcpy(ptr, &opv, sizeof(opv));
+		ptr += sizeof(opv);
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
 
 	return CSS_OK;
 }
