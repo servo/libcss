@@ -361,9 +361,8 @@ Opcodes
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
-			bit 7 set => string or integer follows
-				bits 0-6: 0000000 => string,
-					  0000001 => integer,
+			bit 7 set => <string, integer> pair follows
+				bits 0-6: 0000000 => <string, integer> pair
 					  other   => rffe.
 			bit 7 clear => keywords:
 				bits 0-6: 0000000 => none,
@@ -378,9 +377,8 @@ Opcodes
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
-			bit 7 set => string or integer follows
-				bits 0-6: 0000000 => string,
-					  0000001 => integer,
+			bit 7 set => <string, integer> pair follows
+				bits 0-6: 0000000 => <string, integer> pair,
 					  other   => rffe.
 			bit 7 clear => keywords:
 				bits 0-6: 0000000 => none,
