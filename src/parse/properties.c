@@ -2561,6 +2561,11 @@ css_error parse_font_family(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	/* [ IDENT+ | STRING ] [ ','? [ IDENT+ | STRING ] ]* 
+	 * 
+	 * In the case of IDENT+, any whitespace between tokens is collapsed to
+	 * a single space
+	 */
 	/** \todo font-family */
 
 	UNUSED(c);

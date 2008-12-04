@@ -497,8 +497,10 @@ Opcodes
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
-			bit 7 set => string follows
-				bits 0-6: MBZ
+			bit 7 set => data follows
+				bits 1-6: MBZ
+				bit  0  : clear => string, 
+					  set => ident list (as string)
 			bit 7 clear => keywords:
 				bits 0-6: 0000000 => Reserved.
 					  0000001 => serif,
@@ -508,10 +510,9 @@ Opcodes
 					  0000101 => monospace,
 					  other   => rffe.
 
-	If the value indicates that a string is present, then there is a 
-	parameter list. Each item is preceded by a <value> word which declares
-	the type of the next item. The list is terminated by a word with
-	all bits clear.
+	If the value indicates that data follows, then there is a parameter 
+	list. Each item is preceded by a <value> word which declares the type 
+	of the next item. The list is terminated by a word with	all bits clear.
 
 1c - font-size
 	<value> (14bits) :
