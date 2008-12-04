@@ -64,7 +64,9 @@ enum {
 	TEXT_TOP, MIDDLE, TEXT_BOTTOM, SILENT, X_SOFT, SOFT, LOUD, X_LOUD,
 	PRE, NOWRAP, PRE_WRAP, PRE_LINE, LEFTWARDS, RIGHTWARDS, LEFT_SIDE,
 	FAR_LEFT, FAR_RIGHT, RIGHT_SIDE, BEHIND, RECT, OPEN_QUOTE, CLOSE_QUOTE,
-	NO_OPEN_QUOTE, NO_CLOSE_QUOTE, ATTR, COUNTER, COUNTERS,
+	NO_OPEN_QUOTE, NO_CLOSE_QUOTE, ATTR, COUNTER, COUNTERS, CROSSHAIR,
+	DEFAULT, POINTER, MOVE, E_RESIZE, NE_RESIZE, NW_RESIZE, N_RESIZE,
+	SE_RESIZE, SW_RESIZE, S_RESIZE, W_RESIZE, TEXT, WAIT, HELP, PROGRESS,
 
 	LAST_KNOWN
 };
@@ -321,6 +323,22 @@ static struct {
 	{ "attr", SLEN("attr") },
 	{ "counter", SLEN("counter") },
 	{ "counters", SLEN("counters") },
+	{ "crosshair", SLEN("crosshair") },
+	{ "default", SLEN("default") },
+	{ "pointer", SLEN("pointer") },
+	{ "move", SLEN("move") },
+	{ "e-resize", SLEN("e-resize") },
+	{ "ne-resize", SLEN("ne-resize") },
+	{ "nw-resize", SLEN("nw-resize") },
+	{ "n-resize", SLEN("n-resize") },
+	{ "se-resize", SLEN("se-resize") },
+	{ "sw-resize", SLEN("sw-resize") },
+	{ "s-resize", SLEN("s-resize") },
+	{ "w-resize", SLEN("w-resize") },
+	{ "text", SLEN("text") },
+	{ "wait", SLEN("wait") },
+	{ "help", SLEN("help") },
+	{ "progress", SLEN("progress") },
 };
 
 #endif
