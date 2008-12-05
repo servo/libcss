@@ -2592,27 +2592,58 @@ css_error parse_font_family(css_language *c,
 			if (token->type == CSS_TOKEN_IDENT) {
 				if (first == false) {
 					required_size += sizeof(opv);
-				} else {
-					value = FONT_FAMILY_IDENT_LIST;
 				}
 
-				required_size +=
-					sizeof(parserutils_hash_entry *);
-
-				/* Skip past [ IDENT* S* ]* */
-				while (token != NULL) {
-					token = parserutils_vector_peek(
-							vector, temp_ctx);
-					if (token != NULL && 
-							token->type != 
-							CSS_TOKEN_IDENT &&
-							token->type != 
-							CSS_TOKEN_S) {
-						break;
+				if (token->ilower == c->strings[SERIF]) {
+					if (first) {
+						value = FONT_FAMILY_SERIF;
+					}
+				} else if (token->ilower == 
+						c->strings[SANS_SERIF]) {
+					if (first) {
+						value = FONT_FAMILY_SANS_SERIF;
+					}
+				} else if (token->ilower == 
+						c->strings[CURSIVE]) {
+					if (first) {
+						value = FONT_FAMILY_CURSIVE;
+					}
+				} else if (token->ilower == 
+						c->strings[FANTASY]) {
+					if (first) {
+						value = FONT_FAMILY_FANTASY;
+					}
+				} else if (token->ilower == 
+						c->strings[MONOSPACE]) {
+					if (first) {
+						value = FONT_FAMILY_MONOSPACE;
+					}
+				} else {
+					if (first) {
+						value = FONT_FAMILY_IDENT_LIST;
 					}
 
-					token = parserutils_vector_iterate(
+					required_size +=
+						sizeof(parserutils_hash_entry *);
+
+					/* Skip past [ IDENT* S* ]* */
+					while (token != NULL) {
+						token = parserutils_vector_peek(
+								vector, 
+								temp_ctx);
+						if (token != NULL && 
+							token->type != 
+							CSS_TOKEN_IDENT &&
+								token->type != 
+								CSS_TOKEN_S) {
+							break;
+						}
+
+						/** \todo idents must not 
+						 * match generic families */
+						token = parserutils_vector_iterate(
 							vector, &temp_ctx);
+					}
 				}
 			} else if (token->type == CSS_TOKEN_STRING) {
 				if (first == false) {
@@ -2686,28 +2717,44 @@ css_error parse_font_family(css_language *c,
 				/** \todo need to build string from idents */
 				const parserutils_hash_entry *name = 
 						token->idata;
+			
+				if (token->ilower == c->strings[SERIF]) {
+					opv = FONT_FAMILY_SERIF;
+				} else if (token->ilower == 
+						c->strings[SANS_SERIF]) {
+					opv = FONT_FAMILY_SANS_SERIF;
+				} else if (token->ilower == 
+						c->strings[CURSIVE]) {
+					opv = FONT_FAMILY_CURSIVE;
+				} else if (token->ilower == 
+						c->strings[FANTASY]) {
+					opv = FONT_FAMILY_FANTASY;
+				} else if (token->ilower == 
+						c->strings[MONOSPACE]) {
+					opv = FONT_FAMILY_MONOSPACE;
+				} else {
+					opv = FONT_FAMILY_IDENT_LIST;
 
-				opv = FONT_FAMILY_IDENT_LIST;
+					/* Skip past [ IDENT* S* ]* */
+					while (token != NULL) {
+						token = parserutils_vector_peek(
+								vector, temp_ctx);
+						if (token != NULL && 
+							token->type != 
+							CSS_TOKEN_IDENT &&
+								token->type != 
+								CSS_TOKEN_S) {
+							break;
+						}
+
+						token = parserutils_vector_iterate(
+								vector, ctx);
+					}
+				}
 
 				if (first == false) {
 					memcpy(ptr, &opv, sizeof(opv));
 					ptr += sizeof(opv);
-				}
-
-				/* Skip past [ IDENT* S* ]* */
-				while (token != NULL) {
-					token = parserutils_vector_peek(
-							vector, temp_ctx);
-					if (token != NULL && 
-							token->type != 
-							CSS_TOKEN_IDENT &&
-							token->type != 
-							CSS_TOKEN_S) {
-						break;
-					}
-
-					token = parserutils_vector_iterate(
-							vector, ctx);
 				}
 
 				memcpy(ptr, &name, sizeof(name));

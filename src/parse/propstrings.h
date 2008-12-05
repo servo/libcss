@@ -67,6 +67,7 @@ enum {
 	NO_OPEN_QUOTE, NO_CLOSE_QUOTE, ATTR, COUNTER, COUNTERS, CROSSHAIR,
 	DEFAULT, POINTER, MOVE, E_RESIZE, NE_RESIZE, NW_RESIZE, N_RESIZE,
 	SE_RESIZE, SW_RESIZE, S_RESIZE, W_RESIZE, TEXT, WAIT, HELP, PROGRESS,
+	SERIF, SANS_SERIF, CURSIVE, FANTASY, MONOSPACE,
 
 	LAST_KNOWN
 };
@@ -339,6 +340,11 @@ static struct {
 	{ "wait", SLEN("wait") },
 	{ "help", SLEN("help") },
 	{ "progress", SLEN("progress") },
+	{ "serif", SLEN("serif") },
+	{ "sans-serif", SLEN("sans-serif") },
+	{ "cursive", SLEN("cursive") },
+	{ "fantasy", SLEN("fantasy") },
+	{ "monospace", SLEN("monospace") },
 };
 
 #endif
