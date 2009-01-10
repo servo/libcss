@@ -4587,12 +4587,143 @@ css_error parse_quotes(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	/** \todo quotes */
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	uint32_t required_size = sizeof(opv);
+	int temp_ctx = *ctx;
+	uint8_t *ptr;
 
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	/* [ STRING STRING ]+ | IDENT(none,inherit) */ 
+
+	/* Pass 1: validate input and calculate bytecode size */
+	token = parserutils_vector_iterate(vector, &temp_ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			token->type != CSS_TOKEN_STRING))
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT) {
+		if (token->ilower == c->strings[INHERIT]) {
+			flags = FLAG_INHERIT;
+		} else if (token->ilower == c->strings[NONE]) {
+			value = QUOTES_NONE;
+		} else
+			return CSS_INVALID;
+	} else {
+		bool first = true;
+
+		/* [ STRING STRING ] + */
+		while (token != NULL && token->type == CSS_TOKEN_STRING) {
+			const parserutils_hash_entry *open = token->idata;
+			const parserutils_hash_entry *close;
+
+			consumeWhitespace(vector, &temp_ctx);
+
+			token = parserutils_vector_peek(vector, temp_ctx);
+			if (token == NULL || token->type != CSS_TOKEN_STRING)
+				return CSS_INVALID;
+
+			close = token->idata;
+
+			token = parserutils_vector_iterate(vector, &temp_ctx);
+
+			consumeWhitespace(vector, &temp_ctx);
+
+			if (first == false) {
+				required_size += sizeof(opv);
+			} else {
+				value = QUOTES_STRING;
+			}
+			required_size += sizeof(open) + sizeof(close);
+
+			first = false;
+		}
+
+		consumeWhitespace(vector, &temp_ctx);
+
+		token = parserutils_vector_peek(vector, temp_ctx);
+		if (token != NULL && tokenIsChar(token, '!') == false)
+			return CSS_INVALID;
+
+		/* Terminator */
+		required_size += sizeof(opv);
+	}
+
+	error = parse_important(c, vector, &temp_ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_QUOTES, flags, value);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy OPV to bytecode */
+	ptr = (*result)->bytecode;
+	memcpy(ptr, &opv, sizeof(opv));
+	ptr += sizeof(opv);
+
+	/* Pass 2: construct bytecode */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			token->type != CSS_TOKEN_STRING))
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT) {
+		/* Nothing to do */
+	} else {
+		bool first = true;
+
+		/* [ STRING STRING ]+ */
+		while (token != NULL && token->type == CSS_TOKEN_STRING) {
+			const parserutils_hash_entry *open = token->idata;
+			const parserutils_hash_entry *close;
+
+			consumeWhitespace(vector, ctx);
+
+			token = parserutils_vector_peek(vector, *ctx);
+			if (token == NULL || token->type != CSS_TOKEN_STRING)
+				return CSS_INVALID;
+
+			close = token->idata;
+
+			token = parserutils_vector_iterate(vector, ctx);
+
+			consumeWhitespace(vector, ctx);
+
+			if (first == false) {
+				opv = QUOTES_STRING;
+				memcpy(ptr, &opv, sizeof(opv));
+				ptr += sizeof(opv);
+			}
+
+			memcpy(ptr, &open, sizeof(open));
+			ptr += sizeof(open);
+			memcpy(ptr, &close, sizeof(close));
+			ptr += sizeof(close);
+
+			first = false;
+		}
+
+		consumeWhitespace(vector, ctx);
+
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && tokenIsChar(token, '!') == false)
+			return CSS_INVALID;
+
+		/* Terminator */
+		opv = QUOTES_NONE;
+		memcpy(ptr, &opv, sizeof(opv));
+		ptr += sizeof(opv);
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
 
 	return CSS_OK;
 }
