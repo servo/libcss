@@ -2738,7 +2738,7 @@ css_error parse_font_family(css_language *c,
 					/* Skip past [ IDENT* S* ]* */
 					while (token != NULL) {
 						token = parserutils_vector_peek(
-								vector, temp_ctx);
+								vector, *ctx);
 						if (token != NULL && 
 							token->type != 
 							CSS_TOKEN_IDENT &&
@@ -2757,8 +2757,10 @@ css_error parse_font_family(css_language *c,
 					ptr += sizeof(opv);
 				}
 
-				memcpy(ptr, &name, sizeof(name));
-				ptr += sizeof(name);
+				if (opv == FONT_FAMILY_IDENT_LIST) {
+					memcpy(ptr, &name, sizeof(name));
+					ptr += sizeof(name);
+				}
 			} else if (token->type == CSS_TOKEN_STRING) {
 				opv = FONT_FAMILY_STRING;
 
@@ -2776,7 +2778,7 @@ css_error parse_font_family(css_language *c,
 
 			consumeWhitespace(vector, ctx);
 
-			token = parserutils_vector_peek(vector, temp_ctx);
+			token = parserutils_vector_peek(vector, *ctx);
 			if (token != NULL && tokenIsChar(token, ',')) {
 				parserutils_vector_iterate(vector, ctx);
 
