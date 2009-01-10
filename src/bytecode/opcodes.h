@@ -584,7 +584,8 @@ enum op_visibility {
 };
 
 enum op_voice_family {
-	VOICE_FAMILY_SET		= 0x0080,
+	VOICE_FAMILY_STRING		= 0x0080,
+	VOICE_FAMILY_IDENT_LIST		= 0x0081,
 
 	VOICE_FAMILY_END		= 0x0000,
 

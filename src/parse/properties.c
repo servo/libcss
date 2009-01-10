@@ -5412,12 +5412,313 @@ css_error parse_voice_family(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	/** \todo voice-family */
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	uint32_t required_size = sizeof(opv);
+	int temp_ctx = *ctx;
+	uint8_t *ptr;
 
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	/* [ IDENT+ | STRING ] [ ','? [ IDENT+ | STRING ] ]* | IDENT(inherit)
+	 * 
+	 * In the case of IDENT+, any whitespace between tokens is collapsed to
+	 * a single space
+	 */
+
+	/* Pass 1: validate input and calculate space */
+	token = parserutils_vector_iterate(vector, &temp_ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			token->type != CSS_TOKEN_STRING))
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->ilower == c->strings[INHERIT]) {
+		flags = FLAG_INHERIT;
+	} else {
+		bool first = true;
+
+		while (token != NULL) {
+			if (token->type == CSS_TOKEN_IDENT) {
+				if (first == false) {
+					required_size += sizeof(opv);
+				}
+
+				if (token->ilower == c->strings[MALE]) {
+					if (first) {
+						value = VOICE_FAMILY_MALE;
+					}
+				} else if (token->ilower == 
+						c->strings[FEMALE]) {
+					if (first) {
+						value = VOICE_FAMILY_FEMALE;
+					}
+				} else if (token->ilower == c->strings[CHILD]) {
+					if (first) {
+						value = VOICE_FAMILY_CHILD;
+					}
+				} else {
+					if (first) {
+						value = VOICE_FAMILY_IDENT_LIST;
+					}
+
+					required_size +=
+						sizeof(parserutils_hash_entry *);
+
+					/* Skip past [ IDENT* S* ]* */
+					while (token != NULL) {
+						token = parserutils_vector_peek(
+								vector, 
+								temp_ctx);
+						if (token != NULL && 
+							token->type != 
+							CSS_TOKEN_IDENT &&
+								token->type != 
+								CSS_TOKEN_S) {
+							break;
+						}
+
+						/* idents must not match 
+						 * generic families */
+						if (token != NULL && token->type == CSS_TOKEN_IDENT && 
+								(token->ilower == c->strings[MALE] || 
+								token->ilower == c->strings[FEMALE] || 
+								token->ilower == c->strings[CHILD]))
+							return CSS_INVALID;
+						token = parserutils_vector_iterate(
+							vector, &temp_ctx);
+					}
+				}
+			} else if (token->type == CSS_TOKEN_STRING) {
+				if (first == false) {
+					required_size += sizeof(opv);
+				} else {
+					value = VOICE_FAMILY_STRING;
+				}
+
+				required_size += 
+					sizeof(parserutils_hash_entry *);
+			} else {
+				return CSS_INVALID;
+			}
+
+			consumeWhitespace(vector, &temp_ctx);
+
+			token = parserutils_vector_peek(vector, temp_ctx);
+			if (token != NULL && tokenIsChar(token, ',')) {
+				parserutils_vector_iterate(vector, &temp_ctx);
+
+				consumeWhitespace(vector, &temp_ctx);
+
+				token = parserutils_vector_peek(vector, 
+						temp_ctx);
+				if (token == NULL || tokenIsChar(token, '!'))
+					return CSS_INVALID;
+			}
+
+			first = false;
+
+			token = parserutils_vector_peek(vector, temp_ctx);
+			if (token != NULL && tokenIsChar(token, '!'))
+				break;
+
+			token = parserutils_vector_iterate(vector, &temp_ctx);
+		}
+
+		required_size += sizeof(opv);
+	}
+
+	error = parse_important(c, vector, &temp_ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_VOICE_FAMILY, flags, value);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy OPV to bytecode */
+	ptr = (*result)->bytecode;
+	memcpy(ptr, &opv, sizeof(opv));
+	ptr += sizeof(opv);
+
+	/* Pass 2: populate bytecode */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			token->type != CSS_TOKEN_STRING)) {
+		css_stylesheet_style_destroy(c->sheet, *result);
+		*result = NULL;
+		return CSS_INVALID;
+	}
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->ilower == c->strings[INHERIT]) {
+		/* Nothing to do */
+	} else {
+		bool first = true;
+
+		while (token != NULL) {
+			if (token->type == CSS_TOKEN_IDENT) {
+				const parserutils_hash_entry *name = 
+						token->idata;
+			
+				if (token->ilower == c->strings[MALE]) {
+					opv = VOICE_FAMILY_MALE;
+				} else if (token->ilower == 
+						c->strings[FEMALE]) {
+					opv = VOICE_FAMILY_FEMALE;
+				} else if (token->ilower == c->strings[CHILD]) {
+					opv = VOICE_FAMILY_CHILD;
+				} else {
+					uint16_t len = token->idata->len;
+					const css_token *temp_token = token;
+					parserutils_error perror;
+
+					temp_ctx = *ctx;
+
+					opv = VOICE_FAMILY_IDENT_LIST;
+
+					/* Build string from idents */
+					while (temp_token != NULL) {
+						temp_token = parserutils_vector_peek(
+								vector, temp_ctx);
+						if (temp_token != NULL && 
+							temp_token->type != 
+							CSS_TOKEN_IDENT &&
+								temp_token->type != 
+								CSS_TOKEN_S) {
+							break;
+						}
+
+						if (temp_token != NULL && temp_token->type == CSS_TOKEN_IDENT) {
+							len += temp_token->idata->len;
+						} else if (temp_token != NULL) {
+							len += 1;
+						}
+
+						temp_token = parserutils_vector_iterate(
+								vector, &temp_ctx);
+					}
+
+					uint8_t buf[len];
+					uint8_t *p = buf;
+
+					memcpy(p, token->idata->data, token->idata->len);
+					p += token->idata->len;
+
+					while (token != NULL) {
+						token = parserutils_vector_peek(
+								vector, *ctx);
+						if (token != NULL &&
+							token->type != 
+							CSS_TOKEN_IDENT &&
+								token->type !=
+								CSS_TOKEN_S) {
+							break;
+						}
+
+						if (token != NULL && 
+							token->type == 
+								CSS_TOKEN_IDENT) {
+							memcpy(p,
+								token->idata->data,
+								token->idata->len);
+							p += token->idata->len;
+						} else if (token != NULL) {
+							*p++ = ' ';
+						}
+
+						token = parserutils_vector_iterate(
+							vector, ctx);
+					}
+
+					/* Strip trailing whitespace */
+					while (p > buf && p[-1] == ' ')
+						p--;
+
+					/* Insert into hash, if it's different
+					 * from the name we already have */
+					if (p - buf != name->len || 
+						memcmp(buf, name->data, 
+							name->len) != 0) {
+						perror = parserutils_hash_insert(
+							c->sheet->dictionary, 
+							buf, len, &name);
+						if (perror != PARSERUTILS_OK) {
+							css_stylesheet_style_destroy(c->sheet, *result);
+							*result = NULL;
+							return css_error_from_parserutils_error(perror);
+						}
+					}
+				}
+
+				if (first == false) {
+					memcpy(ptr, &opv, sizeof(opv));
+					ptr += sizeof(opv);
+				}
+
+				if (opv == VOICE_FAMILY_IDENT_LIST) {
+					memcpy(ptr, &name, sizeof(name));
+					ptr += sizeof(name);
+				}
+			} else if (token->type == CSS_TOKEN_STRING) {
+				opv = VOICE_FAMILY_STRING;
+
+				if (first == false) {
+					memcpy(ptr, &opv, sizeof(opv));
+					ptr += sizeof(opv);
+				}
+
+				memcpy(ptr, &token->idata, 
+						sizeof(token->idata));
+				ptr += sizeof(token->idata);
+			} else {
+				css_stylesheet_style_destroy(c->sheet, *result);
+				*result = NULL;
+				return CSS_INVALID;
+			}
+
+			consumeWhitespace(vector, ctx);
+
+			token = parserutils_vector_peek(vector, *ctx);
+			if (token != NULL && tokenIsChar(token, ',')) {
+				parserutils_vector_iterate(vector, ctx);
+
+				consumeWhitespace(vector, ctx);
+
+				token = parserutils_vector_peek(vector, *ctx);
+				if (token == NULL || tokenIsChar(token, '!')) {
+					css_stylesheet_style_destroy(c->sheet,
+							*result);
+					*result = NULL;
+					return CSS_INVALID;
+				}
+			}
+
+			first = false;
+
+			token = parserutils_vector_peek(vector, *ctx);
+			if (token != NULL && tokenIsChar(token, '!'))
+				break;
+
+			token = parserutils_vector_iterate(vector, ctx);
+		}
+
+		/* Write terminator */
+		opv = VOICE_FAMILY_END;
+		memcpy(ptr, &opv, sizeof(opv));
+		ptr += sizeof(opv);
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(c->sheet, *result);
+		*result = NULL;
+		return error;
+	}
 
 	return CSS_OK;
 }
