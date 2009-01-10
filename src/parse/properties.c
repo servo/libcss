@@ -6403,6 +6403,13 @@ css_error parse_colour_specifier(css_language *c,
 	UNUSED(c);
 	UNUSED(result);
 
+	/* IDENT(<colour name>) | HASH(rgb | rrggbb) |
+	 * FUNCTION(rgb) [ [ NUMBER | PERCENTAGE ] ',' ] {3} ')'
+	 *
+	 * For quirks, NUMBER | DIMENSION | IDENT, too
+	 * I.E. "123456" -> NUMBER, "1234f0" -> DIMENSION, "f00000" -> IDENT
+	 */
+
 	/** \todo Parse colours */
 
 	/* For now, consume everything up to the end of the declaration or !, 
