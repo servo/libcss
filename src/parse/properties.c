@@ -2710,8 +2710,11 @@ css_error parse_font_family(css_language *c,
 	/* Pass 2: populate bytecode */
 	token = parserutils_vector_iterate(vector, ctx);
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-			token->type != CSS_TOKEN_STRING))
+			token->type != CSS_TOKEN_STRING)) {
+		css_stylesheet_style_destroy(c->sheet, *result);
+		*result = NULL;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -2813,8 +2816,11 @@ css_error parse_font_family(css_language *c,
 						perror = parserutils_hash_insert(
 							c->sheet->dictionary, 
 							buf, len, &name);
-						if (perror != PARSERUTILS_OK)
+						if (perror != PARSERUTILS_OK) {
+							css_stylesheet_style_destroy(c->sheet, *result);
+							*result = NULL;
 							return css_error_from_parserutils_error(perror);
+						}
 					}
 				}
 
@@ -2839,6 +2845,8 @@ css_error parse_font_family(css_language *c,
 						sizeof(token->idata));
 				ptr += sizeof(token->idata);
 			} else {
+				css_stylesheet_style_destroy(c->sheet, *result);
+				*result = NULL;
 				return CSS_INVALID;
 			}
 
@@ -2851,8 +2859,12 @@ css_error parse_font_family(css_language *c,
 				consumeWhitespace(vector, ctx);
 
 				token = parserutils_vector_peek(vector, *ctx);
-				if (token == NULL || tokenIsChar(token, '!'))
+				if (token == NULL || tokenIsChar(token, '!')) {
+					css_stylesheet_style_destroy(c->sheet,
+							*result);
+					*result = NULL;
 					return CSS_INVALID;
+				}
 			}
 
 			first = false;
@@ -2871,8 +2883,11 @@ css_error parse_font_family(css_language *c,
 	}
 
 	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(c->sheet, *result);
+		*result = NULL;
 		return error;
+	}
 
 	return CSS_OK;
 }
