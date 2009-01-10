@@ -68,7 +68,7 @@ enum {
 	DEFAULT, POINTER, MOVE, E_RESIZE, NE_RESIZE, NW_RESIZE, N_RESIZE,
 	SE_RESIZE, SW_RESIZE, S_RESIZE, W_RESIZE, TEXT, WAIT, HELP, PROGRESS,
 	SERIF, SANS_SERIF, CURSIVE, FANTASY, MONOSPACE, MALE, FEMALE, CHILD,
-	MIX,
+	MIX, UNDERLINE, OVERLINE, LINE_THROUGH, BLINK,
 
 	LAST_KNOWN
 };
@@ -349,7 +349,11 @@ static struct {
 	{ "male", SLEN("male") },
 	{ "female", SLEN("female") },
 	{ "child", SLEN("child") },
-	{ "mix", SLEN("mix") }
+	{ "mix", SLEN("mix") },
+	{ "underline", SLEN("underline") },
+	{ "overline", SLEN("overline") },
+	{ "line-through", SLEN("line-through") },
+	{ "blink", SLEN("blink") }
 };
 
 #endif
