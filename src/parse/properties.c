@@ -2639,8 +2639,15 @@ css_error parse_font_family(css_language *c,
 							break;
 						}
 
-						/** \todo idents must not 
-						 * match generic families */
+						/* idents must not match 
+						 * generic families */
+						if (token != NULL && token->type == CSS_TOKEN_IDENT && 
+								(token->ilower == c->strings[SERIF] || 
+								token->ilower == c->strings[SANS_SERIF] || 
+								token->ilower == c->strings[CURSIVE] || 
+								token->ilower == c->strings[FANTASY] || 
+								token->ilower == c->strings[MONOSPACE]))
+							return CSS_INVALID;
 						token = parserutils_vector_iterate(
 							vector, &temp_ctx);
 					}
@@ -2714,7 +2721,6 @@ css_error parse_font_family(css_language *c,
 
 		while (token != NULL) {
 			if (token->type == CSS_TOKEN_IDENT) {
-				/** \todo need to build string from idents */
 				const parserutils_hash_entry *name = 
 						token->idata;
 			
@@ -2733,22 +2739,82 @@ css_error parse_font_family(css_language *c,
 						c->strings[MONOSPACE]) {
 					opv = FONT_FAMILY_MONOSPACE;
 				} else {
+					uint16_t len = token->idata->len;
+					const css_token *temp_token = token;
+					parserutils_error perror;
+
+					temp_ctx = *ctx;
+
 					opv = FONT_FAMILY_IDENT_LIST;
 
-					/* Skip past [ IDENT* S* ]* */
-					while (token != NULL) {
-						token = parserutils_vector_peek(
-								vector, *ctx);
-						if (token != NULL && 
-							token->type != 
+					/* Build string from idents */
+					while (temp_token != NULL) {
+						temp_token = parserutils_vector_peek(
+								vector, temp_ctx);
+						if (temp_token != NULL && 
+							temp_token->type != 
 							CSS_TOKEN_IDENT &&
-								token->type != 
+								temp_token->type != 
 								CSS_TOKEN_S) {
 							break;
 						}
 
+						if (temp_token != NULL && temp_token->type == CSS_TOKEN_IDENT) {
+							len += temp_token->idata->len;
+						} else if (temp_token != NULL) {
+							len += 1;
+						}
+
+						temp_token = parserutils_vector_iterate(
+								vector, &temp_ctx);
+					}
+
+					uint8_t buf[len];
+					uint8_t *p = buf;
+
+					memcpy(p, token->idata->data, token->idata->len);
+					p += token->idata->len;
+
+					while (token != NULL) {
+						token = parserutils_vector_peek(
+								vector, *ctx);
+						if (token != NULL &&
+							token->type != 
+							CSS_TOKEN_IDENT &&
+								token->type !=
+								CSS_TOKEN_S) {
+							break;
+						}
+
+						if (token != NULL && 
+							token->type == 
+								CSS_TOKEN_IDENT) {
+							memcpy(p,
+								token->idata->data,
+								token->idata->len);
+							p += token->idata->len;
+						} else if (token != NULL) {
+							*p++ = ' ';
+						}
+
 						token = parserutils_vector_iterate(
-								vector, ctx);
+							vector, ctx);
+					}
+
+					/* Strip trailing whitespace */
+					while (p > buf && p[-1] == ' ')
+						p--;
+
+					/* Insert into hash, if it's different
+					 * from the name we already have */
+					if (p - buf != name->len || 
+						memcmp(buf, name->data, 
+							name->len) != 0) {
+						perror = parserutils_hash_insert(
+							c->sheet->dictionary, 
+							buf, len, &name);
+						if (perror != PARSERUTILS_OK)
+							return css_error_from_parserutils_error(perror);
 					}
 				}
 
