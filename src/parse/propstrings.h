@@ -68,6 +68,7 @@ enum {
 	DEFAULT, POINTER, MOVE, E_RESIZE, NE_RESIZE, NW_RESIZE, N_RESIZE,
 	SE_RESIZE, SW_RESIZE, S_RESIZE, W_RESIZE, TEXT, WAIT, HELP, PROGRESS,
 	SERIF, SANS_SERIF, CURSIVE, FANTASY, MONOSPACE, MALE, FEMALE, CHILD,
+	MIX,
 
 	LAST_KNOWN
 };
@@ -347,7 +348,8 @@ static struct {
 	{ "monospace", SLEN("monospace") },
 	{ "male", SLEN("male") },
 	{ "female", SLEN("female") },
-	{ "child", SLEN("child") }
+	{ "child", SLEN("child") },
+	{ "mix", SLEN("mix") }
 };
 
 #endif

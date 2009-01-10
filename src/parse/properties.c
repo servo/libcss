@@ -4462,12 +4462,78 @@ css_error parse_play_during(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	/** \todo play-during */
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	uint32_t required_size;
+	const parserutils_hash_entry *uri;
 
-	UNUSED(c);
-	UNUSED(vector);
-	UNUSED(ctx);
-	UNUSED(result);
+	/* URI [ IDENT(mix) || IDENT(repeat) ]? | IDENT(auto,none,inherit) */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			token->type != CSS_TOKEN_URI))
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT) {
+		if (token->ilower == c->strings[INHERIT]) {
+			flags |= FLAG_INHERIT;
+		} else if (token->ilower == c->strings[NONE]) {
+			value = PLAY_DURING_NONE;
+		} else if (token->ilower == c->strings[AUTO]) {
+			value = PLAY_DURING_AUTO;
+		} else
+			return CSS_INVALID;
+	} else {
+		int flags;
+
+		value = PLAY_DURING_URI;
+		uri = token->idata;
+
+		for (flags = 0; flags < 2; flags++) {
+			token = parserutils_vector_peek(vector, *ctx);
+			if (token != NULL && token->type == CSS_TOKEN_IDENT) {
+				if (token->ilower == c->strings[MIX]) {
+					if ((value & PLAY_DURING_MIX) == 0)
+						value |= PLAY_DURING_MIX;
+					else
+						return CSS_INVALID;
+				} else if (token->ilower == 
+						c->strings[REPEAT]) {
+					if ((value & PLAY_DURING_REPEAT) == 0)
+						value |= PLAY_DURING_REPEAT;
+					else
+						return CSS_INVALID;
+				} else
+					return CSS_INVALID;
+
+				parserutils_vector_iterate(vector, ctx);
+			}
+		}
+	}
+
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK)
+		return error;
+
+	opv = buildOPV(OP_PLAY_DURING, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == PLAY_DURING_URI)
+		required_size += sizeof(parserutils_hash_entry *);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK)
+		return error;
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == PLAY_DURING_URI) {
+		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
+				&uri, sizeof(parserutils_hash_entry *));
+	}
 
 	return CSS_OK;
 }
