@@ -6399,9 +6399,11 @@ css_error parse_colour_specifier(css_language *c,
 		uint32_t *result)
 {
 	const css_token *token;
+	uint8_t r = 0, g = 0, b = 0;
 
 	UNUSED(c);
-	UNUSED(result);
+
+	consumeWhitespace(vector, ctx);
 
 	/* IDENT(<colour name>) | HASH(rgb | rrggbb) |
 	 * FUNCTION(rgb) [ [ NUMBER | PERCENTAGE ] ',' ] {3} ')'
@@ -6409,14 +6411,73 @@ css_error parse_colour_specifier(css_language *c,
 	 * For quirks, NUMBER | DIMENSION | IDENT, too
 	 * I.E. "123456" -> NUMBER, "1234f0" -> DIMENSION, "f00000" -> IDENT
 	 */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			token->type != CSS_TOKEN_HASH &&
+			token->type != CSS_TOKEN_FUNCTION))
+		return CSS_INVALID;
 
-	/** \todo Parse colours */
+	if (token->type == CSS_TOKEN_IDENT) {
+		/** \todo Parse colour names */
+	} else if (token->type == CSS_TOKEN_HASH) {
+		if (token->idata->len == 3) {
+			r = charToHex(token->idata->data[0]);
+			g = charToHex(token->idata->data[1]);
+			b = charToHex(token->idata->data[2]);
 
-	/* For now, consume everything up to the end of the declaration or !, 
- 	 * whichever comes first */
-	while ((token = parserutils_vector_peek(vector, *ctx)) != NULL &&
-			tokenIsChar(token, '!') == false)
-		parserutils_vector_iterate(vector, ctx);
+			r |= (r << 4);
+			g |= (g << 4);
+			b |= (b << 4);
+		} else if (token->idata->len == 6) {
+			r = (charToHex(token->idata->data[0]) << 4);
+			r |= charToHex(token->idata->data[1]);
+			g = (charToHex(token->idata->data[2]) << 4);
+			g |= charToHex(token->idata->data[3]);
+			b = (charToHex(token->idata->data[4]) << 4);
+			b |= charToHex(token->idata->data[5]);
+		} else
+			return CSS_INVALID;
+	} else if (token->type == CSS_TOKEN_FUNCTION) {
+		if (token->ilower == c->strings[RGB]) {
+			css_token_type valid = CSS_TOKEN_NUMBER;
+
+			for (int i = 0; i < 3; i++) {
+				consumeWhitespace(vector, ctx);
+
+				token = parserutils_vector_peek(vector, *ctx);
+				if (token == NULL || (token->type != 
+						CSS_TOKEN_NUMBER && 
+						token->type != 
+						CSS_TOKEN_PERCENTAGE))
+					return CSS_INVALID;
+
+				if (i == 0)
+					valid = token->type;
+				else if (token->type != valid)
+					return CSS_INVALID;
+
+				/** \todo extract values */
+
+				parserutils_vector_iterate(vector, ctx);
+
+				consumeWhitespace(vector, ctx);
+
+				token = parserutils_vector_peek(vector, *ctx);
+				if (token == NULL)
+					return CSS_INVALID;
+
+				if (i != 2 && tokenIsChar(token, ','))
+					parserutils_vector_iterate(vector, ctx);
+				else if (i == 2 && tokenIsChar(token, ')'))
+					parserutils_vector_iterate(vector, ctx);
+				else
+					return CSS_INVALID;
+			}
+		} else
+			return CSS_INVALID;
+	}
+
+	*result = (r << 24) | (g << 16) | (b << 8);
 
 	return CSS_OK;
 }
