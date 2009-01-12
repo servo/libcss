@@ -199,8 +199,11 @@ Opcodes
 07 - border-spacing
 	<value> (14bits) :
 		bits 8-13: MBZ
-		bits 0-7 : 00000000 => two lengths follow,
-			   other    => Reserved for future expansion.	
+		bits 0-7 :
+			bit 7: set => two lengths follow
+					bits 0-6: MBZ
+			       clear => Reserved for future expansion.
+			       		bits 0-6: MBZ
 
 08 - border-{top,right,bottom,left}-color
 	<value> (14bits) :
@@ -210,9 +213,11 @@ Opcodes
 			01 => right
 			10 => bottom
 			11 => left
-		bits 0-7  : 00000000 => colour follows,
-			    00000001 => transparent,
-			    other    => Reserved for future expansion.
+		bit 7 set => colour follows.
+			bits 0-6: MBZ
+		bit 7 clear => keyword colour:
+			bits 1-6: MBZ
+			bit 0   : clear => transparent, set => rffe.
 
 09 - border-{top,right,bottom,left}-style
 	<value> (14bits) :
@@ -309,8 +314,10 @@ Opcodes
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7: 
-			00000000 => colour follows,
-			other    => Reserved for future expansion.
+			bit 7: set => colour follows.
+					bits 0-6: MBZ.
+			       clear => Reserved for future expansion.
+			       		bits 0-6: MBZ.
 
 10 - content
 	<value> (14bits) :
@@ -510,9 +517,9 @@ Opcodes
 					  0000101 => monospace,
 					  other   => rffe.
 
-	If the value indicates that data follows, then there is a parameter 
-	list. Each item is preceded by a <value> word which declares the type 
-	of the next item. The list is terminated by a word with	all bits clear.
+	In all cases, there is a parameter list. Each item is preceded by a 
+	<value> word which declares the type of the next item. The list is 
+	terminated by a word with all bits clear.
 
 1c - font-size
 	<value> (14bits) :
@@ -679,22 +686,28 @@ Opcodes
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
-			00000000 => length or percentage follows,
-			other    => Reserved for future expansion.
+			bit 7: set => length or percentage follows
+					bits 0-6: MBZ
+			       clear => Reserved for future expansion
+			       		bits 0-6: MBZ
 
 2b - min-width
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
-			00000000 => length or percentage follows,
-			other    => Reserved for future expansion.
+			bit 7: set => length or percentage follows
+					bits 0-6: MBZ
+			       clear => Reserved for future expansion
+			       		bits 0-6: MBZ
 
 2c - orphans
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
-			00000000 => integer follows,
-			other    => Reserved for future expansion.
+			bit 7: set => integer follows
+					bits 0-6: MBZ
+			       clear => Reserved for future expansion
+			       		bits 0-6: MBZ
 
 2d - outline-color
 	<value> (14bits) :
@@ -750,9 +763,11 @@ Opcodes
 			01 => right,
 			10 => bottom,
 			11 => left
-		bits 0-7  :
-			00000000 => length or percentage follows,
-			other    => Reserved for future expansion.
+		bits 0-7 :
+			bit 7: set => length or percentage follows
+					bits 0-6: MBZ
+			       clear => Reserved for future expansion
+			       		bits 0-6: MBZ
 
 32 - page-break-after
 	<value> (14bits) :
@@ -782,22 +797,28 @@ Opcodes
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
-			00000000 => time or percentage follows,
-			other    => Reserved for future expansion.
+			bit 7: set => time or percentage follows
+					bits 0-6: MBZ
+			       clear => Reserved for future expansion
+			       		bits 0-6: MBZ
 
 36 - pause-before
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
-			00000000 => time or percentage follows,
-			other    => Reserved for future expansion.
+			bit 7: set => time or percentage follows
+					bits 0-6: MBZ
+			       clear => Reserved for future expansion
+			       		bits 0-6: MBZ
 
 37 - pitch-range
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
-			00000000 => number follows,
-			other    => Reserved for future expansion.
+			bit 7: set => number follows
+					bits 0-6: MBZ
+			       clear => Reserved for future expansion
+			       		bits 0-6: MBZ
 
 38 - pitch
 	<value> (14bits) :
@@ -853,8 +874,10 @@ Opcodes
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
-			00000000 => number follows,
-			other    => Reserved for future expansion.
+			bit 7: set => number follows
+					bits 0-6: MBZ
+			       clear => Reserved for future expansion
+			       		bits 0-6: MBZ
 
 3d - right
 	<value> (14bits) :
@@ -911,8 +934,10 @@ Opcodes
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
-			00000000 => number follows,
-			other    => Reserved for future expansion.
+			bit 7: set => number follows
+					bits 0-6: MBZ
+			       clear => Reserved for future expansion
+			       		bits 0-6: MBZ
 
 44 - table-layout
 	<value> (14bits) :
@@ -945,8 +970,10 @@ Opcodes
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
-			00000000 => length or percentage follows,
-			other    => Reserved for future expansion.
+			bit 7: set => length or percentage follows
+					bits 0-6: MBZ
+			       clear => Reserved for future expansion
+			       		bits 0-6: MBZ
 
 48 - text-transform
 	<value> (14bits) :
@@ -1010,10 +1037,9 @@ Opcodes
 					  0000011 => child,
 					  other   => rffe.
 
-	If the value indicates that a string is present, then there is a 
-	parameter list. Each item is preceded by a <value> word which declares
-	the type of the next item. The list is terminated by a word with
-	all bits clear.
+	In all cases, there is a parameter list. Each item is preceded by a 
+	<value> word which declares the type of the next item. The list is 
+	terminated by a word with all bits clear.
 	
 4e - volume
 	<value> (14bits) :
@@ -1045,8 +1071,10 @@ Opcodes
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
-			00000000 => integer follows,
-			other    => Reserved for future expansion.
+			bit 7: set => integer follows
+					bits 0-6: MBZ
+			       clear => Reserved for future expansion
+			       		bits 0-6: MBZ
 
 51 - width
 	<value> (14bits) :

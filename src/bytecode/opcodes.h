@@ -75,12 +75,12 @@ enum op_border_collapse {
 };
 
 enum op_border_spacing {
-	BORDER_SPACING_SET		= 0x0000,
+	BORDER_SPACING_SET		= 0x0080,
 };
 
 enum op_border_color {
-	BORDER_COLOR_SET		= 0x0000,
-	BORDER_COLOR_TRANSPARENT	= 0x0001,
+	BORDER_COLOR_SET		= 0x0080,
+	BORDER_COLOR_TRANSPARENT	= 0x0000,
 };
 
 enum op_border_style {
@@ -122,6 +122,7 @@ enum op_clear {
 };
 
 enum op_clip {
+	CLIP_SHAPE_MASK			= 0x0087,
 	CLIP_SHAPE_RECT			= 0x0080,
 
 	CLIP_RECT_TOP_AUTO		= 0x0008,
@@ -133,7 +134,7 @@ enum op_clip {
 };
 
 enum op_color {
-	COLOR_SET			= 0x0000,
+	COLOR_SET			= 0x0080,
 };
 
 enum op_content {
@@ -361,15 +362,15 @@ enum op_max_width {
 };
 
 enum op_min_height {
-	MIN_HEIGHT_SET			= 0x0000,
+	MIN_HEIGHT_SET			= 0x0080,
 };
 
 enum op_min_width {
-	MIN_WIDTH_SET			= 0x0000,
+	MIN_WIDTH_SET			= 0x0080,
 };
 
 enum op_orphans {
-	ORPHANS_SET			= 0x0000,
+	ORPHANS_SET			= 0x0080,
 };
 
 enum op_outline_color {
@@ -405,7 +406,7 @@ enum op_overflow {
 };
 
 enum op_padding {
-	PADDING_SET			= 0x0000,
+	PADDING_SET			= 0x0080,
 };
 
 enum op_page_break_after {
@@ -430,15 +431,15 @@ enum op_page_break_inside {
 };
 
 enum op_pause_after {
-	PAUSE_AFTER_SET			= 0x0000,
+	PAUSE_AFTER_SET			= 0x0080,
 };
 
 enum op_pause_before {
-	PAUSE_BEFORE_SET		= 0x0000,
+	PAUSE_BEFORE_SET		= 0x0080,
 };
 
 enum op_pitch_range {
-	PITCH_RANGE_SET			= 0x0000,
+	PITCH_RANGE_SET			= 0x0080,
 };
 
 enum op_pitch {
@@ -474,7 +475,7 @@ enum op_quotes {
 };
 
 enum op_richness {
-	RICHNESS_SET			= 0x0000,
+	RICHNESS_SET			= 0x0080,
 };
 
 enum op_right {
@@ -517,7 +518,7 @@ enum op_speech_rate {
 };
 
 enum op_stress {
-	STRESS_SET			= 0x0000,
+	STRESS_SET			= 0x0080,
 };
 
 enum op_table_layout {
@@ -542,7 +543,7 @@ enum op_text_decoration {
 };
 
 enum op_text_indent {
-	TEXT_INDENT_SET			= 0x0000,
+	TEXT_INDENT_SET			= 0x0080,
 };
 
 enum op_text_transform {
@@ -615,7 +616,7 @@ enum op_white_space {
 };
 
 enum op_widows {
-	WIDOWS_SET			= 0x0000,
+	WIDOWS_SET			= 0x0080,
 };
 
 enum op_width {
