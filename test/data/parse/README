@@ -25,7 +25,8 @@ Format of rule list
 Type corresponds to css_rule_type. Consult the library sources for the values.
 
 Bytecode may be split over multiple lines for readability. All bytecode is
-associated with the most-recently-declared rule.
+associated with the most-recently-declared rule. Consult the bytecode
+documentation for what the hexnums should be representing.
 
 Example
 -------
