@@ -6502,18 +6502,96 @@ css_error parse_unit_specifier(css_language *c,
 		fixed *length, uint32_t *unit)
 {
 	const css_token *token;
+	fixed num;
+	size_t consumed = 0;
+	css_string tmp;
 
 	UNUSED(c);
-	UNUSED(length);
-	UNUSED(unit);
 
-	/** \todo Parse units */
+	consumeWhitespace(vector, ctx);
 
-	/* For now, consume everything up to the end of the declaration or !, 
- 	 * whichever comes first */
-	while ((token = parserutils_vector_peek(vector, *ctx)) != NULL &&
-			tokenIsChar(token, '!') == false)
-		parserutils_vector_iterate(vector, ctx);
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_DIMENSION &&
+			token->type != CSS_TOKEN_PERCENTAGE))
+		return CSS_INVALID;
+
+	tmp.len = token->idata->len;
+	tmp.data = (uint8_t *) token->idata->data;
+	num = number_from_css_string(&tmp, false, &consumed);
+
+	if (token->type == CSS_TOKEN_DIMENSION) {
+		if (consumed == token->idata->len) {
+			/** \todo In quirks mode, non-zero units should be 
+			 * treated as px too */
+			if (num != 0)
+				return CSS_INVALID;
+			*unit = UNIT_PX;
+		} else if (token->idata->len - consumed == 4) {
+			if (strncasecmp((char *) token->idata->data + consumed, 
+					"grad", 4) == 0)
+				*unit = UNIT_GRAD;
+			else
+				return CSS_INVALID;
+		} else if (token->idata->len - consumed == 3) {
+			if (strncasecmp((char *) token->idata->data + consumed,
+					"kHz", 3) == 0)
+				*unit = UNIT_KHZ;
+			else if (strncasecmp((char *) token->idata->data + 
+					consumed, "deg", 3) == 0)
+				*unit = UNIT_DEG;
+			else if (strncasecmp((char *) token->idata->data + 
+					consumed, "rad", 3) == 0)
+				*unit = UNIT_RAD;
+			else
+				return CSS_INVALID;
+		} else if (token->idata->len - consumed == 2) {
+			if (strncasecmp((char *) token->idata->data + consumed,
+					"Hz", 2) == 0)
+				*unit = UNIT_HZ;
+			else if (strncasecmp((char *) token->idata->data + 
+					consumed, "ms", 2) == 0)
+				*unit = UNIT_MS;
+			else if (strncasecmp((char *) token->idata->data + 
+					consumed, "px", 2) == 0)
+				*unit = UNIT_PX;
+			else if (strncasecmp((char *) token->idata->data + 
+					consumed, "ex", 2) == 0)
+				*unit = UNIT_EX;
+			else if (strncasecmp((char *) token->idata->data + 
+					consumed, "em", 2) == 0)
+				*unit = UNIT_EM;
+			else if (strncasecmp((char *) token->idata->data + 
+					consumed, "in", 2) == 0)
+				*unit = UNIT_IN;
+			else if (strncasecmp((char *) token->idata->data + 
+					consumed, "cm", 2) == 0)
+				*unit = UNIT_CM;
+			else if (strncasecmp((char *) token->idata->data + 
+					consumed, "mm", 2) == 0)
+				*unit = UNIT_MM;
+			else if (strncasecmp((char *) token->idata->data + 
+					consumed, "pt", 2) == 0)
+				*unit = UNIT_PT;
+			else if (strncasecmp((char *) token->idata->data + 
+					consumed, "pc", 2) == 0)
+				*unit = UNIT_PC;
+			else
+				return CSS_INVALID;
+		} else if (token->idata->len - consumed == 1) {
+			if (strncasecmp((char *) token->idata->data + consumed,
+					"s", 1) == 0)
+				*unit = UNIT_S;
+			else
+				return CSS_INVALID;
+		} else
+			return CSS_INVALID;
+	} else {
+		if (consumed != token->idata->len)
+			return CSS_INVALID;
+		*unit = UNIT_PCT;
+	}
+
+	*length = num;
 
 	return CSS_OK;
 }
