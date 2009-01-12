@@ -13,7 +13,7 @@
 
 #include "testutils.h"
 
-#define ITERATIONS (10)
+#define ITERATIONS (1)
 #define DUMP_TOKENS (0)
 
 
@@ -107,6 +107,10 @@ static void printToken(const css_token *token)
 		break;
 	case CSS_TOKEN_EOF:
 		printf("EOF");
+		break;
+
+	case CSS_TOKEN_LAST_INTERN_LOWER:
+	case CSS_TOKEN_LAST_INTERN:
 		break;
 	}
 
