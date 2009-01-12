@@ -1,0 +1,48 @@
+Parser testcases
+================
+
+Format
+------
+
+#data
+<css source data>
+#errors
+<list of expected errors, with line/col offsets> (ignored at present)
+#expected
+<rule list, as below>
+#reset
+
+Format of rule list
+-------------------
+
+  line     ::= rule | bytecode
+  rule     ::= '| ' type ' '+ name
+  name     ::= .+
+  type     ::= [0-9]+
+  bytecode ::= '|  ' ' '* hexnum (' '+ hexnum)*
+  hexnum   ::= '0x' [0-9a-fA-F]+
+
+Type corresponds to css_rule_type. Consult the library sources for the values.
+
+Bytecode may be split over multiple lines for readability. All bytecode is
+associated with the most-recently-declared rule.
+
+Example
+-------
+
+#data
+* { color: #ff0000 }
+#errors
+#expected
+| 1 *
+|   0x0200000f 0xff000000
+#reset
+
+TODO
+----
+
+  + Permit nesting of rules (for nested block support)
+  + There's no way of flagging a pointer in the bytecode (ideally, this will
+    be defined in such a way that we'll be able to validate the data pointed
+    to, too)
+
