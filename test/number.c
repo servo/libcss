@@ -115,7 +115,7 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 	UNUSED(exp);
 	UNUSED(explen);
 
-	result = number_from_css_string(&in, &consumed);
+	result = number_from_css_string(&in, false, &consumed);
 
 	snprintf(buf, sizeof buf, "%.3f", FIXTOFLT(result));
 
