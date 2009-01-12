@@ -6426,6 +6426,12 @@ css_error parse_colour_specifier(css_language *c,
 			css_token_type valid = CSS_TOKEN_NUMBER;
 
 			for (int i = 0; i < 3; i++) {
+				css_string tmp;
+				fixed num;
+				size_t consumed = 0;
+				uint8_t *component = i == 0 ? &r 
+							    : i == 1 ? &b : &g;
+
 				consumeWhitespace(vector, ctx);
 
 				token = parserutils_vector_peek(vector, *ctx);
@@ -6440,7 +6446,32 @@ css_error parse_colour_specifier(css_language *c,
 				else if (token->type != valid)
 					return CSS_INVALID;
 
-				/** \todo extract values */
+				tmp.len = token->idata->len;
+				tmp.data = (uint8_t *) token->idata->data;
+				num = number_from_css_string(&tmp, 
+						true, &consumed);
+				if (consumed != token->idata->len)
+					return CSS_INVALID;
+
+				if (valid == CSS_TOKEN_NUMBER) {
+					int32_t intval = FIXTOINT(num);
+
+					if (intval > 255)
+						*component = 255;
+					else if (intval < 0)
+						*component = 0;
+					else
+						*component = intval;
+				} else {
+					int32_t intval = FIXTOINT(num);
+
+					if (intval > 100)
+						*component = 255;
+					else if (intval < 0)
+						*component = 0;
+					else
+						*component = intval * 255 / 100;
+				}
 
 				parserutils_vector_iterate(vector, ctx);
 
