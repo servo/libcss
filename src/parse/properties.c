@@ -2619,17 +2619,17 @@ css_error parse_font_family(css_language *c,
 						token = parserutils_vector_peek(
 								vector, 
 								temp_ctx);
-						if (token != NULL && 
-							token->type != 
+						if (token == NULL ||
+							(token->type != 
 							CSS_TOKEN_IDENT &&
 								token->type != 
-								CSS_TOKEN_S) {
+								CSS_TOKEN_S)) {
 							break;
 						}
 
 						/* idents must not match 
 						 * generic families */
-						if (token != NULL && token->type == CSS_TOKEN_IDENT && 
+						if (token->type == CSS_TOKEN_IDENT && 
 								(token->ilower == c->strings[SERIF] || 
 								token->ilower == c->strings[SANS_SERIF] || 
 								token->ilower == c->strings[CURSIVE] || 
@@ -2742,17 +2742,18 @@ css_error parse_font_family(css_language *c,
 					while (temp_token != NULL) {
 						temp_token = parserutils_vector_peek(
 								vector, temp_ctx);
-						if (temp_token != NULL && 
-							temp_token->type != 
+						if (temp_token == NULL || 
+							(temp_token->type != 
 							CSS_TOKEN_IDENT &&
 								temp_token->type != 
-								CSS_TOKEN_S) {
+								CSS_TOKEN_S)) {
 							break;
 						}
 
-						if (temp_token != NULL && temp_token->type == CSS_TOKEN_IDENT) {
+						if (temp_token->type == 
+							CSS_TOKEN_IDENT) {
 							len += temp_token->idata->len;
-						} else if (temp_token != NULL) {
+						} else {
 							len += 1;
 						}
 
@@ -2769,22 +2770,21 @@ css_error parse_font_family(css_language *c,
 					while (token != NULL) {
 						token = parserutils_vector_peek(
 								vector, *ctx);
-						if (token != NULL &&
-							token->type != 
+						if (token == NULL ||
+							(token->type != 
 							CSS_TOKEN_IDENT &&
 								token->type !=
-								CSS_TOKEN_S) {
+								CSS_TOKEN_S)) {
 							break;
 						}
 
-						if (token != NULL && 
-							token->type == 
+						if (token->type == 
 								CSS_TOKEN_IDENT) {
 							memcpy(p,
 								token->idata->data,
 								token->idata->len);
 							p += token->idata->len;
-						} else if (token != NULL) {
+						} else {
 							*p++ = ' ';
 						}
 
