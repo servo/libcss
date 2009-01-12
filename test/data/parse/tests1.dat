@@ -1,0 +1,23 @@
+#data
+* { }
+#errors
+#expected
+| 1 *
+#reset
+
+#data
+* { color: #ff0000 }
+#errors
+#expected
+| 1 *
+|   0x0200000f 0xff000000
+#reset
+
+#data
+* { color: inherit }
+#errors
+#expected
+| 1 *
+|   0x0000080f
+#reset
+
