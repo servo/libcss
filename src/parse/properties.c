@@ -1622,14 +1622,11 @@ css_error parse_counter_increment(css_language *c,
 				const css_string temp = { token->ilower->len,
 					(uint8_t *) token->ilower->data };
 				size_t consumed = 0;
-				int32_t intpart = 0;
 
 				increment = number_from_css_string(&temp,
-						&consumed);
-				intpart = FIXTOINT(increment);
+						true, &consumed);
 
-				if (consumed != token->ilower->len ||
-						increment != intpart)
+				if (consumed != token->ilower->len)
 					return CSS_INVALID;
 
 				parserutils_vector_iterate(vector, &temp_ctx);
@@ -1701,14 +1698,11 @@ css_error parse_counter_increment(css_language *c,
 				const css_string temp = { token->ilower->len,
 					(uint8_t *) token->ilower->data };
 				size_t consumed = 0;
-				int32_t intpart = 0;
 
 				increment = number_from_css_string(&temp,
-						&consumed);
-				intpart = FIXTOINT(increment);
+						true, &consumed);
 
-				if (consumed != token->ilower->len ||
-						increment != intpart)
+				if (consumed != token->ilower->len)
 					return CSS_INVALID;
 
 				parserutils_vector_iterate(vector, ctx);
@@ -1793,14 +1787,11 @@ css_error parse_counter_reset(css_language *c,
 				const css_string temp = { token->ilower->len,
 					(uint8_t *) token->ilower->data };
 				size_t consumed = 0;
-				int32_t intpart = 0;
 
 				increment = number_from_css_string(&temp,
-						&consumed);
-				intpart = FIXTOINT(increment);
+						true, &consumed);
 
-				if (consumed != token->ilower->len ||
-						increment != intpart)
+				if (consumed != token->ilower->len)
 					return CSS_INVALID;
 
 				parserutils_vector_iterate(vector, &temp_ctx);
@@ -1872,14 +1863,11 @@ css_error parse_counter_reset(css_language *c,
 				const css_string temp = { token->ilower->len,
 					(uint8_t *) token->ilower->data };
 				size_t consumed = 0;
-				int32_t intpart = 0;
 
 				increment = number_from_css_string(&temp,
-						&consumed);
-				intpart = FIXTOINT(increment);
+						true, &consumed);
 
-				if (consumed != token->ilower->len ||
-						increment != intpart)
+				if (consumed != token->ilower->len)
 					return CSS_INVALID;
 
 				parserutils_vector_iterate(vector, ctx);
@@ -3100,12 +3088,11 @@ css_error parse_font_weight(css_language *c,
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len, 
 				(uint8_t *) token->ilower };
-		fixed num = number_from_css_string(&tmp, &consumed);
-		int32_t intpart = FIXTOINT(num);
-		/* Invalid if there are trailing characters or it was a float */
-		if (consumed != token->ilower->len || num != intpart)
+		fixed num = number_from_css_string(&tmp, true, &consumed);
+		/* Invalid if there are trailing characters */
+		if (consumed != token->ilower->len)
 			return CSS_INVALID;
-		switch (intpart) {
+		switch (FIXTOINT(num)) {
 		case 100: value = FONT_WEIGHT_100; break;
 		case 200: value = FONT_WEIGHT_200; break;
 		case 300: value = FONT_WEIGHT_300; break;
@@ -3364,7 +3351,7 @@ css_error parse_line_height(css_language *c,
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len, 
 				(uint8_t *) token->ilower };
-		length = number_from_css_string(&tmp, &consumed);
+		length = number_from_css_string(&tmp, false, &consumed);
 		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
@@ -3854,10 +3841,9 @@ css_error parse_orphans(css_language *c,
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len,
 				(uint8_t *) token->ilower };
-		num = number_from_css_string(&tmp, &consumed);
-		int32_t intpart = FIXTOINT(num);
-		/* Invalid if there are trailing characters or it was a float */
-		if (consumed != token->ilower->len || num != intpart)
+		num = number_from_css_string(&tmp, true, &consumed);
+		/* Invalid if there are trailing characters */
+		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
 		value = ORPHANS_SET;
@@ -4353,7 +4339,7 @@ css_error parse_pitch_range(css_language *c,
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len,
 				(uint8_t *) token->ilower };
-		num = number_from_css_string(&tmp, &consumed);
+		num = number_from_css_string(&tmp, false, &consumed);
 		/* Invalid if there are trailing characters */
 		if (consumed != token->ilower->len)
 			return CSS_INVALID;
@@ -4756,7 +4742,7 @@ css_error parse_richness(css_language *c,
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len,
 				(uint8_t *) token->ilower };
-		num = number_from_css_string(&tmp, &consumed);
+		num = number_from_css_string(&tmp, false, &consumed);
 		/* Invalid if there are trailing characters */
 		if (consumed != token->ilower->len)
 			return CSS_INVALID;
@@ -5068,7 +5054,7 @@ css_error parse_speech_rate(css_language *c,
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len,
 				(uint8_t *) token->ilower };
-		num = number_from_css_string(&tmp, &consumed);
+		num = number_from_css_string(&tmp, false, &consumed);
 		/* Invalid if there are trailing characters */
 		if (consumed != token->ilower->len)
 			return CSS_INVALID;
@@ -5126,7 +5112,7 @@ css_error parse_stress(css_language *c,
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len,
 				(uint8_t *) token->ilower };
-		num = number_from_css_string(&tmp, &consumed);
+		num = number_from_css_string(&tmp, false, &consumed);
 		/* Invalid if there are trailing characters */
 		if (consumed != token->ilower->len)
 			return CSS_INVALID;
@@ -6026,7 +6012,7 @@ css_error parse_volume(css_language *c,
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len,
 				(uint8_t *) token->ilower };
-		length = number_from_css_string(&tmp, &consumed);
+		length = number_from_css_string(&tmp, false, &consumed);
 		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
@@ -6147,10 +6133,9 @@ css_error parse_widows(css_language *c,
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len,
 				(uint8_t *) token->ilower };
-		num = number_from_css_string(&tmp, &consumed);
-		int32_t intpart = FIXTOINT(num);
-		/* Invalid if there are trailing characters or it was a float */
-		if (consumed != token->ilower->len || num != intpart)
+		num = number_from_css_string(&tmp, true, &consumed);
+		/* Invalid if there are trailing characters */
+		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
 		value = WIDOWS_SET;
@@ -6339,10 +6324,9 @@ css_error parse_z_index(css_language *c,
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len,
 				(uint8_t *) token->ilower };
-		num = number_from_css_string(&tmp, &consumed);
-		int32_t intpart = FIXTOINT(num);
-		/* Invalid if there are trailing characters or it was a float */
-		if (consumed != token->ilower->len || num != intpart)
+		num = number_from_css_string(&tmp, true, &consumed);
+		/* Invalid if there are trailing characters */
+		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
 		value = Z_INDEX_SET;

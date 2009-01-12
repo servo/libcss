@@ -30,7 +30,7 @@
 #endif
 
 static inline fixed number_from_css_string(const css_string *string,
-		size_t *consumed)
+		bool int_only, size_t *consumed)
 {
 	size_t len;
 	const uint8_t *ptr;
@@ -89,7 +89,8 @@ static inline fixed number_from_css_string(const css_string *string,
 	}
 
 	/* And fracpart, again, assuming base 10 */
-	if (len > 1 && ptr[0] == '.' && ('0' <= ptr[1] && ptr[1] <= '9')) {
+	if (int_only == false && len > 1 && ptr[0] == '.' && 
+			('0' <= ptr[1] && ptr[1] <= '9')) {
 		ptr++;
 		len--;
 
