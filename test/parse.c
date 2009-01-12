@@ -11,7 +11,7 @@
 
 #include "testutils.h"
 
-#define ITERATIONS (10)
+#define ITERATIONS (1)
 #define DUMP_EVENTS (0)
 
 #if DUMP_EVENTS
