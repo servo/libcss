@@ -417,7 +417,6 @@ css_error emitToken(css_lexer *lexer, css_token_type type,
 		t->data.len -= 1;
 		break;
 	case CSS_TOKEN_DIMENSION:
-		/** \todo Do we want to separate the value from the units? */
 		break;
 	case CSS_TOKEN_URI:
 		/* Strip the "url(" from the start */
