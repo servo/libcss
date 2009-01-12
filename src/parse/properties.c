@@ -6431,6 +6431,7 @@ css_error parse_colour_specifier(css_language *c,
 				size_t consumed = 0;
 				uint8_t *component = i == 0 ? &r 
 							    : i == 1 ? &b : &g;
+				int32_t intval;
 
 				consumeWhitespace(vector, ctx);
 
@@ -6449,29 +6450,24 @@ css_error parse_colour_specifier(css_language *c,
 				tmp.len = token->idata->len;
 				tmp.data = (uint8_t *) token->idata->data;
 				num = number_from_css_string(&tmp, 
-						true, &consumed);
+						valid == CSS_TOKEN_NUMBER, 
+						&consumed);
 				if (consumed != token->idata->len)
 					return CSS_INVALID;
 
 				if (valid == CSS_TOKEN_NUMBER) {
-					int32_t intval = FIXTOINT(num);
-
-					if (intval > 255)
-						*component = 255;
-					else if (intval < 0)
-						*component = 0;
-					else
-						*component = intval;
+					intval = FIXTOINT(num);
 				} else {
-					int32_t intval = FIXTOINT(num);
-
-					if (intval > 100)
-						*component = 255;
-					else if (intval < 0)
-						*component = 0;
-					else
-						*component = intval * 255 / 100;
+					intval = FIXTOINT(
+						FDIVI(FMULI(num, 255), 100));
 				}
+
+				if (intval > 255)
+					*component = 255;
+				else if (intval < 0)
+					*component = 0;
+				else
+					*component = intval;
 
 				parserutils_vector_iterate(vector, ctx);
 
