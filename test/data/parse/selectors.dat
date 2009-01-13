@@ -1,0 +1,140 @@
+#data
+* {}
+#errors
+#expected
+| 1 *
+#reset
+
+#data
+E {}
+#errors
+#expected
+| 1 E
+#reset
+
+#data
+E F {}
+#errors
+#expected
+| 1 E F
+#reset
+
+#data
+E > F {}
+#errors
+#expected
+| 1 E > F
+#reset
+
+#data
+E:first-child {}
+#errors
+#expected
+| 1 E:first-child
+#reset
+
+#data
+E:link {}
+#errors
+#expected
+| 1 E:link
+#reset
+
+#data
+E:visited {}
+#errors
+#expected
+| 1 E:visited
+#reset
+
+#data
+E:active {}
+#errors
+#expected
+| 1 E:active
+#reset
+
+#data
+E:hover {}
+#errors
+#expected
+| 1 E:hover
+#reset
+
+#data
+E:focus {}
+#errors
+#expected
+| 1 E:focus
+#reset
+
+#data
+E:lang(c) {}
+#errors
+#expected
+| 1 E:lang(c)
+#reset
+
+#data
+E + F {}
+#errors
+#expected
+| 1 E + F
+#reset
+
+#data
+E[foo] {}
+#errors
+#expected
+| 1 E[foo]
+#reset
+
+#data
+E[foo="warning"] {}
+#errors
+#expected
+| 1 E[foo="warning"]
+#reset
+
+#data
+E[foo~="warning"] {}
+#errors
+#expected
+| 1 E[foo~="warning"]
+#reset
+
+#data
+E[lang|="en"] {}
+#errors
+#expected
+| 1 E[lang|="en"]
+#reset
+
+#data
+DIV.warning {}
+#errors
+#expected
+| 1 DIV.warning
+#reset
+
+#data
+.warning {}
+#errors
+#expected
+| 1 .warning
+#reset
+
+#data
+E#myid {}
+#errors
+#expected
+| 1 E#myid
+#reset
+
+#data
+#myid {}
+#errors
+#expected
+| 1 #myid
+#reset
+

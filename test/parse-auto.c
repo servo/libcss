@@ -42,6 +42,10 @@ static bool handle_line(const char *data, size_t datalen, void *pw);
 static void parse_expected(line_ctx *ctx, const char *data, size_t len);
 static void run_test(const uint8_t *data, size_t len, 
 		exp_entry *exp, size_t explen);
+static void dump_selector_list(css_selector *list, char **ptr);
+static void dump_selector(css_selector *selector, char **ptr);
+static void dump_selector_detail(css_selector_detail *detail, char **ptr);
+static void dump_string(const parserutils_hash_entry *string, char **ptr);
 
 static void *myrealloc(void *data, size_t len, void *pw)
 {
@@ -184,6 +188,8 @@ start_rule:
 		ctx->exp[ctx->expused].type = type;
 		memcpy(ctx->exp[ctx->expused].name, name, 
 				min(len - (name - data), MAX_RULE_NAME_LEN));
+		ctx->exp[ctx->expused].name[min(len - (name - data), 
+				MAX_RULE_NAME_LEN - 1)] = '\0';
 		ctx->exp[ctx->expused].bclen = 0;
 		ctx->exp[ctx->expused].bcused = 0;
 		ctx->exp[ctx->expused].bytecode = NULL;
@@ -256,6 +262,8 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 
 	for (rule = sheet->rule_list; rule != NULL; rule = rule->next, e++) {
 		css_rule_selector *s = (css_rule_selector *) rule;
+		char name[MAX_RULE_NAME_LEN];
+		char *ptr = name;
 
 		if (rule->type != exp[e].type) {
 			printf("%d: Got type %d. Expected %d\n", 
@@ -263,8 +271,24 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 			assert(0 && "Types differ");
 		}
 
-		/** \todo compare selectors */
+		/* Build selector string */
+		for (uint32_t i = 0; i < rule->items; i++) {
+			dump_selector_list(s->selectors[i], &ptr);
+			if (i != (uint32_t) (rule->items - 1)) {
+				memcpy(ptr, ", ", 2);
+				ptr += 2;
+			}
+		}
+		*ptr = '\0';
 
+		/* Compare with expected selector */
+		if (strcmp(exp[e].name, name) != 0) {
+			printf("%d: Got name '%s'. Expected '%s'\n",
+				testnum, name, exp[e].name);
+			assert(0 && "Mismatched names");
+		}
+
+		/* Now compare bytecode */
 		if (exp[e].bytecode != NULL && s->style == NULL) {
 			printf("%d: Expected bytecode but none created\n",
 				testnum);
@@ -295,3 +319,132 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 
 	printf("Test %d: PASS\n", testnum);
 }
+
+void dump_selector_list(css_selector *list, char **ptr)
+{
+	if (list->combinator != NULL) {
+		dump_selector_list(list->combinator, ptr);
+	}
+
+	switch (list->data.comb) {
+	case CSS_COMBINATOR_NONE:
+		break;
+	case CSS_COMBINATOR_ANCESTOR:
+		(*ptr)[0] = ' ';
+		*ptr += 1;
+		break;
+	case CSS_COMBINATOR_PARENT:
+		memcpy(*ptr, " > ", 3);
+		*ptr += 3;
+		break;
+	case CSS_COMBINATOR_SIBLING:
+		memcpy(*ptr, " + ", 3);
+		*ptr += 3;
+		break;
+	}
+
+	dump_selector(list, ptr);
+}
+
+
+void dump_selector(css_selector *selector, char **ptr)
+{
+	css_selector_detail *d = &selector->data;
+
+	while (true) {
+		dump_selector_detail(d, ptr);
+
+		if (d->next == 0)
+			break;
+
+		d++;
+	}
+}
+
+void dump_selector_detail(css_selector_detail *detail, char **ptr)
+{
+	switch (detail->type) {
+	case CSS_SELECTOR_ELEMENT:
+		if (detail->name->len == 1 && detail->name->data[0] == '*' &&
+				detail->next == 0) {
+			dump_string(detail->name, ptr);
+		} else if (detail->name->len != 1 ||
+				detail->name->data[0] != '*') {
+			dump_string(detail->name, ptr);
+		}
+		break;
+	case CSS_SELECTOR_CLASS:
+		**ptr = '.';
+		*ptr += 1;
+		dump_string(detail->name, ptr);
+		break;
+	case CSS_SELECTOR_ID:
+		**ptr = '#';
+		*ptr += 1;
+		dump_string(detail->name, ptr);
+		break;
+	case CSS_SELECTOR_PSEUDO:
+		**ptr = ':';
+		*ptr += 1;
+		dump_string(detail->name, ptr);
+		if (detail->value != NULL) {
+			**ptr = '(';
+			*ptr += 1;
+			dump_string(detail->value, ptr);
+			**ptr = ')';
+			*ptr += 1;
+		}
+		break;
+	case CSS_SELECTOR_ATTRIBUTE:
+		**ptr = '[';
+		*ptr += 1;
+		dump_string(detail->name, ptr);
+		**ptr = ']';
+		*ptr += 1;
+		break;
+	case CSS_SELECTOR_ATTRIBUTE_EQUAL:
+		**ptr = '[';
+		*ptr += 1;
+		dump_string(detail->name, ptr);
+		(*ptr)[0] = '=';
+		(*ptr)[1] = '"';
+		*ptr += 2;
+		dump_string(detail->value, ptr);
+		(*ptr)[0] = '"';
+		(*ptr)[1] = ']';
+		*ptr += 2;
+		break;
+	case CSS_SELECTOR_ATTRIBUTE_DASHMATCH:
+		**ptr = '[';
+		*ptr += 1;
+		dump_string(detail->name, ptr);
+		(*ptr)[0] = '|';
+		(*ptr)[1] = '=';
+		(*ptr)[2] = '"';
+		*ptr += 3;
+		dump_string(detail->value, ptr);
+		(*ptr)[0] = '"';
+		(*ptr)[1] = ']';
+		*ptr += 2;
+		break;
+	case CSS_SELECTOR_ATTRIBUTE_INCLUDES:
+		**ptr = '[';
+		*ptr += 1;
+		dump_string(detail->name, ptr);
+		(*ptr)[0] = '~';
+		(*ptr)[1] = '=';
+		(*ptr)[2] = '"';
+		*ptr += 3;
+		dump_string(detail->value, ptr);
+		(*ptr)[0] = '"';
+		(*ptr)[1] = ']';
+		*ptr += 2;
+		break;
+	}
+}
+
+void dump_string(const parserutils_hash_entry *string, char **ptr)
+{
+	*ptr += sprintf(*ptr, "%.*s", (int) string->len, string->data);
+}
+
