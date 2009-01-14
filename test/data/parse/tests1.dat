@@ -21,3 +21,10 @@
 |   0x0000080f
 #reset
 
+#data
+* { background-image: url("foo.png"); color: inherit }
+#errors
+#expected
+| 1 *
+|   0x02000003 PTR(foo.png) 0x0000080f
+#reset

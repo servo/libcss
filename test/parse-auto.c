@@ -20,6 +20,13 @@ typedef struct exp_entry {
 	size_t bclen;
 	size_t bcused;
 	uint8_t *bytecode;
+
+	size_t stlen;
+	size_t stused;
+	struct stentry {
+		size_t off;
+		char *string;
+	} *stringtab;
 } exp_entry;
 
 typedef struct line_ctx {
@@ -200,6 +207,9 @@ start_rule:
 		ctx->exp[ctx->expused].bclen = 0;
 		ctx->exp[ctx->expused].bcused = 0;
 		ctx->exp[ctx->expused].bytecode = NULL;
+		ctx->exp[ctx->expused].stlen = 0;
+		ctx->exp[ctx->expused].stused = 0;
+		ctx->exp[ctx->expused].stringtab =  NULL;
 
 		ctx->expused++;
 		
@@ -215,11 +225,16 @@ start_rule:
 
 		/** \todo how to deal with pointers? */
 		while (next < data + len) {
-			uint32_t val = strtoul(next, &next, 16);
+			/* Skip whitespace */
+			while (next < data + len && isspace(*next))
+				next++;
 
-			/* Append to bytecode */
+			if (next == data + len)
+				break;
+
 			if (rule->bcused >= rule->bclen) {
-				size_t num = rule->bclen == 0 ? 4 : rule->bclen;
+				size_t num = rule->bcused == 0 ? 4 : 
+						rule->bcused;
 
 				uint8_t *temp = realloc(rule->bytecode,
 						num * 2);
@@ -231,9 +246,55 @@ start_rule:
 				rule->bclen = num * 2;
 			}
 
-			memcpy(rule->bytecode + rule->bcused, 
-					&val, sizeof(val));
-			rule->bcused += sizeof(val);
+			if (*next == 'P') {
+				/* Pointer */
+				const char *str;
+
+				while (next < data + len && *next != '(')
+					next++;
+				str = next + 1;
+				while (next < data + len && *next != ')')
+					next++;
+				next++;
+
+				if (rule->stused >= rule->stlen) {
+					size_t num = rule->stused == 0 ? 4 :
+							rule->stused;
+
+					struct stentry *temp = realloc(
+						rule->stringtab, 
+						num * 2 * sizeof(struct stentry));
+					if (temp == NULL) {
+						assert(0 && 
+						"No memory for string table");
+					}
+
+					rule->stringtab = temp;
+					rule->stlen = num * 2;
+				}
+
+				rule->stringtab[rule->stused].off = 
+						rule->bcused;
+				rule->stringtab[rule->stused].string =
+						malloc(next - str);
+				assert(rule->stringtab[rule->stused].string != 
+						NULL);
+				memcpy(rule->stringtab[rule->stused].string,
+						str, next - str - 1);
+				rule->stringtab[rule->stused].string[
+						next - str - 1]  = '\0';
+
+				rule->bcused += sizeof(void *);
+				rule->stused++;
+			} else {
+				/* Assume hexnum */
+				uint32_t val = strtoul(next, &next, 16);
+
+				/* Append to bytecode */
+				memcpy(rule->bytecode + rule->bcused, 
+						&val, sizeof(val));
+				rule->bcused += sizeof(val);
+			}
 		}
 	}
 }
@@ -340,9 +401,38 @@ void validate_rule_selector(css_rule_selector *s, exp_entry *e, int testnum)
 			assert(0 && "Bytecode lengths differ");
 		}
 
-		if (memcmp(s->style->bytecode, e->bytecode, e->bcused) != 0) {
-			/** \todo dump bytecode */
-			assert(0 && "Bytecode differs");
+		for (size_t i = 0; i < e->bcused; i++) {
+			size_t j;
+
+			for (j = 0; j < e->stused; j++) {
+				if (e->stringtab[j].off == i)
+					break;
+			}
+
+			if (j != e->stused) {
+				const parserutils_hash_entry **p =
+						(void *) ((uint8_t *) 
+						s->style->bytecode + i);
+
+				if ((*p)->len != 
+					strlen(e->stringtab[j].string) ||
+					memcmp((*p)->data, 
+						e->stringtab[j].string,
+						(*p)->len) != 0) {
+					printf("%d: Got string '%.*s'. Expected '%s'\n",
+						testnum, (int) (*p)->len, 
+						(char *) (*p)->data, 
+						e->stringtab[j].string);
+					assert(0 && "Strings differ");
+				}
+
+				i += sizeof (void *) - 1;
+			} else if (((uint8_t *) s->style->bytecode)[i] != 
+					e->bytecode[i]) {
+				printf("%d: Bytecode differs at %d\n",
+					testnum, i);
+				assert(0 && "Bytecode differs");
+			}
 		}
 	}
 }

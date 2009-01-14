@@ -19,8 +19,9 @@ Format of rule list
   rule     ::= '| ' type ' '+ name
   name     ::= .+
   type     ::= [0-9]+
-  bytecode ::= '|  ' ' '* hexnum (' '+ hexnum)*
+  bytecode ::= '|  ' ' '* hexnum (' '+ (hexnum | ptr))*
   hexnum   ::= '0x' [0-9a-fA-F]+
+  ptr      ::= 'PTR(' .* ')'
 
 Type corresponds to css_rule_type. Consult the library sources for the values.
 
@@ -32,18 +33,16 @@ Example
 -------
 
 #data
-* { color: #ff0000 }
+* { color: #ff0000; background-image: url("foo.png"); }
 #errors
 #expected
 | 1 *
 |   0x0200000f 0xff000000
+|   0x02000003 PTR(foo.png)
 #reset
 
 TODO
 ----
 
   + Permit nesting of rules (for nested block support)
-  + There's no way of flagging a pointer in the bytecode (ideally, this will
-    be defined in such a way that we'll be able to validate the data pointed
-    to, too)
 
