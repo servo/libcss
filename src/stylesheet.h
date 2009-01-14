@@ -133,7 +133,7 @@ typedef struct css_rule_import {
 typedef struct css_rule_charset {
 	css_rule base;
 
-	char *encoding;				/** \todo use MIB enum? */
+	const parserutils_hash_entry *encoding;	/** \todo use MIB enum? */
 } css_rule_charset;
 
 struct css_stylesheet {
@@ -205,6 +205,9 @@ css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet,
 
 css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 		css_rule *rule, css_style *style);
+
+css_error css_stylesheet_rule_set_charset(css_stylesheet *sheet,
+		css_rule *rule, const parserutils_hash_entry *charset);
 
 /** \todo registering other rule-type data with css_rules */
 

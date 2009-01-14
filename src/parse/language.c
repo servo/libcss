@@ -359,17 +359,43 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 
 	if (atkeyword->ilower == c->strings[CHARSET]) {
 		if (c->state == BEFORE_CHARSET) {
+			const css_token *charset;
+			css_rule *rule;
+			css_error error;
+
 			/* any0 = STRING */
 			if (ctx == 0)
 				return CSS_INVALID;
 
-			token = parserutils_vector_iterate(vector, &ctx);
-			if (token == NULL || token->type != CSS_TOKEN_STRING)
+			charset = parserutils_vector_iterate(vector, &ctx);
+			if (charset == NULL || 
+					charset->type != CSS_TOKEN_STRING)
 				return CSS_INVALID;
 
 			token = parserutils_vector_iterate(vector, &ctx);
 			if (token != NULL)
 				return CSS_INVALID;
+
+			error = css_stylesheet_rule_create(c->sheet, 
+					CSS_RULE_CHARSET, &rule);
+			if (error != CSS_OK)
+				return error;
+
+			error = css_stylesheet_rule_set_charset(c->sheet, rule,
+					charset->idata);
+			if (error != CSS_OK) {
+				css_stylesheet_rule_destroy(c->sheet, rule);
+				return error;
+			}
+
+			error = css_stylesheet_add_rule(c->sheet, rule);
+			if (error != CSS_OK) {
+				css_stylesheet_rule_destroy(c->sheet, rule);
+				return error;
+			}
+
+			/* Rule is now owned by the sheet, 
+			 * so no need to destroy it */
 
 			c->state = BEFORE_RULES;
 		} else {

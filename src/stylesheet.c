@@ -674,6 +674,32 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 }
 
 /**
+ * Set the charset of a CSS rule
+ *
+ * \param sheet    The stylesheet context
+ * \param rule     The rule to add to (must be of type CSS_RULE_CHARSET)
+ * \param charset  The charset
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_rule_set_charset(css_stylesheet *sheet,
+		css_rule *rule, const parserutils_hash_entry *charset)
+{
+	css_rule_charset *r = (css_rule_charset *) rule;
+
+	if (sheet == NULL || rule == NULL || charset == NULL)
+		return CSS_BADPARM;
+
+	/* Ensure rule is a CSS_RULE_CHARSET */
+	if (rule->type != CSS_RULE_CHARSET)
+		return CSS_INVALID;
+
+	/* Set rule's encoding field */
+	r->encoding = charset;
+	
+	return CSS_OK;
+}
+
+/**
  * Add a rule to a stylesheet
  *
  * \param sheet  The stylesheet to add to
