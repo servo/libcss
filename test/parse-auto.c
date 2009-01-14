@@ -42,6 +42,13 @@ static bool handle_line(const char *data, size_t datalen, void *pw);
 static void parse_expected(line_ctx *ctx, const char *data, size_t len);
 static void run_test(const uint8_t *data, size_t len, 
 		exp_entry *exp, size_t explen);
+static void validate_rule_selector(css_rule_selector *s, exp_entry *e, 
+		int testnum);
+static void validate_rule_charset(css_rule_charset *s, exp_entry *e, 
+		int testnum);
+static void validate_rule_import(css_rule_import *s, exp_entry *e, 
+		int testnum);
+
 static void dump_selector_list(css_selector *list, char **ptr);
 static void dump_selector(css_selector *selector, char **ptr);
 static void dump_selector_detail(css_selector_detail *detail, char **ptr);
@@ -261,55 +268,29 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 	}
 
 	for (rule = sheet->rule_list; rule != NULL; rule = rule->next, e++) {
-		css_rule_selector *s = (css_rule_selector *) rule;
-		char name[MAX_RULE_NAME_LEN];
-		char *ptr = name;
-
 		if (rule->type != exp[e].type) {
 			printf("%d: Got type %d. Expected %d\n", 
 				testnum, rule->type, exp[e].type);
 			assert(0 && "Types differ");
 		}
 
-		/* Build selector string */
-		for (uint32_t i = 0; i < rule->items; i++) {
-			dump_selector_list(s->selectors[i], &ptr);
-			if (i != (uint32_t) (rule->items - 1)) {
-				memcpy(ptr, ", ", 2);
-				ptr += 2;
-			}
-		}
-		*ptr = '\0';
-
-		/* Compare with expected selector */
-		if (strcmp(exp[e].name, name) != 0) {
-			printf("%d: Got name '%s'. Expected '%s'\n",
-				testnum, name, exp[e].name);
-			assert(0 && "Mismatched names");
-		}
-
-		/* Now compare bytecode */
-		if (exp[e].bytecode != NULL && s->style == NULL) {
-			printf("%d: Expected bytecode but none created\n",
-				testnum);
-			assert(0 && "No bytecode");
-		} else if (exp[e].bytecode == NULL && s->style != NULL) {
-			printf("%d: No bytecode expected but some created\n",
-				testnum);
-			assert(0 && "Unexpected bytecode");
-		} else if (exp[e].bytecode != NULL && s->style != NULL) {
-			if (s->style->length != exp[e].bcused) {
-				printf("%d: Got length %d, Expected %d\n",
-					testnum, s->style->length, 
-					exp[e].bcused);
-				assert(0 && "Bytecode lengths differ");
-			}
-
-			if (memcmp(s->style->bytecode, exp[e].bytecode, 
-					exp[e].bcused) != 0) {
-				/** \todo dump bytecode */
-				assert(0 && "Bytecode differs");
-			}
+		switch (rule->type) {
+		case CSS_RULE_SELECTOR:
+			validate_rule_selector((css_rule_selector *) rule,
+					&exp[e], testnum);
+			break;
+		case CSS_RULE_CHARSET:
+			validate_rule_charset((css_rule_charset *) rule,
+					&exp[e], testnum);
+			break;
+		case CSS_RULE_IMPORT:
+			validate_rule_import((css_rule_import *) rule,
+					&exp[e], testnum);
+			break;
+		default:
+			printf("%d: Unhandled rule type %d\n",
+				testnum, rule->type);
+			break;
 		}
 	}
 
@@ -318,6 +299,75 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 	css_stylesheet_destroy(sheet);
 
 	printf("Test %d: PASS\n", testnum);
+}
+
+void validate_rule_selector(css_rule_selector *s, exp_entry *e, int testnum)
+{
+	char name[MAX_RULE_NAME_LEN];
+	char *ptr = name;
+
+	/* Build selector string */
+	for (uint32_t i = 0; i < s->base.items; i++) {
+		dump_selector_list(s->selectors[i], &ptr);
+		if (i != (uint32_t) (s->base.items - 1)) {
+			memcpy(ptr, ", ", 2);
+			ptr += 2;
+		}
+	}
+	*ptr = '\0';
+
+	/* Compare with expected selector */
+	if (strcmp(e->name, name) != 0) {
+		printf("%d: Got name '%s'. Expected '%s'\n",
+			testnum, name, e->name);
+		assert(0 && "Mismatched names");
+	}
+
+	/* Now compare bytecode */
+	if (e->bytecode != NULL && s->style == NULL) {
+		printf("%d: Expected bytecode but none created\n",
+			testnum);
+		assert(0 && "No bytecode");
+	} else if (e->bytecode == NULL && s->style != NULL) {
+		printf("%d: No bytecode expected but some created\n",
+			testnum);
+		assert(0 && "Unexpected bytecode");
+	} else if (e->bytecode != NULL && s->style != NULL) {
+		if (s->style->length != e->bcused) {
+			printf("%d: Got length %d, Expected %d\n",
+				testnum, s->style->length, 
+				e->bcused);
+			assert(0 && "Bytecode lengths differ");
+		}
+
+		if (memcmp(s->style->bytecode, e->bytecode, e->bcused) != 0) {
+			/** \todo dump bytecode */
+			assert(0 && "Bytecode differs");
+		}
+	}
+}
+
+void validate_rule_charset(css_rule_charset *s, exp_entry *e, int testnum)
+{
+	char name[MAX_RULE_NAME_LEN];
+	char *ptr = name;
+
+	dump_string(s->encoding, &ptr);
+	*ptr = '\0';
+
+	if (strcmp(name, e->name) != 0) {
+		printf("%d: Got charset '%s'. Expected '%s'\n",
+			testnum, name, e->name);
+		assert(0 && "Mismatched charsets");
+	}
+}
+
+void validate_rule_import(css_rule_import *s, exp_entry *e, int testnum)
+{
+	UNUSED(s);
+	UNUSED(e);
+	UNUSED(testnum);
+	assert(0);
 }
 
 void dump_selector_list(css_selector *list, char **ptr)
