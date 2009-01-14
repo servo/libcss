@@ -700,6 +700,32 @@ css_error css_stylesheet_rule_set_charset(css_stylesheet *sheet,
 }
 
 /**
+ * Set the imported stylesheet associated with a rule
+ *
+ * \param sheet   The stylesheet context
+ * \param rule    The rule to add to (must be of type CSS_RULE_IMPORT)
+ * \param import  The imported sheet
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_rule_set_import(css_stylesheet *sheet,
+		css_rule *rule, css_stylesheet *import)
+{
+	css_rule_import *r = (css_rule_import *) rule;
+
+	if (sheet == NULL || rule == NULL || import == NULL)
+		return CSS_BADPARM;
+
+	/* Ensure rule is a CSS_RULE_IMPORT */
+	if (rule->type != CSS_RULE_IMPORT)
+		return CSS_INVALID;
+
+	/* Set the rule's sheet field */
+	r->sheet = import;
+
+	return CSS_OK;
+}
+
+/**
  * Add a rule to a stylesheet
  *
  * \param sheet  The stylesheet to add to

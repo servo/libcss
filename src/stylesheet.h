@@ -209,6 +209,9 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 css_error css_stylesheet_rule_set_charset(css_stylesheet *sheet,
 		css_rule *rule, const parserutils_hash_entry *charset);
 
+css_error css_stylesheet_rule_set_import(css_stylesheet *sheet,
+		css_rule *rule, css_stylesheet *import);
+
 /** \todo registering other rule-type data with css_rules */
 
 css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule);
