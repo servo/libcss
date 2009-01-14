@@ -783,6 +783,7 @@ css_error css_stylesheet_remove_rule(css_stylesheet *sheet, css_rule *rule)
 	return CSS_OK;
 }
 
+#ifndef NDEBUG
 static void css_stylesheet_dump_rule(css_rule *rule, FILE *target, 
 		size_t *size);
 static void css_stylesheet_dump_selector_list(css_selector *list, FILE *target,
@@ -1014,4 +1015,5 @@ void css_stylesheet_dump_string(const parserutils_hash_entry *string,
 {
 	fprintf(target, "%.*s", (int) string->len, string->data);
 }
+#endif
 

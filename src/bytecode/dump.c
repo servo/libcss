@@ -11,6 +11,7 @@
 #include "bytecode/opcodes.h"
 #include "utils/fpmath.h"
 
+#ifndef NDEBUG
 /**
  * Opcode names, indexed by opcode
  */
@@ -1825,4 +1826,5 @@ void css_bytecode_dump(void *bytecode, uint32_t length, FILE *fp)
 
 }
 
+#endif
 

@@ -167,7 +167,9 @@ static inline bool isInherit(uint32_t OPV)
 	return getFlags(OPV) & 0x2;
 }
 
+#ifndef NDEBUG
 void css_bytecode_dump(void *bytecode, uint32_t length, FILE *fp);
+#endif
 
 #endif
 
