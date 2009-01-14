@@ -364,10 +364,15 @@ void validate_rule_charset(css_rule_charset *s, exp_entry *e, int testnum)
 
 void validate_rule_import(css_rule_import *s, exp_entry *e, int testnum)
 {
-	UNUSED(s);
-	UNUSED(e);
-	UNUSED(testnum);
-	assert(0);
+	if (s->sheet == NULL) {
+		assert(0 && "No imported sheet");
+	}
+
+	if (strcmp(s->sheet->url, e->name) != 0) {
+		printf("%d: Got URL '%s'. Expected '%s'\n",
+			testnum, s->sheet->url, e->name);
+		assert(0 && "Mismatched URLs");
+	}
 }
 
 void dump_selector_list(css_selector *list, char **ptr)

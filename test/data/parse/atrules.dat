@@ -7,18 +7,17 @@
 | 2 UTF-8
 #reset
 
-##data
-#@import "foo.css";
-##errors
-##expected
-#| 3 foo.css
-##reset
-#
-##data
-#@import url("foo.css");
-##errors
-##expected
-#| 3 foo.css
-##reset
+#data
+@import "foo.css";
+#errors
+#expected
+| 3 foo.css
+#reset
 
+#data
+@import url("foo.css");
+#errors
+#expected
+| 3 foo.css
+#reset
 
