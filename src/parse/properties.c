@@ -1359,9 +1359,9 @@ css_error parse_clip(css_language *c,
 			token->ilower == c->strings[RECT]) {
 		value = CLIP_SHAPE_RECT;
 
-		consumeWhitespace(vector, ctx);
-
 		for (int i = 0; i < 4; i++) {
+			consumeWhitespace(vector, ctx);
+
 			token = parserutils_vector_peek(vector, *ctx);
 			if (token == NULL)
 				return CSS_INVALID;
@@ -1370,19 +1370,23 @@ css_error parse_clip(css_language *c,
 				/* Slightly magical way of generating the auto 
 				 * values. These are bits 3-6 of the value. */
 				if (token->ilower == c->strings[AUTO])
-					value |= (i+1) << 3;
+					value |= 1 << (i + 3);
 				else
 					return CSS_INVALID;
+
+				parserutils_vector_iterate(vector, ctx);
 			} else {
 				error = parse_unit_specifier(c, vector, ctx, 
-						UNIT_PX, &length[i], &unit[i]);
+						UNIT_PX, 
+						&length[num_lengths], 
+						&unit[num_lengths]);
 				if (error != CSS_OK)
 					return error;
 
-				if (unit[i] & UNIT_ANGLE || 
-						unit[i] & UNIT_TIME || 
-						unit[i] & UNIT_FREQ || 
-						unit[i] & UNIT_PCT)
+				if (unit[num_lengths] & UNIT_ANGLE || 
+						unit[num_lengths] & UNIT_TIME ||
+						unit[num_lengths] & UNIT_FREQ ||
+						unit[num_lengths] & UNIT_PCT)
 					return CSS_INVALID;
 
 				num_lengths++;
@@ -1418,7 +1422,8 @@ css_error parse_clip(css_language *c,
 	opv = buildOPV(OP_CLIP, flags, value);
 
 	required_size = sizeof(opv);
-	if ((flags & FLAG_INHERIT) == false && value == CLIP_SHAPE_RECT) {
+	if ((flags & FLAG_INHERIT) == false && 
+			(value & CLIP_SHAPE_MASK) == CLIP_SHAPE_RECT) {
 		required_size += 
 			num_lengths * (sizeof(length[0]) + sizeof(unit[0]));
 	}
@@ -1430,7 +1435,8 @@ css_error parse_clip(css_language *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if ((flags & FLAG_INHERIT) == false && value == CLIP_SHAPE_RECT) {
+	if ((flags & FLAG_INHERIT) == false && 
+			(value & CLIP_SHAPE_MASK) == CLIP_SHAPE_RECT) {
 		uint8_t *ptr = ((uint8_t *) (*result)->bytecode) + sizeof(opv);
 
 		for (int i = 0; i < num_lengths; i++) {
