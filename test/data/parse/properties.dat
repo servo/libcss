@@ -151,12 +151,21 @@
 #reset
 
 #data
-* { background-position: bottom 2px; }
+* { background-position: 2px bottom; }
 #errors
 #expected
 | 1 *
 |   0x02040004 0x00000800 0x00000000
 #reset
+
+# possible quirk
+##data
+#* { background-position: bottom 2px; }
+##errors
+##expected
+#| 1 *
+#|   0x02040004 0x00000800 0x00000000
+##reset
 
 #data
 * { background-position: left 10%; }
