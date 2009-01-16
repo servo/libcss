@@ -501,11 +501,11 @@ css_error parse_azimuth(css_language *c,
 			value = AZIMUTH_FAR_LEFT;
 		} else if (token->ilower == c->strings[LEFT]) {
 			value = AZIMUTH_LEFT;
-		} else if (token->ilower == c->strings[CENTER-LEFT]) {
+		} else if (token->ilower == c->strings[CENTER_LEFT]) {
 			value = AZIMUTH_CENTER_LEFT;
 		} else if (token->ilower == c->strings[CENTER]) {
 			value = AZIMUTH_CENTER;
-		} else if (token->ilower == c->strings[CENTER-RIGHT]) {
+		} else if (token->ilower == c->strings[CENTER_RIGHT]) {
 			value = AZIMUTH_CENTER_RIGHT;
 		} else if (token->ilower == c->strings[RIGHT]) {
 			value = AZIMUTH_RIGHT;
