@@ -317,6 +317,7 @@ static inline css_error parse_colour_specifier(css_language *c,
 		uint32_t *result);
 static inline css_error parse_unit_specifier(css_language *c,
 		const parserutils_vector *vector, int *ctx,
+		uint32_t default_unit,
 		fixed *length, uint32_t *unit);
 
 static inline css_error parse_border_side_color(css_language *c,
@@ -562,7 +563,8 @@ css_error parse_azimuth(css_language *c,
 			}
 		}
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_DEG, 
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -811,7 +813,7 @@ css_error parse_background_position(css_language *c,
 				}
 			} else {
 				error = parse_unit_specifier(c, vector, ctx, 
-						&length[i], &unit[i]);
+						UNIT_PX, &length[i], &unit[i]);
 				if (error != CSS_OK)
 					return error;
 
@@ -1081,7 +1083,7 @@ css_error parse_border_spacing(css_language *c,
 	} else {
 		int num_lengths = 0;
 
-		error = parse_unit_specifier(c, vector, ctx, 
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
 				&length[0], &unit[0]);
 		if (error != CSS_OK)
 			return error;
@@ -1096,7 +1098,7 @@ css_error parse_border_spacing(css_language *c,
 
 		token = parserutils_vector_peek(vector, *ctx);
 		if (token != NULL && tokenIsChar(token, '!') == false) {
-			error = parse_unit_specifier(c, vector, ctx, 
+			error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
 					&length[1], &unit[1]);
 			if (error != CSS_OK)
 				return error;
@@ -1202,7 +1204,8 @@ css_error parse_bottom(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = BOTTOM_AUTO;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -1372,7 +1375,7 @@ css_error parse_clip(css_language *c,
 					return CSS_INVALID;
 			} else {
 				error = parse_unit_specifier(c, vector, ctx, 
-						&length[i], &unit[i]);
+						UNIT_PX, &length[i], &unit[i]);
 				if (error != CSS_OK)
 					return error;
 
@@ -2429,7 +2432,8 @@ css_error parse_elevation(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = ELEVATION_LOWER;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_DEG,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -2945,7 +2949,8 @@ css_error parse_font_size(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_SMALLER;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -3160,7 +3165,8 @@ css_error parse_height(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = HEIGHT_AUTO;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -3224,7 +3230,8 @@ css_error parse_left(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = LEFT_AUTO;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -3288,7 +3295,8 @@ css_error parse_letter_spacing(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = LETTER_SPACING_NORMAL;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -3362,7 +3370,8 @@ css_error parse_line_height(css_language *c,
 
 		value = LINE_HEIGHT_NUMBER;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -3597,7 +3606,8 @@ css_error parse_max_height(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = MAX_HEIGHT_NONE;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -3661,7 +3671,8 @@ css_error parse_max_width(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = MAX_WIDTH_NONE;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -3721,7 +3732,8 @@ css_error parse_min_height(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -3781,7 +3793,8 @@ css_error parse_min_width(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -4219,7 +4232,8 @@ css_error parse_pause_after(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_S,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -4279,7 +4293,8 @@ css_error parse_pause_before(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_S,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -4412,7 +4427,8 @@ css_error parse_pitch(css_language *c,
 			token->ilower == c->strings[X_HIGH]) {
 		value = PITCH_X_HIGH;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_HZ,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -4804,7 +4820,8 @@ css_error parse_right(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = RIGHT_AUTO;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -5324,7 +5341,8 @@ css_error parse_text_indent(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -5433,7 +5451,8 @@ css_error parse_top(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = TOP_AUTO;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -5570,7 +5589,8 @@ css_error parse_vertical_align(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = VERTICAL_ALIGN_TEXT_BOTTOM;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -6023,7 +6043,9 @@ css_error parse_volume(css_language *c,
 
 		value = VOLUME_NUMBER;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		/* Yes, really UNIT_PX -- percentages MUST have a % sign */
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -6195,7 +6217,8 @@ css_error parse_width(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = WIDTH_AUTO;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -6259,7 +6282,8 @@ css_error parse_word_spacing(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = WORD_SPACING_NORMAL;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -6500,6 +6524,7 @@ css_error parse_colour_specifier(css_language *c,
 
 css_error parse_unit_specifier(css_language *c,
 		const parserutils_vector *vector, int *ctx,
+		uint32_t default_unit,
 		fixed *length, uint32_t *unit)
 {
 	const css_token *token;
@@ -6513,6 +6538,7 @@ css_error parse_unit_specifier(css_language *c,
 
 	token = parserutils_vector_iterate(vector, ctx);
 	if (token == NULL || (token->type != CSS_TOKEN_DIMENSION &&
+			token->type != CSS_TOKEN_NUMBER &&
 			token->type != CSS_TOKEN_PERCENTAGE))
 		return CSS_INVALID;
 
@@ -6521,13 +6547,7 @@ css_error parse_unit_specifier(css_language *c,
 	num = number_from_css_string(&tmp, false, &consumed);
 
 	if (token->type == CSS_TOKEN_DIMENSION) {
-		if (consumed == token->idata->len) {
-			/** \todo In quirks mode, non-zero units should be 
-			 * treated as px too */
-			if (num != 0)
-				return CSS_INVALID;
-			*unit = UNIT_PX;
-		} else if (token->idata->len - consumed == 4) {
+		if (token->idata->len - consumed == 4) {
 			if (strncasecmp((char *) token->idata->data + consumed, 
 					"grad", 4) == 0)
 				*unit = UNIT_GRAD;
@@ -6586,6 +6606,14 @@ css_error parse_unit_specifier(css_language *c,
 				return CSS_INVALID;
 		} else
 			return CSS_INVALID;
+	} else if (token->type == CSS_TOKEN_NUMBER) {
+		/** \todo In quirks mode, non-zero units should be 
+		 * treated as default_unit too */
+		/** \todo also, in quirks mode, we need to cater for dimensions
+		 * separated from their units by whitespace (e.g. "0 px") */
+		if (num != 0)
+			return CSS_INVALID;
+		*unit = default_unit;
 	} else {
 		if (consumed != token->idata->len)
 			return CSS_INVALID;
@@ -6748,7 +6776,8 @@ css_error parse_border_side_width(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = BORDER_WIDTH_THICK;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -6813,7 +6842,8 @@ css_error parse_margin_side(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = MARGIN_AUTO;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
@@ -6873,7 +6903,8 @@ css_error parse_padding_side(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, &length, &unit);
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
 		if (error != CSS_OK)
 			return error;
 
