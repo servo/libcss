@@ -982,7 +982,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #errors
 #expected
 | 1 *
-|   0x02000015 ptr(cursor.png) 0x000c0015
+|   0x02000015 PTR(cursor.png) 0x000c0015
 #reset
 
 #data
@@ -990,7 +990,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #errors
 #expected
 | 1 *
-|   0x02000015 ptr(cursor.svg) 0x00000080 ptr(cursor.png) 0x000c0015
+|   0x02000015 PTR(cursor.svg) 0x00000080 PTR(cursor.png) 0x000c0015
 #reset
 
 ##
