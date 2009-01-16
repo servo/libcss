@@ -426,3 +426,145 @@
 | 1 *
 |   0x0200000a 0x00000800 0x00000000
 #reset
+
+##
+## 0b - bottom
+##
+
+#data
+* { bottom: auto; }
+#errors
+#expected
+| 1 *
+|   0x0000000b
+#reset
+
+#data
+* { bottom: 0.75em; }
+#errors
+#expected
+| 1 *
+|   0x0200000b 0x00000300 0x00000002
+#reset
+
+#data
+* { bottom: 66.667%; }
+#errors
+#expected
+| 1 *
+|   0x0200000b 0x00010aab 0x00000100
+#reset
+
+##
+## 0c - caption-side
+##
+
+#data
+* { caption-side: top; }
+#errors
+#expected
+| 1 *
+|   0x0000000c
+#reset
+
+#data
+* { caption-side: bottom; }
+#errors
+#expected
+| 1 *
+|   0x0004000c
+#reset
+
+##
+## 0d - clear
+##
+
+#data
+* { clear: none; }
+#errors
+#expected
+| 1 *
+|   0x0000000d
+#reset
+
+#data
+* { clear: left; }
+#errors
+#expected
+| 1 *
+|   0x0004000d
+#reset
+
+#data
+* { clear: right; }
+#errors
+#expected
+| 1 *
+|   0x0008000d
+#reset
+
+#data
+* { clear: both; }
+#errors
+#expected
+| 1 *
+|   0x000c000d
+#reset
+
+##
+## 0e - clip
+##
+
+#data
+* { clip: auto; }
+#errors
+#expected
+| 1 *
+|   0x0000000e
+#reset
+
+#data
+* { clip: rect(10px, auto, auto, 10px); }
+#errors
+#expected
+| 1 *
+|   0x02c02800 0x0000000a 0x00000000 0x00002800 0x00000000
+#reset
+
+#data
+* { clip: rect(auto, auto, auto, auto); }
+#errors
+#expected
+| 1 *
+|   0x03e0000e
+#reset
+
+#data
+* { clip: rect(1px, 2px, 3px, 4px); }
+#errors
+#expected
+| 1 *
+|   0x0200000e 0x00000400 0x00000000 0x00000800 0x00000000 0x00000c00 0x00000000 0x00001000 0x00000000
+#reset
+
+#data
+* { clip: rect(auto 1em 1em auto); }
+#errors
+#expected
+| 1 *
+|   0x0320000e 0x00000400 0x00000002 0x00000400 0x00000002
+#reset
+
+##
+## 0f - color
+##
+
+## more fully tested in colours.dat
+
+#data
+* { color: #BBC }
+#errors
+#expected
+| 1 *
+|   0x0200000f 0xbbbbcc00
+#reset

@@ -308,7 +308,7 @@ Opcodes
 		clip: rect(10px, auto, auto, 10px) 
 	would produce the following bytecode:
 
-	<02c0000e> <0000000a> <00000000> <0000000a> <00000000>
+	<02c0000e> <00002800> <00000000> <00002800> <00000000>
 
 0f - color
 	<value> (14bits) :
