@@ -1,0 +1,204 @@
+##
+## 01 - background-attachment
+##
+
+#data
+* { background-attachment: fixed; }
+#errors
+#expected
+| 1 *
+|   0x00000001
+#reset
+
+#data
+* { background-attachment: scroll; }
+#errors
+#expected
+| 1 *
+|   0x00040001
+#reset
+
+##
+## 02 - background-color
+##
+
+#data
+* { background-color: #f08; }
+#errors
+#expected
+| 1 *
+|   0x02000002 0xff008800
+#reset
+
+#data
+* { background-color: transparent; }
+#errors
+#expected
+| 1 *
+|   0x00000002
+#reset
+
+##
+## 03 - background-image
+##
+
+#data
+* { background-image: url(netsurf.png); }
+#errors
+#expected
+| 1 *
+|   0x02000003 PTR(netsurf.png)
+#reset
+
+#data
+* { background-image: url("netsurf.png"); }
+#errors
+#expected
+| 1 *
+|   0x02000003 PTR(netsurf.png)
+#reset
+
+#data
+* { background-image: none; }
+#errors
+#expected
+| 1 *
+|   0x00000003
+#reset
+
+##
+## 04 - background-position
+##
+
+#data
+* { background-position: left; }
+#errors
+#expected
+| 1 *
+|   0x00840004
+#reset
+
+#data
+* { background-position: center; }
+#errors
+#expected
+| 1 *
+|   0x00440004
+#reset
+
+#data
+* { background-position: right; }
+#errors
+#expected
+| 1 *
+|   0x00040004
+#reset
+
+#data
+* { background-position: top; }
+#errors
+#expected
+| 1 *
+|   0x00480004
+#reset
+
+#data
+* { background-position: bottom; }
+#errors
+#expected
+| 1 *
+|   0x00400004
+#reset
+
+#data
+* { background-position: right bottom; }
+#errors
+#expected
+| 1 *
+|   0x00000004
+#reset
+
+#data
+* { background-position: 10%; }
+#errors
+#expected
+| 1 *
+|   0x02040004 0x00000100 0x00002800
+#reset
+
+#data
+* { background-position: 2px; }
+#errors
+#expected
+| 1 *
+|   0x02040004 0x00000000 0x00000800
+#reset
+
+#data
+* { background-position: 10% 20%; }
+#errors
+#expected
+| 1 *
+|   0x02200004 0x00000100 0x00002800 0x00000100 0x00005000
+#reset
+
+#data
+* { background-position: 10% 2px; }
+#errors
+#expected
+| 1 *
+|   0x02200004 0x00000100 0x00002800 0x00000000 0x00000800
+#reset
+
+#data
+* { background-position: bottom 2px; }
+#errors
+#expected
+| 1 *
+|   0x02000004 0x00000000 0x00000800
+#reset
+
+#data
+* { background-position: left 10%; }
+#errors
+#expected
+| 1 *
+|   0x00a00004 0x00000100 0x00002800
+#reset
+
+##
+## 05 - background-repeat
+##
+
+#data
+* { background-repeat: no-repeat; }
+#errors
+#expected
+| 1 *
+|   0x00000005
+#reset
+
+#data
+* { background-repeat: repeat-x; }
+#errors
+#expected
+| 1 *
+|   0x00040005
+#reset
+
+#data
+* { background-repeat: repeat-y; }
+#errors
+#expected
+| 1 *
+|   0x00080005
+#reset
+
+#data
+* { background-repeat: repeat; }
+#errors
+#expected
+| 1 *
+|   0x000a0005
+#reset
+
