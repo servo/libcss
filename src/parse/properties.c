@@ -832,11 +832,13 @@ css_error parse_background_position(css_language *c,
 			assert(BACKGROUND_POSITION_VERT_CENTER ==
 					BACKGROUND_POSITION_HORZ_CENTER);
 
-			/* Only one (horizontal) value, so vertical is center */
+			/* Only one value, so the other is center */
 			switch (value[0]) {
 			case BACKGROUND_POSITION_HORZ_LEFT:
 			case BACKGROUND_POSITION_HORZ_RIGHT:
 			case BACKGROUND_POSITION_VERT_CENTER:
+			case BACKGROUND_POSITION_VERT_TOP:
+			case BACKGROUND_POSITION_VERT_BOTTOM:
 				break;
 			case BACKGROUND_POSITION_VERT_SET:
 				value[0] = BACKGROUND_POSITION_HORZ_SET;
