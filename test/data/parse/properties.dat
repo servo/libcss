@@ -622,11 +622,11 @@ p:after { content: no-close-quote; }
 #reset
 
 #data
-a:after { content: " »"; }
+a:after { content: " a"; }
 #errors
 #expected
 | 1 a:after
-|   0x02000010 PTR( ») 0x00000000
+|   0x02000010 PTR( a) 0x00000000
 #reset
 
 #data
@@ -682,7 +682,7 @@ h2:before { content: "Chapter " counter(chapters) ': \''; }
 #errors
 #expected
 | 1 h2:before
-|   0x02000010 PTR(Chapter ) 0x00000382 PTR(name) 0x00000080 PTR(: ') 0x00000000
+|   0x02000010 PTR(Chapter ) 0x00000382 PTR(chapters) 0x00000080 PTR(: ') 0x00000000
 #reset
 
 #data
@@ -726,7 +726,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #errors
 #expected
 | 1 *
-|   0x02000011 PTR(a) 0x00000400 PTR(moose) 0x00002800 0x00000000
+|   0x02000011 PTR(a) 0x00000400 0x00000080 PTR(moose) 0x00002800 0x00000000
 #reset
 
 #data
@@ -734,7 +734,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #errors
 #expected
 | 1 *
-|   0x02000011 PTR(a) 0x00000800 PTR(moose) 0x00000400 0x00000000
+|   0x02000011 PTR(a) 0x00000800 0x00000080 PTR(moose) 0x00000400 0x00000000
 #reset
 
 #data
@@ -742,7 +742,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #errors
 #expected
 | 1 *
-|   0x02000011 PTR(moose) 0x00000400 PTR(a) 0x00000400 0x00000000
+|   0x02000011 PTR(moose) 0x00000400 0x00000080 PTR(a) 0x00000400 0x00000000
 #reset
 
 ##
@@ -778,7 +778,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #errors
 #expected
 | 1 *
-|   0x02000012 PTR(a) 0x00000400 PTR(moose) 0x00002800 0x00000000
+|   0x02000012 PTR(a) 0x00000400 0x00000080 PTR(moose) 0x00002800 0x00000000
 #reset
 
 #data
@@ -786,7 +786,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #errors
 #expected
 | 1 *
-|   0x02000012 PTR(a) 0x00000800 PTR(moose) 0x00000400 0x00000000
+|   0x02000012 PTR(a) 0x00000800 0x00000080 PTR(moose) 0x00000400 0x00000000
 #reset
 
 #data
@@ -794,7 +794,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #errors
 #expected
 | 1 *
-|   0x02000012 PTR(moose) 0x00000400 PTR(a) 0x00000400 0x00000000
+|   0x02000012 PTR(moose) 0x00000400 0x00000080 PTR(a) 0x00000400 0x00000000
 #reset
 
 ##
