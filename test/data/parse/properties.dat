@@ -244,7 +244,7 @@
 #errors
 #expected
 | 1 *
-|   0x02000007 0x00000c00 0x00080000 0x00000c00 0x00080000
+|   0x02000007 0x00000c00 0x00000002 0x00000c00 0x00000002
 #reset
 
 #data
@@ -252,7 +252,7 @@
 #errors
 #expected
 | 1 *
-|   0x02000007 0x00000a00 0x00080000 0x00000a00 0x00080000
+|   0x02000007 0x00000a00 0x00000002 0x00000a00 0x00000002
 #reset
 
 #data
@@ -260,7 +260,7 @@
 #errors
 #expected
 | 1 *
-|   0x02000007 0x00000c00 0x00000000 0x00000a00 0x00080000
+|   0x02000007 0x00000c00 0x00000000 0x00000a00 0x00000002
 #reset
 
 ##
@@ -352,7 +352,7 @@
 #reset
 
 #data
-* { border-left-style: grove; }
+* { border-left-style: groove; }
 #errors
 #expected
 | 1 *
@@ -408,7 +408,7 @@
 #errors
 #expected
 | 1 *
-|   0x0000000a
+|   0x0808000a
 #reset
 
 #data
