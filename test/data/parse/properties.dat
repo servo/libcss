@@ -797,3 +797,43 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 |   0x02000012 PTR(moose) 0x00000400 PTR(a) 0x00000400 0x00000000
 #reset
 
+##
+## 13 - cue-after
+##
+
+#data
+* { cue-after: none; }
+#errors
+#expected
+| 1 *
+|   0x00000013
+#reset
+
+#data
+* { cue-after: url("sonic_boom.wav"); }
+#errors
+#expected
+| 1 *
+|   0x02000013
+#reset
+
+##
+## 14 - cue-before
+##
+
+#data
+* { cue-after: none; }
+#errors
+#expected
+| 1 *
+|   0x00000014
+#reset
+
+#data
+* { cue-after: url(sonic_boom.wav); }
+#errors
+#expected
+| 1 *
+|   0x02000014
+#reset
+
