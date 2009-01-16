@@ -431,6 +431,12 @@ void validate_rule_selector(css_rule_selector *s, exp_entry *e, int testnum)
 					e->bytecode[i]) {
 				printf("%d: Bytecode differs at %d\n",
 					testnum, i);
+				while (i < e->bcused) {
+					printf("%.2x ", 
+						((uint8_t *) s->style->bytecode)[i]);
+					i++;
+				}
+				printf("\n");
 				assert(0 && "Bytecode differs");
 			}
 		}
