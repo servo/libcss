@@ -75,7 +75,7 @@
 #errors
 #expected
 | 1 *
-|   0x00840004
+|   0x00800004
 #reset
 
 #data
@@ -83,7 +83,7 @@
 #errors
 #expected
 | 1 *
-|   0x00440004
+|   0x00000004
 #reset
 
 #data
@@ -91,7 +91,7 @@
 #errors
 #expected
 | 1 *
-|   0x00040004
+|   0x00400004
 #reset
 
 #data
@@ -99,7 +99,7 @@
 #errors
 #expected
 | 1 *
-|   0x00480004
+|   0x00080004
 #reset
 
 #data
@@ -107,7 +107,7 @@
 #errors
 #expected
 | 1 *
-|   0x00400004
+|   0x00040004
 #reset
 
 #data
@@ -115,7 +115,7 @@
 #errors
 #expected
 | 1 *
-|   0x00000004
+|   0x00440004
 #reset
 
 #data
@@ -123,7 +123,7 @@
 #errors
 #expected
 | 1 *
-|   0x02040004 0x00000100 0x00002800
+|   0x02000004 0x00000100 0x00002800
 #reset
 
 #data
@@ -131,7 +131,7 @@
 #errors
 #expected
 | 1 *
-|   0x02040004 0x00000000 0x00000800
+|   0x02000004 0x00000000 0x00000800
 #reset
 
 #data
@@ -155,7 +155,7 @@
 #errors
 #expected
 | 1 *
-|   0x02000004 0x00000000 0x00000800
+|   0x02040004 0x00000000 0x00000800
 #reset
 
 #data
