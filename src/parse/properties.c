@@ -2046,7 +2046,7 @@ css_error parse_cursor(css_language *c,
 	int temp_ctx = *ctx;
 	uint8_t *ptr;
 
-	/* [ URI* IDENT(auto, crosshair, default, pointer, move, e-resize,
+	/* [ (URI ',')* IDENT(auto, crosshair, default, pointer, move, e-resize,
 	 *              ne-resize, nw-resize, n-resize, se-resize, sw-resize,
 	 *              s-resize, w-resize, text, wait, help, progress) ] 
 	 * | IDENT(inherit) 
@@ -2077,14 +2077,20 @@ css_error parse_cursor(css_language *c,
 
 			consumeWhitespace(vector, &temp_ctx);
 
-			token = parserutils_vector_peek(vector, temp_ctx);
-			if (token != NULL && tokenIsChar(token, '!')) {
-				break;
-			}
+			/* Expect ',' */
+			token = parserutils_vector_iterate(vector, &temp_ctx);
+			if (token == NULL || tokenIsChar(token, ',') == false)
+				return CSS_INVALID;
+
+			consumeWhitespace(vector, &temp_ctx);
+
+			/* Expect either URI or IDENT */
+			token = parserutils_vector_iterate(vector, &temp_ctx);
+			if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+					token->type != CSS_TOKEN_URI))
+				return CSS_INVALID;
 
 			first = false;
-
-			token = parserutils_vector_iterate(vector, &temp_ctx);
 		}
 
 		/* IDENT */
@@ -2216,14 +2222,20 @@ css_error parse_cursor(css_language *c,
 
 			consumeWhitespace(vector, ctx);
 
-			token = parserutils_vector_peek(vector, *ctx);
-			if (token != NULL && tokenIsChar(token, '!')) {
-				break;
-			}
+			/* Expect ',' */
+			token = parserutils_vector_iterate(vector, ctx);
+			if (token == NULL || tokenIsChar(token, ',') == false)
+				return CSS_INVALID;
+
+			consumeWhitespace(vector, ctx);
+
+			/* Expect either URI or IDENT */
+			token = parserutils_vector_iterate(vector, ctx);
+			if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+					token->type != CSS_TOKEN_URI))
+				return CSS_INVALID;
 
 			first = false;
-
-			token = parserutils_vector_iterate(vector, ctx);
 		}
 
 		/* IDENT */
