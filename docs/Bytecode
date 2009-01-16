@@ -169,16 +169,16 @@ Opcodes
 					bits 4-6: MBZ
 			       clear => keywords:
 					bits 4-6:
-						000   => right
-						001   => center
+						000   => center
+						001   => right
 						010   => left
 						other => rffe
 			bit 3: set => percentage or length unit follows
 					bits 0-2: MBZ
 			       clear => keywords:
 					bits 0-2:
-						000   => bottom
-						001   => center
+						000   => center
+						001   => bottom
 						010   => top
 						other => rffe
 
