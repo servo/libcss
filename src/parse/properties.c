@@ -829,6 +829,9 @@ css_error parse_background_position(css_language *c,
 
 		/* Now, sort out the mess we've got */
 		if (i == 1) {
+			assert(BACKGROUND_POSITION_VERT_CENTER ==
+					BACKGROUND_POSITION_HORZ_CENTER);
+
 			/* Only one (horizontal) value, so vertical is center */
 			switch (value[0]) {
 			case BACKGROUND_POSITION_HORZ_LEFT:
@@ -867,7 +870,7 @@ css_error parse_background_position(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_BOTTOM, flags, value[0] | value[1]);
+	opv = buildOPV(OP_BACKGROUND_POSITION, flags, value[0] | value[1]);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false) { 
