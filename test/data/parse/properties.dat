@@ -568,3 +568,232 @@
 | 1 *
 |   0x0200000f 0xbbbbcc00
 #reset
+
+##
+##10 - content
+##
+
+#data
+p:after { content: normal; }
+#errors
+#expected
+| 1 p:after
+|   0x00000010
+#reset
+
+#data
+p:after { content: none; }
+#errors
+#expected
+| 1 p:after
+|   0x00040010
+#reset
+
+#data
+p:before { content: open-quote; }
+#errors
+#expected
+| 1 p:before
+|   0x00080010 0x00000000
+#reset
+
+#data
+p:after { content: close-quote; }
+#errors
+#expected
+| 1 p:after
+|   0x000c0010 0x00000000
+#reset
+
+#data
+p:before { content: no-open-quote; }
+#errors
+#expected
+| 1 p:before
+|   0x00100010 0x00000000
+#reset
+
+#data
+p:after { content: no-close-quote; }
+#errors
+#expected
+| 1 p:after
+|   0x00140010 0x00000000
+#reset
+
+#data
+a:after { content: " »"; }
+#errors
+#expected
+| 1 a:after
+|   0x02000010 PTR( ») 0x00000000
+#reset
+
+#data
+p:after { content: url("http://www.netsurf-browser.org/"); }
+#errors
+#expected
+| 1 p:after
+|   0x02040010 PTR(http://www.netsurf-browser.org/) 0x00000000
+#reset
+
+#data
+p:after { content: counter(n); }
+#errors
+#expected
+| 1 p:after
+|   0x0e080010 PTR(n) 0x00000000
+#reset
+
+#data
+p:after { content: counter(n, upper-roman); }
+#errors
+#expected
+| 1 p:after
+|   0x1a080010 PTR(n) 0x00000000
+#reset
+
+#data
+p:after { content: counters(n, "."); }
+#errors
+#expected
+| 1 p:after
+|   0x0e0c0010 PTR(n) PTR(.) 0x00000000
+#reset
+
+#data
+p:after { content: counters(n, '.', disc); }
+#errors
+#expected
+| 1 p:after
+|   0x020c0010 PTR(n) PTR(.) 0x00000000
+#reset
+
+#data
+p:after { content: attr(name); }
+#errors
+#expected
+| 1 p:after
+|   0x02100010 PTR(name) 0x00000000
+#reset
+
+#data
+h2:before { content: "Chapter " counter(chapters) ': \''; }
+#errors
+#expected
+| 1 h2:before
+|   0x02000010 PTR(Chapter ) 0x00000382 PTR(name) 0x00000080 PTR(: ') 0x00000000
+#reset
+
+#data
+p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " attr(name) " " counter(x) "." counters(y, ".") close-quote; }
+#errors
+#expected
+| 1 p:before
+|   00080010 0x00000081 PTR(http://picodrive.acornarcade.com/) 0x00000080 PTR( : ) 0x00000084 PTR(name) 0x00000080 PTR( ) 0x00000382 PTR(x) 0x00000080 PTR(.) 0x00000383 PTR(y) PTR(.) 0x00000003 0x00000000
+#reset
+
+##
+## 11 - counter-increment
+##
+
+#data
+* { counter-increment: none; }
+#errors
+#expected
+| 1 *
+|   0x00000011
+#reset
+
+#data
+* { counter-increment: a; }
+#errors
+#expected
+| 1 *
+|   0x02000011 PTR(a) 0x00000400 0x00000000
+#reset
+
+#data
+* { counter-increment: moose 10; }
+#errors
+#expected
+| 1 *
+|   0x02000011 PTR(moose) 0x00002800 0x00000000
+#reset
+
+#data
+* { counter-increment: a moose 10; }
+#errors
+#expected
+| 1 *
+|   0x02000011 PTR(a) 0x00000400 PTR(moose) 0x00002800 0x00000000
+#reset
+
+#data
+* { counter-increment: a 2 moose; }
+#errors
+#expected
+| 1 *
+|   0x02000011 PTR(a) 0x00000800 PTR(moose) 0x00000400 0x00000000
+#reset
+
+#data
+* { counter-increment: moose a; }
+#errors
+#expected
+| 1 *
+|   0x02000011 PTR(moose) 0x00000400 PTR(a) 0x00000400 0x00000000
+#reset
+
+##
+## 12 - counter-reset
+##
+
+#data
+* { counter-reset: none; }
+#errors
+#expected
+| 1 *
+|   0x00000012
+#reset
+
+#data
+* { counter-reset: a; }
+#errors
+#expected
+| 1 *
+|   0x02000012 PTR(a) 0x00000400 0x00000000
+#reset
+
+#data
+* { counter-reset: moose 10; }
+#errors
+#expected
+| 1 *
+|   0x02000012 PTR(moose) 0x00002800 0x00000000
+#reset
+
+#data
+* { counter-reset: a moose 10; }
+#errors
+#expected
+| 1 *
+|   0x02000012 PTR(a) 0x00000400 PTR(moose) 0x00002800 0x00000000
+#reset
+
+#data
+* { counter-reset: a 2 moose; }
+#errors
+#expected
+| 1 *
+|   0x02000012 PTR(a) 0x00000800 PTR(moose) 0x00000400 0x00000000
+#reset
+
+#data
+* { counter-reset: moose a; }
+#errors
+#expected
+| 1 *
+|   0x02000012 PTR(moose) 0x00000400 PTR(a) 0x00000400 0x00000000
+#reset
+
