@@ -2,6 +2,126 @@
 ## 00 - azimuth
 ##
 
+#data
+* { azimuth: left-side; }
+#errors
+#expected
+| 1 *
+|   0x00000000
+#reset
+
+#data
+* { azimuth: far-left; }
+#errors
+#expected
+| 1 *
+|   0x00040000
+#reset
+
+#data
+* { azimuth: left; }
+#errors
+#expected
+| 1 *
+|   0x00080000
+#reset
+
+#data
+* { azimuth: center-left; }
+#errors
+#expected
+| 1 *
+|   0x000c0000
+#reset
+
+#data
+* { azimuth: center; }
+#errors
+#expected
+| 1 *
+|   0x00100000
+#reset
+
+#data
+* { azimuth: center-right; }
+#errors
+#expected
+| 1 *
+|   0x00140000
+#reset
+
+#data
+* { azimuth: right; }
+#errors
+#expected
+| 1 *
+|   0x00180000
+#reset
+
+#data
+* { azimuth: far-right; }
+#errors
+#expected
+| 1 *
+|   0x001c0000
+#reset
+
+#data
+* { azimuth: right-side; }
+#errors
+#expected
+| 1 *
+|   0x00200000
+#reset
+
+#data
+* { azimuth: leftwards; }
+#errors
+#expected
+| 1 *
+|   0x01000000
+#reset
+
+#data
+* { azimuth: rightwards; }
+#errors
+#expected
+| 1 *
+|   0x01040000
+#reset
+
+#data
+* { azimuth: 45deg; }
+#errors
+#expected
+| 1 *
+|   0x02000000 0x0000b400 0x00000200
+#reset
+
+#data
+* { azimuth: -45deg; }
+#errors
+#expected
+| 1 *
+|   0x02000000 0xffff4c00 0x00000200
+#reset
+
+#data
+* { azimuth: 50grad; }
+#errors
+#expected
+| 1 *
+|   0x02000000 0x0000c800 0x00000201
+#reset
+
+#data
+* { azimuth: 0.785rad; }
+#errors
+#expected
+| 1 *
+|   0x02000000 0x00000323 0x00000202
+#reset
+
 ##
 ## 01 - background-attachment
 ##
