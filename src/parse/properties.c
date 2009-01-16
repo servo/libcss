@@ -1608,7 +1608,7 @@ css_error parse_counter_increment(css_language *c,
 	int temp_ctx = *ctx;
 	uint8_t *ptr;
 
-	/* [IDENT <integer> ]+ | IDENT(none, inherit) */
+	/* [IDENT <integer>? ]+ | IDENT(none, inherit) */
 
 	/* Pass 1: validate input and calculate bytecode size */
 	token = parserutils_vector_iterate(vector, &temp_ctx);
@@ -1626,17 +1626,17 @@ css_error parse_counter_increment(css_language *c,
 
 		while (token != NULL) {
 			const parserutils_hash_entry *name = token->idata;
-			fixed increment = 1;
+			fixed increment = INTTOFIX(1);
 
 			consumeWhitespace(vector, &temp_ctx);
 
 			/* Optional integer */
 			token = parserutils_vector_peek(vector, temp_ctx);
-			if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-					token->type != CSS_TOKEN_NUMBER))
+			if (token != NULL && token->type != CSS_TOKEN_IDENT &&
+					token->type != CSS_TOKEN_NUMBER)
 				return CSS_INVALID;
 
-			if (token->type == CSS_TOKEN_NUMBER) {
+			if (token != NULL && token->type == CSS_TOKEN_NUMBER) {
 				const css_string temp = { token->ilower->len,
 					(uint8_t *) token->ilower->data };
 				size_t consumed = 0;
@@ -1658,7 +1658,7 @@ css_error parse_counter_increment(css_language *c,
 			required_size += sizeof(name) + sizeof(increment);
 
 			token = parserutils_vector_peek(vector, temp_ctx);
-			if (token != NULL && tokenIsChar(token, '!')) {
+			if (token == NULL || tokenIsChar(token, '!')) {
 				break;
 			}
 
@@ -1702,17 +1702,17 @@ css_error parse_counter_increment(css_language *c,
 
 		while (token != NULL) {
 			const parserutils_hash_entry *name = token->idata;
-			fixed increment = 1;
+			fixed increment = INTTOFIX(1);
 
 			consumeWhitespace(vector, ctx);
 
 			/* Optional integer */
 			token = parserutils_vector_peek(vector, *ctx);
-			if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-					token->type != CSS_TOKEN_NUMBER))
+			if (token != NULL && token->type != CSS_TOKEN_IDENT &&
+					token->type != CSS_TOKEN_NUMBER)
 				return CSS_INVALID;
 
-			if (token->type == CSS_TOKEN_NUMBER) {
+			if (token != NULL && token->type == CSS_TOKEN_NUMBER) {
 				const css_string temp = { token->ilower->len,
 					(uint8_t *) token->ilower->data };
 				size_t consumed = 0;
@@ -1738,7 +1738,7 @@ css_error parse_counter_increment(css_language *c,
 			ptr += sizeof(increment);
 
 			token = parserutils_vector_peek(vector, *ctx);
-			if (token != NULL && tokenIsChar(token, '!')) {
+			if (token == NULL || tokenIsChar(token, '!')) {
 				break;
 			}
 
@@ -1773,7 +1773,7 @@ css_error parse_counter_reset(css_language *c,
 	int temp_ctx = *ctx;
 	uint8_t *ptr;
 
-	/* [IDENT <integer> ]+ | IDENT(none, inherit) */
+	/* [IDENT <integer>? ]+ | IDENT(none, inherit) */
 
 	/* Pass 1: validate input and calculate bytecode size */
 	token = parserutils_vector_iterate(vector, &temp_ctx);
@@ -1791,17 +1791,17 @@ css_error parse_counter_reset(css_language *c,
 
 		while (token != NULL) {
 			const parserutils_hash_entry *name = token->idata;
-			fixed increment = 1;
+			fixed increment = INTTOFIX(1);
 
 			consumeWhitespace(vector, &temp_ctx);
 
 			/* Optional integer */
 			token = parserutils_vector_peek(vector, temp_ctx);
-			if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-					token->type != CSS_TOKEN_NUMBER))
+			if (token != NULL && token->type != CSS_TOKEN_IDENT &&
+					token->type != CSS_TOKEN_NUMBER)
 				return CSS_INVALID;
 
-			if (token->type == CSS_TOKEN_NUMBER) {
+			if (token != NULL && token->type == CSS_TOKEN_NUMBER) {
 				const css_string temp = { token->ilower->len,
 					(uint8_t *) token->ilower->data };
 				size_t consumed = 0;
@@ -1823,7 +1823,7 @@ css_error parse_counter_reset(css_language *c,
 			required_size += sizeof(name) + sizeof(increment);
 
 			token = parserutils_vector_peek(vector, temp_ctx);
-			if (token != NULL && tokenIsChar(token, '!')) {
+			if (token == NULL || tokenIsChar(token, '!')) {
 				break;
 			}
 
@@ -1867,17 +1867,17 @@ css_error parse_counter_reset(css_language *c,
 
 		while (token != NULL) {
 			const parserutils_hash_entry *name = token->idata;
-			fixed increment = 1;
+			fixed increment = INTTOFIX(1);
 
 			consumeWhitespace(vector, ctx);
 
 			/* Optional integer */
 			token = parserutils_vector_peek(vector, *ctx);
-			if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-					token->type != CSS_TOKEN_NUMBER))
+			if (token != NULL && token->type != CSS_TOKEN_IDENT &&
+					token->type != CSS_TOKEN_NUMBER)
 				return CSS_INVALID;
 
-			if (token->type == CSS_TOKEN_NUMBER) {
+			if (token != NULL && token->type == CSS_TOKEN_NUMBER) {
 				const css_string temp = { token->ilower->len,
 					(uint8_t *) token->ilower->data };
 				size_t consumed = 0;
@@ -1903,7 +1903,7 @@ css_error parse_counter_reset(css_language *c,
 			ptr += sizeof(increment);
 
 			token = parserutils_vector_peek(vector, *ctx);
-			if (token != NULL && tokenIsChar(token, '!')) {
+			if (token == NULL || tokenIsChar(token, '!')) {
 				break;
 			}
 
