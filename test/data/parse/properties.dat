@@ -1397,3 +1397,343 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 |   0x0008001a
 #reset
 
+##
+## 1b - font-family
+##
+
+#data
+* { font-family: serif; }
+#errors
+#expected
+| 1 *
+|   0x0004001b 0x00000000
+#reset
+
+#data
+* { font-family: sans-serif; }
+#errors
+#expected
+| 1 *
+|   0x0008001b 0x00000000
+#reset
+
+#data
+* { font-family: cursive; }
+#errors
+#expected
+| 1 *
+|   0x000c001b 0x00000000
+#reset
+
+#data
+* { font-family: fantasy; }
+#errors
+#expected
+| 1 *
+|   0x0010001b 0x00000000
+#reset
+
+#data
+* { font-family: monospace; }
+#errors
+#expected
+| 1 *
+|   0x0014001b 0x00000000
+#reset
+
+#data
+* { font-family: Homerton; }
+#errors
+#expected
+| 1 *
+|   0x0200001b PTR(Homerton) 0x00000000
+#reset
+
+#data
+* { font-family: Homerton; }
+#errors
+#expected
+| 1 *
+|   0x0200001b PTR(Homerton) 0x00000000
+#reset
+
+#data
+* { font-family: "Oxford"; }
+#errors
+#expected
+| 1 *
+|   0x0200001b PTR(Oxford) 0x00000000
+#reset
+
+#data
+* { font-family: "Oxford", 'Optima', 'Zapf Humanist', sans-serif; }
+#errors
+#expected
+| 1 *
+|   0x0200001b PTR(Oxford) 0x00000080 PTR(Optima) 0x00000080 PTR(Zapf Humanist) 0x00000002 0x00000000
+#reset
+
+#data
+* { font-family: "Trinity", serif, 'Homerton', sans-serif; }
+#errors
+#expected
+| 1 *
+|   0x0200001b PTR(Trinity) 0x00000001 0x00000080 PTR(Homerton) 0x00000002 0x00000000
+#reset
+
+##
+## 1c - font-size
+##
+
+#data
+* { font-size: xx-small; }
+#errors
+#expected
+| 1 *
+|   0x0000001c
+#reset
+
+#data
+* { font-size: x-small; }
+#errors
+#expected
+| 1 *
+|   0x0004001c
+#reset
+
+#data
+* { font-size: small; }
+#errors
+#expected
+| 1 *
+|   0x0008001c
+#reset
+
+#data
+* { font-size: medium; }
+#errors
+#expected
+| 1 *
+|   0x000c001c
+#reset
+
+#data
+* { font-size: large; }
+#errors
+#expected
+| 1 *
+|   0x0010001c
+#reset
+
+#data
+* { font-size: x-large; }
+#errors
+#expected
+| 1 *
+|   0x0014001c
+#reset
+
+#data
+* { font-size: xx-large; }
+#errors
+#expected
+| 1 *
+|   0x0018001c
+#reset
+
+#data
+* { font-size: larger; }
+#errors
+#expected
+| 1 *
+|   0x001c001c
+#reset
+
+#data
+* { font-size: smaller; }
+#errors
+#expected
+| 1 *
+|   0x0020001c
+#reset
+
+#data
+* { font-size: 12pt; }
+#errors
+#expected
+| 1 *
+|   0x0200001c 0x00003000 0x00000006
+#reset
+
+#data
+* { font-size: 100px; }
+#errors
+#expected
+| 1 *
+|   0x0200001c 0x00019000 0x00000000
+#reset
+
+#data
+* { font-size: 120%; }
+#errors
+#expected
+| 1 *
+|   0x0200001c 0x0001e000 0x00000100
+#reset
+
+##
+## 1d - font-style
+##
+
+#data
+* { font-style: normal; }
+#errors
+#expected
+| 1 *
+|   0x0000001d
+#reset
+
+#data
+* { font-style: italic; }
+#errors
+#expected
+| 1 *
+|   0x0004001d
+#reset
+
+#data
+* { font-style: oblique; }
+#errors
+#expected
+| 1 *
+|   0x0008001d
+#reset
+
+##
+## 1e - font-variant
+##
+
+#data
+* { font-variant: normal; }
+#errors
+#expected
+| 1 *
+|   0x0000001e
+#reset
+
+#data
+* { font-variant: small-caps; }
+#errors
+#expected
+| 1 *
+|   0x0004001e
+#reset
+
+##
+## 1e - font-weight
+##
+
+#data
+* { font-weight: normal; }
+#errors
+#expected
+| 1 *
+|   0x0000001f
+#reset
+
+#data
+* { font-weight: bold; }
+#errors
+#expected
+| 1 *
+|   0x0004001f
+#reset
+
+#data
+* { font-weight: bolder; }
+#errors
+#expected
+| 1 *
+|   0x0008001f
+#reset
+
+#data
+* { font-weight: lighter; }
+#errors
+#expected
+| 1 *
+|   0x000c001f
+#reset
+
+#data
+* { font-weight: 100; }
+#errors
+#expected
+| 1 *
+|   0x0010001f
+#reset
+
+#data
+* { font-weight: 200; }
+#errors
+#expected
+| 1 *
+|   0x0014001f
+#reset
+
+#data
+* { font-weight: 300; }
+#errors
+#expected
+| 1 *
+|   0x0018001f
+#reset
+
+#data
+* { font-weight: 400; }
+#errors
+#expected
+| 1 *
+|   0x001c001f
+#reset
+
+#data
+* { font-weight: 500; }
+#errors
+#expected
+| 1 *
+|   0x0020001f
+#reset
+
+#data
+* { font-weight: 600; }
+#errors
+#expected
+| 1 *
+|   0x0024001f
+#reset
+
+#data
+* { font-weight: 700; }
+#errors
+#expected
+| 1 *
+|   0x0028001f
+#reset
+
+#data
+* { font-weight: 800; }
+#errors
+#expected
+| 1 *
+|   0x002c001f
+#reset
+
+#data
+* { font-weight: 900; }
+#errors
+#expected
+| 1 *
+|   0x0030001f
+#reset
+
