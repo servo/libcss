@@ -2344,3 +2344,572 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 | 1 *
 |   0x0200002f 0x00000000 0x00000000
 #reset
+
+##
+## 30 - overflow
+##
+
+#data
+* { overflow: visible; }
+#errors
+#expected
+| 1 *
+|   0x00000030
+#reset
+
+#data
+* { overflow: hidden; }
+#errors
+#expected
+| 1 *
+|   0x00040030
+#reset
+
+#data
+* { overflow: scroll; }
+#errors
+#expected
+| 1 *
+|   0x00080030
+#reset
+
+#data
+* { overflow: auto; }
+#errors
+#expected
+| 1 *
+|   0x000c0030
+#reset
+
+##
+## 31 - padding-{top,right,bottom,left}
+##
+
+#data
+* { padding-top: 10pc; }
+#errors
+#expected
+| 1 *
+|   0x02000031 0x00002800 0x00000007
+#reset
+
+#data
+* { padding-right: 1px; }
+#errors
+#expected
+| 1 *
+|   0x06000031 0x00000400 0x00000000
+#reset
+
+#data
+* { padding-bottom: 2em; }
+#errors
+#expected
+| 1 *
+|   0x0a000031 0x00000800 0x00000002
+#reset
+
+#data
+* { padding-left: 5%; }
+#errors
+#expected
+| 1 *
+|   0x0e000031 0x00001400 0x00000100
+#reset
+
+##
+## 32 - page-break-after
+##
+
+#data
+* { page-break-after: auto; }
+#errors
+#expected
+| 1 *
+|   0x00000032
+#reset
+
+#data
+* { page-break-after: always; }
+#errors
+#expected
+| 1 *
+|   0x00040032
+#reset
+
+#data
+* { page-break-after: avoid; }
+#errors
+#expected
+| 1 *
+|   0x00080032
+#reset
+
+#data
+* { page-break-after: left; }
+#errors
+#expected
+| 1 *
+|   0x000c0032
+#reset
+
+#data
+* { page-break-after: right; }
+#errors
+#expected
+| 1 *
+|   0x00100032
+#reset
+
+##
+## 33 - page-break-before
+##
+
+#data
+* { page-break-before: auto; }
+#errors
+#expected
+| 1 *
+|   0x00000033
+#reset
+
+#data
+* { page-break-before: always; }
+#errors
+#expected
+| 1 *
+|   0x00040033
+#reset
+
+#data
+* { page-break-before: avoid; }
+#errors
+#expected
+| 1 *
+|   0x00080033
+#reset
+
+#data
+* { page-break-before: left; }
+#errors
+#expected
+| 1 *
+|   0x000c0033
+#reset
+
+#data
+* { page-break-before: right; }
+#errors
+#expected
+| 1 *
+|   0x00100033
+#reset
+
+##
+## 34 - page-break-inside
+##
+
+#data
+* { page-break-inside: avoid; }
+#errors
+#expected
+| 1 *
+|   0x00000034
+#reset
+
+#data
+* { page-break-inside: auto; }
+#errors
+#expected
+| 1 *
+|   0x00040034
+#reset
+
+##
+## 35 - pause-after
+##
+
+#data
+* { pause-after: 0; }
+#errors
+#expected
+| 1 *
+|   0x02000035 0x00000000 0x00000400
+#reset
+
+#data
+* { pause-after: 100ms; }
+#errors
+#expected
+| 1 *
+|   0x02000035 0x00019000 0x00000400
+#reset
+
+#data
+* { pause-after: 0.7s; }
+#errors
+#expected
+| 1 *
+|   0x02000035 0x000002cd 0x00000401
+#reset
+
+#data
+* { pasue-after: 120%; }
+#errors
+#expected
+| 1 *
+|   0x02000035 0x0001e000 0x00000100
+#reset
+
+##
+## 36 - pause-before
+##
+
+#data
+* { pause-before: 0; }
+#errors
+#expected
+| 1 *
+|   0x02000036 0x00000000 0x00000400
+#reset
+
+#data
+* { pause-before: 100ms; }
+#errors
+#expected
+| 1 *
+|   0x02000036 0x00019000 0x00000400
+#reset
+
+#data
+* { pause-before: 0.7s; }
+#errors
+#expected
+| 1 *
+|   0x02000036 0x000002cd 0x00000401
+#reset
+
+#data
+* { pause-before: 120%; }
+#errors
+#expected
+| 1 *
+|   0x02000036 0x0001e000 0x00000100
+#reset
+
+##
+## 37 - pitch-range
+##
+
+#data
+* { pitch-range: 0; }
+#errors
+#expected
+| 1 *
+|   0x02000037 0x00000000
+#reset
+
+#data
+* { pitch-range: 50; }
+#errors
+#expected
+| 1 *
+|   0x02000037 0x0000c800
+#reset
+
+#data
+* { pitch-range: 100; }
+#errors
+#expected
+| 1 *
+|   0x02000037 0x00019000
+#reset
+
+##
+## 38 - pitch
+##
+
+#data
+* { pitch: x-low; }
+#errors
+#expected
+| 1 *
+|   0x00000038
+#reset
+
+#data
+* { pitch: low; }
+#errors
+#expected
+| 1 *
+|   0x00040038
+#reset
+
+#data
+* { pitch: medium; }
+#errors
+#expected
+| 1 *
+|   0x00080038
+#reset
+
+#data
+* { pitch: high; }
+#errors
+#expected
+| 1 *
+|   0x000c0038
+#reset
+
+#data
+* { pitch: x-high; }
+#errors
+#expected
+| 1 *
+|   0x00100038
+#reset
+
+#data
+* { pitch: 0; }
+#errors
+#expected
+| 1 *
+|   0x02000038 0x00000000 0x00000800
+#reset
+
+#data
+* { pitch: 400Hz; }
+#errors
+#expected
+| 1 *
+|   0x02000038 0x00064000 0x00000800
+#reset
+
+#data
+* { pitch: 1.1kHz; }
+#errors
+#expected
+| 1 *
+|   0x02000038 0x00000466 0x00000801
+#reset
+
+##
+## 39 - play-during
+##
+
+#data
+* { play-during: auto; }
+#errors
+#expected
+| 1 *
+|   0x00000039
+#reset
+
+#data
+* { play-during: none; }
+#errors
+#expected
+| 1 *
+|   0x00040039
+#reset
+
+#data
+* { play-during: url(death_rattle.wav); }
+#errors
+#expected
+| 1 *
+|   0x02000039 PTR(death_rattle.wav)
+#reset
+
+#data
+* { play-during: mix url(death_rattle.wav); }
+#errors
+#expected
+| 1 *
+|   0x03000039 PTR(death_rattle.wav)
+#reset
+
+#data
+* { play-during: url(death_rattle.wav) mix; }
+#errors
+#expected
+| 1 *
+|   0x03000039 PTR(death_rattle.wav)
+#reset
+
+#data
+* { play-during: repeat url(death_rattle.wav) mix; }
+#errors
+#expected
+| 1 *
+|   0x03800039 PTR(death_rattle.wav)
+#reset
+
+#data
+* { play-during: repeat url(death_rattle.wav); }
+#errors
+#expected
+| 1 *
+|   0x02800039 PTR(death_rattle.wav)
+#reset
+
+##
+## 3a - position
+##
+
+#data
+* { position: static; }
+#errors
+#expected
+| 1 *
+|   0x0000003a
+#reset
+
+#data
+* { position: relative; }
+#errors
+#expected
+| 1 *
+|   0x0004003a
+#reset
+
+#data
+* { position: absolute; }
+#errors
+#expected
+| 1 *
+|   0x0008003a
+#reset
+
+#data
+* { position: fixed; }
+#errors
+#expected
+| 1 *
+|   0x000c003a
+#reset
+
+##
+## 3b - quotes
+##
+
+#data
+* { quotes: none; }
+#errors
+#expected
+| 1 *
+|   0x0000003b
+#reset
+
+#data
+* { quotes: "\"" '"'; }
+#errors
+#expected
+| 1 *
+|   0x0200003b PTR(") PTR(") 0x00000000
+#reset
+
+#data
+* { quotes: "'" '\'' '"' '"'; }
+#errors
+#expected
+| 1 *
+|   0x0200003b PTR(') PTR(') 0x00000080 PTR(") PTR(") 0x00000000
+#reset
+
+##
+## 3c - richness
+##
+
+#data
+* { richness: 0; }
+#errors
+#expected
+| 1 *
+|   0x0200003c 0x00000000
+#reset
+
+#data
+* { richness: 50; }
+#errors
+#expected
+| 1 *
+|   0x0200003c 0x0000c800
+#reset
+
+#data
+* { richness: 100; }
+#errors
+#expected
+| 1 *
+|   0x0200003c 0x00019000
+#reset
+
+##
+## 3d - right
+##
+
+#data
+* { right: auto; }
+#errors
+#expected
+| 1 *
+|   0x0000003d
+#reset
+
+#data
+* { right: 0.5in; }
+#errors
+#expected
+| 1 *
+|   0x0200003d 0x00000200 0x00000003
+#reset
+
+#data
+* { right: 4%; }
+#errors
+#expected
+| 1 *
+|   0x0200003d 0x00001000 0x00000100
+#reset
+
+##
+## 3e - speak-header
+##
+
+#data
+* { speak-header: once; }
+#errors
+#expected
+| 1 *
+|   0x0000003e
+#reset
+
+#data
+* { speak-header: always; }
+#errors
+#expected
+| 1 *
+|   0x0004003e
+#reset
+
+##
+## 3f - speak-numeral
+##
+
+#data
+* { speak-numeral: digits; }
+#errors
+#expected
+| 1 *
+|   0x0000003f
+#reset
+
+#data
+* { speak-numeral: continuous; }
+#errors
+#expected
+| 1 *
+|   0x0004003f
+#reset
+
