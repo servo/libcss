@@ -28,12 +28,10 @@
 2097151.000
 #reset
 
-# Test INT_MAX + 1. Note that, in converting the result to float, 
-# we'll end up with INT_MAX + 1 as the output.
 #data
 2097152
 #expected
-2097152.000
+2097151.999
 #reset
 
 #data
@@ -66,16 +64,17 @@
 -2097151.000
 #reset
 
+# TODO: should these next two not result in INT_MIN?
 #data
 -2097152
 #expected
--2097152.000
+-2097151.999
 #reset
 
 #data
 -2097153
 #expected
--2097152.000
+-2097151.999
 #reset
 
 #data

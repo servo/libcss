@@ -21,6 +21,7 @@ typedef struct line_ctx {
 static bool handle_line(const char *data, size_t datalen, void *pw);
 static void run_test(const uint8_t *data, size_t len, 
 		const char *exp, size_t explen);
+static void print_fixed(char *buf, size_t len, fixed f);
 
 int main(int argc, char **argv)
 {
@@ -117,10 +118,76 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 
 	result = number_from_css_string(&in, false, &consumed);
 
-	snprintf(buf, sizeof buf, "%.3f", FIXTOFLT(result));
+	print_fixed(buf, sizeof(buf), result);
 
 	printf("got: %s expected: %.*s\n", buf, (int) explen, exp);
 
 	assert(strncmp(buf, exp, explen) == 0);
+}
+
+void print_fixed(char *buf, size_t len, fixed f)
+{
+#define ABS(x) ((x) < 0 ? -(x) : (x))
+	uint32_t uintpart = FIXTOINT(ABS(f));
+	uint32_t fracpart = ((ABS(f) & 0x3ff) * 1000) / (1 << 10);
+#undef ABS
+	size_t flen = 0;
+	char tmp[20];
+	size_t tlen = 0;
+
+	if (len == 0)
+		return;
+
+	if (f < 0) {
+		buf[0] = '-';
+		buf++;
+		len--;
+	}
+
+	do {
+		tmp[tlen] = "0123456789"[uintpart % 10];
+		tlen++;
+
+		uintpart /= 10;
+	} while (tlen < 20 && uintpart != 0);
+
+	while (len > 0 && tlen > 0) {
+		buf[0] = tmp[--tlen];
+		buf++;
+		len--;
+	}
+
+	if (len > 0) {
+		buf[0] = '.';
+		buf++;
+		len--;
+	}
+
+	do {
+		tmp[tlen] = "0123456789"[fracpart % 10];
+		tlen++;
+
+		fracpart /= 10;
+	} while (tlen < 20 && fracpart != 0);
+
+	while (len > 0 && tlen > 0) {
+		buf[0] = tmp[--tlen];
+		buf++;
+		len--;
+		flen++;
+	}
+
+	while (len > 0 && flen < 3) {
+		buf[0] = '0';
+		buf++;
+		len--;
+		flen++;
+	}
+
+	if (len > 0) {
+		buf[0] = '\0';
+		buf++;
+		len--;
+	}
 }
 
