@@ -3593,3 +3593,91 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 | 1 *
 |   0x0010004f
 #reset
+
+##
+## 50 - widows
+##
+
+#data
+* { widows: 3; }
+#errors
+#expected
+| 1 *
+|   0x02000050 0x00000c00
+#reset
+
+##
+## 51 - width
+##
+
+#data
+* { width: auto; }
+#errors
+#expected
+| 1 *
+|   0x00000051
+#reset
+
+#data
+* { width: 99999.999ex; }
+#errors
+#expected
+| 1 *
+|   0x02000051 0x061a7fff 0x00000001
+#reset
+
+#data
+* { width: 66.667%; }
+#errors
+#expected
+| 1 *
+|   0x02000051 0x00010aab 0x00000100
+#reset
+
+##
+## 52 - word-spacing
+##
+
+#data
+* { word-spacing: normal; }
+#errors
+#expected
+| 1 *
+|   0x00000052
+#reset
+
+#data
+* { word-spacing: 0.1em; }
+#errors
+#expected
+| 1 *
+|   0x02000052 0x00000066 0x00000002
+#reset
+
+##
+## 53 - z-index
+##
+
+#data
+* { z-index: auto; }
+#errors
+#expected
+| 1 *
+|   0x00000053
+#reset
+
+#data
+* { z-index: 2; }
+#errors
+#expected
+| 1 *
+|   0x02000053 0x00000800
+#reset
+
+#data
+* { z-index: -1; }
+#errors
+#expected
+| 1 *
+|   0x02000053 0xfffffc00
+#reset
