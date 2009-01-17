@@ -1450,14 +1450,6 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #reset
 
 #data
-* { font-family: Homerton; }
-#errors
-#expected
-| 1 *
-|   0x0200001b PTR(Homerton) 0x00000000
-#reset
-
-#data
 * { font-family: "Oxford"; }
 #errors
 #expected
@@ -1842,7 +1834,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #reset
 
 #data
-* { left: 33.33%; }
+* { line-height: 33.33%; }
 #errors
 #expected
 | 1 *
@@ -2913,3 +2905,691 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 |   0x0004003f
 #reset
 
+##
+## 40 - speak-punctuation
+##
+
+#data
+* { speak-punctuation: code; }
+#errors
+#expected
+| 1 *
+|   0x00000040
+#reset
+
+#data
+* { speak-punctuation: none; }
+#errors
+#expected
+| 1 *
+|   0x00040040
+#reset
+
+##
+## 41 - speak
+##
+
+#data
+* { speak: normal; }
+#errors
+#expected
+| 1 *
+|   0x00000041
+#reset
+
+#data
+* { speak: none; }
+#errors
+#expected
+| 1 *
+|   0x00040041
+#reset
+
+#data
+* { speak: spell-out; }
+#errors
+#expected
+| 1 *
+|   0x00080041
+#reset
+
+##
+## 42 - speech-rate
+##
+
+#data
+* { speech-rate: x-slow; }
+#errors
+#expected
+| 1 *
+|   0x00000042
+#reset
+
+#data
+* { speech-rate: slow; }
+#errors
+#expected
+| 1 *
+|   0x00040042
+#reset
+
+#data
+* { speech-rate: medium; }
+#errors
+#expected
+| 1 *
+|   0x00080042
+#reset
+
+#data
+* { speech-rate: fast; }
+#errors
+#expected
+| 1 *
+|   0x000c0042
+#reset
+
+#data
+* { speech-rate: x-fast; }
+#errors
+#expected
+| 1 *
+|   0x00100042
+#reset
+
+#data
+* { speech-rate: faster; }
+#errors
+#expected
+| 1 *
+|   0x00140042
+#reset
+
+#data
+* { speech-rate: slower; }
+#errors
+#expected
+| 1 *
+|   0x00180042
+#reset
+
+#data
+* { speech-rate: 190; }
+#errors
+#expected
+| 1 *
+|   0x02000042 0x0002f800
+#reset
+
+##
+## 43 - stress
+##
+
+#data
+* { stress: 0; }
+#errors
+#expected
+| 1 *
+|   0x02000043 0x00000000
+#reset
+
+#data
+* { stress: 50; }
+#errors
+#expected
+| 1 *
+|   0x02000043 0x0000c800
+#reset
+
+#data
+* { stress: 100; }
+#errors
+#expected
+| 1 *
+|   0x02000043 0x00019000
+#reset
+
+##
+## 44 - table-layout
+##
+
+#data
+* { table-layout: auto; }
+#errors
+#expected
+| 1 *
+|   0x00000044
+#reset
+
+#data
+* { table-layout: fixed; }
+#errors
+#expected
+| 1 *
+|   0x00040044
+#reset
+
+##
+## 45 - text-align
+##
+
+#data
+* { text-align: left; }
+#errors
+#expected
+| 1 *
+|   0x00000045
+#reset
+
+#data
+* { text-align: right; }
+#errors
+#expected
+| 1 *
+|   0x00040045
+#reset
+
+#data
+* { text-align: center; }
+#errors
+#expected
+| 1 *
+|   0x00080045
+#reset
+
+#data
+* { text-align: justify; }
+#errors
+#expected
+| 1 *
+|   0x000c0045
+#reset
+
+##
+## 46 - text-decoration
+##
+
+#data
+* { text-decoration: none; }
+#errors
+#expected
+| 1 *
+|   0x00000046
+#reset
+
+#data
+* { text-decoration: underline; }
+#errors
+#expected
+| 1 *
+|   0x00040046
+#reset
+
+#data
+* { text-decoration: overline; }
+#errors
+#expected
+| 1 *
+|   0x00080046
+#reset
+
+#data
+* { text-decoration: line-through; }
+#errors
+#expected
+| 1 *
+|   0x00100046
+#reset
+
+#data
+* { text-decoration: blink; }
+#errors
+#expected
+| 1 *
+|   0x00200046
+#reset
+
+#data
+* { text-decoration: underline overline; }
+#errors
+#expected
+| 1 *
+|   0x000c0046
+#reset
+
+#data
+* { text-decoration: overline underline; }
+#errors
+#expected
+| 1 *
+|   0x000c0046
+#reset
+
+#data
+* { text-decoration: underline blink; }
+#errors
+#expected
+| 1 *
+|   0x00240046
+#reset
+
+##
+## 47 - text-indent
+##
+
+#data
+* { text-indent: ; }
+#errors
+#expected
+| 1 *
+|   0x02000047 0x00000000 0x00000000
+#reset
+
+#data
+* { text-indent: 12mm; }
+#errors
+#expected
+| 1 *
+|   0x02000047 0x00003000 0x00000005
+#reset
+
+#data
+* { text-indent: 33.33%; }
+#errors
+#expected
+| 1 *
+|   0x02000047 0x00008552 0x00000100
+#reset
+
+##
+## 48 - text-transform
+##
+
+#data
+* { text-transform: capitalize; }
+#errors
+#expected
+| 1 *
+|   0x00000048
+#reset
+
+#data
+* { text-transform: uppercase; }
+#errors
+#expected
+| 1 *
+|   0x00040048
+#reset
+
+#data
+* { text-transform: lowercase; }
+#errors
+#expected
+| 1 *
+|   0x00080048
+#reset
+
+#data
+* { text-transform: none; }
+#errors
+#expected
+| 1 *
+|   0x000c0048
+#reset
+
+##
+## 49 - top
+##
+
+#data
+* { top: auto; }
+#errors
+#expected
+| 1 *
+|   0x00000049
+#reset
+
+#data
+* { top: 0.5in; }
+#errors
+#expected
+| 1 *
+|   0x02000049 0x00000200 0x00000003
+#reset
+
+#data
+* { top: 4%; }
+#errors
+#expected
+| 1 *
+|   0x02000049 0x00001000 0x00000100
+#reset
+
+##
+## 4a - unicode-bidi
+##
+
+#data
+* { unicode-bidi: normal; }
+#errors
+#expected
+| 1 *
+|   0x0000004a
+#reset
+
+#data
+* { unicode-bidi: embed; }
+#errors
+#expected
+| 1 *
+|   0x0004004a
+#reset
+
+#data
+* { unicode-bidi: bidi-override; }
+#errors
+#expected
+| 1 *
+|   0x0008004a
+#reset
+
+##
+## 4b - vertical-align
+##
+
+#data
+* { vertical-align: baseline; }
+#errors
+#expected
+| 1 *
+|   0x0000004b
+#reset
+
+#data
+* { vertical-align: sub; }
+#errors
+#expected
+| 1 *
+|   0x0004004b
+#reset
+
+#data
+* { vertical-align: super; }
+#errors
+#expected
+| 1 *
+|   0x0008004b
+#reset
+
+#data
+* { vertical-align: top; }
+#errors
+#expected
+| 1 *
+|   0x000c004b
+#reset
+
+#data
+* { vertical-align: text-top; }
+#errors
+#expected
+| 1 *
+|   0x0010004b
+#reset
+
+#data
+* { vertical-align: middle; }
+#errors
+#expected
+| 1 *
+|   0x0014004b
+#reset
+
+#data
+* { vertical-align: bottom; }
+#errors
+#expected
+| 1 *
+|   0x0018004b
+#reset
+
+#data
+* { vertical-align: text-bottom; }
+#errors
+#expected
+| 1 *
+|   0x001c004b
+#reset
+
+#data
+* { vertical-align: -10%; }
+#errors
+#expected
+| 1 *
+|   0x0200004b 0xffffd800 0x00000100
+#reset
+
+#data
+* { vertical-align: 20%; }
+#errors
+#expected
+| 1 *
+|   0x0200004b 0x00005000 0x00000100
+#reset
+
+#data
+* { vertical-align: 4px; }
+#errors
+#expected
+| 1 *
+|   0x0200004b 0x00001000 0x00000000
+#reset
+
+#data
+* { vertical-align: -4px; }
+#errors
+#expected
+| 1 *
+|   0x0200004b 0xfffff000 0x00000000
+#reset
+
+##
+## 4c - visibility
+##
+
+#data
+* { visibility: visible; }
+#errors
+#expected
+| 1 *
+|   0x0000004c
+#reset
+
+#data
+* { visibility: hidden; }
+#errors
+#expected
+| 1 *
+|   0x0004004c
+#reset
+
+#data
+* { visibility: collapse; }
+#errors
+#expected
+| 1 *
+|   0x0008004c
+#reset
+
+##
+## 4d - voice-family
+##
+
+#data
+* { voice-family: male; }
+#errors
+#expected
+| 1 *
+|   0x0004004d 0x00000000
+#reset
+
+#data
+* { voice-family: female; }
+#errors
+#expected
+| 1 *
+|   0x0008004d 0x00000000
+#reset
+
+#data
+* { voice-family: child; }
+#errors
+#expected
+| 1 *
+|   0x000c004d 0x00000000
+#reset
+
+#data
+* { voice-family: romeo; }
+#errors
+#expected
+| 1 *
+|   0x0200004d PTR(romeo) 0x00000000
+#reset
+
+#data
+* { voice-family: "juliet"; }
+#errors
+#expected
+| 1 *
+|   0x0200004d PTR(juliet) 0x00000000
+#reset
+
+#data
+* { voice-family: "tlsa", 'romeo', male; }
+#errors
+#expected
+| 1 *
+|   0x0200004d PTR(tlsa) 0x00000080 PTR(romeo) 0x00000001 0x00000000
+#reset
+
+#data
+* { voice-family: "juliet", female, 'romeo', male; }
+#errors
+#expected
+| 1 *
+|   0x0200004d PTR(juliet) 0x00000002 0x00000080 PTR(romeo) 0x00000001 0x00000000
+#reset
+
+##
+## 4e - volume
+##
+
+#data
+* { volume: silent; }
+#errors
+#expected
+| 1 *
+|   0x0000004e
+#reset
+
+#data
+* { volume: x-soft; }
+#errors
+#expected
+| 1 *
+|   0x0004004e
+#reset
+
+#data
+* { volume: soft; }
+#errors
+#expected
+| 1 *
+|   0x0008004e
+#reset
+
+#data
+* { volume: medium; }
+#errors
+#expected
+| 1 *
+|   0x000c004e
+#reset
+
+#data
+* { volume: loud; }
+#errors
+#expected
+| 1 *
+|   0x0010004e
+#reset
+
+#data
+* { volume: x-loud; }
+#errors
+#expected
+| 1 *
+|   0x0014004e
+#reset
+
+#data
+* { volume: 50; }
+#errors
+#expected
+| 1 *
+|   0x0200004e 0x0000c800
+#reset
+
+# dunno if % can be tested here, cos it's a percentage of the inherited value
+#data
+* { volume: 33.33%; }
+#errors
+#expected
+| 1 *
+|   0x0204004e 0x00008552 0x00000100
+#reset
+
+##
+## 4f - white-space
+##
+
+#data
+* { white-space: normal; }
+#errors
+#expected
+| 1 *
+|   0x0000004f
+#reset
+
+#data
+* { white-space: pre; }
+#errors
+#expected
+| 1 *
+|   0x0004004f
+#reset
+
+#data
+* { white-space: nowrap; }
+#errors
+#expected
+| 1 *
+|   0x0008004f
+#reset
+
+#data
+* { white-space: pre-wrap; }
+#errors
+#expected
+| 1 *
+|   0x000c004f
+#reset
+
+#data
+* { white-space: pre-line; }
+#errors
+#expected
+| 1 *
+|   0x0010004f
+#reset
