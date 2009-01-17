@@ -122,6 +122,14 @@
 |   0x02000000 0x00000324 0x00000202
 #reset
 
+#data
+* { azimuth: -0.785rad; }
+#errors
+#expected
+| 1 *
+|   0x02000000 0xfffffcdc 0x00000202
+#reset
+
 ##
 ## 01 - background-attachment
 ##
