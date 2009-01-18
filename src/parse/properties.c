@@ -4678,6 +4678,11 @@ css_error parse_quotes(css_language *c,
 			required_size += sizeof(open) + sizeof(close);
 
 			first = false;
+
+			token = parserutils_vector_peek(vector, temp_ctx);
+			if (token == NULL || token->type != CSS_TOKEN_STRING)
+				break;
+			token = parserutils_vector_iterate(vector, &temp_ctx);
 		}
 
 		consumeWhitespace(vector, &temp_ctx);
@@ -4746,6 +4751,11 @@ css_error parse_quotes(css_language *c,
 			ptr += sizeof(close);
 
 			first = false;
+
+			token = parserutils_vector_peek(vector, *ctx);
+			if (token == NULL || token->type != CSS_TOKEN_STRING)
+				break;
+			token = parserutils_vector_iterate(vector, ctx);
 		}
 
 		consumeWhitespace(vector, ctx);
