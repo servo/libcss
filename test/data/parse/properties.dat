@@ -2706,14 +2706,6 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #reset
 
 #data
-* { play-during: mix url(death_rattle.wav); }
-#errors
-#expected
-| 1 *
-|   0x03000039 PTR(death_rattle.wav)
-#reset
-
-#data
 * { play-during: url(death_rattle.wav) mix; }
 #errors
 #expected
@@ -2722,7 +2714,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #reset
 
 #data
-* { play-during: repeat url(death_rattle.wav) mix; }
+* { play-during: url(death_rattle.wav) mix repeat; }
 #errors
 #expected
 | 1 *
@@ -2730,7 +2722,15 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #reset
 
 #data
-* { play-during: repeat url(death_rattle.wav); }
+* { play-during: url(death_rattle.wav) repeat mix; }
+#errors
+#expected
+| 1 *
+|   0x03800039 PTR(death_rattle.wav)
+#reset
+
+#data
+* { play-during: url(death_rattle.wav) repeat; }
 #errors
 #expected
 | 1 *
