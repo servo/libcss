@@ -6081,11 +6081,12 @@ css_error parse_volume(css_language *c,
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len,
-				(uint8_t *) token->ilower };
+				(uint8_t *) token->ilower->data };
 		length = number_from_css_string(&tmp, false, &consumed);
 		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
+		parserutils_vector_iterate(vector, ctx);
 		value = VOLUME_NUMBER;
 	} else {
 		/* Yes, really UNIT_PX -- percentages MUST have a % sign */
