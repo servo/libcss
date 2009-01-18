@@ -3170,7 +3170,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 ##
 
 #data
-* { text-indent: ; }
+* { text-indent: 0; }
 #errors
 #expected
 | 1 *
