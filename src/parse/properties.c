@@ -4527,6 +4527,8 @@ css_error parse_play_during(css_language *c,
 		uri = token->idata;
 
 		for (flags = 0; flags < 2; flags++) {
+			consumeWhitespace(vector, ctx);
+
 			token = parserutils_vector_peek(vector, *ctx);
 			if (token != NULL && token->type == CSS_TOKEN_IDENT) {
 				if (token->ilower == c->strings[MIX]) {
@@ -4555,7 +4557,8 @@ css_error parse_play_during(css_language *c,
 	opv = buildOPV(OP_PLAY_DURING, flags, value);
 
 	required_size = sizeof(opv);
-	if ((flags & FLAG_INHERIT) == false && value == PLAY_DURING_URI)
+	if ((flags & FLAG_INHERIT) == false && 
+			(value & PLAY_DURING_TYPE_MASK) == PLAY_DURING_URI)
 		required_size += sizeof(parserutils_hash_entry *);
 
 	/* Allocate result */
@@ -4565,7 +4568,8 @@ css_error parse_play_during(css_language *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if ((flags & FLAG_INHERIT) == false && value == PLAY_DURING_URI) {
+	if ((flags & FLAG_INHERIT) == false && 
+			(value & PLAY_DURING_TYPE_MASK)  == PLAY_DURING_URI) {
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&uri, sizeof(parserutils_hash_entry *));
 	}

@@ -453,6 +453,7 @@ enum op_pitch {
 };
 
 enum op_play_during {
+	PLAY_DURING_TYPE_MASK		= 0x009f,
 	PLAY_DURING_URI			= 0x0080,
 	PLAY_DURING_MIX			= (1<<6),
 	PLAY_DURING_REPEAT		= (1<<5),
