@@ -4436,18 +4436,23 @@ css_error parse_pitch(css_language *c,
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[X_LOW]) {
+		parserutils_vector_iterate(vector, ctx);
 		value = PITCH_X_LOW;
 	} else if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[LOW]) {
+		parserutils_vector_iterate(vector, ctx);
 		value = PITCH_LOW;
 	} else if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[MEDIUM]) {
+		parserutils_vector_iterate(vector, ctx);
 		value = PITCH_MEDIUM;
 	} else if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[HIGH]) {
+		parserutils_vector_iterate(vector, ctx);
 		value = PITCH_HIGH;
 	} else if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[X_HIGH]) {
+		parserutils_vector_iterate(vector, ctx);
 		value = PITCH_X_HIGH;
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, UNIT_HZ,
