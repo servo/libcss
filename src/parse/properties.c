@@ -5337,9 +5337,12 @@ css_error parse_text_decoration(css_language *c,
 			} else
 				return CSS_INVALID;
 
+			consumeWhitespace(vector, ctx);
+
 			ident = parserutils_vector_peek(vector, *ctx);
 			if (ident != NULL && ident->type != CSS_TOKEN_IDENT)
 				break;
+			ident = parserutils_vector_iterate(vector, ctx);
 		}
 	}
 
