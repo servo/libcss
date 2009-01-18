@@ -3119,7 +3119,7 @@ css_error parse_font_weight(css_language *c,
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len, 
-				(uint8_t *) token->ilower };
+				(uint8_t *) token->ilower->data };
 		fixed num = number_from_css_string(&tmp, true, &consumed);
 		/* Invalid if there are trailing characters */
 		if (consumed != token->ilower->len)
@@ -3385,11 +3385,12 @@ css_error parse_line_height(css_language *c,
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len, 
-				(uint8_t *) token->ilower };
+				(uint8_t *) token->ilower->data };
 		length = number_from_css_string(&tmp, false, &consumed);
 		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
+		parserutils_vector_iterate(vector, ctx);
 		value = LINE_HEIGHT_NUMBER;
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
@@ -3880,7 +3881,7 @@ css_error parse_orphans(css_language *c,
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len,
-				(uint8_t *) token->ilower };
+				(uint8_t *) token->ilower->data };
 		num = number_from_css_string(&tmp, true, &consumed);
 		/* Invalid if there are trailing characters */
 		if (consumed != token->ilower->len)
