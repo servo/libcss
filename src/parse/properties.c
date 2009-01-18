@@ -6205,7 +6205,7 @@ css_error parse_widows(css_language *c,
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len,
-				(uint8_t *) token->ilower };
+				(uint8_t *) token->ilower->data };
 		num = number_from_css_string(&tmp, true, &consumed);
 		/* Invalid if there are trailing characters */
 		if (consumed != token->ilower->len)
