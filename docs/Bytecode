@@ -788,8 +788,8 @@ Opcodes
 
 34 - page-break-inside
 	<value> (14bits) :
-		0     => avoid,
-		1     => auto,
+		0     => auto,
+		1     => avoid,
 		other => Reserved for future expansion.
 
 35 - pause-after

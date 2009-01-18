@@ -2494,7 +2494,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 ##
 
 #data
-* { page-break-inside: avoid; }
+* { page-break-inside: auto; }
 #errors
 #expected
 | 1 *
@@ -2502,7 +2502,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #reset
 
 #data
-* { page-break-inside: auto; }
+* { page-break-inside: avoid; }
 #errors
 #expected
 | 1 *
