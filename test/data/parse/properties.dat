@@ -1446,7 +1446,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #errors
 #expected
 | 1 *
-|   0x0200001b PTR(Homerton) 0x00000000
+|   0x0204001b PTR(Homerton) 0x00000000
 #reset
 
 #data
@@ -1950,7 +1950,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #reset
 
 #data
-* { list-style-type: upper-greek; }
+* { list-style-type: lower-latin; }
 #errors
 #expected
 | 1 *
@@ -1958,7 +1958,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #reset
 
 #data
-* { list-style-type: lower-latin; }
+* { list-style-type: upper-latin; }
 #errors
 #expected
 | 1 *
@@ -1966,7 +1966,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #reset
 
 #data
-* { list-style-type: upper-latin; }
+* { list-style-type: armenian; }
 #errors
 #expected
 | 1 *
@@ -1974,7 +1974,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #reset
 
 #data
-* { list-style-type: armenian; }
+* { list-style-type: georgian; }
 #errors
 #expected
 | 1 *
@@ -1982,7 +1982,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #reset
 
 #data
-* { list-style-type: georgian; }
+* { list-style-type: lower-alpha; }
 #errors
 #expected
 | 1 *
@@ -1990,7 +1990,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #reset
 
 #data
-* { list-style-type: lower-alpha; }
+* { list-style-type: upper-alpha; }
 #errors
 #expected
 | 1 *
@@ -1998,19 +1998,11 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #reset
 
 #data
-* { list-style-type: upper-alpha; }
-#errors
-#expected
-| 1 *
-|   0x00380026
-#reset
-
-#data
 * { list-style-type: none; }
 #errors
 #expected
 | 1 *
-|   0x003c0026
+|   0x00380026
 #reset
 
 ##

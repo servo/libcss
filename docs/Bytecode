@@ -637,14 +637,13 @@ Opcodes
 		5     => lower-roman,
 		6     => upper-roman,
 		7     => lower-greek,
-		8     => upper-greek,
-		9     => lower-latin,
-		a     => upper-latin,
-		b     => armenian,
-		c     => georgian,
-		d     => lower-alpha,
-		e     => upper-alpha,
-		f     => none,
+		8     => lower-latin,
+		9     => upper-latin,
+		a     => armenian,
+		b     => georgian,
+		c     => lower-alpha,
+		d     => upper-alpha,
+		e     => none,
 		other => Reserved for future expansion.
 
 27 - margin-{top,right,bottom,left}
