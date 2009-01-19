@@ -1,0 +1,31 @@
+#data
+* { }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { color: #ff0000 }
+#errors
+#expected
+| *
+|  color: #ff000000
+#reset
+
+#data
+* { color: inherit }
+#errors
+#expected
+| *
+|  color: inherit
+#reset
+
+#data
+* { background-image: url("foo.png"); color: inherit }
+#errors
+#expected
+| *
+|  background-image: url('foo.png')
+|  color: inherit
+#reset
