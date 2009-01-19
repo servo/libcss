@@ -217,9 +217,5 @@ css_error css_stylesheet_rule_set_import(css_stylesheet *sheet,
 css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule);
 css_error css_stylesheet_remove_rule(css_stylesheet *sheet, css_rule *rule);
 
-#ifndef NDEBUG
-void css_stylesheet_dump(css_stylesheet *sheet, FILE *target);
-#endif
-
 #endif
 

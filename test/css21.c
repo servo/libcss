@@ -4,6 +4,7 @@
 #include <libcss/libcss.h>
 #include "stylesheet.h"
 
+#include "dump.h"
 #include "testutils.h"
 
 #define ITERATIONS (1)
@@ -80,7 +81,13 @@ int main(int argc, char **argv)
 #endif
 
 #if DUMP_CSS
-		css_stylesheet_dump(sheet, stdout);
+		char *out;
+		size_t outlen = origlen * 2;
+		out = malloc(outlen);
+		assert(out != NULL);
+		dump_sheet(sheet, out, &outlen);
+		fwrite(out, origlen * 2 - outlen, 1, stdout);
+		free(out);
 #endif
 
 		css_stylesheet_destroy(sheet);

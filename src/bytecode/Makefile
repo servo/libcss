@@ -35,7 +35,7 @@ d              := $(DIR)
 CFLAGS := $(CFLAGS) -I$(d)
 
 # Sources
-SRCS_$(d) := dump.c
+SRCS_$(d) :=
 
 # Append to sources for component
 SOURCES += $(addprefix $(d), $(SRCS_$(d)))
