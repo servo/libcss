@@ -591,8 +591,7 @@ css_error getToken(css_parser *parser, const css_token **token)
 		 * All other token types appear after this magic value.
 		 */
 
-		if (t->type < CSS_TOKEN_LAST_INTERN &&
-				t->data.data != NULL && t->data.len > 0) {
+		if (t->type < CSS_TOKEN_LAST_INTERN && t->data.data != NULL) {
 			if (t->type < CSS_TOKEN_LAST_INTERN_LOWER) {
 				uint8_t temp[t->data.len];
 				bool lower = false;
