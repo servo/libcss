@@ -1,0 +1,22 @@
+#data
+* { dentist: "Mr Peg"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { colour: #BBC; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { dentist: "Mr Peg"; color: #BBC; dentist: "Mr Peg"; }
+#errors
+#expected
+| *
+|  color: #BBBBCC00
+#reset
+
