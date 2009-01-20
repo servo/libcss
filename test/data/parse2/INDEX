@@ -1,5 +1,9 @@
 # Index file for automated parser tests
 #
-# Test			Description
+# Test				Description
 
-tests1.dat		Basic tests
+tests1.dat			Basic tests
+comments.dat			Comment tests
+illegal-values.dat		Illegal value tests
+malformed-declarations.dat	Malformed declaration tests
+unknown-properties.dat		Unknown property tests
