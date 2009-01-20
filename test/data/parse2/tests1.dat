@@ -29,3 +29,12 @@
 |  background-image: url('foo.png')
 |  color: inherit
 #reset
+
+#data
+* { display: block; display: table-cell; }
+#errors
+#expected
+| *
+|  display: block
+|  display: table-cell
+#reset
