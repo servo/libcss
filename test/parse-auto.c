@@ -323,7 +323,7 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 	testnum++;
 
 	if (sheet->rule_count != explen) {
-		printf("%d: Got %d rules. Expected %d\n",
+		printf("%d: Got %d rules. Expected %zu\n",
 				testnum, sheet->rule_count, explen);
 		assert(0 && "Unexpected number of rules");
 	}
@@ -395,7 +395,7 @@ void validate_rule_selector(css_rule_selector *s, exp_entry *e, int testnum)
 		assert(0 && "Unexpected bytecode");
 	} else if (e->bytecode != NULL && s->style != NULL) {
 		if (s->style->length != e->bcused) {
-			printf("%d: Got length %d, Expected %d\n",
+			printf("%d: Got length %d, Expected %zu\n",
 				testnum, s->style->length, 
 				e->bcused);
 			assert(0 && "Bytecode lengths differ");
@@ -429,7 +429,7 @@ void validate_rule_selector(css_rule_selector *s, exp_entry *e, int testnum)
 				i += sizeof (void *) - 1;
 			} else if (((uint8_t *) s->style->bytecode)[i] != 
 					e->bytecode[i]) {
-				printf("%d: Bytecode differs at %d\n",
+				printf("%d: Bytecode differs at %zu\n",
 					testnum, i);
 				while (i < e->bcused) {
 					printf("%.2x ", 
