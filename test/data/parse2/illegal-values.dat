@@ -1,0 +1,103 @@
+#data
+* { color: #gghhgg; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { color: #gghhgg; stress: 101; stress: 50px; stress: -50; stress: 50grad; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { stress: 50 medium; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { stress: medium 50; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { stress: medium 50; stress: 40; position: "fixed"; }
+#errors
+#expected
+| *
+|  stress: 40
+#reset
+
+#data
+* { position: fixed; position: 3; }
+#errors
+#expected
+| *
+|  position: fixed
+#reset
+
+#data
+* { position: 50Hz; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { position: 50em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { top: 50em; bottom: 11; }
+#errors
+#expected
+| *
+|  top: 50em
+#reset
+
+#data
+* { font-weight: 1000; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-weight: 450; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-weight: 400 lighter; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-weight: bold lighter; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { position:fixed; font-family: 'Trinity max-height: 30%; min-height: 2em; }
+#errors
+#expected
+| *
+|  position: fixed
+|  min-height: 2em
+#reset
+
