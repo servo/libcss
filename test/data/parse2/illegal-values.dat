@@ -98,6 +98,17 @@
 #expected
 | *
 |  position: fixed
+|  font-family: Trinity max-height: 30%
+|  min-height: 2em
+#reset
+
+#data
+* { position:fixed; font-family: 'Trinity
+max-height: 30%; min-height: 2em; }
+#errors
+#expected
+| *
+|  position: fixed
 |  min-height: 2em
 #reset
 
