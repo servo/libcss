@@ -15,7 +15,7 @@
 #reset
 
 #data
-/**/* /* 2 *//*3*/ {/*4*/ background-attachment:/*5*/ fixed/**/;/*7*/ speech-rate: /*/*/*/*/*/**/ medium; }
+/**/* /* 2 *//*3*/ {/*4*/ background-attachment:/*5*/ fixed/**/;/*7*/ speech-rate: /*/*//*/**/ medium; }
 #errors
 #expected
 | *
