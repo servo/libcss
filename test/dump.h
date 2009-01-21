@@ -1792,6 +1792,9 @@ void dump_bytecode(css_style *style, char **ptr)
 				case SPEECH_RATE_SLOW:
 					*ptr += sprintf(*ptr, "slow");
 					break;
+				case SPEECH_RATE_MEDIUM:
+					*ptr += sprintf(*ptr, "medium");
+					break;
 				case SPEECH_RATE_FAST:
 					*ptr += sprintf(*ptr, "fast");
 					break;
