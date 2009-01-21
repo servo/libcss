@@ -600,8 +600,11 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_BACKGROUND_COLOR:
 			case OP_BORDER_TRBL_COLOR:
+				/* Clear side bits */
+				value &= ~SIDE_LEFT;
+				/* Fall through */
+			case OP_BACKGROUND_COLOR:
 				assert(BACKGROUND_COLOR_TRANSPARENT == 
 						BORDER_COLOR_TRANSPARENT);
 				assert(BACKGROUND_COLOR_SET ==
@@ -743,6 +746,9 @@ void dump_bytecode(css_style *style, char **ptr)
 				}
 				break;
 			case OP_BORDER_TRBL_STYLE:
+				/* Clear side bits */
+				value &= ~SIDE_LEFT;
+				/* Fall through */
 			case OP_OUTLINE_STYLE:
 				assert(BORDER_STYLE_NONE == OUTLINE_STYLE_NONE);
 				assert(BORDER_STYLE_HIDDEN == 
@@ -798,6 +804,9 @@ void dump_bytecode(css_style *style, char **ptr)
 				}
 				break;
 			case OP_BORDER_TRBL_WIDTH:
+				/* Clear side bits */
+				value &= ~SIDE_LEFT;
+				/* Fall through */
 			case OP_OUTLINE_WIDTH:
 				assert(BORDER_WIDTH_SET == OUTLINE_WIDTH_SET);
 				assert(BORDER_WIDTH_THIN == OUTLINE_WIDTH_THIN);
