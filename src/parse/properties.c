@@ -5181,6 +5181,9 @@ css_error parse_stress(css_language *c,
 		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
+		if (num < 0 || num > INTTOFIX(100))
+			return CSS_INVALID;
+
 		value = STRESS_SET;
 	} else
 		return CSS_INVALID;
