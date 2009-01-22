@@ -125,6 +125,16 @@ static inline fixed number_from_css_string(const css_string *string,
 	return FMULI(((intpart << 10) | fracpart), sign);
 }
 
+static inline bool isDigit(uint8_t c)
+{
+	return '0' <= c && c <= '9';
+}
+
+static inline bool isHex(uint8_t c)
+{
+	return isDigit(c) || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F');
+}
+
 static inline uint32_t charToHex(uint8_t c)
 {
 	switch (c) {

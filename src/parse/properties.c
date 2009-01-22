@@ -6479,7 +6479,10 @@ css_error parse_colour_specifier(css_language *c,
 	if (token->type == CSS_TOKEN_IDENT) {
 		/** \todo Parse colour names */
 	} else if (token->type == CSS_TOKEN_HASH) {
-		if (token->idata->len == 3) {
+		if (token->idata->len == 3 &&
+				isHex(token->idata->data[0]) &&
+				isHex(token->idata->data[1]) &&
+				isHex(token->idata->data[2])) {
 			r = charToHex(token->idata->data[0]);
 			g = charToHex(token->idata->data[1]);
 			b = charToHex(token->idata->data[2]);
@@ -6487,7 +6490,13 @@ css_error parse_colour_specifier(css_language *c,
 			r |= (r << 4);
 			g |= (g << 4);
 			b |= (b << 4);
-		} else if (token->idata->len == 6) {
+		} else if (token->idata->len == 6 &&
+				isHex(token->idata->data[0]) &&
+				isHex(token->idata->data[1]) &&
+				isHex(token->idata->data[2]) &&
+				isHex(token->idata->data[3]) &&
+				isHex(token->idata->data[4]) &&
+				isHex(token->idata->data[5])) {
 			r = (charToHex(token->idata->data[0]) << 4);
 			r |= charToHex(token->idata->data[1]);
 			g = (charToHex(token->idata->data[2]) << 4);

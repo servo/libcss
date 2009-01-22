@@ -163,8 +163,6 @@ static inline bool startNMChar(uint8_t c);
 static inline bool startNMStart(uint8_t c);
 static inline bool startStringChar(uint8_t c);
 static inline bool startURLChar(uint8_t c);
-static inline bool isDigit(uint8_t c);
-static inline bool isHex(uint8_t c);
 static inline bool isSpace(uint8_t c);
 
 /**
@@ -2131,16 +2129,6 @@ bool startURLChar(uint8_t c)
 {
 	return c == '\t' || c == '!' || ('#' <= c && c <= '&') || c == '(' ||
 		('*' <= c && c <= '~') || c >= 0x80 || c == '\\';
-}
-
-bool isDigit(uint8_t c)
-{
-	return '0' <= c && c <= '9';
-}
-
-bool isHex(uint8_t c)
-{
-	return isDigit(c) || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F');
 }
 
 bool isSpace(uint8_t c)
