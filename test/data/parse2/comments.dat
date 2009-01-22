@@ -34,14 +34,12 @@
 * /*{ stress:100; }
 #errors
 #expected
-| *
 #reset
 
 #data
 */* { stress:100; }
 #errors
 #expected
-| *
 #reset
 
 #data
