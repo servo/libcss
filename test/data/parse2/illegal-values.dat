@@ -98,8 +98,6 @@
 #expected
 | *
 |  position: fixed
-|  font-family: Trinity max-height: 30%
-|  min-height: 2em
 #reset
 
 #data
