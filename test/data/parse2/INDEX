@@ -3,6 +3,7 @@
 # Test				Description
 
 tests1.dat			Basic tests
+eof.dat				Unexpected EOF tests
 comments.dat			Comment tests
 illegal-values.dat		Illegal value tests
 malformed-declarations.dat	Malformed declaration tests

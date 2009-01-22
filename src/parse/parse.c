@@ -759,8 +759,9 @@ css_error parseStylesheet(css_parser *parser)
 	css_error error;
 
 	/* stylesheet -> CDO ws stylesheet
-	 *               CDC ws stylesheet
-	 *               statement ws stylesheet
+	 *            -> CDC ws stylesheet
+	 *            -> statement ws stylesheet
+	 *            ->
 	 */
 
 	while (1) {
@@ -969,6 +970,9 @@ css_error parseRulesetEnd(css_parser *parser)
 		error = getToken(parser, &token);
 		if (error != CSS_OK)
 			return error;
+
+		if (token->type == CSS_TOKEN_EOF)
+			break;
 
 		if (token->type != CSS_TOKEN_CHAR || token->ilower->len != 1 ||
 				token->ilower->data[0] != '}') {
@@ -1445,6 +1449,9 @@ css_error parseDeclList(css_parser *parser)
 		if (error != CSS_OK)
 			return error;
 
+		if (token->type == CSS_TOKEN_EOF)
+			return done(parser);
+
 		if (token->type != CSS_TOKEN_CHAR || token->ilower->len != 1) {
 			/* Should never happen */
 			assert(0 && "Expected ; or  }");
@@ -1596,6 +1603,8 @@ css_error parseValue1(css_parser *parser)
 		return transition(parser, to, subsequent);
 	}
 	case AfterValue:
+		if (parser->parseError)
+			return done(parser);
 		break;
 	}
 
@@ -1641,6 +1650,9 @@ css_error parseValue0(css_parser *parser)
 			return transition(parser, to, subsequent);
 		}
 		case AfterValue:
+			if (parser->parseError)
+				return done(parser);
+
 			state->substate = Initial;
 
 			break;
