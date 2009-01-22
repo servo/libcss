@@ -99,10 +99,11 @@ f{g:
 #reset
 
 #data
-f{g:h
+f{clear:both
 #errors
 #expected
 | f
+|  clear: both
 #reset
 
 #data

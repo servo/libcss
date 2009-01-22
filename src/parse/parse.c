@@ -1639,6 +1639,9 @@ css_error parseValue0(css_parser *parser)
 			if (error != CSS_OK)
 				return error;
 
+			if (token->type == CSS_TOKEN_EOF)
+				return done(parser);
+
 			/* Grammar ambiguity -- assume ';' or '}' mark end */
 			if (token->type == CSS_TOKEN_CHAR && 
 					token->ilower->len == 1 &&
@@ -1740,6 +1743,9 @@ css_error parseAny0(css_parser *parser)
 			error = pushBack(parser, token);
 			if (error != CSS_OK)
 				return error;
+
+			if (token->type == CSS_TOKEN_EOF)
+				return done(parser);
 
 			/* Grammar ambiguity: 
 			 * assume '{', ';', ')', ']' mark end */
