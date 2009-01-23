@@ -118,6 +118,7 @@
 #errors
 #expected
 | *
+|  background-image: url('')
 #reset
 
 #data
