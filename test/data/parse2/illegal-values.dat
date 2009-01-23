@@ -233,7 +233,7 @@
 #errors
 #expected
 | *
-|  border-left-width: 0
+|  border-left-width: 0px
 #reset
 
 #data
@@ -248,7 +248,7 @@
 #errors
 #expected
 | *
-|  border-left-width: 0
+|  border-left-style: none
 #reset
 
 #data
@@ -256,7 +256,7 @@
 #errors
 #expected
 | *
-|  border-bottom-width: 0
+|  border-bottom-style: hidden
 #reset
 
 #data
@@ -264,7 +264,7 @@
 #errors
 #expected
 | *
-|  bottom: -50%;
+|  bottom: -50%
 #reset
 
 #data
@@ -272,7 +272,7 @@
 #errors
 #expected
 | *
-|  left: -50%;
+|  left: -50%
 #reset
 
 #data
@@ -280,7 +280,7 @@
 #errors
 #expected
 | *
-|  right: 1em;
+|  right: 1em
 #reset
 
 #data
@@ -288,7 +288,7 @@
 #errors
 #expected
 | *
-|  top: -50%;
+|  top: -50%
 #reset
 
 #data
@@ -317,7 +317,7 @@
 #errors
 #expected
 | *
-|  clip: rect(0 60px 40pt 0px)
+|  clip: rect(0px, 60px, 40pt, 0px)
 #reset
 
 #data
