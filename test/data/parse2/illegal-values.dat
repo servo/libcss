@@ -1201,6 +1201,7 @@
 #errors
 #expected
 | *
+|  font-family: serif, 'Trinity'
 #reset
 
 #data
@@ -1208,6 +1209,7 @@
 #errors
 #expected
 | *
+|  font-family: serif, sans-serif
 #reset
 
 #data
@@ -1215,6 +1217,7 @@
 #errors
 #expected
 | *
+|  font-family: 'Homerton', 'Oxford', 'moose'
 #reset
 
 #data
@@ -1222,6 +1225,7 @@
 #errors
 #expected
 | *
+|  font-family: 'Homerton', 'Oxford', sans-serif, 'moose'
 #reset
 
 #data
