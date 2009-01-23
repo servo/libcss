@@ -966,7 +966,7 @@
 #errors
 #expected
 | *
-|  elevation: -99.9grad
+|  elevation: -99.900grad
 #reset
 
 #data
@@ -988,7 +988,7 @@
 #errors
 #expected
 | *
-|  elevation: 1.57rad
+|  elevation: 1.570rad
 #reset
 
 #data
