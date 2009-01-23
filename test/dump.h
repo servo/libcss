@@ -319,12 +319,67 @@ static const char *opcode_names[] = {
  */
 static const char *sides[] = { "top", "right", "bottom", "left" };
 
+static void dump_fixed(fixed f, char **ptr)
+{
+#define ABS(x) ((x) < 0 ? -(x) : (x))
+	uint32_t uintpart = FIXTOINT(ABS(f));
+	uint32_t fracpart = ((ABS(f) & 0x3ff) * 1000) / (1 << 10);
+#undef ABS
+	size_t flen = 0;
+	char tmp[20];
+	size_t tlen = 0;
+	char *buf = *ptr;
+
+	if (f < 0) {
+		buf[0] = '-';
+		buf++;
+	}
+
+	do {
+		tmp[tlen] = "0123456789"[uintpart % 10];
+		tlen++;
+
+		uintpart /= 10;
+	} while (tlen < 20 && uintpart != 0);
+
+	while (tlen > 0) {
+		buf[0] = tmp[--tlen];
+		buf++;
+	}
+
+	buf[0] = '.';
+	buf++;
+
+	do {
+		tmp[tlen] = "0123456789"[fracpart % 10];
+		tlen++;
+
+		fracpart /= 10;
+	} while (tlen < 20 && fracpart != 0);
+
+	while (tlen > 0) {
+		buf[0] = tmp[--tlen];
+		buf++;
+		flen++;
+	}
+
+	while (flen < 3) {
+		buf[0] = '0';
+		buf++;
+		flen++;
+	}
+
+	buf[0] = '\0';
+
+	*ptr = buf;
+}
+
 static void dump_number(fixed val, char **ptr)
 {
 	if (INTTOFIX(FIXTOINT(val)) == val)
 		*ptr += sprintf(*ptr, "%d", FIXTOINT(val));
 	else
-		*ptr += sprintf(*ptr, "%f", FIXTOFLT(val));
+		dump_fixed(val, ptr);
 }
 
 static void dump_unit(fixed val, uint32_t unit, char **ptr)
