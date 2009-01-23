@@ -884,7 +884,7 @@
 #errors
 #expected
 | *
-|  position: fixed;
+|  position: fixed
 #reset
 
 #data
