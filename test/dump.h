@@ -323,7 +323,8 @@ static void dump_fixed(fixed f, char **ptr)
 {
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 	uint32_t uintpart = FIXTOINT(ABS(f));
-	uint32_t fracpart = ((ABS(f) & 0x3ff) * 1000) / (1 << 10);
+	/* + 500 to ensure round to nearest (division will truncate) */
+	uint32_t fracpart = ((ABS(f) & 0x3ff) * 1000 + 500) / (1 << 10);
 #undef ABS
 	size_t flen = 0;
 	char tmp[20];
