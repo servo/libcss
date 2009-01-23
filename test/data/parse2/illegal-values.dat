@@ -1,4 +1,264 @@
 #data
+* { azimuth: -361deg; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { azimuth: 361deg; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { azimuth: 0 behind; azimuth: moose behind; }
+#errors
+#expected
+| *
+|  azimuth: 0 behind
+#reset
+
+#data
+* { azimuth: behind 0; azimuth: moose behind; }
+#errors
+#expected
+| *
+|  azimuth: 0 behind
+#reset
+
+#data
+* { azimuth: behind; azimuth: -left; }
+#errors
+#expected
+| *
+|  azimuth: behind
+#reset
+
+#data
+* { azimuth: -; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background-attachment: well-stuck; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background-attachment: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background-attachment: 100%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background-color: black and blue; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background-color: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background-color: -bbc; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background-color: -bbc111; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background-image: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background-image: "sonic"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background-image: url"sonic"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background-image: url(); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background-position: -20% 0; background-position: rightwards; }
+#errors
+#expected
+| *
+|  background-position: -20% 0
+#reset
+
+#data
+* { background-position: left; background-position: rightwards; }
+#errors
+#expected
+| *
+|  background-position: left center
+#reset
+
+#data
+* { border-collapse: tweaked; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border-top-color: 25grad; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border-spacing: -1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border-spacing: -1px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border-spacing: 3px -30em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border-spacing: wide; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border-top-style: thin; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border-bottom-style: 7px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border-left-style: smidgin; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border-right-style: url("Sonic"); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border-left-width: url("Sonic"); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border-left-width: inset; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border-left-width: -4px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border-left-width: 0; }
+#errors
+#expected
+| *
+|  border-left-width: 0
+#reset
+
+#data
+* { border-left-width: hidden; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border-left-style: none; }
+#errors
+#expected
+| *
+|  border-left-width: 0
+#reset
+
+#data
+* { border-bottom-style: hidden; }
+#errors
+#expected
+| *
+|  border-bottom-width: 0
+#reset
+
+#data
 * { color: #gghhgg; }
 #errors
 #expected
