@@ -888,55 +888,221 @@
 #reset
 
 #data
-* { stress: 50 medium; }
+* { elevation: 1000; }
 #errors
 #expected
 | *
 #reset
 
 #data
-* { stress: medium 50; }
+* { elevation: 10; }
 #errors
 #expected
 | *
 #reset
 
 #data
-* { stress: medium 50; stress: 40; position: "fixed"; }
+* { elevation: 0; }
 #errors
 #expected
 | *
-|  stress: 40
+|  elevation: 0deg
 #reset
 
 #data
-* { position: fixed; position: 3; }
-#errors
-#expected
-| *
-|  position: fixed
-#reset
-
-#data
-* { position: 50Hz; }
+* { elevation: 91deg; }
 #errors
 #expected
 | *
 #reset
 
 #data
-* { position: 50em; }
+* { elevation: -90.001deg; }
 #errors
 #expected
 | *
 #reset
 
 #data
-* { top: 50em; bottom: 11; }
+* { elevation: 90deg; }
 #errors
 #expected
 | *
-|  top: 50em
+|  elevation: 90deg
+#reset
+
+#data
+* { elevation: -90deg; }
+#errors
+#expected
+| *
+|  elevation: -90deg
+#reset
+
+#data
+* { elevation: 100.1grad; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { elevation: -101grad; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { elevation: 100grad; }
+#errors
+#expected
+| *
+|  elevation: 100grad
+#reset
+
+#data
+* { elevation: -99.9grad; }
+#errors
+#expected
+| *
+|  elevation: -99.9grad
+#reset
+
+#data
+* { elevation: 1.571rad; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { elevation: -1.571rad; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { elevation: 1.57rad; }
+#errors
+#expected
+| *
+|  elevation: 1.57rad
+#reset
+
+#data
+* { elevation: -1.569rad; }
+#errors
+#expected
+| *
+|  elevation: -1.569rad
+#reset
+
+#data
+* { elevation: -1.1739673929057382429872339846535643689687rad; }
+#errors
+#expected
+| *
+|  elevation: -1.174rad
+#reset
+
+#data
+* { elevation: lower -90deg; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { elevation: lower level; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { elevation: moo; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { elevation: "PicoDrive"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { elevation: ""; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { elevation: 3em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { empty-cells: slow; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { empty-cells: 13; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { empty-cells: 13em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { empty-cells: "font-style: italic;"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { empty-cells: show inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { empty-cells: show 2; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { empty-cells: 0 show ; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { empty-cells: empty-cells: show; show; }
+#errors
+#expected
+| *
 #reset
 
 #data
@@ -965,6 +1131,58 @@
 #errors
 #expected
 | *
+#reset
+
+#data
+* { position: fixed; position: 3; }
+#errors
+#expected
+| *
+|  position: fixed
+#reset
+
+#data
+* { position: 50Hz; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { position: 50em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { stress: 50 medium; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { stress: medium 50; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { stress: medium 50; stress: 40; position: "fixed"; }
+#errors
+#expected
+| *
+|  stress: 40
+#reset
+
+#data
+* { top: 50em; bottom: 11; }
+#errors
+#expected
+| *
+|  top: 50em
 #reset
 
 #data
