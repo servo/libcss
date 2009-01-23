@@ -2624,10 +2624,13 @@ css_error parse_font_family(css_language *c,
 	int temp_ctx = *ctx;
 	uint8_t *ptr;
 
-	/* [ IDENT+ | STRING ] [ ','? [ IDENT+ | STRING ] ]* | IDENT(inherit)
+	/* [ IDENT+ | STRING ] [ ',' [ IDENT+ | STRING ] ]* | IDENT(inherit)
 	 * 
 	 * In the case of IDENT+, any whitespace between tokens is collapsed to
 	 * a single space
+	 *
+	 * \todo Mozilla makes the comma optional. 
+	 * Perhaps this is a quirk we should inherit?
 	 */
 
 	/* Pass 1: validate input and calculate space */
@@ -2722,6 +2725,11 @@ css_error parse_font_family(css_language *c,
 			consumeWhitespace(vector, &temp_ctx);
 
 			token = parserutils_vector_peek(vector, temp_ctx);
+			if (token != NULL && tokenIsChar(token, ',') == false &&
+					tokenIsChar(token, '!') == false) {
+				return CSS_INVALID;
+			}
+
 			if (token != NULL && tokenIsChar(token, ',')) {
 				parserutils_vector_iterate(vector, &temp_ctx);
 
@@ -2907,6 +2915,13 @@ css_error parse_font_family(css_language *c,
 			consumeWhitespace(vector, ctx);
 
 			token = parserutils_vector_peek(vector, *ctx);
+			if (token != NULL && tokenIsChar(token, ',') == false &&
+					tokenIsChar(token, '!') == false) {
+				css_stylesheet_style_destroy(c->sheet, *result);
+				*result = NULL;
+				return CSS_INVALID;
+			}
+
 			if (token != NULL && tokenIsChar(token, ',')) {
 				parserutils_vector_iterate(vector, ctx);
 
@@ -5766,7 +5781,7 @@ css_error parse_voice_family(css_language *c,
 	int temp_ctx = *ctx;
 	uint8_t *ptr;
 
-	/* [ IDENT+ | STRING ] [ ','? [ IDENT+ | STRING ] ]* | IDENT(inherit)
+	/* [ IDENT+ | STRING ] [ ',' [ IDENT+ | STRING ] ]* | IDENT(inherit)
 	 * 
 	 * In the case of IDENT+, any whitespace between tokens is collapsed to
 	 * a single space
@@ -5851,6 +5866,11 @@ css_error parse_voice_family(css_language *c,
 			consumeWhitespace(vector, &temp_ctx);
 
 			token = parserutils_vector_peek(vector, temp_ctx);
+			if (token != NULL && tokenIsChar(token, ',') == false &&
+					tokenIsChar(token, '!') == false) {
+				return CSS_INVALID;
+			}
+
 			if (token != NULL && tokenIsChar(token, ',')) {
 				parserutils_vector_iterate(vector, &temp_ctx);
 
@@ -6029,6 +6049,13 @@ css_error parse_voice_family(css_language *c,
 			consumeWhitespace(vector, ctx);
 
 			token = parserutils_vector_peek(vector, *ctx);
+			if (token != NULL && tokenIsChar(token, ',') == false &&
+					tokenIsChar(token, '!') == false) {
+				css_stylesheet_style_destroy(c->sheet, *result);
+				*result = NULL;
+				return CSS_INVALID;
+			}
+
 			if (token != NULL && tokenIsChar(token, ',')) {
 				parserutils_vector_iterate(vector, ctx);
 
