@@ -400,6 +400,492 @@
 #reset
 
 #data
+* { content::; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { content: content: counters(n, ".", moo, moose); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { content: content: content: open-quote shoe-horn url('http://picodrive.acornarcade.com/') " : " attr(name) " " counter(x) "." counters(y, ".") close-quote; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-increment: "moose" 7; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-increment: 1st-moose 7; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-increment: sonic&knuckles 7; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-increment: sonic 7 2; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-increment: sonic 7 knuckles 2; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-increment: sonic 2nd; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-increment: sonic 2px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-increment: sonic "2"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-increment: sonic url(2); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-increment: url(2) 1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-inctement: woo; }
+#errors
+#expected
+| *
+|  counter-increment: woo 1
+#reset
+
+#data
+* { counter-increment: 1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-reset: "moose" 7; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-reset: 1st-moose 7; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-reset: sonic&knuckles 7; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-reset: sonic 7 2; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-reset: sonic 7 knuckles 2; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-reset: sonic 2nd; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-reset: sonic 2px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-reset: sonic "2"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-reset: sonic url(2); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-reset: url(2) 1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-reset: 1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { counter-reset: woo; }
+#errors
+#expected
+| *
+|  counter-reset: woo 0
+#reset
+
+#data
+* { cue-after: url(mooo; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-after: url(mooo) woo; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-after: woo url(mooo); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-after: ""; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-after: "woo"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-after: url"woo"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-after: 10px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-after: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-after: sonic the hedgehog; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-before: url(mooo; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-before: url(mooo) woo; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-before: woo url(mooo); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-before: ""; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-before: "woo"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-before: url"woo"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-before: 10px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-before: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue-before: sonic the hedgehog; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cursor: sonic the hedgehog; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cursor: "sonic the hedgehog"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cursor: move help; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cursor: move url("moose") help; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { direction: rtl ltr; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { direction: rtl, ltr; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { direction: "ltr"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { direction: -ltr; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { direction: -1 ltr; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { direction: ltr -1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { direction: -1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { direction: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { direction: url(knuckles); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { display: web; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { display: "sonic"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { display: block inline-block; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { display: block, inline-block; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { display: block 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { display: 0 block; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { display: 0.00; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { display: 0.00em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { display: 0.0%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { display: ^; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { display:  gB    /© ‹i fw D‰ Ëu D‰    0t D‰ gB ‹i gB gB    gB C 0t Šû Ëu Šû    fw Šû /© C /© gB                    <ÿÿÿ    :© qû §B ]‰   €„© gB    ‘¥ öe ÄÕ @Š à ‰    Óî Lˆ ÅA ¡p WB gB    ÅA . Óî ‚ü à Áû    ÄÕ ú ‘¥ Ø „© gB    „© gB „© gB „© gB        œ  4ýÿÿÌ  à   üÿÿ7    :© tw §B `   ã¨ =w   @.© ³¬ .© !Ð ã¨ —    \R G ­´ G ³B —    gB Ùá gB üš ³B =w    ­´ w \R w ã¨ =w                                           ã¨ =w ³B —         (    ÿÿÿB                         4       Øÿÿÿ&                        °	 ÿÿÿÿÌÿÿÿ    Ä   ¤ÿÿÿ4     ã¨ =w ³B — /© w /© G gB G   €/© j¾    /© Žå fw G Ëu G    0t G gB Žå gB j¾    gB F— 0t w Ëu w    fw w /© F— /© j¾                    <ÿÿÿ    :© tw §B `   €„© j¾    ‘¥ ùá ÄÕ C à     Óî O ÅA ¤ì WB j¾    ÅA 1 Óî …x à Äw    ÄÕ ’v ‘¥ Ûš  „© j¾    „© j¾ „© j¾ „© j¾        œ  4ýÿÿÌ  à   Lùÿÿ7   ! :© vó §B b   ã¨ ?ó   @.© µ( .© #L ã¨ ™    \R I ­´ I ³B ™    gB Û] gB þ ³B ?ó    ­´ ó \R ó ã¨ ?ó                     ; position: fixed; }
+#errors
+#expected
+| *
+|  position: fixed;
+#reset
+
+#data
 * { stress: 50 medium; }
 #errors
 #expected
