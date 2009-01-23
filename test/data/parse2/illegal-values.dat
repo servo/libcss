@@ -259,6 +259,88 @@
 #reset
 
 #data
+* { bottom: -4; bottom: blunderbus; bottom: -50%; bottom: 6Hz; }
+#errors
+#expected
+| *
+|  bottom: -50%;
+#reset
+
+#data
+* { left: -4; left: blunderbus; left: -50%; left: 6Hz; }
+#errors
+#expected
+| *
+|  left: -50%;
+#reset
+
+#data
+* { right: -4; right: blunderbus; right: 1em; right: 6Hz; }
+#errors
+#expected
+| *
+|  right: 1em;
+#reset
+
+#data
+* { top: -4; top: blunderbus; top: -50%; top: 6Hz; }
+#errors
+#expected
+| *
+|  top: -50%;
+#reset
+
+#data
+* { caption-side: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { caption-side: top "7"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { caption-side: 7em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { clip: rect("0 2px 30px 1px"); clip: rect(0 60px 40pt 0px); }
+#errors
+#expected
+| *
+|  clip: rect(0 60px 40pt 0px)
+#reset
+
+#data
+* { clip: rect(1px 2px); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { clip: rect(1px 2px 1px 2px 1px); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { clip: 1px 2px 1px 2px; }
+#errors
+#expected
+| *
+#reset
+
+#data
 * { color: #gghhgg; }
 #errors
 #expected
