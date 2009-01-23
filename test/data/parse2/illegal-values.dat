@@ -126,7 +126,7 @@
 #errors
 #expected
 | *
-|  background-position: -20% 0
+|  background-position: -20% 0px
 #reset
 
 #data
