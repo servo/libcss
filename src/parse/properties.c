@@ -571,6 +571,18 @@ css_error parse_azimuth(css_language *c,
 		if ((unit & UNIT_ANGLE) == false)
 			return CSS_INVALID;
 
+		/* Valid angles lie between -360 and 360 degrees */
+		if (unit == UNIT_DEG) {
+			if (length < FMULI(F_360, -1) || length > F_360)
+				return CSS_INVALID;
+		} else if (unit == UNIT_GRAD) {
+			if (length < FMULI(F_100, -1) || length > F_100)
+				return CSS_INVALID;
+		} else if (unit == UNIT_RAD) {
+			if (length < FMULI(F_2PI, -1) || length > F_2PI)
+				return CSS_INVALID;
+		}
+
 		value = AZIMUTH_ANGLE;
 	}
 

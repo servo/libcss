@@ -41,5 +41,7 @@ typedef int32_t fixed;
 /* Convert a fixed point value to an integer */
 #define FIXTOINT(a) ((a) >> 10)
 
+#include "utils/fpconstants.h"
+
 #endif
 
