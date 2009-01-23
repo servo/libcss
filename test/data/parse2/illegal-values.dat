@@ -13,19 +13,19 @@
 #reset
 
 #data
-* { azimuth: 0 behind; azimuth: moose behind; }
+* { azimuth: 0; azimuth: moose behind; }
 #errors
 #expected
 | *
-|  azimuth: 0 behind
+|  azimuth: 0deg
 #reset
 
 #data
-* { azimuth: behind 0; azimuth: moose behind; }
+* { azimuth: 0; azimuth: moose behind; }
 #errors
 #expected
 | *
-|  azimuth: 0 behind
+|  azimuth: 0deg
 #reset
 
 #data
@@ -33,7 +33,7 @@
 #errors
 #expected
 | *
-|  azimuth: behind
+|  azimuth: center behind
 #reset
 
 #data
