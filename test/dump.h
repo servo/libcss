@@ -1109,7 +1109,7 @@ void dump_bytecode(css_style *style, char **ptr)
 						*((parserutils_hash_entry **) 
 						bytecode);
 						ADVANCE(sizeof(he));
-						*ptr += sprintf(*ptr, " %.*s ", 
+						*ptr += sprintf(*ptr, "%.*s ", 
 							(int) he->len, 
 							(char *) he->data);
 						fixed val =
@@ -1119,6 +1119,11 @@ void dump_bytecode(css_style *style, char **ptr)
 
 						value = *((uint32_t *) bytecode);
 						ADVANCE(sizeof(value));
+
+						if (value != 
+							COUNTER_INCREMENT_NONE)
+							*ptr += sprintf(*ptr, 
+									" "); 
 					}
 					break;
 				case COUNTER_INCREMENT_NONE:
