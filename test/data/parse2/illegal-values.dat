@@ -13,6 +13,50 @@
 #reset
 
 #data
+* { azimuth: -6.284rad; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { azimuth: 6.284rad; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { azimuth: -6.283rad; }
+#errors
+#expected
+| *
+|  azimuth: -6.283rad
+#reset
+
+#data
+* { azimuth: 6.283rad; }
+#errors
+#expected
+| *
+|  azimuth: 6.283rad
+#reset
+
+#data
+* { azimuth: -400.001grad; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { azimuth: 400.001deg; }
+#errors
+#expected
+| *
+#reset
+
+#data
 * { azimuth: 0; azimuth: moose behind; }
 #errors
 #expected
