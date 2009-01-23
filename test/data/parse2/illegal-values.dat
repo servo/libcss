@@ -539,6 +539,7 @@
 #errors
 #expected
 | *
+|  counter-reset: sonic 7 knuckles 2
 #reset
 
 #data
