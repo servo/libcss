@@ -1680,6 +1680,8 @@ css_error parse_counter_increment(css_language *c,
 			first = false;
 
 			token = parserutils_vector_iterate(vector, &temp_ctx);
+			if (token != NULL && token->type != CSS_TOKEN_IDENT)
+				return CSS_INVALID;
 		}
 
 		/* And for the terminator */
@@ -1760,6 +1762,8 @@ css_error parse_counter_increment(css_language *c,
 			first = false;
 
 			token = parserutils_vector_iterate(vector, ctx);
+			if (token != NULL && token->type != CSS_TOKEN_IDENT)
+				return CSS_INVALID;
 		}
 
 		/* And for the terminator */
