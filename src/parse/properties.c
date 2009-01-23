@@ -561,6 +561,9 @@ css_error parse_azimuth(css_language *c,
 			} else {
 				return CSS_INVALID;
 			}
+		} else if ((token == NULL || token->type != CSS_TOKEN_IDENT) &&
+				value == AZIMUTH_BEHIND) {
+			value |= AZIMUTH_CENTER;
 		}
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, UNIT_DEG, 
