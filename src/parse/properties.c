@@ -1810,7 +1810,7 @@ css_error parse_counter_reset(css_language *c,
 
 		while (token != NULL) {
 			const parserutils_hash_entry *name = token->idata;
-			fixed increment = INTTOFIX(1);
+			fixed increment = INTTOFIX(0);
 
 			consumeWhitespace(vector, &temp_ctx);
 
@@ -1849,6 +1849,8 @@ css_error parse_counter_reset(css_language *c,
 			first = false;
 
 			token = parserutils_vector_iterate(vector, &temp_ctx);
+			if (token != NULL && token->type != CSS_TOKEN_IDENT)
+				return CSS_INVALID;
 		}
 
 		/* And for the terminator */
@@ -1886,7 +1888,7 @@ css_error parse_counter_reset(css_language *c,
 
 		while (token != NULL) {
 			const parserutils_hash_entry *name = token->idata;
-			fixed increment = INTTOFIX(1);
+			fixed increment = INTTOFIX(0);
 
 			consumeWhitespace(vector, ctx);
 
@@ -1929,6 +1931,8 @@ css_error parse_counter_reset(css_language *c,
 			first = false;
 
 			token = parserutils_vector_iterate(vector, ctx);
+			if (token != NULL && token->type != CSS_TOKEN_IDENT)
+				return CSS_INVALID;
 		}
 
 		/* And for the terminator */
