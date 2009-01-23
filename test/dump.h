@@ -542,7 +542,7 @@ void dump_bytecode(css_style *style, char **ptr)
 
 			switch (op) {
 			case OP_AZIMUTH:
-				switch (value) {
+				switch (value & ~AZIMUTH_BEHIND) {
 				case AZIMUTH_ANGLE:
 				{
 					fixed val = *((fixed *) bytecode);
