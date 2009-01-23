@@ -1106,6 +1106,419 @@
 #reset
 
 #data
+* { float: 0 none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { float: left"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { float: left right; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { float: "left"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { float: ltr; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { float: -1pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { float: -1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { float: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { float: url(knuckles); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-family: 1000pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-family: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-family: "; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-family: "'; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-family: serif, "Trinity"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-family: serif, sans-serif; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-family: "Homerton", "Oxford", moose; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-family: "Homerton", "Oxford", sans-serif, moose; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-family: "Homerton" "Oxford" sans-serif; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-family: moo, "Homerton", "Oxford"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-family: moo, "Homerton" "Oxford"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-family: "Homerton", "Oxford", url(font); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-size: xx-small larger; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-size: xx-small 3pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-size: 3pt xx-small; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-size: xx-small xx-small; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-size: normal; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-size: -10pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-size: 10pt 11pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-size: 0 larger; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-size: 0 0%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-size: 6% larger; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-size: -150%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-style: -150%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-style: 150%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-style: 150; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-style: 150ex; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-style: "hidden"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-style: thin solid black; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-style: normally; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-style: normal%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-style: 40pt italic; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-style: small-caps; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-style: url(), 20grad, common, "endless drivel"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-style: "
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-style: ,
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-style: {
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-style: }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-variant: sixteen; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-variant: 17%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-variant: 18pc; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-variant: 19; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-variant: 1,2,3,4,5; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-variant: 1, 2, 3, 4, 5; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-variant: bolder small-caps; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-variant: bolder, small-caps; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-variant: bolder,small-caps; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-variant: normal url("small-caps"); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-variant: "normal"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-variant: "normal",; }
+#errors
+#expected
+| *
+#reset
+
+#data
 * { font-weight: 1000; }
 #errors
 #expected
@@ -1114,6 +1527,20 @@
 
 #data
 * { font-weight: 450; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-weight: 100, 300; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font-weight: 100 300; }
 #errors
 #expected
 | *
