@@ -579,7 +579,7 @@ css_error parse_azimuth(css_language *c,
 			if (length < FMULI(F_360, -1) || length > F_360)
 				return CSS_INVALID;
 		} else if (unit == UNIT_GRAD) {
-			if (length < FMULI(F_100, -1) || length > F_100)
+			if (length < FMULI(F_400, -1) || length > F_400)
 				return CSS_INVALID;
 		} else if (unit == UNIT_RAD) {
 			if (length < FMULI(F_2PI, -1) || length > F_2PI)
