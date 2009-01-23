@@ -6858,6 +6858,10 @@ css_error parse_border_side_width(css_language *c,
 				unit & UNIT_TIME || unit & UNIT_FREQ)
 			return CSS_INVALID;
 
+		/* Length must be positive */
+		if (length < 0)
+			return CSS_INVALID;
+
 		value = BORDER_WIDTH_SET;
 	}
 
