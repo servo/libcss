@@ -453,6 +453,7 @@
 #errors
 #expected
 | *
+|  counter-increment: sonic 7 knuckles 2
 #reset
 
 #data
@@ -491,7 +492,7 @@
 #reset
 
 #data
-* { counter-inctement: woo; }
+* { counter-increment: woo; }
 #errors
 #expected
 | *
