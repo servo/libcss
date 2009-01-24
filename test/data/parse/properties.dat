@@ -2214,14 +2214,6 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #reset
 
 #data
-* { outline-style: hidden; }
-#errors
-#expected
-| 1 *
-|   0x0004002e
-#reset
-
-#data
 * { outline-style: dotted; }
 #errors
 #expected
