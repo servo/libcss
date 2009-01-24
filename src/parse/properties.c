@@ -4485,6 +4485,10 @@ css_error parse_pitch_range(css_language *c,
 		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
+		/* Must be between 0 and 100 */
+		if (num < 0 || num > F_100)
+			return CSS_INVALID;
+
 		value = PITCH_RANGE_SET;
 	} else
 		return CSS_INVALID;
