@@ -2821,6 +2821,7 @@
 #errors
 #expected
 | *
+|  pitch-range: 50
 #reset
 
 #data
