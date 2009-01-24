@@ -3043,6 +3043,35 @@
 #reset
 
 #data
+* { position:fixed; font-family: 'Trinity max-height: 30%; min-height: 2em; }
+#errors
+#expected
+| *
+|  position: fixed
+#reset
+
+#data
+* { position:fixed; font-family: 'Trinity
+max-height: 30%; min-height: 2em; }
+#errors
+#expected
+| *
+|  position: fixed
+|  min-height: 2em
+#reset
+
+#data
+* { position:fixed; font-family: 'Trinity
+; max-height: 30px; min-height: 2em; }
+#errors
+#expected
+| *
+|  position: fixed
+|  max-height: 30px
+|  min-height: 2em
+#reset
+
+#data
 * { quotes: "'"; }
 #errors
 #expected
@@ -3719,31 +3748,37 @@
 #reset
 
 #data
-* { position:fixed; font-family: 'Trinity max-height: 30%; min-height: 2em; }
+* { top: 50s; }
 #errors
 #expected
 | *
-|  position: fixed
 #reset
 
 #data
-* { position:fixed; font-family: 'Trinity
-max-height: 30%; min-height: 2em; }
+* { top: "7"; }
 #errors
 #expected
 | *
-|  position: fixed
-|  min-height: 2em
 #reset
 
 #data
-* { position:fixed; font-family: 'Trinity
-; max-height: 30px; min-height: 2em; }
+* { top: "7; }
 #errors
 #expected
 | *
-|  position: fixed
-|  max-height: 30px
-|  min-height: 2em
+#reset
+
+#data
+* { top: ""7em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { top: #147; }
+#errors
+#expected
+| *
 #reset
 
