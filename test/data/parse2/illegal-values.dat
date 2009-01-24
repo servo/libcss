@@ -312,14 +312,6 @@
 #reset
 
 #data
-* { left: -4; left: blunderbus; left: -50%; left: 6Hz; }
-#errors
-#expected
-| *
-|  left: -50%
-#reset
-
-#data
 * { right: -4; right: blunderbus; right: 1em; right: 6Hz; }
 #errors
 #expected
@@ -1560,6 +1552,364 @@
 
 #data
 * { font-weight: bold lighter; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { height: 11; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { height: -11; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { height: 11Hz; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { height: -2grad; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { height: -2px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { height: -20%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { height: 20% 2pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { height: 2px tall; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { height: tall; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { height: auto 3px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { height: 3px auto; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { height: "3"px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { height: "3px"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { height: 3px,; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { height: 3px, 10em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { left: -4; left: blunderbus; left: -50%; left: 6Hz; }
+#errors
+#expected
+| *
+|  left: -50%
+#reset
+
+#data
+* { left: -4px, 2px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { left: -4px 2px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { left: -; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { left: "3"en; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { left: "3en"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { letter-spacing: normal 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { letter-spacing: 30%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { letter-spacing: 1px 2px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { line-height: 1.1 1.1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { line-height: -1.1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { line-height: -1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { line-height: -1%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { line-height: -100%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { line-height: -10em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { line-height: 10em normal; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-image: url(Sonic) url(Knuckles); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-image: "Knuckles"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-image: url(Knuckles) none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-image: url(,"Knuckles"); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-image: inherit none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-position: internal; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-position: -external; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-position: "inside"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-position: -"inside"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-position: 3.14em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-position: none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-position: normal; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-type: normal; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-type: normal; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-type: disc circle; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-type: 24pt circle; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-type: 24pt, circle; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-type: "circle"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-type: lower_alpha; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style-position: url(,"inside"); }
 #errors
 #expected
 | *
