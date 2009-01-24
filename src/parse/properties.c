@@ -7079,6 +7079,10 @@ css_error parse_padding_side(css_language *c,
 		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
 			return CSS_INVALID;
 
+		/* Negative lengths are invalid */
+		if (length < 0)
+			return CSS_INVALID;
+
 		value = PADDING_SET;
 	}
 
