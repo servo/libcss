@@ -3401,7 +3401,42 @@
 #reset
 
 #data
+* { speech-rate: "2"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speech-rate: #BBC; }
+#errors
+#expected
+| *
+#reset
+
+#data
 * { stress: 50 medium; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { stress: -0.1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { stress: 101; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { stress: normal; }
 #errors
 #expected
 | *
@@ -3420,6 +3455,259 @@
 #expected
 | *
 |  stress: 40
+#reset
+
+#data
+* { table-layout: none 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { table-layout: 0pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { table-layout: -0pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { table-layout: fixed inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-align: none 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-align: 0pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-align: -0pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-align: fixed inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-align: left right; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-align: left, right; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-align: left | right; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-align: justified; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-align: center 50%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-align: 50%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-decoration: underline overline none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-decoration: underline overline moose; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-decoration: underline moose overline; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-decoration: moose underline overline; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-decoration: blink hidden underline overline; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-decoration: blink 0 underline overline; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-decoration: overline url("Sonic"); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-decoration: inherit overline; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-indent: -3000px; text-indent: 0 0%; }
+#errors
+#expected
+| *
+|  text-indent: -3000px
+#reset
+
+#data
+* { text-indent: 30%, 5%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-indent: 30% 5%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-indent: 2em, 4em }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-indent: hidden; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-indent: inherit 30%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-indent: 30px inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-transform: capitalise; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-transform: uppercase lowercase; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-transform: lowercase none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-transform: inherit "Sonic"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-transform: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-transform: 40px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { text-transform: #BBCbbc; }
+#errors
+#expected
+| *
 #reset
 
 #data
