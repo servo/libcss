@@ -3972,3 +3972,513 @@ max-height: 30%; min-height: 2em; }
 | *
 #reset
 
+#data
+* { voice-family: 1000pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { voice-family: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { voice-family: "; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { voice-family: "'; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { voice-family: serif, "Trinity"; }
+#errors
+#expected
+| *
+|  voice-family: serif, 'Trinity'
+#reset
+
+#data
+* { voice-family: serif, sans-serif; }
+#errors
+#expected
+| *
+|  voice-family: serif, sans-serif
+#reset
+
+#data
+* { voice-family: "Homerton", "Oxford", moose; }
+#errors
+#expected
+| *
+|  voice-family: 'Homerton', 'Oxford', 'moose'
+#reset
+
+#data
+* { voice-family: "Homerton", "Oxford", sans-serif, moose; }
+#errors
+#expected
+| *
+|  voice-family: 'Homerton', 'Oxford', sans-serif, 'moose'
+#reset
+
+#data
+* { voice-family: "Homerton" "Oxford" sans-serif; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { voice-family: moo, "Homerton", "Oxford"; }
+#errors
+#expected
+| *
+|  voice-family: 'moo', 'Homerton', 'Oxford'
+#reset
+
+#data
+* { voice-family: moo, "Homerton" "Oxford"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { voice-family: "Homerton", "Oxford", url(font); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { volume: racket; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { volume: "loud"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { volume: louder; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { volume: loud 75; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { volume: -1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { volume: 101; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { volume: 3 7; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { volume: 55 20%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { volume: 55 %; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { volume: 150%; volume: -40%; }
+#errors
+#expected
+| *
+|  volume: 150%
+#reset
+
+#data
+* { volume: 55% url(222); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { white-space: pre pre; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { white-space: pre per; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { white-space: per; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { white-space: nowrap pre-line; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { white-space: nowrap 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { white-space: #449; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { white-space: ,cube; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { white-space: pre"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { white-space: pre,; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { white-space: normal|; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { white-space: normal |; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { white-space: |; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { widows: -4; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { widows: 20%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { widows: 3em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { widows: 3 3; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { widows: 3 3pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { widows: 3 %; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { widows: 4,; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { width: -10%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { width: -1px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { width: -1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { width: - 4em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { width: 4px 2px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { width: url(3em); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { width: "3em"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { width: auto 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { width: auto, 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { width: auto,,,,,,, 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { width: ,,,,,,, 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { width: ,,,,, ,,; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { width: wider; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { word-spacing: normally; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { word-spacing: 23pt 3px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { word-spacing: g; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { word-spacing: %; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { word-spacing: 10%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { word-spacing: em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { word-spacing: 0.1em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { z-index: - 40; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { z-index: --3; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { z-index: 3 3; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { z-index: 4%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { z-index: 4em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { z-index: 4 auto; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { z-index: auto 4; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { z-index: "4"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { z-index: #333; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { z-index: url("-2"); }
+#errors
+#expected
+| *
+#reset
+
