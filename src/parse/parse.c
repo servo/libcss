@@ -950,7 +950,13 @@ css_error parseRulesetEnd(css_parser *parser)
 		if (error != CSS_OK)
 			return error;
 
-		if (token->type == CSS_TOKEN_IDENT) {
+		/* If this can't possibly be the start of a decl-list, then
+		 * attempt to parse a declaration. This will catch any invalid
+		 * input at this point and read to the start of the next
+		 * declaration. FIRST(decl-list) = (';', '}') */
+		if (token->type != CSS_TOKEN_CHAR || token->ilower->len != 1 ||
+				(token->ilower->data[0] != '}' &&
+				token->ilower->data[0] != ';')) {
 			parser_state to = { sDeclaration, Initial };
 			parser_state subsequent = { sRulesetEnd, DeclList };
 
@@ -1195,6 +1201,9 @@ css_error parseBlock(css_parser *parser)
 		if (error != CSS_OK)
 			return error;
 
+		if (token->type == CSS_TOKEN_EOF)
+			break;
+
 		if (token->type != CSS_TOKEN_CHAR || token->ilower->len != 1 ||
 				token->ilower->data[0] != '}') {
 			/* This should never happen, as 
@@ -1381,6 +1390,14 @@ css_error parseDeclaration(css_parser *parser)
 		return transition(parser, to, subsequent);
 	}
 	case Colon:
+		if (parser->parseError) {
+			parser_state to = { sMalformedDecl, Initial };
+
+			parser->parseError = false;
+
+			return transitionNoRet(parser, to);
+		}
+
 		error = getToken(parser, &token);
 		if (error != CSS_OK)
 			return error;
@@ -1452,7 +1469,9 @@ css_error parseDeclList(css_parser *parser)
 		if (token->type == CSS_TOKEN_EOF)
 			return done(parser);
 
-		if (token->type != CSS_TOKEN_CHAR || token->ilower->len != 1) {
+		if (token->type != CSS_TOKEN_CHAR || token->ilower->len != 1 ||
+				(token->ilower->data[0] != '}' && 
+				token->ilower->data[0] != ';')) {
 			/* Should never happen */
 			assert(0 && "Expected ; or  }");
 		}
@@ -1463,11 +1482,9 @@ css_error parseDeclList(css_parser *parser)
 				return error;
 
 			return done(parser);
-		} else if (token->ilower->data[0] == ';') {
-			state->substate = WS;
 		} else {
-			/* Should never happen */
-			assert(0 && "Expected ; or }");
+			/* ; */
+			state->substate = WS;
 		}
 
 		/* Fall through */
