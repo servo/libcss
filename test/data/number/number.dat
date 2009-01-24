@@ -64,17 +64,16 @@
 -2097151.000
 #reset
 
-# TODO: should these next two not result in INT_MIN?
 #data
 -2097152
 #expected
--2097151.999
+-2097152
 #reset
 
 #data
 -2097153
 #expected
--2097151.999
+-2097152
 #reset
 
 #data

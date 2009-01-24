@@ -79,7 +79,7 @@ static inline fixed number_from_css_string(const css_string *string,
 		if (ptr[0] < '0' || '9' < ptr[0])
 			break;
 
-		/* Clamp to a max of 2^22 - 1 */
+		/* Prevent overflow of 'intpart'; proper clamping below */
 		if (intpart < (1 << 22)) {
 			intpart *= 10;
 			intpart += ptr[0] - '0';
@@ -113,16 +113,33 @@ static inline fixed number_from_css_string(const css_string *string,
 		}
 	}
 
-	/* If the intpart is larger than we can represent, 
-	 * then clamp to the maximum value we can store. */
-	if (intpart >= (1 << 21)) {
-		fracpart = (1 << 10) - 1;
-		intpart = (1 << 21) - 1;
-	}
-
 	*consumed = ptr - string->data;
 
-	return FMULI(((intpart << 10) | fracpart), sign);
+	if (sign > 0) {
+		/* If the result is larger than we can represent,
+		 * then clamp to the maximum value we can store. */
+		if (intpart >= (1 << 21)) {
+			intpart = (1 << 21) - 1;
+			fracpart = (1 << 10) - 1;
+		}
+	}
+	else {
+		/* If the negated result is smaller than we can represent
+		 * then clamp to the minimum value we can store. */
+		if (intpart >= (1 << 21)) {
+			intpart = -(1 << 21);
+			fracpart = 0;
+		}
+		else {
+			intpart = -intpart;
+			if (fracpart) {
+				fracpart = (1 << 10) - fracpart;
+				intpart--;
+			}
+		}
+	}
+
+	return (intpart << 10) | fracpart;
 }
 
 static inline bool isDigit(uint8_t c)
