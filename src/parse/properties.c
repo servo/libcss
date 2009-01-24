@@ -4076,6 +4076,10 @@ css_error parse_outline_style(css_language *c,
 	flags = getFlags(opv);
 	value = getValue(opv) & ~SIDE_LEFT;
 
+	/* Hidden is invalid */
+	if (value == BORDER_STYLE_HIDDEN)
+		return CSS_INVALID;
+
 	opv = buildOPV(OP_OUTLINE_STYLE, flags, value);
 
 	*((uint32_t *) (*result)->bytecode) = opv;
