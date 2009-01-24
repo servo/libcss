@@ -3029,6 +3029,10 @@ css_error parse_font_size(css_language *c,
 		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
 			return CSS_INVALID;
 
+		/* Negative values are not permitted */
+		if (length < 0)
+			return CSS_INVALID;
+
 		value = FONT_SIZE_DIMENSION;
 	}
 
