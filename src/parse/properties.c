@@ -4916,6 +4916,10 @@ css_error parse_richness(css_language *c,
 		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
+		/* Must be between 0 and 100 */
+		if (num < 0 || num > F_100)
+			return CSS_INVALID;
+
 		value = RICHNESS_SET;
 	} else
 		return CSS_INVALID;
