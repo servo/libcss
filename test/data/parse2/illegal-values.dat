@@ -1706,13 +1706,6 @@
 #reset
 
 #data
-* { letter-spacing: normal 0; }
-#errors
-#expected
-| *
-#reset
-
-#data
 * { letter-spacing: 30%; }
 #errors
 #expected
@@ -1720,7 +1713,22 @@
 #reset
 
 #data
+* { letter-spacing: normal 0; letter-spacing: -1px; }
+#errors
+#expected
+| *
+|  letter-spacing: -1px
+#reset
+
+#data
 * { letter-spacing: 1px 2px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { letter-spacing: --1px; }
 #errors
 #expected
 | *
@@ -1910,6 +1918,470 @@
 
 #data
 * { list-style-position: url(,"inside"); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { margin-left: url("wide"); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { margin-left: <margin-width>; margin-right: -100px; }
+#errors
+#expected
+| *
+|  margin-right: -100px
+#reset
+
+#data
+* { margin-left: margin-top: 0;; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { margin-top: 0 0 0 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { margin-top: 0 2em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { margin-bottom: 2rad; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { margin-bottom: 20px 10%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { margin-bottom: auto 10%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { margin-right: 10% auto; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { max-height: 10% auto; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { max-height: 10% none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { max-height: auto; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { max-height: -3em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { max-height: -30%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { max-height: none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { min-height: -3em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { min-height: -100%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { min-height: -10%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { min-height: 2px 2in; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { min-height: 2px, 2in; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { min-height: url( SEGA ); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { min-height: none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { min-width: none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { min-width: -67%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { min-width: -200px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { min-width: 2em 3em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { min-width: "Sonic & Knuckles"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { max-width: -24pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { max-width: -50%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { max-width: 7 thousand 6 hundred and twenty 3cm; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { max-width: "50"in; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { orphans: -3; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { orphans: 3em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { orphans: "3; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { orphans: ,3; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { orphans: 3,; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { orphans: 3.3; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { orphans: 3.3cm; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { orphans: #567; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { orphans: red; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-color: red black; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-color: #BBC Radio 4; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-color: -#BBC; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-color: rgb); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-color: rgb),,); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-color: rgb)2,3,5); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-color: rgb (2,30,5); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-color: rgb; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-color: Green Hill Zone; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-color: green hill zone; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-color: "Green Hill Zone" outline-color: invert; }
+#errors
+#expected
+| *
+|  outline-color: invert
+#reset
+
+#data
+* { outline-style: hidden; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-style: none solid; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-style: Spin-dash; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-width: thin medium; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-width: 00 medium; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-width: 00; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-width: 00em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-width: 24px 2px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline-width: 5%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { overflow: 5%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { overflow: "hidden"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { overflow: none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { overflow: auto visible; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { overflow: 6; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { overflow: 62em; }
 #errors
 #expected
 | *
