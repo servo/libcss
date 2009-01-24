@@ -3782,3 +3782,193 @@ max-height: 30%; min-height: 2em; }
 | *
 #reset
 
+#data
+* { unicode-bidi: normal embed; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { unicode-bidi: 74px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { unicode-bidi: 74 px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { unicode-bidi: px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { unicode-bidi: override; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { unicode-bidi: 4x4=16; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { unicode-bidi: 4x4 =16; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { unicode-bidi: "trivial"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { vertical-align: "trivial"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { vertical-align: #445"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { vertical-align: text-top 30px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { vertical-align: -4cm; vertical-align: 30px -30px; }
+#errors
+#expected
+| *
+|  vertical-align: -4cm
+#reset
+
+#data
+* { vertical-align: - 30px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { vertical-align: - 20%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { vertical-align: 3% super; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { vertical-align: sub super; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { vertical-align: top; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { visibility: 23pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { visibility: 44em hidden; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { visibility: both hidden; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { visibility: single; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { visibility: "Knuckles"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { visibility: HiDDen; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { visibility: ?hidden; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { visibility: hidden???; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { visibility: hidden ???; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { visibility: inherit 4in; }
+#errors
+#expected
+| *
+#reset
+
