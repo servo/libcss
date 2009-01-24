@@ -5233,6 +5233,10 @@ css_error parse_speech_rate(css_language *c,
 		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
+		/* Make negative values invalid */
+		if (num < 0)
+			return CSS_INVALID;
+
 		value = SPEECH_RATE_SET;
 	} else
 		return CSS_INVALID;
