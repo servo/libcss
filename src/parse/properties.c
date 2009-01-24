@@ -3249,6 +3249,10 @@ css_error parse_height(css_language *c,
 		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
 			return CSS_INVALID;
 
+		/* Negative height is illegal */
+		if (length < 0)
+			return CSS_INVALID;
+
 		value = HEIGHT_SET;
 	}
 
