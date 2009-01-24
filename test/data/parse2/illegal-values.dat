@@ -312,14 +312,6 @@
 #reset
 
 #data
-* { right: -4; right: blunderbus; right: 1em; right: 6Hz; }
-#errors
-#expected
-| *
-|  right: 1em
-#reset
-
-#data
 * { top: -4; top: blunderbus; top: -50%; top: 6Hz; }
 #errors
 #expected
@@ -3044,6 +3036,175 @@
 
 #data
 * { position: static inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { quotes: "'"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { quotes: "'" '"' "'"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { quotes: "'" 0 "'"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { quotes: "'" "'" 0 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { quotes: "'" "'" url(tails) url(tails); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { quotes: 25%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { quotes: 25% 20%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { quotes: "'", "'"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { quotes: "'" "'", '"' '"'; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { quotes: "'" "'" '"' '"' none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { richness: 25%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { richness: -34%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { richness: 2kHz; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { richness: kHz; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { richness: -1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { richness: -0.01; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { richness: 100.001; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { richness: 101; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { richness: 75 rich; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { richness: rich; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { richness: "rich"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { right: -4; right: blunderbus; right: 1em; right: 6Hz; }
+#errors
+#expected
+| *
+|  right: 1em
+#reset
+
+#data
+* { right: "twelve"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { right: auto inherit; }
 #errors
 #expected
 | *
