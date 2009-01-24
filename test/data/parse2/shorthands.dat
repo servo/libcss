@@ -1,0 +1,61 @@
+#data
+* { margin: 0 0 0 0; }
+#errors
+#expected
+| *
+|  margin-top: 0
+|  margin-right: 0
+|  margin-bottom: 0
+|  margin-left: 0
+#reset
+
+#data
+* { margin: 2em; }
+#errors
+#expected
+| *
+|  margin-top: 2em
+|  margin-right: 2em
+|  margin-bottom: 2em
+|  margin-left: 2em
+#reset
+
+#data
+* { margin: 2em auto; }
+#errors
+#expected
+| *
+|  margin-top: 2em
+|  margin-right: auto
+|  margin-bottom: 2em
+|  margin-left: auto
+#reset
+
+#data
+* { margin: 10% 5px -4em -50%; }
+#errors
+#expected
+| *
+|  margin-top: 10%
+|  margin-right: 5px
+|  margin-bottom: -4em
+|  margin-left: -50%
+#reset
+
+#data
+* { margin: 10% 5px -4em; }
+#errors
+#expected
+| *
+|  margin-top: 10%
+|  margin-right: 5px
+|  margin-bottom: -4em
+|  margin-left: 5px
+#reset
+
+#data
+* { margin: 10% 5px "Hello!" -4em; }
+#errors
+#expected
+| *
+#reset
