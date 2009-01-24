@@ -570,7 +570,6 @@ void dump_bytecode(css_style *style, char **ptr)
 
 	while (offset < length) {
 		opcode op;
-		uint8_t flags;
 		uint32_t value;
 		uint32_t opv = *((uint32_t *) bytecode);
 
@@ -589,9 +588,7 @@ void dump_bytecode(css_style *style, char **ptr)
 		} else
 			*ptr += sprintf(*ptr, "%s: ", opcode_names[op]);
 
-		flags = getFlags(opv);
-
-		if (flags & FLAG_INHERIT) {
+		if (isInherit(opv)) {
 			*ptr += sprintf(*ptr, "inherit");
 		} else { 
 			value = getValue(opv);
@@ -2109,7 +2106,7 @@ void dump_bytecode(css_style *style, char **ptr)
 			}
 		}
 
-		if (flags & FLAG_IMPORTANT)
+		if (isImportant(opv))
 			*ptr += sprintf(*ptr, " !important");
 
 		*ptr += sprintf(*ptr, "\n");
