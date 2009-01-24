@@ -2388,6 +2388,209 @@
 #reset
 
 #data
+* { padding-left: -2em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { padding-right: -40%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { padding-top: -2em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { padding-bottom: -4.0%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { padding-top: 2em 4em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { padding-left: 0 4em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { padding-right: "Chemical Plant Zone"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { padding-right: thick; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-after: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-after: 2em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-after: -2em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-after: "Hedgehog"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-after: PicoDrive; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-after: always left; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-after: auto 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-before: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-before: 2em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-before: -2em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-before: "Hedgehog"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-before: PicoDrive; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-before: always left; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-before: auto 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-inside: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-inside: 2em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-inside: -2em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-inside: "Hedgehog"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-inside: PicoDrive; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-inside: auto avoid; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { page-break-inside: auto 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
 * { position: fixed; position: 3; }
 #errors
 #expected
