@@ -2594,6 +2594,419 @@
 #reset
 
 #data
+* { pause-after: auto 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-after: auto; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-after: none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-after: 1s 2s; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-after: -1s; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-after: -1.2ms; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-after: -90%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-after: 24; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-after: 24hrs; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-after: pause; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-after: "pause"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-after: 0 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-after: 0 inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-after: inherit 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-before: auto 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-before: auto; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-before: none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-before: 1s 2s; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-before: -1s; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-before: -1.2ms; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-before: -90%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-before: 24; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-before: 24hrs; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-before: pause; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-before: "pause"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-before: 0 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-before: 0 inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause-before: inherit 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch-range: -1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch-range: -0.01; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch-range: 101; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch-range: 100.1; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch-range: 50 50; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch-range: +50; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch-range: inherit 25; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch-range: 50Hz; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch-range: high; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch-range: wide; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch-range: "subtle"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch-range: url"()#ff9; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch-range: #ff9; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch: -10Hz; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch: -1kHz; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch: kHz; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch: Hz; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch: low, high; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch: low high; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch: 200Hz high; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch: "high"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pitch: ; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { play-during: url(sonic_boom.ogg) mix repeat auto; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { play-during: mix repeat url(sonic_boom.ogg); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { play-during: none url(sonic_boom.ogg); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { play-during: "mix" url(intro); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { play-during: mix; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { play-during: repeat; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { play-during: repeat mix; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { play-during: 12; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { play-during: 12s; }
+#errors
+#expected
+| *
+#reset
+
+#data
 * { position: fixed; position: 3; }
 #errors
 #expected
@@ -2610,6 +3023,27 @@
 
 #data
 * { position: 50em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { position: hidden; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { position: "fixed"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { position: static inherit; }
 #errors
 #expected
 | *
