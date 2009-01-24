@@ -2323,6 +2323,7 @@
 #errors
 #expected
 | *
+|  outline-width: 0px
 #reset
 
 #data
@@ -2330,6 +2331,7 @@
 #errors
 #expected
 | *
+|  outline-width: 0em
 #reset
 
 #data
