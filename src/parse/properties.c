@@ -4565,6 +4565,10 @@ css_error parse_pitch(css_language *c,
 		if ((unit & UNIT_FREQ) == false)
 			return CSS_INVALID;
 
+		/* Negative values are invalid */
+		if (length < 0)
+			return CSS_INVALID;
+
 		value = PITCH_FREQUENCY;
 	}
 
