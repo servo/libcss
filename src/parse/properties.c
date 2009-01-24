@@ -3772,6 +3772,10 @@ css_error parse_max_width(css_language *c,
 		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
 			return CSS_INVALID;
 
+		/* Negative values are illegal */
+		if (length < 0)
+			return CSS_INVALID;
+
 		value = MAX_WIDTH_SET;
 	}
 
@@ -3896,6 +3900,10 @@ css_error parse_min_width(css_language *c,
 			return error;
 
 		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+			return CSS_INVALID;
+
+		/* Negative values are illegal */
+		if (length < 0)
 			return CSS_INVALID;
 
 		value = MIN_WIDTH_SET;
