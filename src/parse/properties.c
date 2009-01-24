@@ -4353,6 +4353,10 @@ css_error parse_pause_after(css_language *c,
 		if ((unit & UNIT_TIME) == false && (unit & UNIT_PCT) == false)
 			return CSS_INVALID;
 
+		/* Negative values are illegal */
+		if (length < 0)
+			return CSS_INVALID;
+
 		value = PAUSE_AFTER_SET;
 	}
 
@@ -4412,6 +4416,10 @@ css_error parse_pause_before(css_language *c,
 			return error;
 
 		if ((unit & UNIT_TIME) == false && (unit & UNIT_PCT) == false)
+			return CSS_INVALID;
+
+		/* Negative values are illegal */
+		if (length < 0)
 			return CSS_INVALID;
 
 		value = PAUSE_BEFORE_SET;
