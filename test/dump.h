@@ -321,7 +321,7 @@ static const char *sides[] = { "top", "right", "bottom", "left" };
 
 static void dump_fixed(fixed f, char **ptr)
 {
-#define ABS(x) ((x) < 0 ? -(x) : (x))
+#define ABS(x) (uint32_t)((x) < 0 ? -(x) : (x))
 	uint32_t uintpart = FIXTOINT(ABS(f));
 	/* + 500 to ensure round to nearest (division will truncate) */
 	uint32_t fracpart = ((ABS(f) & 0x3ff) * 1000 + 500) / (1 << 10);
