@@ -3969,6 +3969,10 @@ css_error parse_orphans(css_language *c,
 		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
+		/* Negative values are nonsensical */
+		if (num < 0)
+			return CSS_INVALID;
+
 		value = ORPHANS_SET;
 	} else
 		return CSS_INVALID;
@@ -6306,6 +6310,10 @@ css_error parse_widows(css_language *c,
 		num = number_from_css_string(&tmp, true, &consumed);
 		/* Invalid if there are trailing characters */
 		if (consumed != token->ilower->len)
+			return CSS_INVALID;
+
+		/* Negative values are nonsensical */
+		if (num < 0)
 			return CSS_INVALID;
 
 		value = WIDOWS_SET;
