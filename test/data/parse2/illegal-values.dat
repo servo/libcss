@@ -4007,7 +4007,7 @@ max-height: 30%; min-height: 2em; }
 #errors
 #expected
 | *
-|  voice-family: serif, 'Trinity'
+|  voice-family: 'serif', 'Trinity'
 #reset
 
 #data
@@ -4015,7 +4015,7 @@ max-height: 30%; min-height: 2em; }
 #errors
 #expected
 | *
-|  voice-family: serif, sans-serif
+|  voice-family: 'serif', 'sans-serif'
 #reset
 
 #data
@@ -4031,7 +4031,7 @@ max-height: 30%; min-height: 2em; }
 #errors
 #expected
 | *
-|  voice-family: 'Homerton', 'Oxford', sans-serif, 'moose'
+|  voice-family: 'Homerton', 'Oxford', 'sans-serif', 'moose'
 #reset
 
 #data
