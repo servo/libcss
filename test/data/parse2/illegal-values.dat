@@ -3900,6 +3900,7 @@ max-height: 30%; min-height: 2em; }
 #errors
 #expected
 | *
+|  vertical-align: top
 #reset
 
 #data
