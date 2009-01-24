@@ -3212,6 +3212,195 @@
 #reset
 
 #data
+* { speak-header: twice; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak-header: once always; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak-header: 1 once; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak-header: 1s once; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak-header: once url(); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak-header: url() always; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak-numeral: digits inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak-numeral: 2 digits; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak-numeral: 2em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak-numeral: once; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak-numeral: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak-punctuation: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak-punctuation: none 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak-punctuation: 0pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak-punctuation: -0pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak-punctuation: code inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak: 23s; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak: 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak: auto; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak: none spell-out; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak: spell-out "Sonic"; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speak: spell-out url("Sonic"); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speech-rate: -10; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speech-rate: slow medium; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speech-rate: 120 slow; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speech-rate: 2s slow; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { speech-rate: 2s; }
+#errors
+#expected
+| *
+#reset
+
+#data
 * { stress: 50 medium; }
 #errors
 #expected
