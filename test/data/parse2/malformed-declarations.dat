@@ -102,3 +102,25 @@
 #|  color: #ffffff00
 ##reset
 
+#data
+*{f():{
+#errors
+#expected
+| *
+#reset
+
+#data
+*{:{
+#errors
+#expected
+| *
+#reset
+
+#data
+*{:{};f():{};font-size:{};clear:both}
+#errors
+#expected
+| *
+|  clear: both
+#reset
+
