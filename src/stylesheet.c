@@ -77,11 +77,19 @@ css_error css_stylesheet_create(css_language_level level,
 		return error;
 	}
 
-	/** \todo create selector hash */
+	error = css_selector_hash_create(alloc, alloc_pw, &sheet->selectors);
+	if (error != CSS_OK) {
+		css_language_destroy(sheet->parser_frontend);
+		css_parser_destroy(sheet->parser);
+		parserutils_hash_destroy(sheet->dictionary);
+		alloc(sheet, 0, alloc_pw);
+		return error;
+	}
 
 	len = strlen(url) + 1;
 	sheet->url = alloc(NULL, len, alloc_pw);
 	if (sheet->url == NULL) {
+		css_selector_hash_destroy(sheet->selectors);
 		css_language_destroy(sheet->parser_frontend);
 		css_parser_destroy(sheet->parser);
 		parserutils_hash_destroy(sheet->dictionary);
@@ -95,6 +103,7 @@ css_error css_stylesheet_create(css_language_level level,
 		sheet->title = alloc(NULL, len, alloc_pw);
 		if (sheet->title == NULL) {
 			alloc(sheet->url, 0, alloc_pw);
+			css_selector_hash_destroy(sheet->selectors);
 			css_language_destroy(sheet->parser_frontend);
 			css_parser_destroy(sheet->parser);
 			parserutils_hash_destroy(sheet->dictionary);
@@ -136,7 +145,9 @@ css_error css_stylesheet_destroy(css_stylesheet *sheet)
 
 	sheet->alloc(sheet->url, 0, sheet->pw);
 
-	/** \todo destroy selector hash + other data */
+	/** \todo destroy other data */
+
+	css_selector_hash_destroy(sheet->selectors);
 
 	css_language_destroy(sheet->parser_frontend);
 

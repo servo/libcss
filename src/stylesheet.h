@@ -19,6 +19,7 @@
 #include <libcss/types.h>
 
 #include "parse/parse.h"
+#include "select/hash.h"
 
 typedef struct css_rule css_rule;
 typedef struct css_selector css_selector;
@@ -137,8 +138,7 @@ typedef struct css_rule_charset {
 } css_rule_charset;
 
 struct css_stylesheet {
-#define HASH_SIZE (37)
-	css_selector *selectors[HASH_SIZE];	/**< Hashtable of selectors */
+	css_selector_hash *selectors;		/**< Hashtable of selectors */
 
 	uint32_t rule_count;			/**< Number of rules in sheet */
 	css_rule *rule_list;			/**< List of rules in sheet */
