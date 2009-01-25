@@ -160,12 +160,6 @@ struct css_stylesheet {
 	void *ownerNode;			/**< Owning node in document */
 	css_rule *ownerRule;			/**< Owning rule in parent */
 
-	css_stylesheet *parent;			/**< Parent sheet */
-	css_stylesheet *first_child;		/**< First in child list */
-	css_stylesheet *last_child;		/**< Last in child list */
-	css_stylesheet *next;			/**< Next in sibling list */
-	css_stylesheet *prev;			/**< Previous in sibling list */
-
 	css_import_handler import;		/**< Import callback */
 	void *import_pw;			/**< Import handler data */
 
