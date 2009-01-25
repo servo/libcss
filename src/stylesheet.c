@@ -5,6 +5,7 @@
  * Copyright 2008 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
+#include <assert.h>
 #include <string.h>
 
 #include "stylesheet.h"
@@ -438,8 +439,7 @@ css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 		return CSS_BADPARM;
 
 	/* Must not be attached to a rule */
-	if (selector->rule != NULL)
-		return CSS_INVALID;
+	assert(selector->rule == NULL);
 
 	/* Destroy combinator chain */
 	for (c = selector->combinator; c != NULL; c = d) {
@@ -570,8 +570,7 @@ css_error css_stylesheet_selector_combine(css_stylesheet *sheet,
 		return CSS_BADPARM;
 
 	/* Ensure that there is no existing combinator on B */
-	if (b->combinator != NULL)
-		return CSS_INVALID;
+	assert(b->combinator == NULL);
 
 	b->combinator = a;
 	b->data.comb = type;
@@ -648,8 +647,8 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 		return CSS_BADPARM;
 
 	/* Must be detached from parent/siblings */
-	if (rule->parent != NULL || rule->next != NULL || rule->prev != NULL)
-		return CSS_INVALID;
+	assert(rule->parent == NULL && rule->next == NULL && 
+			rule->prev == NULL);
 
 	/* Destroy type-specific contents */
 	switch (rule->type) {
@@ -669,7 +668,11 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 			css_stylesheet_selector_destroy(sheet, sel);
 		}
 
-		css_stylesheet_style_destroy(sheet, s->style);
+		if (s->selectors != NULL)
+			sheet->alloc(s->selectors, 0, sheet->pw);
+
+		if (s->style != NULL)
+			css_stylesheet_style_destroy(sheet, s->style);
 	}
 		break;
 	case CSS_RULE_CHARSET:
@@ -702,7 +705,8 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 	{
 		css_rule_font_face *font_face = (css_rule_font_face *) rule;
 
-		css_stylesheet_style_destroy(sheet, font_face->style);
+		if (font_face->style != NULL)
+			css_stylesheet_style_destroy(sheet, font_face->style);
 	}
 		break;
 	case CSS_RULE_PAGE:
@@ -719,7 +723,11 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 			css_stylesheet_selector_destroy(sheet, sel);
 		}
 
-		css_stylesheet_style_destroy(sheet, page->style);
+		if (page->selectors != NULL)
+			sheet->alloc(page->selectors, 0, sheet->pw);
+
+		if (page->style != NULL)
+			css_stylesheet_style_destroy(sheet, page->style);
 	}
 		break;
 	}
@@ -748,8 +756,7 @@ css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet,
 		return CSS_BADPARM;
 
 	/* Ensure rule is a CSS_RULE_SELECTOR */
-	if (rule->type != CSS_RULE_SELECTOR)
-		return CSS_INVALID;
+	assert(rule->type == CSS_RULE_SELECTOR);
 
 	sels = sheet->alloc(r->selectors, 
 			(r->base.items + 1) * sizeof(css_selector *), 
@@ -784,8 +791,7 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 	if (sheet == NULL || rule == NULL || style == NULL)
 		return CSS_BADPARM;
 
-	if (rule->type != CSS_RULE_SELECTOR && rule->type != CSS_RULE_PAGE)
-		return CSS_INVALID;
+	assert(rule->type == CSS_RULE_SELECTOR || rule->type == CSS_RULE_PAGE);
 
 	if (rule->type == CSS_RULE_SELECTOR)
 		cur = ((css_rule_selector *) rule)->style;
@@ -842,8 +848,7 @@ css_error css_stylesheet_rule_set_charset(css_stylesheet *sheet,
 		return CSS_BADPARM;
 
 	/* Ensure rule is a CSS_RULE_CHARSET */
-	if (rule->type != CSS_RULE_CHARSET)
-		return CSS_INVALID;
+	assert(rule->type == CSS_RULE_CHARSET);
 
 	/* Set rule's encoding field */
 	r->encoding = charset;
@@ -868,8 +873,7 @@ css_error css_stylesheet_rule_set_import(css_stylesheet *sheet,
 		return CSS_BADPARM;
 
 	/* Ensure rule is a CSS_RULE_IMPORT */
-	if (rule->type != CSS_RULE_IMPORT)
-		return CSS_INVALID;
+	assert(rule->type == CSS_RULE_IMPORT);
 
 	/* Set the rule's sheet field */
 	r->sheet = import;
@@ -981,8 +985,7 @@ css_error _add_selectors(css_stylesheet *sheet, css_rule *rule)
 		return CSS_BADPARM;
 
 	/* Rule must not be in sheet */
-	if (rule->parent != NULL)
-		return CSS_INVALID;
+	assert(rule->parent == NULL);
 
 	switch (rule->type) {
 	case CSS_RULE_SELECTOR:
