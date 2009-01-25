@@ -4412,6 +4412,7 @@ max-height: 30%; min-height: 2em; }
 #errors
 #expected
 | *
+|  word-spacing: 0.100em
 #reset
 
 #data
