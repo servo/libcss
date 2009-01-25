@@ -630,11 +630,88 @@ css_error css_stylesheet_rule_create(css_stylesheet *sheet, css_rule_type type,
  */
 css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 {
-	UNUSED(sheet);
-	UNUSED(rule);
+	if (sheet == NULL || rule == NULL)
+		return CSS_BADPARM;
 
-	/** \todo should this be recursive? */
-	/** \todo what happens to non-rule objects owned by this rule? */
+	/* Must be detached from parent/siblings */
+	if (rule->parent != NULL || rule->next != NULL || rule->prev != NULL)
+		return CSS_INVALID;
+
+	/* Destroy type-specific contents */
+	switch (rule->type) {
+	case CSS_RULE_UNKNOWN:
+		break;
+	case CSS_RULE_SELECTOR:
+	{
+		css_rule_selector *s = (css_rule_selector *) rule;
+		uint32_t i;
+
+		for (i = 0; i < rule->items; i++) {
+			css_selector *sel = s->selectors[i];
+
+			/* Detach from rule */
+			sel->rule = NULL;
+
+			css_stylesheet_selector_destroy(sheet, sel);
+		}
+
+		css_stylesheet_style_destroy(sheet, s->style);
+	}
+		break;
+	case CSS_RULE_CHARSET:
+		break;
+	case CSS_RULE_IMPORT:
+	{
+		css_rule_import *import = (css_rule_import *) rule;
+
+		css_stylesheet_destroy(import->sheet);
+	}
+		break;
+	case CSS_RULE_MEDIA:
+	{
+		css_rule_media *media = (css_rule_media *) rule;
+		css_rule *c, *d;
+
+		for (c = media->first_child; c != NULL; c = d) {
+			d = c->next;
+
+			/* Detach from list */
+			c->parent = NULL;
+			c->prev = NULL;
+			c->next = NULL;
+
+			css_stylesheet_rule_destroy(sheet, c);
+		}
+	}
+		break;
+	case CSS_RULE_FONT_FACE:
+	{
+		css_rule_font_face *font_face = (css_rule_font_face *) rule;
+
+		css_stylesheet_style_destroy(sheet, font_face->style);
+	}
+		break;
+	case CSS_RULE_PAGE:
+	{
+		css_rule_page *page = (css_rule_page *) rule;
+		uint32_t i;
+
+		for (i = 0; i < rule->items; i++) {
+			css_selector *sel = page->selectors[i];
+
+			/* Detach from rule */
+			sel->rule = NULL;
+
+			css_stylesheet_selector_destroy(sheet, sel);
+		}
+
+		css_stylesheet_style_destroy(sheet, page->style);
+	}
+		break;
+	}
+
+	/* Destroy rule */
+	sheet->alloc(rule, 0, sheet->pw);
 
 	return CSS_OK;
 }
