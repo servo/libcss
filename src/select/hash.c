@@ -22,6 +22,9 @@ struct css_selector_hash {
 	void *pw;
 };
 
+/* Dummy selector, used for lazy deletion */
+static css_selector empty_slot;
+
 static inline uint32_t _hash(const css_selector *sel);
 static inline uint32_t _hash_name(const parserutils_hash_entry *name);
 static inline void grow_slots(css_selector_hash *hash);
@@ -126,6 +129,44 @@ css_error css_selector_hash_insert(css_selector_hash *hash,
 }
 
 /**
+ * Remove an item from a hash
+ *
+ * \param hash      The hash to remove from
+ * \param selector  Pointer to selector
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_selector_hash_remove(css_selector_hash *hash,
+		const css_selector *selector)
+{
+	uint32_t index, mask;
+	const css_selector **entries;
+	const css_selector *entry;
+
+	if (hash == NULL || selector == NULL)
+		return CSS_BADPARM;
+
+	entries = hash->slots;
+
+	/* Find index */
+	mask = hash->n_slots - 1;
+	index = _hash(selector) & mask;
+
+	/* Use linear probing to resolve collisions */
+	while ((entry = entries[index]) != NULL) {
+		/* If we've found the right entry, invalidate it */
+		if (selector == entry) {
+			entries[index] = &empty_slot;
+			return CSS_OK;
+		}
+
+		index = (index + 1) & mask;
+	}
+
+	return CSS_OK;
+}
+
+
+/**
  * Find the first selector that matches name
  *
  * \param hash     Hash to search
@@ -155,7 +196,7 @@ css_error css_selector_hash_find(css_selector_hash *hash,
 	/* Use linear probing to resolve collisions */
 	while ((entry = entries[index]) != NULL) {
 		/* Names match, so we're done here */
-		if (entry->data.name == name) {
+		if (entry != &empty_slot && entry->data.name == name) {
 			break;
 		}
 
@@ -196,7 +237,8 @@ css_error css_selector_hash_iterate(css_selector_hash *hash,
 
 	/* Use linear probing to resolve collisions */
 	while ((entry = entries[index]) != NULL) {
-		if (entry->data.name == (*current)->data.name) {
+		if (entry != &empty_slot &&
+				entry->data.name == (*current)->data.name) {
 			break;
 		}
 
@@ -261,7 +303,10 @@ void grow_slots(css_selector_hash *hash)
 	for (uint32_t i = 0; i < hash->n_slots; i++) {
 		const css_selector *e = hash->slots[i];
 
-		if (e == NULL)
+		/* Ignore unused slots, 
+		 * and slots containing lazily-deleted items
+		 */
+		if (e == NULL || e == &empty_slot)
 			continue;
 
 		/* Find new index */

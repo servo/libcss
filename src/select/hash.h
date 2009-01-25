@@ -24,6 +24,8 @@ css_error css_selector_hash_destroy(css_selector_hash *hash);
 
 css_error css_selector_hash_insert(css_selector_hash *hash,
 		const struct css_selector *selector);
+css_error css_selector_hash_remove(css_selector_hash *hash,
+		const struct css_selector *selector);
 
 css_error css_selector_hash_find(css_selector_hash *hash,
 		const parserutils_hash_entry *name,
