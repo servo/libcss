@@ -359,10 +359,10 @@ css_error css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len,
  */
 css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style)
 {
-	UNUSED(sheet);
-	UNUSED(style);
+	if (sheet == NULL || style == NULL)
+		return CSS_BADPARM;
 
-	/** \todo destroy style */
+	sheet->alloc(style, 0, sheet->pw);
 
 	return CSS_OK;
 }
