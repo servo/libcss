@@ -418,12 +418,24 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 		css_selector *selector)
 {
-	UNUSED(sheet);
-	UNUSED(selector);
+	css_selector *c, *d;
 
-	/** \todo Need to ensure that selector is removed from whatever it's 
-	 * attached to (be that the parent selector, parent rule, or the 
-	 * hashtable of selectors (or any combination of these) */
+	if (sheet == NULL || selector == NULL)
+		return CSS_BADPARM;
+
+	/* Must not be attached to a rule */
+	if (selector->rule != NULL)
+		return CSS_INVALID;
+
+	/* Destroy combinator chain */
+	for (c = selector->combinator; c != NULL; c = d) {
+		d = c->combinator;
+
+		sheet->alloc(c, 0, sheet->pw);
+	}
+
+	/* Destroy this selector */
+	sheet->alloc(selector, 0, sheet->pw);
 
 	return CSS_OK;
 }
