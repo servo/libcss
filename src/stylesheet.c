@@ -368,20 +368,17 @@ css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style)
 }
 
 /**
- * Create a selector
+ * Create an element selector
  *
  * \param sheet     The stylesheet context
- * \param type      The type of selector to create
  * \param name      Name of selector
- * \param value     Value of selector, or NULL
  * \param selector  Pointer to location to receive selector object
  * \return CSS_OK on success,
  *         CSS_BADPARM on bad parameters,
  *         CSS_NOMEM on memory exhaustion
  */
 css_error css_stylesheet_selector_create(css_stylesheet *sheet,
-		css_selector_type type, const parserutils_hash_entry *name, 
-		const parserutils_hash_entry *value, css_selector **selector)
+		const parserutils_hash_entry *name, css_selector **selector)
 {
 	css_selector *sel;
 
@@ -394,9 +391,9 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 
 	memset(sel, 0, sizeof(css_selector));
 
-	sel->data.type = type;
+	sel->data.type = CSS_SELECTOR_ELEMENT;
 	sel->data.name = name;
-	sel->data.value = value;
+	sel->data.value = NULL;
 
 	/** \todo specificity */
 	sel->specificity = 0;

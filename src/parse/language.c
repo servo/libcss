@@ -812,8 +812,7 @@ css_error parseSimpleSelector(css_language *c,
 	if (token->type == CSS_TOKEN_IDENT || tokenIsChar(token, '*')) {
 		/* Have element name */
 		error = css_stylesheet_selector_create(c->sheet,
-				CSS_SELECTOR_ELEMENT, token->idata, NULL,
-				&selector);
+				token->idata, &selector);
 		if (error != CSS_OK)
 			return error;
 
@@ -821,8 +820,7 @@ css_error parseSimpleSelector(css_language *c,
 	} else {
 		/* Universal selector */
 		error = css_stylesheet_selector_create(c->sheet,
-				CSS_SELECTOR_ELEMENT, c->strings[UNIVERSAL], 
-				NULL, &selector);
+				c->strings[UNIVERSAL], &selector);
 		if (error != CSS_OK)
 			return error;
 
