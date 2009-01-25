@@ -395,8 +395,12 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 	sel->data.name = name;
 	sel->data.value = NULL;
 
-	/** \todo specificity */
-	sel->specificity = 0;
+	/* Initial specificity -- 1 for an element, 0 for universal */
+	if (name->len != 1 || name->data[0] != '*')
+		sel->specificity = CSS_SPECIFICITY_D;
+	else
+		sel->specificity = 0;
+
 	sel->data.comb = CSS_COMBINATOR_NONE;
 
 	*selector = sel;
@@ -492,6 +496,28 @@ css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
 	(&temp->data)[num_details].next = 1;
 
 	(*parent) = temp;
+
+	/* Update parent's specificity */
+	switch (detail->type) {
+	case CSS_SELECTOR_CLASS:
+	case CSS_SELECTOR_ATTRIBUTE:
+	case CSS_SELECTOR_ATTRIBUTE_EQUAL:
+	case CSS_SELECTOR_ATTRIBUTE_DASHMATCH:
+	case CSS_SELECTOR_ATTRIBUTE_INCLUDES:
+		(*parent)->specificity += CSS_SPECIFICITY_C;
+		break;
+	case CSS_SELECTOR_ID:
+		(*parent)->specificity += CSS_SPECIFICITY_B;
+		break;
+	case CSS_SELECTOR_PSEUDO:
+		/** \todo distinguish between pseudo classes and elements */
+		/* Assume pseudo class for now */
+		(*parent)->specificity += CSS_SPECIFICITY_C;
+		break;
+	case CSS_SELECTOR_ELEMENT:
+		(*parent)->specificity += CSS_SPECIFICITY_D;
+		break;
+	}
 
 	return CSS_OK;
 }

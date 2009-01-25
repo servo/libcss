@@ -63,6 +63,10 @@ struct css_selector {
 
 	css_rule *rule;				/**< Owning rule */
 
+#define CSS_SPECIFICITY_A 0x01000000
+#define CSS_SPECIFICITY_B 0x00010000
+#define CSS_SPECIFICITY_C 0x00000100
+#define CSS_SPECIFICITY_D 0x00000001
 	uint32_t specificity;			/**< Specificity of selector */
 
 	css_selector_detail data;		/**< Selector data */
