@@ -13,6 +13,9 @@
 #include "utils/parserutilserror.h"
 #include "utils/utils.h"
 
+static css_error _add_selectors(css_stylesheet *sheet, css_rule *rule);
+static css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule);
+
 /**
  * Create a stylesheet
  *
@@ -327,7 +330,7 @@ css_error css_stylesheet_set_disabled(css_stylesheet *sheet, bool disabled)
 }
 
 /******************************************************************************
- * Private API below here                                                     *
+ * Library-private API below here                                             *
  ******************************************************************************/
 
 /**
@@ -883,8 +886,15 @@ css_error css_stylesheet_rule_set_import(css_stylesheet *sheet,
  */
 css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule)
 {
+	css_error error;
+
 	if (sheet == NULL || rule == NULL)
 		return CSS_BADPARM;
+
+	/* Add any selectors to the hash */
+	error = _add_selectors(sheet, rule);
+	if (error != CSS_OK)
+		return error;
 
 	/* Fill in rule's index and parent fields */
 	rule->index = sheet->rule_count;
@@ -904,8 +914,7 @@ css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule)
 		sheet->last_rule = rule;
 	}
 
-	/** \todo If there are selectors in the rule, add them to the hash 
-	 * (this needs to recurse over child rules, too) */
+	/** \todo needs to trigger some event announcing styles have changed */
 
 	return CSS_OK;
 }
@@ -919,15 +928,190 @@ css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule)
  */
 css_error css_stylesheet_remove_rule(css_stylesheet *sheet, css_rule *rule)
 {
-	UNUSED(sheet);
-	UNUSED(rule);
+	css_error error;
 
-	/** \todo If there are selectors (recurse over child rules, too),
-	 * then they must be removed from the hash */
+	if (sheet == NULL || rule == NULL)
+		return CSS_BADPARM;
+
+	error = _remove_selectors(sheet, rule);
+	if (error != CSS_OK)
+		return error;
+
+	if (rule->next == NULL)
+		sheet->last_rule = rule->prev;
+	else
+		rule->next->prev = rule->prev;
+
+	if (rule->prev == NULL)
+		sheet->rule_list = rule->next;
+	else
+		rule->prev->next = rule->next;
+
+	/* Invalidate linkage fields */
+	rule->parent = NULL;
+	rule->prev = NULL;
+	rule->next = NULL;
+
 	/**\ todo renumber subsequent rules? may not be necessary, as there's 
 	 * only an expectation that rules which occur later in the stylesheet 
 	 * have a higher index than those that appear earlier. There's no 
 	 * guarantee that the number space is continuous. */
+
+	/** \todo needs to trigger some event announcing styles have changed */
+
+	return CSS_OK;
+}
+
+/******************************************************************************
+ * Private API below here                                                     *
+ ******************************************************************************/
+
+/**
+ * Add selectors in a rule to the hash
+ *
+ * \param sheet  Stylesheet containing hash
+ * \param rule   Rule to consider
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error _add_selectors(css_stylesheet *sheet, css_rule *rule)
+{
+	css_error error;
+
+	if (sheet == NULL || rule == NULL)
+		return CSS_BADPARM;
+
+	/* Rule must not be in sheet */
+	if (rule->parent != NULL)
+		return CSS_INVALID;
+
+	switch (rule->type) {
+	case CSS_RULE_SELECTOR:
+	{
+		css_rule_selector *s = (css_rule_selector *) rule;
+		int32_t i;
+
+		for (i = 0; i < rule->items; i++) {
+			css_selector *sel = s->selectors[i];
+
+			error = css_selector_hash_insert(sheet->selectors, sel);
+			if (error != CSS_OK) {
+				/* Failed, revert our changes */
+				for (i--; i >= 0; i--) {
+					sel = s->selectors[i];
+
+					/* Ignore errors */
+					css_selector_hash_remove(
+							sheet->selectors, sel);
+				}
+				
+				return error;
+			}
+		}
+	}
+		break;
+	case CSS_RULE_MEDIA:
+	{
+		css_rule_media *m = (css_rule_media *) rule;
+		css_rule *r;
+
+		for (r = m->first_child; r != NULL; r = r->next) {
+			error = _add_selectors(sheet, r);
+			if (error != CSS_OK) {
+				/* Failed, revert out changes */
+				for (r = r->prev; r != NULL; r = r->prev) {
+					_remove_selectors(sheet, r);
+				}
+
+				return error;
+			}
+		}
+	}
+		break;
+	case CSS_RULE_PAGE:
+	{
+		css_rule_page *p = (css_rule_page *) rule;
+		int32_t i;
+
+		for (i = 0; i < rule->items; i++) {
+			css_selector *sel = p->selectors[i];
+
+			error = css_selector_hash_insert(sheet->selectors, sel);
+			if (error != CSS_OK) {
+				/* Failed, revert our changes */
+				for (i--; i >= 0; i--) {
+					sel = p->selectors[i];
+
+					/* Ignore errors */
+					css_selector_hash_remove(
+							sheet->selectors, sel);
+				}
+				
+				return error;
+			}
+		}
+	}
+		break;
+	}
+
+	return CSS_OK;
+}
+
+/**
+ * Remove selectors in a rule from the hash
+ *
+ * \param sheet  Stylesheet containing hash
+ * \param rule   Rule to consider
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule)
+{
+	css_error error;
+
+	if (sheet == NULL || rule == NULL)
+		return CSS_BADPARM;
+
+	switch (rule->type) {
+	case CSS_RULE_SELECTOR:
+	{
+		css_rule_selector *s = (css_rule_selector *) rule;
+		int32_t i;
+
+		for (i = 0; i < rule->items; i++) {
+			css_selector *sel = s->selectors[i];
+
+			error = css_selector_hash_remove(sheet->selectors, sel);
+			if (error != CSS_OK)
+				return error;
+		}
+	}
+		break;
+	case CSS_RULE_MEDIA:
+	{
+		css_rule_media *m = (css_rule_media *) rule;
+		css_rule *r;
+
+		for (r = m->first_child; r != NULL; r = r->next) {
+			error = _remove_selectors(sheet, r);
+			if (error != CSS_OK)
+				return error;
+		}
+	}
+		break;
+	case CSS_RULE_PAGE:
+	{
+		css_rule_page *p = (css_rule_page *) rule;
+		int32_t i;
+
+		for (i = 0; i < rule->items; i++) {
+			css_selector *sel = p->selectors[i];
+
+			error = css_selector_hash_remove(sheet->selectors, sel);
+			if (error != CSS_OK)
+				return error;
+		}
+	}
+		break;
+	}
 
 	return CSS_OK;
 }
