@@ -135,6 +135,8 @@ css_error css_stylesheet_create(css_language_level level,
  */
 css_error css_stylesheet_destroy(css_stylesheet *sheet)
 {
+	css_rule *r, *s;
+
 	if (sheet == NULL)
 		return CSS_BADPARM;
 
@@ -143,7 +145,16 @@ css_error css_stylesheet_destroy(css_stylesheet *sheet)
 
 	sheet->alloc(sheet->url, 0, sheet->pw);
 
-	/** \todo destroy other data */
+	for (r = sheet->rule_list; r != NULL; r = s) {
+		s = r->next;
+
+		/* Detach from list */
+		r->parent = NULL;
+		r->prev = NULL;
+		r->next = NULL;
+
+		css_stylesheet_rule_destroy(sheet, r);
+	}
 
 	css_selector_hash_destroy(sheet->selectors);
 
