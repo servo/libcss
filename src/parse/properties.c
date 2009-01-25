@@ -6215,6 +6215,10 @@ css_error parse_volume(css_language *c,
 		if (consumed != token->ilower->len)
 			return CSS_INVALID;
 
+		/* Must be between 0 and 100 */
+		if (length < 0 || length > F_100)
+			return CSS_INVALID;
+
 		parserutils_vector_iterate(vector, ctx);
 		value = VOLUME_NUMBER;
 	} else {
@@ -6225,6 +6229,10 @@ css_error parse_volume(css_language *c,
 			return error;
 
 		if ((unit & UNIT_PCT) == false)
+			return CSS_INVALID;
+
+		/* Must be positive */
+		if (length < 0)
 			return CSS_INVALID;
 
 		value = VOLUME_DIMENSION;
