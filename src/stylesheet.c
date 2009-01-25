@@ -138,8 +138,6 @@ css_error css_stylesheet_destroy(css_stylesheet *sheet)
 	if (sheet == NULL)
 		return CSS_BADPARM;
 
-	parserutils_hash_destroy(sheet->dictionary);
-
 	if (sheet->title != NULL)
 		sheet->alloc(sheet->title, 0, sheet->pw);
 
@@ -149,9 +147,14 @@ css_error css_stylesheet_destroy(css_stylesheet *sheet)
 
 	css_selector_hash_destroy(sheet->selectors);
 
-	css_language_destroy(sheet->parser_frontend);
+	/* These two may have been destroyed when parsing completed */
+	if (sheet->parser_frontend != NULL)
+		css_language_destroy(sheet->parser_frontend);
 
-	css_parser_destroy(sheet->parser);
+	if (sheet->parser != NULL)
+		css_parser_destroy(sheet->parser);
+
+	parserutils_hash_destroy(sheet->dictionary);
 
 	sheet->alloc(sheet, 0, sheet->pw);
 
@@ -172,6 +175,9 @@ css_error css_stylesheet_append_data(css_stylesheet *sheet,
 	if (sheet == NULL || data == NULL)
 		return CSS_BADPARM;
 
+	if (sheet->parser == NULL)
+		return CSS_INVALID;
+
 	return css_parser_parse_chunk(sheet->parser, data, len);
 }
 
@@ -183,17 +189,26 @@ css_error css_stylesheet_append_data(css_stylesheet *sheet,
  */
 css_error css_stylesheet_data_done(css_stylesheet *sheet)
 {
+	css_error error;
+
 	if (sheet == NULL)
 		return CSS_BADPARM;
 
-	return css_parser_completed(sheet->parser);
+	if (sheet->parser == NULL)
+		return CSS_INVALID;
 
-	/** \todo We can destroy the parser here as it won't be needed
-	 * Note, however, that, if we do so, then the dictionary of
-	 * strings created by the parser *must* be preserved (and, ideally,
-	 * created by us in the first place) because our stylesheet 
-	 * datastructures contain pointers to strings stored in this
-	 * dictionary. */
+	error = css_parser_completed(sheet->parser);
+	if (error != CSS_OK)
+		return error;
+
+	/* Destroy the parser, as it's no longer needed */
+	css_language_destroy(sheet->parser_frontend);
+	css_parser_destroy(sheet->parser);
+
+	sheet->parser_frontend = NULL;
+	sheet->parser = NULL;
+
+	return CSS_OK;
 }
 
 /**
