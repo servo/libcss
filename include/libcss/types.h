@@ -63,4 +63,8 @@ typedef struct css_string {
 
 typedef struct css_stylesheet css_stylesheet;
 
+typedef struct css_select_ctx css_select_ctx;
+
+typedef struct css_computed_style css_computed_style;
+
 #endif
