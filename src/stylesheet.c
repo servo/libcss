@@ -898,17 +898,19 @@ css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule)
 	if (sheet == NULL || rule == NULL)
 		return CSS_BADPARM;
 
+	/* Need to fill in rule's index field before adding selectors
+	 * because selector chains consider the rule index for sort order
+	 */
+	rule->index = sheet->rule_count;
+
 	/* Add any selectors to the hash */
 	error = _add_selectors(sheet, rule);
 	if (error != CSS_OK)
 		return error;
 
-	/* Fill in rule's index and parent fields */
-	rule->index = sheet->rule_count;
+	/* Add rule to sheet */
 	rule->ptype = CSS_RULE_PARENT_STYLESHEET;
 	rule->parent = sheet;
-
-	/* Add rule to sheet */
 	sheet->rule_count++;
 
 	if (sheet->last_rule == NULL) {

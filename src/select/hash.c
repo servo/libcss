@@ -11,23 +11,25 @@
 #include "stylesheet.h"
 #include "select/hash.h"
 
+typedef struct hash_entry {
+	const css_selector *sel;
+	struct hash_entry *next;
+} hash_entry;
+
 struct css_selector_hash {
 #define DEFAULT_SLOTS (1<<6)
 	size_t n_slots;
-	size_t n_used;
 
-	const css_selector **slots;
+	hash_entry *slots;
 
 	css_alloc alloc;
 	void *pw;
 };
 
-/* Dummy selector, used for lazy deletion */
-static css_selector empty_slot;
+static hash_entry empty_slot;
 
 static inline uint32_t _hash(const css_selector *sel);
 static inline uint32_t _hash_name(const parserutils_hash_entry *name);
-static inline void grow_slots(css_selector_hash *hash);
 
 /**
  * Create a hash
@@ -49,15 +51,14 @@ css_error css_selector_hash_create(css_alloc alloc, void *pw,
 	if (h == NULL)
 		return CSS_NOMEM;
 
-	h->slots = alloc(0, DEFAULT_SLOTS * sizeof(css_selector *), pw);
+	h->slots = alloc(0, DEFAULT_SLOTS * sizeof(hash_entry), pw);
 	if (h->slots == NULL) {
 		alloc(h, 0, pw);
 		return CSS_NOMEM;
 	}
 
-	memset(h->slots, 0, DEFAULT_SLOTS * sizeof(css_selector *));
+	memset(h->slots, 0, DEFAULT_SLOTS * sizeof(hash_entry));
 	h->n_slots = DEFAULT_SLOTS;
-	h->n_used = 0;
 
 	h->alloc = alloc;
 	h->pw = pw;
@@ -75,8 +76,20 @@ css_error css_selector_hash_create(css_alloc alloc, void *pw,
  */
 css_error css_selector_hash_destroy(css_selector_hash *hash)
 {
+	uint32_t i;
+
 	if (hash == NULL)
 		return CSS_BADPARM;
+
+	for (i = 0; i < hash->n_slots; i++) {
+		hash_entry *d, *e;
+
+		for (d = hash->slots[i].next; d != NULL; d = e) {
+			e = d->next;
+
+			hash->alloc(d, 0, hash->pw);
+		}
+	}
 
 	hash->alloc(hash->slots, 0, hash->pw);
 
@@ -96,34 +109,53 @@ css_error css_selector_hash_insert(css_selector_hash *hash,
 		const css_selector *selector)
 {
 	uint32_t index, mask;
-	const css_selector **entries;
-	const css_selector *entry;
+	hash_entry *head;
 
 	if (hash == NULL || selector == NULL)
 		return CSS_BADPARM;
-
-	entries = hash->slots;
 
 	/* Find index */
 	mask = hash->n_slots - 1;
 	index = _hash(selector) & mask;
 
-	/* Use linear probing to resolve collisions */
-	while ((entry = entries[index]) != NULL) {
-		/* If this data is already in the hash, return it */
-		if (selector == entry) {
-			return CSS_OK;
+	head = &hash->slots[index];
+
+	if (head->sel == NULL) {
+		head->sel = selector;
+		head->next = NULL;
+	} else {
+		hash_entry *prev = NULL;
+		hash_entry *entry = 
+				hash->alloc(NULL, sizeof(hash_entry), hash->pw);
+		if (entry == NULL)
+			return CSS_NOMEM;
+
+		/* Find place to insert entry */
+		do {
+			/* Sort by ascending specificity */
+			if (head->sel->specificity > selector->specificity)
+				break;
+
+			/* Sort by ascending rule index */
+			if (head->sel->specificity == selector->specificity && 
+				head->sel->rule->index > selector->rule->index)
+				break;
+
+			prev = head;
+			head = head->next;
+		} while (head != NULL);
+
+		if (prev == NULL) {
+			entry->sel = hash->slots[index].sel;
+			entry->next = hash->slots[index].next;
+			hash->slots[index].sel = selector;
+			hash->slots[index].next = entry;
+		} else {
+			entry->sel = selector;
+			entry->next = prev->next;
+			prev->next = entry;
 		}
-
-		index = (index + 1) & mask;
 	}
-
-	/* The data isn't in the hash. Index identifies the slot to use */
-	entries[index] = selector;
-
-	/* If the table is 75% full, then increase its size */
-	if (++hash->n_used >= (hash->n_slots >> 1) + (hash->n_slots >> 2))
-		grow_slots(hash);
 
 	return CSS_OK;
 }
@@ -139,27 +171,43 @@ css_error css_selector_hash_remove(css_selector_hash *hash,
 		const css_selector *selector)
 {
 	uint32_t index, mask;
-	const css_selector **entries;
-	const css_selector *entry;
+	hash_entry *head, *prev = NULL;
 
 	if (hash == NULL || selector == NULL)
 		return CSS_BADPARM;
-
-	entries = hash->slots;
 
 	/* Find index */
 	mask = hash->n_slots - 1;
 	index = _hash(selector) & mask;
 
-	/* Use linear probing to resolve collisions */
-	while ((entry = entries[index]) != NULL) {
-		/* If we've found the right entry, invalidate it */
-		if (selector == entry) {
-			entries[index] = &empty_slot;
-			return CSS_OK;
-		}
+	head = &hash->slots[index];
 
-		index = (index + 1) & mask;
+	if (head->sel == NULL)
+		return CSS_INVALID;
+
+	do {
+		if (head->sel == selector)
+			break;
+
+		prev = head;
+		head = head->next;
+	} while (head != NULL);
+
+	if (head == NULL)
+		return CSS_INVALID;
+
+	if (prev == NULL) {
+		if (head->next != NULL) {
+			hash->slots[index].sel = head->next->sel;
+			hash->slots[index].next = head->next->next;
+		} else {
+			hash->slots[index].sel = NULL;
+			hash->slots[index].next = NULL;
+		}
+	} else {
+		prev->next = head->next;
+
+		hash->alloc(head, 0, hash->pw);
 	}
 
 	return CSS_OK;
@@ -181,29 +229,30 @@ css_error css_selector_hash_find(css_selector_hash *hash,
 		const css_selector ***matched)
 {
 	uint32_t index, mask;
-	const css_selector **entries;
-	const css_selector *entry;
+	hash_entry *head;
 
 	if (hash == NULL || name == NULL || matched == NULL)
 		return CSS_BADPARM;
-
-	entries = hash->slots;
 
 	/* Find index */
 	mask = hash->n_slots - 1;
 	index = _hash_name(name) & mask;
 
-	/* Use linear probing to resolve collisions */
-	while ((entry = entries[index]) != NULL) {
-		/* Names match, so we're done here */
-		if (entry != &empty_slot && entry->data.name == name) {
-			break;
-		}
+	head = &hash->slots[index];
 
-		index = (index + 1) & mask;
+	if (head->sel != NULL) {
+		do {
+			if (head->sel->data.name == name)
+				break;
+
+			head = head->next;
+		} while (head != NULL);
+
+		if (head == NULL)
+			head = &empty_slot;
 	}
 
-	(*matched) = &entries[index];
+	(*matched) = (const css_selector **) head;
 
 	return CSS_OK;
 }
@@ -222,30 +271,20 @@ css_error css_selector_hash_find(css_selector_hash *hash,
 css_error css_selector_hash_iterate(css_selector_hash *hash,
 		const css_selector **current, const css_selector ***next)
 {
-	uint32_t index, mask;
-	const css_selector **entries;
-	const css_selector *entry;
+	hash_entry *head = (hash_entry *) current;
 
 	if (hash == NULL || current == NULL || next == NULL)
 		return CSS_BADPARM;
 
-	entries = hash->slots;
-
-	/* Find index */
-	mask = hash->n_slots - 1;
-	index = (current - entries + 1) & mask;
-
-	/* Use linear probing to resolve collisions */
-	while ((entry = entries[index]) != NULL) {
-		if (entry != &empty_slot &&
-				entry->data.name == (*current)->data.name) {
+	for (head = head->next; head != NULL; head = head->next) {
+		if (head->sel->data.name == (*current)->data.name)
 			break;
-		}
-
-		index = (index + 1) & mask;
 	}
 
-	*next = &entries[index];
+	if (head == NULL)
+		head = &empty_slot;
+
+	(*next) = (const css_selector **) head;
 
 	return CSS_OK;
 }
@@ -274,60 +313,5 @@ uint32_t _hash(const css_selector *sel)
 uint32_t _hash_name(const parserutils_hash_entry *name)
 {
 	return (uint32_t) (((uintptr_t) name) & 0xffffffff);
-}
-
-/**
- * Increase the size of the slot table
- *
- * \param hash  The hash to process
- */
-void grow_slots(css_selector_hash *hash)
-{
-	const css_selector **s;
-	size_t new_size;
-	size_t n_used = 0;
-
-	if (hash == NULL)
-		return;
-
-	new_size = hash->n_slots << 1;
-
-	/* Create new slot table */
-	s = hash->alloc(0, new_size * sizeof(css_selector *), hash->pw);
-	if (s == NULL)
-		return;
-
-	memset(s, 0, new_size * sizeof(css_selector *));
-
-	/* Now, populate it with the contents of the current one */
-	for (uint32_t i = 0; i < hash->n_slots; i++) {
-		const css_selector *e = hash->slots[i];
-
-		/* Ignore unused slots, 
-		 * and slots containing lazily-deleted items
-		 */
-		if (e == NULL || e == &empty_slot)
-			continue;
-
-		/* Find new index */
-		uint32_t mask = new_size - 1;
-		uint32_t index = _hash(e) & mask;
-
-		/* Use linear probing to resolve collisions */
-		while (s[index] != NULL)
-			index = (index + 1) & mask;
-
-		/* Insert into new slot table */
-		s[index] = e;
-		n_used++;
-	}
-
-	/* Destroy current table, and replace it with the new one */
-	hash->alloc(hash->slots, 0, hash->pw);
-	hash->slots = s;
-	hash->n_slots = new_size;
-	hash->n_used = n_used;
-
-	return;
 }
 
