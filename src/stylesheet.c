@@ -575,6 +575,9 @@ css_error css_stylesheet_selector_combine(css_stylesheet *sheet,
 	b->combinator = a;
 	b->data.comb = type;
 
+	/* And propagate A's specificity to B */
+	b->specificity += a->specificity;
+
 	return CSS_OK;
 }
 
