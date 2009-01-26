@@ -1242,6 +1242,14 @@
 #reset
 
 #data
+* { font-family: Soinc the Hedgehog; }
+#errors
+#expected
+| *
+|  font-family: 'Soinc the Hedgehog'
+#reset
+
+#data
 * { font-size: xx-small larger; }
 #errors
 #expected
@@ -4058,6 +4066,37 @@ max-height: 30%; min-height: 2em; }
 
 #data
 * { voice-family: "Homerton", "Oxford", url(font); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { voice-family: male, "Trinity"; }
+#errors
+#expected
+| *
+|  voice-family: male, 'Trinity'
+#reset
+
+#data
+* { voice-family: male, female; }
+#errors
+#expected
+| *
+|  voice-family: male, female
+#reset
+
+#data
+* { voice-family: "Homerton", "Oxford", child, moose; }
+#errors
+#expected
+| *
+|  voice-family: 'Homerton', 'Oxford', child, 'moose'
+#reset
+
+#data
+* { voice-family: "Homerton" "Oxford" child; }
 #errors
 #expected
 | *
