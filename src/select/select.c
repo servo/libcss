@@ -203,13 +203,34 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
 	return CSS_OK;
 }
 
+/**
+ * Select a style for the given node
+ *
+ * \param ctx             Selection context to use
+ * \param node            Node to select style for
+ * \param pseudo_element  Pseudo element to select for, instead
+ * \param pseudo_classes  Currently active pseudo classes
+ * \param media           Currently active media types
+ * \param result          Pointer to style to populate
+ * \return CSS_OK on success, appropriate error otherwise.
+ *
+ * In computing the style, no reference is made to the parent node's
+ * style. Therefore, the resultant computed style is not ready for
+ * immediate use, as some properties may be marked as inherited.
+ * Use css_computed_style_compose() to obtain a fully computed style.
+ *
+ * This two-step approach to style computation is designed to allow
+ * the client to store the partially computed style and efficiently
+ * update the fully computed style for a node when layout changes.
+ */
 css_error css_select_style(css_select_ctx *ctx, void *node,
-		uint32_t pseudo_classes, uint32_t media,
-		css_computed_style **result)
+		uint64_t pseudo_element, uint64_t pseudo_classes,
+		uint64_t media,	css_computed_style *result)
 {
 	UNUSED(ctx);
 	UNUSED(node);
 	UNUSED(pseudo_classes);
+	UNUSED(pseudo_element);
 	UNUSED(media);
 	UNUSED(result);
 
