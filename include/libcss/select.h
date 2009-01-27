@@ -31,10 +31,4 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 		uint64_t pseudo_element, uint64_t pseudo_classes,
 		uint64_t media, css_computed_style *result);
 
-/* css_error css_computed_style_compose(const css_computed_style *parent,
-		const css_computed_style *child,
-		css_computed_style *result); */
-
-/* css_error css_computed_style_destroy(css_computed_style *style); */
-
 #endif
