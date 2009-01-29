@@ -20,17 +20,30 @@ typedef struct css_computed_page {
 
 typedef struct css_computed_uncommon {
 /*
- * border_spacing
- * clip
- * content
- * counter_increment
- * counter_reset
- * cursor
- * letter_spacing
- * outline_color
- * outline_width
- * quotes
- * word_spacing
+ * border_spacing		  1 + 2(4)	  2(4)
+ * clip				  2 + 4(4)	  4(4)
+ * counter_increment		  1		  4 + sizeof(ptr)
+ * counter_reset		  1		  4 + sizeof(ptr)
+ * letter_spacing		  1 + 4		  4
+ * outline_color		  1		  4
+ * outline_width		  3 + 4		  4
+ * word_spacing			  1 + 4		  4
+ * 				---		---
+ * 				 47 bits	 48 + 2sizeof(ptr) bytes
+ *
+ * quotes			  1		  sizeof(ptr)
+ * 				---		---
+ * 				  1 bit		  sizeof(ptr) bytes
+ *
+ * content			?
+ * cursor			?
+ *
+ * 				___		___
+ * 				 48 bits	 48 + 3sizeof(ptr) bytes
+ *
+ * 				  6 bytes	 48 + 3sizeof(ptr) bytes
+ * 				===================
+ * 				 54 + 3sizeof(ptr) bytes
  */
 } css_computed_uncommon;
 
