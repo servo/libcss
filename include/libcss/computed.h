@@ -31,19 +31,26 @@ typedef struct css_computed_uncommon {
  * 				---		---
  * 				 47 bits	 48 + 2sizeof(ptr) bytes
  *
+ * Encode quotes as a (NULL-terminated?) array of string pointers
+ *
  * quotes			  1		  sizeof(ptr)
  * 				---		---
  * 				  1 bit		  sizeof(ptr) bytes
  *
+ * Encode cursor uri(s) as a (NULL-terminated?) array of string pointers
+ *
+ * cursor			  5		   sizeof(ptr)
+ * 				---		---
+ * 				  5 bits	   sizeof(ptr) bytes
+ *
  * content			?
- * cursor			?
  *
  * 				___		___
- * 				 48 bits	 48 + 3sizeof(ptr) bytes
+ * 				 53 bits	 48 + 3sizeof(ptr) bytes
  *
- * 				  6 bytes	 48 + 3sizeof(ptr) bytes
+ * 				  7 bytes	 48 + 3sizeof(ptr) bytes
  * 				===================
- * 				 54 + 3sizeof(ptr) bytes
+ * 				 55 + 3sizeof(ptr) bytes
  */
 } css_computed_uncommon;
 
