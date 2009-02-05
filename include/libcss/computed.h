@@ -10,6 +10,7 @@
 
 #include <libcss/errors.h>
 #include <libcss/functypes.h>
+#include <libcss/properties.h>
 #include <libcss/types.h>
 
 typedef struct css_computed_aural {
@@ -31,12 +32,12 @@ typedef struct css_computed_uncommon {
 /*
  * border_spacing		  1 + 2(4)	  2(4)
  * clip				  2 + 4(4)	  4(4)
- * letter_spacing		  1 + 4		  4
- * outline_color		  1		  4
+ * letter_spacing		  2 + 4		  4
+ * outline_color		  2		  4
  * outline_width		  3 + 4		  4
- * word_spacing			  1 + 4		  4
+ * word_spacing			  2 + 4		  4
  * 				---		---
- * 				 45 bits	 40 bytes
+ * 				 48 bits	 40 bytes
  *
  * Encode counter_increment and _reset as a NULL-terminated array of
  * name, value pairs.
@@ -61,7 +62,7 @@ typedef struct css_computed_uncommon {
  * content			?
  *
  * 				___		___
- * 				 53 bits	 40 + 4sizeof(ptr) bytes
+ * 				 56 bits	 40 + 4sizeof(ptr) bytes
  *
  * 				  7 bytes	 40 + 4sizeof(ptr) bytes
  * 				===================
@@ -126,13 +127,13 @@ struct css_computed_style {
  * Colours are 32bits of RRGGBBAA
  * Dimensions are encoded as a fixed point value + 4 bits of unit data
  *
- * background_color		  1		  4
+ * background_color		  2		  4
  * background_image		  1		  sizeof(ptr)
  * background_position		  1 + 2(4)	  2(4)
- * border_top_color		  1		  4
- * border_right_color		  1		  4
- * border_bottom_color		  1		  4
- * border_left_color		  1		  4
+ * border_top_color		  2		  4
+ * border_right_color		  2		  4
+ * border_bottom_color		  2		  4
+ * border_left_color		  2		  4
  * border_top_width		  3 + 4		  4
  * border_right_width		  3 + 4		  4
  * border_bottom_width		  3 + 4		  4
@@ -163,7 +164,7 @@ struct css_computed_style {
  * width			  2 + 4		  4
  * z_index			  2		  4
  * 				---		---
- *				176 bits	140 + 2sizeof(ptr) bytes
+ *				181 bits	140 + 2sizeof(ptr) bytes
  *
  * Encode font family as a NULL-terminated array of string pointers
  *
@@ -172,15 +173,15 @@ struct css_computed_style {
  * 				  1 bit		  sizeof(ptr)
  *
  * 				___		___
- *				260 bits	140 + 3sizeof(ptr) bytes
+ *				265 bits	140 + 3sizeof(ptr) bytes
  *
- *				 33 bytes	140 + 3sizeof(ptr) bytes
+ *				 34 bytes	140 + 3sizeof(ptr) bytes
  *				===================
- *				173 + 3sizeof(ptr) bytes
+ *				174 + 3sizeof(ptr) bytes
  */
-	uint8_t bits[33];
+	uint8_t bits[34];
 
-	uint8_t unused[3];
+	uint8_t unused[2];
 
 	css_color background_color;
 	const css_string *background_image;
