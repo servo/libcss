@@ -13,31 +13,46 @@
 #include <libcss/types.h>
 
 typedef struct css_computed_aural {
+	/** \todo */
+	uint8_t dummy;
 } css_computed_aural;
 
 typedef struct css_computed_page {
+	/** \todo */
+	uint8_t dummy;
 } css_computed_page;
+
+typedef struct css_computed_counter {
+	const css_string *name;
+	int32_t value;
+} css_computed_counter;
 
 typedef struct css_computed_uncommon {
 /*
  * border_spacing		  1 + 2(4)	  2(4)
  * clip				  2 + 4(4)	  4(4)
- * counter_increment		  1		  4 + sizeof(ptr)
- * counter_reset		  1		  4 + sizeof(ptr)
  * letter_spacing		  1 + 4		  4
  * outline_color		  1		  4
  * outline_width		  3 + 4		  4
  * word_spacing			  1 + 4		  4
  * 				---		---
- * 				 47 bits	 48 + 2sizeof(ptr) bytes
+ * 				 45 bits	 40 bytes
  *
- * Encode quotes as a (NULL-terminated?) array of string pointers
+ * Encode counter_increment and _reset as a NULL-terminated array of
+ * name, value pairs.
+ *
+ * counter_increment		  1		  sizeof(ptr)
+ * counter_reset		  1		  sizeof(ptr)
+ * 				---		---
+ * 				  2 bits	  2sizeof(ptr) bytes
+ *
+ * Encode quotes as a NULL-terminated array of string pointers
  *
  * quotes			  1		  sizeof(ptr)
  * 				---		---
  * 				  1 bit		  sizeof(ptr) bytes
  *
- * Encode cursor uri(s) as a (NULL-terminated?) array of string pointers
+ * Encode cursor uri(s) as a NULL-terminated array of string pointers
  *
  * cursor			  5		   sizeof(ptr)
  * 				---		---
@@ -46,12 +61,33 @@ typedef struct css_computed_uncommon {
  * content			?
  *
  * 				___		___
- * 				 53 bits	 48 + 3sizeof(ptr) bytes
+ * 				 53 bits	 40 + 4sizeof(ptr) bytes
  *
- * 				  7 bytes	 48 + 3sizeof(ptr) bytes
+ * 				  7 bytes	 40 + 4sizeof(ptr) bytes
  * 				===================
- * 				 55 + 3sizeof(ptr) bytes
+ * 				 47 + 4sizeof(ptr) bytes
  */
+	uint8_t bits[7];
+
+	uint8_t unused[1];
+
+	css_fixed border_spacing[2];
+
+	css_fixed clip[4];
+
+	css_fixed letter_spacing;
+
+	css_color outline_color;
+	css_fixed outline_width;
+
+	css_fixed word_spacing;
+
+	css_computed_counter **counter_increment;
+	css_computed_counter **counter_reset;
+
+	const css_string **quotes;
+
+	const css_string *cursor;
 } css_computed_uncommon;
 
 struct css_computed_style {
@@ -92,7 +128,7 @@ struct css_computed_style {
  *
  * background_color		  1		  4
  * background_image		  1		  sizeof(ptr)
- * background_position		  1		  2sizeof(ptr)
+ * background_position		  1 + 2(4)	  2(4)
  * border_top_color		  1		  4
  * border_right_color		  1		  4
  * border_bottom_color		  1		  4
@@ -127,21 +163,67 @@ struct css_computed_style {
  * width			  2 + 4		  4
  * z_index			  2		  4
  * 				---		---
- *				168 bits	132 + 4sizeof(ptr) bytes
+ *				176 bits	140 + 2sizeof(ptr) bytes
  *
- * Encode font family as a (NULL-terminated?) array of string pointers
+ * Encode font family as a NULL-terminated array of string pointers
  *
  * font_family			  1		  sizeof(ptr)
  * 				---		---
- * 				  1 bit		sizeof(ptr)
+ * 				  1 bit		  sizeof(ptr)
  *
  * 				___		___
- *				252 bits	132 + 5sizeof(ptr) bytes
+ *				260 bits	140 + 3sizeof(ptr) bytes
  *
- *				 32 bytes	132 + 5sizeof(ptr) bytes
+ *				 33 bytes	140 + 3sizeof(ptr) bytes
  *				===================
- *				164 + 5sizeof(ptr) bytes
+ *				173 + 3sizeof(ptr) bytes
  */
+	uint8_t bits[33];
+
+	uint8_t unused[3];
+
+	css_color background_color;
+	const css_string *background_image;
+	css_fixed background_position[2];
+
+	css_color border_color[4];
+	css_fixed border_width[4];
+
+	css_fixed top;
+	css_fixed right;
+	css_fixed bottom;
+	css_fixed left;
+
+	css_color color;
+
+	css_fixed font_size;
+
+	css_fixed height;
+
+	css_fixed line_height;
+
+	const css_string *list_style_image;
+
+	css_fixed margin[4];
+
+	css_fixed max_height;
+	css_fixed max_width;
+
+	css_fixed min_height;
+	css_fixed min_width;
+
+	css_fixed padding[4];
+
+	css_fixed text_indent;
+
+	css_fixed vertical_align;
+
+	css_fixed width;
+
+	int32_t z_index;
+
+	const css_string **font_family;
+
 	css_computed_uncommon *uncommon;/**< Uncommon properties */
 	css_computed_aural *aural;	/**< Aural properties */
 	css_computed_page *page;	/**< Page properties */

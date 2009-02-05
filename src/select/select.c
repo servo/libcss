@@ -7,6 +7,7 @@
 
 #include <string.h>
 
+#include <libcss/computed.h>
 #include <libcss/select.h>
 
 #include "stylesheet.h"

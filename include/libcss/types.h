@@ -12,8 +12,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include <parserutils/utils/hash.h>
-
 /** Source of charset information, in order of importance
  * A client-dictated charset will override all others.
  * A document-specified charset will override autodetection or the default */
@@ -60,6 +58,13 @@ typedef struct css_string {
 	size_t len;
 	uint8_t *data;
 } css_string;
+
+/** CSS colour -- RRGGBBAA */
+typedef uint32_t css_color;
+
+/* Fixed point type */
+/** \todo Do we want to make utils/fp*.h public? */
+typedef int32_t css_fixed;
 
 typedef struct css_stylesheet css_stylesheet;
 
