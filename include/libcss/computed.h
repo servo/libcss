@@ -67,6 +67,17 @@ typedef struct css_computed_uncommon {
  * 				  7 bytes	 40 + 4sizeof(ptr) bytes
  * 				===================
  * 				 47 + 4sizeof(ptr) bytes
+ *
+ * Bit allocations:
+ *
+ *    01234567
+ *  1 llllllcc	letter-spacing | outline-color
+ *  2 ooooooob	outline-width  | border-spacing
+ *  3 bbbbbbbb	border-spacing
+ *  4 wwwwwwir	word-spacing   | counter-increment | counter-reset
+ *  5 uuuuuqcc	cursor         | quotes            | clip
+ *  6 cccccccc	clip
+ *  7 cccccccc	clip
  */
 	uint8_t bits[7];
 
@@ -178,6 +189,44 @@ struct css_computed_style {
  *				 34 bytes	140 + 3sizeof(ptr) bytes
  *				===================
  *				174 + 3sizeof(ptr) bytes
+ *
+ * Bit allocations:
+ *
+ *    01234567
+ *  1 vvvvvvvv	vertical-align
+ *  2 ffffffff	font-size
+ *  3 ttttttti	border-top-width    | background-image
+ *  4 rrrrrrrc	border-right-width  | color
+ *  5 bbbbbbbl	border-bottom-width | list-style-image
+ *  6 lllllllf	border-left-width   | font-family
+ *  7 ttttttcc	top                 | border-top-color
+ *  8 rrrrrrcc	right               | border-right-color
+ *  9 bbbbbbcc	bottom              | border-bottom-color
+ * 10 llllllcc	left                | border-left-color
+ * 11 hhhhhhbb	height              | background-color
+ * 12 llllllzz	line-height         | z-index
+ * 13 ttttttbb	margin-top          | background-attachment
+ * 14 rrrrrrbb	margin-right        | border-collapse
+ * 15 bbbbbbcc	margin-bottom       | caption-side
+ * 16 lllllldd	margin-left         | direction
+ * 17 mmmmmmee	max-height          | empty-cells
+ * 18 mmmmmmff	max-width           | float
+ * 19 wwwwwwff	width               | font-style
+ * 20 mmmmmbbb	min-height          | background-repeat
+ * 21 mmmmmccc	min-width           | clear
+ * 22 tttttooo	padding-top         | overflow
+ * 23 rrrrrppp	padding-right       | position
+ * 24 bbbbbttt	padding-bottom      | text-align
+ * 25 lllllttt	padding-left        | text-transform
+ * 26 tttttwww	text-indent         | white-space
+ * 27 bbbbbbbb	background-position
+ * 28 bdddddff	background-position | display               | font-variant
+ * 29 tttttll.	text-decoration     | list-style-position   | <unused>
+ * 30 ttttrrrr	border-top-style    | border-right-style
+ * 31 bbbbllll	border-bottom-style | border-left-style
+ * 32 ffffllll	font-weight         | list-style-type
+ * 33 oooottuu	outline-style       | table-layout          | unicode-bidi
+ * 34 vv......	visibility          | <unused>
  */
 	uint8_t bits[34];
 
