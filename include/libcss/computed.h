@@ -1375,4 +1375,85 @@ static inline uint8_t css_computed_font_style(
 #undef FONT_STYLE_SHIFT
 #undef FONT_STYLE_INDEX
 
+#define MIN_HEIGHT_INDEX 19
+#define MIN_HEIGHT_SHIFT 3
+#define MIN_HEIGHT_MASK  0xf8
+static inline uint8_t css_computed_min_height(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[MIN_HEIGHT_INDEX];
+	bits &= MIN_HEIGHT_MASK;
+	bits >>= MIN_HEIGHT_SHIFT;
+
+	/* 5bits: uuuut : units | type */
+	if ((bits & 0x1) == CSS_MIN_HEIGHT_SET) {
+		*length = style->min_height;
+		*unit = bits >> 2;
+	}
+
+	return (bits & 0x1);
+}
+#undef MIN_HEIGHT_MASK
+#undef MIN_HEIGHT_SHIFT
+#undef MIN_HEIGHT_INDEX
+
+#define MIN_WIDTH_INDEX 20
+#define MIN_WIDTH_SHIFT 3
+#define MIN_WIDTH_MASK  0xf8
+static inline uint8_t css_computed_min_width(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[MIN_WIDTH_INDEX];
+	bits &= MIN_WIDTH_MASK;
+	bits >>= MIN_WIDTH_SHIFT;
+
+	/* 5bits: uuuut : units | type */
+	if ((bits & 0x1) == CSS_MIN_WIDTH_SET) {
+		*length = style->min_width;
+		*unit = bits >> 2;
+	}
+
+	return (bits & 0x1);
+}
+#undef MIN_WIDTH_MASK
+#undef MIN_WIDTH_SHIFT
+#undef MIN_WIDTH_INDEX
+
+#define BACKGROUND_REPEAT_INDEX 19
+#define BACKGROUND_REPEAT_SHIFT 0
+#define BACKGROUND_REPEAT_MASK  0x7
+static inline uint8_t css_computed_background_repeat(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[BACKGROUND_REPEAT_INDEX];
+	bits &= BACKGROUND_REPEAT_MASK;
+	bits >>= BACKGROUND_REPEAT_SHIFT;
+
+	/* 3bits: type */
+	return bits;
+}
+#undef BACKGROUND_REPEAT_MASK
+#undef BACKGROUND_REPEAT_SHIFT
+#undef BACKGROUND_REPEAT_INDEX
+
+#define CLEAR_INDEX 20
+#define CLEAR_SHIFT 0
+#define CLEAR_MASK  0x7
+static inline uint8_t css_computed_clear(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[CLEAR_INDEX];
+	bits &= CLEAR_MASK;
+	bits >>= CLEAR_SHIFT;
+
+	/* 3bits: type */
+	return bits;
+}
+#undef CLEAR_MASK
+#undef CLEAR_SHIFT
+#undef CLEAR_INDEX
+
+
 #endif
