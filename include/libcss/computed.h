@@ -1761,4 +1761,72 @@ static inline uint8_t css_computed_list_style_position(
 #undef LIST_STYLE_POSITION_SHIFT
 #undef LIST_STYLE_POSITION_INDEX
 
+#define BORDER_TOP_STYLE_INDEX 29
+#define BORDER_TOP_STYLE_SHIFT 4
+#define BORDER_TOP_STYLE_MASK  0xf0
+static inline uint8_t css_computed_border_top_style(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[BORDER_TOP_STYLE_INDEX];
+	bits &= BORDER_TOP_STYLE_MASK;
+	bits >>= BORDER_TOP_STYLE_SHIFT;
+
+	/* 4bits: type */
+	return bits;
+}
+#undef BORDER_TOP_STYLE_MASK
+#undef BORDER_TOP_STYLE_SHIFT
+#undef BORDER_TOP_STYLE_INDEX
+
+#define BORDER_RIGHT_STYLE_INDEX 29
+#define BORDER_RIGHT_STYLE_SHIFT 0
+#define BORDER_RIGHT_STYLE_MASK  0xf
+static inline uint8_t css_computed_border_right_style(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[BORDER_RIGHT_STYLE_INDEX];
+	bits &= BORDER_RIGHT_STYLE_MASK;
+	bits >>= BORDER_RIGHT_STYLE_SHIFT;
+
+	/* 4bits: type */
+	return bits;
+}
+#undef BORDER_RIGHT_STYLE_MASK
+#undef BORDER_RIGHT_STYLE_SHIFT
+#undef BORDER_RIGHT_STYLE_INDEX
+
+#define BORDER_BOTTOM_STYLE_INDEX 30
+#define BORDER_BOTTOM_STYLE_SHIFT 4
+#define BORDER_BOTTOM_STYLE_MASK  0xf0
+static inline uint8_t css_computed_border_bottom_style(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[BORDER_BOTTOM_STYLE_INDEX];
+	bits &= BORDER_BOTTOM_STYLE_MASK;
+	bits >>= BORDER_BOTTOM_STYLE_SHIFT;
+
+	/* 4bits: type */
+	return bits;
+}
+#undef BORDER_BOTTOM_STYLE_MASK
+#undef BORDER_BOTTOM_STYLE_SHIFT
+#undef BORDER_BOTTOM_STYLE_INDEX
+
+#define BORDER_LEFT_STYLE_INDEX 30
+#define BORDER_LEFT_STYLE_SHIFT 0
+#define BORDER_LEFT_STYLE_MASK  0xf
+static inline uint8_t css_computed_border_left_style(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[BORDER_LEFT_STYLE_INDEX];
+	bits &= BORDER_LEFT_STYLE_MASK;
+	bits >>= BORDER_LEFT_STYLE_SHIFT;
+
+	/* 4bits: type */
+	return bits;
+}
+#undef BORDER_LEFT_STYLE_MASK
+#undef BORDER_LEFT_STYLE_SHIFT
+#undef BORDER_LEFT_STYLE_INDEX
+
 #endif
