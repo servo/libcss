@@ -1693,5 +1693,72 @@ static inline uint8_t css_computed_background_position(
 #undef BACKGROUND_POSITION_SHIFT
 #undef BACKGROUND_POSITION_INDEX
 
+#define DISPLAY_INDEX 27
+#define DISPLAY_SHIFT 2
+#define DISPLAY_MASK  0x7c
+static inline uint8_t css_computed_display(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[DISPLAY_INDEX];
+	bits &= DISPLAY_MASK;
+	bits >>= DISPLAY_SHIFT;
+
+	/* 5bits: type */
+	return bits;
+}
+#undef DISPLAY_MASK
+#undef DISPLAY_SHIFT
+#undef DISPLAY_INDEX
+
+#define FONT_VARIANT_INDEX 27
+#define FONT_VARIANT_SHIFT 0
+#define FONT_VARIANT_MASK  0x3
+static inline uint8_t css_computed_font_variant(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[FONT_VARIANT_INDEX];
+	bits &= FONT_VARIANT_MASK;
+	bits >>= FONT_VARIANT_SHIFT;
+
+	/* 2bits: type */
+	return bits;
+}
+#undef FONT_VARIANT_MASK
+#undef FONT_VARIANT_SHIFT
+#undef FONT_VARIANT_INDEX
+
+#define TEXT_DECORATION_INDEX 28
+#define TEXT_DECORATION_SHIFT 3
+#define TEXT_DECORATION_MASK  0xf8
+static inline uint8_t css_computed_text_decoration(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[TEXT_DECORATION_INDEX];
+	bits &= TEXT_DECORATION_MASK;
+	bits >>= TEXT_DECORATION_SHIFT;
+
+	/* 5bits: type */
+	return bits;
+}
+#undef TEXT_DECORATION_MASK
+#undef TEXT_DECORATION_SHIFT
+#undef TEXT_DECORATION_INDEX
+
+#define LIST_STYLE_POSITION_INDEX 28
+#define LIST_STYLE_POSITION_SHIFT 1
+#define LIST_STYLE_POSITION_MASK  0x3
+static inline uint8_t css_computed_list_style_position(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[LIST_STYLE_POSITION_INDEX];
+	bits &= LIST_STYLE_POSITION_MASK;
+	bits >>= LIST_STYLE_POSITION_SHIFT;
+
+	/* 2bits: type */
+	return bits;
+}
+#undef LIST_STYLE_POSITION_MASK
+#undef LIST_STYLE_POSITION_SHIFT
+#undef LIST_STYLE_POSITION_INDEX
 
 #endif
