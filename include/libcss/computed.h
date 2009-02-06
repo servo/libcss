@@ -28,6 +28,18 @@ typedef struct css_computed_counter {
 	int32_t value;
 } css_computed_counter;
 
+typedef struct css_computed_clip_rect {
+	css_fixed top;
+	css_fixed right;
+	css_fixed bottom;
+	css_fixed left;
+
+	css_unit tunit;
+	css_unit runit;
+	css_unit bunit;
+	css_unit lunit;
+} css_computed_clip_rect;
+
 typedef struct css_computed_uncommon {
 /*
  * border_spacing		  1 + 2(4)	  2(4)
@@ -99,7 +111,7 @@ typedef struct css_computed_uncommon {
 
 	const css_string **quotes;
 
-	const css_string *cursor;
+	const css_string **cursor;
 } css_computed_uncommon;
 
 struct css_computed_style {
@@ -447,5 +459,160 @@ static inline uint8_t css_computed_word_spacing(
 #undef WORD_SPACING_MASK
 #undef WORD_SPACING_SHIFT
 #undef WORD_SPACING_INDEX
+
+#define COUNTER_INCREMENT_INDEX 3
+#define COUNTER_INCREMENT_SHIFT 1
+#define COUNTER_INCREMENT_MASK  0x2
+static inline uint8_t css_computed_counter_increment(
+		const css_computed_style *style, 
+		css_computed_counter ***counters)
+{
+	if (style->uncommon != NULL) {
+		uint8_t bits = style->uncommon->bits[COUNTER_INCREMENT_INDEX];
+		bits &= COUNTER_INCREMENT_MASK;
+		bits >>= COUNTER_INCREMENT_SHIFT;
+
+		/* 1bit: type */
+		*counters = style->uncommon->counter_increment;
+
+		return bits;
+	}
+
+	return CSS_COUNTER_INCREMENT_NONE;
+}
+#undef COUNTER_INCREMENT_MASK
+#undef COUNTER_INCREMENT_SHIFT
+#undef COUNTER_INCREMENT_INDEX
+
+#define COUNTER_RESET_INDEX 3
+#define COUNTER_RESET_SHIFT 0
+#define COUNTER_RESET_MASK  0x1
+static inline uint8_t css_computed_counter_reset(
+		const css_computed_style *style, 
+		css_computed_counter ***counters)
+{
+	if (style->uncommon != NULL) {
+		uint8_t bits = style->uncommon->bits[COUNTER_RESET_INDEX];
+		bits &= COUNTER_RESET_MASK;
+		bits >>= COUNTER_RESET_SHIFT;
+
+		/* 1bit: type */
+		*counters = style->uncommon->counter_reset;
+
+		return bits;
+	}
+
+	return CSS_COUNTER_RESET_NONE;
+}
+#undef COUNTER_RESET_MASK
+#undef COUNTER_RESET_SHIFT
+#undef COUNTER_RESET_INDEX
+
+#define CURSOR_INDEX 4
+#define CURSOR_SHIFT 3
+#define CURSOR_MASK  0xf8
+static inline uint8_t css_computed_cursor(
+		const css_computed_style *style, 
+		const css_string ***urls)
+{
+	if (style->uncommon != NULL) {
+		uint8_t bits = style->uncommon->bits[CURSOR_INDEX];
+		bits &= CURSOR_MASK;
+		bits >>= CURSOR_SHIFT;
+
+		/* 5bits: type */
+		*urls = style->uncommon->cursor;
+
+		return bits;
+	}
+
+	return CSS_CURSOR_AUTO;
+}
+#undef CURSOR_MASK
+#undef CURSOR_SHIFT
+#undef CURSOR_INDEX
+
+#define QUOTES_INDEX 4
+#define QUOTES_SHIFT 2
+#define QUOTES_MASK  0x4
+static inline uint8_t css_computed_quotes(
+		const css_computed_style *style, 
+		const css_string ***quotes)
+{
+	if (style->uncommon != NULL) {
+		uint8_t bits = style->uncommon->bits[QUOTES_INDEX];
+		bits &= QUOTES_MASK;
+		bits >>= QUOTES_SHIFT;
+
+		/* 1bit: type */
+		*quotes = style->uncommon->quotes;
+
+		return bits;
+	}
+
+	return CSS_QUOTES_NONE;
+}
+#undef QUOTES_MASK
+#undef QUOTES_SHIFT
+#undef QUOTES_INDEX
+
+#define CLIP_INDEX 4
+#define CLIP_SHIFT 0
+#define CLIP_MASK  0x3
+#define CLIP_INDEX1 5
+#define CLIP_SHIFT1 0
+#define CLIP_MASK1 0xff
+#define CLIP_INDEX2 6
+#define CLIP_SHIFT2 0
+#define CLIP_MASK2 0xff
+static inline uint8_t css_computed_clip(
+		const css_computed_style *style, 
+		css_computed_clip_rect *rect)
+{
+	if (style->uncommon != NULL) {
+		uint8_t bits = style->uncommon->bits[CLIP_INDEX];
+		bits &= CLIP_MASK;
+		bits >>= CLIP_SHIFT;
+
+		/* 2bits: type */
+		if (bits == CSS_CLIP_RECT) {
+			uint8_t bits1 = style->uncommon->bits[CLIP_INDEX1];
+			uint8_t bits2 = style->uncommon->bits[CLIP_INDEX2];
+
+			/* 8bits: ttttrrrr : top | right */
+			bits1 &= CLIP_MASK1;
+			bits1 >>= CLIP_SHIFT1;
+
+			/* 8bits: bbbbllll : bottom | left */
+			bits2 &= CLIP_MASK2;
+			bits2 >>= CLIP_SHIFT2;
+
+			rect->top = style->uncommon->clip[0];
+			rect->tunit = bits1 >> 4;
+
+			rect->right = style->uncommon->clip[1];
+			rect->runit = bits1 & 0xf;
+
+			rect->bottom = style->uncommon->clip[2];
+			rect->bunit = bits2 >> 4;
+
+			rect->left = style->uncommon->clip[3];
+			rect->lunit = bits2 & 0xf;
+		}
+
+		return bits;
+	}
+
+	return CSS_CLIP_AUTO;
+}
+#undef CLIP_MASK2
+#undef CLIP_SHIFT2
+#undef CLIP_INDEX2
+#undef CLIP_MASK1
+#undef CLIP_SHIFT1
+#undef CLIP_INDEX1
+#undef CLIP_MASK
+#undef CLIP_SHIFT
+#undef CLIP_INDEX
 
 #endif
