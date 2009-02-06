@@ -615,4 +615,222 @@ static inline uint8_t css_computed_clip(
 #undef CLIP_SHIFT
 #undef CLIP_INDEX
 
+#define VERTICAL_ALIGN_INDEX 0
+#define VERTICAL_ALIGN_SHIFT 0
+#define VERTICAL_ALIGN_MASK  0xff
+static inline uint8_t css_computed_vertical_align(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[VERTICAL_ALIGN_INDEX];
+	bits &= VERTICAL_ALIGN_MASK;
+	bits >>= VERTICAL_ALIGN_SHIFT;
+
+	/* 8bits: uuuutttt : units | type */
+	if ((bits & 0xf) == CSS_VERTICAL_ALIGN_SET) {
+		*length = style->vertical_align;
+		*unit = bits >> 4;
+	}
+
+	return (bits & 0xf);
+}
+#undef VERTICAL_ALIGN_MASK
+#undef VERTICAL_ALIGN_SHIFT
+#undef VERTICAL_ALIGN_INDEX
+
+#define FONT_SIZE_INDEX 1
+#define FONT_SIZE_SHIFT 0
+#define FONT_SIZE_MASK  0xff
+static inline uint8_t css_computed_font_size(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[FONT_SIZE_INDEX];
+	bits &= FONT_SIZE_MASK;
+	bits >>= FONT_SIZE_SHIFT;
+
+	/* 8bits: uuuutttt : units | type */
+	if ((bits & 0xf) == CSS_FONT_SIZE_DIMENSION) {
+		*length = style->font_size;
+		*unit = bits >> 4;
+	}
+
+	return (bits & 0xf);
+}
+#undef FONT_SIZE_MASK
+#undef FONT_SIZE_SHIFT
+#undef FONT_SIZE_INDEX
+
+#define BORDER_TOP_WIDTH_INDEX 2
+#define BORDER_TOP_WIDTH_SHIFT 1
+#define BORDER_TOP_WIDTH_MASK  0xfe
+static inline uint8_t css_computed_border_top_width(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[BORDER_TOP_WIDTH_INDEX];
+	bits &= BORDER_TOP_WIDTH_MASK;
+	bits >>= BORDER_TOP_WIDTH_SHIFT;
+
+	/* 7bits: uuuuttt : units | type */
+	if ((bits & 0x7) == CSS_BORDER_WIDTH_WIDTH) {
+		*length = style->border_width[0];
+		*unit = bits >> 3;
+	}
+
+	return (bits & 0x7);
+}
+#undef BORDER_TOP_WIDTH_MASK
+#undef BORDER_TOP_WIDTH_SHIFT
+#undef BORDER_TOP_WIDTH_INDEX
+
+#define BORDER_RIGHT_WIDTH_INDEX 3
+#define BORDER_RIGHT_WIDTH_SHIFT 1
+#define BORDER_RIGHT_WIDTH_MASK  0xfe
+static inline uint8_t css_computed_border_right_width(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[BORDER_RIGHT_WIDTH_INDEX];
+	bits &= BORDER_RIGHT_WIDTH_MASK;
+	bits >>= BORDER_RIGHT_WIDTH_SHIFT;
+
+	/* 7bits: uuuuttt : units | type */
+	if ((bits & 0x7) == CSS_BORDER_WIDTH_WIDTH) {
+		*length = style->border_width[1];
+		*unit = bits >> 3;
+	}
+
+	return (bits & 0x7);
+}
+#undef BORDER_RIGHT_WIDTH_MASK
+#undef BORDER_RIGHT_WIDTH_SHIFT
+#undef BORDER_RIGHT_WIDTH_INDEX
+
+#define BORDER_BOTTOM_WIDTH_INDEX 4
+#define BORDER_BOTTOM_WIDTH_SHIFT 1
+#define BORDER_BOTTOM_WIDTH_MASK  0xfe
+static inline uint8_t css_computed_border_bottom_width(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[BORDER_BOTTOM_WIDTH_INDEX];
+	bits &= BORDER_BOTTOM_WIDTH_MASK;
+	bits >>= BORDER_BOTTOM_WIDTH_SHIFT;
+
+	/* 7bits: uuuuttt : units | type */
+	if ((bits & 0x7) == CSS_BORDER_WIDTH_WIDTH) {
+		*length = style->border_width[2];
+		*unit = bits >> 3;
+	}
+
+	return (bits & 0x7);
+}
+#undef BORDER_BOTTOM_WIDTH_MASK
+#undef BORDER_BOTTOM_WIDTH_SHIFT
+#undef BORDER_BOTTOM_WIDTH_INDEX
+
+#define BORDER_LEFT_WIDTH_INDEX 5
+#define BORDER_LEFT_WIDTH_SHIFT 1
+#define BORDER_LEFT_WIDTH_MASK  0xfe
+static inline uint8_t css_computed_border_left_width(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[BORDER_LEFT_WIDTH_INDEX];
+	bits &= BORDER_LEFT_WIDTH_MASK;
+	bits >>= BORDER_LEFT_WIDTH_SHIFT;
+
+	/* 7bits: uuuuttt : units | type */
+	if ((bits & 0x7) == CSS_BORDER_WIDTH_WIDTH) {
+		*length = style->border_width[3];
+		*unit = bits >> 3;
+	}
+
+	return (bits & 0x7);
+}
+#undef BORDER_LEFT_WIDTH_MASK
+#undef BORDER_LEFT_WIDTH_SHIFT
+#undef BORDER_LEFT_WIDTH_INDEX
+
+#define BACKGROUND_IMAGE_INDEX 2
+#define BACKGROUND_IMAGE_SHIFT 0
+#define BACKGROUND_IMAGE_MASK  0x1
+static inline uint8_t css_computed_background_image(
+		const css_computed_style *style, 
+		const css_string **url)
+{
+	uint8_t bits = style->bits[BACKGROUND_IMAGE_INDEX];
+	bits &= BACKGROUND_IMAGE_MASK;
+	bits >>= BACKGROUND_IMAGE_SHIFT;
+
+	/* 1bit: type */
+	*url = style->background_image;
+
+	return bits;
+}
+#undef BACKGROUND_IMAGE_MASK
+#undef BACKGROUND_IMAGE_SHIFT
+#undef BACKGROUND_IMAGE_INDEX
+
+#define COLOR_INDEX 3
+#define COLOR_SHIFT 0
+#define COLOR_MASK  0x1
+static inline uint8_t css_computed_color(
+		const css_computed_style *style, 
+		css_color *color)
+{
+	uint8_t bits = style->bits[COLOR_INDEX];
+	bits &= COLOR_MASK;
+	bits >>= COLOR_SHIFT;
+
+	/* 1bit: type */
+	*color = style->color;
+
+	return bits;
+}
+#undef COLOR_MASK
+#undef COLOR_SHIFT
+#undef COLOR_INDEX
+
+#define LIST_STYLE_IMAGE_INDEX 4
+#define LIST_STYLE_IMAGE_SHIFT 0
+#define LIST_STYLE_IMAGE_MASK  0x1
+static inline uint8_t css_computed_list_style_image(
+		const css_computed_style *style, 
+		const css_string **url)
+{
+	uint8_t bits = style->bits[LIST_STYLE_IMAGE_INDEX];
+	bits &= LIST_STYLE_IMAGE_MASK;
+	bits >>= LIST_STYLE_IMAGE_SHIFT;
+
+	/* 1bit: type */
+	*url = style->list_style_image;
+
+	return bits;
+}
+#undef LIST_STYLE_IMAGE_MASK
+#undef LIST_STYLE_IMAGE_SHIFT
+#undef LIST_STYLE_IMAGE_INDEX
+
+#define FONT_FAMILY_INDEX 5
+#define FONT_FAMILY_SHIFT 0
+#define FONT_FAMILY_MASK  0x1
+static inline uint8_t css_computed_font_family(
+		const css_computed_style *style, 
+		const css_string ***names)
+{
+	uint8_t bits = style->bits[FONT_FAMILY_INDEX];
+	bits &= FONT_FAMILY_MASK;
+	bits >>= FONT_FAMILY_SHIFT;
+
+	/* 1bit: type */
+	*names = style->font_family;
+
+	return bits;
+}
+#undef FONT_FAMILY_MASK
+#undef FONT_FAMILY_SHIFT
+#undef FONT_FAMILY_INDEX
+
 #endif
