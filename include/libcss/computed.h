@@ -1005,4 +1005,94 @@ static inline uint8_t css_computed_border_left_color(
 #undef BORDER_LEFT_COLOR_SHIFT
 #undef BORDER_LEFT_COLOR_INDEX
 
+#define HEIGHT_INDEX 10
+#define HEIGHT_SHIFT 2
+#define HEIGHT_MASK  0xfc
+static inline uint8_t css_computed_height(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[HEIGHT_INDEX];
+	bits &= HEIGHT_MASK;
+	bits >>= HEIGHT_SHIFT;
+
+	/* 6bits: uuuutt : units | type */
+	if ((bits & 0x3) == CSS_HEIGHT_SET) {
+		*length = style->height;
+		*unit = bits >> 2;
+	}
+
+	return (bits & 0x3);
+}
+#undef HEIGHT_MASK
+#undef HEIGHT_SHIFT
+#undef HEIGHT_INDEX
+
+#define LINE_HEIGHT_INDEX 11
+#define LINE_HEIGHT_SHIFT 2
+#define LINE_HEIGHT_MASK  0xfc
+static inline uint8_t css_computed_line_height(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[LINE_HEIGHT_INDEX];
+	bits &= LINE_HEIGHT_MASK;
+	bits >>= LINE_HEIGHT_SHIFT;
+
+	/* 6bits: uuuutt : units | type */
+	if ((bits & 0x3) == CSS_LINE_HEIGHT_NUMBER || 
+			(bits & 0x3) == CSS_LINE_HEIGHT_DIMENSION) {
+		*length = style->line_height;
+	}
+
+	if ((bits & 0x3) == CSS_LINE_HEIGHT_DIMENSION) {
+		*unit = bits >> 2;
+	}
+
+	return (bits & 0x3);
+}
+#undef LINE_HEIGHT_MASK
+#undef LINE_HEIGHT_SHIFT
+#undef LINE_HEIGHT_INDEX
+
+#define BACKGROUND_COLOR_INDEX 10
+#define BACKGROUND_COLOR_SHIFT 0
+#define BACKGROUND_COLOR_MASK  0x3
+static inline uint8_t css_computed_background_color(
+		const css_computed_style *style, 
+		css_color *color)
+{
+	uint8_t bits = style->bits[BACKGROUND_COLOR_INDEX];
+	bits &= BACKGROUND_COLOR_MASK;
+	bits >>= BACKGROUND_COLOR_SHIFT;
+
+	/* 2bits: type */
+	*color = style->background_color;
+
+	return bits;
+}
+#undef BACKGROUND_COLOR_MASK
+#undef BACKGROUND_COLOR_SHIFT
+#undef BACKGROUND_COLOR_INDEX
+
+#define Z_INDEX_INDEX 11
+#define Z_INDEX_SHIFT 0
+#define Z_INDEX_MASK  0x3
+static inline uint8_t css_computed_z_index(
+		const css_computed_style *style, 
+		int32_t *z_index)
+{
+	uint8_t bits = style->bits[Z_INDEX_INDEX];
+	bits &= Z_INDEX_MASK;
+	bits >>= Z_INDEX_SHIFT;
+
+	/* 2bits: type */
+	*z_index = style->z_index;
+
+	return bits;
+}
+#undef Z_INDEX_MASK
+#undef Z_INDEX_SHIFT
+#undef Z_INDEX_INDEX
+
 #endif
