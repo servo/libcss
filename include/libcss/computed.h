@@ -1095,4 +1095,164 @@ static inline uint8_t css_computed_z_index(
 #undef Z_INDEX_SHIFT
 #undef Z_INDEX_INDEX
 
+#define MARGIN_TOP_INDEX 12
+#define MARGIN_TOP_SHIFT 2
+#define MARGIN_TOP_MASK  0xfc
+static inline uint8_t css_computed_margin_top(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[MARGIN_TOP_INDEX];
+	bits &= MARGIN_TOP_MASK;
+	bits >>= MARGIN_TOP_SHIFT;
+
+	/* 6bits: uuuutt : units | type */
+	if ((bits & 0x3) == CSS_MARGIN_SET) {
+		*length = style->margin[0];
+		*unit = bits >> 2;
+	}
+
+	return (bits & 0x3);
+}
+#undef MARGIN_TOP_MASK
+#undef MARGIN_TOP_SHIFT
+#undef MARGIN_TOP_INDEX
+
+#define MARGIN_RIGHT_INDEX 13
+#define MARGIN_RIGHT_SHIFT 2
+#define MARGIN_RIGHT_MASK  0xfc
+static inline uint8_t css_computed_margin_right(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[MARGIN_RIGHT_INDEX];
+	bits &= MARGIN_RIGHT_MASK;
+	bits >>= MARGIN_RIGHT_SHIFT;
+
+	/* 6bits: uuuutt : units | type */
+	if ((bits & 0x3) == CSS_MARGIN_SET) {
+		*length = style->margin[1];
+		*unit = bits >> 2;
+	}
+
+	return (bits & 0x3);
+}
+#undef MARGIN_RIGHT_MASK
+#undef MARGIN_RIGHT_SHIFT
+#undef MARGIN_RIGHT_INDEX
+
+#define MARGIN_BOTTOM_INDEX 14
+#define MARGIN_BOTTOM_SHIFT 2
+#define MARGIN_BOTTOM_MASK  0xfc
+static inline uint8_t css_computed_margin_bottom(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[MARGIN_BOTTOM_INDEX];
+	bits &= MARGIN_BOTTOM_MASK;
+	bits >>= MARGIN_BOTTOM_SHIFT;
+
+	/* 6bits: uuuutt : units | type */
+	if ((bits & 0x3) == CSS_MARGIN_SET) {
+		*length = style->margin[2];
+		*unit = bits >> 2;
+	}
+
+	return (bits & 0x3);
+}
+#undef MARGIN_BOTTOM_MASK
+#undef MARGIN_BOTTOM_SHIFT
+#undef MARGIN_BOTTOM_INDEX
+
+#define MARGIN_LEFT_INDEX 15
+#define MARGIN_LEFT_SHIFT 2
+#define MARGIN_LEFT_MASK  0xfc
+static inline uint8_t css_computed_margin_left(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[MARGIN_LEFT_INDEX];
+	bits &= MARGIN_LEFT_MASK;
+	bits >>= MARGIN_LEFT_SHIFT;
+
+	/* 6bits: uuuutt : units | type */
+	if ((bits & 0x3) == CSS_MARGIN_SET) {
+		*length = style->margin[3];
+		*unit = bits >> 2;
+	}
+
+	return (bits & 0x3);
+}
+#undef MARGIN_LEFT_MASK
+#undef MARGIN_LEFT_SHIFT
+#undef MARGIN_LEFT_INDEX
+
+#define BACKGROUND_ATTACHMENT_INDEX 12
+#define BACKGROUND_ATTACHMENT_SHIFT 0
+#define BACKGROUND_ATTACHMENT_MASK  0x3
+static inline uint8_t css_computed_background_attachment(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[BACKGROUND_ATTACHMENT_INDEX];
+	bits &= BACKGROUND_ATTACHMENT_MASK;
+	bits >>= BACKGROUND_ATTACHMENT_SHIFT;
+
+	/* 2bits: type */
+	return bits;
+}
+#undef BACKGROUND_ATTACHMENT_MASK
+#undef BACKGROUND_ATTACHMENT_SHIFT
+#undef BACKGROUND_ATTACHMENT_INDEX
+
+#define BORDER_COLLAPSE_INDEX 13
+#define BORDER_COLLAPSE_SHIFT 0
+#define BORDER_COLLAPSE_MASK  0x3
+static inline uint8_t css_computed_border_collapse(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[BORDER_COLLAPSE_INDEX];
+	bits &= BORDER_COLLAPSE_MASK;
+	bits >>= BORDER_COLLAPSE_SHIFT;
+
+	/* 2bits: type */
+	return bits;
+}
+#undef BORDER_COLLAPSE_MASK
+#undef BORDER_COLLAPSE_SHIFT
+#undef BORDER_COLLAPSE_INDEX
+
+#define CAPTION_SIDE_INDEX 14
+#define CAPTION_SIDE_SHIFT 0
+#define CAPTION_SIDE_MASK  0x3
+static inline uint8_t css_computed_caption_side(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[CAPTION_SIDE_INDEX];
+	bits &= CAPTION_SIDE_MASK;
+	bits >>= CAPTION_SIDE_SHIFT;
+
+	/* 2bits: type */
+	return bits;
+}
+#undef CAPTION_SIDE_MASK
+#undef CAPTION_SIDE_SHIFT
+#undef CAPTION_SIDE_INDEX
+
+#define DIRECTION_INDEX 15
+#define DIRECTION_SHIFT 0
+#define DIRECTION_MASK  0x3
+static inline uint8_t css_computed_direction(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[DIRECTION_INDEX];
+	bits &= DIRECTION_MASK;
+	bits >>= DIRECTION_SHIFT;
+
+	/* 2bits: type */
+	return bits;
+}
+#undef DIRECTION_MASK
+#undef DIRECTION_SHIFT
+#undef DIRECTION_INDEX
+
 #endif
