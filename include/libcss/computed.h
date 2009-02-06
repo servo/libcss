@@ -1389,7 +1389,7 @@ static inline uint8_t css_computed_min_height(
 	/* 5bits: uuuut : units | type */
 	if ((bits & 0x1) == CSS_MIN_HEIGHT_SET) {
 		*length = style->min_height;
-		*unit = bits >> 2;
+		*unit = bits >> 1;
 	}
 
 	return (bits & 0x1);
@@ -1412,7 +1412,7 @@ static inline uint8_t css_computed_min_width(
 	/* 5bits: uuuut : units | type */
 	if ((bits & 0x1) == CSS_MIN_WIDTH_SET) {
 		*length = style->min_width;
-		*unit = bits >> 2;
+		*unit = bits >> 1;
 	}
 
 	return (bits & 0x1);
@@ -1455,5 +1455,164 @@ static inline uint8_t css_computed_clear(
 #undef CLEAR_SHIFT
 #undef CLEAR_INDEX
 
+#define PADDING_TOP_INDEX 21
+#define PADDING_TOP_SHIFT 3
+#define PADDING_TOP_MASK  0xf8
+static inline uint8_t css_computed_padding_top(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[PADDING_TOP_INDEX];
+	bits &= PADDING_TOP_MASK;
+	bits >>= PADDING_TOP_SHIFT;
+
+	/* 5bits: uuuut : units | type */
+	if ((bits & 0x1) == CSS_PADDING_SET) {
+		*length = style->padding[0];
+		*unit = bits >> 1;
+	}
+
+	return (bits & 0x1);
+}
+#undef PADDING_TOP_MASK
+#undef PADDING_TOP_SHIFT
+#undef PADDING_TOP_INDEX
+
+#define PADDING_RIGHT_INDEX 22
+#define PADDING_RIGHT_SHIFT 3
+#define PADDING_RIGHT_MASK  0xf8
+static inline uint8_t css_computed_padding_right(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[PADDING_RIGHT_INDEX];
+	bits &= PADDING_RIGHT_MASK;
+	bits >>= PADDING_RIGHT_SHIFT;
+
+	/* 5bits: uuuut : units | type */
+	if ((bits & 0x1) == CSS_PADDING_SET) {
+		*length = style->padding[1];
+		*unit = bits >> 1;
+	}
+
+	return (bits & 0x1);
+}
+#undef PADDING_RIGHT_MASK
+#undef PADDING_RIGHT_SHIFT
+#undef PADDING_RIGHT_INDEX
+
+#define PADDING_BOTTOM_INDEX 23
+#define PADDING_BOTTOM_SHIFT 3
+#define PADDING_BOTTOM_MASK  0xf8
+static inline uint8_t css_computed_padding_bottom(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[PADDING_BOTTOM_INDEX];
+	bits &= PADDING_BOTTOM_MASK;
+	bits >>= PADDING_BOTTOM_SHIFT;
+
+	/* 5bits: uuuut : units | type */
+	if ((bits & 0x1) == CSS_PADDING_SET) {
+		*length = style->padding[2];
+		*unit = bits >> 1;
+	}
+
+	return (bits & 0x1);
+}
+#undef PADDING_BOTTOM_MASK
+#undef PADDING_BOTTOM_SHIFT
+#undef PADDING_BOTTOM_INDEX
+
+#define PADDING_LEFT_INDEX 24
+#define PADDING_LEFT_SHIFT 3
+#define PADDING_LEFT_MASK  0xf8
+static inline uint8_t css_computed_padding_left(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[PADDING_LEFT_INDEX];
+	bits &= PADDING_LEFT_MASK;
+	bits >>= PADDING_LEFT_SHIFT;
+
+	/* 5bits: uuuut : units | type */
+	if ((bits & 0x1) == CSS_PADDING_SET) {
+		*length = style->padding[3];
+		*unit = bits >> 1;
+	}
+
+	return (bits & 0x1);
+}
+#undef PADDING_LEFT_MASK
+#undef PADDING_LEFT_SHIFT
+#undef PADDING_LEFT_INDEX
+
+#define OVERFLOW_INDEX 21
+#define OVERFLOW_SHIFT 0
+#define OVERFLOW_MASK  0x7
+static inline uint8_t css_computed_overflow(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[OVERFLOW_INDEX];
+	bits &= OVERFLOW_MASK;
+	bits >>= OVERFLOW_SHIFT;
+
+	/* 3bits: type */
+	return bits;
+}
+#undef OVERFLOW_MASK
+#undef OVERFLOW_SHIFT
+#undef OVERFLOW_INDEX
+
+#define POSITION_INDEX 22
+#define POSITION_SHIFT 0
+#define POSITION_MASK  0x7
+static inline uint8_t css_computed_position(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[POSITION_INDEX];
+	bits &= POSITION_MASK;
+	bits >>= POSITION_SHIFT;
+
+	/* 3bits: type */
+	return bits;
+}
+#undef POSITION_MASK
+#undef POSITION_SHIFT
+#undef POSITION_INDEX
+
+#define TEXT_ALIGN_INDEX 23
+#define TEXT_ALIGN_SHIFT 0
+#define TEXT_ALIGN_MASK  0x7
+static inline uint8_t css_computed_text_align(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[TEXT_ALIGN_INDEX];
+	bits &= TEXT_ALIGN_MASK;
+	bits >>= TEXT_ALIGN_SHIFT;
+
+	/* 3bits: type */
+	return bits;
+}
+#undef TEXT_ALIGN_MASK
+#undef TEXT_ALIGN_SHIFT
+#undef TEXT_ALIGN_INDEX
+
+#define TEXT_TRANSFORM_INDEX 24
+#define TEXT_TRANSFORM_SHIFT 0
+#define TEXT_TRANSFORM_MASK  0x7
+static inline uint8_t css_computed_text_transform(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[TEXT_TRANSFORM_INDEX];
+	bits &= TEXT_TRANSFORM_MASK;
+	bits >>= TEXT_TRANSFORM_SHIFT;
+
+	/* 3bits: type */
+	return bits;
+}
+#undef TEXT_TRANSFORM_MASK
+#undef TEXT_TRANSFORM_SHIFT
+#undef TEXT_TRANSFORM_INDEX
 
 #endif
