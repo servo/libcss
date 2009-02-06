@@ -308,8 +308,9 @@ static inline uint8_t css_computed_letter_spacing(
 		if ((bits & 3) == CSS_LETTER_SPACING_SET) {
 			*length = style->uncommon->letter_spacing;
 			*unit = bits >> 2;
-			return CSS_LETTER_SPACING_SET;
 		}
+
+		return (bits & 3);
 	}
 
 	return CSS_LETTER_SPACING_NORMAL;
@@ -333,8 +334,9 @@ static inline uint8_t css_computed_outline_color(
 
 		if ((bits & 3) == CSS_OUTLINE_COLOR_COLOR) {
 			*color = style->uncommon->outline_color;
-			return CSS_OUTLINE_COLOR_COLOR;
 		}
+
+		return (bits & 3);
 	}
 
 	return CSS_OUTLINE_COLOR_INVERT;
@@ -360,9 +362,9 @@ static inline uint8_t css_computed_outline_width(
 		if ((bits & 7) == CSS_OUTLINE_WIDTH_WIDTH) {
 			*length = style->uncommon->outline_width;
 			*unit = bits >> 3;
-			return CSS_OUTLINE_WIDTH_WIDTH;
-		} else
-			return (bits & 7);
+		}
+
+		return (bits & 7);
 	}
 
 	return CSS_OUTLINE_WIDTH_MEDIUM;
@@ -371,9 +373,12 @@ static inline uint8_t css_computed_outline_width(
 #undef OUTLINE_WIDTH_SHIFT
 #undef OUTLINE_WIDTH_INDEX
 
-#define BORDER_SPACING_INDEX 2
+#define BORDER_SPACING_INDEX 1
 #define BORDER_SPACING_SHIFT 0
-#define BORDER_SPACING_MASK  0xff
+#define BORDER_SPACING_MASK  0x1
+#define BORDER_SPACING_INDEX1 2
+#define BORDER_SPACING_SHIFT1 0
+#define BORDER_SPACING_MASK1 0xff
 static inline uint8_t css_computed_border_spacing(
 		const css_computed_style *style, 
 		css_fixed *hlength, css_unit *hunit,
@@ -384,17 +389,23 @@ static inline uint8_t css_computed_border_spacing(
 		bits &= BORDER_SPACING_MASK;
 		bits >>= BORDER_SPACING_SHIFT;
 
-		/* There's actually a ninth bit (bit 0 of the previous byte)
-		 * This encodes SET/INHERIT. Given that we must be SET here,
-		 * we don't bother looking at it */
+		/* 1 bit: type */
+		if (bits == CSS_BORDER_SPACING_SET) {
+			uint8_t bits1 = 
+				style->uncommon->bits[BORDER_SPACING_INDEX1];
+			bits1 &= BORDER_SPACING_MASK1;
+			bits1 >>= BORDER_SPACING_SHIFT1;
 
-		/* 8bits: hhhhvvvv : hunit | vunit */
+			/* 8bits: hhhhvvvv : hunit | vunit */
 
-		*hlength = style->uncommon->border_spacing[0];
-		*hunit = bits >> 4;
+			*hlength = style->uncommon->border_spacing[0];
+			*hunit = bits1 >> 4;
 
-		*vlength = style->uncommon->border_spacing[1];
-		*vunit = bits & 0xf;
+			*vlength = style->uncommon->border_spacing[1];
+			*vunit = bits1 & 0xf;
+		}
+
+		return bits;
 	} else {
 		*hlength = *vlength = 0;
 		*hunit = *vunit = CSS_UNIT_PX;
@@ -402,9 +413,39 @@ static inline uint8_t css_computed_border_spacing(
 
 	return CSS_BORDER_SPACING_SET;
 }
+#undef BORDER_SPACING_MASK1
+#undef BORDER_SPACING_SHIFT1
+#undef BORDER_SPACING_INDEX1
 #undef BORDER_SPACING_MASK
 #undef BORDER_SPACING_SHIFT
 #undef BORDER_SPACING_INDEX
 
+#define WORD_SPACING_INDEX 3
+#define WORD_SPACING_SHIFT 2
+#define WORD_SPACING_MASK  0xfc
+static inline uint8_t css_computed_word_spacing(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	if (style->uncommon != NULL) {
+		uint8_t bits = style->uncommon->bits[WORD_SPACING_INDEX];
+		bits &= WORD_SPACING_MASK;
+		bits >>= WORD_SPACING_SHIFT;
+
+		/* 6bits: uuuutt : unit | type */
+
+		if ((bits & 3) == CSS_WORD_SPACING_SET) {
+			*length = style->uncommon->word_spacing;
+			*unit = bits >> 2;
+		}
+
+		return (bits & 3);
+	}
+
+	return CSS_WORD_SPACING_NORMAL;
+}
+#undef WORD_SPACING_MASK
+#undef WORD_SPACING_SHIFT
+#undef WORD_SPACING_INDEX
 
 #endif
