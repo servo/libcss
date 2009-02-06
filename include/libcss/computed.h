@@ -70,7 +70,7 @@ typedef struct css_computed_uncommon {
  *
  * Bit allocations:
  *
- *    01234567
+ *    76543210
  *  1 llllllcc	letter-spacing | outline-color
  *  2 ooooooob	outline-width  | border-spacing
  *  3 bbbbbbbb	border-spacing
@@ -192,7 +192,7 @@ struct css_computed_style {
  *
  * Bit allocations:
  *
- *    01234567
+ *    76543210
  *  1 vvvvvvvv	vertical-align
  *  2 ffffffff	font-size
  *  3 ttttttti	border-top-width    | background-image
@@ -286,5 +286,125 @@ css_error css_computed_style_destroy(css_computed_style *style);
 css_error css_computed_style_compose(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result);
+
+/******************************************************************************
+ * Property accessors below here                                              *
+ ******************************************************************************/
+
+#define LETTER_SPACING_INDEX 0
+#define LETTER_SPACING_SHIFT 2
+#define LETTER_SPACING_MASK  0xfc
+static inline uint8_t css_computed_letter_spacing(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	if (style->uncommon != NULL) {
+		uint8_t bits = style->uncommon->bits[LETTER_SPACING_INDEX];
+		bits &= LETTER_SPACING_MASK;
+		bits >>= LETTER_SPACING_SHIFT;
+
+		/* 6bits: uuuutt : unit | type */
+
+		if ((bits & 3) == CSS_LETTER_SPACING_SET) {
+			*length = style->uncommon->letter_spacing;
+			*unit = bits >> 2;
+			return CSS_LETTER_SPACING_SET;
+		}
+	}
+
+	return CSS_LETTER_SPACING_NORMAL;
+}
+#undef LETTER_SPACING_MASK
+#undef LETTER_SPACING_SHIFT
+#undef LETTER_SPACING_INDEX
+
+#define OUTLINE_COLOR_INDEX 0
+#define OUTLINE_COLOR_SHIFT 0
+#define OUTLINE_COLOR_MASK  0x3
+static inline uint8_t css_computed_outline_color(
+		const css_computed_style *style, css_color *color)
+{
+	if (style->uncommon != NULL) {
+		uint8_t bits = style->uncommon->bits[OUTLINE_COLOR_INDEX];
+		bits &= OUTLINE_COLOR_MASK;
+		bits >>= OUTLINE_COLOR_SHIFT;
+
+		/* 2bits: tt : type */
+
+		if ((bits & 3) == CSS_OUTLINE_COLOR_COLOR) {
+			*color = style->uncommon->outline_color;
+			return CSS_OUTLINE_COLOR_COLOR;
+		}
+	}
+
+	return CSS_OUTLINE_COLOR_INVERT;
+}
+#undef OUTLINE_COLOR_MASK
+#undef OUTLINE_COLOR_SHIFT
+#undef OUTLINE_COLOR_INDEX
+
+#define OUTLINE_WIDTH_INDEX 1
+#define OUTLINE_WIDTH_SHIFT 1
+#define OUTLINE_WIDTH_MASK  0xfe
+static inline uint8_t css_computed_outline_width(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	if (style->uncommon != NULL) {
+		uint8_t bits = style->uncommon->bits[OUTLINE_WIDTH_INDEX];
+		bits &= OUTLINE_WIDTH_MASK;
+		bits >>= OUTLINE_WIDTH_SHIFT;
+
+		/* 7bits: uuuuttt : unit | type */
+
+		if ((bits & 7) == CSS_OUTLINE_WIDTH_WIDTH) {
+			*length = style->uncommon->outline_width;
+			*unit = bits >> 3;
+			return CSS_OUTLINE_WIDTH_WIDTH;
+		} else
+			return (bits & 7);
+	}
+
+	return CSS_OUTLINE_WIDTH_MEDIUM;
+}
+#undef OUTLINE_WIDTH_MASK
+#undef OUTLINE_WIDTH_SHIFT
+#undef OUTLINE_WIDTH_INDEX
+
+#define BORDER_SPACING_INDEX 2
+#define BORDER_SPACING_SHIFT 0
+#define BORDER_SPACING_MASK  0xff
+static inline uint8_t css_computed_border_spacing(
+		const css_computed_style *style, 
+		css_fixed *hlength, css_unit *hunit,
+		css_fixed *vlength, css_unit *vunit)
+{
+	if (style->uncommon != NULL) {
+		uint8_t bits = style->uncommon->bits[BORDER_SPACING_INDEX];
+		bits &= BORDER_SPACING_MASK;
+		bits >>= BORDER_SPACING_SHIFT;
+
+		/* There's actually a ninth bit (bit 0 of the previous byte)
+		 * This encodes SET/INHERIT. Given that we must be SET here,
+		 * we don't bother looking at it */
+
+		/* 8bits: hhhhvvvv : hunit | vunit */
+
+		*hlength = style->uncommon->border_spacing[0];
+		*hunit = bits >> 4;
+
+		*vlength = style->uncommon->border_spacing[1];
+		*vunit = bits & 0xf;
+	} else {
+		*hlength = *vlength = 0;
+		*hunit = *vunit = CSS_UNIT_PX;
+	}
+
+	return CSS_BORDER_SPACING_SET;
+}
+#undef BORDER_SPACING_MASK
+#undef BORDER_SPACING_SHIFT
+#undef BORDER_SPACING_INDEX
+
 
 #endif

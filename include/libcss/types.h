@@ -46,9 +46,9 @@ typedef enum css_media_type {
  * Stylesheet origin
  */
 typedef enum css_origin {
-	CSS_ORIGIN_UA                = 0,	/**< User agent stylesheet */
-	CSS_ORIGIN_USER              = 1,	/**< User stylesheet */
-	CSS_ORIGIN_AUTHOR            = 2	/**< Author stylesheet */
+	CSS_ORIGIN_UA               = 0,	/**< User agent stylesheet */
+	CSS_ORIGIN_USER             = 1,	/**< User stylesheet */
+	CSS_ORIGIN_AUTHOR           = 2		/**< Author stylesheet */
 } css_origin;
 
 /**
@@ -65,6 +65,30 @@ typedef uint32_t css_color;
 /* Fixed point type */
 /** \todo Do we want to make utils/fp*.h public? */
 typedef int32_t css_fixed;
+
+/* CSS unit */
+typedef enum css_unit {
+	CSS_UNIT_PX                 = 0x0,
+	CSS_UNIT_EX                 = 0x1,
+	CSS_UNIT_EM                 = 0x2,
+	CSS_UNIT_IN                 = 0x3,
+	CSS_UNIT_CM                 = 0x4,
+	CSS_UNIT_MM                 = 0x5,
+	CSS_UNIT_PT                 = 0x6,
+	CSS_UNIT_PC                 = 0x7,
+
+	CSS_UNIT_PCT                = 0x8,	/* Percentage */
+
+	CSS_UNIT_DEG                = 0x9,
+	CSS_UNIT_GRAD               = 0xa,
+	CSS_UNIT_RAD                = 0xb,
+
+	CSS_UNIT_MS                 = 0xc,
+	CSS_UNIT_S                  = 0xd,
+
+	CSS_UNIT_HZ                 = 0xe,
+	CSS_UNIT_KHZ                = 0xf
+} css_unit;
 
 typedef struct css_stylesheet css_stylesheet;
 
