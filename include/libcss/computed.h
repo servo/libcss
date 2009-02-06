@@ -1255,4 +1255,124 @@ static inline uint8_t css_computed_direction(
 #undef DIRECTION_SHIFT
 #undef DIRECTION_INDEX
 
+#define MAX_HEIGHT_INDEX 16
+#define MAX_HEIGHT_SHIFT 2
+#define MAX_HEIGHT_MASK  0xfc
+static inline uint8_t css_computed_max_height(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[MAX_HEIGHT_INDEX];
+	bits &= MAX_HEIGHT_MASK;
+	bits >>= MAX_HEIGHT_SHIFT;
+
+	/* 6bits: uuuutt : units | type */
+	if ((bits & 0x3) == CSS_MAX_HEIGHT_SET) {
+		*length = style->max_height;
+		*unit = bits >> 2;
+	}
+
+	return (bits & 0x3);
+}
+#undef MAX_HEIGHT_MASK
+#undef MAX_HEIGHT_SHIFT
+#undef MAX_HEIGHT_INDEX
+
+#define MAX_WIDTH_INDEX 17
+#define MAX_WIDTH_SHIFT 2
+#define MAX_WIDTH_MASK  0xfc
+static inline uint8_t css_computed_max_width(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[MAX_WIDTH_INDEX];
+	bits &= MAX_WIDTH_MASK;
+	bits >>= MAX_WIDTH_SHIFT;
+
+	/* 6bits: uuuutt : units | type */
+	if ((bits & 0x3) == CSS_MAX_WIDTH_SET) {
+		*length = style->max_width;
+		*unit = bits >> 2;
+	}
+
+	return (bits & 0x3);
+}
+#undef MAX_WIDTH_MASK
+#undef MAX_WIDTH_SHIFT
+#undef MAX_WIDTH_INDEX
+
+#define WIDTH_INDEX 18
+#define WIDTH_SHIFT 2
+#define WIDTH_MASK  0xfc
+static inline uint8_t css_computed_width(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[WIDTH_INDEX];
+	bits &= WIDTH_MASK;
+	bits >>= WIDTH_SHIFT;
+
+	/* 6bits: uuuutt : units | type */
+	if ((bits & 0x3) == CSS_WIDTH_SET) {
+		*length = style->width;
+		*unit = bits >> 2;
+	}
+
+	return (bits & 0x3);
+}
+#undef WIDTH_MASK
+#undef WIDTH_SHIFT
+#undef WIDTH_INDEX
+
+#define EMPTY_CELLS_INDEX 16
+#define EMPTY_CELLS_SHIFT 0
+#define EMPTY_CELLS_MASK  0x3
+static inline uint8_t css_computed_empty_cells(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[EMPTY_CELLS_INDEX];
+	bits &= EMPTY_CELLS_MASK;
+	bits >>= EMPTY_CELLS_SHIFT;
+
+	/* 2bits: type */
+	return bits;
+}
+#undef EMPTY_CELLS_MASK
+#undef EMPTY_CELLS_SHIFT
+#undef EMPTY_CELLS_INDEX
+
+#define FLOAT_INDEX 17
+#define FLOAT_SHIFT 0
+#define FLOAT_MASK  0x3
+static inline uint8_t css_computed_float(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[FLOAT_INDEX];
+	bits &= FLOAT_MASK;
+	bits >>= FLOAT_SHIFT;
+
+	/* 2bits: type */
+	return bits;
+}
+#undef FLOAT_MASK
+#undef FLOAT_SHIFT
+#undef FLOAT_INDEX
+
+#define FONT_STYLE_INDEX 18
+#define FONT_STYLE_SHIFT 0
+#define FONT_STYLE_MASK  0x3
+static inline uint8_t css_computed_font_style(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[FONT_STYLE_INDEX];
+	bits &= FONT_STYLE_MASK;
+	bits >>= FONT_STYLE_SHIFT;
+
+	/* 2bits: type */
+	return bits;
+}
+#undef FONT_STYLE_MASK
+#undef FONT_STYLE_SHIFT
+#undef FONT_STYLE_INDEX
+
 #endif
