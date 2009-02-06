@@ -1829,4 +1829,106 @@ static inline uint8_t css_computed_border_left_style(
 #undef BORDER_LEFT_STYLE_SHIFT
 #undef BORDER_LEFT_STYLE_INDEX
 
+#define FONT_WEIGHT_INDEX 31
+#define FONT_WEIGHT_SHIFT 4
+#define FONT_WEIGHT_MASK  0xf0
+static inline uint8_t css_computed_font_weight(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[FONT_WEIGHT_INDEX];
+	bits &= FONT_WEIGHT_MASK;
+	bits >>= FONT_WEIGHT_SHIFT;
+
+	/* 4bits: type */
+	return bits;
+}
+#undef FONT_WEIGHT_MASK
+#undef FONT_WEIGHT_SHIFT
+#undef FONT_WEIGHT_INDEX
+
+#define LIST_STYLE_TYPE_INDEX 31
+#define LIST_STYLE_TYPE_SHIFT 0
+#define LIST_STYLE_TYPE_MASK  0xf
+static inline uint8_t css_computed_list_style_type(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[LIST_STYLE_TYPE_INDEX];
+	bits &= LIST_STYLE_TYPE_MASK;
+	bits >>= LIST_STYLE_TYPE_SHIFT;
+
+	/* 4bits: type */
+	return bits;
+}
+#undef LIST_STYLE_TYPE_MASK
+#undef LIST_STYLE_TYPE_SHIFT
+#undef LIST_STYLE_TYPE_INDEX
+
+#define OUTLINE_STYLE_INDEX 32
+#define OUTLINE_STYLE_SHIFT 4
+#define OUTLINE_STYLE_MASK  0xf0
+static inline uint8_t css_computed_outline_style(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[OUTLINE_STYLE_INDEX];
+	bits &= OUTLINE_STYLE_MASK;
+	bits >>= OUTLINE_STYLE_SHIFT;
+
+	/* 4bits: type */
+	return bits;
+}
+#undef OUTLINE_STYLE_MASK
+#undef OUTLINE_STYLE_SHIFT
+#undef OUTLINE_STYLE_INDEX
+
+#define TABLE_LAYOUT_INDEX 32
+#define TABLE_LAYOUT_SHIFT 2
+#define TABLE_LAYOUT_MASK  0xc
+static inline uint8_t css_computed_table_layout(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[TABLE_LAYOUT_INDEX];
+	bits &= TABLE_LAYOUT_MASK;
+	bits >>= TABLE_LAYOUT_SHIFT;
+
+	/* 2bits: type */
+	return bits;
+}
+#undef TABLE_LAYOUT_MASK
+#undef TABLE_LAYOUT_SHIFT
+#undef TABLE_LAYOUT_INDEX
+
+#define UNICODE_BIDI_INDEX 32
+#define UNICODE_BIDI_SHIFT 0
+#define UNICODE_BIDI_MASK  0x3
+static inline uint8_t css_computed_unicode_bidi(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[UNICODE_BIDI_INDEX];
+	bits &= UNICODE_BIDI_MASK;
+	bits >>= UNICODE_BIDI_SHIFT;
+
+	/* 2bits: type */
+	return bits;
+}
+#undef UNICODE_BIDI_MASK
+#undef UNICODE_BIDI_SHIFT
+#undef UNICODE_BIDI_INDEX
+
+#define VISIBILITY_INDEX 33
+#define VISIBILITY_SHIFT 6
+#define VISIBILITY_MASK  0xc0
+static inline uint8_t css_computed_visibility(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[VISIBILITY_INDEX];
+	bits &= VISIBILITY_MASK;
+	bits >>= VISIBILITY_SHIFT;
+
+	/* 2bits: type */
+	return bits;
+}
+#undef VISIBILITY_MASK
+#undef VISIBILITY_SHIFT
+#undef VISIBILITY_INDEX
+
 #endif
