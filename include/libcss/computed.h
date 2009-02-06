@@ -1615,4 +1615,44 @@ static inline uint8_t css_computed_text_transform(
 #undef TEXT_TRANSFORM_SHIFT
 #undef TEXT_TRANSFORM_INDEX
 
+#define TEXT_INDENT_INDEX 25
+#define TEXT_INDENT_SHIFT 3
+#define TEXT_INDENT_MASK  0xf8
+static inline uint8_t css_computed_text_indent(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[TEXT_INDENT_INDEX];
+	bits &= TEXT_INDENT_MASK;
+	bits >>= TEXT_INDENT_SHIFT;
+
+	/* 5bits: uuuut : units | type */
+	if ((bits & 0x1) == CSS_TEXT_INDENT_SET) {
+		*length = style->text_indent;
+		*unit = bits >> 1;
+	}
+
+	return (bits & 0x1);
+}
+#undef TEXT_INDENT_MASK
+#undef TEXT_INDENT_SHIFT
+#undef TEXT_INDENT_INDEX
+
+#define WHITE_SPACE_INDEX 25
+#define WHITE_SPACE_SHIFT 0
+#define WHITE_SPACE_MASK  0x7
+static inline uint8_t css_computed_white_space(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[WHITE_SPACE_INDEX];
+	bits &= WHITE_SPACE_MASK;
+	bits >>= WHITE_SPACE_SHIFT;
+
+	/* 3bits: type */
+	return bits;
+}
+#undef WHITE_SPACE_MASK
+#undef WHITE_SPACE_SHIFT
+#undef WHITE_SPACE_INDEX
+
 #endif
