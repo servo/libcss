@@ -1655,4 +1655,43 @@ static inline uint8_t css_computed_white_space(
 #undef WHITE_SPACE_SHIFT
 #undef WHITE_SPACE_INDEX
 
+#define BACKGROUND_POSITION_INDEX 27
+#define BACKGROUND_POSITION_SHIFT 7
+#define BACKGROUND_POSITION_MASK  0x80
+#define BACKGROUND_POSITION_INDEX1 26
+#define BACKGROUND_POSITION_SHIFT1 0
+#define BACKGROUND_POSITION_MASK1 0xff
+static inline uint8_t css_computed_background_position(
+		const css_computed_style *style, 
+		css_fixed *hlength, css_unit *hunit,
+		css_fixed *vlength, css_unit *vunit)
+{
+	uint8_t bits = style->bits[BACKGROUND_POSITION_INDEX];
+	bits &= BACKGROUND_POSITION_MASK;
+	bits >>= BACKGROUND_POSITION_SHIFT;
+
+	/* 1bit: type */
+	if (bits == CSS_BACKGROUND_POSITION_SET) {
+		uint8_t bits1 = style->bits[BACKGROUND_POSITION_INDEX1];
+		bits1 &= BACKGROUND_POSITION_MASK1;
+		bits1 >>= BACKGROUND_POSITION_SHIFT1;
+
+		/* 8bits: hhhhvvvv : hunit | vunit */
+		*hlength = style->background_position[0];
+		*hunit = bits1 >> 4;
+
+		*vlength = style->background_position[1];
+		*hunit = bits1 & 0xf;
+	}
+
+	return bits;
+}
+#undef BACKGROUND_POSITION_MASK1
+#undef BACKGROUND_POSITION_SHIFT1
+#undef BACKGROUND_POSITION_INDEX1
+#undef BACKGROUND_POSITION_MASK
+#undef BACKGROUND_POSITION_SHIFT
+#undef BACKGROUND_POSITION_INDEX
+
+
 #endif
