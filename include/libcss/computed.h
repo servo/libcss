@@ -833,4 +833,176 @@ static inline uint8_t css_computed_font_family(
 #undef FONT_FAMILY_SHIFT
 #undef FONT_FAMILY_INDEX
 
+#define TOP_INDEX 6
+#define TOP_SHIFT 2
+#define TOP_MASK  0xfc
+static inline uint8_t css_computed_top(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[TOP_INDEX];
+	bits &= TOP_MASK;
+	bits >>= TOP_SHIFT;
+
+	/* 6bits: uuuutt : units | type */
+	if ((bits & 0x3) == CSS_TOP_SET) {
+		*length = style->top;
+		*unit = bits >> 2;
+	}
+
+	return (bits & 0x3);
+}
+#undef TOP_MASK
+#undef TOP_SHIFT
+#undef TOP_INDEX
+
+#define RIGHT_INDEX 7
+#define RIGHT_SHIFT 2
+#define RIGHT_MASK  0xfc
+static inline uint8_t css_computed_right(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[RIGHT_INDEX];
+	bits &= RIGHT_MASK;
+	bits >>= RIGHT_SHIFT;
+
+	/* 6bits: uuuutt : units | type */
+	if ((bits & 0x3) == CSS_RIGHT_SET) {
+		*length = style->right;
+		*unit = bits >> 2;
+	}
+
+	return (bits & 0x3);
+}
+#undef RIGHT_MASK
+#undef RIGHT_SHIFT
+#undef RIGHT_INDEX
+
+#define BOTTOM_INDEX 8
+#define BOTTOM_SHIFT 2
+#define BOTTOM_MASK  0xfc
+static inline uint8_t css_computed_bottom(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[BOTTOM_INDEX];
+	bits &= BOTTOM_MASK;
+	bits >>= BOTTOM_SHIFT;
+
+	/* 6bits: uuuutt : units | type */
+	if ((bits & 0x3) == CSS_BOTTOM_SET) {
+		*length = style->bottom;
+		*unit = bits >> 2;
+	}
+
+	return (bits & 0x3);
+}
+#undef BOTTOM_MASK
+#undef BOTTOM_SHIFT
+#undef BOTTOM_INDEX
+
+#define LEFT_INDEX 9
+#define LEFT_SHIFT 2
+#define LEFT_MASK  0xfc
+static inline uint8_t css_computed_left(
+		const css_computed_style *style, 
+		css_fixed *length, css_unit *unit)
+{
+	uint8_t bits = style->bits[LEFT_INDEX];
+	bits &= LEFT_MASK;
+	bits >>= LEFT_SHIFT;
+
+	/* 6bits: uuuutt : units | type */
+	if ((bits & 0x3) == CSS_LEFT_SET) {
+		*length = style->left;
+		*unit = bits >> 2;
+	}
+
+	return (bits & 0x3);
+}
+#undef LEFT_MASK
+#undef LEFT_SHIFT
+#undef LEFT_INDEX
+
+#define BORDER_TOP_COLOR_INDEX 6
+#define BORDER_TOP_COLOR_SHIFT 0
+#define BORDER_TOP_COLOR_MASK  0x3
+static inline uint8_t css_computed_border_top_color(
+		const css_computed_style *style, 
+		css_color *color)
+{
+	uint8_t bits = style->bits[BORDER_TOP_COLOR_INDEX];
+	bits &= BORDER_TOP_COLOR_MASK;
+	bits >>= BORDER_TOP_COLOR_SHIFT;
+
+	/* 2bits: type */
+	*color = style->border_color[0];
+
+	return bits;
+}
+#undef BORDER_TOP_COLOR_MASK
+#undef BORDER_TOP_COLOR_SHIFT
+#undef BORDER_TOP_COLOR_INDEX
+
+#define BORDER_RIGHT_COLOR_INDEX 7
+#define BORDER_RIGHT_COLOR_SHIFT 0
+#define BORDER_RIGHT_COLOR_MASK  0x3
+static inline uint8_t css_computed_border_right_color(
+		const css_computed_style *style, 
+		css_color *color)
+{
+	uint8_t bits = style->bits[BORDER_RIGHT_COLOR_INDEX];
+	bits &= BORDER_RIGHT_COLOR_MASK;
+	bits >>= BORDER_RIGHT_COLOR_SHIFT;
+
+	/* 2bits: type */
+	*color = style->border_color[1];
+
+	return bits;
+}
+#undef BORDER_RIGHT_COLOR_MASK
+#undef BORDER_RIGHT_COLOR_SHIFT
+#undef BORDER_RIGHT_COLOR_INDEX
+
+#define BORDER_BOTTOM_COLOR_INDEX 8
+#define BORDER_BOTTOM_COLOR_SHIFT 0
+#define BORDER_BOTTOM_COLOR_MASK  0x3
+static inline uint8_t css_computed_border_bottom_color(
+		const css_computed_style *style, 
+		css_color *color)
+{
+	uint8_t bits = style->bits[BORDER_BOTTOM_COLOR_INDEX];
+	bits &= BORDER_BOTTOM_COLOR_MASK;
+	bits >>= BORDER_BOTTOM_COLOR_SHIFT;
+
+	/* 2bits: type */
+	*color = style->border_color[2];
+
+	return bits;
+}
+#undef BORDER_BOTTOM_COLOR_MASK
+#undef BORDER_BOTTOM_COLOR_SHIFT
+#undef BORDER_BOTTOM_COLOR_INDEX
+
+#define BORDER_LEFT_COLOR_INDEX 9
+#define BORDER_LEFT_COLOR_SHIFT 0
+#define BORDER_LEFT_COLOR_MASK  0x3
+static inline uint8_t css_computed_border_left_color(
+		const css_computed_style *style, 
+		css_color *color)
+{
+	uint8_t bits = style->bits[BORDER_LEFT_COLOR_INDEX];
+	bits &= BORDER_LEFT_COLOR_MASK;
+	bits >>= BORDER_LEFT_COLOR_SHIFT;
+
+	/* 2bits: type */
+	*color = style->border_color[3];
+
+	return bits;
+}
+#undef BORDER_LEFT_COLOR_MASK
+#undef BORDER_LEFT_COLOR_SHIFT
+#undef BORDER_LEFT_COLOR_INDEX
+
 #endif
