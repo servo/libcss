@@ -294,11 +294,13 @@ struct css_computed_style {
 	void *pw;
 };
 
+css_error css_computed_style_create(css_alloc alloc, void *pw,
+		css_computed_style **result);
 css_error css_computed_style_destroy(css_computed_style *style);
 
 css_error css_computed_style_compose(const css_computed_style *parent,
 		const css_computed_style *child,
-		css_computed_style **result);
+		css_computed_style *result);
 
 /******************************************************************************
  * Property accessors below here                                              *

@@ -7,7 +7,8 @@
 
 #include <string.h>
 
-#include "select/computed.h"
+#include <libcss/computed.h>
+
 #include "utils/utils.h"
 
 /**
@@ -109,7 +110,7 @@ css_error css_computed_style_destroy(css_computed_style *style)
  *
  * \param parent  Parent style
  * \param child   Child style
- * \param result  Pointer to location to receive composed style
+ * \param result  Pointer to style to compose into
  * \return CSS_OK on success, appropriate error otherwise.
  *
  * Precondition: Parent is a fully composed style (thus has no properties
@@ -117,7 +118,7 @@ css_error css_computed_style_destroy(css_computed_style *style)
  */
 css_error css_computed_style_compose(const css_computed_style *parent,
 		const css_computed_style *child,
-		css_computed_style **result)
+		css_computed_style *result)
 {
 	UNUSED(parent);
 	UNUSED(child);

@@ -29,6 +29,6 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
 
 css_error css_select_style(css_select_ctx *ctx, void *node,
 		uint64_t pseudo_element, uint64_t pseudo_classes,
-		uint64_t media, css_computed_style **result);
+		uint64_t media, css_computed_style *result);
 
 #endif
