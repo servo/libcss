@@ -30,7 +30,13 @@ struct css_select_ctx {
 /**
  * State for each property during selection
  */
-struct css_select_state {
+typedef struct css_select_state {
+	void *node;			/* Node we're selecting for */
+	uint64_t pseudo_element;	/* Pseudo element to select for */
+	uint64_t pseudo_classes;	/* Currently active pseudo classes */
+	uint64_t media;			/* Currently active media types */
+	css_computed_style *result;	/* Style to populate */
+
 /** \todo We need a better way of knowing the number of properties
  * Bytecode opcodes cover 84 properties, then there's a 
  * further 15 generated from the side bits */
@@ -42,7 +48,10 @@ struct css_select_state {
 		         important : 1;	/* Importance of property in result */
 	} props[N_PROPS];
 #undef N_PROPS
-};
+} css_select_state;
+
+static css_error select_from_sheet(css_select_ctx *ctx, 
+		const css_stylesheet *sheet, css_select_state *state);
 
 /**
  * Create a selection context
@@ -246,14 +255,71 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 		uint64_t pseudo_element, uint64_t pseudo_classes,
 		uint64_t media,	css_computed_style *result)
 {
-	UNUSED(ctx);
-	UNUSED(node);
-	UNUSED(pseudo_classes);
-	UNUSED(pseudo_element);
-	UNUSED(media);
-	UNUSED(result);
+	uint32_t i;
+	css_error error;
+	css_select_state state;
 
-	/** \todo implement */
+	if (ctx == NULL || node == NULL || result == NULL)
+		return CSS_BADPARM;
+
+	/* Set up the selection state */
+	memset(&state, 0, sizeof(css_select_state));
+	state.node = node;
+	state.pseudo_element = pseudo_element;
+	state.pseudo_classes = pseudo_classes;
+	state.media = media;
+	state.result = result;
+
+	/* Iterate through the top-level stylesheets, selecting styles
+	 * from those which apply to our current media requirements */
+	for (i = 0; i < ctx->n_sheets; i++) {
+		if ((ctx->sheets[i]->media & media) != 0) {
+			error = select_from_sheet(ctx, ctx->sheets[i], &state);
+			if (error != CSS_OK)
+				return error;
+		}
+	}
+
+	/* Finally, fix up any remaining unset properties.
+	 * Those properties which are inherited, need to be set as inherit.
+	 * Those which are not inherited need to be set to their default value.
+	 */
+	/** \todo fixup unset properties */
+
+	return CSS_OK;
+}
+
+/******************************************************************************
+ * Selection engine internals below here                                      *
+ ******************************************************************************/
+css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet, 
+		css_select_state *state)
+{
+	const css_rule *rule;
+	css_error error;
+
+	/* Find first non-charset rule */
+	for (rule = sheet->rule_list; rule != NULL; rule = rule->next) {
+		if (rule->type != CSS_RULE_CHARSET)
+			break;
+	}
+
+	/* Process imports, if we have any */
+	while (rule != NULL && rule->type == CSS_RULE_IMPORT) {
+		const css_rule_import *import = (const css_rule_import *) rule;
+
+		if (import->sheet != NULL &&
+				(import->sheet->media & state->media) != 0) {
+			/** \todo We really don't want to recurse here */
+			error = select_from_sheet(ctx, import->sheet, state);
+			if (error != CSS_OK)
+				return error;
+		}
+
+		rule = rule->next;
+	}
+
+	/** \todo Finally, process the rest of the rules */
 
 	return CSS_OK;
 }
