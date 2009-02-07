@@ -289,6 +289,9 @@ struct css_computed_style {
 	css_computed_uncommon *uncommon;/**< Uncommon properties */
 	css_computed_aural *aural;	/**< Aural properties */
 	css_computed_page *page;	/**< Page properties */
+
+	css_alloc alloc;
+	void *pw;
 };
 
 css_error css_computed_style_create(css_alloc alloc, void *pw,
@@ -1681,7 +1684,7 @@ static inline uint8_t css_computed_background_position(
 		*hunit = bits1 >> 4;
 
 		*vlength = style->background_position[1];
-		*hunit = bits1 & 0xf;
+		*vunit = bits1 & 0xf;
 	}
 
 	return bits;
