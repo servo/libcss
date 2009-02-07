@@ -40,12 +40,18 @@ typedef struct css_select_state {
 /** \todo We need a better way of knowing the number of properties
  * Bytecode opcodes cover 84 properties, then there's a 
  * further 15 generated from the side bits */
+/* Stylesheet identity is a monotonically increasing number based at 1 and
+ * increasing by 1 for every stylesheet encountered, including imports.
+ * Imported sheets' identities are below that of the sheet that imported
+ * them. */
 #define N_PROPS (99)
 	struct {
 		uint32_t specificity;	/* Specificity of property in result */
+		uint32_t sheet;		/* Identity of applicable stylesheet */
 		uint32_t set       : 1,	/* Whether property is set in result */
 		         origin    : 2,	/* Origin of property in result */
-		         important : 1;	/* Importance of property in result */
+		         important : 1,	/* Importance of property in result */
+		         index     : 16;/* Index of corresponding rule */
 	} props[N_PROPS];
 #undef N_PROPS
 } css_select_state;
@@ -319,7 +325,7 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 		rule = rule->next;
 	}
 
-	/** \todo Finally, process the rest of the rules */
+	/** \todo Finally, process the selectors in this sheet */
 
 	return CSS_OK;
 }
