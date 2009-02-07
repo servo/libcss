@@ -7,10 +7,10 @@
 
 #include <string.h>
 
+#include <libcss/computed.h>
 #include <libcss/select.h>
 
 #include "stylesheet.h"
-#include "select/computed.h"
 #include "select/hash.h"
 #include "select/propset.h"
 #include "utils/utils.h"
@@ -25,6 +25,23 @@ struct css_select_ctx {
 
 	css_alloc alloc;		/**< Allocation routine */
 	void *pw;			/**< Client-specific private data */
+};
+
+/**
+ * State for each property during selection
+ */
+struct css_select_state {
+/** \todo We need a better way of knowing the number of properties
+ * Bytecode opcodes cover 84 properties, then there's a 
+ * further 15 generated from the side bits */
+#define N_PROPS (99)
+	struct {
+		uint32_t specificity;	/* Specificity of property in result */
+		uint32_t set       : 1,	/* Whether property is set in result */
+		         origin    : 2,	/* Origin of property in result */
+		         important : 1;	/* Importance of property in result */
+	} props[N_PROPS];
+#undef N_PROPS
 };
 
 /**
