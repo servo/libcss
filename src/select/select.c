@@ -10,6 +10,7 @@
 #include <libcss/select.h>
 
 #include "stylesheet.h"
+#include "select/computed.h"
 #include "select/hash.h"
 #include "select/propset.h"
 #include "utils/utils.h"
@@ -212,7 +213,7 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
  * \param pseudo_element  Pseudo element to select for, instead
  * \param pseudo_classes  Currently active pseudo classes
  * \param media           Currently active media types
- * \param result          Pointer to style to populate
+ * \param result          Pointer to location to receive resulting style
  * \return CSS_OK on success, appropriate error otherwise.
  *
  * In computing the style, no reference is made to the parent node's
@@ -226,7 +227,7 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
  */
 css_error css_select_style(css_select_ctx *ctx, void *node,
 		uint64_t pseudo_element, uint64_t pseudo_classes,
-		uint64_t media,	css_computed_style *result)
+		uint64_t media,	css_computed_style **result)
 {
 	UNUSED(ctx);
 	UNUSED(node);
