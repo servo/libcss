@@ -624,13 +624,50 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 		const css_selector_detail *detail, css_select_state *state, 
 		bool *match)
 {
-	UNUSED(ctx);
-	UNUSED(node);
-	UNUSED(detail);
-	UNUSED(state);
-	UNUSED(match);
+	css_error error = CSS_OK;
 
-	return CSS_OK;
+	UNUSED(ctx);
+
+	switch (detail->type) {
+	case CSS_SELECTOR_CLASS:
+		error = state->handler->node_has_class(state->pw, node,
+				detail->name->data, detail->name->len,
+				match);
+		break;
+	case CSS_SELECTOR_ID:
+		error = state->handler->node_has_id(state->pw, node,
+				detail->name->data, detail->name->len,
+				match);
+		break;
+	case CSS_SELECTOR_PSEUDO:
+		/** \todo pseudo classes/elements */
+		break;
+	case CSS_SELECTOR_ATTRIBUTE:
+		error = state->handler->node_has_attribute(state->pw, node,
+				detail->name->data, detail->name->len,
+				match);
+		break;
+	case CSS_SELECTOR_ATTRIBUTE_EQUAL:
+		error = state->handler->node_has_attribute_equal(state->pw, 
+				node, detail->name->data, detail->name->len,
+				detail->value->data, detail->value->len,
+				match);
+		break;
+	case CSS_SELECTOR_ATTRIBUTE_DASHMATCH:
+		error = state->handler->node_has_attribute_dashmatch(state->pw,
+				node, detail->name->data, detail->name->len,
+				detail->value->data, detail->value->len,
+				match);
+		break;
+	case CSS_SELECTOR_ATTRIBUTE_INCLUDES:
+		error = state->handler->node_has_attribute_includes(state->pw, 
+				node, detail->name->data, detail->name->len,
+				detail->value->data, detail->value->len,
+				match);
+		break;
+	}
+
+	return error;
 }
 
 css_error cascade_style(css_select_ctx *ctx, css_style *style, 
