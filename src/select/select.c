@@ -7,12 +7,15 @@
 
 #include <string.h>
 
+#include <parserutils/utils/hash.h>
+
 #include <libcss/computed.h>
 #include <libcss/select.h>
 
 #include "stylesheet.h"
 #include "select/hash.h"
 #include "select/propset.h"
+#include "utils/parserutilserror.h"
 #include "utils/utils.h"
 
 /**
@@ -62,6 +65,8 @@ static css_error select_from_sheet(css_select_ctx *ctx,
 		const css_stylesheet *sheet, css_select_state *state);
 static css_error match_selectors_in_sheet(css_select_ctx *ctx, 
 		const css_stylesheet *sheet, css_select_state *state);
+static css_error match_selector(css_select_ctx *ctx, 
+		const css_selector *selector, css_select_state *state);
 
 /**
  * Create a selection context
@@ -359,11 +364,79 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 css_error match_selectors_in_sheet(css_select_ctx *ctx, 
 		const css_stylesheet *sheet, css_select_state *state)
 {
-	UNUSED(ctx);
-	UNUSED(sheet);
-	UNUSED(state);
+	const parserutils_hash_entry *universal;
+	const parserutils_hash_entry *element;
+	const css_selector **selectors;
+	const uint8_t *name;
+	size_t len;
+	parserutils_error perror;
+	css_error error;
 
-	/** \todo Implement */
+	/** \todo Get node's name */
+#if 0
+	error = ...(state->pw, state->node, &name, &len);
+	if (error != CSS_OK)
+		return error;
+#else
+	name = NULL;
+	len = 0;
+#endif
+
+	/* Intern it */
+	perror = parserutils_hash_insert(sheet->dictionary,
+			name, len, &element);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	/* Intern universal selector string */
+	perror = parserutils_hash_insert(sheet->dictionary, 
+			(const uint8_t *) "*", 1, &universal);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	/* Find hash chain that applies to current node */
+	error = css_selector_hash_find(sheet->selectors, element, &selectors);
+	if (error != CSS_OK)
+		return error;
+
+	/* Process any matching selectors */
+	while (*selectors != NULL) {
+		error = match_selector(ctx, *selectors, state);
+		if (error != CSS_OK)
+			return error;
+
+		error = css_selector_hash_iterate(sheet->selectors, selectors,
+				&selectors);
+		if (error != CSS_OK)
+			return error;
+	}
+
+	/* Find hash chain for universal selector */
+	error = css_selector_hash_find(sheet->selectors, universal, &selectors);
+	if (error != CSS_OK)
+		return error;
+
+	/* Process any matching selectors */
+	while (*selectors != NULL) {
+		error = match_selector(ctx, *selectors, state);
+		if (error != CSS_OK)
+			return error;
+
+		error = css_selector_hash_iterate(sheet->selectors, selectors,
+				&selectors);
+		if (error != CSS_OK)
+			return error;
+	}
+
+	return CSS_OK;
+}
+
+css_error match_selector(css_select_ctx *ctx, const css_selector *selector,
+		css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(selector);
+	UNUSED(state);
 
 	return CSS_OK;
 }
