@@ -70,7 +70,17 @@ static css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		const css_stylesheet *sheet, css_select_state *state);
 static css_error match_selector_chain(css_select_ctx *ctx, 
 		const css_selector *selector, css_origin origin,
-		css_select_state *state);
+		css_select_state *state, 
+		const parserutils_hash_entry *universal);
+static css_error match_named_combinator(css_select_ctx *ctx, 
+		css_combinator type, const parserutils_hash_entry *name, 
+		css_select_state *state, void *node, void **next_node);
+static css_error match_universal_combinator(css_select_ctx *ctx, 
+		css_combinator type, const css_selector *selector, 
+		css_select_state *state, void *node, void **next_node);
+static css_error match_details(css_select_ctx *ctx, void *node, 
+		const css_selector_detail *detail, css_select_state *state, 
+		bool *match);
 static css_error match_detail(css_select_ctx *ctx, void *node, 
 		const css_selector_detail *detail, css_select_state *state, 
 		bool *match);
@@ -412,7 +422,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 	/* Process any matching selectors */
 	while (*selectors != NULL) {
 		error = match_selector_chain(ctx, *selectors, 
-				sheet->origin, state);
+				sheet->origin, state, universal);
 		if (error != CSS_OK)
 			return error;
 
@@ -430,7 +440,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 	/* Process any matching selectors */
 	while (*selectors != NULL) {
 		error = match_selector_chain(ctx, *selectors, 
-				sheet->origin, state);
+				sheet->origin, state, universal);
 		if (error != CSS_OK)
 			return error;
 
@@ -445,7 +455,8 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 
 css_error match_selector_chain(css_select_ctx *ctx, 
 		const css_selector *selector, css_origin origin, 
-		css_select_state *state)
+		css_select_state *state, 
+		const parserutils_hash_entry *universal)
 {
 	const css_selector *s = selector;
 	void *node = state->node;
@@ -454,35 +465,16 @@ css_error match_selector_chain(css_select_ctx *ctx,
 	do {
 		void *next_node = NULL;
 		const css_selector_detail *detail = &s->data;
+		bool match = false;
 
-		/* First, consider any combinator on this selector */
-		if (s->data.comb != CSS_COMBINATOR_NONE) {
-			const uint8_t *name = s->combinator->data.name->data;
-			size_t len = s->combinator->data.name->len;
-
-			switch (s->data.comb) {
-			case CSS_COMBINATOR_ANCESTOR:
-				error = state->handler->ancestor_node(
-						state->pw, node, name, len, 
-						&next_node);
-				if (error != CSS_OK)
-					return error;
-				break;
-			case CSS_COMBINATOR_PARENT:
-				error = state->handler->parent_node(
-						state->pw, node, name, len,
-						&next_node);
-				if (error != CSS_OK)
-					return error;
-				break;
-			case CSS_COMBINATOR_SIBLING:
-				error = state->handler->sibling_node(
-						state->pw, node, name, len,
-						&next_node);
-				if (error != CSS_OK)
-					return error;
-				break;
-			}
+		/* First, consider any named combinator on this selector */
+		if (s->data.comb != CSS_COMBINATOR_NONE &&
+				s->combinator->data.name != universal) {
+			error = match_named_combinator(ctx, s->data.comb, 
+					s->combinator->data.name, state, node, 
+					&next_node);
+			if (error != CSS_OK)
+				return error;
 
 			/* No match for combinator, so reject selector chain */
 			if (next_node == NULL)
@@ -490,19 +482,24 @@ css_error match_selector_chain(css_select_ctx *ctx,
 		}
 
 		/* Now match details on this selector */
-		while (detail->next != 0) {
-			bool match = false;
+		error = match_details(ctx, node, detail, state, &match);
+		if (error != CSS_OK)
+			return error;
 
-			/* Don't bother with the first detail, as it's the 
-			 * element selector */
-			detail++;
+		/* Details don't match, so reject selector chain */
+		if (match == false)
+			return CSS_OK;
 
-			error = match_detail(ctx, node, detail, state, &match);
+		/* If we had a universal combinator, then consider that */
+		if (s->data.comb != CSS_COMBINATOR_NONE &&
+				s->combinator->data.name == universal) {
+			error = match_universal_combinator(ctx, s->data.comb, 
+					s->combinator, state, node, &next_node);
 			if (error != CSS_OK)
 				return error;
 
-			/* Detail doesn't match, so reject selector chain */
-			if (match == false)
+			/* No match for combinator, so reject selector chain */
+			if (next_node == NULL)
 				return CSS_OK;
 		}
 
@@ -517,6 +514,111 @@ css_error match_selector_chain(css_select_ctx *ctx,
 			selector->specificity, origin, selector->rule->index,
 			state);
 }
+
+css_error match_named_combinator(css_select_ctx *ctx, css_combinator type,
+		const parserutils_hash_entry *name, css_select_state *state,
+		void *node, void **next_node)
+{
+	css_error error;
+
+	UNUSED(ctx);
+
+	switch (type) {
+	case CSS_COMBINATOR_ANCESTOR:
+		error = state->handler->named_ancestor_node(state->pw, node, 
+				name->data, name->len, next_node);
+		if (error != CSS_OK)
+			return error;
+		break;
+	case CSS_COMBINATOR_PARENT:
+		error = state->handler->named_parent_node(state->pw, node, 
+				name->data, name->len, next_node);
+		if (error != CSS_OK)
+			return error;
+		break;
+	case CSS_COMBINATOR_SIBLING:
+		error = state->handler->named_sibling_node(state->pw, node, 
+				name->data, name->len, next_node);
+		if (error != CSS_OK)
+			return error;
+		break;
+	case CSS_COMBINATOR_NONE:
+		break;
+	}
+
+	return CSS_OK;
+}
+
+css_error match_universal_combinator(css_select_ctx *ctx, css_combinator type,
+		const css_selector *selector, css_select_state *state,
+		void *node, void **next_node)
+{
+	const css_selector_detail *detail = &selector->data;
+	void *n = node;
+	css_error error;
+
+	do {
+		bool match = false;
+
+		/* Find candidate node */
+		switch (type) {
+		case CSS_COMBINATOR_ANCESTOR:
+		case CSS_COMBINATOR_PARENT:
+			error = state->handler->parent_node(state->pw, n, &n);
+			if (error != CSS_OK)
+				return error;
+			break;
+		case CSS_COMBINATOR_SIBLING:
+			error = state->handler->sibling_node(state->pw, n, &n);
+			if (error != CSS_OK)
+				return error;
+			break;
+		case CSS_COMBINATOR_NONE:
+			break;
+		}
+
+		/* Match its details */
+		error = match_details(ctx, n, detail, state, &match);
+		if (error != CSS_OK)
+			return error;
+
+		/* If we found a match, use it */
+		if (match == true)
+			break;
+
+		/* Wanted the parent, but it didn't match, so stop looking */
+		if (type == CSS_COMBINATOR_PARENT)
+			n = NULL;
+	} while (n != NULL);
+
+	*next_node = n;
+
+	return CSS_OK;
+}
+
+css_error match_details(css_select_ctx *ctx, void *node, 
+		const css_selector_detail *detail, css_select_state *state, 
+		bool *match)
+{
+	css_error error;
+
+	while (detail->next != 0) {
+		/* Don't bother with the first detail, as it's the 
+		 * element selector */
+		detail++;
+
+		error = match_detail(ctx, node, detail, state, match);
+		if (error != CSS_OK)
+			return error;
+
+		/* Detail doesn't match, so reject selector chain */
+		if (*match == false)
+			return CSS_OK;
+	}
+
+	return CSS_OK;
+}
+
 
 css_error match_detail(css_select_ctx *ctx, void *node, 
 		const css_selector_detail *detail, css_select_state *state, 
