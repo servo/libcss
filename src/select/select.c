@@ -40,6 +40,9 @@ typedef struct css_select_state {
 	uint64_t media;			/* Currently active media types */
 	css_computed_style *result;	/* Style to populate */
 
+	css_select_handler *handler;	/* Handler functions */
+	void *pw;			/* Client data for handlers */
+
 	uint32_t current_sheet;		/* Identity of current sheet */
 
 /** \todo We need a better way of knowing the number of properties
@@ -255,6 +258,8 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
  * \param pseudo_classes  Currently active pseudo classes
  * \param media           Currently active media types
  * \param result          Pointer to style to populate
+ * \param handler         Dispatch table of handler functions
+ * \param pw              Client-specific private data for handler functions
  * \return CSS_OK on success, appropriate error otherwise.
  *
  * In computing the style, no reference is made to the parent node's
@@ -268,7 +273,8 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
  */
 css_error css_select_style(css_select_ctx *ctx, void *node,
 		uint64_t pseudo_element, uint64_t pseudo_classes,
-		uint64_t media,	css_computed_style *result)
+		uint64_t media,	css_computed_style *result,
+		css_select_handler *handler, void *pw)
 {
 	uint32_t i;
 	css_error error;
@@ -284,6 +290,8 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	state.pseudo_classes = pseudo_classes;
 	state.media = media;
 	state.result = result;
+	state.handler = handler;
+	state.pw = pw;
 
 	/* Iterate through the top-level stylesheets, selecting styles
 	 * from those which apply to our current media requirements */
@@ -372,15 +380,10 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 	parserutils_error perror;
 	css_error error;
 
-	/** \todo Get node's name */
-#if 0
-	error = ...(state->pw, state->node, &name, &len);
+	/* Get node's name */
+	error = state->handler->node_name(state->pw, state->node, &name, &len);
 	if (error != CSS_OK)
 		return error;
-#else
-	name = NULL;
-	len = 0;
-#endif
 
 	/* Intern it */
 	perror = parserutils_hash_insert(sheet->dictionary,
