@@ -16,7 +16,15 @@ typedef struct css_select_handler {
 	css_error (*node_name)(void *pw, void *node, const uint8_t **name, 
 			size_t *len);
 
-
+	css_error (*ancestor_node)(void *pw, void *node,
+			const uint8_t *name, size_t len,
+			void **ancestor);
+	css_error (*parent_node)(void *pw, void *node,
+			const uint8_t *name, size_t len,
+			void **parent);
+	css_error (*sibling_node)(void *pw, void *node,
+			const uint8_t *name, size_t len,
+			void **sibling);
 } css_select_handler;
 
 css_error css_select_ctx_create(css_alloc alloc, void *pw,

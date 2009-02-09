@@ -68,8 +68,15 @@ static css_error select_from_sheet(css_select_ctx *ctx,
 		const css_stylesheet *sheet, css_select_state *state);
 static css_error match_selectors_in_sheet(css_select_ctx *ctx, 
 		const css_stylesheet *sheet, css_select_state *state);
-static css_error match_selector(css_select_ctx *ctx, 
-		const css_selector *selector, css_select_state *state);
+static css_error match_selector_chain(css_select_ctx *ctx, 
+		const css_selector *selector, css_origin origin,
+		css_select_state *state);
+static css_error match_detail(css_select_ctx *ctx, void *node, 
+		const css_selector_detail *detail, css_select_state *state, 
+		bool *match);
+static css_error cascade_style(css_select_ctx *ctx, css_style *style, 
+		uint32_t specificity, css_origin origin, uint32_t rule_index,
+		css_select_state *state);
 
 /**
  * Create a selection context
@@ -404,7 +411,8 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 
 	/* Process any matching selectors */
 	while (*selectors != NULL) {
-		error = match_selector(ctx, *selectors, state);
+		error = match_selector_chain(ctx, *selectors, 
+				sheet->origin, state);
 		if (error != CSS_OK)
 			return error;
 
@@ -421,7 +429,8 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 
 	/* Process any matching selectors */
 	while (*selectors != NULL) {
-		error = match_selector(ctx, *selectors, state);
+		error = match_selector_chain(ctx, *selectors, 
+				sheet->origin, state);
 		if (error != CSS_OK)
 			return error;
 
@@ -434,11 +443,103 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 	return CSS_OK;
 }
 
-css_error match_selector(css_select_ctx *ctx, const css_selector *selector,
+css_error match_selector_chain(css_select_ctx *ctx, 
+		const css_selector *selector, css_origin origin, 
+		css_select_state *state)
+{
+	const css_selector *s = selector;
+	void *node = state->node;
+	css_error error;
+
+	do {
+		void *next_node = NULL;
+		const css_selector_detail *detail = &s->data;
+
+		/* First, consider any combinator on this selector */
+		if (s->data.comb != CSS_COMBINATOR_NONE) {
+			const uint8_t *name = s->combinator->data.name->data;
+			size_t len = s->combinator->data.name->len;
+
+			switch (s->data.comb) {
+			case CSS_COMBINATOR_ANCESTOR:
+				error = state->handler->ancestor_node(
+						state->pw, node, name, len, 
+						&next_node);
+				if (error != CSS_OK)
+					return error;
+				break;
+			case CSS_COMBINATOR_PARENT:
+				error = state->handler->parent_node(
+						state->pw, node, name, len,
+						&next_node);
+				if (error != CSS_OK)
+					return error;
+				break;
+			case CSS_COMBINATOR_SIBLING:
+				error = state->handler->sibling_node(
+						state->pw, node, name, len,
+						&next_node);
+				if (error != CSS_OK)
+					return error;
+				break;
+			}
+
+			/* No match for combinator, so reject selector chain */
+			if (next_node == NULL)
+				return CSS_OK;
+		}
+
+		/* Now match details on this selector */
+		while (detail->next != 0) {
+			bool match = false;
+
+			/* Don't bother with the first detail, as it's the 
+			 * element selector */
+			detail++;
+
+			error = match_detail(ctx, node, detail, state, &match);
+			if (error != CSS_OK)
+				return error;
+
+			/* Detail doesn't match, so reject selector chain */
+			if (match == false)
+				return CSS_OK;
+		}
+
+		/* Details matched, so progress to combining selector */
+		s = s->combinator;
+		node = next_node;
+	} while (s != NULL);
+
+	/* If we got here, then the entire selector chain matched, so cascade */
+	return cascade_style(ctx,
+			((css_rule_selector *) selector->rule)->style, 
+			selector->specificity, origin, selector->rule->index,
+			state);
+}
+
+css_error match_detail(css_select_ctx *ctx, void *node, 
+		const css_selector_detail *detail, css_select_state *state, 
+		bool *match)
+{
+	UNUSED(ctx);
+	UNUSED(node);
+	UNUSED(detail);
+	UNUSED(state);
+	UNUSED(match);
+
+	return CSS_OK;
+}
+
+css_error cascade_style(css_select_ctx *ctx, css_style *style, 
+		uint32_t specificity, css_origin origin, uint32_t rule_index,
 		css_select_state *state)
 {
 	UNUSED(ctx);
-	UNUSED(selector);
+	UNUSED(style);
+	UNUSED(specificity);
+	UNUSED(origin);
+	UNUSED(rule_index);
 	UNUSED(state);
 
 	return CSS_OK;
