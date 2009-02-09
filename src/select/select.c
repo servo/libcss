@@ -602,6 +602,12 @@ css_error match_details(css_select_ctx *ctx, void *node,
 {
 	css_error error;
 
+	/** \todo Some details are easier to test than others (e.g. dashmatch 
+	 * actually requires looking at data rather than simply comparing 
+	 * pointers). Should we consider sorting the detail list such that the 
+	 * simpler details come first (and thus the expensive match routines 
+	 * can be avoided unless absolutely necessary). */
+
 	while (detail->next != 0) {
 		/* Don't bother with the first detail, as it's the 
 		 * element selector */
