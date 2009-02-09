@@ -37,13 +37,15 @@ typedef struct css_select_state {
 	uint64_t media;			/* Currently active media types */
 	css_computed_style *result;	/* Style to populate */
 
+	uint32_t current_sheet;		/* Identity of current sheet */
+
 /** \todo We need a better way of knowing the number of properties
  * Bytecode opcodes cover 84 properties, then there's a 
  * further 15 generated from the side bits */
 /* Stylesheet identity is a monotonically increasing number based at 1 and
- * increasing by 1 for every stylesheet encountered, including imports.
- * Imported sheets' identities are below that of the sheet that imported
- * them. */
+ * increasing by 1 for every applicable stylesheet encountered, including 
+ * imports. Imported sheets' identities are below that of the sheet that 
+ * imported them. */
 #define N_PROPS (99)
 	struct {
 		uint32_t specificity;	/* Specificity of property in result */
@@ -57,6 +59,8 @@ typedef struct css_select_state {
 } css_select_state;
 
 static css_error select_from_sheet(css_select_ctx *ctx, 
+		const css_stylesheet *sheet, css_select_state *state);
+static css_error match_selectors_in_sheet(css_select_ctx *ctx, 
 		const css_stylesheet *sheet, css_select_state *state);
 
 /**
@@ -301,31 +305,65 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet, 
 		css_select_state *state)
 {
-	const css_rule *rule;
-	css_error error;
+	const css_stylesheet *s = sheet;
+	const css_rule *rule = s->rule_list;
 
-	/* Find first non-charset rule */
-	for (rule = sheet->rule_list; rule != NULL; rule = rule->next) {
-		if (rule->type != CSS_RULE_CHARSET)
-			break;
-	}
-
-	/* Process imports, if we have any */
-	while (rule != NULL && rule->type == CSS_RULE_IMPORT) {
-		const css_rule_import *import = (const css_rule_import *) rule;
-
-		if (import->sheet != NULL &&
-				(import->sheet->media & state->media) != 0) {
-			/** \todo We really don't want to recurse here */
-			error = select_from_sheet(ctx, import->sheet, state);
-			if (error != CSS_OK)
-				return error;
+	do {
+		/* Find first non-charset rule, if we're at the list head */
+		if (rule == s->rule_list) {
+			for (; rule != NULL; rule = rule->next) {
+				if (rule->type != CSS_RULE_CHARSET)
+					break;
+			}
 		}
 
-		rule = rule->next;
-	}
+		if (rule != NULL && rule->type == CSS_RULE_IMPORT) {
+			/* Current rule is an import */
+			const css_rule_import *import = 
+					(const css_rule_import *) rule;
 
-	/** \todo Finally, process the selectors in this sheet */
+			if (import->sheet != NULL &&
+					(import->sheet->media & 
+					state->media) != 0) {
+				/* It's applicable, so process it */
+				s = import->sheet;
+				rule = s->rule_list;
+			} else {
+				/* Not applicable; skip over it */
+				rule = rule->next;
+			}
+		} else {
+			/* Gone past import rules in this sheet */
+			css_error error;
+
+			/* Process this sheet */
+			state->current_sheet++;
+
+			error = match_selectors_in_sheet(ctx, s, state);
+			if (error != CSS_OK)
+				return error;
+
+			/* Find next sheet to process */
+			if (s->ownerRule != NULL) {
+				s = s->ownerRule->parent;
+				rule = s->ownerRule->next;
+			} else {
+				s = NULL;
+			}
+		}
+	} while (s != NULL);
+
+	return CSS_OK;
+}
+
+css_error match_selectors_in_sheet(css_select_ctx *ctx, 
+		const css_stylesheet *sheet, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(sheet);
+	UNUSED(state);
+
+	/** \todo Implement */
 
 	return CSS_OK;
 }
