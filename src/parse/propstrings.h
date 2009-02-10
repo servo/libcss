@@ -17,6 +17,13 @@ enum {
 	/* At-rules */
 	CHARSET, IMPORT, MEDIA, PAGE,
 
+	/* Pseudo classes */
+	FIRST_CHILD, LINK, VISITED, HOVER, ACTIVE, FOCUS, LANG, 
+	/* LEFT, RIGHT, -- already in properties */ FIRST,
+
+	/* Pseudo elements */
+	FIRST_LINE, FIRST_LETTER, BEFORE, AFTER,
+
 	/* Properties */
 	FIRST_PROP,
 
@@ -29,7 +36,7 @@ enum {
 	BORDER_TOP_WIDTH, BOTTOM, CAPTION_SIDE, CLEAR, CLIP, COLOR, CONTENT, 
 	COUNTER_INCREMENT, COUNTER_RESET, CUE_AFTER, CUE_BEFORE, CURSOR, 
 	DIRECTION, DISPLAY, ELEVATION, EMPTY_CELLS, FLOAT, FONT_FAMILY, 
-	FONT_SIZE, FONT_STYLE, FONT_VARIANT, FONT_WEIGHT, HEIGHT, LEFT, 
+	FONT_SIZE, FONT_STYLE, FONT_VARIANT, FONT_WEIGHT, HEIGHT, LEFT,
 	LETTER_SPACING, LINE_HEIGHT, LIST_STYLE_IMAGE, LIST_STYLE_POSITION, 
 	LIST_STYLE_TYPE, MARGIN_BOTTOM, MARGIN_LEFT, MARGIN_RIGHT, MARGIN_TOP, 
 	MAX_HEIGHT, MAX_WIDTH, MIN_HEIGHT, MIN_WIDTH, ORPHANS, OUTLINE_COLOR, 
@@ -85,6 +92,20 @@ static struct {
 	{ "import", SLEN("import") },
 	{ "media", SLEN("media") },
 	{ "page", SLEN("page") },
+
+	{ "first-child", SLEN("first-child") },
+	{ "link", SLEN("link") },
+	{ "visited", SLEN("visited") },
+	{ "hover", SLEN("hover") },
+	{ "active", SLEN("active") },
+	{ "focus", SLEN("focus") },
+	{ "lang", SLEN("lang") },
+	{ "first", SLEN("first") },
+
+	{ "first-line", SLEN("first-line") },
+	{ "first-letter", SLEN("first-letter") },
+	{ "before", SLEN("before") },
+	{ "after", SLEN("after") },
 
 	{ "azimuth", SLEN("azimuth") },
 	{ "background-attachment", SLEN("background-attachment") },

@@ -694,6 +694,7 @@ css_error parsePseudo(css_language *c, const parserutils_vector *vector,
 		int *ctx, css_selector_detail *specific)
 {
 	const css_token *token, *name, *value = NULL;
+	css_selector_type type;
 
 	/* pseudo    -> ':' [ IDENT | FUNCTION ws IDENT? ws ')' ] */
 
@@ -725,9 +726,28 @@ css_error parsePseudo(css_language *c, const parserutils_vector *vector,
 			return CSS_INVALID;
 	}
 
+	if (name->ilower == c->strings[FIRST_CHILD] ||
+			name->ilower == c->strings[LINK] || 
+			name->ilower == c->strings[VISITED] || 
+			name->ilower == c->strings[HOVER] || 
+			name->ilower == c->strings[ACTIVE] || 
+			name->ilower == c->strings[FOCUS] || 
+			name->ilower == c->strings[LANG] || 
+			name->ilower == c->strings[LEFT] || 
+			name->ilower == c->strings[RIGHT] || 
+			name->ilower == c->strings[FIRST])
+		type = CSS_SELECTOR_PSEUDO_CLASS;
+	else if (name->ilower == c->strings[FIRST_LINE] ||
+			name->ilower == c->strings[FIRST_LETTER] ||
+			name->ilower == c->strings[BEFORE] ||
+			name->ilower == c->strings[AFTER])
+		type = CSS_SELECTOR_PSEUDO_ELEMENT;
+	else
+		return CSS_INVALID;
+
 	return css_stylesheet_selector_detail_init(c->sheet, 
-			CSS_SELECTOR_PSEUDO, name->idata, 
-			value != NULL ? value->idata : NULL, specific);
+			type, name->idata, value != NULL ? value->idata : NULL,
+			specific);
 }
 
 css_error parseSpecific(css_language *c, 

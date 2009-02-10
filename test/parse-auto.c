@@ -534,7 +534,8 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 		*ptr += 1;
 		dump_string(detail->name, ptr);
 		break;
-	case CSS_SELECTOR_PSEUDO:
+	case CSS_SELECTOR_PSEUDO_CLASS:
+	case CSS_SELECTOR_PSEUDO_ELEMENT:
 		**ptr = ':';
 		*ptr += 1;
 		dump_string(detail->name, ptr);

@@ -645,8 +645,11 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 				detail->name->data, detail->name->len,
 				match);
 		break;
-	case CSS_SELECTOR_PSEUDO:
-		/** \todo pseudo classes/elements */
+	case CSS_SELECTOR_PSEUDO_CLASS:
+		/** \todo pseudo classes */
+		break;
+	case CSS_SELECTOR_PSEUDO_ELEMENT:
+		/** \todo pseudo elements */
 		break;
 	case CSS_SELECTOR_ATTRIBUTE:
 		error = state->handler->node_has_attribute(state->pw, node,

@@ -526,6 +526,7 @@ css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
 	/* Update parent's specificity */
 	switch (detail->type) {
 	case CSS_SELECTOR_CLASS:
+	case CSS_SELECTOR_PSEUDO_CLASS:
 	case CSS_SELECTOR_ATTRIBUTE:
 	case CSS_SELECTOR_ATTRIBUTE_EQUAL:
 	case CSS_SELECTOR_ATTRIBUTE_DASHMATCH:
@@ -535,11 +536,7 @@ css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
 	case CSS_SELECTOR_ID:
 		(*parent)->specificity += CSS_SPECIFICITY_B;
 		break;
-	case CSS_SELECTOR_PSEUDO:
-		/** \todo distinguish between pseudo classes and elements */
-		/* Assume pseudo class for now */
-		(*parent)->specificity += CSS_SPECIFICITY_C;
-		break;
+	case CSS_SELECTOR_PSEUDO_ELEMENT:
 	case CSS_SELECTOR_ELEMENT:
 		(*parent)->specificity += CSS_SPECIFICITY_D;
 		break;
