@@ -12,6 +12,8 @@
 #include <libcss/computed.h>
 #include <libcss/select.h>
 
+#include "bytecode/bytecode.h"
+#include "bytecode/opcodes.h"
 #include "stylesheet.h"
 #include "select/hash.h"
 #include "select/propset.h"
@@ -31,7 +33,7 @@ struct css_select_ctx {
 };
 
 /**
- * State for each property during selection
+ * Selection state
  */
 typedef struct css_select_state {
 	void *node;			/* Node we're selecting for */
@@ -44,6 +46,9 @@ typedef struct css_select_state {
 	void *pw;			/* Client data for handlers */
 
 	uint32_t current_sheet;		/* Identity of current sheet */
+	css_origin current_origin;	/* Origin of current sheet */
+	uint32_t current_rule_index;	/* Index of current rule */
+	uint32_t current_specificity;	/* Specificity of current rule */
 
 /** \todo We need a better way of knowing the number of properties
  * Bytecode opcodes cover 84 properties, then there's a 
@@ -69,8 +74,7 @@ static css_error select_from_sheet(css_select_ctx *ctx,
 static css_error match_selectors_in_sheet(css_select_ctx *ctx, 
 		const css_stylesheet *sheet, css_select_state *state);
 static css_error match_selector_chain(css_select_ctx *ctx, 
-		const css_selector *selector, css_origin origin,
-		css_select_state *state, 
+		const css_selector *selector, css_select_state *state, 
 		const parserutils_hash_entry *universal);
 static css_error match_named_combinator(css_select_ctx *ctx, 
 		css_combinator type, const parserutils_hash_entry *name, 
@@ -84,9 +88,108 @@ static css_error match_details(css_select_ctx *ctx, void *node,
 static css_error match_detail(css_select_ctx *ctx, void *node, 
 		const css_selector_detail *detail, css_select_state *state, 
 		bool *match);
-static css_error cascade_style(css_select_ctx *ctx, css_style *style, 
-		uint32_t specificity, css_origin origin, uint32_t rule_index,
+static css_error cascade_style(css_select_ctx *ctx, const css_style *style, 
 		css_select_state *state);
+static inline void advance_bytecode(css_style *style, uint32_t n_bytes);
+
+/* Property handlers */
+#include "select/properties.c"
+
+/**
+ * Dispatch table for properties, indexed by opcode
+ */
+static struct prop_table {
+	css_error (*cascade)(css_select_ctx *ctx, uint32_t opv,
+			css_style *style, css_select_state *state);
+	css_error (*initial)(css_computed_style *style);
+
+	uint32_t inherited : 1;
+} properties[] = {
+	{ cascade_azimuth,               initial_azimuth,               1 },
+	{ cascade_background_attachment, initial_background_attachment, 0 },
+	{ cascade_background_color,      initial_background_color,      0 },
+	{ cascade_background_image,      initial_background_image,      0 },
+	{ cascade_background_position,   initial_background_position,   0 },
+	{ cascade_background_repeat,     initial_background_repeat,     0 },
+	{ cascade_border_collapse,       initial_border_collapse,       1 },
+	{ cascade_border_spacing,        initial_border_spacing,        1 },
+	{ cascade_border_color,          initial_border_color,          0 },
+	{ cascade_border_style,          initial_border_style,          0 },
+	{ cascade_border_width,          initial_border_width,          0 },
+	{ cascade_bottom,                initial_bottom,                0 },
+	{ cascade_caption_side,          initial_caption_side,          1 },
+	{ cascade_clear,                 initial_clear,                 0 },
+	{ cascade_clip,                  initial_clip,                  0 },
+	{ cascade_color,                 initial_color,                 1 },
+	{ cascade_content,               initial_content,               0 },
+	{ cascade_counter_increment,     initial_counter_increment,     0 },
+	{ cascade_counter_reset,         initial_counter_reset,         0 },
+	{ cascade_cue_after,             initial_cue_after,             0 },
+	{ cascade_cue_before,            initial_cue_before,            0 },
+	{ cascade_cursor,                initial_cursor,                1 },
+	{ cascade_direction,             initial_direction,             1 },
+	{ cascade_display,               initial_display,               0 },
+	{ cascade_elevation,             initial_elevation,             1 },
+	{ cascade_empty_cells,           initial_empty_cells,           1 },
+	{ cascade_float,                 initial_float,                 0 },
+	{ cascade_font_family,           initial_font_family,           1 },
+	{ cascade_font_size,             initial_font_size,             1 },
+	{ cascade_font_style,            initial_font_style,            1 },
+	{ cascade_font_variant,          initial_font_variant,          1 },
+	{ cascade_font_weight,           initial_font_weight,           1 },
+	{ cascade_height,                initial_height,                0 },
+	{ cascade_left,                  initial_left,                  0 },
+	{ cascade_letter_spacing,        initial_letter_spacing,        1 },
+	{ cascade_line_height,           initial_line_height,           1 },
+	{ cascade_list_style_image,      initial_list_style_image,      1 },
+	{ cascade_list_style_position,   initial_list_style_position,   1 },
+	{ cascade_list_style_type,       initial_list_style_type,       1 },
+	{ cascade_margin,                initial_margin,                0 },
+	{ cascade_max_height,            initial_max_height,            0 },
+	{ cascade_max_width,             initial_max_width,             0 },
+	{ cascade_min_height,            initial_min_height,            0 },
+	{ cascade_min_width,             initial_min_width,             0 },
+	{ cascade_orphans,               initial_orphans,               1 },
+	{ cascade_outline_color,         initial_outline_color,         0 },
+	{ cascade_outline_style,         initial_outline_style,         0 },
+	{ cascade_outline_width,         initial_outline_width,         0 },
+	{ cascade_overflow,              initial_overflow,              0 },
+	{ cascade_padding,               initial_padding,               0 },
+	{ cascade_page_break_after,      initial_page_break_after,      0 },
+	{ cascade_page_break_before,     initial_page_break_before,     0 },
+	{ cascade_page_break_inside,     initial_page_break_inside,     1 },
+	{ cascade_pause_after,           initial_pause_after,           0 },
+	{ cascade_pause_before,          initial_pause_before,          0 },
+	{ cascade_pitch_range,           initial_pitch_range,           1 },
+	{ cascade_pitch,                 initial_pitch,                 1 },
+	{ cascade_play_during,           initial_play_during,           0 },
+	{ cascade_position,              initial_position,              0 },
+	{ cascade_quotes,                initial_quotes,                1 },
+	{ cascade_richness,              initial_richness,              1 },
+	{ cascade_right,                 initial_right,                 0 },
+	{ cascade_speak_header,          initial_speak_header,          1 },
+	{ cascade_speak_numeral,         initial_speak_numeral,         1 },
+	{ cascade_speak_punctuation,     initial_speak_punctuation,     1 },
+	{ cascade_speak,                 initial_speak,                 1 },
+	{ cascade_speech_rate,           initial_speech_rate,           1 },
+	{ cascade_stress,                initial_stress,                1 },
+	{ cascade_table_layout,          initial_table_layout,          0 },
+	{ cascade_text_align,            initial_text_align,            1 },
+	{ cascade_text_decoration,       initial_text_decoration,       0 },
+	{ cascade_text_indent,           initial_text_indent,           1 },
+	{ cascade_text_transform,        initial_text_transform,        1 },
+	{ cascade_top,                   initial_top,                   0 },
+	{ cascade_unicode_bidi,          initial_unicode_bidi,          0 },
+	{ cascade_vertical_align,        initial_vertical_align,        0 },
+	{ cascade_visibility,            initial_visibility,            1 },
+	{ cascade_voice_family,          initial_voice_family,          1 },
+	{ cascade_volume,                initial_volume,                1 },
+	{ cascade_white_space,           initial_white_space,           1 },
+	{ cascade_widows,                initial_widows,                1 },
+	{ cascade_width,                 initial_width,                 0 },
+	{ cascade_word_spacing,          initial_word_spacing,          1 },
+	{ cascade_z_index,               initial_z_index,               0 }
+};
 
 /**
  * Create a selection context
@@ -321,7 +424,7 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	}
 
 	/* Finally, fix up any remaining unset properties.
-	 * Those properties which are inherited, need to be set as inherit.
+	 * Those properties which are inherited need to be set as inherit.
 	 * Those which are not inherited need to be set to their default value.
 	 */
 	/** \todo fixup unset properties */
@@ -332,6 +435,7 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 /******************************************************************************
  * Selection engine internals below here                                      *
  ******************************************************************************/
+
 css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet, 
 		css_select_state *state)
 {
@@ -368,6 +472,7 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 
 			/* Process this sheet */
 			state->current_sheet++;
+			state->current_origin = s->origin;
 
 			error = match_selectors_in_sheet(ctx, s, state);
 			if (error != CSS_OK)
@@ -421,8 +526,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 
 	/* Process any matching selectors */
 	while (*selectors != NULL) {
-		error = match_selector_chain(ctx, *selectors, 
-				sheet->origin, state, universal);
+		error = match_selector_chain(ctx, *selectors, state, universal);
 		if (error != CSS_OK)
 			return error;
 
@@ -439,8 +543,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 
 	/* Process any matching selectors */
 	while (*selectors != NULL) {
-		error = match_selector_chain(ctx, *selectors, 
-				sheet->origin, state, universal);
+		error = match_selector_chain(ctx, *selectors, state, universal);
 		if (error != CSS_OK)
 			return error;
 
@@ -454,8 +557,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 }
 
 css_error match_selector_chain(css_select_ctx *ctx, 
-		const css_selector *selector, css_origin origin, 
-		css_select_state *state, 
+		const css_selector *selector, css_select_state *state, 
 		const parserutils_hash_entry *universal)
 {
 	const css_selector *s = selector;
@@ -509,9 +611,11 @@ css_error match_selector_chain(css_select_ctx *ctx,
 	} while (s != NULL);
 
 	/* If we got here, then the entire selector chain matched, so cascade */
+	state->current_rule_index = selector->rule->index;
+	state->current_specificity = selector->specificity;
+
 	return cascade_style(ctx,
 			((css_rule_selector *) selector->rule)->style, 
-			selector->specificity, origin, selector->rule->index,
 			state);
 }
 
@@ -606,7 +710,7 @@ css_error match_details(css_select_ctx *ctx, void *node,
 	 * actually requires looking at data rather than simply comparing 
 	 * pointers). Should we consider sorting the detail list such that the 
 	 * simpler details come first (and thus the expensive match routines 
-	 * can be avoided unless absolutely necessary). */
+	 * can be avoided unless absolutely necessary)? */
 
 	while (detail->next != 0) {
 		/* Don't bother with the first detail, as it's the 
@@ -624,7 +728,6 @@ css_error match_details(css_select_ctx *ctx, void *node,
 
 	return CSS_OK;
 }
-
 
 css_error match_detail(css_select_ctx *ctx, void *node, 
 		const css_selector_detail *detail, css_select_state *state, 
@@ -679,17 +782,32 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 	return error;
 }
 
-css_error cascade_style(css_select_ctx *ctx, css_style *style, 
-		uint32_t specificity, css_origin origin, uint32_t rule_index,
+css_error cascade_style(css_select_ctx *ctx, const css_style *style, 
 		css_select_state *state)
 {
-	UNUSED(ctx);
-	UNUSED(style);
-	UNUSED(specificity);
-	UNUSED(origin);
-	UNUSED(rule_index);
-	UNUSED(state);
+	css_style s = *style;
+
+	while (s.length > 0) {
+		opcode op;
+		css_error error;
+		uint32_t opv = *((uint32_t *) s.bytecode);
+
+		advance_bytecode(&s, sizeof(opv));
+
+		op = getOpcode(opv);
+
+		error = properties[op].cascade(ctx, opv, &s, state);
+		if (error != CSS_OK)
+			return error;
+	}
 
 	return CSS_OK;
 }
+
+void advance_bytecode(css_style *style, uint32_t n_bytes)
+{
+	style->length -= n_bytes;
+	style->bytecode = ((uint8_t *) style->bytecode) + n_bytes;
+}
+
 
