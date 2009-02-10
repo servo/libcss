@@ -205,28 +205,24 @@ Opcodes
 			       clear => Reserved for future expansion.
 			       		bits 0-6: MBZ
 
-08 - border-{top,right,bottom,left}-color
+08 - border-top-color
+09 - border-right-color
+0a - border-bottom-color
+0b - border-left-color
 	<value> (14bits) :
-		bits 10-13: MBZ
-		bits 8-9  :
-			00 => top
-			01 => right
-			10 => bottom
-			11 => left
+		bits 8-13: MBZ
 		bit 7 set => colour follows.
 			bits 0-6: MBZ
 		bit 7 clear => keyword colour:
 			bits 1-6: MBZ
 			bit 0   : clear => transparent, set => rffe.
 
-09 - border-{top,right,bottom,left}-style
+0c - border-top-style
+0d - border-right-style
+0e - border-bottom-style
+0f - border-left-style
 	<value> (14bits) :
-		bits 10-13: MBZ
-		bits 8-9 :
-			00 => top
-			01 => right
-			10 => bottom
-			11 => left
+		bits 8-13: MBZ
 		bits 0-7 :
 			00000000 => none,
 			00000001 => hidden,
@@ -240,14 +236,12 @@ Opcodes
 			00001001 => outset,
 			other    => Reserved for future expansion.
 
-0a - border-{top,right,bottom,left}-width
+10 - border-top-width
+11 - border-right-width
+12 - border-bottom-width
+13 - border-left-width
 	<value> (14bits) :
-		bits 10-13: MBZ
-		bits 8-9 :
-			00 => top
-			01 => right
-			10 => bottom
-			11 => left
+		bits 8-13: MBZ
 		bits 0-7 :
 			bit 7 set => length follows
 				bits 0-6: MBZ
@@ -257,7 +251,7 @@ Opcodes
 					  0000010 => thick,
 					  other   => rffe.
 
-0b - bottom
+14 - bottom
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7: 
@@ -267,13 +261,13 @@ Opcodes
 				bits 0-6: 0000000 => auto,
 					  other   => rffe.
 
-0c - caption-side
+15 - caption-side
 	<value> (14bits) :
 		0     => top
 		1     => bottom
 		other => Reserved for future expansion.
 
-0d - clear
+16 - clear
 	<value> (14bits) :
 		0     => none
 		1     => left
@@ -281,7 +275,7 @@ Opcodes
 		3     => both
 		other => Reserved for future expansion.
 
-0e - clip
+17 - clip
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7: 
@@ -308,9 +302,9 @@ Opcodes
 		clip: rect(10px, auto, auto, 10px) 
 	would produce the following bytecode:
 
-	<02c0000e> <00002800> <00000000> <00002800> <00000000>
+	<02c00017> <00002800> <00000000> <00002800> <00000000>
 
-0f - color
+18 - color
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7: 
@@ -319,7 +313,7 @@ Opcodes
 			       clear => Reserved for future expansion.
 			       		bits 0-6: MBZ.
 
-10 - content
+19 - content
 	<value> (14bits) :
 		bits 8-13: MBZ (except counter & counters, see below)
 		bits 0-7 :
@@ -354,7 +348,7 @@ Opcodes
 			 close-quote;"
 	would result in the following bytecode:
 
-	<00080010>
+	<00080019>
 	<00000081> <ptr to "http://example.com">
 	<00000080> <ptr to " : ">
 	<00000084> <ptr to "name">
@@ -364,7 +358,7 @@ Opcodes
 	<00000383> <ptr to "y"> <ptr to ".">
 	<00000003> <00000000>
 
-11 - counter-increment
+1a - counter-increment
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -380,7 +374,7 @@ Opcodes
 	of the next item. The list is terminated by a word with all bits set to
 	zero (the encoding for "none").
 
-12 - counter-reset
+1b - counter-reset
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -396,7 +390,7 @@ Opcodes
 	of the next item. The list is terminated by a word with all bits set to
 	zero (the encoding for "none").
 
-13 - cue-after
+1c - cue-after
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -406,7 +400,7 @@ Opcodes
 				bits 0-6: 0000000 => none,
 					  other   => rffe.
 
-14 - cue-before
+1d - cue-before
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -416,7 +410,7 @@ Opcodes
 				bits 0-6: 0000000 => none,
 					  other   => rffe.
 
-15 - cursor
+1e - cursor
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -447,13 +441,13 @@ Opcodes
 	the type of the next item. The list is terminated by a word with
 	bit 7 clear.
 
-16 - direction
+1f - direction
 	<value> (14bits) :
 		0     => ltr,
 		1     => rtl,
 		other => Reserved for future expansion.
 
-17 - display
+20 - display
 	<value> (14bits) :
 		0     => inline,
 		1     => block,
@@ -473,7 +467,7 @@ Opcodes
 		f     => none,
 		other => Reserved for future expansion.
 
-18 - elevation
+21 - elevation
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -487,20 +481,20 @@ Opcodes
 					  0000100 => lower,
 					  other   => rffe.
 
-19 - empty-cells
+22 - empty-cells
 	<value> (14bits) :
 		0     => show,
 		1     => hide,
 		other => Reserved for future expansion.
 
-1a - float
+23 - float
 	<value> (14bits) :
 		0     => left,
 		1     => right,
 		2     => none,
 		other => Reserved for future expansion.
 
-1b - font-family
+24 - font-family
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -521,7 +515,7 @@ Opcodes
 	<value> word which declares the type of the next item. The list is 
 	terminated by a word with all bits clear.
 
-1c - font-size
+25 - font-size
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7:
@@ -539,20 +533,20 @@ Opcodes
 					  0001000 => smaller,
 					  other   => rffe.
 
-1d - font-style
+26 - font-style
 	<value> (14bits) :
 		0     => normal,
 		1     => italic,
 		2     => oblique,
 		other => Reserved for future expansion.
 
-1e - font-variant
+27 - font-variant
 	<value> (14bits) :
 		0     => normal,
 		1     => small-caps,
 		other => Reserved for future expansion.
 
-1f - font-weight
+28 - font-weight
 	<value> (14bits) :
 		0     => normal,
 		1     => bold,
@@ -569,7 +563,7 @@ Opcodes
 		c     => 900,
 		other => Reserved for future expansion.
 
-20 - height
+29 - height
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -579,7 +573,7 @@ Opcodes
 				bits 0-6: 0000000 => auto,
 					  other   => rffe.
 
-21 - left
+2a - left
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -589,7 +583,7 @@ Opcodes
 				bits 0-6: 0000000 => auto,
 					  other   => rffe.
 
-22 - letter-spacing
+2b - letter-spacing
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -599,7 +593,7 @@ Opcodes
 				bits 0-6: 0000000 => normal,
 					  other   => rffe.
 
-23 - line-height
+2c - line-height
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -611,7 +605,7 @@ Opcodes
 				bits 0-6: 0000000 => normal,
 					  other   => rffe.
 
-24 - list-style-image
+2d - list-style-image
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -621,13 +615,13 @@ Opcodes
 				bits 0-6: 0000000 => none,
 					  other   => rffe.
 
-25 - list-style-position
+2e - list-style-position
 	<value> (14bits) :
 		0     => inside,
 		1     => outside,
 		other => Reserved for future expansion.
 
-26 - list-style-type
+2f - list-style-type
 	<value> (14bits) :
 		0     => disc,
 		1     => circle,
@@ -646,22 +640,20 @@ Opcodes
 		e     => none,
 		other => Reserved for future expansion.
 
-27 - margin-{top,right,bottom,left}
+30 - margin-top
+31 - margin-right
+32 - margin-bottom
+33 - margin-left
 	<value> (14bits) :
-		bits 10-13: MBZ
-		bits 8-9  :
-			00 => top,
-			01 => right,
-			10 => bottom,
-			11 => left
-		bits 0-7  :
+		bits 8-13: MBZ
+		bits 0-7 :
 			bit 7 set => length or percentage follows
 				bits 0-6: MBZ
 			bit 7 clear => keywords:
 				bits 0-6: 0000000 => auto,
 					  other   => rffe.
 
-28 - max-height
+34 - max-height
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -671,7 +663,7 @@ Opcodes
 				bits 0-6: 0000000 => none,
 					  other   => rffe.
 
-29 - max-width
+35 - max-width
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -681,7 +673,7 @@ Opcodes
 				bits 0-6: 0000000 => none,
 					  other   => rffe.
 
-2a - min-height
+36 - min-height
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -690,7 +682,7 @@ Opcodes
 			       clear => Reserved for future expansion
 			       		bits 0-6: MBZ
 
-2b - min-width
+37 - min-width
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -699,7 +691,7 @@ Opcodes
 			       clear => Reserved for future expansion
 			       		bits 0-6: MBZ
 
-2c - orphans
+38 - orphans
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -708,7 +700,7 @@ Opcodes
 			       clear => Reserved for future expansion
 			       		bits 0-6: MBZ
 
-2d - outline-color
+39 - outline-color
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -718,7 +710,7 @@ Opcodes
 				bits 0-6: 0000000 => invert,
 					  other   => rffe.
 
-2e - outline-style
+3a - outline-style
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -734,7 +726,7 @@ Opcodes
 			00001001 => outset,
 			other    => Reserved for future expansion.
 
-2f - outline-width
+3b - outline-width
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -746,7 +738,7 @@ Opcodes
 					  0000010 => thick,
 					  other   => rffe.
 
-30 - overflow
+3c - overflow
 	<value> (14bits) :
 		0     => visible,
 		1     => hidden,
@@ -754,21 +746,19 @@ Opcodes
 		3     => auto,
 		other => Reserved for future expansion.
 
-31 - padding-{top,right,bottom,left}
+3d - padding-top
+3e - padding-right
+3f - padding-bottom
+40 - padding-left
 	<value> (14bits) :
-		bits 10-13: MBZ
-		bits 8-9  :
-			00 => top,
-			01 => right,
-			10 => bottom,
-			11 => left
+		bits 8-13: MBZ
 		bits 0-7 :
 			bit 7: set => length or percentage follows
 					bits 0-6: MBZ
 			       clear => Reserved for future expansion
 			       		bits 0-6: MBZ
 
-32 - page-break-after
+41 - page-break-after
 	<value> (14bits) :
 		0     => auto,
 		1     => always,
@@ -777,7 +767,7 @@ Opcodes
 		4     => right,
 		other => Reserved for future expansion.
 
-33 - page-break-before
+42 - page-break-before
 	<value> (14bits) :
 		0     => auto,
 		1     => always,
@@ -786,13 +776,13 @@ Opcodes
 		4     => right,
 		other => Reserved for future expansion.
 
-34 - page-break-inside
+43 - page-break-inside
 	<value> (14bits) :
 		0     => auto,
 		1     => avoid,
 		other => Reserved for future expansion.
 
-35 - pause-after
+44 - pause-after
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -801,7 +791,7 @@ Opcodes
 			       clear => Reserved for future expansion
 			       		bits 0-6: MBZ
 
-36 - pause-before
+45 - pause-before
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -810,7 +800,7 @@ Opcodes
 			       clear => Reserved for future expansion
 			       		bits 0-6: MBZ
 
-37 - pitch-range
+46 - pitch-range
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -819,7 +809,7 @@ Opcodes
 			       clear => Reserved for future expansion
 			       		bits 0-6: MBZ
 
-38 - pitch
+47 - pitch
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -833,7 +823,7 @@ Opcodes
 					  0000100 => x-high,
 					  other   => rffe.
 
-39 - play-during
+48 - play-during
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -846,7 +836,7 @@ Opcodes
 					  0000001 => none,
 					  other   => rffe.
 
-3a - position
+49 - position
 	<value> (14bits) :
 		0     => static,
 		1     => relative,
@@ -854,7 +844,7 @@ Opcodes
 		3     => fixed,
 		other => Reserved for future expansion.
 
-3b - quotes
+4a - quotes
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -869,7 +859,7 @@ Opcodes
 	the type of the next item. The list is terminated by a word with
 	all bits clear (the encoding for "none").
 
-3c - richness
+4b - richness
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -878,7 +868,7 @@ Opcodes
 			       clear => Reserved for future expansion
 			       		bits 0-6: MBZ
 
-3d - right
+4c - right
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -888,32 +878,32 @@ Opcodes
 				bits 0-6: 0000000 => auto,
 					  other   => rffe.
 
-3e - speak-header
+4d - speak-header
 	<value> (14bits) :
 		0     => once,
 		1     => always,
 		other => Reserved for future expansion.
 
-3f - speak-numeral
+4e - speak-numeral
 	<value> (14bits) :
 		0     => digits,
 		1     => continuous,
 		other => Reserved for future expansion.
 
-40 - speak-punctuation
+4f - speak-punctuation
 	<value> (14bits) :
 		0     => code,
 		1     => none,
 		other => Reserved for future expansion.
 
-41 - speak
+50 - speak
 	<value> (14bits) :
 		0     => normal,
 		1     => none,
 		2     => spell-out,
 		other => Reserved for future expansion.
 
-42 - speech-rate
+51 - speech-rate
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -929,7 +919,7 @@ Opcodes
 					  0000110 => slower,
 					  other   => rffe.
 
-43 - stress
+52 - stress
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -938,13 +928,13 @@ Opcodes
 			       clear => Reserved for future expansion
 			       		bits 0-6: MBZ
 
-44 - table-layout
+53 - table-layout
 	<value> (14bits) :
 		0     => auto,
 		1     => fixed,
 		other => Reserved for future expansion.
 
-45 - text-align
+54 - text-align
 	<value> (14bits) :
 		0     => left,
 		1     => right,
@@ -952,7 +942,7 @@ Opcodes
 		3     => justify,
 		other => Reserved for future expansion.
 
-46 - text-decoration
+55 - text-decoration
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -965,7 +955,7 @@ Opcodes
 				bit 1: set => overline, clear => no overline
 				bit 0: set => underline, clear => no underline
 
-47 - text-indent
+56 - text-indent
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -974,7 +964,7 @@ Opcodes
 			       clear => Reserved for future expansion
 			       		bits 0-6: MBZ
 
-48 - text-transform
+57 - text-transform
 	<value> (14bits) :
 		0     => capitalize,
 		1     => uppercase,
@@ -982,7 +972,7 @@ Opcodes
 		3     => none,
 		other => Reserved for future expansion.
 
-49 - top
+58 - top
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -992,14 +982,14 @@ Opcodes
 				bits 0-6: 0000000 => auto,
 					  other   => rffe.
 
-4a - unicode-bidi
+59 - unicode-bidi
 	<value> (14bits) :
 		0     => normal,
 		1     => embed,
 		2     => bidi-override,
 		other => Reserved for future expansion.
 
-4b - vertical-align
+5a - vertical-align
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -1016,14 +1006,14 @@ Opcodes
 					  0000111 => text-bottom,
 					  other   => rffe.
 
-4c - visibility
+5b - visibility
 	<value> (14bits) :
 		0     => visible,
 		1     => hidden,
 		2     => collapse,
 		other => Reserved for future expansion.
 
-4d - voice-family
+5c - voice-family
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -1042,7 +1032,7 @@ Opcodes
 	<value> word which declares the type of the next item. The list is 
 	terminated by a word with all bits clear.
 	
-4e - volume
+5d - volume
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -1059,7 +1049,7 @@ Opcodes
 					  0000101 => x-loud,
 					  other   => rffe.
 
-4f - white-space
+5e - white-space
 	<value> (14bits) :
 		0     => normal,
 		1     => pre,
@@ -1068,7 +1058,7 @@ Opcodes
 		4     => pre-line,
 		other => Reserved for future expansion.
 
-50 - widows
+5f - widows
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -1077,7 +1067,7 @@ Opcodes
 			       clear => Reserved for future expansion
 			       		bits 0-6: MBZ
 
-51 - width
+60 - width
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -1087,7 +1077,7 @@ Opcodes
 				bits 0-6: 0000000 => auto,
 					  other   => rffe.
 
-52 - word-spacing
+61 - word-spacing
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -1097,7 +1087,7 @@ Opcodes
 				bits 0-6: 0000000 => normal,
 					  other   => rffe.
 
-53 - z-index
+62 - z-index
 	<value> (14bits) :
 		bits 8-13: MBZ
 		bits 0-7 :
@@ -1107,5 +1097,5 @@ Opcodes
 				bits 0-6: 0000000 => auto,
 					  other   => rffe.
 
-54-3ff - Reserved for future expansion.
+63-3ff - Reserved for future expansion.
 

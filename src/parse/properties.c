@@ -322,19 +322,19 @@ static inline css_error parse_unit_specifier(css_language *c,
 
 static inline css_error parse_border_side_color(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		uint16_t side, css_style **result);
+		uint16_t op, css_style **result);
 static inline css_error parse_border_side_style(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		uint16_t side, css_style **result);
+		uint16_t op, css_style **result);
 static inline css_error parse_border_side_width(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		uint16_t side, css_style **result);
+		uint16_t op, css_style **result);
 static inline css_error parse_margin_side(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		uint16_t side, css_style **result);
+		uint16_t op, css_style **result);
 static inline css_error parse_padding_side(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		uint16_t side, css_style **result);
+		uint16_t op, css_style **result);
 static inline css_error parse_list_style_type_value(css_language *c,
 		const css_token *token, uint16_t *value);
 static inline css_error parse_content_list(css_language *c,
@@ -973,21 +973,24 @@ css_error parse_border_bottom_color(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_border_side_color(c, vector, ctx, SIDE_BOTTOM, result);
+	return parse_border_side_color(c, vector, ctx, 
+			OP_BORDER_BOTTOM_COLOR, result);
 }
 
 css_error parse_border_bottom_style(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_border_side_style(c, vector, ctx, SIDE_BOTTOM, result);
+	return parse_border_side_style(c, vector, ctx, 
+			OP_BORDER_BOTTOM_STYLE, result);
 }
 
 css_error parse_border_bottom_width(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_border_side_width(c, vector, ctx, SIDE_BOTTOM, result);
+	return parse_border_side_width(c, vector, ctx, 
+			OP_BORDER_BOTTOM_WIDTH, result);
 }
 
 css_error parse_border_collapse(css_language *c, 
@@ -1035,42 +1038,48 @@ css_error parse_border_left_color(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_border_side_color(c, vector, ctx, SIDE_LEFT, result);
+	return parse_border_side_color(c, vector, ctx, 
+			OP_BORDER_LEFT_COLOR, result);
 }
 
 css_error parse_border_left_style(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_border_side_style(c, vector, ctx, SIDE_LEFT, result);
+	return parse_border_side_style(c, vector, ctx, 
+			OP_BORDER_LEFT_STYLE, result);
 }
 
 css_error parse_border_left_width(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_border_side_width(c, vector, ctx, SIDE_LEFT, result);
+	return parse_border_side_width(c, vector, ctx, 
+			OP_BORDER_LEFT_WIDTH, result);
 }
 
 css_error parse_border_right_color(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_border_side_color(c, vector, ctx, SIDE_RIGHT, result);
+	return parse_border_side_color(c, vector, ctx, 
+			OP_BORDER_RIGHT_COLOR, result);
 }
 
 css_error parse_border_right_style(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_border_side_style(c, vector, ctx, SIDE_RIGHT, result);
+	return parse_border_side_style(c, vector, ctx, 
+			OP_BORDER_RIGHT_STYLE, result);
 }
 
 css_error parse_border_right_width(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_border_side_width(c, vector, ctx, SIDE_RIGHT, result);
+	return parse_border_side_width(c, vector, ctx, 
+			OP_BORDER_RIGHT_WIDTH, result);
 }
 
 css_error parse_border_spacing(css_language *c, 
@@ -1175,21 +1184,24 @@ css_error parse_border_top_color(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_border_side_color(c, vector, ctx, SIDE_TOP, result);
+	return parse_border_side_color(c, vector, ctx, 
+			OP_BORDER_TOP_COLOR, result);
 }
 
 css_error parse_border_top_style(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_border_side_style(c, vector, ctx, SIDE_TOP, result);
+	return parse_border_side_style(c, vector, ctx, 
+			OP_BORDER_TOP_STYLE, result);
 }
 
 css_error parse_border_top_width(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_border_side_width(c, vector, ctx, SIDE_TOP, result);
+	return parse_border_side_width(c, vector, ctx, 
+			OP_BORDER_TOP_WIDTH, result);
 }
 
 css_error parse_bottom(css_language *c, 
@@ -3644,28 +3656,28 @@ css_error parse_margin_bottom(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_margin_side(c, vector, ctx, SIDE_BOTTOM, result);
+	return parse_margin_side(c, vector, ctx, OP_MARGIN_BOTTOM, result);
 }
 
 css_error parse_margin_left(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_margin_side(c, vector, ctx, SIDE_LEFT, result);
+	return parse_margin_side(c, vector, ctx, OP_MARGIN_LEFT, result);
 }
 
 css_error parse_margin_right(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_margin_side(c, vector, ctx, SIDE_RIGHT, result);
+	return parse_margin_side(c, vector, ctx, OP_MARGIN_RIGHT, result);
 }
 
 css_error parse_margin_top(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_margin_side(c, vector, ctx, SIDE_TOP, result);
+	return parse_margin_side(c, vector, ctx, OP_MARGIN_TOP, result);
 }
 
 css_error parse_max_height(css_language *c, 
@@ -4062,27 +4074,21 @@ css_error parse_outline_style(css_language *c,
 {
 	css_error error;
 	uint32_t opv;
-	uint8_t flags;
 	uint16_t value;
 
-	/* Fake as border-left-style */
-	error = parse_border_side_style(c, vector, ctx, SIDE_LEFT, result);
+	/* Parse as a border style  */
+	error = parse_border_side_style(c, vector, ctx, 
+			OP_OUTLINE_STYLE, result);
 	if (error != CSS_OK)
 		return error;
 
-	/* Then change the opcode to outline-style, and clear the side bits */
 	opv = *((uint32_t *) (*result)->bytecode);
 
-	flags = getFlags(opv);
-	value = getValue(opv) & ~SIDE_LEFT;
+	value = getValue(opv);
 
 	/* Hidden is invalid */
 	if (value == BORDER_STYLE_HIDDEN)
 		return CSS_INVALID;
-
-	opv = buildOPV(OP_OUTLINE_STYLE, flags, value);
-
-	*((uint32_t *) (*result)->bytecode) = opv;
 
 	return CSS_OK;
 }
@@ -4091,27 +4097,9 @@ css_error parse_outline_width(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	css_error error;
-	uint32_t opv;
-	uint8_t flags;
-	uint16_t value;
-
-	/* Fake as border-left-width */
-	error = parse_border_side_width(c, vector, ctx, SIDE_LEFT, result);
-	if (error != CSS_OK)
-		return error;
-
-	/* Then change the opcode to outline-width, and clear the side bits */
-	opv = *((uint32_t *) (*result)->bytecode);
-
-	flags = getFlags(opv);
-	value = getValue(opv) & ~SIDE_LEFT;
-
-	opv = buildOPV(OP_OUTLINE_WIDTH, flags, value);
-
-	*((uint32_t *) (*result)->bytecode) = opv;
-
-	return CSS_OK;
+	/* Parse as border width */
+	return parse_border_side_width(c, vector, ctx, 
+			OP_OUTLINE_WIDTH, result);
 }
 
 css_error parse_overflow(css_language *c, 
@@ -4163,28 +4151,28 @@ css_error parse_padding_bottom(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_padding_side(c, vector, ctx, SIDE_BOTTOM, result);
+	return parse_padding_side(c, vector, ctx, OP_PADDING_BOTTOM, result);
 }
 
 css_error parse_padding_left(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_padding_side(c, vector, ctx, SIDE_LEFT, result);
+	return parse_padding_side(c, vector, ctx, OP_PADDING_LEFT, result);
 }
 
 css_error parse_padding_right(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_padding_side(c, vector, ctx, SIDE_RIGHT, result);
+	return parse_padding_side(c, vector, ctx, OP_PADDING_RIGHT, result);
 }
 
 css_error parse_padding_top(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_padding_side(c, vector, ctx, SIDE_TOP, result);
+	return parse_padding_side(c, vector, ctx, OP_PADDING_TOP, result);
 }
 
 css_error parse_page_break_after(css_language *c, 
@@ -6827,13 +6815,13 @@ css_error parse_unit_specifier(css_language *c,
 
 css_error parse_border_side_color(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		uint16_t side, css_style **result)
+		uint16_t op, css_style **result)
 {
 	css_error error;
 	const css_token *token;
+	uint32_t opv;
 	uint8_t flags = 0;
 	uint16_t value = 0;
-	uint32_t opv;
 	uint32_t colour = 0;
 	uint32_t required_size;
 
@@ -6862,7 +6850,7 @@ css_error parse_border_side_color(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_BORDER_TRBL_COLOR, flags, value | side);
+	opv = buildOPV(op, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == BORDER_COLOR_SET)
@@ -6885,7 +6873,7 @@ css_error parse_border_side_color(css_language *c,
 
 css_error parse_border_side_style(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		uint16_t side, css_style **result)
+		uint16_t op, css_style **result)
 {
 	css_error error;
 	const css_token *ident;
@@ -6928,7 +6916,7 @@ css_error parse_border_side_style(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_BORDER_TRBL_STYLE, flags, value | side);
+	opv = buildOPV(op, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -6943,7 +6931,7 @@ css_error parse_border_side_style(css_language *c,
 
 css_error parse_border_side_width(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		uint16_t side, css_style **result)
+		uint16_t op, css_style **result)
 {
 	css_error error;
 	const css_token *token;
@@ -6996,7 +6984,7 @@ css_error parse_border_side_width(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_BORDER_TRBL_WIDTH, flags, value | side);
+	opv = buildOPV(op, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == BORDER_WIDTH_SET)
@@ -7021,7 +7009,7 @@ css_error parse_border_side_width(css_language *c,
 
 css_error parse_margin_side(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		uint16_t side, css_style **result)
+		uint16_t op, css_style **result)
 {
 	css_error error;
 	const css_token *token;
@@ -7061,7 +7049,7 @@ css_error parse_margin_side(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_MARGIN_TRBL, flags, value | side);
+	opv = buildOPV(op, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == MARGIN_SET)
@@ -7086,7 +7074,7 @@ css_error parse_margin_side(css_language *c,
 
 css_error parse_padding_side(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		uint16_t side, css_style **result)
+		uint16_t op, css_style **result)
 {
 	css_error error;
 	const css_token *token;
@@ -7126,7 +7114,7 @@ css_error parse_padding_side(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_PADDING_TRBL, flags, value | side);
+	opv = buildOPV(op, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == PADDING_SET)

@@ -149,7 +149,7 @@ static css_error initial_border_spacing(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_border_color(css_select_ctx *ctx, 
+static css_error cascade_border_top_color(css_select_ctx *ctx, 
 		uint32_t opv, css_style *style, css_select_state *state)
 {
 	UNUSED(ctx);
@@ -160,14 +160,14 @@ static css_error cascade_border_color(css_select_ctx *ctx,
 	return CSS_OK;
 }
 
-static css_error initial_border_color(css_computed_style *style)
+static css_error initial_border_top_color(css_computed_style *style)
 {
 	UNUSED(style);
 
 	return CSS_OK;
 }
 
-static css_error cascade_border_style(css_select_ctx *ctx, 
+static css_error cascade_border_right_color(css_select_ctx *ctx, 
 		uint32_t opv, css_style *style, css_select_state *state)
 {
 	UNUSED(ctx);
@@ -178,14 +178,14 @@ static css_error cascade_border_style(css_select_ctx *ctx,
 	return CSS_OK;
 }
 
-static css_error initial_border_style(css_computed_style *style)
+static css_error initial_border_right_color(css_computed_style *style)
 {
 	UNUSED(style);
 
 	return CSS_OK;
 }
 
-static css_error cascade_border_width(css_select_ctx *ctx, 
+static css_error cascade_border_bottom_color(css_select_ctx *ctx, 
 		uint32_t opv, css_style *style, css_select_state *state)
 {
 	UNUSED(ctx);
@@ -196,7 +196,169 @@ static css_error cascade_border_width(css_select_ctx *ctx,
 	return CSS_OK;
 }
 
-static css_error initial_border_width(css_computed_style *style)
+static css_error initial_border_bottom_color(css_computed_style *style)
+{
+	UNUSED(style);
+
+	return CSS_OK;
+}
+
+static css_error cascade_border_left_color(css_select_ctx *ctx, 
+		uint32_t opv, css_style *style, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(opv);
+	UNUSED(style);
+	UNUSED(state);
+
+	return CSS_OK;
+}
+
+static css_error initial_border_left_color(css_computed_style *style)
+{
+	UNUSED(style);
+
+	return CSS_OK;
+}
+
+static css_error cascade_border_top_style(css_select_ctx *ctx, 
+		uint32_t opv, css_style *style, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(opv);
+	UNUSED(style);
+	UNUSED(state);
+
+	return CSS_OK;
+}
+
+static css_error initial_border_top_style(css_computed_style *style)
+{
+	UNUSED(style);
+
+	return CSS_OK;
+}
+
+static css_error cascade_border_right_style(css_select_ctx *ctx, 
+		uint32_t opv, css_style *style, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(opv);
+	UNUSED(style);
+	UNUSED(state);
+
+	return CSS_OK;
+}
+
+static css_error initial_border_right_style(css_computed_style *style)
+{
+	UNUSED(style);
+
+	return CSS_OK;
+}
+
+static css_error cascade_border_bottom_style(css_select_ctx *ctx, 
+		uint32_t opv, css_style *style, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(opv);
+	UNUSED(style);
+	UNUSED(state);
+
+	return CSS_OK;
+}
+
+static css_error initial_border_bottom_style(css_computed_style *style)
+{
+	UNUSED(style);
+
+	return CSS_OK;
+}
+
+static css_error cascade_border_left_style(css_select_ctx *ctx, 
+		uint32_t opv, css_style *style, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(opv);
+	UNUSED(style);
+	UNUSED(state);
+
+	return CSS_OK;
+}
+
+static css_error initial_border_left_style(css_computed_style *style)
+{
+	UNUSED(style);
+
+	return CSS_OK;
+}
+
+static css_error cascade_border_top_width(css_select_ctx *ctx, 
+		uint32_t opv, css_style *style, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(opv);
+	UNUSED(style);
+	UNUSED(state);
+
+	return CSS_OK;
+}
+
+static css_error initial_border_top_width(css_computed_style *style)
+{
+	UNUSED(style);
+
+	return CSS_OK;
+}
+
+static css_error cascade_border_right_width(css_select_ctx *ctx, 
+		uint32_t opv, css_style *style, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(opv);
+	UNUSED(style);
+	UNUSED(state);
+
+	return CSS_OK;
+}
+
+static css_error initial_border_right_width(css_computed_style *style)
+{
+	UNUSED(style);
+
+	return CSS_OK;
+}
+
+static css_error cascade_border_bottom_width(css_select_ctx *ctx, 
+		uint32_t opv, css_style *style, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(opv);
+	UNUSED(style);
+	UNUSED(state);
+
+	return CSS_OK;
+}
+
+static css_error initial_border_bottom_width(css_computed_style *style)
+{
+	UNUSED(style);
+
+	return CSS_OK;
+}
+
+static css_error cascade_border_left_width(css_select_ctx *ctx, 
+		uint32_t opv, css_style *style, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(opv);
+	UNUSED(style);
+	UNUSED(state);
+
+	return CSS_OK;
+}
+
+static css_error initial_border_left_width(css_computed_style *style)
 {
 	UNUSED(style);
 
@@ -707,7 +869,7 @@ static css_error initial_list_style_type(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_margin(css_select_ctx *ctx, 
+static css_error cascade_margin_top(css_select_ctx *ctx, 
 		uint32_t opv, css_style *style, css_select_state *state)
 {
 	UNUSED(ctx);
@@ -718,7 +880,61 @@ static css_error cascade_margin(css_select_ctx *ctx,
 	return CSS_OK;
 }
 
-static css_error initial_margin(css_computed_style *style)
+static css_error initial_margin_top(css_computed_style *style)
+{
+	UNUSED(style);
+
+	return CSS_OK;
+}
+
+static css_error cascade_margin_right(css_select_ctx *ctx, 
+		uint32_t opv, css_style *style, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(opv);
+	UNUSED(style);
+	UNUSED(state);
+
+	return CSS_OK;
+}
+
+static css_error initial_margin_right(css_computed_style *style)
+{
+	UNUSED(style);
+
+	return CSS_OK;
+}
+
+static css_error cascade_margin_bottom(css_select_ctx *ctx, 
+		uint32_t opv, css_style *style, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(opv);
+	UNUSED(style);
+	UNUSED(state);
+
+	return CSS_OK;
+}
+
+static css_error initial_margin_bottom(css_computed_style *style)
+{
+	UNUSED(style);
+
+	return CSS_OK;
+}
+
+static css_error cascade_margin_left(css_select_ctx *ctx, 
+		uint32_t opv, css_style *style, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(opv);
+	UNUSED(style);
+	UNUSED(state);
+
+	return CSS_OK;
+}
+
+static css_error initial_margin_left(css_computed_style *style)
 {
 	UNUSED(style);
 
@@ -887,7 +1103,7 @@ static css_error initial_overflow(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_padding(css_select_ctx *ctx, 
+static css_error cascade_padding_top(css_select_ctx *ctx, 
 		uint32_t opv, css_style *style, css_select_state *state)
 {
 	UNUSED(ctx);
@@ -898,7 +1114,61 @@ static css_error cascade_padding(css_select_ctx *ctx,
 	return CSS_OK;
 }
 
-static css_error initial_padding(css_computed_style *style)
+static css_error initial_padding_top(css_computed_style *style)
+{
+	UNUSED(style);
+
+	return CSS_OK;
+}
+
+static css_error cascade_padding_right(css_select_ctx *ctx, 
+		uint32_t opv, css_style *style, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(opv);
+	UNUSED(style);
+	UNUSED(state);
+
+	return CSS_OK;
+}
+
+static css_error initial_padding_right(css_computed_style *style)
+{
+	UNUSED(style);
+
+	return CSS_OK;
+}
+
+static css_error cascade_padding_bottom(css_select_ctx *ctx, 
+		uint32_t opv, css_style *style, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(opv);
+	UNUSED(style);
+	UNUSED(state);
+
+	return CSS_OK;
+}
+
+static css_error initial_padding_bottom(css_computed_style *style)
+{
+	UNUSED(style);
+
+	return CSS_OK;
+}
+
+static css_error cascade_padding_left(css_select_ctx *ctx, 
+		uint32_t opv, css_style *style, css_select_state *state)
+{
+	UNUSED(ctx);
+	UNUSED(opv);
+	UNUSED(style);
+	UNUSED(state);
+
+	return CSS_OK;
+}
+
+static css_error initial_padding_left(css_computed_style *style)
 {
 	UNUSED(style);
 

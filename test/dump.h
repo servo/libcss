@@ -237,9 +237,18 @@ static const char *opcode_names[] = {
 	"background-repeat",
 	"border-collapse",
 	"border-spacing",
-	"border-%s-color",
-	"border-%s-style",
-	"border-%s-width",
+	"border-top-color",
+	"border-right-color",
+	"border-bottom-color",
+	"border-left-color",
+	"border-top-style",
+	"border-right-style",
+	"border-bottom-style",
+	"border-left-style",
+	"border-top-width",
+	"border-right-width",
+	"border-bottom-width",
+	"border-left-width",
 	"bottom",
 	"caption-side",
 	"clear",
@@ -268,7 +277,10 @@ static const char *opcode_names[] = {
 	"list-style-image",
 	"list-style-position",
 	"list-style-type",
-	"margin-%s",
+	"margin-top",
+	"margin-right",
+	"margin-bottom",
+	"margin-left",
 	"max-height",
 	"max-width",
 	"min-height",
@@ -278,7 +290,10 @@ static const char *opcode_names[] = {
 	"outline-style",
 	"outline-width",
 	"overflow",
-	"padding-%s",
+	"padding-top",
+	"padding-right",
+	"padding-bottom",
+	"padding-left",
 	"page-break-after",
 	"page-break-before",
 	"page-break-inside",
@@ -314,11 +329,6 @@ static const char *opcode_names[] = {
 	"word-spacing",
 	"z-index",
 };
-
-/**
- * Sides, indexed by SIDE_*
- */
-static const char *sides[] = { "top", "right", "bottom", "left" };
 
 static void dump_fixed(fixed f, char **ptr)
 {
@@ -578,16 +588,7 @@ void dump_bytecode(css_style *style, char **ptr)
 
 		op = getOpcode(opv);
 
-		*ptr += sprintf(*ptr, "|  ");
-
-		if (op == OP_BORDER_TRBL_COLOR || op == OP_BORDER_TRBL_STYLE ||
-				op == OP_BORDER_TRBL_WIDTH ||
-				op == OP_MARGIN_TRBL || op == OP_PADDING_TRBL) {
-			const uint32_t side = (getValue(opv) & SIDE_LEFT) >> 8;
-			*ptr += sprintf(*ptr, opcode_names[op], sides[side]);
-			*ptr += sprintf(*ptr, ": ");
-		} else
-			*ptr += sprintf(*ptr, "%s: ", opcode_names[op]);
+		*ptr += sprintf(*ptr, "|  %s: ", opcode_names[op]);
 
 		if (isInherit(opv)) {
 			*ptr += sprintf(*ptr, "inherit");
@@ -654,10 +655,10 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_BORDER_TRBL_COLOR:
-				/* Clear side bits */
-				value &= ~SIDE_LEFT;
-				/* Fall through */
+			case OP_BORDER_TOP_COLOR:
+			case OP_BORDER_RIGHT_COLOR:
+			case OP_BORDER_BOTTOM_COLOR:
+			case OP_BORDER_LEFT_COLOR:
 			case OP_BACKGROUND_COLOR:
 				assert(BACKGROUND_COLOR_TRANSPARENT == 
 						BORDER_COLOR_TRANSPARENT);
@@ -799,10 +800,10 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_BORDER_TRBL_STYLE:
-				/* Clear side bits */
-				value &= ~SIDE_LEFT;
-				/* Fall through */
+			case OP_BORDER_TOP_STYLE:
+			case OP_BORDER_RIGHT_STYLE:
+			case OP_BORDER_BOTTOM_STYLE:
+			case OP_BORDER_LEFT_STYLE:
 			case OP_OUTLINE_STYLE:
 				assert(BORDER_STYLE_NONE == OUTLINE_STYLE_NONE);
 				assert(BORDER_STYLE_HIDDEN == 
@@ -857,10 +858,10 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_BORDER_TRBL_WIDTH:
-				/* Clear side bits */
-				value &= ~SIDE_LEFT;
-				/* Fall through */
+			case OP_BORDER_TOP_WIDTH:
+			case OP_BORDER_RIGHT_WIDTH:
+			case OP_BORDER_BOTTOM_WIDTH:
+			case OP_BORDER_LEFT_WIDTH:
 			case OP_OUTLINE_WIDTH:
 				assert(BORDER_WIDTH_SET == OUTLINE_WIDTH_SET);
 				assert(BORDER_WIDTH_THIN == OUTLINE_WIDTH_THIN);
@@ -891,10 +892,10 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_MARGIN_TRBL:
-				/* Clear side bits */
-				value &= ~SIDE_LEFT;
-				/* Fall through */
+			case OP_MARGIN_TOP:
+			case OP_MARGIN_RIGHT:
+			case OP_MARGIN_BOTTOM:
+			case OP_MARGIN_LEFT:
 			case OP_BOTTOM:
 			case OP_LEFT:
 			case OP_RIGHT:
@@ -1582,10 +1583,10 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_PADDING_TRBL:
-				/* Clear side bits */
-				value &= ~SIDE_LEFT;
-				/* Fall through */
+			case OP_PADDING_TOP:
+			case OP_PADDING_RIGHT:
+			case OP_PADDING_BOTTOM:
+			case OP_PADDING_LEFT:
 			case OP_MIN_HEIGHT:
 			case OP_MIN_WIDTH:
 			case OP_PAUSE_AFTER:

@@ -5,7 +5,7 @@
 ##errors
 ##expected
 #| 1 *
-#|   0x0200000f 0xff000000
+#|   0x02000018 0xff000000
 ##reset
 
 #data
@@ -13,7 +13,7 @@
 #errors
 #expected
 | 1 *
-|   0x0200000f 0xff000000
+|   0x02000018 0xff000000
 #reset
 
 #data
@@ -21,7 +21,7 @@
 #errors
 #expected
 | 1 *
-|   0x0200000f 0xff000000
+|   0x02000018 0xff000000
 #reset
 
 #data
@@ -29,7 +29,7 @@
 #errors
 #expected
 | 1 *
-|   0x0200000f 0xff000000
+|   0x02000018 0xff000000
 #reset
 
 #data
@@ -37,7 +37,7 @@
 #errors
 #expected
 | 1 *
-|   0x0200000f 0xff000000
+|   0x02000018 0xff000000
 #reset
 
 ## Out-of-range rgb() parameters
@@ -47,7 +47,7 @@
 #errors
 #expected
 | 1 *
-|   0x0200000f 0xff000000
+|   0x02000018 0xff000000
 #reset
 
 #data
@@ -55,7 +55,7 @@
 #errors
 #expected
 | 1 *
-|   0x0200000f 0x00000000
+|   0x02000018 0x00000000
 #reset
 
 #data
@@ -63,7 +63,7 @@
 #errors
 #expected
 | 1 *
-|   0x0200000f 0xff000000
+|   0x02000018 0xff000000
 #reset
 
 #data
@@ -71,6 +71,6 @@
 #errors
 #expected
 | 1 *
-|   0x0200000f 0x00000000
+|   0x02000018 0x00000000
 #reset
 

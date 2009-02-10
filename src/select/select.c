@@ -50,14 +50,11 @@ typedef struct css_select_state {
 	uint32_t current_rule_index;	/* Index of current rule */
 	uint32_t current_specificity;	/* Specificity of current rule */
 
-/** \todo We need a better way of knowing the number of properties
- * Bytecode opcodes cover 84 properties, then there's a 
- * further 15 generated from the side bits */
-/* Stylesheet identity is a monotonically increasing number based at 1 and
- * increasing by 1 for every applicable stylesheet encountered, including 
- * imports. Imported sheets' identities are below that of the sheet that 
- * imported them. */
-#define N_PROPS (99)
+	/* Stylesheet identity is a monotonically increasing number based at 1 
+	 * and increasing by 1 for every applicable stylesheet encountered, 
+	 * including imports. Imported sheets' identities are below that of 
+	 * the sheet that imported them.
+	 */
 	struct {
 		uint32_t specificity;	/* Specificity of property in result */
 		uint32_t sheet;		/* Identity of applicable stylesheet */
@@ -65,8 +62,7 @@ typedef struct css_select_state {
 		         origin    : 2,	/* Origin of property in result */
 		         important : 1,	/* Importance of property in result */
 		         index     : 16;/* Index of corresponding rule */
-	} props[N_PROPS];
-#undef N_PROPS
+	} props[N_OPCODES];
 } css_select_state;
 
 static css_error select_from_sheet(css_select_ctx *ctx, 
@@ -104,7 +100,7 @@ static struct prop_table {
 	css_error (*initial)(css_computed_style *style);
 
 	uint32_t inherited : 1;
-} properties[] = {
+} properties[N_OPCODES] = {
 	{ cascade_azimuth,               initial_azimuth,               1 },
 	{ cascade_background_attachment, initial_background_attachment, 0 },
 	{ cascade_background_color,      initial_background_color,      0 },
@@ -113,9 +109,18 @@ static struct prop_table {
 	{ cascade_background_repeat,     initial_background_repeat,     0 },
 	{ cascade_border_collapse,       initial_border_collapse,       1 },
 	{ cascade_border_spacing,        initial_border_spacing,        1 },
-	{ cascade_border_color,          initial_border_color,          0 },
-	{ cascade_border_style,          initial_border_style,          0 },
-	{ cascade_border_width,          initial_border_width,          0 },
+	{ cascade_border_top_color,      initial_border_top_color,      0 },
+	{ cascade_border_right_color,    initial_border_right_color,    0 },
+	{ cascade_border_bottom_color,   initial_border_bottom_color,   0 },
+	{ cascade_border_left_color,     initial_border_left_color,     0 },
+	{ cascade_border_top_style,      initial_border_top_style,      0 },
+	{ cascade_border_right_style,    initial_border_right_style,    0 },
+	{ cascade_border_bottom_style,   initial_border_bottom_style,   0 },
+	{ cascade_border_left_style,     initial_border_left_style,     0 },
+	{ cascade_border_top_width,      initial_border_top_width,      0 },
+	{ cascade_border_right_width,    initial_border_right_width,    0 },
+	{ cascade_border_bottom_width,   initial_border_bottom_width,   0 },
+	{ cascade_border_left_width,     initial_border_left_width,     0 },
 	{ cascade_bottom,                initial_bottom,                0 },
 	{ cascade_caption_side,          initial_caption_side,          1 },
 	{ cascade_clear,                 initial_clear,                 0 },
@@ -144,7 +149,10 @@ static struct prop_table {
 	{ cascade_list_style_image,      initial_list_style_image,      1 },
 	{ cascade_list_style_position,   initial_list_style_position,   1 },
 	{ cascade_list_style_type,       initial_list_style_type,       1 },
-	{ cascade_margin,                initial_margin,                0 },
+	{ cascade_margin_top,            initial_margin_top,            0 },
+	{ cascade_margin_right,          initial_margin_right,          0 },
+	{ cascade_margin_bottom,         initial_margin_bottom,         0 },
+	{ cascade_margin_left,           initial_margin_left,           0 },
 	{ cascade_max_height,            initial_max_height,            0 },
 	{ cascade_max_width,             initial_max_width,             0 },
 	{ cascade_min_height,            initial_min_height,            0 },
@@ -154,7 +162,10 @@ static struct prop_table {
 	{ cascade_outline_style,         initial_outline_style,         0 },
 	{ cascade_outline_width,         initial_outline_width,         0 },
 	{ cascade_overflow,              initial_overflow,              0 },
-	{ cascade_padding,               initial_padding,               0 },
+	{ cascade_padding_top,           initial_padding_top,           0 },
+	{ cascade_padding_right,         initial_padding_right,         0 },
+	{ cascade_padding_bottom,        initial_padding_bottom,        0 },
+	{ cascade_padding_left,          initial_padding_left,          0 },
 	{ cascade_page_break_after,      initial_page_break_after,      0 },
 	{ cascade_page_break_before,     initial_page_break_before,     0 },
 	{ cascade_page_break_inside,     initial_page_break_inside,     1 },

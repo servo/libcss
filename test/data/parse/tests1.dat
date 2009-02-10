@@ -10,7 +10,7 @@
 #errors
 #expected
 | 1 *
-|   0x0200000f 0xff000000
+|   0x02000018 0xff000000
 #reset
 
 #data
@@ -18,7 +18,7 @@
 #errors
 #expected
 | 1 *
-|   0x0000080f
+|   0x00000818
 #reset
 
 #data
@@ -26,5 +26,5 @@
 #errors
 #expected
 | 1 *
-|   0x02000003 PTR(foo.png) 0x0000080f
+|   0x02000003 PTR(foo.png) 0x00000818
 #reset

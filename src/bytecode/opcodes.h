@@ -10,13 +10,6 @@
 
 #include <inttypes.h>
 
-enum side {
-	SIDE_TOP			= 0x0000,
-	SIDE_RIGHT			= 0x0100,
-	SIDE_BOTTOM			= 0x0200,
-	SIDE_LEFT			= 0x0300,
-};
-
 enum op_azimuth {
 	AZIMUTH_ANGLE			= 0x0080,
 
@@ -103,7 +96,6 @@ enum op_border_width {
 	BORDER_WIDTH_THICK		= 0x0002,
 };
 
-/** \todo merge top, right, left, bottom into one opcode and use side bits? */
 enum op_bottom {
 	BOTTOM_SET			= 0x0080,
 	BOTTOM_AUTO			= 0x0000,
