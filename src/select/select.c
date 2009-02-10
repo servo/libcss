@@ -5,6 +5,7 @@
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
+#include <assert.h>
 #include <string.h>
 
 #include <parserutils/utils/hash.h>
@@ -32,6 +33,13 @@ struct css_select_ctx {
 	void *pw;			/**< Client-specific private data */
 };
 
+typedef struct prop_state {
+	uint32_t specificity;		/* Specificity of property in result */
+	uint32_t set       : 1,		/* Whether property is set in result */
+	         origin    : 2,		/* Origin of property in result */
+	         important : 1;		/* Importance of property in result */
+} prop_state;
+
 /**
  * Selection state
  */
@@ -45,24 +53,10 @@ typedef struct css_select_state {
 	css_select_handler *handler;	/* Handler functions */
 	void *pw;			/* Client data for handlers */
 
-	uint32_t current_sheet;		/* Identity of current sheet */
 	css_origin current_origin;	/* Origin of current sheet */
-	uint32_t current_rule_index;	/* Index of current rule */
 	uint32_t current_specificity;	/* Specificity of current rule */
 
-	/* Stylesheet identity is a monotonically increasing number based at 1 
-	 * and increasing by 1 for every applicable stylesheet encountered, 
-	 * including imports. Imported sheets' identities are below that of 
-	 * the sheet that imported them.
-	 */
-	struct {
-		uint32_t specificity;	/* Specificity of property in result */
-		uint32_t sheet;		/* Identity of applicable stylesheet */
-		uint32_t set       : 1,	/* Whether property is set in result */
-		         origin    : 2,	/* Origin of property in result */
-		         important : 1,	/* Importance of property in result */
-		         index     : 16;/* Index of corresponding rule */
-	} props[N_OPCODES];
+	prop_state props[N_OPCODES];
 } css_select_state;
 
 static css_error select_from_sheet(css_select_ctx *ctx, 
@@ -87,6 +81,8 @@ static css_error match_detail(css_select_ctx *ctx, void *node,
 static css_error cascade_style(css_select_ctx *ctx, const css_style *style, 
 		css_select_state *state);
 static inline void advance_bytecode(css_style *style, uint32_t n_bytes);
+static bool outranks_existing(uint16_t op, bool important, 
+		css_select_state *state);
 
 /* Property handlers */
 #include "select/properties.c"
@@ -482,7 +478,6 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 			css_error error;
 
 			/* Process this sheet */
-			state->current_sheet++;
 			state->current_origin = s->origin;
 
 			error = match_selectors_in_sheet(ctx, s, state);
@@ -622,7 +617,6 @@ css_error match_selector_chain(css_select_ctx *ctx,
 	} while (s != NULL);
 
 	/* If we got here, then the entire selector chain matched, so cascade */
-	state->current_rule_index = selector->rule->index;
 	state->current_specificity = selector->specificity;
 
 	return cascade_style(ctx,
@@ -821,4 +815,103 @@ void advance_bytecode(css_style *style, uint32_t n_bytes)
 	style->bytecode = ((uint8_t *) style->bytecode) + n_bytes;
 }
 
+bool outranks_existing(uint16_t op, bool important, css_select_state *state)
+{
+	prop_state *existing = &state->props[op];
+	bool outranks = false;
+
+	/* Sorting on origin & importance gives the following:
+	 * 
+	 *           | UA, - | UA, i | USER, - | USER, i | AUTHOR, - | AUTHOR, i
+	 *           |----------------------------------------------------------
+	 * UA    , - |   S       S       Y          Y         Y           Y
+	 * UA    , i |   S       S       Y          Y         Y           Y
+	 * USER  , - |   -       -       S          Y         Y           Y
+	 * USER  , i |   -       -       -          S         -           -
+	 * AUTHOR, - |   -       -       -          Y         S           Y
+	 * AUTHOR, i |   -       -       -          Y         -           S
+	 *
+	 * Where the columns represent the origin/importance of the property 
+	 * being considered and the rows represent the origin/importance of 
+	 * the existing property.
+	 *
+	 * - means that the existing property must be preserved
+	 * Y means that the new property must be applied
+	 * S means that the specificities of the rules must be considered.
+	 *
+	 * If specificities are considered, the highest specificity wins.
+	 * If specificities are equal, then the rule defined last wins.
+	 *
+	 * We have no need to explicitly consider the ordering of rules if
+	 * the specificities are the same because:
+	 *
+	 * a) We process stylesheets in order
+	 * b) The selector hash chains within a sheet are ordered such that 
+	 *    more specific rules come after less specific ones and, when
+	 *    specificities are identical, rules defined later occur after
+	 *    those defined earlier.
+	 *
+	 * Therefore, where we consider specificity, below, the property 
+	 * currently being considered will always be applied if its specificity
+	 * is greater than or equal to that of the existing property.
+	 */
+
+	if (existing->set == 0) {
+		/* Property hasn't been set before, new one wins */
+		outranks = true;
+	} else {
+		assert(CSS_ORIGIN_UA < CSS_ORIGIN_USER);
+		assert(CSS_ORIGIN_USER < CSS_ORIGIN_AUTHOR);
+
+		if (existing->origin < state->current_origin) {
+			/* New origin has more weight than existing one.
+			 * Thus, new property wins, except when the existing 
+			 * one is USER, i. */
+			if (existing->important == 0 ||
+					existing->origin != CSS_ORIGIN_USER) {
+				outranks = true;
+			}
+		} else if (existing->origin == state->current_origin) {
+			/* Origins are identical, consider importance, except 
+			 * for UA stylesheets, when specificity is always 
+			 * considered (as importance is meaningless) */
+			if (existing->origin == CSS_ORIGIN_UA) {
+				if (state->current_specificity >=
+						existing->specificity) {
+					outranks = true;
+				}
+			} else if (existing->important == 0 && important) {
+				/* New is more important than old. */
+				outranks = true;
+			} else if (existing->important && important == false) {
+				/* Old is more important than new */
+			} else {
+				/* Same importance, consider specificity */
+				if (state->current_specificity >=
+						existing->specificity) {
+					outranks = true;
+				}
+			}
+		} else {
+			/* Existing origin has more weight than new one.
+			 * Thus, existing property wins, except when the new
+			 * one is USER, i. */
+			if (state->current_origin == CSS_ORIGIN_USER &&
+					important) {
+				outranks = true;
+			}
+		}
+	}
+
+	if (outranks) {
+		/* The new property is about to replace the old one.
+		 * Update our state to reflect this. */
+		existing->set = 1;
+		existing->specificity = state->current_specificity;
+		existing->origin = state->current_origin;
+		existing->important = important;
+	}
+
+	return outranks;
+}
 
