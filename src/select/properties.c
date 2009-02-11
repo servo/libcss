@@ -576,11 +576,12 @@ static css_error initial_content(css_computed_style *style)
 
 static css_error cascade_counter_increment(uint32_t opv, css_style *style, 
 		css_select_state *state)
-{
-	
+{	
 	UNUSED(opv);
 	UNUSED(style);
 	UNUSED(state);
+
+	/** \todo counter-increment/reset */
 
 	return CSS_OK;
 }
@@ -592,8 +593,8 @@ static css_error initial_counter_increment(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_counter_reset( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_counter_reset(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
 	
 	UNUSED(opv);
@@ -610,13 +611,14 @@ static css_error initial_counter_reset(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_cue_after( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_cue_after(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
 	UNUSED(opv);
 	UNUSED(style);
 	UNUSED(state);
+
+	/** \todo cue-after */
 
 	return CSS_OK;
 }
@@ -628,13 +630,14 @@ static css_error initial_cue_after(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_cue_before( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_cue_before(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
 	UNUSED(opv);
 	UNUSED(style);
 	UNUSED(state);
+
+	/** \todo cue-before */
 
 	return CSS_OK;
 }
@@ -646,13 +649,14 @@ static css_error initial_cue_before(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_cursor( 
-		uint32_t opv, css_style *style, css_select_state *state)
-{
-	
+static css_error cascade_cursor(uint32_t opv, css_style *style, 
+		css_select_state *state)
+{	
 	UNUSED(opv);
 	UNUSED(style);
 	UNUSED(state);
+
+	/** \todo cursor */
 
 	return CSS_OK;
 }
@@ -664,40 +668,106 @@ static css_error initial_cursor(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_direction( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_direction(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_DIRECTION_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case DIRECTION_LTR:
+			value = CSS_DIRECTION_LTR;
+			break;
+		case DIRECTION_RTL:
+			value = CSS_DIRECTION_RTL;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_direction(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_direction(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_direction(style, CSS_DIRECTION_LTR);
 }
 
-static css_error cascade_display( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_display(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_DISPLAY_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case DISPLAY_INLINE:
+			value = CSS_DISPLAY_INLINE;
+			break;
+		case DISPLAY_BLOCK:
+			value = CSS_DISPLAY_BLOCK;
+			break;
+		case DISPLAY_LIST_ITEM:
+			value = CSS_DISPLAY_LIST_ITEM;
+			break;
+		case DISPLAY_RUN_IN:
+			value = CSS_DISPLAY_RUN_IN;
+			break;
+		case DISPLAY_INLINE_BLOCK:
+			value = CSS_DISPLAY_INLINE_BLOCK;
+			break;
+		case DISPLAY_TABLE:
+			value = CSS_DISPLAY_TABLE;
+			break;
+		case DISPLAY_INLINE_TABLE:
+			value = CSS_DISPLAY_INLINE_TABLE;
+			break;
+		case DISPLAY_TABLE_ROW_GROUP:
+			value = CSS_DISPLAY_TABLE_ROW_GROUP;
+			break;
+		case DISPLAY_TABLE_HEADER_GROUP:
+			value = CSS_DISPLAY_TABLE_HEADER_GROUP;
+			break;
+		case DISPLAY_TABLE_FOOTER_GROUP:
+			value = CSS_DISPLAY_TABLE_FOOTER_GROUP;
+			break;
+		case DISPLAY_TABLE_ROW:
+			value = CSS_DISPLAY_TABLE_ROW;
+			break;
+		case DISPLAY_TABLE_COLUMN_GROUP:
+			value = CSS_DISPLAY_TABLE_COLUMN_GROUP;
+			break;
+		case DISPLAY_TABLE_COLUMN:
+			value = CSS_DISPLAY_TABLE_COLUMN;
+			break;
+		case DISPLAY_TABLE_CELL:
+			value = CSS_DISPLAY_TABLE_CELL;
+			break;
+		case DISPLAY_TABLE_CAPTION:
+			value = CSS_DISPLAY_TABLE_CAPTION;
+			break;
+		case DISPLAY_NONE:
+			value = DISPLAY_NONE;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_display(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_display(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_display(style, CSS_DISPLAY_INLINE);
 }
 
 static css_error cascade_elevation( 
