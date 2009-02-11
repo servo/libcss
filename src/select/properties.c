@@ -5,6 +5,11 @@
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
+static css_error cascade_bg_border_color(uint32_t opv, css_style *style,
+		css_select_state *state, 
+		css_error (*fun)(css_computed_style *, uint8_t, css_color));
+
+
 static css_error cascade_azimuth(uint32_t opv, css_style *style,
 		 css_select_state *state)
 {
@@ -71,27 +76,7 @@ static css_error initial_background_attachment(css_computed_style *style)
 static css_error cascade_background_color(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	uint16_t value = CSS_BACKGROUND_COLOR_INHERIT;
-	css_color color = 0;
-
-	if (isInherit(opv) == false) {
-		switch (getValue(opv)) {
-		case BACKGROUND_COLOR_TRANSPARENT:
-			value = CSS_BACKGROUND_COLOR_TRANSPARENT;
-			break;
-		case BACKGROUND_COLOR_SET:
-			value = CSS_BACKGROUND_COLOR_COLOR;
-			color = *((css_color *) style->bytecode);
-			advance_bytecode(style, sizeof(color));
-			break;
-		}
-	}
-
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
-		return set_background_color(state->result, value, color);
-	}
-
-	return CSS_OK;
+	return cascade_bg_border_color(opv, style, state, set_background_color);
 }
 
 static css_error initial_background_color(css_computed_style *style)
@@ -303,76 +288,51 @@ static css_error initial_border_spacing(css_computed_style *style)
 			0, CSS_UNIT_PX, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_border_top_color( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_border_top_color(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_bg_border_color(opv, style, state, set_border_top_color);
 }
 
 static css_error initial_border_top_color(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_border_top_color(style, CSS_BORDER_COLOR_COLOR, 0);
 }
 
-static css_error cascade_border_right_color( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_border_right_color(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_bg_border_color(opv, style, state, 
+			set_border_right_color);
 }
 
 static css_error initial_border_right_color(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_border_right_color(style, CSS_BORDER_COLOR_COLOR, 0);
 }
 
-static css_error cascade_border_bottom_color( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_border_bottom_color(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_bg_border_color(opv, style, state,
+			set_border_bottom_color);
 }
 
 static css_error initial_border_bottom_color(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_border_bottom_color(style, CSS_BORDER_COLOR_COLOR, 0);
 }
 
 static css_error cascade_border_left_color( 
 		uint32_t opv, css_style *style, css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_bg_border_color(opv, style, state, 
+			set_border_left_color);
 }
 
 static css_error initial_border_left_color(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_border_left_color(style, CSS_BORDER_COLOR_COLOR, 0);
 }
 
 static css_error cascade_border_top_style( 
@@ -1937,6 +1897,41 @@ static css_error cascade_z_index(
 static css_error initial_z_index(css_computed_style *style)
 {
 	UNUSED(style);
+
+	return CSS_OK;
+}
+
+/******************************************************************************
+ * Utilities below here                                                       *
+ ******************************************************************************/
+css_error cascade_bg_border_color(uint32_t opv, css_style *style,
+		css_select_state *state, 
+		css_error (*fun)(css_computed_style *, uint8_t, css_color))
+{
+	uint16_t value = CSS_BACKGROUND_COLOR_INHERIT;
+	css_color color = 0;
+
+	assert(CSS_BACKGROUND_COLOR_INHERIT == CSS_BORDER_COLOR_INHERIT);
+	assert(CSS_BACKGROUND_COLOR_TRANSPARENT == 
+			CSS_BORDER_COLOR_TRANSPARENT);
+	assert(CSS_BACKGROUND_COLOR_COLOR == CSS_BORDER_COLOR_COLOR);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case BACKGROUND_COLOR_TRANSPARENT:
+			value = CSS_BACKGROUND_COLOR_TRANSPARENT;
+			break;
+		case BACKGROUND_COLOR_SET:
+			value = CSS_BACKGROUND_COLOR_COLOR;
+			color = *((css_color *) style->bytecode);
+			advance_bytecode(style, sizeof(color));
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return fun(state->result, value, color);
+	}
 
 	return CSS_OK;
 }
