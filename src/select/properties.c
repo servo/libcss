@@ -44,14 +44,31 @@ static css_error cascade_azimuth(uint32_t opv, css_style *style,
 	uint32_t unit = CSS_UNIT_DEG;
 
 	if (isInherit(opv) == false) {
-		value = getValue(opv);
+		switch (getValue(opv) & ~AZIMUTH_BEHIND) {
+		case AZIMUTH_ANGLE:
+			value = 0;
 
-		if (value == AZIMUTH_ANGLE) {
 			val = *((css_fixed *) style->bytecode);
 			advance_bytecode(style, sizeof(val));
 			unit = *((uint32_t *) style->bytecode);
 			advance_bytecode(style, sizeof(unit));
+			break;
+		case AZIMUTH_LEFTWARDS:
+		case AZIMUTH_RIGHTWARDS:
+		case AZIMUTH_LEFT_SIDE:
+		case AZIMUTH_FAR_LEFT:
+		case AZIMUTH_LEFT:
+		case AZIMUTH_CENTER_LEFT:
+		case AZIMUTH_CENTER:
+		case AZIMUTH_CENTER_RIGHT:
+		case AZIMUTH_RIGHT:
+		case AZIMUTH_FAR_RIGHT:
+		case AZIMUTH_RIGHT_SIDE:
+			/** \todo azimuth values */
+			break;
 		}
+
+		/** \todo azimuth behind */
 	}
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
@@ -626,13 +643,8 @@ static css_error initial_counter_reset(css_computed_style *style)
 static css_error cascade_cue_after(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
 	/** \todo cue-after */
-
-	return CSS_OK;
+	return cascade_uri_none(opv, style, state, NULL);
 }
 
 static css_error initial_cue_after(css_computed_style *style)
@@ -645,13 +657,8 @@ static css_error initial_cue_after(css_computed_style *style)
 static css_error cascade_cue_before(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
 	/** \todo cue-before */
-
-	return CSS_OK;
+	return cascade_uri_none(opv, style, state, NULL);
 }
 
 static css_error initial_cue_before(css_computed_style *style)
@@ -2109,7 +2116,9 @@ css_error cascade_uri_none(uint32_t opv, css_style *style,
 		}
 	}
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+	/** \todo lose fun != NULL once all properties have set routines */
+	if (fun != NULL && outranks_existing(getOpcode(opv), 
+			isImportant(opv), state)) {
 		/** \todo fix this mess -- it's seriously unsafe */
 		return fun(state->result, value, (css_string *) uri);
 	}
