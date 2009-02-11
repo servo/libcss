@@ -2122,67 +2122,137 @@ static css_error initial_top(css_computed_style *style)
 	return set_top(style, CSS_TOP_AUTO, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_unicode_bidi( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_unicode_bidi(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_UNICODE_BIDI_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case UNICODE_BIDI_NORMAL:
+			value = CSS_UNICODE_BIDI_NORMAL;
+			break;
+		case UNICODE_BIDI_EMBED:
+			value = CSS_UNICODE_BIDI_EMBED;
+			break;
+		case UNICODE_BIDI_BIDI_OVERRIDE:
+			value = CSS_UNICODE_BIDI_BIDI_OVERRIDE;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_unicode_bidi(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_unicode_bidi(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_unicode_bidi(style, CSS_UNICODE_BIDI_NORMAL);
 }
 
-static css_error cascade_vertical_align( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_vertical_align(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = CSS_VERTICAL_ALIGN_INHERIT;
+	css_fixed length = 0;
+	uint32_t unit = CSS_UNIT_PX;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case VERTICAL_ALIGN_SET:
+			value = CSS_VERTICAL_ALIGN_SET;
+
+			length = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(length));
+			unit = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(unit));
+			break;
+		case VERTICAL_ALIGN_BASELINE:
+			value = CSS_VERTICAL_ALIGN_BASELINE;
+			break;
+		case VERTICAL_ALIGN_SUB:
+			value = CSS_VERTICAL_ALIGN_SUB;
+			break;
+		case VERTICAL_ALIGN_SUPER:
+			value = CSS_VERTICAL_ALIGN_SUPER;
+			break;
+		case VERTICAL_ALIGN_TOP:
+			value = CSS_VERTICAL_ALIGN_TOP;
+			break;
+		case VERTICAL_ALIGN_TEXT_TOP:
+			value = CSS_VERTICAL_ALIGN_TEXT_TOP;
+			break;
+		case VERTICAL_ALIGN_MIDDLE:
+			value = CSS_VERTICAL_ALIGN_MIDDLE;
+			break;
+		case VERTICAL_ALIGN_BOTTOM:
+			value = CSS_VERTICAL_ALIGN_BOTTOM;
+			break;
+		case VERTICAL_ALIGN_TEXT_BOTTOM:
+			value = CSS_VERTICAL_ALIGN_TEXT_BOTTOM;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_vertical_align(state->result, value, length, unit);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_vertical_align(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_vertical_align(style, CSS_VERTICAL_ALIGN_BASELINE,
+			0, CSS_UNIT_PX);
 }
 
-static css_error cascade_visibility( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_visibility(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_VISIBILITY_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case VISIBILITY_VISIBLE:
+			value = CSS_VISIBILITY_VISIBLE;
+			break;
+		case VISIBILITY_HIDDEN:
+			value = CSS_VISIBILITY_HIDDEN;
+			break;
+		case VISIBILITY_COLLAPSE:
+			value = CSS_VISIBILITY_COLLAPSE;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_visibility(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_visibility(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_visibility(style, CSS_VISIBILITY_VISIBLE);
 }
 
-static css_error cascade_voice_family( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_voice_family(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
 	UNUSED(opv);
 	UNUSED(style);
 	UNUSED(state);
+
+	/** \todo voice-family */
 
 	return CSS_OK;
 }
@@ -2194,13 +2264,43 @@ static css_error initial_voice_family(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_volume( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_volume(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = 0;
+	css_fixed val = 0;
+	uint32_t unit = CSS_UNIT_PCT;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case VOLUME_NUMBER:
+			value = 0;
+
+			val = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(val));
+			break;
+		case VOLUME_DIMENSION:
+			value = 0;
+
+			val = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(val));
+			unit = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(unit));
+			break;
+		case VOLUME_SILENT:
+		case VOLUME_X_SOFT:
+		case VOLUME_SOFT:
+		case VOLUME_MEDIUM:
+		case VOLUME_LOUD:
+		case VOLUME_X_LOUD:
+			/** \todo convert to public values */
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		/** \todo volume */
+	}
 
 	return CSS_OK;
 }
@@ -2212,22 +2312,43 @@ static css_error initial_volume(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_white_space( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_white_space(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_WHITE_SPACE_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case WHITE_SPACE_NORMAL:
+			value = CSS_WHITE_SPACE_NORMAL;
+			break;
+		case WHITE_SPACE_PRE:
+			value = CSS_WHITE_SPACE_PRE;
+			break;
+		case WHITE_SPACE_NOWRAP:
+			value = CSS_WHITE_SPACE_NOWRAP;
+			break;
+		case WHITE_SPACE_PRE_WRAP:
+			value = CSS_WHITE_SPACE_PRE_WRAP;
+			break;
+		case WHITE_SPACE_PRE_LINE:
+			value = CSS_WHITE_SPACE_PRE_LINE;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_white_space(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_white_space(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_white_space(style, CSS_WHITE_SPACE_NORMAL);
 }
 
 static css_error cascade_widows(uint32_t opv, css_style *style, 
@@ -2266,22 +2387,36 @@ static css_error initial_word_spacing(css_computed_style *style)
 	return set_word_spacing(style, CSS_WORD_SPACING_NORMAL, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_z_index( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_z_index(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = CSS_Z_INDEX_INHERIT;
+	css_fixed index = 0;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case Z_INDEX_SET:
+			value = CSS_Z_INDEX_SET;
+
+			index = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(index));
+			break;
+		case Z_INDEX_AUTO:
+			value = CSS_Z_INDEX_AUTO;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_z_index(state->result, value, index);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_z_index(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_z_index(style, CSS_Z_INDEX_AUTO, 0);
 }
 
 /******************************************************************************
