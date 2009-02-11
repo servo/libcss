@@ -2071,9 +2071,7 @@ static css_error cascade_quotes(uint32_t opv, css_style *style,
 
 static css_error initial_quotes(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_quotes(style, CSS_QUOTES_DEFAULT, NULL);
 }
 
 static css_error cascade_richness(uint32_t opv, css_style *style, 
