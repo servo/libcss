@@ -23,6 +23,14 @@ static css_error cascade_length_auto(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
 				css_unit));
+static css_error cascade_length_normal(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
+				css_unit));
+static css_error cascade_length_none(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
+				css_unit));
 
 static css_error cascade_azimuth(uint32_t opv, css_style *style,
 		 css_select_state *state)
@@ -1102,44 +1110,59 @@ static css_error initial_left(css_computed_style *style)
 	return set_left(style, CSS_LEFT_AUTO, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_letter_spacing( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_letter_spacing(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length_normal(opv, style, state, set_letter_spacing);
 }
 
 static css_error initial_letter_spacing(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_letter_spacing(style, CSS_LETTER_SPACING_NORMAL, 
+			0, CSS_UNIT_PX);
 }
 
-static css_error cascade_line_height( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_line_height(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = CSS_LINE_HEIGHT_INHERIT;
+	css_fixed val = 0;
+	uint32_t unit = CSS_UNIT_PX;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case LINE_HEIGHT_NUMBER:
+			value = CSS_LINE_HEIGHT_NUMBER;
+			val = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(val));
+			break;
+		case LINE_HEIGHT_DIMENSION:
+			value = CSS_LINE_HEIGHT_DIMENSION;
+			val = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(val));
+			unit = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(unit));
+			break;
+		case LINE_HEIGHT_NORMAL:
+			value = CSS_LINE_HEIGHT_NORMAL;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_line_height(state->result, value, val, unit);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_line_height(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_line_height(style, CSS_LINE_HEIGHT_NORMAL, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_list_style_image( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_list_style_image(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
 	return cascade_uri_none(opv, style, state, set_list_style_image);
 }
@@ -1149,40 +1172,103 @@ static css_error initial_list_style_image(css_computed_style *style)
 	return set_list_style_image(style, CSS_LIST_STYLE_IMAGE_NONE, NULL);
 }
 
-static css_error cascade_list_style_position( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_list_style_position(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_LIST_STYLE_POSITION_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case LIST_STYLE_POSITION_INSIDE:
+			value = CSS_LIST_STYLE_POSITION_INSIDE;
+			break;
+		case LIST_STYLE_POSITION_OUTSIDE:
+			value = CSS_LIST_STYLE_POSITION_OUTSIDE;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_list_style_position(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_list_style_position(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_list_style_position(style, CSS_LIST_STYLE_POSITION_OUTSIDE);
 }
 
-static css_error cascade_list_style_type( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_list_style_type(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_LIST_STYLE_TYPE_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case LIST_STYLE_TYPE_DISC:
+			value = CSS_LIST_STYLE_TYPE_DISC;
+			break;
+		case LIST_STYLE_TYPE_CIRCLE:
+			value = CSS_LIST_STYLE_TYPE_CIRCLE;
+			break;
+		case LIST_STYLE_TYPE_SQUARE:
+			value = CSS_LIST_STYLE_TYPE_SQUARE;
+			break;
+		case LIST_STYLE_TYPE_DECIMAL:
+			value = CSS_LIST_STYLE_TYPE_DECIMAL;
+			break;
+		case LIST_STYLE_TYPE_DECIMAL_LEADING_ZERO:
+			value = CSS_LIST_STYLE_TYPE_DECIMAL_LEADING_ZERO;
+			break;
+		case LIST_STYLE_TYPE_LOWER_ROMAN:
+			value = CSS_LIST_STYLE_TYPE_LOWER_ROMAN;
+			break;
+		case LIST_STYLE_TYPE_UPPER_ROMAN:
+			value = CSS_LIST_STYLE_TYPE_UPPER_ROMAN;
+			break;
+		case LIST_STYLE_TYPE_LOWER_GREEK:
+			value = CSS_LIST_STYLE_TYPE_LOWER_GREEK;
+			break;
+		case LIST_STYLE_TYPE_LOWER_LATIN:
+			value = CSS_LIST_STYLE_TYPE_LOWER_LATIN;
+			break;
+		case LIST_STYLE_TYPE_UPPER_LATIN:
+			value = CSS_LIST_STYLE_TYPE_UPPER_LATIN;
+			break;
+		case LIST_STYLE_TYPE_ARMENIAN:
+			value = CSS_LIST_STYLE_TYPE_ARMENIAN;
+			break;
+		case LIST_STYLE_TYPE_GEORGIAN:
+			value = CSS_LIST_STYLE_TYPE_GEORGIAN;
+			break;
+		case LIST_STYLE_TYPE_LOWER_ALPHA:
+			value = CSS_LIST_STYLE_TYPE_LOWER_ALPHA;
+			break;
+		case LIST_STYLE_TYPE_UPPER_ALPHA:
+			value = CSS_LIST_STYLE_TYPE_UPPER_ALPHA;
+			break;
+		case LIST_STYLE_TYPE_NONE:
+			value = CSS_LIST_STYLE_TYPE_NONE;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_list_style_type(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_list_style_type(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_list_style_type(style, CSS_LIST_STYLE_TYPE_DISC);
 }
 
 static css_error cascade_margin_top(uint32_t opv, css_style *style, 
@@ -1229,40 +1315,26 @@ static css_error initial_margin_left(css_computed_style *style)
 	return set_margin_left(style, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_max_height( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_max_height(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length_none(opv, style, state, set_max_height);
 }
 
 static css_error initial_max_height(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_max_height(style, CSS_MAX_HEIGHT_NONE, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_max_width( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_max_width(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length_none(opv, style, state, set_max_width);;
 }
 
 static css_error initial_max_width(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_max_width(style, CSS_MAX_WIDTH_NONE, 0, CSS_UNIT_PX);
 }
 
 static css_error cascade_min_height( 
@@ -2005,22 +2077,15 @@ static css_error initial_width(css_computed_style *style)
 	return set_width(style, CSS_WIDTH_AUTO, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_word_spacing( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_word_spacing(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length_normal(opv, style, state, set_word_spacing);
 }
 
 static css_error initial_word_spacing(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_word_spacing(style, CSS_WORD_SPACING_NORMAL, 0, CSS_UNIT_PX);
 }
 
 static css_error cascade_z_index( 
@@ -2212,6 +2277,68 @@ css_error cascade_length_auto(uint32_t opv, css_style *style,
 			break;
 		case BOTTOM_AUTO:
 			value = CSS_BOTTOM_AUTO;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return fun(state->result, value, length, unit);
+	}
+
+	return CSS_OK;
+}
+
+css_error cascade_length_normal(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
+				css_unit))
+{
+	uint16_t value = CSS_LETTER_SPACING_INHERIT;
+	css_fixed length = 0;
+	uint32_t unit = CSS_UNIT_PX;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case LETTER_SPACING_SET:
+			value = CSS_LETTER_SPACING_SET;
+			length = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(length));
+			unit = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(unit));
+			break;
+		case LETTER_SPACING_NORMAL:
+			value = CSS_LETTER_SPACING_NORMAL;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return fun(state->result, value, length, unit);
+	}
+
+	return CSS_OK;
+}
+
+css_error cascade_length_none(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
+				css_unit))
+{
+	uint16_t value = CSS_MAX_HEIGHT_INHERIT;
+	css_fixed length = 0;
+	uint32_t unit = CSS_UNIT_PX;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case MAX_HEIGHT_SET:
+			value = CSS_MAX_HEIGHT_SET;
+			length = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(length));
+			unit = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(unit));
+			break;
+		case MAX_HEIGHT_NONE:
+			value = CSS_MAX_HEIGHT_NONE;
 			break;
 		}
 	}
