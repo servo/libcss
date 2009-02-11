@@ -53,6 +53,8 @@ typedef struct css_select_state {
 	css_select_handler *handler;	/* Handler functions */
 	void *pw;			/* Client data for handlers */
 
+	const css_stylesheet *sheet;	/* Current sheet being processed */
+
 	css_origin current_origin;	/* Origin of current sheet */
 	uint32_t current_specificity;	/* Specificity of current rule */
 
@@ -477,6 +479,7 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 			css_error error;
 
 			/* Process this sheet */
+			state->sheet = s;
 			state->current_origin = s->origin;
 
 			error = match_selectors_in_sheet(ctx, s, state);
