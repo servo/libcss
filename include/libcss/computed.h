@@ -24,7 +24,7 @@ typedef struct css_computed_page {
 } css_computed_page;
 
 typedef struct css_computed_counter {
-	const css_string *name;
+	css_string name;
 	int32_t value;
 } css_computed_counter;
 
@@ -51,21 +51,22 @@ typedef struct css_computed_uncommon {
  * 				---		---
  * 				 48 bits	 40 bytes
  *
- * Encode counter_increment and _reset as a NULL-terminated array of
- * name, value pairs.
+ * Encode counter_increment and _reset as an array of name, value pairs,
+ * terminated with a blank entry.
  *
  * counter_increment		  1		  sizeof(ptr)
  * counter_reset		  1		  sizeof(ptr)
  * 				---		---
  * 				  2 bits	  2sizeof(ptr) bytes
  *
- * Encode quotes as a NULL-terminated array of string pointers
+ * Encode quotes as an array of string objects, terminated with a blank entry.
  *
  * quotes			  1		  sizeof(ptr)
  * 				---		---
  * 				  1 bit		  sizeof(ptr) bytes
  *
- * Encode cursor uri(s) as a NULL-terminated array of string pointers
+ * Encode cursor uri(s) as an array of string objects, terminated with a
+ * blank entry.
  *
  * cursor			  5		   sizeof(ptr)
  * 				---		---
@@ -106,12 +107,12 @@ typedef struct css_computed_uncommon {
 
 	css_fixed word_spacing;
 
-	css_computed_counter **counter_increment;
-	css_computed_counter **counter_reset;
+	css_computed_counter *counter_increment;
+	css_computed_counter *counter_reset;
 
-	const css_string **quotes;
+	css_string *quotes;
 
-	const css_string **cursor;
+	css_string *cursor;
 } css_computed_uncommon;
 
 struct css_computed_style {
@@ -151,7 +152,7 @@ struct css_computed_style {
  * Dimensions are encoded as a fixed point value + 4 bits of unit data
  *
  * background_color		  2		  4
- * background_image		  1		  sizeof(ptr)
+ * background_image		  1		  sizeof(css_string)
  * background_position		  1 + 2(4)	  2(4)
  * border_top_color		  2		  4
  * border_right_color		  2		  4
@@ -169,7 +170,7 @@ struct css_computed_style {
  * font_size			  4 + 4		  4
  * height			  2 + 4		  4
  * line_height			  2 + 4		  4
- * list_style_image		  1		  sizeof(ptr)
+ * list_style_image		  1		  sizeof(css_string)
  * margin_top			  2 + 4		  4
  * margin_right			  2 + 4		  4
  * margin_bottom		  2 + 4		  4
@@ -187,20 +188,23 @@ struct css_computed_style {
  * width			  2 + 4		  4
  * z_index			  2		  4
  * 				---		---
- *				181 bits	140 + 2sizeof(ptr) bytes
+ *				181 bits	140 + 2sizeof(css_string) bytes
  *
- * Encode font family as a NULL-terminated array of string pointers
+ * Encode font family as an array of string objects, terminated with a 
+ * blank entry.
  *
  * font_family			  1		  sizeof(ptr)
  * 				---		---
  * 				  1 bit		  sizeof(ptr)
  *
  * 				___		___
- *				265 bits	140 + 3sizeof(ptr) bytes
+ *				265 bits	140 + 2sizeof(css_string) + 
+ *							sizeof(ptr) bytes
  *
- *				 34 bytes	140 + 3sizeof(ptr) bytes
+ *				 34 bytes	140 + 2sizeof(css_string) +
+ *				 			sizeof(ptr) bytes
  *				===================
- *				174 + 3sizeof(ptr) bytes
+ *				174 + 2sizeof(css_string) + sizeof(ptr) bytes
  *
  * Bit allocations:
  *
@@ -245,7 +249,7 @@ struct css_computed_style {
 	uint8_t unused[2];
 
 	css_color background_color;
-	const css_string *background_image;
+	css_string background_image;
 	css_fixed background_position[2];
 
 	css_color border_color[4];
@@ -264,7 +268,7 @@ struct css_computed_style {
 
 	css_fixed line_height;
 
-	const css_string *list_style_image;
+	css_string list_style_image;
 
 	css_fixed margin[4];
 
@@ -284,7 +288,7 @@ struct css_computed_style {
 
 	int32_t z_index;
 
-	const css_string **font_family;
+	css_string *font_family;
 
 	css_computed_uncommon *uncommon;/**< Uncommon properties */
 	css_computed_aural *aural;	/**< Aural properties */
@@ -468,7 +472,7 @@ static inline uint8_t css_computed_word_spacing(
 #define COUNTER_INCREMENT_MASK  0x2
 static inline uint8_t css_computed_counter_increment(
 		const css_computed_style *style, 
-		css_computed_counter ***counters)
+		css_computed_counter **counters)
 {
 	if (style->uncommon != NULL) {
 		uint8_t bits = style->uncommon->bits[COUNTER_INCREMENT_INDEX];
@@ -492,7 +496,7 @@ static inline uint8_t css_computed_counter_increment(
 #define COUNTER_RESET_MASK  0x1
 static inline uint8_t css_computed_counter_reset(
 		const css_computed_style *style, 
-		css_computed_counter ***counters)
+		css_computed_counter **counters)
 {
 	if (style->uncommon != NULL) {
 		uint8_t bits = style->uncommon->bits[COUNTER_RESET_INDEX];
@@ -516,7 +520,7 @@ static inline uint8_t css_computed_counter_reset(
 #define CURSOR_MASK  0xf8
 static inline uint8_t css_computed_cursor(
 		const css_computed_style *style, 
-		const css_string ***urls)
+		const css_string **urls)
 {
 	if (style->uncommon != NULL) {
 		uint8_t bits = style->uncommon->bits[CURSOR_INDEX];
@@ -540,7 +544,7 @@ static inline uint8_t css_computed_cursor(
 #define QUOTES_MASK  0x4
 static inline uint8_t css_computed_quotes(
 		const css_computed_style *style, 
-		const css_string ***quotes)
+		const css_string **quotes)
 {
 	if (style->uncommon != NULL) {
 		uint8_t bits = style->uncommon->bits[QUOTES_INDEX];
@@ -768,7 +772,7 @@ static inline uint8_t css_computed_background_image(
 	bits >>= BACKGROUND_IMAGE_SHIFT;
 
 	/* 1bit: type */
-	*url = style->background_image;
+	*url = &style->background_image;
 
 	return bits;
 }
@@ -808,7 +812,7 @@ static inline uint8_t css_computed_list_style_image(
 	bits >>= LIST_STYLE_IMAGE_SHIFT;
 
 	/* 1bit: type */
-	*url = style->list_style_image;
+	*url = &style->list_style_image;
 
 	return bits;
 }
@@ -821,7 +825,7 @@ static inline uint8_t css_computed_list_style_image(
 #define FONT_FAMILY_MASK  0x1
 static inline uint8_t css_computed_font_family(
 		const css_computed_style *style, 
-		const css_string ***names)
+		const css_string **names)
 {
 	uint8_t bits = style->bits[FONT_FAMILY_INDEX];
 	bits &= FONT_FAMILY_MASK;

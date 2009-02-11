@@ -53,27 +53,11 @@ css_error css_computed_style_destroy(css_computed_style *style)
 
 	if (style->uncommon != NULL) {
 		if (style->uncommon->counter_increment != NULL) {
-			css_computed_counter **c = 
-					style->uncommon->counter_increment;
-
-			while (*c != NULL) {
-				style->alloc(*c, 0, style->pw);
-				c++;
-			}
-
 			style->alloc(style->uncommon->counter_increment, 0,
 					style->pw);
 		}
 
 		if (style->uncommon->counter_reset != NULL) {
-			css_computed_counter **c = 
-					style->uncommon->counter_reset;
-
-			while (*c != NULL) {
-				style->alloc(*c, 0, style->pw);
-				c++;
-			}
-
 			style->alloc(style->uncommon->counter_reset, 0,
 					style->pw);
 		}

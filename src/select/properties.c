@@ -11,7 +11,7 @@ static css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 static css_error cascade_uri_none(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, 
-				const css_string *));
+				const parserutils_hash_entry *));
 static css_error cascade_border_style(uint32_t opv, css_style *style,
 		css_select_state *state, 
 		css_error (*fun)(css_computed_style *, uint8_t));
@@ -2457,7 +2457,7 @@ css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 css_error cascade_uri_none(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, 
-				const css_string *))
+				const parserutils_hash_entry *))
 {
 	uint16_t value = CSS_BACKGROUND_IMAGE_INHERIT;
 	parserutils_hash_entry *uri = NULL;
@@ -2478,8 +2478,7 @@ css_error cascade_uri_none(uint32_t opv, css_style *style,
 	/** \todo lose fun != NULL once all properties have set routines */
 	if (fun != NULL && outranks_existing(getOpcode(opv), 
 			isImportant(opv), state)) {
-		/** \todo fix this mess -- it's seriously unsafe */
-		return fun(state->result, value, (css_string *) uri);
+		return fun(state->result, value, uri);
 	}
 
 	return CSS_OK;

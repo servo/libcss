@@ -169,7 +169,7 @@ static inline css_error set_word_spacing(
 #define COUNTER_INCREMENT_MASK  0x2
 static inline css_error set_counter_increment(
 		css_computed_style *style, uint8_t type, 
-		css_computed_counter **counters)
+		css_computed_counter *counters)
 {
 	uint8_t *bits;
 
@@ -181,8 +181,6 @@ static inline css_error set_counter_increment(
 	*bits = (*bits & ~COUNTER_INCREMENT_MASK) |
 			((type & 0x1) << COUNTER_INCREMENT_SHIFT);
 
-	/** \todo Is this remotely sane? Would it be better to have this 
-	 * function append entries to the array, instead? */
 	style->uncommon->counter_increment = counters;
 
 	return CSS_OK;
@@ -196,7 +194,7 @@ static inline css_error set_counter_increment(
 #define COUNTER_RESET_MASK  0x1
 static inline css_error set_counter_reset(
 		css_computed_style *style, uint8_t type, 
-		css_computed_counter **counters)
+		css_computed_counter *counters)
 {
 	uint8_t *bits;
 
@@ -208,8 +206,6 @@ static inline css_error set_counter_reset(
 	*bits = (*bits & ~COUNTER_RESET_MASK) |
 			((type & 0x1) << COUNTER_RESET_SHIFT);
 
-	/** \todo Is this remotely sane? Would it be better to have this 
-	 * function append entries to the array, instead? */
 	style->uncommon->counter_reset = counters;
 
 	return CSS_OK;
@@ -223,7 +219,7 @@ static inline css_error set_counter_reset(
 #define CURSOR_MASK  0xf8
 static inline css_error set_cursor(
 		css_computed_style *style, uint8_t type, 
-		const css_string **urls)
+		css_string *urls)
 {
 	uint8_t *bits;
 
@@ -235,8 +231,6 @@ static inline css_error set_cursor(
 	*bits = (*bits & ~CURSOR_MASK) |
 			((type & 0x1f) << CURSOR_SHIFT);
 
-	/** \todo Is this remotely sane? Would it be better to have this 
-	 * function append entries to the array, instead? */
 	style->uncommon->cursor = urls;
 
 	return CSS_OK;
@@ -250,7 +244,7 @@ static inline css_error set_cursor(
 #define QUOTES_MASK  0x4
 static inline css_error set_quotes(
 		css_computed_style *style, uint8_t type, 
-		const css_string **quotes)
+		css_string *quotes)
 {
 	uint8_t *bits;
 
@@ -262,8 +256,6 @@ static inline css_error set_quotes(
 	*bits = (*bits & ~QUOTES_MASK) |
 			((type & 0x1) << QUOTES_SHIFT);
 
-	/** \todo Is this remotely sane? Would it be better to have this 
-	 * function append entries to the array, instead? */
 	style->uncommon->quotes = quotes;
 
 	return CSS_OK;
@@ -457,7 +449,7 @@ static inline css_error set_border_left_width(
 #define BACKGROUND_IMAGE_MASK  0x1
 static inline css_error set_background_image(
 		css_computed_style *style, uint8_t type, 
-		const css_string *url)
+		const parserutils_hash_entry *url)
 {
 	uint8_t *bits = &style->bits[BACKGROUND_IMAGE_INDEX];
 
@@ -465,7 +457,8 @@ static inline css_error set_background_image(
 	*bits = (*bits & ~BACKGROUND_IMAGE_MASK) |
 			((type & 0x1) << BACKGROUND_IMAGE_SHIFT);
 
-	style->background_image = url;
+	style->background_image.data = (uint8_t *) url->data;
+	style->background_image.len = url->len;
 
 	return CSS_OK;
 }
@@ -499,7 +492,7 @@ static inline css_error set_color(
 #define LIST_STYLE_IMAGE_MASK  0x1
 static inline css_error set_list_style_image(
 		css_computed_style *style, uint8_t type, 
-		const css_string *url)
+		const parserutils_hash_entry *url)
 {
 	uint8_t *bits = &style->bits[LIST_STYLE_IMAGE_INDEX];
 
@@ -507,7 +500,8 @@ static inline css_error set_list_style_image(
 	*bits = (*bits & ~LIST_STYLE_IMAGE_MASK) |
 			((type & 0x1) << LIST_STYLE_IMAGE_SHIFT);
 
-	style->list_style_image = url;
+	style->list_style_image.data = (uint8_t *) url->data;
+	style->list_style_image.len = url->len;
 
 	return CSS_OK;
 }
@@ -520,7 +514,7 @@ static inline css_error set_list_style_image(
 #define FONT_FAMILY_MASK  0x1
 static inline css_error set_font_family(
 		css_computed_style *style, uint8_t type, 
-		const css_string **names)
+		css_string *names)
 {
 	uint8_t *bits = &style->bits[FONT_FAMILY_INDEX];
 
@@ -528,7 +522,6 @@ static inline css_error set_font_family(
 	*bits = (*bits & ~FONT_FAMILY_MASK) |
 			((type & 0x1) << FONT_FAMILY_SHIFT);
 
-	/** \todo This probably wants to append to the array */
 	style->font_family = names;
 
 	return CSS_OK;
