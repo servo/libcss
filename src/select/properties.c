@@ -8,7 +8,21 @@
 static css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 		css_select_state *state, 
 		css_error (*fun)(css_computed_style *, uint8_t, css_color));
-
+static css_error cascade_uri_none(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t, 
+				const css_string *));
+static css_error cascade_border_style(uint32_t opv, css_style *style,
+		css_select_state *state, 
+		css_error (*fun)(css_computed_style *, uint8_t));
+static css_error cascade_border_width(uint32_t opv, css_style *style,
+		css_select_state *state, 
+		css_error (*fun)(css_computed_style *, uint8_t, css_fixed, 
+				css_unit));
+static css_error cascade_length_auto(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
+				css_unit));
 
 static css_error cascade_azimuth(uint32_t opv, css_style *style,
 		 css_select_state *state)
@@ -87,29 +101,7 @@ static css_error initial_background_color(css_computed_style *style)
 static css_error cascade_background_image(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	uint16_t value = CSS_BACKGROUND_IMAGE_INHERIT;
-	parserutils_hash_entry *uri = NULL;
-
-	if (isInherit(opv) == false) {
-		switch (getValue(opv)) {
-		case BACKGROUND_IMAGE_NONE:
-			value = CSS_BACKGROUND_IMAGE_NONE;
-			break;
-		case BACKGROUND_IMAGE_URI:
-			value = CSS_BACKGROUND_IMAGE_IMAGE;
-			uri = *((parserutils_hash_entry **) style->bytecode);
-			advance_bytecode(style, sizeof(uri));
-			break;
-		}
-	}
-
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
-		/** \todo fix this mess -- it's seriously unsafe */
-		return set_background_image(state->result, value, 
-				(css_string *) uri);
-	}
-
-	return CSS_OK;
+	return cascade_uri_none(opv, style, state, set_background_image);
 }
 
 static css_error initial_background_image(css_computed_style *style)
@@ -323,8 +315,8 @@ static css_error initial_border_bottom_color(css_computed_style *style)
 	return set_border_bottom_color(style, CSS_BORDER_COLOR_COLOR, 0);
 }
 
-static css_error cascade_border_left_color( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_border_left_color(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
 	return cascade_bg_border_color(opv, style, state, 
 			set_border_left_color);
@@ -335,166 +327,107 @@ static css_error initial_border_left_color(css_computed_style *style)
 	return set_border_left_color(style, CSS_BORDER_COLOR_COLOR, 0);
 }
 
-static css_error cascade_border_top_style( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_border_top_style(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_border_style(opv, style, state, set_border_top_style);
 }
 
 static css_error initial_border_top_style(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_border_top_style(style, CSS_BORDER_STYLE_NONE);
 }
 
-static css_error cascade_border_right_style( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_border_right_style(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_border_style(opv, style, state, set_border_right_style);
 }
 
 static css_error initial_border_right_style(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_border_right_style(style, CSS_BORDER_STYLE_NONE);
 }
 
-static css_error cascade_border_bottom_style( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_border_bottom_style(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_border_style(opv, style, state, set_border_bottom_style);
 }
 
 static css_error initial_border_bottom_style(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_border_bottom_style(style, CSS_BORDER_STYLE_NONE);
 }
 
-static css_error cascade_border_left_style( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_border_left_style(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_border_style(opv, style, state, set_border_left_style);
 }
 
 static css_error initial_border_left_style(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_border_left_style(style, CSS_BORDER_STYLE_NONE);
 }
 
-static css_error cascade_border_top_width( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_border_top_width(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_border_width(opv, style, state, set_border_top_width);
 }
 
 static css_error initial_border_top_width(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_border_top_width(style, CSS_BORDER_WIDTH_MEDIUM, 
+			0, CSS_UNIT_PX);
 }
 
-static css_error cascade_border_right_width( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_border_right_width(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_border_width(opv, style, state, set_border_right_width);
 }
 
 static css_error initial_border_right_width(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_border_right_width(style, CSS_BORDER_WIDTH_MEDIUM,
+			0, CSS_UNIT_PX);
 }
 
-static css_error cascade_border_bottom_width( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_border_bottom_width(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_border_width(opv, style, state, set_border_bottom_width);
 }
 
 static css_error initial_border_bottom_width(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_border_bottom_width(style, CSS_BORDER_WIDTH_MEDIUM,
+			0, CSS_UNIT_PX);
 }
 
-static css_error cascade_border_left_width( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_border_left_width(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_border_width(opv, style, state, set_border_left_width);
 }
 
 static css_error initial_border_left_width(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_border_left_width(style, CSS_BORDER_WIDTH_MEDIUM,
+			0, CSS_UNIT_PX);
 }
 
-static css_error cascade_bottom( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_bottom(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length_auto(opv, style, state, set_bottom);
 }
 
 static css_error initial_bottom(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_bottom(style, CSS_BOTTOM_AUTO, 0, CSS_UNIT_PX);
 }
 
 static css_error cascade_caption_side( 
@@ -857,40 +790,26 @@ static css_error initial_font_weight(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_height( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_height(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length_auto(opv, style, state, set_height);
 }
 
 static css_error initial_height(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_height(style, CSS_HEIGHT_AUTO, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_left( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_left(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length_auto(opv, style, state, set_left);
 }
 
 static css_error initial_left(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_left(style, CSS_LEFT_AUTO, 0, CSS_UNIT_PX);
 }
 
 static css_error cascade_letter_spacing( 
@@ -932,19 +851,12 @@ static css_error initial_line_height(css_computed_style *style)
 static css_error cascade_list_style_image( 
 		uint32_t opv, css_style *style, css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_uri_none(opv, style, state, set_list_style_image);
 }
 
 static css_error initial_list_style_image(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_list_style_image(style, CSS_LIST_STYLE_IMAGE_NONE, NULL);
 }
 
 static css_error cascade_list_style_position( 
@@ -983,76 +895,48 @@ static css_error initial_list_style_type(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_margin_top( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_margin_top(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length_auto(opv, style, state, set_margin_top);
 }
 
 static css_error initial_margin_top(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_margin_top(style, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_margin_right( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_margin_right(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length_auto(opv, style, state, set_margin_right);
 }
 
 static css_error initial_margin_right(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_margin_right(style, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_margin_bottom( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_margin_bottom(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length_auto(opv, style, state, set_margin_bottom);
 }
 
 static css_error initial_margin_bottom(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_margin_bottom(style, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_margin_left( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_margin_left(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length_auto(opv, style, state, set_margin_left);
 }
 
 static css_error initial_margin_left(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_margin_left(style, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
 }
 
 static css_error cascade_max_height( 
@@ -1163,40 +1047,27 @@ static css_error initial_outline_color(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_outline_style( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_outline_style(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_border_style(opv, style, state, set_outline_style);
 }
 
 static css_error initial_outline_style(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_outline_style(style, CSS_OUTLINE_STYLE_NONE);
 }
 
-static css_error cascade_outline_width( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_outline_width(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_border_width(opv, style, state, set_outline_width);
 }
 
 static css_error initial_outline_width(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_outline_width(style, CSS_OUTLINE_WIDTH_MEDIUM,
+			0, CSS_UNIT_PX);
 }
 
 static css_error cascade_overflow( 
@@ -1487,22 +1358,15 @@ static css_error initial_richness(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_right( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_right(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length_auto(opv, style, state, set_right);
 }
 
 static css_error initial_right(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_right(style, CSS_RIGHT_AUTO, 0, CSS_UNIT_PX);
 }
 
 static css_error cascade_speak_header( 
@@ -1703,22 +1567,15 @@ static css_error initial_text_transform(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_top( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_top(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length_auto(opv, style, state, set_top);
 }
 
 static css_error initial_top(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_top(style, CSS_TOP_AUTO, 0, CSS_UNIT_PX);
 }
 
 static css_error cascade_unicode_bidi( 
@@ -1847,22 +1704,15 @@ static css_error initial_widows(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_width( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_width(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length_auto(opv, style, state, set_width);
 }
 
 static css_error initial_width(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_width(style, CSS_WIDTH_AUTO, 0, CSS_UNIT_PX);
 }
 
 static css_error cascade_word_spacing( 
@@ -1931,6 +1781,153 @@ css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		return fun(state->result, value, color);
+	}
+
+	return CSS_OK;
+}
+
+css_error cascade_uri_none(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t, 
+				const css_string *))
+{
+	uint16_t value = CSS_BACKGROUND_IMAGE_INHERIT;
+	parserutils_hash_entry *uri = NULL;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case BACKGROUND_IMAGE_NONE:
+			value = CSS_BACKGROUND_IMAGE_NONE;
+			break;
+		case BACKGROUND_IMAGE_URI:
+			value = CSS_BACKGROUND_IMAGE_IMAGE;
+			uri = *((parserutils_hash_entry **) style->bytecode);
+			advance_bytecode(style, sizeof(uri));
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		/** \todo fix this mess -- it's seriously unsafe */
+		return fun(state->result, value, (css_string *) uri);
+	}
+
+	return CSS_OK;
+}
+
+css_error cascade_border_style(uint32_t opv, css_style *style,
+		css_select_state *state, 
+		css_error (*fun)(css_computed_style *, uint8_t))
+{
+	uint16_t value = CSS_BORDER_STYLE_INHERIT;
+
+	UNUSED(style);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case BORDER_STYLE_NONE:
+			value = CSS_BORDER_STYLE_NONE;
+			break;
+		case BORDER_STYLE_HIDDEN:
+			value = CSS_BORDER_STYLE_HIDDEN;
+			break;
+		case BORDER_STYLE_DOTTED:
+			value = CSS_BORDER_STYLE_DOTTED;
+			break;
+		case BORDER_STYLE_DASHED:
+			value = CSS_BORDER_STYLE_DASHED;
+			break;
+		case BORDER_STYLE_SOLID:
+			value = CSS_BORDER_STYLE_SOLID;
+			break;
+		case BORDER_STYLE_DOUBLE:
+			value = CSS_BORDER_STYLE_DOUBLE;
+			break;
+		case BORDER_STYLE_GROOVE:
+			value = CSS_BORDER_STYLE_GROOVE;
+			break;
+		case BORDER_STYLE_RIDGE:
+			value = CSS_BORDER_STYLE_RIDGE;
+			break;
+		case BORDER_STYLE_INSET:
+			value = CSS_BORDER_STYLE_INSET;
+			break;
+		case BORDER_STYLE_OUTSET:
+			value = CSS_BORDER_STYLE_OUTSET;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return fun(state->result, value);
+	}
+
+	return CSS_OK;
+}
+
+css_error cascade_border_width(uint32_t opv, css_style *style,
+		css_select_state *state, 
+		css_error (*fun)(css_computed_style *, uint8_t, css_fixed, 
+				css_unit))
+{
+	uint16_t value = CSS_BORDER_WIDTH_INHERIT;
+	css_fixed length = 0;
+	uint32_t unit = CSS_UNIT_PX;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case BORDER_WIDTH_SET:
+			value = CSS_BORDER_WIDTH_WIDTH;
+			length = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(length));
+			unit = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(unit));
+			break;
+		case BORDER_WIDTH_THIN:
+			value = CSS_BORDER_WIDTH_THIN;
+			break;
+		case BORDER_WIDTH_MEDIUM:
+			value = CSS_BORDER_WIDTH_MEDIUM;
+			break;
+		case BORDER_WIDTH_THICK:
+			value = CSS_BORDER_WIDTH_THICK;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return fun(state->result, value, length, unit);
+	}
+
+	return CSS_OK;
+}
+
+css_error cascade_length_auto(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
+				css_unit))
+{
+	uint16_t value = CSS_BOTTOM_INHERIT;
+	css_fixed length = 0;
+	uint32_t unit = CSS_UNIT_PX;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case BOTTOM_SET:
+			value = CSS_BOTTOM_SET;
+			length = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(length));
+			unit = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(unit));
+			break;
+		case BOTTOM_AUTO:
+			value = CSS_BOTTOM_AUTO;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return fun(state->result, value, length, unit);
 	}
 
 	return CSS_OK;
