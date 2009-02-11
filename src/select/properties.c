@@ -1080,15 +1080,12 @@ static css_error cascade_font_family(uint32_t opv, css_style *style,
 	uint16_t value = CSS_FONT_FAMILY_INHERIT;
 	css_string *fonts = NULL;
 	uint32_t n_fonts = 0;
-	parserutils_error perror;
 
 	if (isInherit(opv) == false) {
 		uint32_t v = getValue(opv);
 
-		value = CSS_FONT_FAMILY_SET;
-
 		while (v != FONT_FAMILY_END) {
-			const parserutils_hash_entry *font;
+			const parserutils_hash_entry *font = NULL;
 			css_string *temp;
 
 			switch (v) {
@@ -1098,96 +1095,51 @@ static css_error cascade_font_family(uint32_t opv, css_style *style,
 						style->bytecode);
 				advance_bytecode(style, sizeof(font));
 				break;
-			/** \todo This sucks */
 			case FONT_FAMILY_SERIF:
-				perror = parserutils_hash_insert(
-						state->sheet->dictionary, 
-						(const uint8_t *) "serif", 
-						SLEN("serif"), &font);
-				if (perror != PARSERUTILS_OK) {
-					if (fonts != NULL) {
-						state->result->alloc(fonts, 0,
-							state->result->pw);
-					}
-					return css_error_from_parserutils_error(
-							perror);
-				}
+				if (value == CSS_FONT_FAMILY_INHERIT)
+					value = CSS_FONT_FAMILY_SERIF;
 				break;
 			case FONT_FAMILY_SANS_SERIF:
-				perror = parserutils_hash_insert(
-						state->sheet->dictionary, 
-						(const uint8_t *) "sans-serif", 
-						SLEN("sans-serif"), &font);
-				if (perror != PARSERUTILS_OK) {
-					if (fonts != NULL) {
-						state->result->alloc(fonts, 0,
-							state->result->pw);
-					}
-					return css_error_from_parserutils_error(
-							perror);
-				}
+				if (value == CSS_FONT_FAMILY_INHERIT)
+					value = CSS_FONT_FAMILY_SANS_SERIF;
 				break;
 			case FONT_FAMILY_CURSIVE:
-				perror = parserutils_hash_insert(
-						state->sheet->dictionary, 
-						(const uint8_t *) "cursive", 
-						SLEN("cursive"), &font);
-				if (perror != PARSERUTILS_OK) {
-					if (fonts != NULL) {
-						state->result->alloc(fonts, 0,
-							state->result->pw);
-					}
-					return css_error_from_parserutils_error(
-							perror);
-				}
+				if (value == CSS_FONT_FAMILY_INHERIT)
+					value = CSS_FONT_FAMILY_CURSIVE;
 				break;
 			case FONT_FAMILY_FANTASY:
-				perror = parserutils_hash_insert(
-						state->sheet->dictionary, 
-						(const uint8_t *) "fantasy", 
-						SLEN("fantasy"), &font);
-				if (perror != PARSERUTILS_OK) {
-					if (fonts != NULL) {
-						state->result->alloc(fonts, 0,
-							state->result->pw);
-					}
-					return css_error_from_parserutils_error(
-							perror);
-				}
+				if (value == CSS_FONT_FAMILY_INHERIT)
+					value = CSS_FONT_FAMILY_FANTASY;
 				break;
 			case FONT_FAMILY_MONOSPACE:
-				perror = parserutils_hash_insert(
-						state->sheet->dictionary, 
-						(const uint8_t *) "monospace", 
-						SLEN("monospace"), &font);
-				if (perror != PARSERUTILS_OK) {
+				if (value == CSS_FONT_FAMILY_INHERIT)
+					value = CSS_FONT_FAMILY_MONOSPACE;
+				break;
+			}
+
+			/* Only use family-names which occur before the first
+			 * generic-family. Any values which occur after the
+			 * first generic-family are ignored. */
+			/** \todo Do this at bytecode generation time? */
+			if (value == CSS_FONT_FAMILY_INHERIT && font != NULL) {
+				temp = state->result->alloc(fonts, 
+					(n_fonts + 1) * sizeof(css_string), 
+					state->result->pw);
+				if (temp == NULL) {
 					if (fonts != NULL) {
 						state->result->alloc(fonts, 0,
 							state->result->pw);
 					}
-					return css_error_from_parserutils_error(
-							perror);
+					return CSS_NOMEM;
 				}
-				break;
+
+				fonts = temp;
+
+				fonts[n_fonts].data = (uint8_t *) font->data;
+				fonts[n_fonts].len = font->len;
+
+				n_fonts++;
 			}
-
-			temp = state->result->alloc(fonts, 
-					(n_fonts + 1) * sizeof(css_string), 
-					state->result->pw);
-			if (temp == NULL) {
-				if (fonts != NULL) {
-					state->result->alloc(fonts, 0,
-							state->result->pw);
-				}
-				return CSS_NOMEM;
-			}
-
-			fonts = temp;
-
-			fonts[n_fonts].data = (uint8_t *) font->data;
-			fonts[n_fonts].len = font->len;
-
-			n_fonts++;
 
 			v = *((uint32_t *) style->bytecode);
 			advance_bytecode(style, sizeof(v));
@@ -1224,20 +1176,7 @@ static css_error cascade_font_family(uint32_t opv, css_style *style,
 
 static css_error initial_font_family(css_computed_style *style)
 {
-	css_string *fonts;
-
-	/** \todo This also sucks */
-
-	fonts = style->alloc(NULL, 2 * sizeof(css_string), style->pw);
-	if (fonts == NULL)
-		return CSS_NOMEM;
-
-	fonts[0].data = (uint8_t *) "sans-serif";
-	fonts[0].len = SLEN("sans-serif");
-	fonts[1].data = NULL;
-	fonts[1].len = 0;
-
-	return set_font_family(style, CSS_FONT_FAMILY_SET, fonts);
+	return set_font_family(style, CSS_FONT_FAMILY_DEFAULT, NULL);
 }
 
 static css_error cascade_font_size(uint32_t opv, css_style *style, 
