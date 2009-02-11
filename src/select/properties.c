@@ -538,12 +538,38 @@ static css_error cascade_clip(uint32_t opv, css_style *style,
 	css_computed_clip_rect rect = { 0, 0, 0, 0, 
 			CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX };
 
-	UNUSED(style);
-
 	if (isInherit(opv) == false) {
 		switch (getValue(opv) & CLIP_SHAPE_MASK) {
 		case CLIP_SHAPE_RECT:
 			/** \todo clip rect can't store auto values */
+			if (getValue(opv) & CLIP_RECT_TOP_AUTO) {
+			} else {
+				rect.top = *((css_fixed *) style->bytecode);
+				advance_bytecode(style, sizeof(css_fixed));
+				rect.tunit = *((uint32_t *) style->bytecode);
+				advance_bytecode(style, sizeof(uint32_t));
+			}
+			if (getValue(opv) & CLIP_RECT_RIGHT_AUTO) {
+			} else {
+				rect.right = *((css_fixed *) style->bytecode);
+				advance_bytecode(style, sizeof(css_fixed));
+				rect.runit = *((uint32_t *) style->bytecode);
+				advance_bytecode(style, sizeof(uint32_t));
+			}
+			if (getValue(opv) & CLIP_RECT_BOTTOM_AUTO) {
+			} else {
+				rect.bottom = *((css_fixed *) style->bytecode);
+				advance_bytecode(style, sizeof(css_fixed));
+				rect.bunit = *((uint32_t *) style->bytecode);
+				advance_bytecode(style, sizeof(uint32_t));
+			}
+			if (getValue(opv) & CLIP_RECT_LEFT_AUTO) {
+			} else {
+				rect.left = *((css_fixed *) style->bytecode);
+				advance_bytecode(style, sizeof(css_fixed));
+				rect.lunit = *((uint32_t *) style->bytecode);
+				advance_bytecode(style, sizeof(uint32_t));
+			}
 			break;
 		case CLIP_AUTO:
 			value = CSS_CLIP_AUTO;
