@@ -2002,11 +2002,69 @@ static css_error initial_position(css_computed_style *style)
 static css_error cascade_quotes(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = CSS_QUOTES_INHERIT;
+	css_string *quotes = NULL;
+	uint32_t n_quotes = 0;
 
-	/** \todo quotes */
+	if (isInherit(opv) == false) {
+		uint32_t v = getValue(opv);
+
+		value = CSS_QUOTES_STRING;
+
+		while (v != QUOTES_NONE) {
+			parserutils_hash_entry *quote;
+			css_string *temp;
+
+			quote = *((parserutils_hash_entry **) style->bytecode);
+			advance_bytecode(style, sizeof(quote));
+
+			temp = state->result->alloc(quotes, 
+					(n_quotes + 1) * sizeof(css_string), 
+					state->result->pw);
+			if (temp == NULL) {
+				if (quotes != NULL) {
+					state->result->alloc(quotes, 0,
+							state->result->pw);
+				}
+				return CSS_NOMEM;
+			}
+
+			quotes = temp;
+
+			quotes[n_quotes].data = (uint8_t *) quote->data;
+			quotes[n_quotes].len = quote->len;
+
+			n_quotes++;
+
+			v = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(v));
+		}
+	}
+
+	/* Terminate array, if required */
+	if (n_quotes > 0) {
+		css_string *temp;
+
+		temp = state->result->alloc(quotes, 
+				(n_quotes + 1) * sizeof(css_string), 
+				state->result->pw);
+		if (temp == NULL) {
+			state->result->alloc(quotes, 0, state->result->pw);
+			return CSS_NOMEM;
+		}
+
+		quotes = temp;
+
+		quotes[n_quotes].data = NULL;
+		quotes[n_quotes].len = 0;
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_quotes(state->result, value, quotes);
+	} else {
+		if (quotes != NULL)
+			state->result->alloc(quotes, 0, state->result->pw);
+	}
 
 	return CSS_OK;
 }
