@@ -38,3 +38,12 @@
 |  display: block
 |  display: table-cell
 #reset
+
+#data
+* { cursor: url("foo.png"), url("bar.gif"), pointer; }
+#errors
+#expected
+| *
+|  cursor: url('foo.png'), url('bar.gif'), pointer
+#reset
+

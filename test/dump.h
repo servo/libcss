@@ -1132,18 +1132,20 @@ void dump_bytecode(css_style *style, char **ptr)
 				}
 				break;
 			case OP_CURSOR:
-				switch (value) {
-				case CURSOR_URI:
-				{
+				while (value == CURSOR_URI) {
 					parserutils_hash_entry *he = 
 						*((parserutils_hash_entry **) 
 						bytecode);
 					ADVANCE(sizeof(ptr));
-					*ptr += sprintf(*ptr, "url('%.*s')", 
+					*ptr += sprintf(*ptr, "url('%.*s'), ", 
 							(int) he->len, 
 							(char *) he->data);
+
+					value = *((uint32_t *) bytecode);
+					ADVANCE(sizeof(value));
 				}
-					break;
+
+				switch (value) {
 				case CURSOR_AUTO:
 					*ptr += sprintf(*ptr, "auto");
 					break;
