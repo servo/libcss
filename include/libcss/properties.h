@@ -396,7 +396,8 @@ enum css_text_align {
 	CSS_TEXT_ALIGN_LEFT			= 0x1,
 	CSS_TEXT_ALIGN_RIGHT			= 0x2,
 	CSS_TEXT_ALIGN_CENTER			= 0x3,
-	CSS_TEXT_ALIGN_JUSTIFY			= 0x4
+	CSS_TEXT_ALIGN_JUSTIFY			= 0x4,
+	CSS_TEXT_ALIGN_DEFAULT			= 0x5
 };
 
 enum css_text_decoration {

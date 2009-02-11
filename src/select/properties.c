@@ -38,6 +38,9 @@ static css_error cascade_length(uint32_t opv, css_style *style,
 static css_error cascade_number(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, css_fixed));
+static css_error cascade_page_break_after_before(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t));
 
 static css_error cascade_azimuth(uint32_t opv, css_style *style,
 		 css_select_state *state)
@@ -1387,22 +1390,35 @@ static css_error initial_orphans(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_outline_color( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_outline_color(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = CSS_OUTLINE_COLOR_INHERIT;
+	css_color color = 0;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case OUTLINE_COLOR_SET:
+			value = CSS_OUTLINE_COLOR_COLOR;
+			color = *((css_color *) style->bytecode);
+			advance_bytecode(style, sizeof(color));
+			break;
+		case OUTLINE_COLOR_INVERT:
+			value = CSS_OUTLINE_COLOR_INVERT;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_outline_color(state->result, value, color);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_outline_color(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_outline_color(style, CSS_OUTLINE_COLOR_INVERT, 0);
 }
 
 static css_error cascade_outline_style(uint32_t opv, css_style *style, 
@@ -1428,22 +1444,40 @@ static css_error initial_outline_width(css_computed_style *style)
 			0, CSS_UNIT_PX);
 }
 
-static css_error cascade_overflow( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_overflow(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_OVERFLOW_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case OVERFLOW_VISIBLE:
+			value = CSS_OVERFLOW_VISIBLE;
+			break;
+		case OVERFLOW_HIDDEN:
+			value = CSS_OVERFLOW_HIDDEN;
+			break;
+		case OVERFLOW_SCROLL:
+			value = CSS_OVERFLOW_SCROLL;
+			break;
+		case OVERFLOW_AUTO:
+			value = CSS_OVERFLOW_AUTO;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_overflow(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_overflow(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_overflow(style, CSS_OVERFLOW_VISIBLE);
 }
 
 static css_error cascade_padding_top(uint32_t opv, css_style *style, 
@@ -1490,15 +1524,11 @@ static css_error initial_padding_left(css_computed_style *style)
 	return set_padding_left(style, CSS_PADDING_SET, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_page_break_after( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_page_break_after(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	/** \todo page-break-after */
+	return cascade_page_break_after_before(opv, style, state, NULL);
 }
 
 static css_error initial_page_break_after(css_computed_style *style)
@@ -1508,15 +1538,11 @@ static css_error initial_page_break_after(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_page_break_before( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_page_break_before(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	/** \todo page-break-before */
+	return cascade_page_break_after_before(opv, style, state, NULL);
 }
 
 static css_error initial_page_break_before(css_computed_style *style)
@@ -1526,13 +1552,26 @@ static css_error initial_page_break_before(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_page_break_inside( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_page_break_inside(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = 0;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case PAGE_BREAK_INSIDE_AUTO:
+		case PAGE_BREAK_INSIDE_AVOID:
+			/** \todo convert to public values */
+			value = 0;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		/** \todo page-break-inside */
+	}
 
 	return CSS_OK;
 }
@@ -1586,13 +1625,36 @@ static css_error initial_pitch_range(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_pitch( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_pitch(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = 0;
+	css_fixed freq = 0;
+	uint32_t unit = CSS_UNIT_HZ;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case PITCH_FREQUENCY:
+			value = 0;
+
+			freq = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(freq));
+			unit = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(unit));
+			break;
+		case PITCH_X_LOW:
+		case PITCH_LOW:
+		case PITCH_MEDIUM:
+		case PITCH_HIGH:
+		case PITCH_X_HIGH:
+			/** \todo convert to public values */
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		/** \todo pitch */
+	}
 
 	return CSS_OK;
 }
@@ -1604,13 +1666,32 @@ static css_error initial_pitch(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_play_during( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_play_during(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = 0;
+	parserutils_hash_entry *uri = NULL;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case PLAY_DURING_URI:
+			value = 0;
+
+			uri = *((parserutils_hash_entry **) style->bytecode);
+			advance_bytecode(style, sizeof(uri));
+			break;
+		case PLAY_DURING_AUTO:
+		case PLAY_DURING_NONE:
+			/** \todo convert to public values */
+			break;
+		}
+
+		/** \todo mix & repeat */
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		/** \todo play-during */
+	}
 
 	return CSS_OK;
 }
@@ -1622,31 +1703,50 @@ static css_error initial_play_during(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_position( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_position(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_POSITION_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case POSITION_STATIC:
+			value = CSS_POSITION_STATIC;
+			break;
+		case POSITION_RELATIVE:
+			value = CSS_POSITION_RELATIVE;
+			break;
+		case POSITION_ABSOLUTE:
+			value = CSS_POSITION_ABSOLUTE;
+			break;
+		case POSITION_FIXED:
+			value = CSS_POSITION_FIXED;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_position(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_position(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_position(style, CSS_POSITION_STATIC);
 }
 
-static css_error cascade_quotes( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_quotes(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
 	UNUSED(opv);
 	UNUSED(style);
 	UNUSED(state);
+
+	/** \todo quotes */
 
 	return CSS_OK;
 }
@@ -1683,13 +1783,26 @@ static css_error initial_right(css_computed_style *style)
 	return set_right(style, CSS_RIGHT_AUTO, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_speak_header( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_speak_header(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = 0;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case SPEAK_HEADER_ONCE:
+		case SPEAK_HEADER_ALWAYS:
+			/** \todo convert to public values */
+			value = 0;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		/** \todo speak-header */
+	}
 
 	return CSS_OK;
 }
@@ -1701,13 +1814,26 @@ static css_error initial_speak_header(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_speak_numeral( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_speak_numeral(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = 0;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case SPEAK_NUMERAL_DIGITS:
+		case SPEAK_NUMERAL_CONTINUOUS:
+			/** \todo convert to public values */
+			value = 0;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		/** \todo speak-numeral */
+	}
 
 	return CSS_OK;
 }
@@ -1722,10 +1848,23 @@ static css_error initial_speak_numeral(css_computed_style *style)
 static css_error cascade_speak_punctuation( 
 		uint32_t opv, css_style *style, css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = 0;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case SPEAK_PUNCTUATION_CODE:
+		case SPEAK_PUNCTUATION_NONE:
+			/** \todo convert to public values */
+			value = 0;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		/** \todo speak-punctuation */
+	}
 
 	return CSS_OK;
 }
@@ -1737,13 +1876,27 @@ static css_error initial_speak_punctuation(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_speak( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_speak(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = 0;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case SPEAK_NORMAL:
+		case SPEAK_NONE:
+		case SPEAK_SPELL_OUT:
+			/** \todo convert to public values */
+			value = 0;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		/** \todo speak */
+	}
 
 	return CSS_OK;
 }
@@ -1755,13 +1908,35 @@ static css_error initial_speak(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_speech_rate( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_speech_rate(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = 0;
+	css_fixed rate = 0;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case SPEECH_RATE_SET:
+			value = 0;
+
+			rate = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(rate));
+			break;
+		case SPEECH_RATE_X_SLOW:
+		case SPEECH_RATE_SLOW:
+		case SPEECH_RATE_MEDIUM:
+		case SPEECH_RATE_FAST:
+		case SPEECH_RATE_X_FAST:
+		case SPEECH_RATE_FASTER:
+		case SPEECH_RATE_SLOWER:
+			/** \todo convert to public values */
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		/** \todo speech-rate */
+	}
 
 	return CSS_OK;
 }
@@ -1787,58 +1962,106 @@ static css_error initial_stress(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_table_layout( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_table_layout(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_TABLE_LAYOUT_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case TABLE_LAYOUT_AUTO:
+			value = CSS_TABLE_LAYOUT_AUTO;
+			break;
+		case TABLE_LAYOUT_FIXED:
+			value = CSS_TABLE_LAYOUT_FIXED;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_table_layout(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_table_layout(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_table_layout(style, CSS_TABLE_LAYOUT_AUTO);
 }
 
-static css_error cascade_text_align( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_text_align(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_TEXT_ALIGN_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case TEXT_ALIGN_LEFT:
+			value = CSS_TEXT_ALIGN_LEFT;
+			break;
+		case TEXT_ALIGN_RIGHT:
+			value = CSS_TEXT_ALIGN_RIGHT;
+			break;
+		case TEXT_ALIGN_CENTER:
+			value = CSS_TEXT_ALIGN_CENTER;
+			break;
+		case TEXT_ALIGN_JUSTIFY:
+			value = CSS_TEXT_ALIGN_JUSTIFY;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_text_align(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_text_align(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_text_align(style, CSS_TEXT_ALIGN_DEFAULT);
 }
 
-static css_error cascade_text_decoration( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_text_decoration(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
+	uint16_t value = CSS_TEXT_DECORATION_INHERIT;
 	
-	UNUSED(opv);
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		if (getValue(opv) == TEXT_DECORATION_NONE) {
+			value = CSS_TEXT_DECORATION_NONE;
+		} else {
+			assert(value == 0);
+
+			if (getValue(opv) & TEXT_DECORATION_UNDERLINE)
+				value |= CSS_TEXT_DECORATION_UNDERLINE;
+			if (getValue(opv) & TEXT_DECORATION_OVERLINE)
+				value |= CSS_TEXT_DECORATION_OVERLINE;
+			if (getValue(opv) & TEXT_DECORATION_LINE_THROUGH)
+				value |= CSS_TEXT_DECORATION_LINE_THROUGH;
+			if (getValue(opv) & TEXT_DECORATION_BLINK)
+				value |= CSS_TEXT_DECORATION_BLINK;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_text_decoration(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_text_decoration(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_text_decoration(style, CSS_TEXT_DECORATION_NONE);
 }
 
 static css_error cascade_text_indent(uint32_t opv, css_style *style, 
@@ -1852,22 +2075,40 @@ static css_error initial_text_indent(css_computed_style *style)
 	return set_text_indent(style, CSS_TEXT_INDENT_SET, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_text_transform( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_text_transform(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
+	uint16_t value = CSS_TEXT_TRANSFORM_INHERIT;
 	
-	UNUSED(opv);
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case TEXT_TRANSFORM_CAPITALIZE:
+			value = CSS_TEXT_TRANSFORM_CAPITALIZE;
+			break;
+		case TEXT_TRANSFORM_UPPERCASE:
+			value = CSS_TEXT_TRANSFORM_UPPERCASE;
+			break;
+		case TEXT_TRANSFORM_LOWERCASE:
+			value = CSS_TEXT_TRANSFORM_LOWERCASE;
+			break;
+		case TEXT_TRANSFORM_NONE:
+			value = CSS_TEXT_TRANSFORM_NONE;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_text_transform(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_text_transform(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_text_transform(style, CSS_TEXT_TRANSFORM_NONE);
 }
 
 static css_error cascade_top(uint32_t opv, css_style *style, 
@@ -2334,6 +2575,35 @@ css_error cascade_number(uint32_t opv, css_style *style,
 	if (fun != NULL && outranks_existing(getOpcode(opv), 
 			isImportant(opv), state)) {
 		return fun(state->result, value, length);
+	}
+
+	return CSS_OK;
+}
+
+css_error cascade_page_break_after_before(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t))
+{
+	uint16_t value = 0;
+
+	UNUSED(style);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case PAGE_BREAK_AFTER_AUTO:
+		case PAGE_BREAK_AFTER_ALWAYS:
+		case PAGE_BREAK_AFTER_AVOID:
+		case PAGE_BREAK_AFTER_LEFT:
+		case PAGE_BREAK_AFTER_RIGHT:
+			/** \todo convert to public values */
+			break;
+		}
+	}
+
+	/** \todo lose fun != NULL */
+	if (fun != NULL && outranks_existing(getOpcode(opv), 
+			isImportant(opv), state)) {
+		return fun(state->result, value);
 	}
 
 	return CSS_OK;
