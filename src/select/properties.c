@@ -743,20 +743,125 @@ static css_error initial_cue_before(css_computed_style *style)
 static css_error cascade_cursor(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = CSS_CURSOR_INHERIT;
+	css_string *uris = NULL;
+	uint32_t n_uris = 0;
 
-	/** \todo cursor */
+	if (isInherit(opv) == false) {
+		uint32_t v = getValue(opv);
+
+		while (v == CURSOR_URI) {
+			parserutils_hash_entry *uri;
+			css_string *temp;
+
+			uri = *((parserutils_hash_entry **) style->bytecode);
+			advance_bytecode(style, sizeof(uri));
+
+			temp = state->result->alloc(uris, 
+					(n_uris + 1) * sizeof(css_string), 
+					state->result->pw);
+			if (temp == NULL) {
+				if (uris != NULL) {
+					state->result->alloc(uris, 0,
+							state->result->pw);
+				}
+				return CSS_NOMEM;
+			}
+
+			uris = temp;
+
+			uris[n_uris].data = (uint8_t *) uri->data;
+			uris[n_uris].len = uri->len;
+
+			n_uris++;
+
+			v = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(v));
+		}
+
+		switch (v) {
+		case CURSOR_AUTO:
+			value = CSS_CURSOR_AUTO;
+			break;
+		case CURSOR_CROSSHAIR:
+			value = CSS_CURSOR_CROSSHAIR;
+			break;
+		case CURSOR_DEFAULT:
+			value = CSS_CURSOR_DEFAULT;
+			break;
+		case CURSOR_POINTER:
+			value = CSS_CURSOR_POINTER;
+			break;
+		case CURSOR_MOVE:
+			value = CSS_CURSOR_MOVE;
+			break;
+		case CURSOR_E_RESIZE:
+			value = CSS_CURSOR_E_RESIZE;
+			break;
+		case CURSOR_NE_RESIZE:
+			value = CSS_CURSOR_NE_RESIZE;
+			break;
+		case CURSOR_NW_RESIZE:
+			value = CSS_CURSOR_NW_RESIZE;
+			break;
+		case CURSOR_N_RESIZE:
+			value = CSS_CURSOR_N_RESIZE;
+			break;
+		case CURSOR_SE_RESIZE:
+			value = CSS_CURSOR_SE_RESIZE;
+			break;
+		case CURSOR_SW_RESIZE:
+			value = CSS_CURSOR_SW_RESIZE;
+			break;
+		case CURSOR_S_RESIZE:
+			value = CSS_CURSOR_S_RESIZE;
+			break;
+		case CURSOR_W_RESIZE:
+			value = CSS_CURSOR_W_RESIZE;
+			break;
+		case CURSOR_TEXT:
+			value = CSS_CURSOR_TEXT;
+			break;
+		case CURSOR_WAIT:
+			value = CSS_CURSOR_WAIT;
+			break;
+		case CURSOR_HELP:
+			value = CSS_CURSOR_HELP;
+			break;
+		case CURSOR_PROGRESS:
+			value = CSS_CURSOR_PROGRESS;
+			break;
+		}
+	}
+
+	/* Terminate array with blank entry, if needed */
+	if (n_uris > 0) {
+		css_string *temp;
+
+		temp = state->result->alloc(uris, 
+				(n_uris + 1) * sizeof(css_string), 
+				state->result->pw);
+		if (temp == NULL) {
+			state->result->alloc(uris, 0, state->result->pw);
+			return CSS_NOMEM;
+		}
+
+		uris = temp;
+
+		uris[n_uris].data = NULL;
+		uris[n_uris].len = 0;
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_cursor(state->result, value, uris);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_cursor(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_cursor(style, CSS_CURSOR_AUTO, NULL);
 }
 
 static css_error cascade_direction(uint32_t opv, css_style *style, 
@@ -2868,6 +2973,7 @@ css_error cascade_counter_increment_reset(uint32_t opv, css_style *style,
 		}
 	}
 
+	/* If we have some counters, terminate the array with a blank entry */
 	if (n_counters > 0) {
 		css_computed_counter *temp;
 
