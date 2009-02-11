@@ -430,85 +430,139 @@ static css_error initial_bottom(css_computed_style *style)
 	return set_bottom(style, CSS_BOTTOM_AUTO, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_caption_side( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_caption_side(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_CAPTION_SIDE_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case CAPTION_SIDE_TOP:
+			value = CSS_CAPTION_SIDE_TOP;
+			break;
+		case CAPTION_SIDE_BOTTOM:
+			value = CSS_CAPTION_SIDE_BOTTOM;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_caption_side(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_caption_side(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_caption_side(style, CSS_CAPTION_SIDE_TOP);
 }
 
-static css_error cascade_clear( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_clear(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_CLEAR_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case CLEAR_NONE:
+			value = CSS_CLEAR_NONE;
+			break;
+		case CLEAR_LEFT:
+			value = CSS_CLEAR_LEFT;
+			break;
+		case CLEAR_RIGHT:
+			value = CSS_CLEAR_RIGHT;
+			break;
+		case CLEAR_BOTH:
+			value = CSS_CLEAR_BOTH;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_clear(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_clear(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_clear(style, CSS_CLEAR_NONE);
 }
 
-static css_error cascade_clip( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_clip(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_CLIP_INHERIT;
+	css_computed_clip_rect rect = { 0, 0, 0, 0, 
+			CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX };
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv) & CLIP_SHAPE_MASK) {
+		case CLIP_SHAPE_RECT:
+			/** \todo clip rect can't store auto values */
+			break;
+		case CLIP_AUTO:
+			value = CSS_CLIP_AUTO;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_clip(state->result, value, &rect);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_clip(css_computed_style *style)
 {
-	UNUSED(style);
+	css_computed_clip_rect rect = { 0, 0, 0, 0, 
+			CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX };
 
-	return CSS_OK;
+	return set_clip(style, CSS_CLIP_AUTO, &rect);
 }
 
-static css_error cascade_color( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_color(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = CSS_COLOR_INHERIT;
+	css_color color = 0;
+
+	if (isInherit(opv) == false) {
+		value = CSS_COLOR_COLOR;
+		color = *((css_color *) style->bytecode);
+		advance_bytecode(style, sizeof(color));
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_color(state->result, value, color);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_color(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_color(style, CSS_COLOR_COLOR, 0);
 }
 
-static css_error cascade_content( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_content(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
 	UNUSED(opv);
 	UNUSED(style);
 	UNUSED(state);
+
+	/** \todo content */
 
 	return CSS_OK;
 }
@@ -520,8 +574,8 @@ static css_error initial_content(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_counter_increment( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_counter_increment(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
 	
 	UNUSED(opv);
