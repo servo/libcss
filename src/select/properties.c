@@ -27,9 +27,9 @@ static css_error cascade_length_auto(uint32_t opv, css_style *style,
 static css_error cascade_azimuth(uint32_t opv, css_style *style,
 		 css_select_state *state)
 {
-	uint16_t value = 0;;
+	uint16_t value = 0;
 	css_fixed val = 0;
-	uint32_t unit = CSS_UNIT_PX;
+	uint32_t unit = CSS_UNIT_DEG;
 
 	if (isInherit(opv) == false) {
 		value = getValue(opv);
@@ -770,13 +770,37 @@ static css_error initial_display(css_computed_style *style)
 	return set_display(style, CSS_DISPLAY_INLINE);
 }
 
-static css_error cascade_elevation( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_elevation(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = 0;
+	css_fixed val = 0;
+	uint32_t unit = CSS_UNIT_DEG;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case ELEVATION_ANGLE: 
+			value = 0;
+
+			val = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(val));
+
+			unit = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(unit));
+			break;
+		case ELEVATION_BELOW:
+		case ELEVATION_LEVEL:
+		case ELEVATION_ABOVE:
+		case ELEVATION_HIGHER:
+		case ELEVATION_LOWER:
+			/** \todo convert to public values */
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		/** \todo set computed elevation */
+	}
 
 	return CSS_OK;
 }
@@ -788,49 +812,77 @@ static css_error initial_elevation(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_empty_cells( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_empty_cells(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_EMPTY_CELLS_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case EMPTY_CELLS_SHOW:
+			value = CSS_EMPTY_CELLS_SHOW;
+			break;
+		case EMPTY_CELLS_HIDE:
+			value = CSS_EMPTY_CELLS_HIDE;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_empty_cells(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_empty_cells(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_empty_cells(style, CSS_EMPTY_CELLS_SHOW);
 }
 
-static css_error cascade_float( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_float(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_FLOAT_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case FLOAT_LEFT:
+			value = CSS_FLOAT_LEFT;
+			break;
+		case FLOAT_RIGHT:
+			value = CSS_FLOAT_RIGHT;
+			break;
+		case FLOAT_NONE:
+			value = CSS_FLOAT_NONE;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_float(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_float(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_float(style, CSS_FLOAT_NONE);
 }
 
-static css_error cascade_font_family( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_font_family(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
 	UNUSED(opv);
 	UNUSED(style);
 	UNUSED(state);
+
+	/** \todo font-family */
 
 	return CSS_OK;
 }
@@ -842,76 +894,190 @@ static css_error initial_font_family(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_font_size( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_font_size(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = CSS_FONT_SIZE_INHERIT;
+	css_fixed size = 0;
+	uint32_t unit = CSS_UNIT_PX;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case FONT_SIZE_DIMENSION: 
+			value = CSS_FONT_SIZE_DIMENSION;
+
+			size = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(size));
+
+			unit = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(unit));
+			break;
+		case FONT_SIZE_XX_SMALL:
+			value = CSS_FONT_SIZE_XX_SMALL;
+			break;
+		case FONT_SIZE_X_SMALL:
+			value = CSS_FONT_SIZE_X_SMALL;
+			break;
+		case FONT_SIZE_SMALL:
+			value = CSS_FONT_SIZE_SMALL;
+			break;
+		case FONT_SIZE_MEDIUM:
+			value = CSS_FONT_SIZE_MEDIUM;
+			break;
+		case FONT_SIZE_LARGE:
+			value = CSS_FONT_SIZE_LARGE;
+			break;
+		case FONT_SIZE_X_LARGE:
+			value = CSS_FONT_SIZE_X_LARGE;
+			break;
+		case FONT_SIZE_XX_LARGE:
+			value = CSS_FONT_SIZE_XX_LARGE;
+			break;
+		case FONT_SIZE_LARGER:
+			value = CSS_FONT_SIZE_LARGER;
+			break;
+		case FONT_SIZE_SMALLER:
+			value = CSS_FONT_SIZE_SMALLER;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_font_size(state->result, value, size, unit);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_font_size(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_font_size(style, CSS_FONT_SIZE_MEDIUM, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_font_style( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_font_style(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_FONT_STYLE_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case FONT_STYLE_NORMAL:
+			value = CSS_FONT_STYLE_NORMAL;
+			break;
+		case FONT_STYLE_ITALIC:
+			value = CSS_FONT_STYLE_ITALIC;
+			break;
+		case FONT_STYLE_OBLIQUE:
+			value = CSS_FONT_STYLE_OBLIQUE;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_font_style(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_font_style(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_font_style(style, CSS_FONT_STYLE_NORMAL);
 }
 
-static css_error cascade_font_variant( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_font_variant(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_FONT_VARIANT_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case FONT_VARIANT_NORMAL:
+			value = CSS_FONT_VARIANT_NORMAL;
+			break;
+		case FONT_VARIANT_SMALL_CAPS:
+			value = CSS_FONT_VARIANT_SMALL_CAPS;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_font_variant(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_font_variant(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_font_variant(style, CSS_FONT_VARIANT_NORMAL);
 }
 
-static css_error cascade_font_weight( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_font_weight(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_FONT_WEIGHT_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case FONT_WEIGHT_NORMAL:
+			value = CSS_FONT_WEIGHT_NORMAL;
+			break;
+		case FONT_WEIGHT_BOLD:
+			value = CSS_FONT_WEIGHT_BOLD;
+			break;
+		case FONT_WEIGHT_BOLDER:
+			value = CSS_FONT_WEIGHT_BOLDER;
+			break;
+		case FONT_WEIGHT_LIGHTER:
+			value = CSS_FONT_WEIGHT_LIGHTER;
+			break;
+		case FONT_WEIGHT_100:
+			value = CSS_FONT_WEIGHT_100;
+			break;
+		case FONT_WEIGHT_200:
+			value = CSS_FONT_WEIGHT_200;
+			break;
+		case FONT_WEIGHT_300:
+			value = CSS_FONT_WEIGHT_300;
+			break;
+		case FONT_WEIGHT_400:
+			value = CSS_FONT_WEIGHT_400;
+			break;
+		case FONT_WEIGHT_500:
+			value = CSS_FONT_WEIGHT_500;
+			break;
+		case FONT_WEIGHT_600:
+			value = CSS_FONT_WEIGHT_600;
+			break;
+		case FONT_WEIGHT_700:
+			value = CSS_FONT_WEIGHT_700;
+			break;
+		case FONT_WEIGHT_800:
+			value = CSS_FONT_WEIGHT_800;
+			break;
+		case FONT_WEIGHT_900:
+			value = CSS_FONT_WEIGHT_900;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_font_weight(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_font_weight(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_font_weight(style, CSS_FONT_WEIGHT_NORMAL);
 }
 
 static css_error cascade_height(uint32_t opv, css_style *style, 
