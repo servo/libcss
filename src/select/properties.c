@@ -854,6 +854,8 @@ static css_error cascade_cursor(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		return set_cursor(state->result, value, uris);
+	} else {
+		state->result->alloc(uris, 0, state->result->pw);
 	}
 
 	return CSS_OK;
