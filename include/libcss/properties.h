@@ -382,7 +382,8 @@ enum css_quotes {
 	CSS_QUOTES_INHERIT			= 0x0,
 	/* Consult pointer in struct to determine which */
 	CSS_QUOTES_STRING			= 0x1,
-	CSS_QUOTES_NONE				= 0x1
+	CSS_QUOTES_NONE				= 0x1,
+	CSS_QUOTES_DEFAULT			= 0x2
 };
 
 enum css_right {

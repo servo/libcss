@@ -240,8 +240,8 @@ static inline css_error set_cursor(
 #undef CURSOR_INDEX
 
 #define QUOTES_INDEX 4
-#define QUOTES_SHIFT 2
-#define QUOTES_MASK  0x4
+#define QUOTES_SHIFT 1
+#define QUOTES_MASK  0x6
 static inline css_error set_quotes(
 		css_computed_style *style, uint8_t type, 
 		css_string *quotes)
@@ -252,9 +252,9 @@ static inline css_error set_quotes(
 
 	bits = &style->uncommon->bits[QUOTES_INDEX];
 
-	/* 1bit: type */
+	/* 2bits: type */
 	*bits = (*bits & ~QUOTES_MASK) |
-			((type & 0x1) << QUOTES_SHIFT);
+			((type & 0x3) << QUOTES_SHIFT);
 
 	style->uncommon->quotes = quotes;
 
@@ -264,9 +264,9 @@ static inline css_error set_quotes(
 #undef QUOTES_SHIFT
 #undef QUOTES_INDEX
 
-#define CLIP_INDEX 4
-#define CLIP_SHIFT 0
-#define CLIP_MASK  0x3
+#define CLIP_INDEX 7
+#define CLIP_SHIFT 6
+#define CLIP_MASK  0xc0
 #define CLIP_INDEX1 5
 #define CLIP_SHIFT1 0
 #define CLIP_MASK1 0xff

@@ -61,9 +61,9 @@ typedef struct css_computed_uncommon {
  *
  * Encode quotes as an array of string objects, terminated with a blank entry.
  *
- * quotes			  1		  sizeof(ptr)
+ * quotes			  2		  sizeof(ptr)
  * 				---		---
- * 				  1 bit		  sizeof(ptr) bytes
+ * 				  2 bits	  sizeof(ptr) bytes
  *
  * Encode cursor uri(s) as an array of string objects, terminated with a
  * blank entry.
@@ -75,11 +75,11 @@ typedef struct css_computed_uncommon {
  * content			?
  *
  * 				___		___
- * 				 56 bits	 40 + 4sizeof(ptr) bytes
+ * 				 57 bits	 40 + 4sizeof(ptr) bytes
  *
- * 				  7 bytes	 40 + 4sizeof(ptr) bytes
+ * 				  8 bytes	 40 + 4sizeof(ptr) bytes
  * 				===================
- * 				 47 + 4sizeof(ptr) bytes
+ * 				 48 + 4sizeof(ptr) bytes
  *
  * Bit allocations:
  *
@@ -88,13 +88,12 @@ typedef struct css_computed_uncommon {
  *  2 ooooooob	outline-width  | border-spacing
  *  3 bbbbbbbb	border-spacing
  *  4 wwwwwwir	word-spacing   | counter-increment | counter-reset
- *  5 uuuuuqcc	cursor         | quotes            | clip
+ *  5 uuuuuqq.	cursor         | quotes            | <unused>
  *  6 cccccccc	clip
  *  7 cccccccc	clip
+ *  8 cc......	clip           | <unused>
  */
-	uint8_t bits[7];
-
-	uint8_t unused[1];
+	uint8_t bits[8];
 
 	css_fixed border_spacing[2];
 
@@ -540,8 +539,8 @@ static inline uint8_t css_computed_cursor(
 #undef CURSOR_INDEX
 
 #define QUOTES_INDEX 4
-#define QUOTES_SHIFT 2
-#define QUOTES_MASK  0x4
+#define QUOTES_SHIFT 1
+#define QUOTES_MASK  0x6
 static inline uint8_t css_computed_quotes(
 		const css_computed_style *style, 
 		const css_string **quotes)
@@ -551,21 +550,21 @@ static inline uint8_t css_computed_quotes(
 		bits &= QUOTES_MASK;
 		bits >>= QUOTES_SHIFT;
 
-		/* 1bit: type */
+		/* 2bits: type */
 		*quotes = style->uncommon->quotes;
 
 		return bits;
 	}
 
-	return CSS_QUOTES_NONE;
+	return CSS_QUOTES_DEFAULT;
 }
 #undef QUOTES_MASK
 #undef QUOTES_SHIFT
 #undef QUOTES_INDEX
 
-#define CLIP_INDEX 4
-#define CLIP_SHIFT 0
-#define CLIP_MASK  0x3
+#define CLIP_INDEX 7
+#define CLIP_SHIFT 6
+#define CLIP_MASK  0xc0
 #define CLIP_INDEX1 5
 #define CLIP_SHIFT1 0
 #define CLIP_MASK1 0xff
