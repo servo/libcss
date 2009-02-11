@@ -78,8 +78,7 @@ static css_error match_details(css_select_ctx *ctx, void *node,
 static css_error match_detail(css_select_ctx *ctx, void *node, 
 		const css_selector_detail *detail, css_select_state *state, 
 		bool *match);
-static css_error cascade_style(css_select_ctx *ctx, const css_style *style, 
-		css_select_state *state);
+static css_error cascade_style(const css_style *style, css_select_state *state);
 static inline void advance_bytecode(css_style *style, uint32_t n_bytes);
 static bool outranks_existing(uint16_t op, bool important, 
 		css_select_state *state);
@@ -91,8 +90,8 @@ static bool outranks_existing(uint16_t op, bool important,
  * Dispatch table for properties, indexed by opcode
  */
 static struct prop_table {
-	css_error (*cascade)(css_select_ctx *ctx, uint32_t opv,
-			css_style *style, css_select_state *state);
+	css_error (*cascade)(uint32_t opv, css_style *style, 
+			css_select_state *state);
 	css_error (*initial)(css_computed_style *style);
 
 	uint32_t inherited : 1;
@@ -619,8 +618,7 @@ css_error match_selector_chain(css_select_ctx *ctx,
 	/* If we got here, then the entire selector chain matched, so cascade */
 	state->current_specificity = selector->specificity;
 
-	return cascade_style(ctx,
-			((css_rule_selector *) selector->rule)->style, 
+	return cascade_style(((css_rule_selector *) selector->rule)->style, 
 			state);
 }
 
@@ -787,8 +785,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 	return error;
 }
 
-css_error cascade_style(css_select_ctx *ctx, const css_style *style, 
-		css_select_state *state)
+css_error cascade_style(const css_style *style, css_select_state *state)
 {
 	css_style s = *style;
 
@@ -801,7 +798,7 @@ css_error cascade_style(css_select_ctx *ctx, const css_style *style,
 
 		op = getOpcode(opv);
 
-		error = properties[op].cascade(ctx, opv, &s, state);
+		error = properties[op].cascade(opv, &s, state);
 		if (error != CSS_OK)
 			return error;
 	}
