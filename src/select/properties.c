@@ -237,40 +237,70 @@ static css_error initial_background_repeat(css_computed_style *style)
 	return set_background_repeat(style, CSS_BACKGROUND_REPEAT_REPEAT);
 }
 
-static css_error cascade_border_collapse( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_border_collapse(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_BORDER_COLLAPSE_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case BORDER_COLLAPSE_SEPARATE:
+			value = CSS_BORDER_COLLAPSE_SEPARATE;
+			break;
+		case BORDER_COLLAPSE_COLLAPSE:
+			value = CSS_BORDER_COLLAPSE_COLLAPSE;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_border_collapse(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_border_collapse(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_border_collapse(style, CSS_BORDER_COLLAPSE_SEPARATE);
 }
 
-static css_error cascade_border_spacing( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_border_spacing(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = CSS_BORDER_SPACING_INHERIT;
+	css_fixed hlength = 0;
+	css_fixed vlength = 0;
+	uint32_t hunit = CSS_UNIT_PX;
+	uint32_t vunit = CSS_UNIT_PX;
+
+	if (isInherit(opv) == false) {
+		value = CSS_BORDER_SPACING_SET;
+		hlength = *((css_fixed *) style->bytecode);
+		advance_bytecode(style, sizeof(hlength));
+		hunit = *((uint32_t *) style->bytecode);
+		advance_bytecode(style, sizeof(hunit));
+
+		vlength = *((css_fixed *) style->bytecode);
+		advance_bytecode(style, sizeof(vlength));
+		vunit = *((uint32_t *) style->bytecode);
+		advance_bytecode(style, sizeof(vunit));
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_border_spacing(state->result, value,
+				hlength, hunit, vlength, vunit);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_border_spacing(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_border_spacing(style, CSS_BORDER_SPACING_SET,
+			0, CSS_UNIT_PX, 0, CSS_UNIT_PX);
 }
 
 static css_error cascade_border_top_color( 
