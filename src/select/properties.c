@@ -619,11 +619,60 @@ static css_error initial_color(css_computed_style *style)
 static css_error cascade_content(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = 0;
 
-	/** \todo content */
+	if (isInherit(opv) == false) {
+		uint32_t v = getValue(opv);
+
+		if (v == CONTENT_NORMAL) {
+			value = 0;
+		} else if (v == CONTENT_NONE) {
+			value = 0;
+		}
+
+		while (v != CONTENT_NORMAL) {
+			parserutils_hash_entry *he = 
+				*((parserutils_hash_entry **) style->bytecode);
+
+			switch (v & 0xff) {
+			case CONTENT_COUNTER:
+				advance_bytecode(style, sizeof(he));
+				break;
+			case CONTENT_COUNTERS:
+			{
+				parserutils_hash_entry *sep;
+
+				advance_bytecode(style, sizeof(he));
+
+				sep = *((parserutils_hash_entry **) 
+						style->bytecode);
+				advance_bytecode(style, sizeof(sep));
+
+			}
+				break;
+			case CONTENT_URI:
+			case CONTENT_ATTR:	
+			case CONTENT_STRING:
+				advance_bytecode(style, sizeof(he));
+				break;
+			case CONTENT_OPEN_QUOTE:
+				break;
+			case CONTENT_CLOSE_QUOTE:
+				break;
+			case CONTENT_NO_OPEN_QUOTE:
+				break;
+			case CONTENT_NO_CLOSE_QUOTE:
+				break;
+			}
+
+			v = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(v));
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		/** \todo content */
+	}
 
 	return CSS_OK;
 }
