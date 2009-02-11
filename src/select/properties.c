@@ -132,40 +132,109 @@ static css_error initial_background_image(css_computed_style *style)
 	return set_background_image(style, CSS_BACKGROUND_IMAGE_NONE, NULL);
 }
 
-static css_error cascade_background_position( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_background_position(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = CSS_BACKGROUND_POSITION_INHERIT;
+	css_fixed hlength = 0;
+	css_fixed vlength = 0;
+	uint32_t hunit = CSS_UNIT_PX;
+	uint32_t vunit = CSS_UNIT_PX;
+
+	if (isInherit(opv) == false) {
+		value = CSS_BACKGROUND_POSITION_SET;
+
+		switch (getValue(opv) & 0xf0) {
+		case BACKGROUND_POSITION_HORZ_SET:
+			hlength = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(hlength));
+			hunit = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(hunit));
+			break;
+		case BACKGROUND_POSITION_HORZ_CENTER:
+			hlength = INTTOFIX(50);
+			hunit = CSS_UNIT_PCT;
+			break;
+		case BACKGROUND_POSITION_HORZ_RIGHT:
+			hlength = INTTOFIX(100);
+			hunit = CSS_UNIT_PCT;
+			break;
+		case BACKGROUND_POSITION_HORZ_LEFT:
+			hlength = INTTOFIX(0);
+			hunit = CSS_UNIT_PCT;
+			break;
+		}
+
+		switch (getValue(opv) & 0x0f) {
+		case BACKGROUND_POSITION_VERT_SET:
+			vlength = *((css_fixed *) style->bytecode);
+			advance_bytecode(style, sizeof(vlength));
+			vunit = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(vunit));
+			break;
+		case BACKGROUND_POSITION_VERT_CENTER:
+			vlength = INTTOFIX(50);
+			vunit = CSS_UNIT_PCT;
+			break;
+		case BACKGROUND_POSITION_VERT_BOTTOM:
+			vlength = INTTOFIX(100);
+			vunit = CSS_UNIT_PCT;
+			break;
+		case BACKGROUND_POSITION_VERT_TOP:
+			vlength = INTTOFIX(0);
+			vunit = CSS_UNIT_PCT;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_background_position(state->result, value,
+				hlength, hunit, vlength, vunit);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_background_position(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_background_position(style, CSS_BACKGROUND_POSITION_SET, 
+			0, CSS_UNIT_PCT, 0, CSS_UNIT_PCT);
 }
 
-static css_error cascade_background_repeat( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_background_repeat(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
+	uint16_t value = CSS_BACKGROUND_REPEAT_INHERIT;
+
 	UNUSED(style);
-	UNUSED(state);
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case BACKGROUND_REPEAT_NO_REPEAT:
+			value = CSS_BACKGROUND_REPEAT_NO_REPEAT;
+			break;
+		case BACKGROUND_REPEAT_REPEAT_X:
+			value = CSS_BACKGROUND_REPEAT_REPEAT_X;
+			break;
+		case BACKGROUND_REPEAT_REPEAT_Y:
+			value = CSS_BACKGROUND_REPEAT_REPEAT_Y;
+			break;
+		case BACKGROUND_REPEAT_REPEAT:
+			value = CSS_BACKGROUND_REPEAT_REPEAT;
+			break;
+		}
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return set_background_repeat(state->result, value);
+	}
 
 	return CSS_OK;
 }
 
 static css_error initial_background_repeat(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_background_repeat(style, CSS_BACKGROUND_REPEAT_REPEAT);
 }
 
 static css_error cascade_border_collapse( 
