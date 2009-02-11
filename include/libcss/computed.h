@@ -193,12 +193,12 @@ struct css_computed_style {
  * Encode font family as an array of string objects, terminated with a 
  * blank entry.
  *
- * font_family			  1		  sizeof(ptr)
+ * font_family			  3		  sizeof(ptr)
  * 				---		---
- * 				  1 bit		  sizeof(ptr)
+ * 				  3 bits	  sizeof(ptr)
  *
  * 				___		___
- *				265 bits	140 + 2sizeof(css_string) + 
+ *				267 bits	140 + 2sizeof(css_string) + 
  *							sizeof(ptr) bytes
  *
  *				 34 bytes	140 + 2sizeof(css_string) +
@@ -214,7 +214,7 @@ struct css_computed_style {
  *  3 ttttttti	border-top-width    | background-image
  *  4 rrrrrrrc	border-right-width  | color
  *  5 bbbbbbbl	border-bottom-width | list-style-image
- *  6 lllllllf	border-left-width   | font-family
+ *  6 lllllll.	border-left-width   | <unused>
  *  7 ttttttcc	top                 | border-top-color
  *  8 rrrrrrcc	right               | border-right-color
  *  9 bbbbbbcc	bottom              | border-bottom-color
@@ -237,12 +237,12 @@ struct css_computed_style {
  * 26 tttttwww	text-indent         | white-space
  * 27 bbbbbbbb	background-position
  * 28 bdddddff	background-position | display               | font-variant
- * 29 tttttll.	text-decoration     | list-style-position   | <unused>
+ * 29 tttttfff	text-decoration     | font-family
  * 30 ttttrrrr	border-top-style    | border-right-style
  * 31 bbbbllll	border-bottom-style | border-left-style
  * 32 ffffllll	font-weight         | list-style-type
  * 33 oooottuu	outline-style       | table-layout          | unicode-bidi
- * 34 vv......	visibility          | <unused>
+ * 34 vvll....	visibility          | list-style-position   | <unused>
  */
 	uint8_t bits[34];
 
@@ -819,26 +819,6 @@ static inline uint8_t css_computed_list_style_image(
 #undef LIST_STYLE_IMAGE_MASK
 #undef LIST_STYLE_IMAGE_SHIFT
 #undef LIST_STYLE_IMAGE_INDEX
-
-#define FONT_FAMILY_INDEX 5
-#define FONT_FAMILY_SHIFT 0
-#define FONT_FAMILY_MASK  0x1
-static inline uint8_t css_computed_font_family(
-		const css_computed_style *style, 
-		const css_string **names)
-{
-	uint8_t bits = style->bits[FONT_FAMILY_INDEX];
-	bits &= FONT_FAMILY_MASK;
-	bits >>= FONT_FAMILY_SHIFT;
-
-	/* 1bit: type */
-	*names = style->font_family;
-
-	return bits;
-}
-#undef FONT_FAMILY_MASK
-#undef FONT_FAMILY_SHIFT
-#undef FONT_FAMILY_INDEX
 
 #define TOP_INDEX 6
 #define TOP_SHIFT 2
@@ -1751,22 +1731,25 @@ static inline uint8_t css_computed_text_decoration(
 #undef TEXT_DECORATION_SHIFT
 #undef TEXT_DECORATION_INDEX
 
-#define LIST_STYLE_POSITION_INDEX 28
-#define LIST_STYLE_POSITION_SHIFT 1
-#define LIST_STYLE_POSITION_MASK  0x3
-static inline uint8_t css_computed_list_style_position(
-		const css_computed_style *style)
+#define FONT_FAMILY_INDEX 28
+#define FONT_FAMILY_SHIFT 0
+#define FONT_FAMILY_MASK  0x7
+static inline uint8_t css_computed_font_family(
+		const css_computed_style *style, 
+		const css_string **names)
 {
-	uint8_t bits = style->bits[LIST_STYLE_POSITION_INDEX];
-	bits &= LIST_STYLE_POSITION_MASK;
-	bits >>= LIST_STYLE_POSITION_SHIFT;
+	uint8_t bits = style->bits[FONT_FAMILY_INDEX];
+	bits &= FONT_FAMILY_MASK;
+	bits >>= FONT_FAMILY_SHIFT;
 
-	/* 2bits: type */
+	/* 3bits: type */
+	*names = style->font_family;
+
 	return bits;
 }
-#undef LIST_STYLE_POSITION_MASK
-#undef LIST_STYLE_POSITION_SHIFT
-#undef LIST_STYLE_POSITION_INDEX
+#undef FONT_FAMILY_MASK
+#undef FONT_FAMILY_SHIFT
+#undef FONT_FAMILY_INDEX
 
 #define BORDER_TOP_STYLE_INDEX 29
 #define BORDER_TOP_STYLE_SHIFT 4
@@ -1937,5 +1920,22 @@ static inline uint8_t css_computed_visibility(
 #undef VISIBILITY_MASK
 #undef VISIBILITY_SHIFT
 #undef VISIBILITY_INDEX
+
+#define LIST_STYLE_POSITION_INDEX 33
+#define LIST_STYLE_POSITION_SHIFT 4
+#define LIST_STYLE_POSITION_MASK  0x30
+static inline uint8_t css_computed_list_style_position(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[LIST_STYLE_POSITION_INDEX];
+	bits &= LIST_STYLE_POSITION_MASK;
+	bits >>= LIST_STYLE_POSITION_SHIFT;
+
+	/* 2bits: type */
+	return bits;
+}
+#undef LIST_STYLE_POSITION_MASK
+#undef LIST_STYLE_POSITION_SHIFT
+#undef LIST_STYLE_POSITION_INDEX
 
 #endif

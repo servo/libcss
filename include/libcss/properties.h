@@ -192,7 +192,13 @@ enum css_float {
 
 enum css_font_family {
 	CSS_FONT_FAMILY_INHERIT			= 0x0,
-	CSS_FONT_FAMILY_SET			= 0x1
+	/* Named fonts exist if pointer is non-NULL */
+	CSS_FONT_FAMILY_SERIF			= 0x1,
+	CSS_FONT_FAMILY_SANS_SERIF		= 0x2,
+	CSS_FONT_FAMILY_CURSIVE			= 0x3,
+	CSS_FONT_FAMILY_FANTASY			= 0x4,
+	CSS_FONT_FAMILY_MONOSPACE		= 0x5,
+	CSS_FONT_FAMILY_DEFAULT			= 0x6
 };
 
 enum css_font_size {

@@ -509,27 +509,6 @@ static inline css_error set_list_style_image(
 #undef LIST_STYLE_IMAGE_SHIFT
 #undef LIST_STYLE_IMAGE_INDEX
 
-#define FONT_FAMILY_INDEX 5
-#define FONT_FAMILY_SHIFT 0
-#define FONT_FAMILY_MASK  0x1
-static inline css_error set_font_family(
-		css_computed_style *style, uint8_t type, 
-		css_string *names)
-{
-	uint8_t *bits = &style->bits[FONT_FAMILY_INDEX];
-
-	/* 1bit: type */
-	*bits = (*bits & ~FONT_FAMILY_MASK) |
-			((type & 0x1) << FONT_FAMILY_SHIFT);
-
-	style->font_family = names;
-
-	return CSS_OK;
-}
-#undef FONT_FAMILY_MASK
-#undef FONT_FAMILY_SHIFT
-#undef FONT_FAMILY_INDEX
-
 #define TOP_INDEX 6
 #define TOP_SHIFT 2
 #define TOP_MASK  0xfc
@@ -1419,23 +1398,26 @@ static inline css_error set_text_decoration(
 #undef TEXT_DECORATION_SHIFT
 #undef TEXT_DECORATION_INDEX
 
-#define LIST_STYLE_POSITION_INDEX 28
-#define LIST_STYLE_POSITION_SHIFT 1
-#define LIST_STYLE_POSITION_MASK  0x3
-static inline css_error set_list_style_position(
-		css_computed_style *style, uint8_t type)
+#define FONT_FAMILY_INDEX 28
+#define FONT_FAMILY_SHIFT 0
+#define FONT_FAMILY_MASK  0x7
+static inline css_error set_font_family(
+		css_computed_style *style, uint8_t type, 
+		css_string *names)
 {
-	uint8_t *bits = &style->bits[LIST_STYLE_POSITION_INDEX];
+	uint8_t *bits = &style->bits[FONT_FAMILY_INDEX];
 
-	/* 2bits: type */
-	*bits = (*bits & ~LIST_STYLE_POSITION_MASK) |
-			((type & 0x3) << LIST_STYLE_POSITION_SHIFT);
+	/* 3bits: type */
+	*bits = (*bits & ~FONT_FAMILY_MASK) |
+			((type & 0x7) << FONT_FAMILY_SHIFT);
+
+	style->font_family = names;
 
 	return CSS_OK;
 }
-#undef LIST_STYLE_POSITION_MASK
-#undef LIST_STYLE_POSITION_SHIFT
-#undef LIST_STYLE_POSITION_INDEX
+#undef FONT_FAMILY_MASK
+#undef FONT_FAMILY_SHIFT
+#undef FONT_FAMILY_INDEX
 
 #define BORDER_TOP_STYLE_INDEX 29
 #define BORDER_TOP_STYLE_SHIFT 4
@@ -1616,5 +1598,23 @@ static inline css_error set_visibility(
 #undef VISIBILITY_MASK
 #undef VISIBILITY_SHIFT
 #undef VISIBILITY_INDEX
+
+#define LIST_STYLE_POSITION_INDEX 33
+#define LIST_STYLE_POSITION_SHIFT 4
+#define LIST_STYLE_POSITION_MASK  0x30
+static inline css_error set_list_style_position(
+		css_computed_style *style, uint8_t type)
+{
+	uint8_t *bits = &style->bits[LIST_STYLE_POSITION_INDEX];
+
+	/* 2bits: type */
+	*bits = (*bits & ~LIST_STYLE_POSITION_MASK) |
+			((type & 0x3) << LIST_STYLE_POSITION_SHIFT);
+
+	return CSS_OK;
+}
+#undef LIST_STYLE_POSITION_MASK
+#undef LIST_STYLE_POSITION_SHIFT
+#undef LIST_STYLE_POSITION_INDEX
 
 #endif
