@@ -2564,11 +2564,93 @@ static css_error initial_visibility(css_computed_style *style)
 static css_error cascade_voice_family(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
+	uint16_t value = 0;
+	css_string *voices = NULL;
+	uint32_t n_voices = 0;
 
-	/** \todo voice-family */
+	if (isInherit(opv) == false) {
+		uint32_t v = getValue(opv);
+
+		while (v != VOICE_FAMILY_END) {
+			const parserutils_hash_entry *voice = NULL;
+			css_string *temp;
+
+			switch (v) {
+			case VOICE_FAMILY_STRING:
+			case VOICE_FAMILY_IDENT_LIST:
+				voice = *((parserutils_hash_entry **) 
+						style->bytecode);
+				advance_bytecode(style, sizeof(voice));
+				break;
+			case VOICE_FAMILY_MALE:
+				if (value == 0)
+					value = 1;
+				break;
+			case VOICE_FAMILY_FEMALE:
+				if (value == 0)
+					value = 1;
+				break;
+			case VOICE_FAMILY_CHILD:
+				if (value == 0)
+					value = 1;
+				break;
+			}
+
+			/* Only use family-names which occur before the first
+			 * generic-family. Any values which occur after the
+			 * first generic-family are ignored. */
+			/** \todo Do this at bytecode generation time? */
+			if (value == 0 && voice != NULL) {
+				temp = state->result->alloc(voices, 
+					(n_voices + 1) * sizeof(css_string), 
+					state->result->pw);
+				if (temp == NULL) {
+					if (voices != NULL) {
+						state->result->alloc(voices, 0,
+							state->result->pw);
+					}
+					return CSS_NOMEM;
+				}
+
+				voices = temp;
+
+				voices[n_voices].data = (uint8_t *) voice->data;
+				voices[n_voices].len = voice->len;
+
+				n_voices++;
+			}
+
+			v = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(v));
+		}
+	}
+
+	/* Terminate array with blank entry, if needed */
+	if (n_voices > 0) {
+		css_string *temp;
+
+		temp = state->result->alloc(voices, 
+				(n_voices + 1) * sizeof(css_string), 
+				state->result->pw);
+		if (temp == NULL) {
+			state->result->alloc(voices, 0, state->result->pw);
+			return CSS_NOMEM;
+		}
+
+		voices = temp;
+
+		voices[n_voices].data = NULL;
+		voices[n_voices].len = 0;
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		/** \todo voice-family */
+		if (n_voices > 0)
+			state->result->alloc(voices, 0, state->result->pw);
+	} else {
+		if (n_voices > 0)
+			state->result->alloc(voices, 0, state->result->pw);
+	}
 
 	return CSS_OK;
 }
