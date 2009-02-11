@@ -35,6 +35,9 @@ static css_error cascade_length(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
 				css_unit));
+static css_error cascade_number(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t, css_fixed));
 
 static css_error cascade_azimuth(uint32_t opv, css_style *style,
 		 css_select_state *state)
@@ -1370,15 +1373,11 @@ static css_error initial_min_width(css_computed_style *style)
 	return set_min_width(style, CSS_MIN_WIDTH_SET, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_orphans( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_orphans(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	/** \todo orphans */
+	return cascade_number(opv, style, state, NULL);
 }
 
 static css_error initial_orphans(css_computed_style *style)
@@ -1573,15 +1572,11 @@ static css_error initial_pause_before(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_pitch_range( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_pitch_range(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	/** \todo pitch-range */
+	return cascade_number(opv, style, state, NULL);
 }
 
 static css_error initial_pitch_range(css_computed_style *style)
@@ -1663,15 +1658,11 @@ static css_error initial_quotes(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_richness( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_richness(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	/** \todo richness */
+	return cascade_number(opv, style, state, NULL);
 }
 
 static css_error initial_richness(css_computed_style *style)
@@ -1782,15 +1773,11 @@ static css_error initial_speech_rate(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_stress( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_stress(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	/** \todo stress */
+	return cascade_number(opv, style, state, NULL);
 }
 
 static css_error initial_stress(css_computed_style *style)
@@ -2002,15 +1989,11 @@ static css_error initial_white_space(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_widows( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_widows(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	/** \todo widows */
+	return cascade_number(opv, style, state, NULL);
 }
 
 static css_error initial_widows(css_computed_style *style)
@@ -2327,6 +2310,30 @@ css_error cascade_length(uint32_t opv, css_style *style,
 	if (fun != NULL && outranks_existing(getOpcode(opv), 
 			isImportant(opv), state)) {
 		return fun(state->result, value, length, unit);
+	}
+
+	return CSS_OK;
+}
+
+css_error cascade_number(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t, css_fixed))
+{
+	uint16_t value = 0;
+	css_fixed length = 0;
+
+	/** \todo values */
+
+	if (isInherit(opv) == false) {
+		value = 0;
+		length = *((css_fixed *) style->bytecode);
+		advance_bytecode(style, sizeof(length));
+	}
+
+	/** \todo lose fun != NULL once all properties have set routines */
+	if (fun != NULL && outranks_existing(getOpcode(opv), 
+			isImportant(opv), state)) {
+		return fun(state->result, value, length);
 	}
 
 	return CSS_OK;
