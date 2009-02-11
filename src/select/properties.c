@@ -41,6 +41,10 @@ static css_error cascade_number(uint32_t opv, css_style *style,
 static css_error cascade_page_break_after_before(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t));
+static css_error cascade_counter_increment_reset(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t,
+				css_computed_counter *));
 
 static css_error cascade_azimuth(uint32_t opv, css_style *style,
 		 css_select_state *state)
@@ -687,38 +691,25 @@ static css_error initial_content(css_computed_style *style)
 static css_error cascade_counter_increment(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	/** \todo counter-increment/reset */
-
-	return CSS_OK;
+	return cascade_counter_increment_reset(opv, style, state, 
+			set_counter_increment);
 }
 
 static css_error initial_counter_increment(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_counter_increment(style, CSS_COUNTER_INCREMENT_NONE, NULL);
 }
 
 static css_error cascade_counter_reset(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_counter_increment_reset(opv, style, state,
+			set_counter_reset);
 }
 
 static css_error initial_counter_reset(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_counter_reset(style, CSS_COUNTER_RESET_NONE, NULL);
 }
 
 static css_error cascade_cue_after(uint32_t opv, css_style *style, 
@@ -2813,6 +2804,92 @@ css_error cascade_page_break_after_before(uint32_t opv, css_style *style,
 	if (fun != NULL && outranks_existing(getOpcode(opv), 
 			isImportant(opv), state)) {
 		return fun(state->result, value);
+	}
+
+	return CSS_OK;
+}
+
+css_error cascade_counter_increment_reset(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t,
+				css_computed_counter *))
+{
+	uint16_t value = CSS_COUNTER_INCREMENT_INHERIT;
+	css_computed_counter *counters = NULL;
+	uint32_t n_counters = 0;
+
+	if (isInherit(opv) == false) {
+		switch (getValue(opv)) {
+		case COUNTER_INCREMENT_NAMED:
+		{
+			uint32_t v = getValue(opv);
+
+			while (v != COUNTER_INCREMENT_NONE) {
+				css_computed_counter *temp;
+				parserutils_hash_entry *name;
+				css_fixed val = 0;
+
+				name = *((parserutils_hash_entry **)
+						style->bytecode);
+				advance_bytecode(style, sizeof(name));
+
+				val = *((css_fixed *) style->bytecode);
+				advance_bytecode(style, sizeof(val));
+
+				temp = state->result->alloc(counters,
+						(n_counters + 1) * 
+						sizeof(css_computed_counter),
+						state->result->pw);
+				if (temp == NULL) {
+					if (counters != NULL) {
+						state->result->alloc(counters, 
+							0, state->result->pw);
+					}
+					return CSS_NOMEM;
+				}
+
+				counters = temp;
+
+				counters[n_counters].name.data = 
+						(uint8_t *) name->data;
+				counters[n_counters].name.len = name->len;
+				counters[n_counters].value = val;
+
+				n_counters++;
+
+				v = *((uint32_t *) style->bytecode);
+				advance_bytecode(style, sizeof(v));
+			}
+		}
+			break;
+		case COUNTER_INCREMENT_NONE:
+			value = CSS_COUNTER_INCREMENT_NONE;
+			break;
+		}
+	}
+
+	if (n_counters > 0) {
+		css_computed_counter *temp;
+
+		temp = state->result->alloc(counters, 
+				(n_counters + 1) * sizeof(css_computed_counter),
+				state->result->pw);
+		if (temp == NULL) {
+			state->result->alloc(counters, 0, state->result->pw);
+			return CSS_NOMEM;
+		}
+
+		counters = temp;
+
+		counters[n_counters].name.data = NULL;
+		counters[n_counters].name.len = 0;
+		counters[n_counters].value = 0;
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return fun(state->result, value, counters);
+	} else if (n_counters > 0) {
+		state->result->alloc(counters, 0, state->result->pw);
 	}
 
 	return CSS_OK;

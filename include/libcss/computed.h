@@ -25,7 +25,7 @@ typedef struct css_computed_page {
 
 typedef struct css_computed_counter {
 	css_string name;
-	int32_t value;
+	css_fixed value;
 } css_computed_counter;
 
 typedef struct css_computed_clip_rect {
@@ -286,7 +286,7 @@ struct css_computed_style {
 
 	css_fixed width;
 
-	int32_t z_index;
+	css_fixed z_index;
 
 	css_string *font_family;
 
