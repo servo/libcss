@@ -31,6 +31,10 @@ static css_error cascade_length_none(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
 				css_unit));
+static css_error cascade_length(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
+				css_unit));
 
 static css_error cascade_azimuth(uint32_t opv, css_style *style,
 		 css_select_state *state)
@@ -1337,40 +1341,26 @@ static css_error initial_max_width(css_computed_style *style)
 	return set_max_width(style, CSS_MAX_WIDTH_NONE, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_min_height( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_min_height(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length(opv, style, state, set_min_height);
 }
 
 static css_error initial_min_height(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_min_height(style, CSS_MIN_HEIGHT_SET, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_min_width( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_min_width(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length(opv, style, state, set_min_width);
 }
 
 static css_error initial_min_width(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_min_width(style, CSS_MIN_WIDTH_SET, 0, CSS_UNIT_PX);
 }
 
 static css_error cascade_orphans( 
@@ -1450,76 +1440,48 @@ static css_error initial_overflow(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_padding_top( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_padding_top(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length(opv, style, state, set_padding_top);
 }
 
 static css_error initial_padding_top(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_padding_top(style, CSS_PADDING_SET, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_padding_right( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_padding_right(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length(opv, style, state, set_padding_right);
 }
 
 static css_error initial_padding_right(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_padding_right(style, CSS_PADDING_SET, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_padding_bottom( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_padding_bottom(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length(opv, style, state, set_padding_bottom);
 }
 
 static css_error initial_padding_bottom(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_padding_bottom(style, CSS_PADDING_SET, 0, CSS_UNIT_PX);
 }
 
-static css_error cascade_padding_left( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_padding_left(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length(opv, style, state, set_padding_left);
 }
 
 static css_error initial_padding_left(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_padding_left(style, CSS_PADDING_SET, 0, CSS_UNIT_PX);
 }
 
 static css_error cascade_page_break_after( 
@@ -1576,15 +1538,11 @@ static css_error initial_page_break_inside(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_pause_after( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_pause_after(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	/** \todo pause-after */
+	return cascade_length(opv, style, state, NULL);
 }
 
 static css_error initial_pause_after(css_computed_style *style)
@@ -1594,15 +1552,11 @@ static css_error initial_pause_after(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_pause_before( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_pause_before(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	/** \todo pause-before */
+	return cascade_length(opv, style, state, NULL);
 }
 
 static css_error initial_pause_before(css_computed_style *style)
@@ -1893,22 +1847,15 @@ static css_error initial_text_decoration(css_computed_style *style)
 	return CSS_OK;
 }
 
-static css_error cascade_text_indent( 
-		uint32_t opv, css_style *style, css_select_state *state)
+static css_error cascade_text_indent(uint32_t opv, css_style *style, 
+		css_select_state *state)
 {
-	
-	UNUSED(opv);
-	UNUSED(style);
-	UNUSED(state);
-
-	return CSS_OK;
+	return cascade_length(opv, style, state, set_text_indent);
 }
 
 static css_error initial_text_indent(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_text_indent(style, CSS_TEXT_INDENT_SET, 0, CSS_UNIT_PX);
 }
 
 static css_error cascade_text_transform( 
@@ -2344,6 +2291,32 @@ css_error cascade_length_none(uint32_t opv, css_style *style,
 	}
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
+		return fun(state->result, value, length, unit);
+	}
+
+	return CSS_OK;
+}
+
+css_error cascade_length(uint32_t opv, css_style *style,
+		css_select_state *state,
+		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
+				css_unit))
+{
+	uint16_t value = CSS_MIN_HEIGHT_INHERIT;
+	css_fixed length = 0;
+	uint32_t unit = CSS_UNIT_PX;
+
+	if (isInherit(opv) == false) {
+		value = CSS_MIN_HEIGHT_SET;
+		length = *((css_fixed *) style->bytecode);
+		advance_bytecode(style, sizeof(length));
+		unit = *((uint32_t *) style->bytecode);
+		advance_bytecode(style, sizeof(unit));
+	}
+
+	/** \todo lose fun != NULL once all properties have set routines */
+	if (fun != NULL && outranks_existing(getOpcode(opv), 
+			isImportant(opv), state)) {
 		return fun(state->result, value, length, unit);
 	}
 
