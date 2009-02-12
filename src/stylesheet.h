@@ -156,7 +156,7 @@ struct css_stylesheet {
 	char *title;				/**< Title of this sheet */
 
 	css_origin origin;			/**< Origin of stylesheet */
-	uint32_t media;				/**< Bitfield of media types */
+	uint64_t media;				/**< Bitfield of media types */
 
 	void *ownerNode;			/**< Owning node in document */
 	css_rule *ownerRule;			/**< Owning rule in parent */

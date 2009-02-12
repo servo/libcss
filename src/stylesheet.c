@@ -37,7 +37,7 @@ static css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule);
  */
 css_error css_stylesheet_create(css_language_level level,
 		const char *charset, const char *url, const char *title,
-		css_origin origin, uint32_t media,
+		css_origin origin, uint64_t media,
 		css_import_handler import_callback, void *import_pw,
 		css_alloc alloc, void *alloc_pw, css_stylesheet **stylesheet)
 {
@@ -284,7 +284,7 @@ css_error css_stylesheet_get_origin(css_stylesheet *sheet, css_origin *origin)
  * \param media  Pointer to location to receive media types
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_stylesheet_get_media(css_stylesheet *sheet, uint32_t *media)
+css_error css_stylesheet_get_media(css_stylesheet *sheet, uint64_t *media)
 {
 	if (sheet == NULL || media == NULL)
 		return CSS_BADPARM;
