@@ -35,6 +35,9 @@ css_error css_computed_style_create(css_alloc alloc, void *pw,
 
 	memset(s, 0, sizeof(css_computed_style));
 
+	s->alloc = alloc;
+	s->pw = pw;
+
 	*result = s;
 
 	return CSS_OK;
