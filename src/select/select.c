@@ -408,7 +408,7 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	css_error error;
 	css_select_state state;
 
-	if (ctx == NULL || node == NULL || result == NULL)
+	if (ctx == NULL || node == NULL || result == NULL || handler == NULL)
 		return CSS_BADPARM;
 
 	/* Set up the selection state */
