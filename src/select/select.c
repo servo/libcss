@@ -687,18 +687,21 @@ css_error match_universal_combinator(css_select_ctx *ctx, css_combinator type,
 			break;
 		}
 
-		/* Match its details */
-		error = match_details(ctx, n, detail, state, &match);
-		if (error != CSS_OK)
-			return error;
+		if (n != NULL) {
+			/* Match its details */
+			error = match_details(ctx, n, detail, state, &match);
+			if (error != CSS_OK)
+				return error;
 
-		/* If we found a match, use it */
-		if (match == true)
-			break;
+			/* If we found a match, use it */
+			if (match == true)
+				break;
 
-		/* Wanted the parent, but it didn't match, so stop looking */
-		if (type == CSS_COMBINATOR_PARENT)
-			n = NULL;
+			/* Wanted the parent, but it didn't match, 
+			 * so stop looking */
+			if (type == CSS_COMBINATOR_PARENT)
+				n = NULL;
+		}
 	} while (n != NULL);
 
 	*next_node = n;
