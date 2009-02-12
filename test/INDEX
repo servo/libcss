@@ -11,6 +11,7 @@ parse		Parsing (core syntax)			css
 css21		Parsing (CSS2.1 specifics)		css
 parse-auto	Automated parser tests (bytecode)	parse
 parse2-auto	Automated parser tests (om & invalid)	parse2
+select-auto	Automated selection engine tests	select
 
 # Regression tests
 

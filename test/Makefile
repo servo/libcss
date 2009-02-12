@@ -36,7 +36,7 @@ CFLAGS := $(CFLAGS) -I$(TOP)/src/ -I$(d)
 
 # Tests
 TESTS_$(d) := csdetect css21 lex lex-auto libcss number parse parse-auto \
-		parse2-auto
+		parse2-auto select-auto
 TESTS_$(d) := $(TESTS_$(d))
 
 # Items for top-level makefile to use
