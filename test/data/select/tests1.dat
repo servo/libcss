@@ -1,0 +1,40 @@
+#tree
+| div
+|  id=foo
+|  p*
+|   class=green
+#ua
+div, p { display: block; }
+#user
+.green { color: red !important; }
+#author
+div#foo { background-color: #bbc; }
+.green { color: green; }
+#errors
+#expected
+background-color: #bbbbcc00
+color: red;
+display: block
+#reset
+
+#tree screen
+| div*
+#ua
+div { display: block; }
+#user print
+div { display: inline; }
+#errors
+#expected
+display: block;
+#reset
+
+#tree all active
+| div*
+#author
+div { background-color: #000; }
+div:active { background-color: #bbc; }
+#errors
+#expected
+background-color: #bbbbcc00
+#reset
+
