@@ -12,6 +12,7 @@
 
 #include "utils/utils.h"
 
+#include "dump_computed.h"
 #include "testutils.h"
 
 typedef struct attribute {
@@ -182,6 +183,14 @@ bool handle_line(const char *data, size_t datalen, void *pw)
 				ctx->insheet = false;
 				ctx->inerrors = true;
 				ctx->inexp = false;
+			} else if (strncasecmp(data+1, "ua", 2) == 0 ||
+					strncasecmp(data+1, "user", 4) == 0 ||
+					strncasecmp(data+1, "author", 6) == 0) {
+				assert(css_stylesheet_data_done(
+						ctx->sheets[ctx->n_sheets - 1])
+						== CSS_OK);
+
+				parse_sheet(ctx, data + 1, datalen - 1);
 			} else {
 				error = css_stylesheet_append_data(
 						ctx->sheets[ctx->n_sheets - 1], 
@@ -636,15 +645,14 @@ void run_test(line_ctx *ctx, const char *exp, size_t explen)
 			ctx->pseudo_classes, ctx->media, computed,
 			&select_handler, NULL) == CSS_OK);
 
-	/** \todo dump_computed_style(sheet, buf, &buflen); */
-#if 0
+	dump_computed_style(computed, buf, &buflen);
+
 	if (2 * explen - buflen != explen || memcmp(buf, exp, explen) != 0) {
 		printf("Expected (%zu):\n%.*s\n", explen, (int) explen, exp);
 		printf("Result (%zu):\n%.*s\n", 2 * explen - buflen,
 			(int) (2 * explen - buflen), buf);
 		assert(0 && "Result doesn't match expected");
 	}
-#endif
 
 	/* Clean up */
 	css_computed_style_destroy(computed);

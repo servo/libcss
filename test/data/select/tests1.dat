@@ -6,14 +6,13 @@
 #ua
 div, p { display: block; }
 #user
-.green { color: red !important; }
+.green { color: #f00 !important; }
 #author
 div#foo { background-color: #bbc; }
-.green { color: green; }
+.green { color: #0f0; }
 #errors
 #expected
-background-color: #bbbbcc00
-color: red;
+color: #ff000000
 display: block
 #reset
 
@@ -25,7 +24,7 @@ div { display: block; }
 div { display: inline; }
 #errors
 #expected
-display: block;
+display: block
 #reset
 
 #tree all active
