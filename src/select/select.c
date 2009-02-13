@@ -715,6 +715,10 @@ css_error match_details(css_select_ctx *ctx, void *node,
 {
 	css_error error;
 
+	/* We match by default (if there are no details than the element
+	 * selector, then we must match) */
+	*match = true;
+
 	/** \todo Some details are easier to test than others (e.g. dashmatch 
 	 * actually requires looking at data rather than simply comparing 
 	 * pointers). Should we consider sorting the detail list such that the 
@@ -759,9 +763,11 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 		break;
 	case CSS_SELECTOR_PSEUDO_CLASS:
 		/** \todo pseudo classes */
+		*match = false;
 		break;
 	case CSS_SELECTOR_PSEUDO_ELEMENT:
 		/** \todo pseudo elements */
+		*match = false;
 		break;
 	case CSS_SELECTOR_ATTRIBUTE:
 		error = state->handler->node_has_attribute(state->pw, node,
