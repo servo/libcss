@@ -409,6 +409,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 		if (c->state != HAD_RULE) {
 			css_rule *rule;
 			css_stylesheet *import;
+			css_media_type media = 0;
 			css_error error;
 
 			/* any0 = (STRING | URI) ws 
@@ -421,8 +422,54 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 
 			consumeWhitespace(vector, &ctx);
 
-			/** \todo Media list */
-			if (parserutils_vector_peek(vector, ctx) != NULL) {
+			/* Parse media list */
+			token = parserutils_vector_iterate(vector, &ctx);
+
+			while (token != NULL) {
+				if (token->type != CSS_TOKEN_IDENT)
+					return CSS_INVALID;
+
+				if (token->ilower == c->strings[AURAL]) {
+					media |= CSS_MEDIA_AURAL;
+				} else if (token->ilower == 
+						c->strings[BRAILLE]) {
+					media |= CSS_MEDIA_BRAILLE;
+				} else if (token->ilower ==
+						c->strings[EMBOSSED]) {
+					media |= CSS_MEDIA_EMBOSSED;
+				} else if (token->ilower ==
+						c->strings[HANDHELD]) {
+					media |= CSS_MEDIA_HANDHELD;
+				} else if (token->ilower ==
+						c->strings[PRINT]) {
+					media |= CSS_MEDIA_PRINT;
+				} else if (token->ilower ==
+						c->strings[PROJECTION]) {
+					media |= CSS_MEDIA_PROJECTION;
+				} else if (token->ilower ==
+						c->strings[SCREEN]) {
+					media |= CSS_MEDIA_SCREEN;
+				} else if (token->ilower ==
+						c->strings[SPEECH]) {
+					media |= CSS_MEDIA_SPEECH;
+				} else if (token->ilower == c->strings[TTY]) {
+					media |= CSS_MEDIA_TTY;
+				} else if (token->ilower == c->strings[TV]) {
+					media |= CSS_MEDIA_TV;
+				} else if (token->ilower == c->strings[ALL]) {
+					media |= CSS_MEDIA_ALL;
+				} else
+					return CSS_INVALID;
+
+				consumeWhitespace(vector, &ctx);
+
+				token = parserutils_vector_iterate(vector, 
+						&ctx);
+				if (token != NULL && tokenIsChar(token, ',') == 
+						false)
+					return CSS_INVALID;
+
+				consumeWhitespace(vector, &ctx);
 			}
 
 			error = css_stylesheet_rule_create(c->sheet, 
@@ -436,11 +483,8 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 			url[uri->idata->len] = '\0';
 
 			/* Create imported sheet */
-			/** \todo Replace CSS_MEDIA_ALL with the result of
-			 * parsing the media list */
 			error = css_stylesheet_create(c->sheet->level, NULL,
-					url, NULL, c->sheet->origin,
-					CSS_MEDIA_ALL, 
+					url, NULL, c->sheet->origin, media, 
 					c->sheet->import, c->sheet->import_pw,
 					c->alloc, c->pw, &import);
 			if (error != CSS_OK) {

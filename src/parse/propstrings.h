@@ -17,6 +17,10 @@ enum {
 	/* At-rules */
 	CHARSET, IMPORT, MEDIA, PAGE,
 
+	/* Media types */
+	AURAL, BRAILLE, EMBOSSED, HANDHELD, PRINT, PROJECTION, 
+	SCREEN, SPEECH, TTY, TV, ALL,
+
 	/* Pseudo classes */
 	FIRST_CHILD, LINK, VISITED, HOVER, ACTIVE, FOCUS, LANG, 
 	/* LEFT, RIGHT, -- already in properties */ FIRST,
@@ -92,6 +96,18 @@ static struct {
 	{ "import", SLEN("import") },
 	{ "media", SLEN("media") },
 	{ "page", SLEN("page") },
+
+	{ "aural", SLEN("aural") },
+	{ "braille", SLEN("braille") },
+	{ "embossed", SLEN("embossed") },
+	{ "handheld", SLEN("handheld") },
+	{ "print", SLEN("print") },
+	{ "projection", SLEN("projection") },
+	{ "screen", SLEN("screen") },
+	{ "speech", SLEN("speech") },
+	{ "tty", SLEN("tty") },
+	{ "tv", SLEN("tv") },
+	{ "all", SLEN("all") },
 
 	{ "first-child", SLEN("first-child") },
 	{ "link", SLEN("link") },
