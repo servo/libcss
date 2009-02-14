@@ -5,6 +5,7 @@
 tests1.dat			Basic tests
 eof.dat				Unexpected EOF tests
 comments.dat			Comment tests
+selectors.dat			Invalid selector tests
 illegal-values.dat		Illegal value tests
 malformed-declarations.dat	Malformed declaration tests
 unknown-properties.dat		Unknown property tests

@@ -557,17 +557,25 @@ css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
  * For example, given A + B, the combinator field of B would point at A, 
  * with a combinator type of CSS_COMBINATOR_SIBLING. Thus, given B, we can
  * find its combinator. It is not possible to find B given A.
- *
- * \todo Check that this (backwards) representation plays well with CSSOM.
  */
 css_error css_stylesheet_selector_combine(css_stylesheet *sheet,
 		css_combinator type, css_selector *a, css_selector *b)
 {
+	const css_selector_detail *det;
+
 	if (sheet == NULL || a == NULL || b == NULL)
 		return CSS_BADPARM;
 
 	/* Ensure that there is no existing combinator on B */
 	assert(b->combinator == NULL);
+
+	/* A must not contain a pseudo element */
+	for (det = &a->data; det != NULL; ) {
+		if (det->type == CSS_SELECTOR_PSEUDO_ELEMENT)
+			return CSS_INVALID;
+
+		det = (det->next != 0) ? det + 1 : NULL;
+	}
 
 	b->combinator = a;
 	b->data.comb = type;

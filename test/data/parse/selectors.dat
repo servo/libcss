@@ -78,6 +78,55 @@ E:lang(c) {}
 #reset
 
 #data
+E:left {}
+#errors
+#expected
+| 1 E:left
+#reset
+
+#data
+E:right {}
+#errors
+#expected
+| 1 E:right
+#reset
+
+#data
+E:first {}
+#errors
+#expected
+| 1 E:first
+#reset
+
+#data
+E:first-line {}
+#errors
+#expected
+| 1 E:first-line
+#reset
+
+#data
+E:first-letter {}
+#errors
+#expected
+| 1 E:first-letter
+#reset
+
+#data
+E:before {}
+#errors
+#expected
+| 1 E:before
+#reset
+
+#data
+E:after {}
+#errors
+#expected
+| 1 E:after
+#reset
+
+#data
 E + F {}
 #errors
 #expected
