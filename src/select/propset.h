@@ -323,6 +323,32 @@ static inline css_error set_clip(
 #undef CLIP_SHIFT
 #undef CLIP_INDEX
 
+#define CONTENT_INDEX 7
+#define CONTENT_SHIFT 0
+#define CONTENT_MASK  0x3
+static inline css_error set_content(
+		css_computed_style *style, uint8_t type,
+		css_computed_content_item *content)
+{
+	uint8_t *bits;
+
+	ENSURE_UNCOMMON;
+
+	/* 2bits: type */
+	bits = &style->uncommon->bits[CONTENT_INDEX];
+
+	*bits = (*bits & ~CONTENT_MASK) |
+			((type & 0x3) << CONTENT_SHIFT);
+
+	style->uncommon->content = content;
+
+	return CSS_OK;
+}
+#undef CONTENT_MASK
+#undef CONTENT_SHIFT
+#undef CONTENT_INDEX
+
+
 #define VERTICAL_ALIGN_INDEX 0
 #define VERTICAL_ALIGN_SHIFT 0
 #define VERTICAL_ALIGN_MASK  0xff

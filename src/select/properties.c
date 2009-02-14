@@ -628,59 +628,139 @@ static css_error initial_color(css_computed_style *style)
 static css_error cascade_content(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	uint16_t value = 0;
+	uint16_t value = CSS_CONTENT_INHERIT;
+	css_computed_content_item *content = NULL;
+	uint32_t n_contents = 0;
 
 	if (isInherit(opv) == false) {
 		uint32_t v = getValue(opv);
 
 		if (v == CONTENT_NORMAL) {
-			value = 0;
+			value = CSS_CONTENT_NORMAL;
 		} else if (v == CONTENT_NONE) {
-			value = 0;
-		}
+			value = CSS_CONTENT_NONE;
+		} else {
+			value = CSS_CONTENT_SET;
 
-		while (v != CONTENT_NORMAL) {
-			parserutils_hash_entry *he = 
+			while (v != CONTENT_NORMAL) {
+				css_computed_content_item *temp;
+				parserutils_hash_entry *he = 
 				*((parserutils_hash_entry **) style->bytecode);
 
-			switch (v & 0xff) {
-			case CONTENT_COUNTER:
-				advance_bytecode(style, sizeof(he));
-				break;
-			case CONTENT_COUNTERS:
-			{
-				parserutils_hash_entry *sep;
+				temp = state->result->alloc(content,
+						(n_contents + 1) *
+						sizeof(css_computed_content_item),
+						state->result->pw);
+				if (temp == NULL) {
+					if (content != NULL) {
+						state->result->alloc(content,
+							0, state->result->pw);
+					}
+					return CSS_NOMEM;
+				}
 
-				advance_bytecode(style, sizeof(he));
+				content = temp;
 
-				sep = *((parserutils_hash_entry **) 
-						style->bytecode);
-				advance_bytecode(style, sizeof(sep));
+				switch (v & 0xff) {
+				case CONTENT_COUNTER:
+					advance_bytecode(style, sizeof(he));
 
+					content[n_contents].type =
+						CSS_COMPUTED_CONTENT_COUNTER;
+					content[n_contents].data.counter.name.data = (uint8_t *) he->data;
+					content[n_contents].data.counter.name.len = he->len;
+					content[n_contents].data.counter.style = v >> CONTENT_COUNTER_STYLE_SHIFT;
+					break;
+				case CONTENT_COUNTERS:
+				{
+					parserutils_hash_entry *sep;
+	
+					advance_bytecode(style, sizeof(he));
+
+					sep = *((parserutils_hash_entry **) 
+							style->bytecode);
+					advance_bytecode(style, sizeof(sep));
+
+					content[n_contents].type =
+						CSS_COMPUTED_CONTENT_COUNTERS;
+					content[n_contents].data.counters.name.data = (uint8_t *) he->data;
+					content[n_contents].data.counters.name.len = he->len;
+					content[n_contents].data.counters.sep.data = (uint8_t *) sep->data;
+					content[n_contents].data.counters.sep.len = sep->len;
+					content[n_contents].data.counters.style = v >> CONTENT_COUNTERS_STYLE_SHIFT;
+				}
+					break;
+				case CONTENT_URI:
+					advance_bytecode(style, sizeof(he));
+
+					content[n_contents].type =
+						CSS_COMPUTED_CONTENT_URI;
+					content[n_contents].data.uri.data = (uint8_t *) he->data;
+					content[n_contents].data.uri.len = he->len;
+					break;
+				case CONTENT_ATTR:
+					advance_bytecode(style, sizeof(he));
+
+					content[n_contents].type =
+						CSS_COMPUTED_CONTENT_ATTR;
+					content[n_contents].data.attr.data = (uint8_t *) he->data;
+					content[n_contents].data.attr.len = he->len;
+					break;
+				case CONTENT_STRING:
+					advance_bytecode(style, sizeof(he));
+
+					content[n_contents].type =
+						CSS_COMPUTED_CONTENT_STRING;
+					content[n_contents].data.string.data = (uint8_t *) he->data;
+					content[n_contents].data.string.len = he->len;
+					break;
+				case CONTENT_OPEN_QUOTE:
+					content[n_contents].type =
+						CSS_COMPUTED_CONTENT_OPEN_QUOTE;
+					break;
+				case CONTENT_CLOSE_QUOTE:
+					content[n_contents].type =
+						CSS_COMPUTED_CONTENT_CLOSE_QUOTE;
+					break;
+				case CONTENT_NO_OPEN_QUOTE:
+					content[n_contents].type =
+						CSS_COMPUTED_CONTENT_NO_OPEN_QUOTE;
+					break;
+				case CONTENT_NO_CLOSE_QUOTE:
+					content[n_contents].type =
+						CSS_COMPUTED_CONTENT_NO_CLOSE_QUOTE;
+					break;
+				}
+
+				n_contents++;
+
+				v = *((uint32_t *) style->bytecode);
+				advance_bytecode(style, sizeof(v));
 			}
-				break;
-			case CONTENT_URI:
-			case CONTENT_ATTR:	
-			case CONTENT_STRING:
-				advance_bytecode(style, sizeof(he));
-				break;
-			case CONTENT_OPEN_QUOTE:
-				break;
-			case CONTENT_CLOSE_QUOTE:
-				break;
-			case CONTENT_NO_OPEN_QUOTE:
-				break;
-			case CONTENT_NO_CLOSE_QUOTE:
-				break;
-			}
-
-			v = *((uint32_t *) style->bytecode);
-			advance_bytecode(style, sizeof(v));
 		}
 	}
 
+	/* If we have some content, terminate the array with a blank entry */
+	if (n_contents > 0) {
+		css_computed_content_item *temp;
+
+		temp = state->result->alloc(content,
+				(n_contents + 1) * sizeof(css_computed_content_item),
+				state->result->pw);
+		if (temp == NULL) {
+			state->result->alloc(content, 0, state->result->pw);
+			return CSS_NOMEM;
+		}
+
+		content = temp;
+
+		content[n_contents].type = CSS_COMPUTED_CONTENT_NONE;
+	}
+
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
-		/** \todo content */
+		return set_content(state->result, value, content);
+	} else if (content != NULL) {
+		state->result->alloc(content, 0, state->result->pw);
 	}
 
 	return CSS_OK;

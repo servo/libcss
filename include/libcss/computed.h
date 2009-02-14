@@ -23,6 +23,37 @@ typedef struct css_computed_page {
 	uint8_t dummy;
 } css_computed_page;
 
+enum css_computed_content_type {
+	CSS_COMPUTED_CONTENT_NONE		= 0,
+	CSS_COMPUTED_CONTENT_STRING		= 1,
+	CSS_COMPUTED_CONTENT_URI		= 2,
+	CSS_COMPUTED_CONTENT_COUNTER		= 3,
+	CSS_COMPUTED_CONTENT_COUNTERS		= 4,
+	CSS_COMPUTED_CONTENT_ATTR		= 5,
+	CSS_COMPUTED_CONTENT_OPEN_QUOTE		= 6,
+	CSS_COMPUTED_CONTENT_CLOSE_QUOTE	= 7,
+	CSS_COMPUTED_CONTENT_NO_OPEN_QUOTE	= 8,
+	CSS_COMPUTED_CONTENT_NO_CLOSE_QUOTE	= 9
+};
+
+typedef struct css_computed_content_item {
+	uint8_t type;
+	union {
+		css_string string;
+		css_string uri;
+		css_string attr;
+		struct {
+			css_string name;
+			uint8_t style;
+		} counter;
+		struct {
+			css_string name;
+			css_string sep;
+			uint8_t style;
+		} counters;
+	} data;	
+} css_computed_content_item;
+
 typedef struct css_computed_counter {
 	css_string name;
 	css_fixed value;
@@ -73,18 +104,20 @@ typedef struct css_computed_uncommon {
  * Encode cursor uri(s) as an array of string objects, terminated with a
  * blank entry.
  *
- * cursor			  5		   sizeof(ptr)
+ * cursor			  5		  sizeof(ptr)
  * 				---		---
- * 				  5 bits	   sizeof(ptr) bytes
+ * 				  5 bits	  sizeof(ptr) bytes
  *
- * content			?
+ * content			  2		  sizeof(ptr)
+ * 				---		---
+ * 				  2 bits	  sizeof(ptr)
  *
  * 				___		___
- * 				 61 bits	 40 + 4sizeof(ptr) bytes
+ * 				 63 bits	 40 + 5sizeof(ptr) bytes
  *
- * 				  8 bytes	 40 + 4sizeof(ptr) bytes
+ * 				  8 bytes	 40 + 5sizeof(ptr) bytes
  * 				===================
- * 				 48 + 4sizeof(ptr) bytes
+ * 				 48 + 5sizeof(ptr) bytes
  *
  * Bit allocations:
  *
@@ -96,7 +129,7 @@ typedef struct css_computed_uncommon {
  *  5 uuuuuqq.	cursor         | quotes            | <unused>
  *  6 cccccccc	clip
  *  7 cccccccc	clip
- *  8 cccccc..	clip           | <unused>
+ *  8 ccccccoo	clip           | content
  */
 	uint8_t bits[8];
 
@@ -117,6 +150,8 @@ typedef struct css_computed_uncommon {
 	css_string *quotes;
 
 	css_string *cursor;
+
+	css_computed_content_item *content;
 } css_computed_uncommon;
 
 struct css_computed_style {
@@ -641,6 +676,30 @@ static inline uint8_t css_computed_clip(
 #undef CLIP_MASK
 #undef CLIP_SHIFT
 #undef CLIP_INDEX
+
+#define CONTENT_INDEX 7
+#define CONTENT_SHIFT 0
+#define CONTENT_MASK  0x3
+static inline uint8_t css_computed_content(
+		const css_computed_style *style, 
+		const css_computed_content_item **content)
+{
+	if (style->uncommon != NULL) {
+		uint8_t bits = style->uncommon->bits[CONTENT_INDEX];
+		bits &= CONTENT_MASK;
+		bits >>= CONTENT_SHIFT;
+
+		/* 2bits: type */
+		*content = style->uncommon->content;
+
+		return bits;
+	}
+
+	return CSS_CONTENT_NORMAL;
+}
+#undef CONTENT_MASK
+#undef CONTENT_SHIFT
+#undef CONTENT_INDEX
 
 #define VERTICAL_ALIGN_INDEX 0
 #define VERTICAL_ALIGN_SHIFT 0

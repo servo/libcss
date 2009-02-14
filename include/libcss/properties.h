@@ -110,10 +110,12 @@ enum css_color {
 	CSS_COLOR_COLOR				= 0x1
 };
 
-/** \todo content
 enum css_content {
+	CSS_CONTENT_INHERIT			= 0x0,
+	CSS_CONTENT_NONE			= 0x1,
+	CSS_CONTENT_NORMAL			= 0x2,
+	CSS_CONTENT_SET				= 0x3
 };
-*/
 
 enum css_counter_increment {
 	CSS_COUNTER_INCREMENT_INHERIT		= 0x0,
