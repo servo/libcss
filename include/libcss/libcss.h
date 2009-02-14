@@ -9,8 +9,8 @@
 #define libcss_h_
 
 #include <libcss/errors.h>
-#include <libcss/functypes.h>
 #include <libcss/types.h>
+#include <libcss/functypes.h>
 
 /* Initialise the CSS library for use */
 css_error css_initialise(const char *aliases_file,

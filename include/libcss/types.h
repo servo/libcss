@@ -12,9 +12,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-/** Source of charset information, in order of importance
+/**
+ * Source of charset information, in order of importance.
  * A client-dictated charset will override all others.
- * A document-specified charset will override autodetection or the default */
+ * A document-specified charset will override autodetection or the default.
+ */
 typedef enum css_charset_source {
 	CSS_CHARSET_DEFAULT          = 0,	/**< Default setting */
 	CSS_CHARSET_REFERRED         = 1,	/**< From referring document */
@@ -38,16 +40,16 @@ typedef enum css_language_level {
  * Stylesheet media types
  */
 typedef enum css_media_type {
-	CSS_MEDIA_AURAL             = (1<<0),
-	CSS_MEDIA_BRAILLE           = (1<<1),
-	CSS_MEDIA_EMBOSSED          = (1<<2),
-	CSS_MEDIA_HANDHELD          = (1<<3),
-	CSS_MEDIA_PRINT             = (1<<4),
-	CSS_MEDIA_PROJECTION        = (1<<5),
-	CSS_MEDIA_SCREEN            = (1<<6),
-	CSS_MEDIA_SPEECH            = (1<<7),
-	CSS_MEDIA_TTY               = (1<<8),
-	CSS_MEDIA_TV                = (1<<9),
+	CSS_MEDIA_AURAL             = (1 << 0),
+	CSS_MEDIA_BRAILLE           = (1 << 1),
+	CSS_MEDIA_EMBOSSED          = (1 << 2),
+	CSS_MEDIA_HANDHELD          = (1 << 3),
+	CSS_MEDIA_PRINT             = (1 << 4),
+	CSS_MEDIA_PROJECTION        = (1 << 5),
+	CSS_MEDIA_SCREEN            = (1 << 6),
+	CSS_MEDIA_SPEECH            = (1 << 7),
+	CSS_MEDIA_TTY               = (1 << 8),
+	CSS_MEDIA_TV                = (1 << 9),
 	CSS_MEDIA_ALL               = CSS_MEDIA_AURAL | CSS_MEDIA_BRAILLE |
                                       CSS_MEDIA_EMBOSSED | CSS_MEDIA_HANDHELD |
                                       CSS_MEDIA_PRINT | CSS_MEDIA_PROJECTION |
