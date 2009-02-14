@@ -1,7 +1,6 @@
 #include <libcss/computed.h>
 #include <libcss/properties.h>
-
-#include "utils/fpmath.h"
+#include <libcss/types.h>
 
 static size_t dump_css_fixed(css_fixed f, char *ptr, size_t len)
 {

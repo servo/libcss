@@ -318,7 +318,7 @@ static inline css_error parse_colour_specifier(css_language *c,
 static inline css_error parse_unit_specifier(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint32_t default_unit,
-		fixed *length, uint32_t *unit);
+		css_fixed *length, uint32_t *unit);
 
 static inline css_error parse_border_side_color(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -463,7 +463,7 @@ css_error parse_azimuth(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -778,7 +778,7 @@ css_error parse_background_position(css_language *c,
 	uint8_t flags = 0;
 	uint32_t opv;
 	uint16_t value[2] = { 0 };
-	fixed length[2] = { 0 };
+	css_fixed length[2] = { 0 };
 	uint32_t unit[2] = { 0 };
 	uint32_t required_size;
 
@@ -1091,7 +1091,7 @@ css_error parse_border_spacing(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length[2] = { 0 };
+	css_fixed length[2] = { 0 };
 	uint32_t unit[2] = { 0 };
 	uint32_t required_size;
 
@@ -1213,7 +1213,7 @@ css_error parse_bottom(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -1365,7 +1365,7 @@ css_error parse_clip(css_language *c,
 	uint16_t value = 0;
 	uint32_t opv;
 	int num_lengths = 0;
-	fixed length[4] = { 0 };
+	css_fixed length[4] = { 0 };
 	uint32_t unit[4] = { 0 };
 	uint32_t required_size;
 
@@ -1653,7 +1653,7 @@ css_error parse_counter_increment(css_language *c,
 
 		while (token != NULL) {
 			const parserutils_hash_entry *name = token->idata;
-			fixed increment = INTTOFIX(1);
+			css_fixed increment = INTTOFIX(1);
 
 			consumeWhitespace(vector, &temp_ctx);
 
@@ -1731,7 +1731,7 @@ css_error parse_counter_increment(css_language *c,
 
 		while (token != NULL) {
 			const parserutils_hash_entry *name = token->idata;
-			fixed increment = INTTOFIX(1);
+			css_fixed increment = INTTOFIX(1);
 
 			consumeWhitespace(vector, ctx);
 
@@ -1822,7 +1822,7 @@ css_error parse_counter_reset(css_language *c,
 
 		while (token != NULL) {
 			const parserutils_hash_entry *name = token->idata;
-			fixed increment = INTTOFIX(0);
+			css_fixed increment = INTTOFIX(0);
 
 			consumeWhitespace(vector, &temp_ctx);
 
@@ -1900,7 +1900,7 @@ css_error parse_counter_reset(css_language *c,
 
 		while (token != NULL) {
 			const parserutils_hash_entry *name = token->idata;
-			fixed increment = INTTOFIX(0);
+			css_fixed increment = INTTOFIX(0);
 
 			consumeWhitespace(vector, ctx);
 
@@ -2455,7 +2455,7 @@ css_error parse_elevation(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -2982,7 +2982,7 @@ css_error parse_font_size(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -3186,7 +3186,7 @@ css_error parse_font_weight(css_language *c,
 		size_t consumed = 0;
 		css_string tmp = { token->ilower->len, 
 				(uint8_t *) token->ilower->data };
-		fixed num = number_from_css_string(&tmp, true, &consumed);
+		css_fixed num = number_from_css_string(&tmp, true, &consumed);
 		/* Invalid if there are trailing characters */
 		if (consumed != token->ilower->len)
 			return CSS_INVALID;
@@ -3235,7 +3235,7 @@ css_error parse_height(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -3304,7 +3304,7 @@ css_error parse_left(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -3369,7 +3369,7 @@ css_error parse_letter_spacing(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -3435,7 +3435,7 @@ css_error parse_line_height(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -3689,7 +3689,7 @@ css_error parse_max_height(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -3758,7 +3758,7 @@ css_error parse_max_width(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -3827,7 +3827,7 @@ css_error parse_min_height(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -3892,7 +3892,7 @@ css_error parse_min_width(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -3957,7 +3957,7 @@ css_error parse_orphans(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed num = 0;
+	css_fixed num = 0;
 	uint32_t required_size;
 
 	/* <integer> | IDENT (inherit) */
@@ -4319,7 +4319,7 @@ css_error parse_pause_after(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -4384,7 +4384,7 @@ css_error parse_pause_before(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -4449,7 +4449,7 @@ css_error parse_pitch_range(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed num = 0;
+	css_fixed num = 0;
 	uint32_t required_size;
 
 	/* number | IDENT (inherit) */
@@ -4511,7 +4511,7 @@ css_error parse_pitch(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -4880,7 +4880,7 @@ css_error parse_richness(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed num = 0;
+	css_fixed num = 0;
 	uint32_t required_size;
 
 	/* number | IDENT (inherit) */
@@ -4942,7 +4942,7 @@ css_error parse_right(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -5173,7 +5173,7 @@ css_error parse_speech_rate(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed num = 0;
+	css_fixed num = 0;
 	uint32_t required_size;
 
 	/* number | IDENT (x-slow, slow, medium, fast, x-fast, faster, slower, 
@@ -5259,7 +5259,7 @@ css_error parse_stress(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed num = 0;
+	css_fixed num = 0;
 	uint32_t required_size;
 
 	/* number | IDENT (inherit) */
@@ -5477,7 +5477,7 @@ css_error parse_text_indent(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -5583,7 +5583,7 @@ css_error parse_top(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -5691,7 +5691,7 @@ css_error parse_vertical_align(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -6156,7 +6156,7 @@ css_error parse_volume(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -6312,7 +6312,7 @@ css_error parse_widows(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed num = 0;
+	css_fixed num = 0;
 	uint32_t required_size;
 
 	/* <integer> | IDENT (inherit) */
@@ -6374,7 +6374,7 @@ css_error parse_width(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -6443,7 +6443,7 @@ css_error parse_word_spacing(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -6509,7 +6509,7 @@ css_error parse_z_index(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed num = 0;
+	css_fixed num = 0;
 	uint32_t required_size;
 
 	/* <integer> | IDENT (auto, inherit) */
@@ -6644,7 +6644,7 @@ css_error parse_colour_specifier(css_language *c,
 
 			for (int i = 0; i < 3; i++) {
 				css_string tmp;
-				fixed num;
+				css_fixed num;
 				size_t consumed = 0;
 				uint8_t *component = i == 0 ? &r 
 							    : i == 1 ? &b : &g;
@@ -6713,10 +6713,10 @@ css_error parse_colour_specifier(css_language *c,
 css_error parse_unit_specifier(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint32_t default_unit,
-		fixed *length, uint32_t *unit)
+		css_fixed *length, uint32_t *unit)
 {
 	const css_token *token;
-	fixed num;
+	css_fixed num;
 	size_t consumed = 0;
 	css_string tmp;
 
@@ -6938,7 +6938,7 @@ css_error parse_border_side_width(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -7016,7 +7016,7 @@ css_error parse_margin_side(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 
@@ -7081,7 +7081,7 @@ css_error parse_padding_side(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
-	fixed length = 0;
+	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
 

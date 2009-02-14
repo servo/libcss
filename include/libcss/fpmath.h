@@ -5,13 +5,13 @@
  * Copyright 2008 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
-#ifndef css_utils_fpmath_h_
-#define css_utils_fpmath_h_
+#ifndef libcss_fpmath_h_
+#define libcss_fpmath_h_
 
 #include <stdint.h>
 
 /* 22:10 fixed point math */
-typedef int32_t fixed;
+typedef int32_t css_fixed;
 
 /* Add two fixed point values */
 #define FADD(a, b) ((a) + (b))
@@ -41,7 +41,21 @@ typedef int32_t fixed;
 /* Convert a fixed point value to an integer */
 #define FIXTOINT(a) ((a) >> 10)
 
-#include "utils/fpconstants.h"
+/* Useful values */
+#define F_PI_2	0x00000648	/* 1.5708 (PI/2) */
+#define F_PI	0x00000c91	/* 3.1415 (PI) */
+#define F_3PI_2	0x000012d9	/* 4.7124 (3PI/2) */
+#define F_2PI	0x00001922	/* 6.2831 (2 PI) */
+
+#define F_90	0x00016800	/*  90 */
+#define F_180	0x0002d000	/* 180 */
+#define F_270	0x00043800	/* 270 */
+#define F_360	0x0005a000	/* 360 */
+
+#define F_100	0x00019000	/* 100 */
+#define F_200	0x00032000	/* 200 */
+#define F_300	0x0004b000	/* 300 */
+#define F_400	0x00064000	/* 400 */
 
 #endif
 

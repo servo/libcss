@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libcss/libcss.h"
+#include <libcss/libcss.h>
 
 #include "utils/utils.h"
 
@@ -23,7 +23,7 @@ typedef struct line_ctx {
 static bool handle_line(const char *data, size_t datalen, void *pw);
 static void run_test(const uint8_t *data, size_t len, 
 		const char *exp, size_t explen);
-static void print_fixed(char *buf, size_t len, fixed f);
+static void print_css_fixed(char *buf, size_t len, css_fixed f);
 
 int main(int argc, char **argv)
 {
@@ -112,7 +112,7 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 {
 	css_string in = { len, (uint8_t *) data };
 	size_t consumed;
-	fixed result;
+	css_fixed result;
 	char buf[256];
 
 	UNUSED(exp);
@@ -120,14 +120,14 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 
 	result = number_from_css_string(&in, false, &consumed);
 
-	print_fixed(buf, sizeof(buf), result);
+	print_css_fixed(buf, sizeof(buf), result);
 
 	printf("got: %s expected: %.*s\n", buf, (int) explen, exp);
 
 	assert(strncmp(buf, exp, explen) == 0);
 }
 
-void print_fixed(char *buf, size_t len, fixed f)
+void print_css_fixed(char *buf, size_t len, css_fixed f)
 {
 #define ABS(x) (uint32_t)((x) < 0 ? -(x) : (x))
 	uint32_t uintpart = FIXTOINT(ABS(f));
