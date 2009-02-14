@@ -13,16 +13,6 @@
 #include <libcss/properties.h>
 #include <libcss/types.h>
 
-typedef struct css_computed_aural {
-	/** \todo */
-	uint8_t dummy;
-} css_computed_aural;
-
-typedef struct css_computed_page {
-	/** \todo */
-	uint8_t dummy;
-} css_computed_page;
-
 enum css_computed_content_type {
 	CSS_COMPUTED_CONTENT_NONE		= 0,
 	CSS_COMPUTED_CONTENT_STRING		= 1,
@@ -330,8 +320,8 @@ struct css_computed_style {
 	css_string *font_family;
 
 	css_computed_uncommon *uncommon;/**< Uncommon properties */
-	css_computed_aural *aural;	/**< Aural properties */
-	css_computed_page *page;	/**< Page properties */
+	void *aural;			/**< Aural properties */
+	void *page;			/**< Page properties */
 
 	css_allocator_fn alloc;
 	void *pw;
