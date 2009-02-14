@@ -925,11 +925,10 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 				match);
 		break;
 	case CSS_SELECTOR_PSEUDO_CLASS:
-		if (detail->name == state->first_child &&
-				(state->pseudo_classes &
-				CSS_PSEUDO_CLASS_FIRST_CHILD))
-			*match = true;
-		else if (detail->name == state->link &&
+		if (detail->name == state->first_child) {
+			error = state->handler->node_is_first_child(state->pw, 
+					node, match);
+		} else if (detail->name == state->link &&
 				(state->pseudo_classes & 
 				CSS_PSEUDO_CLASS_LINK))
 			*match = true;

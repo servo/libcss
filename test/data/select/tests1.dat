@@ -64,3 +64,21 @@ border-left-color: #00000000
 display: inline
 #reset
 
+#tree
+| div
+|  p*
+#author
+p:first-child { background-color: #bbc; }
+#errors
+#expected
+background-attachment: scroll
+background-color: #bbbbcc00
+background-image: none
+background-position: 0% 0%
+background-repeat: repeat
+border-top-color: #00000000
+border-right-color: #00000000
+border-bottom-color: #00000000
+border-left-color: #00000000
+display: inline
+#reset

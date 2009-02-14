@@ -13,16 +13,15 @@
 #include <libcss/types.h>
 
 enum css_pseudo_class {
-	CSS_PSEUDO_CLASS_FIRST_CHILD    = (1<<0),
-	CSS_PSEUDO_CLASS_LINK           = (1<<1),
-	CSS_PSEUDO_CLASS_VISITED        = (1<<2),
-	CSS_PSEUDO_CLASS_HOVER          = (1<<3),
-	CSS_PSEUDO_CLASS_ACTIVE         = (1<<4),
-	CSS_PSEUDO_CLASS_FOCUS          = (1<<5),
-	/** \todo CSS_PSEUDO_CLASS_LANG = (1<<6), */
-	CSS_PSEUDO_CLASS_LEFT           = (1<<7),
-	CSS_PSEUDO_CLASS_RIGHT          = (1<<8),
-	CSS_PSEUDO_CLASS_FIRST          = (1<<9)
+	CSS_PSEUDO_CLASS_LINK           = (1<<0),
+	CSS_PSEUDO_CLASS_VISITED        = (1<<1),
+	CSS_PSEUDO_CLASS_HOVER          = (1<<2),
+	CSS_PSEUDO_CLASS_ACTIVE         = (1<<3),
+	CSS_PSEUDO_CLASS_FOCUS          = (1<<4),
+	/** \todo CSS_PSEUDO_CLASS_LANG = (1<<5), */
+	CSS_PSEUDO_CLASS_LEFT           = (1<<6),
+	CSS_PSEUDO_CLASS_RIGHT          = (1<<7),
+	CSS_PSEUDO_CLASS_FIRST          = (1<<8)
 };
 
 enum css_pseudo_element {
@@ -70,6 +69,8 @@ typedef struct css_select_handler {
 			const uint8_t *name, size_t nlen,
 			const uint8_t *value, size_t vlen,
 			bool *match);
+
+	css_error (*node_is_first_child)(void *pw, void *node, bool *match);
 } css_select_handler;
 
 css_error css_select_ctx_create(css_alloc alloc, void *pw,

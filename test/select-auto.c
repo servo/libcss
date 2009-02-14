@@ -101,6 +101,7 @@ static css_error node_has_attribute_includes(void *pw, void *node,
 		const uint8_t *name, size_t nlen,
 		const uint8_t *value, size_t vlen,
 		bool *match);
+static css_error node_is_first_child(void *pw, void *node, bool *match);
 
 static css_select_handler select_handler = {
 	node_name,
@@ -114,7 +115,8 @@ static css_select_handler select_handler = {
 	node_has_attribute,
 	node_has_attribute_equal,
 	node_has_attribute_dashmatch,
-	node_has_attribute_includes
+	node_has_attribute_includes,
+	node_is_first_child
 };
 
 static void *myrealloc(void *data, size_t len, void *pw)
@@ -357,6 +359,7 @@ void parse_tree_data(line_ctx *ctx, const char *data, size_t len)
 
 				ctx->current->last_child = n;
 			}
+			n->parent = ctx->current;
 		}
 
 		ctx->current = n;
@@ -532,10 +535,7 @@ void parse_pseudo_list(const char **data, size_t *len, uint64_t *elements,
 			p++;
 
 		/* Pseudo classes */
-		if (p - start == 11 && 
-				strncasecmp(start, "first-child", 11) == 0)
-			*classes |= CSS_PSEUDO_CLASS_FIRST_CHILD;
-		else if (p - start == 7 &&
+		if (p - start == 7 &&
 				strncasecmp(start, "visited", 7) == 0)
 			*classes |= CSS_PSEUDO_CLASS_VISITED;
 		else if (p - start == 6 &&
@@ -958,3 +958,13 @@ css_error node_has_attribute_includes(void *pw, void *n,
 	return CSS_OK;
 }
 
+css_error node_is_first_child(void *pw, void *n, bool *match)
+{
+	node *node = n;
+
+	UNUSED(pw);
+
+	*match = (node->parent != NULL && node->parent->children == node);
+
+	return CSS_OK;
+}
