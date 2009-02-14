@@ -378,7 +378,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	case CSS_BORDER_STYLE_RIDGE:
 		wrote = snprintf(ptr, *len, "border-top-style: ridge\n");
 		break;
-	case CSS_BORDER_STYLE_INSET
+	case CSS_BORDER_STYLE_INSET:
 		wrote = snprintf(ptr, *len, "border-top-style: inset\n");
 		break;
 	case CSS_BORDER_STYLE_OUTSET:
@@ -418,7 +418,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	case CSS_BORDER_STYLE_RIDGE:
 		wrote = snprintf(ptr, *len, "border-right-style: ridge\n");
 		break;
-	case CSS_BORDER_STYLE_INSET
+	case CSS_BORDER_STYLE_INSET:
 		wrote = snprintf(ptr, *len, "border-right-style: inset\n");
 		break;
 	case CSS_BORDER_STYLE_OUTSET:
@@ -458,7 +458,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	case CSS_BORDER_STYLE_RIDGE:
 		wrote = snprintf(ptr, *len, "border-bottom-style: ridge\n");
 		break;
-	case CSS_BORDER_STYLE_INSET
+	case CSS_BORDER_STYLE_INSET:
 		wrote = snprintf(ptr, *len, "border-bottom-style: inset\n");
 		break;
 	case CSS_BORDER_STYLE_OUTSET:
@@ -498,7 +498,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	case CSS_BORDER_STYLE_RIDGE:
 		wrote = snprintf(ptr, *len, "border-left-style: ridge\n");
 		break;
-	case CSS_BORDER_STYLE_INSET
+	case CSS_BORDER_STYLE_INSET:
 		wrote = snprintf(ptr, *len, "border-left-style: inset\n");
 		break;
 	case CSS_BORDER_STYLE_OUTSET:
