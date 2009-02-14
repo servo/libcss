@@ -35,11 +35,10 @@ static css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule);
  */
 css_error css_stylesheet_create(css_language_level level,
 		const char *charset, const char *url, const char *title,
-		css_origin origin, uint64_t media,
+		css_origin origin, uint64_t media, lwc_context *dict,
 		css_allocator_fn alloc, void *alloc_pw, 
 		css_stylesheet **stylesheet)
 {
-	parserutils_error perror;
 	css_error error;
 	css_stylesheet *sheet;
 	size_t len;
@@ -52,19 +51,13 @@ css_error css_stylesheet_create(css_language_level level,
 		return CSS_NOMEM;
 
 	memset(sheet, 0, sizeof(css_stylesheet));
-
-	perror = parserutils_hash_create((parserutils_alloc) alloc, alloc_pw,
-			&sheet->dictionary);
-	if (perror != PARSERUTILS_OK) {
-		alloc(sheet, 0, alloc_pw);
-		return css_error_from_parserutils_error(perror);
-	}
+        
+        sheet->dictionary = dict;
 
 	error = css_parser_create(charset, 
 			charset ? CSS_CHARSET_DICTATED : CSS_CHARSET_DEFAULT,
 			sheet->dictionary, alloc, alloc_pw, &sheet->parser);
 	if (error != CSS_OK) {
-		parserutils_hash_destroy(sheet->dictionary);
 		alloc(sheet, 0, alloc_pw);
 		return error;
 	}
@@ -74,7 +67,6 @@ css_error css_stylesheet_create(css_language_level level,
 			&sheet->parser_frontend);
 	if (error != CSS_OK) {
 		css_parser_destroy(sheet->parser);
-		parserutils_hash_destroy(sheet->dictionary);
 		alloc(sheet, 0, alloc_pw);
 		return error;
 	}
@@ -83,7 +75,6 @@ css_error css_stylesheet_create(css_language_level level,
 	if (error != CSS_OK) {
 		css_language_destroy(sheet->parser_frontend);
 		css_parser_destroy(sheet->parser);
-		parserutils_hash_destroy(sheet->dictionary);
 		alloc(sheet, 0, alloc_pw);
 		return error;
 	}
@@ -94,7 +85,6 @@ css_error css_stylesheet_create(css_language_level level,
 		css_selector_hash_destroy(sheet->selectors);
 		css_language_destroy(sheet->parser_frontend);
 		css_parser_destroy(sheet->parser);
-		parserutils_hash_destroy(sheet->dictionary);
 		alloc(sheet, 0, alloc_pw);
 		return CSS_NOMEM;
 	}
@@ -108,7 +98,6 @@ css_error css_stylesheet_create(css_language_level level,
 			css_selector_hash_destroy(sheet->selectors);
 			css_language_destroy(sheet->parser_frontend);
 			css_parser_destroy(sheet->parser);
-			parserutils_hash_destroy(sheet->dictionary);
 			alloc(sheet, 0, alloc_pw);
 			return CSS_NOMEM;
 		}
@@ -163,8 +152,6 @@ css_error css_stylesheet_destroy(css_stylesheet *sheet)
 
 	if (sheet->parser != NULL)
 		css_parser_destroy(sheet->parser);
-
-	parserutils_hash_destroy(sheet->dictionary);
 
 	sheet->alloc(sheet, 0, sheet->pw);
 
@@ -262,7 +249,7 @@ css_error css_stylesheet_data_done(css_stylesheet *sheet)
  * register an empty stylesheet with the parent in its place.
  */
 css_error css_stylesheet_next_pending_import(css_stylesheet *parent,
-		css_string *url, uint64_t *media)
+		lwc_string **url, uint64_t *media)
 {
 	const css_rule *r;
 
@@ -278,9 +265,7 @@ css_error css_stylesheet_next_pending_import(css_stylesheet *parent,
 			break;
 
 		if (r->type == CSS_RULE_IMPORT && i->sheet == NULL) {
-			url->len = i->url->len;
-			url->data = (uint8_t *) i->url->data;
-
+                        *url = lwc_context_string_ref(parent->dictionary, i->url);
 			*media = i->media;
 
 			return CSS_OK;
@@ -512,7 +497,7 @@ css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style)
  *         CSS_NOMEM on memory exhaustion
  */
 css_error css_stylesheet_selector_create(css_stylesheet *sheet,
-		const parserutils_hash_entry *name, css_selector **selector)
+		lwc_string *name, css_selector **selector)
 {
 	css_selector *sel;
 
@@ -530,7 +515,7 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 	sel->data.value = NULL;
 
 	/* Initial specificity -- 1 for an element, 0 for universal */
-	if (name->len != 1 || name->data[0] != '*')
+	if (lwc_string_length(name) != 1 || lwc_string_data(name)[0] != '*')
 		sel->specificity = CSS_SPECIFICITY_D;
 	else
 		sel->specificity = 0;
@@ -585,8 +570,8 @@ css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
  *         CSS_BADPARM on bad parameters
  */
 css_error css_stylesheet_selector_detail_init(css_stylesheet *sheet,
-		css_selector_type type, const parserutils_hash_entry *name, 
-		const parserutils_hash_entry *value, 
+		css_selector_type type, lwc_string *name, 
+		lwc_string *value, 
 		css_selector_detail *detail)
 {
 	if (sheet == NULL || name == NULL || detail == NULL)
@@ -968,7 +953,7 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error css_stylesheet_rule_set_charset(css_stylesheet *sheet,
-		css_rule *rule, const parserutils_hash_entry *charset)
+		css_rule *rule, lwc_string *charset)
 {
 	css_rule_charset *r = (css_rule_charset *) rule;
 
@@ -995,7 +980,7 @@ css_error css_stylesheet_rule_set_charset(css_stylesheet *sheet,
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error css_stylesheet_rule_set_nascent_import(css_stylesheet *sheet,
-		css_rule *rule, const parserutils_hash_entry *url, 
+		css_rule *rule, lwc_string *url, 
 		uint64_t media)
 {
 	css_rule_import *r = (css_rule_import *) rule;

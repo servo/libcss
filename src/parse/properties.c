@@ -751,7 +751,7 @@ css_error parse_background_image(css_language *c,
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == BACKGROUND_IMAGE_URI)
-		required_size += sizeof(parserutils_hash_entry *);
+		required_size += sizeof(lwc_string *);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -763,7 +763,7 @@ css_error parse_background_image(css_language *c,
 	if ((flags & FLAG_INHERIT) == false && value == BACKGROUND_IMAGE_URI) {
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&token->idata, 
-				sizeof(parserutils_hash_entry *));
+				sizeof(lwc_string *));
 	}
 
 	return CSS_OK;
@@ -1652,7 +1652,7 @@ css_error parse_counter_increment(css_language *c,
 		value = COUNTER_INCREMENT_NAMED;
 
 		while (token != NULL) {
-			const parserutils_hash_entry *name = token->idata;
+			lwc_string *name = token->idata;
 			css_fixed increment = INTTOFIX(1);
 
 			consumeWhitespace(vector, &temp_ctx);
@@ -1664,14 +1664,12 @@ css_error parse_counter_increment(css_language *c,
 				return CSS_INVALID;
 
 			if (token != NULL && token->type == CSS_TOKEN_NUMBER) {
-				const css_string temp = { token->ilower->len,
-					(uint8_t *) token->ilower->data };
 				size_t consumed = 0;
 
-				increment = number_from_css_string(&temp,
+				increment = number_from_lwc_string(token->ilower,
 						true, &consumed);
 
-				if (consumed != token->ilower->len)
+				if (consumed != lwc_string_length(token->ilower))
 					return CSS_INVALID;
 
 				parserutils_vector_iterate(vector, &temp_ctx);
@@ -1730,7 +1728,7 @@ css_error parse_counter_increment(css_language *c,
 		opv = COUNTER_INCREMENT_NAMED;
 
 		while (token != NULL) {
-			const parserutils_hash_entry *name = token->idata;
+			lwc_string *name = token->idata;
 			css_fixed increment = INTTOFIX(1);
 
 			consumeWhitespace(vector, ctx);
@@ -1742,14 +1740,12 @@ css_error parse_counter_increment(css_language *c,
 				return CSS_INVALID;
 
 			if (token != NULL && token->type == CSS_TOKEN_NUMBER) {
-				const css_string temp = { token->ilower->len,
-					(uint8_t *) token->ilower->data };
 				size_t consumed = 0;
 
-				increment = number_from_css_string(&temp,
+				increment = number_from_lwc_string(token->ilower,
 						true, &consumed);
 
-				if (consumed != token->ilower->len)
+				if (consumed != lwc_string_length(token->ilower))
 					return CSS_INVALID;
 
 				parserutils_vector_iterate(vector, ctx);
@@ -1821,7 +1817,7 @@ css_error parse_counter_reset(css_language *c,
 		value = COUNTER_RESET_NAMED;
 
 		while (token != NULL) {
-			const parserutils_hash_entry *name = token->idata;
+			lwc_string *name = token->idata;
 			css_fixed increment = INTTOFIX(0);
 
 			consumeWhitespace(vector, &temp_ctx);
@@ -1833,14 +1829,12 @@ css_error parse_counter_reset(css_language *c,
 				return CSS_INVALID;
 
 			if (token != NULL && token->type == CSS_TOKEN_NUMBER) {
-				const css_string temp = { token->ilower->len,
-					(uint8_t *) token->ilower->data };
 				size_t consumed = 0;
 
-				increment = number_from_css_string(&temp,
+				increment = number_from_lwc_string(token->ilower,
 						true, &consumed);
 
-				if (consumed != token->ilower->len)
+				if (consumed != lwc_string_length(token->ilower))
 					return CSS_INVALID;
 
 				parserutils_vector_iterate(vector, &temp_ctx);
@@ -1899,7 +1893,7 @@ css_error parse_counter_reset(css_language *c,
 		opv = COUNTER_RESET_NAMED;
 
 		while (token != NULL) {
-			const parserutils_hash_entry *name = token->idata;
+			lwc_string *name = token->idata;
 			css_fixed increment = INTTOFIX(0);
 
 			consumeWhitespace(vector, ctx);
@@ -1911,14 +1905,12 @@ css_error parse_counter_reset(css_language *c,
 				return CSS_INVALID;
 
 			if (token != NULL && token->type == CSS_TOKEN_NUMBER) {
-				const css_string temp = { token->ilower->len,
-					(uint8_t *) token->ilower->data };
 				size_t consumed = 0;
 
-				increment = number_from_css_string(&temp,
+				increment = number_from_lwc_string(token->ilower,
 						true, &consumed);
 
-				if (consumed != token->ilower->len)
+				if (consumed != lwc_string_length(token->ilower))
 					return CSS_INVALID;
 
 				parserutils_vector_iterate(vector, ctx);
@@ -1996,7 +1988,7 @@ css_error parse_cue_after(css_language *c,
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == CUE_AFTER_URI)
-		required_size += sizeof(parserutils_hash_entry *);
+		required_size += sizeof(lwc_string *);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -2008,7 +2000,7 @@ css_error parse_cue_after(css_language *c,
 	if ((flags & FLAG_INHERIT) == false && value == CUE_AFTER_URI) {
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&token->idata, 
-				sizeof(parserutils_hash_entry *));
+				sizeof(lwc_string *));
 	}
 
 	return CSS_OK;
@@ -2050,7 +2042,7 @@ css_error parse_cue_before(css_language *c,
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == CUE_BEFORE_URI)
-		required_size += sizeof(parserutils_hash_entry *);
+		required_size += sizeof(lwc_string *);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -2062,7 +2054,7 @@ css_error parse_cue_before(css_language *c,
 	if ((flags & FLAG_INHERIT) == false && value == CUE_BEFORE_URI) {
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&token->idata, 
-				sizeof(parserutils_hash_entry *));
+				sizeof(lwc_string *));
 	}
 
 	return CSS_OK;
@@ -2101,7 +2093,7 @@ css_error parse_cursor(css_language *c,
 
 		/* URI* */
 		while (token != NULL && token->type == CSS_TOKEN_URI) {
-			const parserutils_hash_entry *uri = token->idata;
+			lwc_string *uri = token->idata;
 
 			if (first == false) {
 				required_size += sizeof(opv);
@@ -2244,7 +2236,7 @@ css_error parse_cursor(css_language *c,
 
 		/* URI* */
 		while (token != NULL && token->type == CSS_TOKEN_URI) {
-			const parserutils_hash_entry *uri = token->idata;
+			lwc_string *uri = token->idata;
 
 			if (first == false) {
 				opv = CURSOR_URI;
@@ -2693,7 +2685,7 @@ css_error parse_font_family(css_language *c,
 					}
 
 					required_size +=
-						sizeof(parserutils_hash_entry *);
+						sizeof(lwc_string *);
 
 					/* Skip past [ IDENT* S* ]* */
 					while (token != NULL) {
@@ -2729,7 +2721,7 @@ css_error parse_font_family(css_language *c,
 				}
 
 				required_size += 
-					sizeof(parserutils_hash_entry *);
+					sizeof(lwc_string *);
 			} else {
 				return CSS_INVALID;
 			}
@@ -2798,8 +2790,8 @@ css_error parse_font_family(css_language *c,
 
 		while (token != NULL) {
 			if (token->type == CSS_TOKEN_IDENT) {
-				const parserutils_hash_entry *name = 
-						token->idata;
+				lwc_string *name = token->idata;
+                                lwc_string *newname;
 			
 				if (token->ilower == c->strings[SERIF]) {
 					opv = FONT_FAMILY_SERIF;
@@ -2816,9 +2808,10 @@ css_error parse_font_family(css_language *c,
 						c->strings[MONOSPACE]) {
 					opv = FONT_FAMILY_MONOSPACE;
 				} else {
-					uint16_t len = token->idata->len;
+					uint16_t len = lwc_string_length(token->idata);
 					const css_token *temp_token = token;
-					parserutils_error perror;
+					lwc_error lerror;
+                                        
 
 					temp_ctx = *ctx;
 
@@ -2838,7 +2831,7 @@ css_error parse_font_family(css_language *c,
 
 						if (temp_token->type == 
 							CSS_TOKEN_IDENT) {
-							len += temp_token->idata->len;
+							len += lwc_string_length(temp_token->idata);
 						} else {
 							len += 1;
 						}
@@ -2850,8 +2843,8 @@ css_error parse_font_family(css_language *c,
 					uint8_t buf[len];
 					uint8_t *p = buf;
 
-					memcpy(p, token->idata->data, token->idata->len);
-					p += token->idata->len;
+					memcpy(p, lwc_string_data(token->idata), lwc_string_length(token->idata));
+					p += lwc_string_length(token->idata);
 
 					while (token != NULL) {
 						token = parserutils_vector_peek(
@@ -2867,9 +2860,9 @@ css_error parse_font_family(css_language *c,
 						if (token->type == 
 								CSS_TOKEN_IDENT) {
 							memcpy(p,
-								token->idata->data,
-								token->idata->len);
-							p += token->idata->len;
+								lwc_string_data(token->idata),
+								lwc_string_length(token->idata));
+							p += lwc_string_length(token->idata);
 						} else {
 							*p++ = ' ';
 						}
@@ -2884,18 +2877,21 @@ css_error parse_font_family(css_language *c,
 
 					/* Insert into hash, if it's different
 					 * from the name we already have */
-					if (p - buf != name->len || 
-						memcmp(buf, name->data, 
-							name->len) != 0) {
-						perror = parserutils_hash_insert(
-							c->sheet->dictionary, 
-							buf, len, &name);
-						if (perror != PARSERUTILS_OK) {
-							css_stylesheet_style_destroy(c->sheet, *result);
-							*result = NULL;
-							return css_error_from_parserutils_error(perror);
-						}
-					}
+                                        
+                                        lerror = lwc_context_intern(c->sheet->dictionary,
+                                                                    (char *)buf, len, &newname);
+                                        if (lerror != lwc_error_ok) {
+                                                css_stylesheet_style_destroy(c->sheet, *result);
+                                                *result = NULL;
+                                                return css_error_from_lwc_error(lerror);
+                                        }
+                                        
+                                        if (newname == name)
+                                                lwc_context_string_unref(c->sheet->dictionary,
+                                                                         newname);
+                                        
+                                        name = newname;
+                                        
 				}
 
 				if (first == false) {
@@ -3184,11 +3180,9 @@ css_error parse_font_weight(css_language *c,
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		css_string tmp = { token->ilower->len, 
-				(uint8_t *) token->ilower->data };
-		css_fixed num = number_from_css_string(&tmp, true, &consumed);
+		css_fixed num = number_from_lwc_string(token->ilower, true, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != token->ilower->len)
+		if (consumed != lwc_string_length(token->ilower))
 			return CSS_INVALID;
 		switch (FIXTOINT(num)) {
 		case 100: value = FONT_WEIGHT_100; break;
@@ -3454,10 +3448,8 @@ css_error parse_line_height(css_language *c,
 		value = LINE_HEIGHT_NORMAL;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		css_string tmp = { token->ilower->len, 
-				(uint8_t *) token->ilower->data };
-		length = number_from_css_string(&tmp, false, &consumed);
-		if (consumed != token->ilower->len)
+		length = number_from_lwc_string(token->ilower, false, &consumed);
+		if (consumed != lwc_string_length(token->ilower))
 			return CSS_INVALID;
 
 		/* Negative values are illegal */
@@ -3549,7 +3541,7 @@ css_error parse_list_style_image(css_language *c,
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == LIST_STYLE_IMAGE_URI)
-		required_size += sizeof(parserutils_hash_entry *);
+		required_size += sizeof(lwc_string *);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -3561,7 +3553,7 @@ css_error parse_list_style_image(css_language *c,
 	if ((flags & FLAG_INHERIT) == false && value == LIST_STYLE_IMAGE_URI) {
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&token->idata, 
-				sizeof(parserutils_hash_entry *));
+				sizeof(lwc_string *));
 	}
 
 	return CSS_OK;
@@ -3974,11 +3966,9 @@ css_error parse_orphans(css_language *c,
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		css_string tmp = { token->ilower->len,
-				(uint8_t *) token->ilower->data };
-		num = number_from_css_string(&tmp, true, &consumed);
+		num = number_from_lwc_string(token->ilower, true, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != token->ilower->len)
+		if (consumed != lwc_string_length(token->ilower))
 			return CSS_INVALID;
 
 		/* Negative values are nonsensical */
@@ -4466,11 +4456,9 @@ css_error parse_pitch_range(css_language *c,
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		css_string tmp = { token->ilower->len,
-				(uint8_t *) token->ilower->data };
-		num = number_from_css_string(&tmp, false, &consumed);
+		num = number_from_lwc_string(token->ilower, false, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != token->ilower->len)
+		if (consumed != lwc_string_length(token->ilower))
 			return CSS_INVALID;
 
 		/* Must be between 0 and 100 */
@@ -4597,7 +4585,7 @@ css_error parse_play_during(css_language *c,
 	uint16_t value = 0;
 	uint32_t opv;
 	uint32_t required_size;
-	const parserutils_hash_entry *uri;
+	lwc_string *uri;
 
 	/* URI [ IDENT(mix) || IDENT(repeat) ]? | IDENT(auto,none,inherit) */
 	token = parserutils_vector_iterate(vector, ctx);
@@ -4653,7 +4641,7 @@ css_error parse_play_during(css_language *c,
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && 
 			(value & PLAY_DURING_TYPE_MASK) == PLAY_DURING_URI)
-		required_size += sizeof(parserutils_hash_entry *);
+		required_size += sizeof(lwc_string *);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -4665,7 +4653,7 @@ css_error parse_play_during(css_language *c,
 	if ((flags & FLAG_INHERIT) == false && 
 			(value & PLAY_DURING_TYPE_MASK)  == PLAY_DURING_URI) {
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
-				&uri, sizeof(parserutils_hash_entry *));
+				&uri, sizeof(lwc_string *));
 	}
 
 	return CSS_OK;
@@ -4749,8 +4737,8 @@ css_error parse_quotes(css_language *c,
 
 		/* [ STRING STRING ] + */
 		while (token != NULL && token->type == CSS_TOKEN_STRING) {
-			const parserutils_hash_entry *open = token->idata;
-			const parserutils_hash_entry *close;
+			lwc_string *open = token->idata;
+			lwc_string *close;
 
 			consumeWhitespace(vector, &temp_ctx);
 
@@ -4818,8 +4806,8 @@ css_error parse_quotes(css_language *c,
 
 		/* [ STRING STRING ]+ */
 		while (token != NULL && token->type == CSS_TOKEN_STRING) {
-			const parserutils_hash_entry *open = token->idata;
-			const parserutils_hash_entry *close;
+			lwc_string *open = token->idata;
+			lwc_string *close;
 
 			consumeWhitespace(vector, ctx);
 
@@ -4897,11 +4885,9 @@ css_error parse_richness(css_language *c,
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		css_string tmp = { token->ilower->len,
-				(uint8_t *) token->ilower->data };
-		num = number_from_css_string(&tmp, false, &consumed);
+		num = number_from_lwc_string(token->ilower, false, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != token->ilower->len)
+		if (consumed != lwc_string_length(token->ilower))
 			return CSS_INVALID;
 
 		/* Must be between 0 and 100 */
@@ -5214,11 +5200,9 @@ css_error parse_speech_rate(css_language *c,
 		value = SPEECH_RATE_SLOWER;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		css_string tmp = { token->ilower->len,
-				(uint8_t *) token->ilower->data };
-		num = number_from_css_string(&tmp, false, &consumed);
+		num = number_from_lwc_string(token->ilower, false, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != token->ilower->len)
+		if (consumed != lwc_string_length(token->ilower))
 			return CSS_INVALID;
 
 		/* Make negative values invalid */
@@ -5276,11 +5260,9 @@ css_error parse_stress(css_language *c,
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		css_string tmp = { token->ilower->len,
-				(uint8_t *) token->ilower->data };
-		num = number_from_css_string(&tmp, false, &consumed);
+		num = number_from_lwc_string(token->ilower, false, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != token->ilower->len)
+		if (consumed != lwc_string_length(token->ilower))
 			return CSS_INVALID;
 
 		if (num < 0 || num > INTTOFIX(100))
@@ -5876,7 +5858,7 @@ css_error parse_voice_family(css_language *c,
 					}
 
 					required_size +=
-						sizeof(parserutils_hash_entry *);
+						sizeof(lwc_string *);
 
 					/* Skip past [ IDENT* S* ]* */
 					while (token != NULL) {
@@ -5910,7 +5892,7 @@ css_error parse_voice_family(css_language *c,
 				}
 
 				required_size += 
-					sizeof(parserutils_hash_entry *);
+					sizeof(lwc_string *);
 			} else {
 				return CSS_INVALID;
 			}
@@ -5979,8 +5961,8 @@ css_error parse_voice_family(css_language *c,
 
 		while (token != NULL) {
 			if (token->type == CSS_TOKEN_IDENT) {
-				const parserutils_hash_entry *name = 
-						token->idata;
+				lwc_string *name = token->idata;
+                                lwc_string *newname;
 			
 				if (token->ilower == c->strings[MALE]) {
 					opv = VOICE_FAMILY_MALE;
@@ -5990,9 +5972,9 @@ css_error parse_voice_family(css_language *c,
 				} else if (token->ilower == c->strings[CHILD]) {
 					opv = VOICE_FAMILY_CHILD;
 				} else {
-					uint16_t len = token->idata->len;
+					uint16_t len = lwc_string_length(token->idata);
 					const css_token *temp_token = token;
-					parserutils_error perror;
+                                        lwc_error lerror;
 
 					temp_ctx = *ctx;
 
@@ -6011,7 +5993,7 @@ css_error parse_voice_family(css_language *c,
 						}
 
 						if (temp_token != NULL && temp_token->type == CSS_TOKEN_IDENT) {
-							len += temp_token->idata->len;
+							len += lwc_string_length(temp_token->idata);
 						} else if (temp_token != NULL) {
 							len += 1;
 						}
@@ -6023,8 +6005,8 @@ css_error parse_voice_family(css_language *c,
 					uint8_t buf[len];
 					uint8_t *p = buf;
 
-					memcpy(p, token->idata->data, token->idata->len);
-					p += token->idata->len;
+					memcpy(p, lwc_string_data(token->idata), lwc_string_length(token->idata));
+					p += lwc_string_length(token->idata);
 
 					while (token != NULL) {
 						token = parserutils_vector_peek(
@@ -6041,9 +6023,9 @@ css_error parse_voice_family(css_language *c,
 							token->type == 
 								CSS_TOKEN_IDENT) {
 							memcpy(p,
-								token->idata->data,
-								token->idata->len);
-							p += token->idata->len;
+								lwc_string_data(token->idata),
+								lwc_string_length(token->idata));
+							p += lwc_string_length(token->idata);
 						} else if (token != NULL) {
 							*p++ = ' ';
 						}
@@ -6058,19 +6040,20 @@ css_error parse_voice_family(css_language *c,
 
 					/* Insert into hash, if it's different
 					 * from the name we already have */
-					if (p - buf != name->len || 
-						memcmp(buf, name->data, 
-							name->len) != 0) {
-						perror = parserutils_hash_insert(
-							c->sheet->dictionary, 
-							buf, len, &name);
-						if (perror != PARSERUTILS_OK) {
-							css_stylesheet_style_destroy(c->sheet, *result);
-							*result = NULL;
-							return css_error_from_parserutils_error(perror);
-						}
-					}
-				}
+                                        lerror = lwc_context_intern(c->sheet->dictionary,
+                                                                    (char *)buf, len, &newname);
+                                        if (lerror != lwc_error_ok) {
+                                                css_stylesheet_style_destroy(c->sheet, *result);
+                                                *result = NULL;
+                                                return css_error_from_lwc_error(lerror);
+                                        }
+                                        
+                                        if (newname == name)
+                                                lwc_context_string_unref(c->sheet->dictionary,
+                                                                         newname);
+                                        
+                                        name = newname;
+                                }
 
 				if (first == false) {
 					memcpy(ptr, &opv, sizeof(opv));
@@ -6197,10 +6180,8 @@ css_error parse_volume(css_language *c,
 		value = VOLUME_X_LOUD;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		css_string tmp = { token->ilower->len,
-				(uint8_t *) token->ilower->data };
-		length = number_from_css_string(&tmp, false, &consumed);
-		if (consumed != token->ilower->len)
+		length = number_from_lwc_string(token->ilower, false, &consumed);
+		if (consumed != lwc_string_length(token->ilower))
 			return CSS_INVALID;
 
 		/* Must be between 0 and 100 */
@@ -6329,11 +6310,9 @@ css_error parse_widows(css_language *c,
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		css_string tmp = { token->ilower->len,
-				(uint8_t *) token->ilower->data };
-		num = number_from_css_string(&tmp, true, &consumed);
+		num = number_from_lwc_string(token->ilower, true, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != token->ilower->len)
+		if (consumed != lwc_string_length(token->ilower))
 			return CSS_INVALID;
 
 		/* Negative values are nonsensical */
@@ -6530,11 +6509,9 @@ css_error parse_z_index(css_language *c,
 		value = Z_INDEX_AUTO;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		css_string tmp = { token->ilower->len,
-				(uint8_t *) token->ilower->data };
-		num = number_from_css_string(&tmp, true, &consumed);
+		num = number_from_lwc_string(token->ilower, true, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != token->ilower->len)
+		if (consumed != lwc_string_length(token->ilower))
 			return CSS_INVALID;
 
 		value = Z_INDEX_SET;
@@ -6612,30 +6589,30 @@ css_error parse_colour_specifier(css_language *c,
 	if (token->type == CSS_TOKEN_IDENT) {
 		/** \todo Parse colour names */
 	} else if (token->type == CSS_TOKEN_HASH) {
-		if (token->idata->len == 3 &&
-				isHex(token->idata->data[0]) &&
-				isHex(token->idata->data[1]) &&
-				isHex(token->idata->data[2])) {
-			r = charToHex(token->idata->data[0]);
-			g = charToHex(token->idata->data[1]);
-			b = charToHex(token->idata->data[2]);
+		if (lwc_string_length(token->idata) == 3 &&
+				isHex(lwc_string_data(token->idata)[0]) &&
+				isHex(lwc_string_data(token->idata)[1]) &&
+				isHex(lwc_string_data(token->idata)[2])) {
+			r = charToHex(lwc_string_data(token->idata)[0]);
+			g = charToHex(lwc_string_data(token->idata)[1]);
+			b = charToHex(lwc_string_data(token->idata)[2]);
 
 			r |= (r << 4);
 			g |= (g << 4);
 			b |= (b << 4);
-		} else if (token->idata->len == 6 &&
-				isHex(token->idata->data[0]) &&
-				isHex(token->idata->data[1]) &&
-				isHex(token->idata->data[2]) &&
-				isHex(token->idata->data[3]) &&
-				isHex(token->idata->data[4]) &&
-				isHex(token->idata->data[5])) {
-			r = (charToHex(token->idata->data[0]) << 4);
-			r |= charToHex(token->idata->data[1]);
-			g = (charToHex(token->idata->data[2]) << 4);
-			g |= charToHex(token->idata->data[3]);
-			b = (charToHex(token->idata->data[4]) << 4);
-			b |= charToHex(token->idata->data[5]);
+		} else if (lwc_string_length(token->idata) == 6 &&
+				isHex(lwc_string_data(token->idata)[0]) &&
+				isHex(lwc_string_data(token->idata)[1]) &&
+				isHex(lwc_string_data(token->idata)[2]) &&
+				isHex(lwc_string_data(token->idata)[3]) &&
+				isHex(lwc_string_data(token->idata)[4]) &&
+				isHex(lwc_string_data(token->idata)[5])) {
+			r = (charToHex(lwc_string_data(token->idata)[0]) << 4);
+			r |= charToHex(lwc_string_data(token->idata)[1]);
+			g = (charToHex(lwc_string_data(token->idata)[2]) << 4);
+			g |= charToHex(lwc_string_data(token->idata)[3]);
+			b = (charToHex(lwc_string_data(token->idata)[4]) << 4);
+			b |= charToHex(lwc_string_data(token->idata)[5]);
 		} else
 			return CSS_INVALID;
 	} else if (token->type == CSS_TOKEN_FUNCTION) {
@@ -6643,7 +6620,6 @@ css_error parse_colour_specifier(css_language *c,
 			css_token_type valid = CSS_TOKEN_NUMBER;
 
 			for (int i = 0; i < 3; i++) {
-				css_string tmp;
 				css_fixed num;
 				size_t consumed = 0;
 				uint8_t *component = i == 0 ? &r 
@@ -6664,12 +6640,10 @@ css_error parse_colour_specifier(css_language *c,
 				else if (token->type != valid)
 					return CSS_INVALID;
 
-				tmp.len = token->idata->len;
-				tmp.data = (uint8_t *) token->idata->data;
-				num = number_from_css_string(&tmp, 
+				num = number_from_lwc_string(token->idata,
 						valid == CSS_TOKEN_NUMBER, 
 						&consumed);
-				if (consumed != token->idata->len)
+				if (consumed != lwc_string_length(token->idata))
 					return CSS_INVALID;
 
 				if (valid == CSS_TOKEN_NUMBER) {
@@ -6718,7 +6692,6 @@ css_error parse_unit_specifier(css_language *c,
 	const css_token *token;
 	css_fixed num;
 	size_t consumed = 0;
-	css_string tmp;
 
 	UNUSED(c);
 
@@ -6730,64 +6703,62 @@ css_error parse_unit_specifier(css_language *c,
 			token->type != CSS_TOKEN_PERCENTAGE))
 		return CSS_INVALID;
 
-	tmp.len = token->idata->len;
-	tmp.data = (uint8_t *) token->idata->data;
-	num = number_from_css_string(&tmp, false, &consumed);
+	num = number_from_lwc_string(token->idata, false, &consumed);
 
 	if (token->type == CSS_TOKEN_DIMENSION) {
-		if (token->idata->len - consumed == 4) {
-			if (strncasecmp((char *) token->idata->data + consumed, 
+		if (lwc_string_length(token->idata) - consumed == 4) {
+			if (strncasecmp((char *) lwc_string_data(token->idata) + consumed, 
 					"grad", 4) == 0)
 				*unit = UNIT_GRAD;
 			else
 				return CSS_INVALID;
-		} else if (token->idata->len - consumed == 3) {
-			if (strncasecmp((char *) token->idata->data + consumed,
+		} else if (lwc_string_length(token->idata) - consumed == 3) {
+			if (strncasecmp((char *) lwc_string_data(token->idata) + consumed,
 					"kHz", 3) == 0)
 				*unit = UNIT_KHZ;
-			else if (strncasecmp((char *) token->idata->data + 
+			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
 					consumed, "deg", 3) == 0)
 				*unit = UNIT_DEG;
-			else if (strncasecmp((char *) token->idata->data + 
+			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
 					consumed, "rad", 3) == 0)
 				*unit = UNIT_RAD;
 			else
 				return CSS_INVALID;
-		} else if (token->idata->len - consumed == 2) {
-			if (strncasecmp((char *) token->idata->data + consumed,
+		} else if (lwc_string_length(token->idata) - consumed == 2) {
+			if (strncasecmp((char *) lwc_string_data(token->idata) + consumed,
 					"Hz", 2) == 0)
 				*unit = UNIT_HZ;
-			else if (strncasecmp((char *) token->idata->data + 
+			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
 					consumed, "ms", 2) == 0)
 				*unit = UNIT_MS;
-			else if (strncasecmp((char *) token->idata->data + 
+			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
 					consumed, "px", 2) == 0)
 				*unit = UNIT_PX;
-			else if (strncasecmp((char *) token->idata->data + 
+			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
 					consumed, "ex", 2) == 0)
 				*unit = UNIT_EX;
-			else if (strncasecmp((char *) token->idata->data + 
+			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
 					consumed, "em", 2) == 0)
 				*unit = UNIT_EM;
-			else if (strncasecmp((char *) token->idata->data + 
+			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
 					consumed, "in", 2) == 0)
 				*unit = UNIT_IN;
-			else if (strncasecmp((char *) token->idata->data + 
+			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
 					consumed, "cm", 2) == 0)
 				*unit = UNIT_CM;
-			else if (strncasecmp((char *) token->idata->data + 
+			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
 					consumed, "mm", 2) == 0)
 				*unit = UNIT_MM;
-			else if (strncasecmp((char *) token->idata->data + 
+			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
 					consumed, "pt", 2) == 0)
 				*unit = UNIT_PT;
-			else if (strncasecmp((char *) token->idata->data + 
+			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
 					consumed, "pc", 2) == 0)
 				*unit = UNIT_PC;
 			else
 				return CSS_INVALID;
-		} else if (token->idata->len - consumed == 1) {
-			if (strncasecmp((char *) token->idata->data + consumed,
+		} else if (lwc_string_length(token->idata) - consumed == 1) {
+			if (strncasecmp((char *) lwc_string_data(token->idata) + consumed,
 					"s", 1) == 0)
 				*unit = UNIT_S;
 			else
@@ -6803,7 +6774,7 @@ css_error parse_unit_specifier(css_language *c,
 			return CSS_INVALID;
 		*unit = default_unit;
 	} else {
-		if (consumed != token->idata->len)
+		if (consumed != lwc_string_length(token->idata))
 			return CSS_INVALID;
 		*unit = UNIT_PCT;
 	}
@@ -7323,7 +7294,7 @@ css_error parse_content_list(css_language *c,
 				return CSS_INVALID;
 		} else if (token->type == CSS_TOKEN_FUNCTION &&
 				token->ilower == c->strings[COUNTER]) {
-			const parserutils_hash_entry *name;
+			lwc_string *name;
 
 			opv = CONTENT_COUNTER;
 
@@ -7394,8 +7365,8 @@ css_error parse_content_list(css_language *c,
 			offset += sizeof(name);
 		} else if (token->type == CSS_TOKEN_FUNCTION &&
 				token->ilower == c->strings[COUNTERS]) {
-			const parserutils_hash_entry *name;
-			const parserutils_hash_entry *sep;
+			lwc_string *name;
+			lwc_string *sep;
 
 			opv = CONTENT_COUNTERS;
 

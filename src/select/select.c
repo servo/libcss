@@ -8,8 +8,6 @@
 #include <assert.h>
 #include <string.h>
 
-#include <parserutils/utils/hash.h>
-
 #include <libcss/computed.h>
 #include <libcss/select.h>
 
@@ -58,17 +56,17 @@ typedef struct css_select_state {
 	uint32_t current_specificity;	/* Specificity of current rule */
 
 	/* Useful interned strings */
-	const parserutils_hash_entry *universal;
-	const parserutils_hash_entry *first_child;
-	const parserutils_hash_entry *link;
-	const parserutils_hash_entry *visited;
-	const parserutils_hash_entry *hover;
-	const parserutils_hash_entry *active;
-	const parserutils_hash_entry *focus;
-	const parserutils_hash_entry *first_line;
-	const parserutils_hash_entry *first_letter;
-	const parserutils_hash_entry *before;
-	const parserutils_hash_entry *after;
+	lwc_string *universal;
+	lwc_string *first_child;
+	lwc_string *link;
+	lwc_string *visited;
+	lwc_string *hover;
+	lwc_string *active;
+	lwc_string *focus;
+	lwc_string *first_line;
+	lwc_string *first_letter;
+	lwc_string *before;
+	lwc_string *after;
 
 	prop_state props[N_OPCODES];
 } css_select_state;
@@ -82,7 +80,7 @@ static css_error match_selectors_in_sheet(css_select_ctx *ctx,
 static css_error match_selector_chain(css_select_ctx *ctx, 
 		const css_selector *selector, css_select_state *state);
 static css_error match_named_combinator(css_select_ctx *ctx, 
-		css_combinator type, const parserutils_hash_entry *name, 
+		css_combinator type, lwc_string *name, 
 		css_select_state *state, void *node, void **next_node);
 static css_error match_universal_combinator(css_select_ctx *ctx, 
 		css_combinator type, const css_selector *selector, 
@@ -449,7 +447,7 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 		if ((ctx->sheets[i]->media & media) != 0) {
 			error = select_from_sheet(ctx, ctx->sheets[i], &state);
 			if (error != CSS_OK)
-				return error;
+                                goto cleanup;
 		}
 	}
 
@@ -478,26 +476,63 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 		if (properties[i].group == GROUP_NORMAL) {
 			error = properties[i].initial(result);
 			if (error != CSS_OK)
-				return error;
+				goto cleanup;
 		} else if (properties[i].group == GROUP_UNCOMMON &&
 				result->uncommon != NULL) {
 			error = properties[i].initial(result);
 			if (error != CSS_OK)
-				return error;
+				goto cleanup;
 		} else if (properties[i].group == GROUP_PAGE &&
 				result->page != NULL) {
 			error = properties[i].initial(result);
 			if (error != CSS_OK)
-				return error;
+				goto cleanup;
 		} else if (properties[i].group == GROUP_AURAL &&
 				result->aural != NULL) {
 			error = properties[i].initial(result);
 			if (error != CSS_OK)
-				return error;
+				goto cleanup;
 		}
 	}
 
-	return CSS_OK;
+	error = CSS_OK;
+cleanup:
+        if (ctx->sheets[0] != NULL) {
+                if (state.universal != NULL)
+                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
+                                                 state.universal);
+                if (state.first_child != NULL)
+                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
+                                                 state.first_child);
+                if (state.link != NULL)
+                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
+                                                 state.link);
+                if (state.visited != NULL)
+                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
+                                                 state.visited);
+                if (state.hover != NULL)
+                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
+                                                 state.hover);
+                if (state.active != NULL)
+                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
+                                                 state.active);
+                if (state.focus != NULL)
+                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
+                                                 state.focus);
+                if (state.first_line != NULL)
+                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
+                                                 state.first_line);
+                if (state.first_letter != NULL)
+                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
+                                                 state.first_letter);
+                if (state.before != NULL)
+                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
+                                                 state.before);
+                if (state.after != NULL)
+                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
+                                                 state.after);
+        }
+        return error;
 }
 
 /******************************************************************************
@@ -566,77 +601,80 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 css_error intern_strings_for_sheet(css_select_ctx *ctx, 
 		const css_stylesheet *sheet, css_select_state *state)
 {
-	parserutils_error perror;
+	lwc_error error;
 
 	UNUSED(ctx);
 
 	/* Universal selector */
-	perror = parserutils_hash_insert(sheet->dictionary, 
-			(const uint8_t *) "*", SLEN("*"), &state->universal);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
+        if (state->universal != NULL)
+                return CSS_OK;
+
+	error = lwc_context_intern(sheet->dictionary, 
+			"*", SLEN("*"), &state->universal);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
 
 	/* Pseudo classes */
-	perror = parserutils_hash_insert(sheet->dictionary, 
-			(const uint8_t *) "first-child", SLEN("first-child"), 
+	error = lwc_context_intern(sheet->dictionary, 
+			"first-child", SLEN("first-child"), 
 			&state->first_child);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
 
-	perror = parserutils_hash_insert(sheet->dictionary, 
-			(const uint8_t *) "link", SLEN("link"), 
+	error = lwc_context_intern(sheet->dictionary, 
+			"link", SLEN("link"), 
 			&state->link);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
 
-	perror = parserutils_hash_insert(sheet->dictionary, 
-			(const uint8_t *) "visited", SLEN("visited"), 
+	error = lwc_context_intern(sheet->dictionary, 
+			"visited", SLEN("visited"), 
 			&state->visited);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
 
-	perror = parserutils_hash_insert(sheet->dictionary, 
-			(const uint8_t *) "hover", SLEN("hover"), 
+	error = lwc_context_intern(sheet->dictionary, 
+			"hover", SLEN("hover"), 
 			&state->hover);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
 
-	perror = parserutils_hash_insert(sheet->dictionary, 
-			(const uint8_t *) "active", SLEN("active"), 
+	error = lwc_context_intern(sheet->dictionary, 
+			"active", SLEN("active"), 
 			&state->active);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
 
-	perror = parserutils_hash_insert(sheet->dictionary, 
-			(const uint8_t *) "focus", SLEN("focus"), 
+	error = lwc_context_intern(sheet->dictionary, 
+			"focus", SLEN("focus"), 
 			&state->focus);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
 
 	/* Pseudo elements */
-	perror = parserutils_hash_insert(sheet->dictionary, 
-			(const uint8_t *) "first-line", SLEN("first-line"), 
+	error = lwc_context_intern(sheet->dictionary, 
+			"first-line", SLEN("first-line"), 
 			&state->first_line);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
 
-	perror = parserutils_hash_insert(sheet->dictionary, 
-			(const uint8_t *) "first_letter", SLEN("first-letter"),
+	error = lwc_context_intern(sheet->dictionary, 
+			"first_letter", SLEN("first-letter"),
 			&state->first_letter);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
 
-	perror = parserutils_hash_insert(sheet->dictionary, 
-			(const uint8_t *) "before", SLEN("before"), 
+	error = lwc_context_intern(sheet->dictionary, 
+			"before", SLEN("before"), 
 			&state->before);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
 
-	perror = parserutils_hash_insert(sheet->dictionary, 
-			(const uint8_t *) "after", SLEN("after"), 
+	error = lwc_context_intern(sheet->dictionary, 
+			"after", SLEN("after"), 
 			&state->after);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
 
 	return CSS_OK;
 }
@@ -644,60 +682,55 @@ css_error intern_strings_for_sheet(css_select_ctx *ctx,
 css_error match_selectors_in_sheet(css_select_ctx *ctx, 
 		const css_stylesheet *sheet, css_select_state *state)
 {
-	const parserutils_hash_entry *element;
+	lwc_string *element;
 	const css_selector **selectors;
-	const uint8_t *name;
-	size_t len;
-	parserutils_error perror;
 	css_error error;
 
 	/* Get node's name */
-	error = state->handler->node_name(state->pw, state->node, &name, &len);
+	error = state->handler->node_name(state->pw, state->node, sheet->dictionary, &element);
 	if (error != CSS_OK)
 		return error;
-
-	/* Intern it */
-	perror = parserutils_hash_insert(sheet->dictionary,
-			name, len, &element);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
 
 	/* Find hash chain that applies to current node */
 	error = css_selector_hash_find(sheet->selectors, element, &selectors);
 	if (error != CSS_OK)
-		return error;
+                goto cleanup;
 
 	/* Process any matching selectors */
 	while (*selectors != NULL) {
 		error = match_selector_chain(ctx, *selectors, state);
 		if (error != CSS_OK)
-			return error;
+			goto cleanup;
 
 		error = css_selector_hash_iterate(sheet->selectors, selectors,
 				&selectors);
 		if (error != CSS_OK)
-			return error;
+			goto cleanup;
 	}
 
 	/* Find hash chain for universal selector */
 	error = css_selector_hash_find(sheet->selectors, state->universal, 
 			&selectors);
 	if (error != CSS_OK)
-		return error;
+		goto cleanup;
 
 	/* Process any matching selectors */
 	while (*selectors != NULL) {
 		error = match_selector_chain(ctx, *selectors, state);
 		if (error != CSS_OK)
-			return error;
+			goto cleanup;
 
 		error = css_selector_hash_iterate(sheet->selectors, selectors,
 				&selectors);
 		if (error != CSS_OK)
-			return error;
+			goto cleanup;
 	}
 
-	return CSS_OK;
+        
+        error = CSS_OK;
+cleanup:
+        lwc_context_string_unref(sheet->dictionary, element);
+        return error;
 }
 
 css_error match_selector_chain(css_select_ctx *ctx, 
@@ -761,7 +794,7 @@ css_error match_selector_chain(css_select_ctx *ctx,
 }
 
 css_error match_named_combinator(css_select_ctx *ctx, css_combinator type,
-		const parserutils_hash_entry *name, css_select_state *state,
+		lwc_string *name, css_select_state *state,
 		void *node, void **next_node)
 {
 	css_error error;
@@ -771,19 +804,19 @@ css_error match_named_combinator(css_select_ctx *ctx, css_combinator type,
 	switch (type) {
 	case CSS_COMBINATOR_ANCESTOR:
 		error = state->handler->named_ancestor_node(state->pw, node, 
-				name->data, name->len, next_node);
+				name, next_node);
 		if (error != CSS_OK)
 			return error;
 		break;
 	case CSS_COMBINATOR_PARENT:
 		error = state->handler->named_parent_node(state->pw, node, 
-				name->data, name->len, next_node);
+				name, next_node);
 		if (error != CSS_OK)
 			return error;
 		break;
 	case CSS_COMBINATOR_SIBLING:
 		error = state->handler->named_sibling_node(state->pw, node, 
-				name->data, name->len, next_node);
+				name, next_node);
 		if (error != CSS_OK)
 			return error;
 		break;
@@ -890,13 +923,11 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 	switch (detail->type) {
 	case CSS_SELECTOR_CLASS:
 		error = state->handler->node_has_class(state->pw, node,
-				detail->name->data, detail->name->len,
-				match);
+				detail->name, match);
 		break;
 	case CSS_SELECTOR_ID:
 		error = state->handler->node_has_id(state->pw, node,
-				detail->name->data, detail->name->len,
-				match);
+				detail->name, match);
 		break;
 	case CSS_SELECTOR_PSEUDO_CLASS:
 		if (detail->name == state->first_child) {
@@ -942,26 +973,19 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 		break;
 	case CSS_SELECTOR_ATTRIBUTE:
 		error = state->handler->node_has_attribute(state->pw, node,
-				detail->name->data, detail->name->len,
-				match);
+				detail->name, match);
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_EQUAL:
 		error = state->handler->node_has_attribute_equal(state->pw, 
-				node, detail->name->data, detail->name->len,
-				detail->value->data, detail->value->len,
-				match);
+				node, detail->name, detail->value, match);
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_DASHMATCH:
 		error = state->handler->node_has_attribute_dashmatch(state->pw,
-				node, detail->name->data, detail->name->len,
-				detail->value->data, detail->value->len,
-				match);
+				node, detail->name, detail->value, match);
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_INCLUDES:
 		error = state->handler->node_has_attribute_includes(state->pw, 
-				node, detail->name->data, detail->name->len,
-				detail->value->data, detail->value->len,
-				match);
+				node, detail->name, detail->value, match);
 		break;
 	}
 

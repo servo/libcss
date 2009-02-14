@@ -59,7 +59,7 @@ static void validate_rule_import(css_rule_import *s, exp_entry *e,
 static void dump_selector_list(css_selector *list, char **ptr);
 static void dump_selector(css_selector *selector, char **ptr);
 static void dump_selector_detail(css_selector_detail *detail, char **ptr);
-static void dump_string(const parserutils_hash_entry *string, char **ptr);
+static void dump_string(lwc_string *string, char **ptr);
 
 static void *myrealloc(void *data, size_t len, void *pw)
 {
@@ -306,9 +306,13 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 	css_error error;
 	size_t e;
 	static int testnum;
-
+        lwc_context *ctx;
+        
+        assert(lwc_create_context(myrealloc, NULL, &ctx) == lwc_error_ok);
+        lwc_context_ref(ctx);
+        
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", NULL,
-			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL,
+			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, ctx,
 			myrealloc, NULL, &sheet) == CSS_OK);
 
 	error = css_stylesheet_append_data(sheet, data, len);
@@ -321,7 +325,7 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 	assert(error == CSS_OK || error == CSS_IMPORTS_PENDING);
 
 	while (error == CSS_IMPORTS_PENDING) {
-		css_string url;
+		lwc_string *url;
 		uint64_t media;
 
 		error = css_stylesheet_next_pending_import(sheet,
@@ -330,14 +334,14 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 
 		if (error == CSS_OK) {
 			css_stylesheet *import;
-			char buf[url.len + 1];
+			char buf[lwc_string_length(url) + 1];
 
-			memcpy(buf, url.data, url.len);
-			buf[url.len] = '\0';
+			memcpy(buf, lwc_string_data(url), lwc_string_length(url));
+			buf[lwc_string_length(url)] = '\0';
 
 			assert(css_stylesheet_create(CSS_LEVEL_21,
 				"UTF-8", buf, NULL, CSS_ORIGIN_AUTHOR,
-				media, myrealloc, NULL, &import) == 
+				media, ctx, myrealloc, NULL, &import) == 
 				CSS_OK);
 
 			assert(css_stylesheet_register_import(sheet,
@@ -388,6 +392,7 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 	css_stylesheet_destroy(sheet);
 
 	printf("Test %d: PASS\n", testnum);
+        lwc_context_unref(ctx);
 }
 
 void validate_rule_selector(css_rule_selector *s, exp_entry *e, int testnum)
@@ -438,18 +443,18 @@ void validate_rule_selector(css_rule_selector *s, exp_entry *e, int testnum)
 			}
 
 			if (j != e->stused) {
-				const parserutils_hash_entry **p =
+				lwc_string **p =
 						(void *) ((uint8_t *) 
 						s->style->bytecode + i);
 
-				if ((*p)->len != 
+				if (lwc_string_length(*p) != 
 					strlen(e->stringtab[j].string) ||
-					memcmp((*p)->data, 
+					memcmp(lwc_string_data(*p), 
 						e->stringtab[j].string,
-						(*p)->len) != 0) {
+						lwc_string_length(*p)) != 0) {
 					printf("%d: Got string '%.*s'. Expected '%s'\n",
-						testnum, (int) (*p)->len, 
-						(char *) (*p)->data, 
+						testnum, (int) lwc_string_length(*p), 
+						lwc_string_data(*p), 
 						e->stringtab[j].string);
 					assert(0 && "Strings differ");
 				}
@@ -488,10 +493,10 @@ void validate_rule_charset(css_rule_charset *s, exp_entry *e, int testnum)
 
 void validate_rule_import(css_rule_import *s, exp_entry *e, int testnum)
 {
-	if (strncmp((const char *) s->url->data, e->name,
-			(int) s->url->len) != 0) {
+        if (strncmp(lwc_string_data(s->url), e->name,
+                    lwc_string_length(s->url)) != 0) {
 		printf("%d: Got URL '%.*s'. Expected '%s'\n",
-			testnum, (int) s->url->len, (const char *) s->url->data,
+                       testnum, (int) lwc_string_length(s->url), lwc_string_data(s->url),
 		e->name);
 		assert(0 && "Mismatched URLs");
 	}
@@ -542,11 +547,11 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 {
 	switch (detail->type) {
 	case CSS_SELECTOR_ELEMENT:
-		if (detail->name->len == 1 && detail->name->data[0] == '*' &&
+		if (lwc_string_length(detail->name) == 1 && lwc_string_data(detail->name)[0] == '*' &&
 				detail->next == 0) {
 			dump_string(detail->name, ptr);
-		} else if (detail->name->len != 1 ||
-				detail->name->data[0] != '*') {
+		} else if (lwc_string_length(detail->name) != 1 ||
+                           lwc_string_data(detail->name)[0] != '*') {
 			dump_string(detail->name, ptr);
 		}
 		break;
@@ -621,8 +626,8 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 	}
 }
 
-void dump_string(const parserutils_hash_entry *string, char **ptr)
+void dump_string(lwc_string *string, char **ptr)
 {
-	*ptr += sprintf(*ptr, "%.*s", (int) string->len, string->data);
+	*ptr += sprintf(*ptr, "%.*s", (int) lwc_string_length(string), lwc_string_data(string));
 }
 

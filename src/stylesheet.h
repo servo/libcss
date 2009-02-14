@@ -11,7 +11,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-#include <parserutils/utils/hash.h>
+#include <libwapcaplet/libwapcaplet.h>
 
 #include <libcss/errors.h>
 #include <libcss/functypes.h>
@@ -50,8 +50,8 @@ typedef enum css_combinator {
 } css_combinator;
 
 typedef struct css_selector_detail {
-	const parserutils_hash_entry *name;	/**< Interned name */
-	const parserutils_hash_entry *value;	/**< Interned value, or NULL */
+	lwc_string *name;	/**< Interned name */
+	lwc_string *value;	/**< Interned value, or NULL */
 
 	uint32_t type : 4,			/**< Type of selector */
 	         comb : 2,			/**< Type of combinator */
@@ -133,7 +133,7 @@ typedef struct css_rule_page {
 typedef struct css_rule_import {
 	css_rule base;
 
-	const parserutils_hash_entry *url;
+	lwc_string *url;
 	uint64_t media;
 
 	css_stylesheet *sheet;
@@ -142,7 +142,7 @@ typedef struct css_rule_import {
 typedef struct css_rule_charset {
 	css_rule base;
 
-	const parserutils_hash_entry *encoding;	/** \todo use MIB enum? */
+	lwc_string *encoding;	/** \todo use MIB enum? */
 } css_rule_charset;
 
 struct css_stylesheet {
@@ -168,7 +168,7 @@ struct css_stylesheet {
 	css_parser *parser;			/**< Core parser for sheet */
 	void *parser_frontend;			/**< Frontend parser */
 
-	parserutils_hash *dictionary;		/**< String dictionary */
+	lwc_context *dictionary;		/**< String dictionary */
 
 	css_allocator_fn alloc;			/**< Allocation function */
 	void *pw;				/**< Private word */
@@ -179,13 +179,13 @@ css_error css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len,
 css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style);
 
 css_error css_stylesheet_selector_create(css_stylesheet *sheet,
-		const parserutils_hash_entry *name, css_selector **selector);
+		lwc_string *name, css_selector **selector);
 css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 		css_selector *selector);
 
 css_error css_stylesheet_selector_detail_init(css_stylesheet *sheet,
-		css_selector_type type, const parserutils_hash_entry *name,
-		const parserutils_hash_entry *value, 
+		css_selector_type type, lwc_string *name,
+		lwc_string *value, 
 		css_selector_detail *detail);
 
 css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
@@ -205,11 +205,10 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 		css_rule *rule, css_style *style);
 
 css_error css_stylesheet_rule_set_charset(css_stylesheet *sheet,
-		css_rule *rule, const parserutils_hash_entry *charset);
+		css_rule *rule, lwc_string *charset);
 
 css_error css_stylesheet_rule_set_nascent_import(css_stylesheet *sheet,
-		css_rule *rule, const parserutils_hash_entry *url,
-		uint64_t media);
+		css_rule *rule, lwc_string *url, uint64_t media);
 
 /** \todo registering other rule-type data with css_rules */
 

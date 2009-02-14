@@ -13,7 +13,7 @@
 
 css_error css_stylesheet_create(css_language_level level,
 		const char *charset, const char *url, const char *title,
-		css_origin origin, uint64_t media,
+		css_origin origin, uint64_t media, lwc_context *dict,
 		css_allocator_fn alloc, void *alloc_pw, 
 		css_stylesheet **stylesheet);
 css_error css_stylesheet_destroy(css_stylesheet *sheet);
@@ -23,7 +23,7 @@ css_error css_stylesheet_append_data(css_stylesheet *sheet,
 css_error css_stylesheet_data_done(css_stylesheet *sheet);
 
 css_error css_stylesheet_next_pending_import(css_stylesheet *parent,
-		css_string *url, uint64_t *media);
+		lwc_string **url, uint64_t *media);
 css_error css_stylesheet_register_import(css_stylesheet *parent,
 		css_stylesheet *child);
 

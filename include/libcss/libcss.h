@@ -8,6 +8,8 @@
 #ifndef libcss_h_
 #define libcss_h_
 
+#include <libwapcaplet/libwapcaplet.h>
+
 #include <libcss/errors.h>
 #include <libcss/types.h>
 #include <libcss/functypes.h>

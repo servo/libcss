@@ -164,15 +164,19 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 	char *buf;
 	size_t buflen;
 	static int testnum;
+        lwc_context *ctx;
 
 	buf = malloc(2 * explen);
 	if (buf == NULL) {
 		assert(0 && "No memory for result data");
 	}
 	buflen = 2 * explen;
-
+        
+        assert(lwc_create_context(myrealloc, NULL, &ctx) == lwc_error_ok);
+        lwc_context_ref(ctx);
+        
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", NULL,
-			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL,
+			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, ctx,
 			myrealloc, NULL, &sheet) == CSS_OK);
 
 	error = css_stylesheet_append_data(sheet, data, len);
@@ -195,7 +199,7 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 	}
 
 	css_stylesheet_destroy(sheet);
-
+        lwc_context_unref(ctx);
 	printf("Test %d: PASS\n", testnum);
 }
 

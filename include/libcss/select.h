@@ -8,6 +8,8 @@
 #ifndef libcss_select_h_
 #define libcss_select_h_
 
+#include <libwapcaplet/libwapcaplet.h>
+
 #include <libcss/errors.h>
 #include <libcss/functypes.h>
 #include <libcss/types.h>
@@ -21,42 +23,33 @@ enum css_pseudo_element {
 };
 
 typedef struct css_select_handler {
-	css_error (*node_name)(void *pw, void *node, const uint8_t **name, 
-			size_t *len);
+	css_error (*node_name)(void *pw, void *node,
+			lwc_context *dict, lwc_string **name);
 
 	css_error (*named_ancestor_node)(void *pw, void *node,
-			const uint8_t *name, size_t len,
-			void **ancestor);
+			lwc_string *name, void **ancestor);
 	css_error (*named_parent_node)(void *pw, void *node,
-			const uint8_t *name, size_t len,
-			void **parent);
+			lwc_string *name, void **parent);
 	css_error (*named_sibling_node)(void *pw, void *node,
-			const uint8_t *name, size_t len,
-			void **sibling);
+			lwc_string *name, void **sibling);
 
 	css_error (*parent_node)(void *pw, void *node, void **parent);
 	css_error (*sibling_node)(void *pw, void *node, void **sibling);
 
 	css_error (*node_has_class)(void *pw, void *node,
-			const uint8_t *name, size_t len,
-			bool *match);
+			lwc_string *name, bool *match);
 	css_error (*node_has_id)(void *pw, void *node,
-			const uint8_t *name, size_t len,
-			bool *match);
+			lwc_string *name, bool *match);
 	css_error (*node_has_attribute)(void *pw, void *node,
-			const uint8_t *name, size_t len,
-			bool *match);
+			lwc_string *name, bool *match);
 	css_error (*node_has_attribute_equal)(void *pw, void *node,
-			const uint8_t *name, size_t nlen,
-			const uint8_t *value, size_t vlen,
+			lwc_string *name, lwc_string *value,
 			bool *match);
 	css_error (*node_has_attribute_dashmatch)(void *pw, void *node,
-			const uint8_t *name, size_t nlen,
-			const uint8_t *value, size_t vlen,
+			lwc_string *name, lwc_string *value,
 			bool *match);
 	css_error (*node_has_attribute_includes)(void *pw, void *node,
-			const uint8_t *name, size_t nlen,
-			const uint8_t *value, size_t vlen,
+			lwc_string *name, lwc_string *value,
 			bool *match);
 
 	css_error (*node_is_first_child)(void *pw, void *node, bool *match);
@@ -66,8 +59,7 @@ typedef struct css_select_handler {
 	css_error (*node_is_active)(void *pw, void *node, bool *match);
 	css_error (*node_is_focus)(void *pw, void *node, bool *match);
 	css_error (*node_is_lang)(void *pw, void *node,
-			const uint8_t *lang, size_t len,
-			bool *match);
+			lwc_string *lang, bool *match);
 } css_select_handler;
 
 css_error css_select_ctx_create(css_allocator_fn alloc, void *pw,

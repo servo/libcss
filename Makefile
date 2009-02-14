@@ -22,11 +22,11 @@ WARNFLAGS := -Wall -Wextra -Wundef -Wpointer-arith -Wcast-align \
 	-Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes \
 	-Wmissing-declarations -Wnested-externs -Werror -pedantic
 CFLAGS += -std=c99 -D_BSD_SOURCE -I$(TOP)/include/ $(WARNFLAGS) \
-	`$(PKGCONFIG) --cflags libparserutils`
+	`$(PKGCONFIG) --cflags libparserutils libwapcaplet`
 RELEASECFLAGS = $(CFLAGS) -DNDEBUG -O2
 DEBUGCFLAGS = $(CFLAGS) -O0 -g
 ARFLAGS := -cru
-LDFLAGS += `$(PKGCONFIG) --libs libparserutils` -L$(TOP)/
+LDFLAGS += `$(PKGCONFIG) --libs libparserutils libwapcaplet` -L$(TOP)/
 
 CPFLAGS :=
 RMFLAGS := -f

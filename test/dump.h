@@ -19,7 +19,7 @@ static void dump_selector_list(css_selector *list, char **ptr);
 static void dump_selector(css_selector *selector, char **ptr);
 static void dump_selector_detail(css_selector_detail *detail, char **ptr);
 static void dump_bytecode(css_style *style, char **ptr);
-static void dump_string(const parserutils_hash_entry *string, char **ptr);
+static void dump_string(lwc_string *string, char **ptr);
 
 void dump_sheet(css_stylesheet *sheet, char *buf, size_t *buflen)
 {
@@ -89,7 +89,7 @@ void dump_rule_import(css_rule_import *s, char **buf, size_t *buflen)
 	char *ptr = *buf;
 
 	ptr += sprintf(ptr, "| @import url(\"%.*s\")", 
-			(int) s->url->len, (const char *) s->url->data);
+                       (int) lwc_string_length(s->url), lwc_string_data(s->url));
 
 	/** \todo media list */
 
@@ -144,11 +144,12 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 {
 	switch (detail->type) {
 	case CSS_SELECTOR_ELEMENT:
-		if (detail->name->len == 1 && detail->name->data[0] == '*' &&
+                if (lwc_string_length(detail->name) == 1 && 
+                    lwc_string_data(detail->name)[0] == '*' &&
 				detail->next == 0) {
 			dump_string(detail->name, ptr);
-		} else if (detail->name->len != 1 ||
-				detail->name->data[0] != '*') {
+		} else if (lwc_string_length(detail->name) != 1 ||
+                           lwc_string_data(detail->name)[0] != '*') {
 			dump_string(detail->name, ptr);
 		}
 		break;
@@ -448,11 +449,11 @@ static void dump_unit(css_fixed val, uint32_t unit, char **ptr)
 	}
 }
 
-static void dump_counter(const parserutils_hash_entry *name, uint32_t value,
+static void dump_counter(lwc_string *name, uint32_t value,
 		char **ptr)
 {
-	*ptr += sprintf(*ptr, 
-		"counter(%.*s", (int) name->len, (char *) name->data);
+	*ptr += sprintf(*ptr, "counter(%.*s",
+                        (int) lwc_string_length(name), lwc_string_data(name));
 
 	value >>= CONTENT_COUNTER_STYLE_SHIFT;
 
@@ -506,13 +507,14 @@ static void dump_counter(const parserutils_hash_entry *name, uint32_t value,
 	*ptr += sprintf(*ptr, ")");
 }
 
-static void dump_counters(const parserutils_hash_entry *name, 
-		const parserutils_hash_entry *separator,
+static void dump_counters(lwc_string *name, lwc_string *separator,
 		uint32_t value, char **ptr)
 {
 	*ptr += sprintf(*ptr, "counter(%.*s, %.*s", 
-			(int) name->len, (char *) name->data,
-			(int) separator->len, (char *) separator->data);
+			(int) lwc_string_length(name),
+                        lwc_string_data(name),
+			(int) lwc_string_length(separator),
+                        lwc_string_data(separator));
 
 	value >>= CONTENT_COUNTER_STYLE_SHIFT;
 
@@ -696,13 +698,13 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				case BACKGROUND_IMAGE_URI:
 				{
-					parserutils_hash_entry *he = 
-						*((parserutils_hash_entry **) 
+					lwc_string *he = 
+						*((lwc_string **) 
 						bytecode);
 					ADVANCE(sizeof(he));
 					*ptr += sprintf(*ptr, "url('%.*s')", 
-							(int) he->len, 
-							(char *) he->data);
+							(int) lwc_string_length(he), 
+							lwc_string_data(he));
 				}
 					break;
 				}
@@ -1032,8 +1034,8 @@ void dump_bytecode(css_style *style, char **ptr)
 				}
 
 				while (value != CONTENT_NORMAL) {
-					parserutils_hash_entry *he = 
-						*((parserutils_hash_entry **) 
+					lwc_string *he = 
+						*((lwc_string **) 
 						bytecode);
 					const char *end = "";
 
@@ -1044,11 +1046,11 @@ void dump_bytecode(css_style *style, char **ptr)
 						break;
 					case CONTENT_COUNTERS:
 					{
-						parserutils_hash_entry *sep;
+						lwc_string *sep;
 
 						ADVANCE(sizeof(he));
 
-						sep = *((parserutils_hash_entry **) bytecode);
+						sep = *((lwc_string **) bytecode);
 						ADVANCE(sizeof(sep));
 
 						dump_counters(he, sep, value,
@@ -1068,8 +1070,8 @@ void dump_bytecode(css_style *style, char **ptr)
 						ADVANCE(sizeof(he));
 
 						*ptr += sprintf(*ptr, "'%.*s'%s",
-							(int) he->len,
-							(char *) he->data,
+                                                                (int) lwc_string_length(he),
+                                                                lwc_string_data(he),
 							end);
 						break;
 					case CONTENT_OPEN_QUOTE:
@@ -1103,13 +1105,13 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value) {
 				case COUNTER_INCREMENT_NAMED:
 					while (value != COUNTER_INCREMENT_NONE) {
-						parserutils_hash_entry *he = 
-						*((parserutils_hash_entry **) 
+						lwc_string *he = 
+						*((lwc_string **) 
 						bytecode);
 						ADVANCE(sizeof(he));
 						*ptr += sprintf(*ptr, "%.*s ", 
-							(int) he->len, 
-							(char *) he->data);
+                                                                (int)lwc_string_length(he),
+                                                                lwc_string_data(he));
 						css_fixed val =
 							*((css_fixed *) bytecode);
 						ADVANCE(sizeof(val));
@@ -1131,13 +1133,13 @@ void dump_bytecode(css_style *style, char **ptr)
 				break;
 			case OP_CURSOR:
 				while (value == CURSOR_URI) {
-					parserutils_hash_entry *he = 
-						*((parserutils_hash_entry **) 
+					lwc_string *he = 
+						*((lwc_string **) 
 						bytecode);
 					ADVANCE(sizeof(ptr));
 					*ptr += sprintf(*ptr, "url('%.*s'), ", 
-							(int) he->len, 
-							(char *) he->data);
+							(int) lwc_string_length(he),
+							lwc_string_data(he));
 
 					value = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(value));
@@ -1317,13 +1319,13 @@ void dump_bytecode(css_style *style, char **ptr)
 					case FONT_FAMILY_STRING:
 					case FONT_FAMILY_IDENT_LIST:
 					{
-						parserutils_hash_entry *he = 
-						*((parserutils_hash_entry **) 
+						lwc_string *he = 
+						*((lwc_string **) 
 						bytecode);
 						ADVANCE(sizeof(he));
 						*ptr += sprintf(*ptr, "'%.*s'", 
-							(int) he->len, 
-							(char *) he->data);
+                                                                (int) lwc_string_length(he), 
+                                                                lwc_string_data(he));
 					}
 						break;
 					case FONT_FAMILY_SERIF:
@@ -1736,13 +1738,13 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value) {
 				case PLAY_DURING_URI:
 				{
-					parserutils_hash_entry *he = 
-						*((parserutils_hash_entry **) 
+					lwc_string *he = 
+						*((lwc_string **) 
 						bytecode);
 					ADVANCE(sizeof(he));
 					*ptr += sprintf(*ptr, "'%.*s'", 
-						(int) he->len, 
-						(char *) he->data);
+                                                        (int) lwc_string_length(he), 
+                                                        lwc_string_data(he));
 				}
 					break;
 				case PLAY_DURING_AUTO:
@@ -1778,21 +1780,21 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value) {
 				case QUOTES_STRING:
 					while (value != QUOTES_NONE) {
-						parserutils_hash_entry *he = 
-						*((parserutils_hash_entry **) 
+						lwc_string *he = 
+						*((lwc_string **) 
 						bytecode);
 						ADVANCE(sizeof(he));
 						*ptr += sprintf(*ptr, " '%.*s' ", 
-							(int) he->len, 
-							(char *) he->data);
+                                                                (int) lwc_string_length(he), 
+                                                                lwc_string_data(he));
 
 						he = 
-						*((parserutils_hash_entry **) 
+						*((lwc_string **) 
 						bytecode);
 						ADVANCE(sizeof(he));
 						*ptr += sprintf(*ptr, " '%.*s' ", 
-							(int) he->len, 
-							(char *) he->data);
+                                                                (int) lwc_string_length(he), 
+                                                                lwc_string_data(he));
 
 						value = *((uint32_t *) bytecode);
 						ADVANCE(sizeof(value));
@@ -2003,13 +2005,13 @@ void dump_bytecode(css_style *style, char **ptr)
 					case VOICE_FAMILY_STRING:
 					case VOICE_FAMILY_IDENT_LIST:
 					{
-						parserutils_hash_entry *he = 
-						*((parserutils_hash_entry **) 
+						lwc_string *he = 
+						*((lwc_string **) 
 						bytecode);
 						ADVANCE(sizeof(he));
 						*ptr += sprintf(*ptr, "'%.*s'", 
-							(int) he->len, 
-							(char *) he->data);
+                                                                (int) lwc_string_length(he),
+                                                                lwc_string_data(he));
 					}
 						break;
 					case VOICE_FAMILY_MALE:
@@ -2118,9 +2120,11 @@ void dump_bytecode(css_style *style, char **ptr)
 
 }
 
-void dump_string(const parserutils_hash_entry *string, char **ptr)
+void dump_string(lwc_string *string, char **ptr)
 {
-	*ptr += sprintf(*ptr, "%.*s", (int) string->len, string->data);
+	*ptr += sprintf(*ptr, "%.*s", 
+                        (int) lwc_string_length(string),
+                        lwc_string_data(string));
 }
 
 #endif

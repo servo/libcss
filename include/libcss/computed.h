@@ -8,6 +8,8 @@
 #ifndef libcss_computed_h_
 #define libcss_computed_h_
 
+#include <libwapcaplet/libwapcaplet.h>
+
 #include <libcss/errors.h>
 #include <libcss/functypes.h>
 #include <libcss/properties.h>
@@ -29,23 +31,23 @@ enum css_computed_content_type {
 typedef struct css_computed_content_item {
 	uint8_t type;
 	union {
-		css_string string;
-		css_string uri;
-		css_string attr;
+		lwc_string *string;
+		lwc_string *uri;
+		lwc_string *attr;
 		struct {
-			css_string name;
+			lwc_string *name;
 			uint8_t style;
 		} counter;
 		struct {
-			css_string name;
-			css_string sep;
+			lwc_string *name;
+			lwc_string *sep;
 			uint8_t style;
 		} counters;
 	} data;	
 } css_computed_content_item;
 
 typedef struct css_computed_counter {
-	css_string name;
+	lwc_string *name;
 	css_fixed value;
 } css_computed_counter;
 
@@ -137,9 +139,9 @@ typedef struct css_computed_uncommon {
 	css_computed_counter *counter_increment;
 	css_computed_counter *counter_reset;
 
-	css_string *quotes;
+	lwc_string **quotes;
 
-	css_string *cursor;
+	lwc_string **cursor;
 
 	css_computed_content_item *content;
 } css_computed_uncommon;
@@ -181,7 +183,7 @@ struct css_computed_style {
  * Dimensions are encoded as a fixed point value + 4 bits of unit data
  *
  * background_color		  2		  4
- * background_image		  1		  sizeof(css_string)
+ * background_image		  1		  sizeof(lwc_string)
  * background_position		  1 + 2(4)	  2(4)
  * border_top_color		  2		  4
  * border_right_color		  2		  4
@@ -199,7 +201,7 @@ struct css_computed_style {
  * font_size			  4 + 4		  4
  * height			  2 + 4		  4
  * line_height			  2 + 4		  4
- * list_style_image		  1		  sizeof(css_string)
+ * list_style_image		  1		  sizeof(lwc_string)
  * margin_top			  2 + 4		  4
  * margin_right			  2 + 4		  4
  * margin_bottom		  2 + 4		  4
@@ -217,7 +219,7 @@ struct css_computed_style {
  * width			  2 + 4		  4
  * z_index			  2		  4
  * 				---		---
- *				181 bits	140 + 2sizeof(css_string) bytes
+ *				181 bits	140 + 2sizeof(lwc_string) bytes
  *
  * Encode font family as an array of string objects, terminated with a 
  * blank entry.
@@ -227,13 +229,13 @@ struct css_computed_style {
  * 				  3 bits	  sizeof(ptr)
  *
  * 				___		___
- *				267 bits	140 + 2sizeof(css_string) + 
+ *				267 bits	140 + 2sizeof(lwc_string) + 
  *							sizeof(ptr) bytes
  *
- *				 34 bytes	140 + 2sizeof(css_string) +
+ *				 34 bytes	140 + 2sizeof(lwc_string) +
  *				 			sizeof(ptr) bytes
  *				===================
- *				174 + 2sizeof(css_string) + sizeof(ptr) bytes
+ *				174 + 2sizeof(lwc_string) + sizeof(ptr) bytes
  *
  * Bit allocations:
  *
@@ -278,7 +280,7 @@ struct css_computed_style {
 	uint8_t unused[2];
 
 	css_color background_color;
-	css_string background_image;
+	lwc_string *background_image;
 	css_fixed background_position[2];
 
 	css_color border_color[4];
@@ -297,7 +299,7 @@ struct css_computed_style {
 
 	css_fixed line_height;
 
-	css_string list_style_image;
+	lwc_string *list_style_image;
 
 	css_fixed margin[4];
 
@@ -317,7 +319,7 @@ struct css_computed_style {
 
 	css_fixed z_index;
 
-	css_string *font_family;
+	lwc_string **font_family;
 
 	css_computed_uncommon *uncommon;/**< Uncommon properties */
 	void *aural;			/**< Aural properties */
@@ -549,7 +551,7 @@ static inline uint8_t css_computed_counter_reset(
 #define CURSOR_MASK  0xf8
 static inline uint8_t css_computed_cursor(
 		const css_computed_style *style, 
-		const css_string **urls)
+		lwc_string ***urls)
 {
 	if (style->uncommon != NULL) {
 		uint8_t bits = style->uncommon->bits[CURSOR_INDEX];
@@ -573,7 +575,7 @@ static inline uint8_t css_computed_cursor(
 #define QUOTES_MASK  0x6
 static inline uint8_t css_computed_quotes(
 		const css_computed_style *style, 
-		const css_string **quotes)
+		lwc_string ***quotes)
 {
 	if (style->uncommon != NULL) {
 		uint8_t bits = style->uncommon->bits[QUOTES_INDEX];
@@ -834,14 +836,14 @@ static inline uint8_t css_computed_border_left_width(
 #define BACKGROUND_IMAGE_MASK  0x1
 static inline uint8_t css_computed_background_image(
 		const css_computed_style *style, 
-		const css_string **url)
+		lwc_string **url)
 {
 	uint8_t bits = style->bits[BACKGROUND_IMAGE_INDEX];
 	bits &= BACKGROUND_IMAGE_MASK;
 	bits >>= BACKGROUND_IMAGE_SHIFT;
 
 	/* 1bit: type */
-	*url = &style->background_image;
+	*url = style->background_image;
 
 	return bits;
 }
@@ -874,14 +876,14 @@ static inline uint8_t css_computed_color(
 #define LIST_STYLE_IMAGE_MASK  0x1
 static inline uint8_t css_computed_list_style_image(
 		const css_computed_style *style, 
-		const css_string **url)
+		lwc_string **url)
 {
 	uint8_t bits = style->bits[LIST_STYLE_IMAGE_INDEX];
 	bits &= LIST_STYLE_IMAGE_MASK;
 	bits >>= LIST_STYLE_IMAGE_SHIFT;
 
 	/* 1bit: type */
-	*url = &style->list_style_image;
+	*url = style->list_style_image;
 
 	return bits;
 }
@@ -1805,7 +1807,7 @@ static inline uint8_t css_computed_text_decoration(
 #define FONT_FAMILY_MASK  0x7
 static inline uint8_t css_computed_font_family(
 		const css_computed_style *style, 
-		const css_string **names)
+		lwc_string ***names)
 {
 	uint8_t bits = style->bits[FONT_FAMILY_INDEX];
 	bits &= FONT_FAMILY_MASK;

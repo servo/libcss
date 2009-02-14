@@ -8,6 +8,13 @@
 
 #include "testutils.h"
 
+static void *myrealloc(void *ptr, size_t len, void *pw)
+{
+	UNUSED(pw);
+
+	return realloc(ptr, len);
+}
+
 typedef struct line_ctx {
 	size_t buflen;
 	size_t bufused;
@@ -110,21 +117,27 @@ bool handle_line(const char *data, size_t datalen, void *pw)
 
 void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 {
-	css_string in = { len, (uint8_t *) data };
+        lwc_string *in;
+        lwc_context *ctx;
 	size_t consumed;
 	css_fixed result;
 	char buf[256];
 
 	UNUSED(exp);
 	UNUSED(explen);
-
-	result = number_from_css_string(&in, false, &consumed);
+        
+        assert(lwc_create_context(myrealloc, NULL, &ctx) == lwc_error_ok);
+        lwc_context_ref(ctx);
+        assert(lwc_context_intern(ctx, (const char *)data, len, &in) == lwc_error_ok);
+        
+	result = number_from_lwc_string(in, false, &consumed);
 
 	print_css_fixed(buf, sizeof(buf), result);
 
 	printf("got: %s expected: %.*s\n", buf, (int) explen, exp);
 
 	assert(strncmp(buf, exp, explen) == 0);
+        lwc_context_unref(ctx);
 }
 
 void print_css_fixed(char *buf, size_t len, css_fixed f)

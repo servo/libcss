@@ -8,7 +8,10 @@
 #ifndef css_utils_h_
 #define css_utils_h_
 
+#include <libwapcaplet/libwapcaplet.h>
+
 #include <libcss/types.h>
+#include <libcss/errors.h>
 
 #ifndef max
 #define max(a,b) ((a)>(b)?(a):(b))
@@ -27,7 +30,7 @@
 #define UNUSED(x) ((x)=(x))
 #endif
 
-css_fixed number_from_css_string(const css_string *string, bool int_only,
+css_fixed number_from_lwc_string(lwc_string *string, bool int_only,
 		size_t *consumed);
 
 static inline bool isDigit(uint8_t c)
@@ -78,6 +81,20 @@ static inline uint32_t charToHex(uint8_t c)
 	}
 
 	return 0;
+}
+
+static inline css_error
+css_error_from_lwc_error(lwc_error err)
+{
+        switch (err) {
+        case lwc_error_ok:
+                return CSS_OK;
+        case lwc_error_oom:
+                return CSS_NOMEM;
+        case lwc_error_range:
+                return CSS_BADPARM;
+        }
+        return CSS_INVALID;
 }
 
 #endif

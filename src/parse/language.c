@@ -41,7 +41,7 @@ struct css_language {
 
 	/** \todo These should be statically allocated */
 	/** Interned strings */
-	const parserutils_hash_entry *strings[LAST_KNOWN];
+	lwc_string *strings[LAST_KNOWN];
 
 	css_allocator_fn alloc;		/**< Memory (de)allocation function */
 	void *pw;			/**< Client's private data */
@@ -127,6 +127,7 @@ css_error css_language_create(css_stylesheet *sheet, css_parser *parser,
 	css_language *c;
 	css_parser_optparams params;
 	parserutils_error perror;
+        lwc_error lerror;
 	css_error error;
 
 	if (sheet == NULL || parser == NULL || alloc == NULL || 
@@ -147,10 +148,11 @@ css_error css_language_create(css_stylesheet *sheet, css_parser *parser,
 
 	/* Intern all known strings */
 	for (int i = 0; i < LAST_KNOWN; i++) {
-		c->strings[i] = css_parser_dict_add(parser,
-				(const uint8_t *) stringmap[i].data, 
-				stringmap[i].len);
-		if (c->strings[i] == NULL) {
+                lerror = lwc_context_intern(sheet->dictionary,
+                                            stringmap[i].data,
+                                            stringmap[i].len,
+                                            &(c->strings[i]));
+                if (lerror != lwc_error_ok) {
 			parserutils_stack_destroy(c->context);
 			alloc(c, 0, pw);
 			return CSS_NOMEM;
@@ -184,11 +186,18 @@ css_error css_language_create(css_stylesheet *sheet, css_parser *parser,
  */
 css_error css_language_destroy(css_language *language)
 {
+        int i;
+        
 	if (language == NULL)
 		return CSS_BADPARM;
 
 	parserutils_stack_destroy(language->context);
-
+        
+        for (i = 0; i < LAST_KNOWN; ++i) {
+                lwc_context_string_unref(language->sheet->dictionary,
+                                         language->strings[i]);
+        }
+        
 	language->alloc(language, 0, language->pw);
 
 	return CSS_OK;
@@ -1107,7 +1116,7 @@ void consumeWhitespace(const parserutils_vector *vector, int *ctx)
 bool tokenIsChar(const css_token *token, uint8_t c)
 {
 	return token != NULL && token->type == CSS_TOKEN_CHAR && 
-			token->ilower->len == 1 && token->ilower->data[0] == c;
+                lwc_string_length(token->ilower) == 1 && lwc_string_data(token->ilower)[0] == c;
 }
 
 

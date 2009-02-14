@@ -29,7 +29,7 @@ struct css_selector_hash {
 static hash_entry empty_slot;
 
 static inline uint32_t _hash(const css_selector *sel);
-static inline uint32_t _hash_name(const parserutils_hash_entry *name);
+static inline uint32_t _hash_name(lwc_string *name);
 
 /**
  * Create a hash
@@ -225,7 +225,7 @@ css_error css_selector_hash_remove(css_selector_hash *hash,
  * If nothing matches, CSS_OK will be returned and **matched == NULL
  */
 css_error css_selector_hash_find(css_selector_hash *hash,
-		const parserutils_hash_entry *name,
+		lwc_string *name,
 		const css_selector ***matched)
 {
 	uint32_t index, mask;
@@ -310,7 +310,7 @@ uint32_t _hash(const css_selector *sel)
  * \param name  Name to hash
  * \return hash value
  */
-uint32_t _hash_name(const parserutils_hash_entry *name)
+uint32_t _hash_name(lwc_string *name)
 {
 	return (uint32_t) (((uintptr_t) name) & 0xffffffff);
 }

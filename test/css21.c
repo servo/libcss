@@ -11,8 +11,6 @@
 #define DUMP_HASH (1)
 #define DUMP_CSS (1)
 
-extern void parserutils_hash_dump(parserutils_hash *hash);
-
 static void *myrealloc(void *ptr, size_t len, void *pw)
 {
 	UNUSED(pw);
@@ -28,6 +26,7 @@ int main(int argc, char **argv)
 #define CHUNK_SIZE (4096)
 	uint8_t buf[CHUNK_SIZE];
 	css_error error;
+        lwc_context *ctx;
 
 	if (argc != 3) {
 		printf("Usage: %s <aliases_file> <filename>\n", argv[0]);
@@ -36,11 +35,15 @@ int main(int argc, char **argv)
 
 	/* Initialise library */
 	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
-
+        
+        assert(lwc_create_context(myrealloc, NULL, &ctx) == lwc_error_ok);
+        
+        lwc_context_ref(ctx); /* Transform weak ref to a strong ref */
+        
 	for (int count = 0; count < ITERATIONS; count++) {
 
 		assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", argv[2], 
-				NULL, CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, 
+				NULL, CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, ctx,
 				myrealloc, NULL, &sheet) == CSS_OK);
 
 		fp = fopen(argv[2], "rb");
@@ -78,7 +81,7 @@ int main(int argc, char **argv)
 		assert(error == CSS_OK || error == CSS_IMPORTS_PENDING);
 
 		while (error == CSS_IMPORTS_PENDING) {
-			css_string url;
+			lwc_string *url;
 			uint64_t media;
 
 			error = css_stylesheet_next_pending_import(sheet,
@@ -87,14 +90,14 @@ int main(int argc, char **argv)
 
 			if (error == CSS_OK) {
 				css_stylesheet *import;
-				char buf[url.len + 1];
+				char buf[lwc_string_length(url) + 1];
 
-				memcpy(buf, url.data, url.len);
-				buf[url.len] = '\0';
+				memcpy(buf, lwc_string_data(url), lwc_string_length(url));
+				buf[lwc_string_length(url)] = '\0';
 
 				assert(css_stylesheet_create(CSS_LEVEL_21,
 					"UTF-8", buf, NULL, CSS_ORIGIN_AUTHOR,
-					media, myrealloc, NULL, &import) == 
+					media, ctx, myrealloc, NULL, &import) == 
 					CSS_OK);
 
 				assert(css_stylesheet_data_done(import) == 
@@ -106,10 +109,6 @@ int main(int argc, char **argv)
 				error = CSS_IMPORTS_PENDING;
 			}
 		}
-
-#if DUMP_HASH
-		parserutils_hash_dump(sheet->dictionary);
-#endif
 
 #if DUMP_CSS
 		char *out;
@@ -127,7 +126,9 @@ int main(int argc, char **argv)
 	assert(css_finalise(myrealloc, NULL) == CSS_OK);
 
 	printf("PASS\n");
-
+        
+        lwc_context_unref(ctx);
+        
 	return 0;
 }
 

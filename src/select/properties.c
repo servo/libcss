@@ -11,7 +11,7 @@ static css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 static css_error cascade_uri_none(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, 
-				const parserutils_hash_entry *));
+				lwc_string *));
 static css_error cascade_border_style(uint32_t opv, css_style *style,
 		css_select_state *state, 
 		css_error (*fun)(css_computed_style *, uint8_t));
@@ -641,13 +641,12 @@ static css_error cascade_content(uint32_t opv, css_style *style,
 			value = CSS_CONTENT_NONE;
 		} else {
 			value = CSS_CONTENT_SET;
-
-			while (v != CONTENT_NORMAL) {
-				css_computed_content_item *temp;
-				parserutils_hash_entry *he = 
-				*((parserutils_hash_entry **) style->bytecode);
-
-				temp = state->result->alloc(content,
+                        
+                        while (v != CONTENT_NORMAL) {
+                                lwc_string *he = *((lwc_string **) style->bytecode);
+                                css_computed_content_item *temp;
+                                
+                                temp = state->result->alloc(content,
 						(n_contents + 1) *
 						sizeof(css_computed_content_item),
 						state->result->pw);
@@ -667,26 +666,23 @@ static css_error cascade_content(uint32_t opv, css_style *style,
 
 					content[n_contents].type =
 						CSS_COMPUTED_CONTENT_COUNTER;
-					content[n_contents].data.counter.name.data = (uint8_t *) he->data;
-					content[n_contents].data.counter.name.len = he->len;
+					content[n_contents].data.counter.name = he;
 					content[n_contents].data.counter.style = v >> CONTENT_COUNTER_STYLE_SHIFT;
 					break;
 				case CONTENT_COUNTERS:
 				{
-					parserutils_hash_entry *sep;
+					lwc_string *sep;
 	
 					advance_bytecode(style, sizeof(he));
 
-					sep = *((parserutils_hash_entry **) 
+					sep = *((lwc_string **) 
 							style->bytecode);
 					advance_bytecode(style, sizeof(sep));
 
 					content[n_contents].type =
 						CSS_COMPUTED_CONTENT_COUNTERS;
-					content[n_contents].data.counters.name.data = (uint8_t *) he->data;
-					content[n_contents].data.counters.name.len = he->len;
-					content[n_contents].data.counters.sep.data = (uint8_t *) sep->data;
-					content[n_contents].data.counters.sep.len = sep->len;
+					content[n_contents].data.counters.name = he;
+					content[n_contents].data.counters.sep = sep;
 					content[n_contents].data.counters.style = v >> CONTENT_COUNTERS_STYLE_SHIFT;
 				}
 					break;
@@ -695,24 +691,21 @@ static css_error cascade_content(uint32_t opv, css_style *style,
 
 					content[n_contents].type =
 						CSS_COMPUTED_CONTENT_URI;
-					content[n_contents].data.uri.data = (uint8_t *) he->data;
-					content[n_contents].data.uri.len = he->len;
+					content[n_contents].data.uri = he;
 					break;
 				case CONTENT_ATTR:
 					advance_bytecode(style, sizeof(he));
 
 					content[n_contents].type =
 						CSS_COMPUTED_CONTENT_ATTR;
-					content[n_contents].data.attr.data = (uint8_t *) he->data;
-					content[n_contents].data.attr.len = he->len;
+					content[n_contents].data.attr = he;
 					break;
 				case CONTENT_STRING:
 					advance_bytecode(style, sizeof(he));
 
 					content[n_contents].type =
 						CSS_COMPUTED_CONTENT_STRING;
-					content[n_contents].data.string.data = (uint8_t *) he->data;
-					content[n_contents].data.string.len = he->len;
+					content[n_contents].data.string = he;
 					break;
 				case CONTENT_OPEN_QUOTE:
 					content[n_contents].type =
@@ -829,21 +822,21 @@ static css_error cascade_cursor(uint32_t opv, css_style *style,
 		css_select_state *state)
 {	
 	uint16_t value = CSS_CURSOR_INHERIT;
-	css_string *uris = NULL;
+	lwc_string **uris = NULL;
 	uint32_t n_uris = 0;
 
 	if (isInherit(opv) == false) {
 		uint32_t v = getValue(opv);
 
 		while (v == CURSOR_URI) {
-			parserutils_hash_entry *uri;
-			css_string *temp;
+			lwc_string *uri;
+			lwc_string **temp;
 
-			uri = *((parserutils_hash_entry **) style->bytecode);
+			uri = *((lwc_string **) style->bytecode);
 			advance_bytecode(style, sizeof(uri));
 
 			temp = state->result->alloc(uris, 
-					(n_uris + 1) * sizeof(css_string), 
+					(n_uris + 1) * sizeof(lwc_string *), 
 					state->result->pw);
 			if (temp == NULL) {
 				if (uris != NULL) {
@@ -855,8 +848,7 @@ static css_error cascade_cursor(uint32_t opv, css_style *style,
 
 			uris = temp;
 
-			uris[n_uris].data = (uint8_t *) uri->data;
-			uris[n_uris].len = uri->len;
+			uris[n_uris] = uri;
 
 			n_uris++;
 
@@ -921,10 +913,10 @@ static css_error cascade_cursor(uint32_t opv, css_style *style,
 
 	/* Terminate array with blank entry, if needed */
 	if (n_uris > 0) {
-		css_string *temp;
+		lwc_string **temp;
 
 		temp = state->result->alloc(uris, 
-				(n_uris + 1) * sizeof(css_string), 
+				(n_uris + 1) * sizeof(lwc_string *), 
 				state->result->pw);
 		if (temp == NULL) {
 			state->result->alloc(uris, 0, state->result->pw);
@@ -933,8 +925,7 @@ static css_error cascade_cursor(uint32_t opv, css_style *style,
 
 		uris = temp;
 
-		uris[n_uris].data = NULL;
-		uris[n_uris].len = 0;
+		uris[n_uris] = NULL;
 	}
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
@@ -1163,20 +1154,20 @@ static css_error cascade_font_family(uint32_t opv, css_style *style,
 		css_select_state *state)
 {
 	uint16_t value = CSS_FONT_FAMILY_INHERIT;
-	css_string *fonts = NULL;
+	lwc_string **fonts = NULL;
 	uint32_t n_fonts = 0;
 
 	if (isInherit(opv) == false) {
 		uint32_t v = getValue(opv);
 
 		while (v != FONT_FAMILY_END) {
-			const parserutils_hash_entry *font = NULL;
-			css_string *temp;
+			lwc_string *font = NULL;
+			lwc_string **temp;
 
 			switch (v) {
 			case FONT_FAMILY_STRING:
 			case FONT_FAMILY_IDENT_LIST:
-				font = *((parserutils_hash_entry **) 
+				font = *((lwc_string **) 
 						style->bytecode);
 				advance_bytecode(style, sizeof(font));
 				break;
@@ -1208,7 +1199,7 @@ static css_error cascade_font_family(uint32_t opv, css_style *style,
 			/** \todo Do this at bytecode generation time? */
 			if (value == CSS_FONT_FAMILY_INHERIT && font != NULL) {
 				temp = state->result->alloc(fonts, 
-					(n_fonts + 1) * sizeof(css_string), 
+					(n_fonts + 1) * sizeof(lwc_string *), 
 					state->result->pw);
 				if (temp == NULL) {
 					if (fonts != NULL) {
@@ -1220,8 +1211,7 @@ static css_error cascade_font_family(uint32_t opv, css_style *style,
 
 				fonts = temp;
 
-				fonts[n_fonts].data = (uint8_t *) font->data;
-				fonts[n_fonts].len = font->len;
+				fonts[n_fonts] = font;
 
 				n_fonts++;
 			}
@@ -1233,10 +1223,10 @@ static css_error cascade_font_family(uint32_t opv, css_style *style,
 
 	/* Terminate array with blank entry, if needed */
 	if (n_fonts > 0) {
-		css_string *temp;
+		lwc_string **temp;
 
 		temp = state->result->alloc(fonts, 
-				(n_fonts + 1) * sizeof(css_string), 
+				(n_fonts + 1) * sizeof(lwc_string *), 
 				state->result->pw);
 		if (temp == NULL) {
 			state->result->alloc(fonts, 0, state->result->pw);
@@ -1245,8 +1235,7 @@ static css_error cascade_font_family(uint32_t opv, css_style *style,
 
 		fonts = temp;
 
-		fonts[n_fonts].data = NULL;
-		fonts[n_fonts].len = 0;
+		fonts[n_fonts] = NULL;
 	}
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
@@ -2015,14 +2004,14 @@ static css_error cascade_play_during(uint32_t opv, css_style *style,
 		css_select_state *state)
 {
 	uint16_t value = 0;
-	parserutils_hash_entry *uri = NULL;
+	lwc_string *uri = NULL;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
 		case PLAY_DURING_URI:
 			value = 0;
 
-			uri = *((parserutils_hash_entry **) style->bytecode);
+			uri = *((lwc_string **) style->bytecode);
 			advance_bytecode(style, sizeof(uri));
 			break;
 		case PLAY_DURING_AUTO:
@@ -2088,7 +2077,7 @@ static css_error cascade_quotes(uint32_t opv, css_style *style,
 		css_select_state *state)
 {
 	uint16_t value = CSS_QUOTES_INHERIT;
-	css_string *quotes = NULL;
+	lwc_string **quotes = NULL;
 	uint32_t n_quotes = 0;
 
 	if (isInherit(opv) == false) {
@@ -2097,14 +2086,14 @@ static css_error cascade_quotes(uint32_t opv, css_style *style,
 		value = CSS_QUOTES_STRING;
 
 		while (v != QUOTES_NONE) {
-			parserutils_hash_entry *quote;
-			css_string *temp;
+			lwc_string *quote;
+			lwc_string **temp;
 
-			quote = *((parserutils_hash_entry **) style->bytecode);
+			quote = *((lwc_string **) style->bytecode);
 			advance_bytecode(style, sizeof(quote));
 
 			temp = state->result->alloc(quotes, 
-					(n_quotes + 1) * sizeof(css_string), 
+					(n_quotes + 1) * sizeof(lwc_string *), 
 					state->result->pw);
 			if (temp == NULL) {
 				if (quotes != NULL) {
@@ -2116,8 +2105,7 @@ static css_error cascade_quotes(uint32_t opv, css_style *style,
 
 			quotes = temp;
 
-			quotes[n_quotes].data = (uint8_t *) quote->data;
-			quotes[n_quotes].len = quote->len;
+			quotes[n_quotes] = quote;
 
 			n_quotes++;
 
@@ -2128,10 +2116,10 @@ static css_error cascade_quotes(uint32_t opv, css_style *style,
 
 	/* Terminate array, if required */
 	if (n_quotes > 0) {
-		css_string *temp;
+		lwc_string **temp;
 
 		temp = state->result->alloc(quotes, 
-				(n_quotes + 1) * sizeof(css_string), 
+				(n_quotes + 1) * sizeof(lwc_string *), 
 				state->result->pw);
 		if (temp == NULL) {
 			state->result->alloc(quotes, 0, state->result->pw);
@@ -2140,8 +2128,7 @@ static css_error cascade_quotes(uint32_t opv, css_style *style,
 
 		quotes = temp;
 
-		quotes[n_quotes].data = NULL;
-		quotes[n_quotes].len = 0;
+		quotes[n_quotes] = NULL;
 	}
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
@@ -2650,20 +2637,20 @@ static css_error cascade_voice_family(uint32_t opv, css_style *style,
 		css_select_state *state)
 {
 	uint16_t value = 0;
-	css_string *voices = NULL;
+	lwc_string **voices = NULL;
 	uint32_t n_voices = 0;
 
 	if (isInherit(opv) == false) {
 		uint32_t v = getValue(opv);
 
 		while (v != VOICE_FAMILY_END) {
-			const parserutils_hash_entry *voice = NULL;
-			css_string *temp;
+			lwc_string *voice = NULL;
+			lwc_string **temp;
 
 			switch (v) {
 			case VOICE_FAMILY_STRING:
 			case VOICE_FAMILY_IDENT_LIST:
-				voice = *((parserutils_hash_entry **) 
+				voice = *((lwc_string **) 
 						style->bytecode);
 				advance_bytecode(style, sizeof(voice));
 				break;
@@ -2687,7 +2674,7 @@ static css_error cascade_voice_family(uint32_t opv, css_style *style,
 			/** \todo Do this at bytecode generation time? */
 			if (value == 0 && voice != NULL) {
 				temp = state->result->alloc(voices, 
-					(n_voices + 1) * sizeof(css_string), 
+					(n_voices + 1) * sizeof(lwc_string *), 
 					state->result->pw);
 				if (temp == NULL) {
 					if (voices != NULL) {
@@ -2699,8 +2686,7 @@ static css_error cascade_voice_family(uint32_t opv, css_style *style,
 
 				voices = temp;
 
-				voices[n_voices].data = (uint8_t *) voice->data;
-				voices[n_voices].len = voice->len;
+				voices[n_voices] = voice;
 
 				n_voices++;
 			}
@@ -2712,10 +2698,10 @@ static css_error cascade_voice_family(uint32_t opv, css_style *style,
 
 	/* Terminate array with blank entry, if needed */
 	if (n_voices > 0) {
-		css_string *temp;
+		lwc_string **temp;
 
 		temp = state->result->alloc(voices, 
-				(n_voices + 1) * sizeof(css_string), 
+				(n_voices + 1) * sizeof(lwc_string *), 
 				state->result->pw);
 		if (temp == NULL) {
 			state->result->alloc(voices, 0, state->result->pw);
@@ -2724,8 +2710,7 @@ static css_error cascade_voice_family(uint32_t opv, css_style *style,
 
 		voices = temp;
 
-		voices[n_voices].data = NULL;
-		voices[n_voices].len = 0;
+		voices[n_voices] = NULL;
 	}
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
@@ -2940,10 +2925,10 @@ css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 css_error cascade_uri_none(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, 
-				const parserutils_hash_entry *))
+				lwc_string *))
 {
 	uint16_t value = CSS_BACKGROUND_IMAGE_INHERIT;
-	parserutils_hash_entry *uri = NULL;
+	lwc_string *uri = NULL;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
@@ -2952,7 +2937,7 @@ css_error cascade_uri_none(uint32_t opv, css_style *style,
 			break;
 		case BACKGROUND_IMAGE_URI:
 			value = CSS_BACKGROUND_IMAGE_IMAGE;
-			uri = *((parserutils_hash_entry **) style->bytecode);
+			uri = *((lwc_string **) style->bytecode);
 			advance_bytecode(style, sizeof(uri));
 			break;
 		}
@@ -3243,10 +3228,10 @@ css_error cascade_counter_increment_reset(uint32_t opv, css_style *style,
 
 			while (v != COUNTER_INCREMENT_NONE) {
 				css_computed_counter *temp;
-				parserutils_hash_entry *name;
+				lwc_string *name;
 				css_fixed val = 0;
 
-				name = *((parserutils_hash_entry **)
+				name = *((lwc_string **)
 						style->bytecode);
 				advance_bytecode(style, sizeof(name));
 
@@ -3267,9 +3252,7 @@ css_error cascade_counter_increment_reset(uint32_t opv, css_style *style,
 
 				counters = temp;
 
-				counters[n_counters].name.data = 
-						(uint8_t *) name->data;
-				counters[n_counters].name.len = name->len;
+				counters[n_counters].name = name;
 				counters[n_counters].value = val;
 
 				n_counters++;
@@ -3299,8 +3282,7 @@ css_error cascade_counter_increment_reset(uint32_t opv, css_style *style,
 
 		counters = temp;
 
-		counters[n_counters].name.data = NULL;
-		counters[n_counters].name.len = 0;
+		counters[n_counters].name = NULL;
 		counters[n_counters].value = 0;
 	}
 

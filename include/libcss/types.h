@@ -68,14 +68,6 @@ typedef enum css_origin {
 	CSS_ORIGIN_AUTHOR           = 2		/**< Author stylesheet */
 } css_origin;
 
-/**
- * String type
- */
-typedef struct css_string {
-	size_t len;
-	uint8_t *data;
-} css_string;
-
 /** CSS colour -- RRGGBBAA */
 typedef uint32_t css_color;
 

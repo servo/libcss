@@ -8,7 +8,7 @@
 #ifndef css_select_hash_h_
 #define css_select_hash_h_
 
-#include <parserutils/utils/hash.h>
+#include <libwapcaplet/libwapcaplet.h>
 
 #include <libcss/errors.h>
 #include <libcss/functypes.h>
@@ -28,7 +28,7 @@ css_error css_selector_hash_remove(css_selector_hash *hash,
 		const struct css_selector *selector);
 
 css_error css_selector_hash_find(css_selector_hash *hash,
-		const parserutils_hash_entry *name,
+		lwc_string *name,
 		const struct css_selector ***matched);
 css_error css_selector_hash_iterate(css_selector_hash *hash,
 		const struct css_selector **current, 

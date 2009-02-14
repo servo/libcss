@@ -7,7 +7,7 @@
 
 #include "utils/utils.h"
 
-css_fixed number_from_css_string(const css_string *string,
+css_fixed number_from_lwc_string(lwc_string *string,
 		bool int_only, size_t *consumed)
 {
 	size_t len;
@@ -17,11 +17,11 @@ css_fixed number_from_css_string(const css_string *string,
 	int32_t fracpart = 0;
 	int32_t pwr = 1;
 
-	if (string == NULL || string->len == 0 || consumed == NULL)
+	if (string == NULL || lwc_string_length(string) == 0 || consumed == NULL)
 		return 0;
 
-	len = string->len;
-	ptr = string->data;
+	len = lwc_string_length(string);
+	ptr = (uint8_t *)lwc_string_data(string);
 
 	/* number = [+-]? ([0-9]+ | [0-9]* '.' [0-9]+) */
 
@@ -91,7 +91,7 @@ css_fixed number_from_css_string(const css_string *string,
 		}
 	}
 
-	*consumed = ptr - string->data;
+	*consumed = (char *)ptr - lwc_string_data(string);
 
 	if (sign > 0) {
 		/* If the result is larger than we can represent,

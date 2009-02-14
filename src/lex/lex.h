@@ -8,12 +8,13 @@
 #ifndef css_lex_lex_h_
 #define css_lex_lex_h_
 
+#include <libwapcaplet/libwapcaplet.h>
+
 #include <libcss/errors.h>
 #include <libcss/functypes.h>
 #include <libcss/types.h>
 
 #include <parserutils/input/inputstream.h>
-#include <parserutils/utils/hash.h>
 
 typedef struct css_lexer css_lexer;
 
@@ -59,10 +60,13 @@ typedef enum css_token_type {
 typedef struct css_token {
 	css_token_type type;
 
-	css_string data;
+        struct {
+                uint8_t *data;
+                size_t len;
+        } data;
 
-	const parserutils_hash_entry *idata;
-	const parserutils_hash_entry *ilower;
+	lwc_string *idata;
+	lwc_string *ilower;
 	
 	uint32_t col;
 	uint32_t line;

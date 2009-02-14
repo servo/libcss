@@ -142,7 +142,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	size_t wrote = 0;
 	uint8_t val;
 	css_color color;
-	const css_string *url;
+	lwc_string *url;
 	css_fixed len1, len2;
 	css_unit unit1, unit2;
 
@@ -180,9 +180,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 
 	/* background-image */
 	val = css_computed_background_image(style, &url);
-	if (val == CSS_BACKGROUND_IMAGE_IMAGE && url->data != NULL) {
+	if (val == CSS_BACKGROUND_IMAGE_IMAGE && url != NULL) {
 		wrote = snprintf(ptr, *len, "background-image: url('%.*s')\n",
-				(int) url->len, url->data);
+                                 (int) lwc_string_length(url), lwc_string_data(url));
 	} else if (val == CSS_BACKGROUND_IMAGE_NONE) {
 		wrote = snprintf(ptr, *len, "background-image: none\n");
 	} else {
