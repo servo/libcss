@@ -87,11 +87,8 @@ void dump_rule_import(css_rule_import *s, char **buf, size_t *buflen)
 {
 	char *ptr = *buf;
 
-	if (s->sheet == NULL) {
-		assert(0 && "No imported sheet");
-	}
-
-	ptr += sprintf(ptr, "| @import url(\"%s\")", s->sheet->url);
+	ptr += sprintf(ptr, "| @import url(\"%.*s\")", 
+			(int) s->url->len, (const char *) s->url->data);
 
 	/** \todo media list */
 

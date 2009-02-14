@@ -44,6 +44,9 @@ const char *css_error_to_string(css_error error)
 	case CSS_EOF:
 		result = "EOF encountered";
 		break;
+	case CSS_IMPORTS_PENDING:
+		result = "Imports pending";
+		break;
 	}
 
 	return result;

@@ -133,6 +133,9 @@ typedef struct css_rule_page {
 typedef struct css_rule_import {
 	css_rule base;
 
+	const parserutils_hash_entry *url;
+	uint64_t media;
+
 	css_stylesheet *sheet;
 } css_rule_import;
 
@@ -160,9 +163,6 @@ struct css_stylesheet {
 
 	void *ownerNode;			/**< Owning node in document */
 	css_rule *ownerRule;			/**< Owning rule in parent */
-
-	css_import_handler import;		/**< Import callback */
-	void *import_pw;			/**< Import handler data */
 
 	css_language_level level;		/**< Language level of sheet */
 	css_parser *parser;			/**< Core parser for sheet */
@@ -207,8 +207,9 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 css_error css_stylesheet_rule_set_charset(css_stylesheet *sheet,
 		css_rule *rule, const parserutils_hash_entry *charset);
 
-css_error css_stylesheet_rule_set_import(css_stylesheet *sheet,
-		css_rule *rule, css_stylesheet *import);
+css_error css_stylesheet_rule_set_nascent_import(css_stylesheet *sheet,
+		css_rule *rule, const parserutils_hash_entry *url,
+		uint64_t media);
 
 /** \todo registering other rule-type data with css_rules */
 

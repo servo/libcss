@@ -308,7 +308,7 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 	static int testnum;
 
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", NULL,
-			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, NULL, NULL,
+			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL,
 			myrealloc, NULL, &sheet) == CSS_OK);
 
 	error = css_stylesheet_append_data(sheet, data, len);
@@ -317,7 +317,35 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 		assert(0);
 	}
 
-	assert(css_stylesheet_data_done(sheet) == CSS_OK);
+	error = css_stylesheet_data_done(sheet);
+	assert(error == CSS_OK || error == CSS_IMPORTS_PENDING);
+
+	while (error == CSS_IMPORTS_PENDING) {
+		css_string url;
+		uint64_t media;
+
+		error = css_stylesheet_next_pending_import(sheet,
+				&url, &media);
+		assert(error == CSS_OK || error == CSS_INVALID);
+
+		if (error == CSS_OK) {
+			css_stylesheet *import;
+			char buf[url.len + 1];
+
+			memcpy(buf, url.data, url.len);
+			buf[url.len] = '\0';
+
+			assert(css_stylesheet_create(CSS_LEVEL_21,
+				"UTF-8", buf, NULL, CSS_ORIGIN_AUTHOR,
+				media, myrealloc, NULL, &import) == 
+				CSS_OK);
+
+			assert(css_stylesheet_register_import(sheet,
+				import) == CSS_OK);
+
+			error = CSS_IMPORTS_PENDING;
+		}
+	}
 
 	e = 0;
 	testnum++;
@@ -460,13 +488,11 @@ void validate_rule_charset(css_rule_charset *s, exp_entry *e, int testnum)
 
 void validate_rule_import(css_rule_import *s, exp_entry *e, int testnum)
 {
-	if (s->sheet == NULL) {
-		assert(0 && "No imported sheet");
-	}
-
-	if (strcmp(s->sheet->url, e->name) != 0) {
-		printf("%d: Got URL '%s'. Expected '%s'\n",
-			testnum, s->sheet->url, e->name);
+	if (strncmp((const char *) s->url->data, e->name,
+			(int) s->url->len) != 0) {
+		printf("%d: Got URL '%.*s'. Expected '%s'\n",
+			testnum, (int) s->url->len, (const char *) s->url->data,
+		e->name);
 		assert(0 && "Mismatched URLs");
 	}
 }

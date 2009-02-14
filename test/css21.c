@@ -40,8 +40,8 @@ int main(int argc, char **argv)
 	for (int count = 0; count < ITERATIONS; count++) {
 
 		assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", argv[2], 
-				NULL, CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, NULL, 
-				NULL, myrealloc, NULL, &sheet) == CSS_OK);
+				NULL, CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, 
+				myrealloc, NULL, &sheet) == CSS_OK);
 
 		fp = fopen(argv[2], "rb");
 		if (fp == NULL) {
@@ -74,7 +74,38 @@ int main(int argc, char **argv)
 
 		fclose(fp);
 
-		assert(css_stylesheet_data_done(sheet) == CSS_OK);
+		error = css_stylesheet_data_done(sheet);
+		assert(error == CSS_OK || error == CSS_IMPORTS_PENDING);
+
+		while (error == CSS_IMPORTS_PENDING) {
+			css_string url;
+			uint64_t media;
+
+			error = css_stylesheet_next_pending_import(sheet,
+					&url, &media);
+			assert(error == CSS_OK || error == CSS_INVALID);
+
+			if (error == CSS_OK) {
+				css_stylesheet *import;
+				char buf[url.len + 1];
+
+				memcpy(buf, url.data, url.len);
+				buf[url.len] = '\0';
+
+				assert(css_stylesheet_create(CSS_LEVEL_21,
+					"UTF-8", buf, NULL, CSS_ORIGIN_AUTHOR,
+					media, myrealloc, NULL, &import) == 
+					CSS_OK);
+
+				assert(css_stylesheet_data_done(import) == 
+					CSS_OK);
+
+				assert(css_stylesheet_register_import(sheet,
+					import) == CSS_OK);
+
+				error = CSS_IMPORTS_PENDING;
+			}
+		}
 
 #if DUMP_HASH
 		parserutils_hash_dump(sheet->dictionary);

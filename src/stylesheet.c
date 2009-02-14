@@ -26,8 +26,6 @@ static css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule);
  * \param title            Title of stylesheet
  * \param origin           Origin of stylesheet
  * \param media            Media stylesheet applies to
- * \param import_callback  Handler for imported stylesheets, or NULL
- * \param import_pw        Client private data for import_callback
  * \param alloc            Memory (de)allocation function
  * \param alloc_pw         Client private data for alloc
  * \param stylesheet       Pointer to location to receive stylesheet
@@ -38,8 +36,8 @@ static css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule);
 css_error css_stylesheet_create(css_language_level level,
 		const char *charset, const char *url, const char *title,
 		css_origin origin, uint64_t media,
-		css_import_handler import_callback, void *import_pw,
-		css_allocator_fn alloc, void *alloc_pw, css_stylesheet **stylesheet)
+		css_allocator_fn alloc, void *alloc_pw, 
+		css_stylesheet **stylesheet)
 {
 	parserutils_error perror;
 	css_error error;
@@ -120,9 +118,6 @@ css_error css_stylesheet_create(css_language_level level,
 	sheet->origin = origin;
 	sheet->media = media;
 
-	sheet->import = import_callback;
-	sheet->import_pw = import_pw;
-
 	sheet->alloc = alloc;
 	sheet->pw = alloc_pw;
 
@@ -200,10 +195,13 @@ css_error css_stylesheet_append_data(css_stylesheet *sheet,
  * Flag that the last of a stylesheet's data has been seen
  *
  * \param sheet  The stylesheet in question
- * \return CSS_OK on success, appropriate error otherwise
+ * \return CSS_OK on success,
+ *         CSS_IMPORTS_PENDING if there are imports pending,
+ *         appropriate error otherwise
  */
 css_error css_stylesheet_data_done(css_stylesheet *sheet)
 {
+	const css_rule *r;
 	css_error error;
 
 	if (sheet == NULL)
@@ -222,6 +220,127 @@ css_error css_stylesheet_data_done(css_stylesheet *sheet)
 
 	sheet->parser_frontend = NULL;
 	sheet->parser = NULL;
+
+	/* Determine if there are any pending imports */
+	for (r = sheet->rule_list; r != NULL; r = r->next) {
+		const css_rule_import *i = (const css_rule_import *) r;
+
+		if (r->type != CSS_RULE_UNKNOWN &&
+				r->type != CSS_RULE_CHARSET &&
+				r->type != CSS_RULE_IMPORT)
+			break;
+
+		if (r->type == CSS_RULE_IMPORT && i->sheet == NULL)
+			return CSS_IMPORTS_PENDING;
+	}
+
+	return CSS_OK;
+}
+
+/**
+ * Retrieve the next pending import for the parent stylesheet
+ *
+ * \param parent  Parent stylesheet
+ * \param url     Pointer to object to be populated with details of URL of 
+ *                imported stylesheet (potentially relative)
+ * \param media   Pointer to location to receive applicable media types for
+ *                imported sheet,
+ * \return CSS_OK on success,
+ *         CSS_INVALID if there are no pending imports remaining
+ *
+ * The client must resolve the absolute URL of the imported stylesheet,
+ * using the parent's URL as the base. It must then fetch the imported
+ * stylesheet, and parse it to completion, including fetching any stylesheets
+ * it may import. The resultant sheet must then be registered with the
+ * parent using css_stylesheet_register_import().
+ *
+ * The client must then call this function again, to determine if there
+ * are any further imports for the parent stylesheet, and, if so,
+ * process them as described above.
+ *
+ * If the client is unable to fetch an imported stylesheet, it must
+ * register an empty stylesheet with the parent in its place.
+ */
+css_error css_stylesheet_next_pending_import(css_stylesheet *parent,
+		css_string *url, uint64_t *media)
+{
+	const css_rule *r;
+
+	if (parent == NULL || url == NULL || media == NULL)
+		return CSS_BADPARM;
+
+	for (r = parent->rule_list; r != NULL; r = r->next) {
+		const css_rule_import *i = (const css_rule_import *) r;
+
+		if (r->type != CSS_RULE_UNKNOWN &&
+				r->type != CSS_RULE_CHARSET &&
+				r->type != CSS_RULE_IMPORT)
+			break;
+
+		if (r->type == CSS_RULE_IMPORT && i->sheet == NULL) {
+			url->len = i->url->len;
+			url->data = (uint8_t *) i->url->data;
+
+			*media = i->media;
+
+			return CSS_OK;
+		}
+	}
+
+	return CSS_INVALID;
+}
+
+/**
+ * Register an imported stylesheet with its parent
+ *
+ * \param parent  Parent stylesheet
+ * \param import  Imported sheet
+ * \return CSS_OK on success, 
+ *         CSS_INVALID if there are no outstanding imports,
+ *         appropriate error otherwise.
+ *
+ * Ownership of the imported stylesheet is transferred to the parent.
+ */
+css_error css_stylesheet_register_import(css_stylesheet *parent,
+		css_stylesheet *import)
+{
+	css_rule *r;
+
+	if (parent == NULL || import == NULL)
+		return CSS_BADPARM;
+
+	for (r = parent->rule_list; r != NULL; r = r->next) {
+		css_rule_import *i = (css_rule_import *) r;
+
+		if (r->type != CSS_RULE_UNKNOWN &&
+				r->type != CSS_RULE_CHARSET &&
+				r->type != CSS_RULE_IMPORT)
+			break;
+
+		if (r->type == CSS_RULE_IMPORT && i->sheet == NULL) {
+			i->sheet = import;
+
+			return CSS_OK;
+		}
+	}
+
+	return CSS_INVALID;
+}
+
+/**
+ * Retrieve the language level of a stylesheet
+ *
+ * \param sheet  The stylesheet to retrieve the language level of
+ * \param level  Pointer to location to receive language level
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_get_language_level(css_stylesheet *sheet,
+		css_language_level *level)
+{
+	if (sheet == NULL || level == NULL)
+		return CSS_BADPARM;
+
+	*level = sheet->level;
 
 	return CSS_OK;
 }
@@ -689,7 +808,8 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 	{
 		css_rule_import *import = (css_rule_import *) rule;
 
-		css_stylesheet_destroy(import->sheet);
+		if (import->sheet != NULL)
+			css_stylesheet_destroy(import->sheet);
 	}
 		break;
 	case CSS_RULE_MEDIA:
@@ -864,27 +984,31 @@ css_error css_stylesheet_rule_set_charset(css_stylesheet *sheet,
 	return CSS_OK;
 }
 
+
 /**
- * Set the imported stylesheet associated with a rule
+ * Set the necessary data to import a stylesheet associated with a rule
  *
  * \param sheet   The stylesheet context
  * \param rule    The rule to add to (must be of type CSS_RULE_IMPORT)
- * \param import  The imported sheet
+ * \param url     The URL of the imported stylesheet
+ * \param media   The applicable media types for the imported stylesheet
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_stylesheet_rule_set_import(css_stylesheet *sheet,
-		css_rule *rule, css_stylesheet *import)
+css_error css_stylesheet_rule_set_nascent_import(css_stylesheet *sheet,
+		css_rule *rule, const parserutils_hash_entry *url, 
+		uint64_t media)
 {
 	css_rule_import *r = (css_rule_import *) rule;
 
-	if (sheet == NULL || rule == NULL || import == NULL)
+	if (sheet == NULL || rule == NULL || url == NULL)
 		return CSS_BADPARM;
 
 	/* Ensure rule is a CSS_RULE_IMPORT */
 	assert(rule->type == CSS_RULE_IMPORT);
 
 	/* Set the rule's sheet field */
-	r->sheet = import;
+	r->url = url;
+	r->media = media;
 
 	return CSS_OK;
 }

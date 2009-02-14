@@ -439,8 +439,7 @@ void parse_sheet(line_ctx *ctx, const char *data, size_t len)
 
 	/** \todo How are we going to handle @import? */
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", "foo", 
-			origin, media, NULL, NULL, myrealloc, NULL, &sheet) == 
-			CSS_OK);
+			origin, media, myrealloc, NULL, &sheet) == CSS_OK);
 
 	/* Extend array of sheets and append new sheet to it */
 	temp = realloc(ctx->sheets, 

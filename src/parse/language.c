@@ -408,7 +408,6 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 	} else if (atkeyword->ilower == c->strings[IMPORT]) {
 		if (c->state != HAD_RULE) {
 			css_rule *rule;
-			css_stylesheet *import;
 			css_media_type media = 0;
 			css_error error;
 
@@ -477,49 +476,15 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 			if (error != CSS_OK)
 				return error;
 
-			/** \todo resolve URI */
-			char url[uri->idata->len + 1];
-			memcpy(url, uri->idata->data, uri->idata->len);
-			url[uri->idata->len] = '\0';
-
-			/* Create imported sheet */
-			error = css_stylesheet_create(c->sheet->level, NULL,
-					url, NULL, c->sheet->origin, media, 
-					c->sheet->import, c->sheet->import_pw,
-					c->alloc, c->pw, &import);
+			error = css_stylesheet_rule_set_nascent_import(c->sheet,
+					rule, uri->idata, media);
 			if (error != CSS_OK) {
 				css_stylesheet_rule_destroy(c->sheet, rule);
 				return error;
 			}
-
-			/* Trigger fetch of imported sheet */
-			if (c->sheet->import != NULL) {
-				error = c->sheet->import(c->sheet->import_pw, 
-						url, import);
-				if (error != CSS_OK) {
-					css_stylesheet_destroy(import);
-					css_stylesheet_rule_destroy(c->sheet, 
-							rule);
-					return error;
-				}
-			}
-
-			error = css_stylesheet_rule_set_import(c->sheet, rule,
-					import);
-			if (error != CSS_OK) {
-				/** \todo we need to tell the client to stop
-				 * doing stuff with the imported sheet */
-				css_stylesheet_destroy(import);
-				css_stylesheet_rule_destroy(c->sheet, rule);
-				return error;
-			}
-
-			/* Imported sheet is now owned by the rule */
 
 			error = css_stylesheet_add_rule(c->sheet, rule);
 			if (error != CSS_OK) {
-				/** \todo we need to tell the client to stop
-				 * doing stuff with the imported sheet */
 				css_stylesheet_rule_destroy(c->sheet, rule);
 				return error;
 			}

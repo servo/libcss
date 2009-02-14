@@ -172,7 +172,7 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 	buflen = 2 * explen;
 
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", NULL,
-			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, NULL, NULL,
+			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL,
 			myrealloc, NULL, &sheet) == CSS_OK);
 
 	error = css_stylesheet_append_data(sheet, data, len);
