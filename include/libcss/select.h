@@ -12,23 +12,12 @@
 #include <libcss/functypes.h>
 #include <libcss/types.h>
 
-enum css_pseudo_class {
-	CSS_PSEUDO_CLASS_LINK           = (1<<0),
-	CSS_PSEUDO_CLASS_VISITED        = (1<<1),
-	CSS_PSEUDO_CLASS_HOVER          = (1<<2),
-	CSS_PSEUDO_CLASS_ACTIVE         = (1<<3),
-	CSS_PSEUDO_CLASS_FOCUS          = (1<<4),
-	/** \todo CSS_PSEUDO_CLASS_LANG = (1<<5), */
-	CSS_PSEUDO_CLASS_LEFT           = (1<<6),
-	CSS_PSEUDO_CLASS_RIGHT          = (1<<7),
-	CSS_PSEUDO_CLASS_FIRST          = (1<<8)
-};
-
 enum css_pseudo_element {
-	CSS_PSEUDO_ELEMENT_FIRST_LINE   = (1<<0),
-	CSS_PSEUDO_ELEMENT_FIRST_LETTER = (1<<1),
-	CSS_PSEUDO_ELEMENT_BEFORE       = (1<<2),
-	CSS_PSEUDO_ELEMENT_AFTER        = (1<<3)
+	CSS_PSEUDO_ELEMENT_NONE         = 0,
+	CSS_PSEUDO_ELEMENT_FIRST_LINE   = 1,
+	CSS_PSEUDO_ELEMENT_FIRST_LETTER = 2,
+	CSS_PSEUDO_ELEMENT_BEFORE       = 3,
+	CSS_PSEUDO_ELEMENT_AFTER        = 4
 };
 
 typedef struct css_select_handler {
@@ -71,6 +60,14 @@ typedef struct css_select_handler {
 			bool *match);
 
 	css_error (*node_is_first_child)(void *pw, void *node, bool *match);
+	css_error (*node_is_link)(void *pw, void *node, bool *match);
+	css_error (*node_is_visited)(void *pw, void *node, bool *match);
+	css_error (*node_is_hover)(void *pw, void *node, bool *match);
+	css_error (*node_is_active)(void *pw, void *node, bool *match);
+	css_error (*node_is_focus)(void *pw, void *node, bool *match);
+	css_error (*node_is_lang)(void *pw, void *node,
+			const uint8_t *lang, size_t len,
+			bool *match);
 } css_select_handler;
 
 css_error css_select_ctx_create(css_alloc alloc, void *pw,
@@ -89,8 +86,8 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
 		const css_stylesheet **sheet);
 
 css_error css_select_style(css_select_ctx *ctx, void *node,
-		uint64_t pseudo_element, uint64_t pseudo_classes,
-		uint64_t media, css_computed_style *result,
+		uint32_t pseudo_element, uint64_t media, 
+		css_computed_style *result,
 		css_select_handler *handler, void *pw);
 
 #endif

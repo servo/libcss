@@ -45,7 +45,7 @@ border-left-color: #00000000
 display: block
 #reset
 
-#tree all active
+#tree all
 | div*
 #author
 div { background-color: #000; }
@@ -53,7 +53,7 @@ div:active { background-color: #bbc; }
 #errors
 #expected
 background-attachment: scroll
-background-color: #bbbbcc00
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat

@@ -51,8 +51,7 @@ typedef struct line_ctx {
 	css_stylesheet **sheets;
 
 	uint64_t media;
-	uint64_t pseudo_elements;
-	uint64_t pseudo_classes;
+	uint32_t pseudo_element;
 	node *target;
 } line_ctx;
 
@@ -61,8 +60,8 @@ static void parse_tree(line_ctx *ctx, const char *data, size_t len);
 static void parse_tree_data(line_ctx *ctx, const char *data, size_t len);
 static void parse_sheet(line_ctx *ctx, const char *data, size_t len);
 static void parse_media_list(const char **data, size_t *len, uint64_t *media);
-static void parse_pseudo_list(const char **data, size_t *len,
-		uint64_t *elements, uint64_t *classes);
+static void parse_pseudo_list(const char **data, size_t *len, 
+		uint32_t *element);
 static void parse_expected(line_ctx *ctx, const char *data, size_t len);
 static void run_test(line_ctx *ctx, const char *exp, size_t explen);
 static void destroy_tree(node *root);
@@ -102,6 +101,14 @@ static css_error node_has_attribute_includes(void *pw, void *node,
 		const uint8_t *value, size_t vlen,
 		bool *match);
 static css_error node_is_first_child(void *pw, void *node, bool *match);
+static css_error node_is_link(void *pw, void *node, bool *match);
+static css_error node_is_visited(void *pw, void *node, bool *match);
+static css_error node_is_hover(void *pw, void *node, bool *match);
+static css_error node_is_active(void *pw, void *node, bool *match);
+static css_error node_is_focus(void *pw, void *node, bool *match);
+static css_error node_is_lang(void *pw, void *node,
+		const uint8_t *lang, size_t len,
+		bool *match);
 
 static css_select_handler select_handler = {
 	node_name,
@@ -116,7 +123,13 @@ static css_select_handler select_handler = {
 	node_has_attribute_equal,
 	node_has_attribute_dashmatch,
 	node_has_attribute_includes,
-	node_is_first_child
+	node_is_first_child,
+	node_is_link,
+	node_is_visited,
+	node_is_hover,
+	node_is_active,
+	node_is_focus,
+	node_is_lang
 };
 
 static void *myrealloc(void *data, size_t len, void *pw)
@@ -254,8 +267,7 @@ void parse_tree(line_ctx *ctx, const char *data, size_t len)
 	/* [ <media_list> <pseudo>? ] ? */
 
 	ctx->media = CSS_MEDIA_ALL;
-	ctx->pseudo_elements = 0;
-	ctx->pseudo_classes = 0;
+	ctx->pseudo_element = CSS_PSEUDO_ELEMENT_NONE;
 
 	/* Consume any leading whitespace */
 	while (p < end && isspace(*p))
@@ -272,8 +284,7 @@ void parse_tree(line_ctx *ctx, const char *data, size_t len)
 	if (p < end) {
 		left = end - p;
 
-		parse_pseudo_list(&p, &left, &ctx->pseudo_elements, 
-				&ctx->pseudo_classes);
+		parse_pseudo_list(&p, &left, &ctx->pseudo_element);
 	}
 }
 
@@ -516,16 +527,14 @@ void parse_media_list(const char **data, size_t *len, uint64_t *media)
 	*len = end - p;
 }
 
-void parse_pseudo_list(const char **data, size_t *len, uint64_t *elements, 
-		uint64_t *classes)
+void parse_pseudo_list(const char **data, size_t *len, uint32_t *element)
 {
 	const char *p = *data;
 	const char *end = p + *len;
 
 	/* <pseudo> [ ',' <pseudo> ]* */
 
-	*elements = 0;
-	*classes = 0;
+	*element = CSS_PSEUDO_ELEMENT_NONE;
 
 	while (p < end) {
 		const char *start = p;
@@ -534,44 +543,19 @@ void parse_pseudo_list(const char **data, size_t *len, uint64_t *elements,
 		while (isspace(*p) == false && *p != ',')
 			p++;
 
-		/* Pseudo classes */
-		if (p - start == 7 &&
-				strncasecmp(start, "visited", 7) == 0)
-			*classes |= CSS_PSEUDO_CLASS_VISITED;
-		else if (p - start == 6 &&
-				strncasecmp(start, "active", 6) == 0)
-			*classes |= CSS_PSEUDO_CLASS_ACTIVE;
-		else if (p - start == 5 &&
-				strncasecmp(start, "first", 5) == 0)
-			*classes |= CSS_PSEUDO_CLASS_FIRST;
-		else if (p - start == 5 &&
-				strncasecmp(start, "right", 5) == 0)
-			*classes |= CSS_PSEUDO_CLASS_RIGHT;
-		else if (p - start == 5 &&
-				strncasecmp(start, "focus", 5) == 0)
-			*classes |= CSS_PSEUDO_CLASS_FOCUS;
-		else if (p - start == 5 &&
-				strncasecmp(start, "hover", 5) == 0)
-			*classes |= CSS_PSEUDO_CLASS_HOVER;
-		else if (p - start == 4 &&
-				strncasecmp(start, "left", 4) == 0)
-			*classes |= CSS_PSEUDO_CLASS_LEFT;
-		else if (p - start == 4 &&
-				strncasecmp(start, "link", 4) == 0)
-			*classes |= CSS_PSEUDO_CLASS_LINK;
 		/* Pseudo elements */
-		else if (p - start == 12 &&
+		if (p - start == 12 &&
 				strncasecmp(start, "first-letter", 12) == 0)
-			*elements |= CSS_PSEUDO_ELEMENT_FIRST_LETTER;
+			*element = CSS_PSEUDO_ELEMENT_FIRST_LETTER;
 		else if (p - start == 10 &&
 				strncasecmp(start, "first-line", 10) == 0)
-			*elements |= CSS_PSEUDO_ELEMENT_FIRST_LINE;
+			*element = CSS_PSEUDO_ELEMENT_FIRST_LINE;
 		else if (p - start == 6 &&
 				strncasecmp(start, "before", 6) == 0)
-			*elements |= CSS_PSEUDO_ELEMENT_BEFORE;
+			*element = CSS_PSEUDO_ELEMENT_BEFORE;
 		else if (p - start == 5 &&
 				strncasecmp(start, "after", 5) == 0)
-			*elements |= CSS_PSEUDO_ELEMENT_AFTER;
+			*element = CSS_PSEUDO_ELEMENT_AFTER;
 		else
 			assert(0 && "Unknown pseudo");
 
@@ -641,9 +625,8 @@ void run_test(line_ctx *ctx, const char *exp, size_t explen)
 
 	testnum++;
 
-	assert(css_select_style(select, ctx->target, ctx->pseudo_elements,
-			ctx->pseudo_classes, ctx->media, computed,
-			&select_handler, NULL) == CSS_OK);
+	assert(css_select_style(select, ctx->target, ctx->pseudo_element,
+			ctx->media, computed, &select_handler, NULL) == CSS_OK);
 
 	dump_computed_style(computed, buf, &buflen);
 
@@ -968,3 +951,80 @@ css_error node_is_first_child(void *pw, void *n, bool *match)
 
 	return CSS_OK;
 }
+
+css_error node_is_link(void *pw, void *n, bool *match)
+{
+	node *node = n;
+
+	UNUSED(pw);
+	UNUSED(node);
+
+	*match = false;
+
+	return CSS_OK;
+}
+
+css_error node_is_visited(void *pw, void *n, bool *match)
+{
+	node *node = n;
+
+	UNUSED(pw);
+	UNUSED(node);
+
+	*match = false;
+
+	return CSS_OK;
+}
+
+css_error node_is_hover(void *pw, void *n, bool *match)
+{
+	node *node = n;
+
+	UNUSED(pw);
+	UNUSED(node);
+
+	*match = false;
+
+	return CSS_OK;
+}
+
+css_error node_is_active(void *pw, void *n, bool *match)
+{
+	node *node = n;
+
+	UNUSED(pw);
+	UNUSED(node);
+
+	*match = false;
+
+	return CSS_OK;
+}
+
+css_error node_is_focus(void *pw, void *n, bool *match)
+{
+	node *node = n;
+
+	UNUSED(pw);
+	UNUSED(node);
+
+	*match = false;
+
+	return CSS_OK;
+}
+
+css_error node_is_lang(void *pw, void *n,
+		const uint8_t *lang, size_t len,
+		bool *match)
+{
+	node *node = n;
+
+	UNUSED(pw);
+	UNUSED(node);
+	UNUSED(lang);
+	UNUSED(len);
+
+	*match = false;
+
+	return CSS_OK;
+}
+

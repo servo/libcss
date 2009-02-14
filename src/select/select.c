@@ -45,8 +45,7 @@ typedef struct prop_state {
  */
 typedef struct css_select_state {
 	void *node;			/* Node we're selecting for */
-	uint64_t pseudo_element;	/* Pseudo element to select for */
-	uint64_t pseudo_classes;	/* Currently active pseudo classes */
+	uint32_t pseudo_element;	/* Pseudo element to select for */
 	uint64_t media;			/* Currently active media types */
 	css_computed_style *result;	/* Style to populate */
 
@@ -66,9 +65,6 @@ typedef struct css_select_state {
 	const parserutils_hash_entry *hover;
 	const parserutils_hash_entry *active;
 	const parserutils_hash_entry *focus;
-	const parserutils_hash_entry *left;
-	const parserutils_hash_entry *right;
-	const parserutils_hash_entry *first;
 	const parserutils_hash_entry *first_line;
 	const parserutils_hash_entry *first_letter;
 	const parserutils_hash_entry *before;
@@ -411,7 +407,6 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
  * \param ctx             Selection context to use
  * \param node            Node to select style for
  * \param pseudo_element  Pseudo element to select for, instead
- * \param pseudo_classes  Currently active pseudo classes
  * \param media           Currently active media types
  * \param result          Pointer to style to populate (assumed clean)
  * \param handler         Dispatch table of handler functions
@@ -428,8 +423,8 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
  * update the fully computed style for a node when layout changes.
  */
 css_error css_select_style(css_select_ctx *ctx, void *node,
-		uint64_t pseudo_element, uint64_t pseudo_classes,
-		uint64_t media,	css_computed_style *result,
+		uint32_t pseudo_element, uint64_t media,
+		css_computed_style *result,
 		css_select_handler *handler, void *pw)
 {
 	uint32_t i;
@@ -443,7 +438,6 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	memset(&state, 0, sizeof(css_select_state));
 	state.node = node;
 	state.pseudo_element = pseudo_element;
-	state.pseudo_classes = pseudo_classes;
 	state.media = media;
 	state.result = result;
 	state.handler = handler;
@@ -616,24 +610,6 @@ css_error intern_strings_for_sheet(css_select_ctx *ctx,
 	perror = parserutils_hash_insert(sheet->dictionary, 
 			(const uint8_t *) "focus", SLEN("focus"), 
 			&state->focus);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
-
-	perror = parserutils_hash_insert(sheet->dictionary, 
-			(const uint8_t *) "left", SLEN("left"), 
-			&state->left);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
-
-	perror = parserutils_hash_insert(sheet->dictionary, 
-			(const uint8_t *) "right", SLEN("right"), 
-			&state->right);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
-
-	perror = parserutils_hash_insert(sheet->dictionary, 
-			(const uint8_t *) "first", SLEN("first"), 
-			&state->first);
 	if (perror != PARSERUTILS_OK)
 		return css_error_from_parserutils_error(perror);
 
@@ -928,57 +904,40 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 		if (detail->name == state->first_child) {
 			error = state->handler->node_is_first_child(state->pw, 
 					node, match);
-		} else if (detail->name == state->link &&
-				(state->pseudo_classes & 
-				CSS_PSEUDO_CLASS_LINK))
-			*match = true;
-		else if (detail->name == state->visited &&
-				(state->pseudo_classes &
-				CSS_PSEUDO_CLASS_VISITED))
-			*match = true;
-		else if (detail->name == state->hover &&
-				(state->pseudo_classes &
-				CSS_PSEUDO_CLASS_HOVER))
-			*match = true;
-		else if (detail->name == state->active &&
-				(state->pseudo_classes &
-				CSS_PSEUDO_CLASS_ACTIVE))
-			*match = true;
-		else if (detail->name == state->focus &&
-				(state->pseudo_classes &
-				CSS_PSEUDO_CLASS_FOCUS))
-			*match = true;
-		else if (detail->name == state->left &&
-				(state->pseudo_classes &
-				CSS_PSEUDO_CLASS_LEFT))
-			*match = true;
-		else if (detail->name == state->right &&
-				(state->pseudo_classes &
-				CSS_PSEUDO_CLASS_RIGHT))
-			*match = true;
-		else if (detail->name == state->first &&
-				(state->pseudo_classes &
-				CSS_PSEUDO_CLASS_FIRST))
-			*match = true;
-		else
+		} else if (detail->name == state->link) {
+			error = state->handler->node_is_link(state->pw,
+					node, match);
+		} else if (detail->name == state->visited) {
+			error = state->handler->node_is_visited(state->pw,
+					node, match);
+		} else if (detail->name == state->hover) {
+			error = state->handler->node_is_hover(state->pw,
+					node, match);
+		} else if (detail->name == state->active) {
+			error = state->handler->node_is_active(state->pw,
+					node, match);
+		} else if (detail->name == state->focus) {
+			error = state->handler->node_is_focus(state->pw,
+					node, match);
+		} else
 			*match = false;
 		break;
 	case CSS_SELECTOR_PSEUDO_ELEMENT:
 		if (detail->name == state->first_line && 
-				(state->pseudo_element & 
-				CSS_PSEUDO_ELEMENT_FIRST_LINE))
+				state->pseudo_element ==
+				CSS_PSEUDO_ELEMENT_FIRST_LINE)
 			*match = true;
 		else if (detail->name == state->first_letter &&
-				(state->pseudo_element &
-				CSS_PSEUDO_ELEMENT_FIRST_LETTER))
+				state->pseudo_element ==
+				CSS_PSEUDO_ELEMENT_FIRST_LETTER)
 			*match = true;
 		else if (detail->name == state->before &&
-				(state->pseudo_element &
-				CSS_PSEUDO_ELEMENT_BEFORE))
+				state->pseudo_element ==
+				CSS_PSEUDO_ELEMENT_BEFORE)
 			*match = true;
 		else if (detail->name == state->after &&
-				(state->pseudo_element &
-				CSS_PSEUDO_ELEMENT_AFTER))
+				state->pseudo_element ==
+				CSS_PSEUDO_ELEMENT_AFTER)
 			*match = true;
 		else
 			*match = false;
