@@ -311,6 +311,10 @@ css_error handleStartRuleset(css_language *c, const parserutils_vector *vector)
 		return error;
 	}
 
+	/* Flag that we've had a valid rule, so @import/@charset have 
+	 * no effect. */
+	c->state = HAD_RULE;
+
 	/* Rule is now owned by the sheet, so no need to destroy it */
 
 	return CSS_OK;
@@ -489,8 +493,10 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 	 * at-rule until then */
 	} else if (atkeyword->ilower == c->strings[MEDIA]) {
 		/** \todo any0 = IDENT ws (',' ws IDENT ws)* */
+		c->state = HAD_RULE;
 	} else if (atkeyword->ilower == c->strings[PAGE]) {
 		/** \todo any0 = (':' IDENT)? ws */
+		c->state = HAD_RULE;
 #endif
 	} else {
 		return CSS_INVALID;
