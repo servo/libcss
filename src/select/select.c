@@ -856,9 +856,11 @@ css_error match_universal_combinator(css_select_ctx *ctx, css_combinator type,
 			if (match == true)
 				break;
 
-			/* Wanted the parent, but it didn't match, 
-			 * so stop looking */
-			if (type == CSS_COMBINATOR_PARENT)
+			/* For parent and sibling selectors, only adjacent
+			 * nodes are valid. Thus, if we failed to match,
+			 * give up. */
+			if (type == CSS_COMBINATOR_PARENT ||
+					type == CSS_COMBINATOR_SIBLING)
 				n = NULL;
 		}
 	} while (n != NULL);
