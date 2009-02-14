@@ -607,6 +607,80 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	ptr += wrote;
 	*len -= wrote;
 
+	/* bottom */
+	val = css_computed_bottom(style, &len1, &unit1);
+	switch (val) {
+	case CSS_BOTTOM_AUTO:
+		wrote = snprintf(ptr, *len, "bottom: auto\n");
+		break;
+	case CSS_BOTTOM_SET:
+		wrote = snprintf(ptr, *len, "bottom: \n");
+
+		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* caption-side */
+	val = css_computed_caption_side(style);
+	switch (val) {
+	case CSS_BOTTOM_TOP:
+		wrote = snprintf(ptr, *len, "caption_side: top\n");
+		break;
+	case CSS_BOTTOM_BOTTOM:
+		wrote = snprintf(ptr, *len, "caption_side: bottom\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* clear */
+	val = css_computed_clear(style);
+	switch (val) {
+	case CSS_CLEAR_NONE:
+		wrote = snprintf(ptr, *len, "clear: none\n");
+		break;
+	case CSS_CLEAR_LEFT:
+		wrote = snprintf(ptr, *len, "clear: left\n");
+		break;
+	case CSS_CLEAR_RIGHT:
+		wrote = snprintf(ptr, *len, "clear: right\n");
+		break;
+	case CSS_CLEAR_BOTH:
+		wrote = snprintf(ptr, *len, "clear: both\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* clip */
+	if (style->uncommon != NULL) {
+		val = css_computed_clip(style);
+		switch (val) {
+		case CSS_CLEAR_AUTO:
+			wrote = snprintf(ptr, *len, "clip: auto\n");
+			break;
+		case CSS_CLEAR_RECT:
+			wrote = snprintf(ptr, *len, "clip: rect\n");
+			break;
+		default:
+			wrote = 0;
+			break;
+		}
+		ptr += wrote;
+		*len -= wrote;
+	}
+
 	/* color */
 	val = css_computed_color(style, &color);
 	if (val == CSS_COLOR_COLOR) {
