@@ -21,6 +21,18 @@ border-top-color: #00000000
 border-right-color: #00000000
 border-bottom-color: #00000000
 border-left-color: #00000000
+border-top-style: none
+border-right-style: none
+border-bottom-style: none
+border-left-style: none
+border-top-width: medium
+border-right-width: medium
+border-bottom-width: medium
+border-left-width: medium
+bottom: auto
+caption-side: top
+clear: none
+clip: auto
 color: #ff000000
 display: block
 #reset
@@ -42,6 +54,18 @@ border-top-color: #00000000
 border-right-color: #00000000
 border-bottom-color: #00000000
 border-left-color: #00000000
+border-top-style: none
+border-right-style: none
+border-bottom-style: none
+border-left-style: none
+border-top-width: medium
+border-right-width: medium
+border-bottom-width: medium
+border-left-width: medium
+bottom: auto
+caption-side: top
+clear: none
+clip: auto
 display: block
 #reset
 
@@ -61,6 +85,18 @@ border-top-color: #00000000
 border-right-color: #00000000
 border-bottom-color: #00000000
 border-left-color: #00000000
+border-top-style: none
+border-right-style: none
+border-bottom-style: none
+border-left-style: none
+border-top-width: medium
+border-right-width: medium
+border-bottom-width: medium
+border-left-width: medium
+bottom: auto
+caption-side: top
+clear: none
+clip: auto
 display: inline
 #reset
 
@@ -80,5 +116,17 @@ border-top-color: #00000000
 border-right-color: #00000000
 border-bottom-color: #00000000
 border-left-color: #00000000
+border-top-style: none
+border-right-style: none
+border-bottom-style: none
+border-left-style: none
+border-top-width: medium
+border-right-width: medium
+border-bottom-width: medium
+border-left-width: medium
+bottom: auto
+caption-side: top
+clear: none
+clip: auto
 display: inline
 #reset
