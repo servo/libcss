@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
 
 #ifndef UNUSED
 #define UNUSED(x) ((x) = (x))
@@ -146,5 +148,36 @@ size_t parse_filesize(const char *filename)
 	return len;
 }
 
+
+/**
+ * Convert a string representation of an error name to a LibCSS error code
+ *
+ * \param str  String containing error name
+ * \param len  Length of string (bytes)
+ * \return LibCSS error code, or CSS_OK if unknown
+ */
+css_error css_error_from_string(const char *str, size_t len);
+css_error css_error_from_string(const char *str, size_t len)
+{
+	if (strncmp(str, "CSS_OK", len) == 0) {
+		return CSS_OK;
+	} else if (strncmp(str, "CSS_NOMEM", len) == 0) {
+		return CSS_NOMEM;
+	} else if (strncmp(str, "CSS_BADPARM", len) == 0) {
+		return CSS_BADPARM;
+	} else if (strncmp(str, "CSS_INVALID", len) == 0) {
+		return CSS_INVALID;
+	} else if (strncmp(str, "CSS_FILENOTFOUND", len) == 0) {
+		return CSS_FILENOTFOUND;
+	} else if (strncmp(str, "CSS_NEEDDATA", len) == 0) {
+		return CSS_NEEDDATA;
+	} else if (strncmp(str, "CSS_BADCHARSET", len) == 0) {
+		return CSS_BADCHARSET;
+	} else if (strncmp(str, "CSS_EOF", len) == 0) {
+		return CSS_EOF;
+	}
+
+	return CSS_OK;
+}
 
 #endif

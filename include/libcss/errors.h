@@ -24,8 +24,6 @@ typedef enum css_error {
 
 /* Convert a libcss error value to a string */
 const char *css_error_to_string(css_error error);
-/* Convert a string to a libcss error value */
-css_error css_error_from_string(const char *str, size_t len);
 
 #endif
 

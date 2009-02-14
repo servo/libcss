@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "libcss/libcss.h"
+
 #include "utils/utils.h"
 
 #include "testutils.h"
