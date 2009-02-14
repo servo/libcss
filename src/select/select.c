@@ -802,8 +802,6 @@ css_error match_universal_combinator(css_select_ctx *ctx, css_combinator type,
 	void *n = node;
 	css_error error;
 
-	/** \todo div * p */
-
 	do {
 		bool match = false;
 
