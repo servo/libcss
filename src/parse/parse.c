@@ -107,7 +107,7 @@ struct css_parser
 	css_parser_event_handler event;	/**< Client's event handler */
 	void *event_pw;			/**< Client data for event handler */
 
-	css_alloc alloc;		/**< Memory (de)allocation function */
+	css_allocator_fn alloc;		/**< Memory (de)allocation function */
 	void *pw;			/**< Client-specific private data */
 };
 
@@ -187,7 +187,7 @@ static css_error (*parseFuncs[])(css_parser *parser) = {
  *         CSS_NOMEM on memory exhaustion
  */
 css_error css_parser_create(const char *charset, css_charset_source cs_source,
-		parserutils_hash *dictionary, css_alloc alloc, void *pw, 
+		parserutils_hash *dictionary, css_allocator_fn alloc, void *pw, 
 		css_parser **parser)
 {
 	css_parser *p;

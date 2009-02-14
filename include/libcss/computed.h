@@ -293,11 +293,11 @@ struct css_computed_style {
 	css_computed_aural *aural;	/**< Aural properties */
 	css_computed_page *page;	/**< Page properties */
 
-	css_alloc alloc;
+	css_allocator_fn alloc;
 	void *pw;
 };
 
-css_error css_computed_style_create(css_alloc alloc, void *pw,
+css_error css_computed_style_create(css_allocator_fn alloc, void *pw,
 		css_computed_style **result);
 css_error css_computed_style_destroy(css_computed_style *style);
 

@@ -15,13 +15,7 @@
 #include <libcss/types.h>
 
 /* Type of allocation function for libcss */
-typedef void *(*css_alloc)(void *ptr, size_t size, void *pw);
-
-/**
- * Type of parse error handling function
- */
-typedef void (*css_error_handler)(uint32_t line, uint32_t col,
-		const char *message, void *pw);
+typedef void *(*css_allocator_fn)(void *ptr, size_t size, void *pw);
 
 #endif
 

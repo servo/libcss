@@ -22,7 +22,7 @@
  * \return CSS_OK on success, applicable error otherwise.
  */
 css_error css_initialise(const char *aliases_file,
-		css_alloc alloc, void *pw)
+		css_allocator_fn alloc, void *pw)
 {
 	if (aliases_file == NULL || alloc == NULL)
 		return CSS_BADPARM;
@@ -38,7 +38,7 @@ css_error css_initialise(const char *aliases_file,
  * \param pw     Pointer to client-specific private data (may be NULL)
  * \return CSS_OK on success, applicable error otherwise.
  */
-css_error css_finalise(css_alloc alloc, void *pw)
+css_error css_finalise(css_allocator_fn alloc, void *pw)
 {
 	if (alloc == NULL)
 		return CSS_BADPARM;

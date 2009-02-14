@@ -43,7 +43,7 @@ struct css_language {
 	/** Interned strings */
 	const parserutils_hash_entry *strings[LAST_KNOWN];
 
-	css_alloc alloc;		/**< Memory (de)allocation function */
+	css_allocator_fn alloc;		/**< Memory (de)allocation function */
 	void *pw;			/**< Client's private data */
 };
 
@@ -122,7 +122,7 @@ static inline bool tokenIsChar(const css_token *token, uint8_t c);
  *         CSS_NOMEM on memory exhaustion
  */
 css_error css_language_create(css_stylesheet *sheet, css_parser *parser,
-		css_alloc alloc, void *pw, void **language)
+		css_allocator_fn alloc, void *pw, void **language)
 {
 	css_language *c;
 	css_parser_optparams params;

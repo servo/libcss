@@ -170,7 +170,7 @@ struct css_stylesheet {
 
 	parserutils_hash *dictionary;		/**< String dictionary */
 
-	css_alloc alloc;			/**< Allocation function */
+	css_allocator_fn alloc;			/**< Allocation function */
 	void *pw;				/**< Private word */
 };
 

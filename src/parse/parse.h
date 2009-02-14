@@ -57,7 +57,7 @@ typedef union css_parser_optparams {
 } css_parser_optparams;
 
 css_error css_parser_create(const char *charset, css_charset_source cs_source,
-		parserutils_hash *dict, css_alloc alloc, void *pw, 
+		parserutils_hash *dict, css_allocator_fn alloc, void *pw, 
 		css_parser **parser);
 css_error css_parser_destroy(css_parser *parser);
 

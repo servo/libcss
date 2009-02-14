@@ -29,7 +29,7 @@ struct css_select_ctx {
 
 	const css_stylesheet **sheets;	/**< Array of sheets */
 
-	css_alloc alloc;		/**< Allocation routine */
+	css_allocator_fn alloc;		/**< Allocation routine */
 	void *pw;			/**< Client-specific private data */
 };
 
@@ -231,7 +231,7 @@ static struct prop_table {
  * \param result  Pointer to location to receive created context
  * \return CSS_OK on success, appropriate error otherwise.
  */
-css_error css_select_ctx_create(css_alloc alloc, void *pw,
+css_error css_select_ctx_create(css_allocator_fn alloc, void *pw,
 		css_select_ctx **result)
 {
 	css_select_ctx *c;

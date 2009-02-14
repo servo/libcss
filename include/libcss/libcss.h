@@ -11,13 +11,15 @@
 #include <libcss/errors.h>
 #include <libcss/types.h>
 #include <libcss/functypes.h>
+#include <libcss/computed.h>
+#include <libcss/select.h>
 
 /* Initialise the CSS library for use */
 css_error css_initialise(const char *aliases_file,
-		css_alloc alloc, void *pw);
+		css_allocator_fn alloc, void *pw);
 
 /* Clean up after LibCSS */
-css_error css_finalise(css_alloc alloc, void *pw);
+css_error css_finalise(css_allocator_fn alloc, void *pw);
 
 #endif
 

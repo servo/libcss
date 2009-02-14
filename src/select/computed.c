@@ -21,7 +21,7 @@
  *         CSS_NOMEM on memory exhaustion,
  *         CSS_BADPARM on bad parameters.
  */
-css_error css_computed_style_create(css_alloc alloc, void *pw,
+css_error css_computed_style_create(css_allocator_fn alloc, void *pw,
 		css_computed_style **result)
 {
 	css_computed_style *s;

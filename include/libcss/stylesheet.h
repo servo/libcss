@@ -21,7 +21,7 @@ css_error css_stylesheet_create(css_language_level level,
 		const char *charset, const char *url, const char *title,
 		css_origin origin, uint64_t media,
 		css_import_handler import_callback, void *import_pw,
-		css_alloc alloc, void *alloc_pw, css_stylesheet **stylesheet);
+		css_allocator_fn alloc, void *alloc_pw, css_stylesheet **stylesheet);
 css_error css_stylesheet_destroy(css_stylesheet *sheet);
 
 css_error css_stylesheet_append_data(css_stylesheet *sheet,

@@ -22,7 +22,7 @@ struct css_selector_hash {
 
 	hash_entry *slots;
 
-	css_alloc alloc;
+	css_allocator_fn alloc;
 	void *pw;
 };
 
@@ -39,7 +39,7 @@ static inline uint32_t _hash_name(const parserutils_hash_entry *name);
  * \param hash   Pointer to location to receive result
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_selector_hash_create(css_alloc alloc, void *pw, 
+css_error css_selector_hash_create(css_allocator_fn alloc, void *pw, 
 		css_selector_hash **hash)
 {
 	css_selector_hash *h;

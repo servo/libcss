@@ -109,7 +109,7 @@ struct css_lexer
 	uint32_t currentCol;		/**< Current column in source */
 	uint32_t currentLine;		/**< Current line in source */
 
-	css_alloc alloc;		/**< Memory (de)allocation function */
+	css_allocator_fn alloc;		/**< Memory (de)allocation function */
 	void *pw;			/**< Pointer to client-specific data */
 };
 
@@ -177,7 +177,7 @@ static inline bool isSpace(uint8_t c);
  *         CSS_NOMEM on memory exhaustion
  */
 css_error css_lexer_create(parserutils_inputstream *input, 
-		css_alloc alloc, void *pw, css_lexer **lexer)
+		css_allocator_fn alloc, void *pw, css_lexer **lexer)
 {
 	css_lexer *lex;
 
