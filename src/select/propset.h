@@ -265,8 +265,8 @@ static inline css_error set_quotes(
 #undef QUOTES_INDEX
 
 #define CLIP_INDEX 7
-#define CLIP_SHIFT 6
-#define CLIP_MASK  0xc0
+#define CLIP_SHIFT 2
+#define CLIP_MASK  0xfc
 #define CLIP_INDEX1 5
 #define CLIP_SHIFT1 0
 #define CLIP_MASK1 0xff
@@ -283,11 +283,16 @@ static inline css_error set_clip(
 
 	bits = &style->uncommon->bits[CLIP_INDEX];
 
-	/* 2bits: type */
-	*bits = (*bits & ~CLIP_MASK) |
+	/* 6bits: trblyy : top | right | bottom | left | type */
+	*bits = (*bits & ~CLIP_MASK) | 
 			((type & 0x3) << CLIP_SHIFT);
 
 	if (type == CSS_CLIP_RECT) {
+		*bits |= (rect->top_auto ? 0x20 : 0) |
+				(rect->right_auto ? 0x10 : 0) |
+				(rect->bottom_auto ? 0x8 : 0) |
+				(rect->left_auto ? 0x4 : 0);
+
 		bits = &style->uncommon->bits[CLIP_INDEX1];
 
 		/* 8bits: ttttrrrr : top | right */

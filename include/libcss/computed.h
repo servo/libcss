@@ -38,18 +38,23 @@ typedef struct css_computed_clip_rect {
 	css_unit runit;
 	css_unit bunit;
 	css_unit lunit;
+
+	bool top_auto;
+	bool right_auto;
+	bool bottom_auto;
+	bool left_auto;
 } css_computed_clip_rect;
 
 typedef struct css_computed_uncommon {
 /*
  * border_spacing		  1 + 2(4)	  2(4)
- * clip				  2 + 4(4)	  4(4)
+ * clip				  2 + 4(4) + 4	  4(4)
  * letter_spacing		  2 + 4		  4
  * outline_color		  2		  4
  * outline_width		  3 + 4		  4
  * word_spacing			  2 + 4		  4
  * 				---		---
- * 				 48 bits	 40 bytes
+ * 				 52 bits	 40 bytes
  *
  * Encode counter_increment and _reset as an array of name, value pairs,
  * terminated with a blank entry.
@@ -75,7 +80,7 @@ typedef struct css_computed_uncommon {
  * content			?
  *
  * 				___		___
- * 				 57 bits	 40 + 4sizeof(ptr) bytes
+ * 				 61 bits	 40 + 4sizeof(ptr) bytes
  *
  * 				  8 bytes	 40 + 4sizeof(ptr) bytes
  * 				===================
@@ -91,7 +96,7 @@ typedef struct css_computed_uncommon {
  *  5 uuuuuqq.	cursor         | quotes            | <unused>
  *  6 cccccccc	clip
  *  7 cccccccc	clip
- *  8 cc......	clip           | <unused>
+ *  8 cccccc..	clip           | <unused>
  */
 	uint8_t bits[8];
 
@@ -563,8 +568,8 @@ static inline uint8_t css_computed_quotes(
 #undef QUOTES_INDEX
 
 #define CLIP_INDEX 7
-#define CLIP_SHIFT 6
-#define CLIP_MASK  0xc0
+#define CLIP_SHIFT 2
+#define CLIP_MASK  0xfc
 #define CLIP_INDEX1 5
 #define CLIP_SHIFT1 0
 #define CLIP_MASK1 0xff
@@ -580,18 +585,24 @@ static inline uint8_t css_computed_clip(
 		bits &= CLIP_MASK;
 		bits >>= CLIP_SHIFT;
 
-		/* 2bits: type */
-		if (bits == CSS_CLIP_RECT) {
-			uint8_t bits1 = style->uncommon->bits[CLIP_INDEX1];
-			uint8_t bits2 = style->uncommon->bits[CLIP_INDEX2];
+		/* 6bits: trblyy : top | right | bottom | left | type */
+		if ((bits & 0x3) == CSS_CLIP_RECT) {
+			uint8_t bits1; 
 
-			/* 8bits: ttttrrrr : top | right */
-			bits1 &= CLIP_MASK1;
-			bits1 >>= CLIP_SHIFT1;
+			rect->left_auto = (bits & 0x4);
+			rect->bottom_auto = (bits & 0x8);
+			rect->right_auto = (bits & 0x10);
+			rect->top_auto = (bits & 0x20);
 
-			/* 8bits: bbbbllll : bottom | left */
-			bits2 &= CLIP_MASK2;
-			bits2 >>= CLIP_SHIFT2;
+			if (rect->top_auto == false ||
+					rect->right_auto == false) {
+				/* 8bits: ttttrrrr : top | right */
+				bits1 = style->uncommon->bits[CLIP_INDEX1];
+				bits1 &= CLIP_MASK1;
+				bits1 >>= CLIP_SHIFT1;
+			} else {
+				bits1 = 0;
+			}
 
 			rect->top = style->uncommon->clip[0];
 			rect->tunit = bits1 >> 4;
@@ -599,14 +610,24 @@ static inline uint8_t css_computed_clip(
 			rect->right = style->uncommon->clip[1];
 			rect->runit = bits1 & 0xf;
 
+			if (rect->bottom_auto == false ||
+					rect->left_auto == false) {
+				/* 8bits: bbbbllll : bottom | left */
+				bits1 = style->uncommon->bits[CLIP_INDEX2];
+				bits1 &= CLIP_MASK2;
+				bits1 >>= CLIP_SHIFT2;
+			} else {
+				bits1 = 0;
+			}
+
 			rect->bottom = style->uncommon->clip[2];
-			rect->bunit = bits2 >> 4;
+			rect->bunit = bits1 >> 4;
 
 			rect->left = style->uncommon->clip[3];
-			rect->lunit = bits2 & 0xf;
+			rect->lunit = bits1 & 0xf;
 		}
 
-		return bits;
+		return (bits & 0x3);
 	}
 
 	return CSS_CLIP_AUTO;
