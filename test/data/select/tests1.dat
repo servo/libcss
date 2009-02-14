@@ -12,6 +12,15 @@ div#foo { background-color: #bbc; }
 .green { color: #0f0; }
 #errors
 #expected
+background-attachment: scroll
+background-color: transparent
+background-image: none
+background-position: 0% 0%
+background-repeat: repeat
+border-top-color: #00000000
+border-right-color: #00000000
+border-bottom-color: #00000000
+border-left-color: #00000000
 color: #ff000000
 display: block
 #reset
@@ -24,6 +33,15 @@ div { display: block; }
 div { display: inline; }
 #errors
 #expected
+background-attachment: scroll
+background-color: transparent
+background-image: none
+background-position: 0% 0%
+background-repeat: repeat
+border-top-color: #00000000
+border-right-color: #00000000
+border-bottom-color: #00000000
+border-left-color: #00000000
 display: block
 #reset
 
@@ -34,6 +52,15 @@ div { background-color: #000; }
 div:active { background-color: #bbc; }
 #errors
 #expected
+background-attachment: scroll
 background-color: #bbbbcc00
+background-image: none
+background-position: 0% 0%
+background-repeat: repeat
+border-top-color: #00000000
+border-right-color: #00000000
+border-bottom-color: #00000000
+border-left-color: #00000000
+display: inline
 #reset
 

@@ -24,6 +24,9 @@ TARGET_TESTS :=
 # Source files
 SOURCES :=
 
+# Include configuration Makefile fragment
+include build/Makefile.config
+
 # Include Makefile fragments in subdirectories
 
 define do_include

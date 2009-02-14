@@ -436,7 +436,7 @@ static void dump_unit(fixed val, uint32_t unit, char **ptr)
 		*ptr += sprintf(*ptr, "rad");
 		break;
 	case UNIT_MS:
-		*ptr += printf(*ptr, "ms");
+		*ptr += sprintf(*ptr, "ms");
 		break;
 	case UNIT_S:
 		*ptr += sprintf(*ptr, "s");

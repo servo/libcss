@@ -58,16 +58,33 @@ typedef struct css_select_state {
 	css_origin current_origin;	/* Origin of current sheet */
 	uint32_t current_specificity;	/* Specificity of current rule */
 
+	/* Useful interned strings */
+	const parserutils_hash_entry *universal;
+	const parserutils_hash_entry *first_child;
+	const parserutils_hash_entry *link;
+	const parserutils_hash_entry *visited;
+	const parserutils_hash_entry *hover;
+	const parserutils_hash_entry *active;
+	const parserutils_hash_entry *focus;
+	const parserutils_hash_entry *left;
+	const parserutils_hash_entry *right;
+	const parserutils_hash_entry *first;
+	const parserutils_hash_entry *first_line;
+	const parserutils_hash_entry *first_letter;
+	const parserutils_hash_entry *before;
+	const parserutils_hash_entry *after;
+
 	prop_state props[N_OPCODES];
 } css_select_state;
 
 static css_error select_from_sheet(css_select_ctx *ctx, 
 		const css_stylesheet *sheet, css_select_state *state);
+static css_error intern_strings_for_sheet(css_select_ctx *ctx,
+		const css_stylesheet *sheet, css_select_state *state);
 static css_error match_selectors_in_sheet(css_select_ctx *ctx, 
 		const css_stylesheet *sheet, css_select_state *state);
 static css_error match_selector_chain(css_select_ctx *ctx, 
-		const css_selector *selector, css_select_state *state, 
-		const parserutils_hash_entry *universal);
+		const css_selector *selector, css_select_state *state);
 static css_error match_named_combinator(css_select_ctx *ctx, 
 		css_combinator type, const parserutils_hash_entry *name, 
 		css_select_state *state, void *node, void **next_node);
@@ -89,6 +106,16 @@ static bool outranks_existing(uint16_t op, bool important,
 #include "select/properties.c"
 
 /**
+ * Enumeration of property groups
+ */
+enum prop_group {
+	GROUP_NORMAL	= 0x0,
+	GROUP_UNCOMMON	= 0x1,
+	GROUP_PAGE	= 0x2,
+	GROUP_AURAL	= 0x3
+};
+
+/**
  * Dispatch table for properties, indexed by opcode
  */
 static struct prop_table {
@@ -96,107 +123,108 @@ static struct prop_table {
 			css_select_state *state);
 	css_error (*initial)(css_computed_style *style);
 
-	uint32_t inherited : 1;
+	uint32_t inherited : 1,
+	         group : 2;
 } properties[N_OPCODES] = {
-	{ cascade_azimuth,               initial_azimuth,               1 },
-	{ cascade_background_attachment, initial_background_attachment, 0 },
-	{ cascade_background_color,      initial_background_color,      0 },
-	{ cascade_background_image,      initial_background_image,      0 },
-	{ cascade_background_position,   initial_background_position,   0 },
-	{ cascade_background_repeat,     initial_background_repeat,     0 },
-	{ cascade_border_collapse,       initial_border_collapse,       1 },
-	{ cascade_border_spacing,        initial_border_spacing,        1 },
-	{ cascade_border_top_color,      initial_border_top_color,      0 },
-	{ cascade_border_right_color,    initial_border_right_color,    0 },
-	{ cascade_border_bottom_color,   initial_border_bottom_color,   0 },
-	{ cascade_border_left_color,     initial_border_left_color,     0 },
-	{ cascade_border_top_style,      initial_border_top_style,      0 },
-	{ cascade_border_right_style,    initial_border_right_style,    0 },
-	{ cascade_border_bottom_style,   initial_border_bottom_style,   0 },
-	{ cascade_border_left_style,     initial_border_left_style,     0 },
-	{ cascade_border_top_width,      initial_border_top_width,      0 },
-	{ cascade_border_right_width,    initial_border_right_width,    0 },
-	{ cascade_border_bottom_width,   initial_border_bottom_width,   0 },
-	{ cascade_border_left_width,     initial_border_left_width,     0 },
-	{ cascade_bottom,                initial_bottom,                0 },
-	{ cascade_caption_side,          initial_caption_side,          1 },
-	{ cascade_clear,                 initial_clear,                 0 },
-	{ cascade_clip,                  initial_clip,                  0 },
-	{ cascade_color,                 initial_color,                 1 },
-	{ cascade_content,               initial_content,               0 },
-	{ cascade_counter_increment,     initial_counter_increment,     0 },
-	{ cascade_counter_reset,         initial_counter_reset,         0 },
-	{ cascade_cue_after,             initial_cue_after,             0 },
-	{ cascade_cue_before,            initial_cue_before,            0 },
-	{ cascade_cursor,                initial_cursor,                1 },
-	{ cascade_direction,             initial_direction,             1 },
-	{ cascade_display,               initial_display,               0 },
-	{ cascade_elevation,             initial_elevation,             1 },
-	{ cascade_empty_cells,           initial_empty_cells,           1 },
-	{ cascade_float,                 initial_float,                 0 },
-	{ cascade_font_family,           initial_font_family,           1 },
-	{ cascade_font_size,             initial_font_size,             1 },
-	{ cascade_font_style,            initial_font_style,            1 },
-	{ cascade_font_variant,          initial_font_variant,          1 },
-	{ cascade_font_weight,           initial_font_weight,           1 },
-	{ cascade_height,                initial_height,                0 },
-	{ cascade_left,                  initial_left,                  0 },
-	{ cascade_letter_spacing,        initial_letter_spacing,        1 },
-	{ cascade_line_height,           initial_line_height,           1 },
-	{ cascade_list_style_image,      initial_list_style_image,      1 },
-	{ cascade_list_style_position,   initial_list_style_position,   1 },
-	{ cascade_list_style_type,       initial_list_style_type,       1 },
-	{ cascade_margin_top,            initial_margin_top,            0 },
-	{ cascade_margin_right,          initial_margin_right,          0 },
-	{ cascade_margin_bottom,         initial_margin_bottom,         0 },
-	{ cascade_margin_left,           initial_margin_left,           0 },
-	{ cascade_max_height,            initial_max_height,            0 },
-	{ cascade_max_width,             initial_max_width,             0 },
-	{ cascade_min_height,            initial_min_height,            0 },
-	{ cascade_min_width,             initial_min_width,             0 },
-	{ cascade_orphans,               initial_orphans,               1 },
-	{ cascade_outline_color,         initial_outline_color,         0 },
-	{ cascade_outline_style,         initial_outline_style,         0 },
-	{ cascade_outline_width,         initial_outline_width,         0 },
-	{ cascade_overflow,              initial_overflow,              0 },
-	{ cascade_padding_top,           initial_padding_top,           0 },
-	{ cascade_padding_right,         initial_padding_right,         0 },
-	{ cascade_padding_bottom,        initial_padding_bottom,        0 },
-	{ cascade_padding_left,          initial_padding_left,          0 },
-	{ cascade_page_break_after,      initial_page_break_after,      0 },
-	{ cascade_page_break_before,     initial_page_break_before,     0 },
-	{ cascade_page_break_inside,     initial_page_break_inside,     1 },
-	{ cascade_pause_after,           initial_pause_after,           0 },
-	{ cascade_pause_before,          initial_pause_before,          0 },
-	{ cascade_pitch_range,           initial_pitch_range,           1 },
-	{ cascade_pitch,                 initial_pitch,                 1 },
-	{ cascade_play_during,           initial_play_during,           0 },
-	{ cascade_position,              initial_position,              0 },
-	{ cascade_quotes,                initial_quotes,                1 },
-	{ cascade_richness,              initial_richness,              1 },
-	{ cascade_right,                 initial_right,                 0 },
-	{ cascade_speak_header,          initial_speak_header,          1 },
-	{ cascade_speak_numeral,         initial_speak_numeral,         1 },
-	{ cascade_speak_punctuation,     initial_speak_punctuation,     1 },
-	{ cascade_speak,                 initial_speak,                 1 },
-	{ cascade_speech_rate,           initial_speech_rate,           1 },
-	{ cascade_stress,                initial_stress,                1 },
-	{ cascade_table_layout,          initial_table_layout,          0 },
-	{ cascade_text_align,            initial_text_align,            1 },
-	{ cascade_text_decoration,       initial_text_decoration,       0 },
-	{ cascade_text_indent,           initial_text_indent,           1 },
-	{ cascade_text_transform,        initial_text_transform,        1 },
-	{ cascade_top,                   initial_top,                   0 },
-	{ cascade_unicode_bidi,          initial_unicode_bidi,          0 },
-	{ cascade_vertical_align,        initial_vertical_align,        0 },
-	{ cascade_visibility,            initial_visibility,            1 },
-	{ cascade_voice_family,          initial_voice_family,          1 },
-	{ cascade_volume,                initial_volume,                1 },
-	{ cascade_white_space,           initial_white_space,           1 },
-	{ cascade_widows,                initial_widows,                1 },
-	{ cascade_width,                 initial_width,                 0 },
-	{ cascade_word_spacing,          initial_word_spacing,          1 },
-	{ cascade_z_index,               initial_z_index,               0 }
+	{ cascade_azimuth,               initial_azimuth,               1, GROUP_AURAL},
+	{ cascade_background_attachment, initial_background_attachment, 0, GROUP_NORMAL },
+	{ cascade_background_color,      initial_background_color,      0, GROUP_NORMAL },
+	{ cascade_background_image,      initial_background_image,      0, GROUP_NORMAL },
+	{ cascade_background_position,   initial_background_position,   0, GROUP_NORMAL },
+	{ cascade_background_repeat,     initial_background_repeat,     0, GROUP_NORMAL },
+	{ cascade_border_collapse,       initial_border_collapse,       1, GROUP_NORMAL },
+	{ cascade_border_spacing,        initial_border_spacing,        1, GROUP_UNCOMMON },
+	{ cascade_border_top_color,      initial_border_top_color,      0, GROUP_NORMAL },
+	{ cascade_border_right_color,    initial_border_right_color,    0, GROUP_NORMAL },
+	{ cascade_border_bottom_color,   initial_border_bottom_color,   0, GROUP_NORMAL },
+	{ cascade_border_left_color,     initial_border_left_color,     0, GROUP_NORMAL },
+	{ cascade_border_top_style,      initial_border_top_style,      0, GROUP_NORMAL },
+	{ cascade_border_right_style,    initial_border_right_style,    0, GROUP_NORMAL },
+	{ cascade_border_bottom_style,   initial_border_bottom_style,   0, GROUP_NORMAL },
+	{ cascade_border_left_style,     initial_border_left_style,     0, GROUP_NORMAL },
+	{ cascade_border_top_width,      initial_border_top_width,      0, GROUP_NORMAL },
+	{ cascade_border_right_width,    initial_border_right_width,    0, GROUP_NORMAL },
+	{ cascade_border_bottom_width,   initial_border_bottom_width,   0, GROUP_NORMAL },
+	{ cascade_border_left_width,     initial_border_left_width,     0, GROUP_NORMAL },
+	{ cascade_bottom,                initial_bottom,                0, GROUP_NORMAL },
+	{ cascade_caption_side,          initial_caption_side,          1, GROUP_NORMAL },
+	{ cascade_clear,                 initial_clear,                 0, GROUP_NORMAL },
+	{ cascade_clip,                  initial_clip,                  0, GROUP_UNCOMMON },
+	{ cascade_color,                 initial_color,                 1, GROUP_NORMAL },
+	{ cascade_content,               initial_content,               0, GROUP_UNCOMMON },
+	{ cascade_counter_increment,     initial_counter_increment,     0, GROUP_UNCOMMON },
+	{ cascade_counter_reset,         initial_counter_reset,         0, GROUP_UNCOMMON },
+	{ cascade_cue_after,             initial_cue_after,             0, GROUP_AURAL },
+	{ cascade_cue_before,            initial_cue_before,            0, GROUP_AURAL },
+	{ cascade_cursor,                initial_cursor,                1, GROUP_UNCOMMON },
+	{ cascade_direction,             initial_direction,             1, GROUP_NORMAL },
+	{ cascade_display,               initial_display,               0, GROUP_NORMAL },
+	{ cascade_elevation,             initial_elevation,             1, GROUP_AURAL },
+	{ cascade_empty_cells,           initial_empty_cells,           1, GROUP_NORMAL },
+	{ cascade_float,                 initial_float,                 0, GROUP_NORMAL },
+	{ cascade_font_family,           initial_font_family,           1, GROUP_NORMAL },
+	{ cascade_font_size,             initial_font_size,             1, GROUP_NORMAL },
+	{ cascade_font_style,            initial_font_style,            1, GROUP_NORMAL },
+	{ cascade_font_variant,          initial_font_variant,          1, GROUP_NORMAL },
+	{ cascade_font_weight,           initial_font_weight,           1, GROUP_NORMAL },
+	{ cascade_height,                initial_height,                0, GROUP_NORMAL },
+	{ cascade_left,                  initial_left,                  0, GROUP_NORMAL },
+	{ cascade_letter_spacing,        initial_letter_spacing,        1, GROUP_UNCOMMON },
+	{ cascade_line_height,           initial_line_height,           1, GROUP_NORMAL },
+	{ cascade_list_style_image,      initial_list_style_image,      1, GROUP_NORMAL },
+	{ cascade_list_style_position,   initial_list_style_position,   1, GROUP_NORMAL },
+	{ cascade_list_style_type,       initial_list_style_type,       1, GROUP_NORMAL },
+	{ cascade_margin_top,            initial_margin_top,            0, GROUP_NORMAL },
+	{ cascade_margin_right,          initial_margin_right,          0, GROUP_NORMAL },
+	{ cascade_margin_bottom,         initial_margin_bottom,         0, GROUP_NORMAL },
+	{ cascade_margin_left,           initial_margin_left,           0, GROUP_NORMAL },
+	{ cascade_max_height,            initial_max_height,            0, GROUP_NORMAL },
+	{ cascade_max_width,             initial_max_width,             0, GROUP_NORMAL },
+	{ cascade_min_height,            initial_min_height,            0, GROUP_NORMAL },
+	{ cascade_min_width,             initial_min_width,             0, GROUP_NORMAL },
+	{ cascade_orphans,               initial_orphans,               1, GROUP_PAGE },
+	{ cascade_outline_color,         initial_outline_color,         0, GROUP_UNCOMMON },
+	{ cascade_outline_style,         initial_outline_style,         0, GROUP_NORMAL },
+	{ cascade_outline_width,         initial_outline_width,         0, GROUP_UNCOMMON },
+	{ cascade_overflow,              initial_overflow,              0, GROUP_NORMAL },
+	{ cascade_padding_top,           initial_padding_top,           0, GROUP_NORMAL },
+	{ cascade_padding_right,         initial_padding_right,         0, GROUP_NORMAL },
+	{ cascade_padding_bottom,        initial_padding_bottom,        0, GROUP_NORMAL },
+	{ cascade_padding_left,          initial_padding_left,          0, GROUP_NORMAL },
+	{ cascade_page_break_after,      initial_page_break_after,      0, GROUP_PAGE },
+	{ cascade_page_break_before,     initial_page_break_before,     0, GROUP_PAGE },
+	{ cascade_page_break_inside,     initial_page_break_inside,     1, GROUP_PAGE },
+	{ cascade_pause_after,           initial_pause_after,           0, GROUP_AURAL },
+	{ cascade_pause_before,          initial_pause_before,          0, GROUP_AURAL },
+	{ cascade_pitch_range,           initial_pitch_range,           1, GROUP_AURAL },
+	{ cascade_pitch,                 initial_pitch,                 1, GROUP_AURAL },
+	{ cascade_play_during,           initial_play_during,           0, GROUP_AURAL },
+	{ cascade_position,              initial_position,              0, GROUP_NORMAL },
+	{ cascade_quotes,                initial_quotes,                1, GROUP_UNCOMMON },
+	{ cascade_richness,              initial_richness,              1, GROUP_AURAL },
+	{ cascade_right,                 initial_right,                 0, GROUP_NORMAL },
+	{ cascade_speak_header,          initial_speak_header,          1, GROUP_AURAL },
+	{ cascade_speak_numeral,         initial_speak_numeral,         1, GROUP_AURAL },
+	{ cascade_speak_punctuation,     initial_speak_punctuation,     1, GROUP_AURAL },
+	{ cascade_speak,                 initial_speak,                 1, GROUP_AURAL },
+	{ cascade_speech_rate,           initial_speech_rate,           1, GROUP_AURAL },
+	{ cascade_stress,                initial_stress,                1, GROUP_AURAL },
+	{ cascade_table_layout,          initial_table_layout,          0, GROUP_NORMAL },
+	{ cascade_text_align,            initial_text_align,            1, GROUP_NORMAL },
+	{ cascade_text_decoration,       initial_text_decoration,       0, GROUP_NORMAL },
+	{ cascade_text_indent,           initial_text_indent,           1, GROUP_NORMAL },
+	{ cascade_text_transform,        initial_text_transform,        1, GROUP_NORMAL },
+	{ cascade_top,                   initial_top,                   0, GROUP_NORMAL },
+	{ cascade_unicode_bidi,          initial_unicode_bidi,          0, GROUP_NORMAL },
+	{ cascade_vertical_align,        initial_vertical_align,        0, GROUP_NORMAL },
+	{ cascade_visibility,            initial_visibility,            1, GROUP_NORMAL },
+	{ cascade_voice_family,          initial_voice_family,          1, GROUP_AURAL },
+	{ cascade_volume,                initial_volume,                1, GROUP_AURAL },
+	{ cascade_white_space,           initial_white_space,           1, GROUP_NORMAL },
+	{ cascade_widows,                initial_widows,                1, GROUP_PAGE },
+	{ cascade_width,                 initial_width,                 0, GROUP_NORMAL },
+	{ cascade_word_spacing,          initial_word_spacing,          1, GROUP_UNCOMMON },
+	{ cascade_z_index,               initial_z_index,               0, GROUP_NORMAL }
 };
 
 /**
@@ -385,7 +413,7 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
  * \param pseudo_element  Pseudo element to select for, instead
  * \param pseudo_classes  Currently active pseudo classes
  * \param media           Currently active media types
- * \param result          Pointer to style to populate
+ * \param result          Pointer to style to populate (assumed clean)
  * \param handler         Dispatch table of handler functions
  * \param pw              Client-specific private data for handler functions
  * \return CSS_OK on success, appropriate error otherwise.
@@ -435,7 +463,45 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	 * Those properties which are inherited need to be set as inherit.
 	 * Those which are not inherited need to be set to their default value.
 	 */
-	/** \todo fixup unset properties */
+	for (i = 0; i < N_OPCODES; i++) {
+		/* Do nothing if this property is set */
+		if (state.props[i].set)
+			continue;
+
+		/* Do nothing if this property is inherited (the default state 
+		 * of a clean computed style is for everything to be set to 
+		 * inherit) */
+		if (properties[i].inherited)
+			continue;
+
+		/* Remaining properties are neither inherited nor already set.
+		 * Thus, we set them to their initial values here. Except, 
+		 * however, if the property in question resides in one of the 
+		 * extension blocks and the extension block has yet to be 
+		 * allocated. In that case, we do nothing and leave it to the 
+		 * property accessors to return the initial values for the 
+		 * property. */
+		if (properties[i].group == GROUP_NORMAL) {
+			error = properties[i].initial(result);
+			if (error != CSS_OK)
+				return error;
+		} else if (properties[i].group == GROUP_UNCOMMON &&
+				result->uncommon != NULL) {
+			error = properties[i].initial(result);
+			if (error != CSS_OK)
+				return error;
+		} else if (properties[i].group == GROUP_PAGE &&
+				result->page != NULL) {
+			error = properties[i].initial(result);
+			if (error != CSS_OK)
+				return error;
+		} else if (properties[i].group == GROUP_AURAL &&
+				result->aural != NULL) {
+			error = properties[i].initial(result);
+			if (error != CSS_OK)
+				return error;
+		}
+	}
 
 	return CSS_OK;
 }
@@ -482,6 +548,10 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 			state->sheet = s;
 			state->current_origin = s->origin;
 
+			error = intern_strings_for_sheet(ctx, s, state);
+			if (error != CSS_OK)
+				return error;
+
 			error = match_selectors_in_sheet(ctx, s, state);
 			if (error != CSS_OK)
 				return error;
@@ -499,10 +569,105 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 	return CSS_OK;
 }
 
+css_error intern_strings_for_sheet(css_select_ctx *ctx, 
+		const css_stylesheet *sheet, css_select_state *state)
+{
+	parserutils_error perror;
+
+	UNUSED(ctx);
+
+	/* Universal selector */
+	perror = parserutils_hash_insert(sheet->dictionary, 
+			(const uint8_t *) "*", SLEN("*"), &state->universal);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	/* Pseudo classes */
+	perror = parserutils_hash_insert(sheet->dictionary, 
+			(const uint8_t *) "first-child", SLEN("first-child"), 
+			&state->first_child);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	perror = parserutils_hash_insert(sheet->dictionary, 
+			(const uint8_t *) "link", SLEN("link"), 
+			&state->link);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	perror = parserutils_hash_insert(sheet->dictionary, 
+			(const uint8_t *) "visited", SLEN("visited"), 
+			&state->visited);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	perror = parserutils_hash_insert(sheet->dictionary, 
+			(const uint8_t *) "hover", SLEN("hover"), 
+			&state->hover);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	perror = parserutils_hash_insert(sheet->dictionary, 
+			(const uint8_t *) "active", SLEN("active"), 
+			&state->active);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	perror = parserutils_hash_insert(sheet->dictionary, 
+			(const uint8_t *) "focus", SLEN("focus"), 
+			&state->focus);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	perror = parserutils_hash_insert(sheet->dictionary, 
+			(const uint8_t *) "left", SLEN("left"), 
+			&state->left);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	perror = parserutils_hash_insert(sheet->dictionary, 
+			(const uint8_t *) "right", SLEN("right"), 
+			&state->right);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	perror = parserutils_hash_insert(sheet->dictionary, 
+			(const uint8_t *) "first", SLEN("first"), 
+			&state->first);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	/* Pseudo elements */
+	perror = parserutils_hash_insert(sheet->dictionary, 
+			(const uint8_t *) "first-line", SLEN("first-line"), 
+			&state->first_line);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	perror = parserutils_hash_insert(sheet->dictionary, 
+			(const uint8_t *) "first_letter", SLEN("first-letter"),
+			&state->first_letter);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	perror = parserutils_hash_insert(sheet->dictionary, 
+			(const uint8_t *) "before", SLEN("before"), 
+			&state->before);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	perror = parserutils_hash_insert(sheet->dictionary, 
+			(const uint8_t *) "after", SLEN("after"), 
+			&state->after);
+	if (perror != PARSERUTILS_OK)
+		return css_error_from_parserutils_error(perror);
+
+	return CSS_OK;
+}
+
 css_error match_selectors_in_sheet(css_select_ctx *ctx, 
 		const css_stylesheet *sheet, css_select_state *state)
 {
-	const parserutils_hash_entry *universal;
 	const parserutils_hash_entry *element;
 	const css_selector **selectors;
 	const uint8_t *name;
@@ -521,12 +686,6 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 	if (perror != PARSERUTILS_OK)
 		return css_error_from_parserutils_error(perror);
 
-	/* Intern universal selector string */
-	perror = parserutils_hash_insert(sheet->dictionary, 
-			(const uint8_t *) "*", 1, &universal);
-	if (perror != PARSERUTILS_OK)
-		return css_error_from_parserutils_error(perror);
-
 	/* Find hash chain that applies to current node */
 	error = css_selector_hash_find(sheet->selectors, element, &selectors);
 	if (error != CSS_OK)
@@ -534,7 +693,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 
 	/* Process any matching selectors */
 	while (*selectors != NULL) {
-		error = match_selector_chain(ctx, *selectors, state, universal);
+		error = match_selector_chain(ctx, *selectors, state);
 		if (error != CSS_OK)
 			return error;
 
@@ -545,13 +704,14 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 	}
 
 	/* Find hash chain for universal selector */
-	error = css_selector_hash_find(sheet->selectors, universal, &selectors);
+	error = css_selector_hash_find(sheet->selectors, state->universal, 
+			&selectors);
 	if (error != CSS_OK)
 		return error;
 
 	/* Process any matching selectors */
 	while (*selectors != NULL) {
-		error = match_selector_chain(ctx, *selectors, state, universal);
+		error = match_selector_chain(ctx, *selectors, state);
 		if (error != CSS_OK)
 			return error;
 
@@ -565,8 +725,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 }
 
 css_error match_selector_chain(css_select_ctx *ctx, 
-		const css_selector *selector, css_select_state *state, 
-		const parserutils_hash_entry *universal)
+		const css_selector *selector, css_select_state *state)
 {
 	const css_selector *s = selector;
 	void *node = state->node;
@@ -579,7 +738,7 @@ css_error match_selector_chain(css_select_ctx *ctx,
 
 		/* First, consider any named combinator on this selector */
 		if (s->data.comb != CSS_COMBINATOR_NONE &&
-				s->combinator->data.name != universal) {
+				s->combinator->data.name != state->universal) {
 			error = match_named_combinator(ctx, s->data.comb, 
 					s->combinator->data.name, state, node, 
 					&next_node);
@@ -602,7 +761,7 @@ css_error match_selector_chain(css_select_ctx *ctx,
 
 		/* If we had a universal combinator, then consider that */
 		if (s->data.comb != CSS_COMBINATOR_NONE &&
-				s->combinator->data.name == universal) {
+				s->combinator->data.name == state->universal) {
 			error = match_universal_combinator(ctx, s->data.comb, 
 					s->combinator, state, node, &next_node);
 			if (error != CSS_OK)
@@ -762,12 +921,64 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 				match);
 		break;
 	case CSS_SELECTOR_PSEUDO_CLASS:
-		/** \todo pseudo classes */
-		*match = false;
+		if (detail->name == state->first_child &&
+				(state->pseudo_classes &
+				CSS_PSEUDO_CLASS_FIRST_CHILD))
+			*match = true;
+		else if (detail->name == state->link &&
+				(state->pseudo_classes & 
+				CSS_PSEUDO_CLASS_LINK))
+			*match = true;
+		else if (detail->name == state->visited &&
+				(state->pseudo_classes &
+				CSS_PSEUDO_CLASS_VISITED))
+			*match = true;
+		else if (detail->name == state->hover &&
+				(state->pseudo_classes &
+				CSS_PSEUDO_CLASS_HOVER))
+			*match = true;
+		else if (detail->name == state->active &&
+				(state->pseudo_classes &
+				CSS_PSEUDO_CLASS_ACTIVE))
+			*match = true;
+		else if (detail->name == state->focus &&
+				(state->pseudo_classes &
+				CSS_PSEUDO_CLASS_FOCUS))
+			*match = true;
+		else if (detail->name == state->left &&
+				(state->pseudo_classes &
+				CSS_PSEUDO_CLASS_LEFT))
+			*match = true;
+		else if (detail->name == state->right &&
+				(state->pseudo_classes &
+				CSS_PSEUDO_CLASS_RIGHT))
+			*match = true;
+		else if (detail->name == state->first &&
+				(state->pseudo_classes &
+				CSS_PSEUDO_CLASS_FIRST))
+			*match = true;
+		else
+			*match = false;
 		break;
 	case CSS_SELECTOR_PSEUDO_ELEMENT:
-		/** \todo pseudo elements */
-		*match = false;
+		if (detail->name == state->first_line && 
+				(state->pseudo_element & 
+				CSS_PSEUDO_ELEMENT_FIRST_LINE))
+			*match = true;
+		else if (detail->name == state->first_letter &&
+				(state->pseudo_element &
+				CSS_PSEUDO_ELEMENT_FIRST_LETTER))
+			*match = true;
+		else if (detail->name == state->before &&
+				(state->pseudo_element &
+				CSS_PSEUDO_ELEMENT_BEFORE))
+			*match = true;
+		else if (detail->name == state->after &&
+				(state->pseudo_element &
+				CSS_PSEUDO_ELEMENT_AFTER))
+			*match = true;
+		else
+			*match = false;
 		break;
 	case CSS_SELECTOR_ATTRIBUTE:
 		error = state->handler->node_has_attribute(state->pw, node,

@@ -457,8 +457,13 @@ static inline css_error set_background_image(
 	*bits = (*bits & ~BACKGROUND_IMAGE_MASK) |
 			((type & 0x1) << BACKGROUND_IMAGE_SHIFT);
 
-	style->background_image.data = (uint8_t *) url->data;
-	style->background_image.len = url->len;
+	if (url != NULL) {
+		style->background_image.data = (uint8_t *) url->data;
+		style->background_image.len = url->len;
+	} else {
+		style->background_image.data = NULL;
+		style->background_image.len = 0;
+	}
 
 	return CSS_OK;
 }
@@ -500,8 +505,13 @@ static inline css_error set_list_style_image(
 	*bits = (*bits & ~LIST_STYLE_IMAGE_MASK) |
 			((type & 0x1) << LIST_STYLE_IMAGE_SHIFT);
 
-	style->list_style_image.data = (uint8_t *) url->data;
-	style->list_style_image.len = url->len;
+	if (url != NULL) {
+		style->list_style_image.data = (uint8_t *) url->data;
+		style->list_style_image.len = url->len;
+	} else {
+		style->list_style_image.data = NULL;
+		style->list_style_image.len = 0;
+	}
 
 	return CSS_OK;
 }

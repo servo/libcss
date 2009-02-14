@@ -624,11 +624,11 @@ void run_test(line_ctx *ctx, const char *exp, size_t explen)
 
 	UNUSED(exp);
 
-	buf = malloc(2 * explen);
+	buf = malloc(8192);
 	if (buf == NULL) {
 		assert(0 && "No memory for result data");
 	}
-	buflen = 2 * explen;
+	buflen = 8192;
 
 	assert(css_select_ctx_create(myrealloc, NULL, &select) == CSS_OK);
 
@@ -647,10 +647,10 @@ void run_test(line_ctx *ctx, const char *exp, size_t explen)
 
 	dump_computed_style(computed, buf, &buflen);
 
-	if (2 * explen - buflen != explen || memcmp(buf, exp, explen) != 0) {
+	if (8192 - buflen != explen || memcmp(buf, exp, explen) != 0) {
 		printf("Expected (%zu):\n%.*s\n", explen, (int) explen, exp);
-		printf("Result (%zu):\n%.*s\n", 2 * explen - buflen,
-			(int) (2 * explen - buflen), buf);
+		printf("Result (%zu):\n%.*s\n", 8192 - buflen,
+			(int) (8192 - buflen), buf);
 		assert(0 && "Result doesn't match expected");
 	}
 
