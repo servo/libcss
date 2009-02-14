@@ -136,7 +136,7 @@ static size_t dump_css_unit(css_fixed val, css_unit unit, char *ptr, size_t len)
 }
 
 
-static void dump_computed_style(const css_computed_style *style, char *buf, 
+static void dump_computed_style(const css_computed_style *style, char *buf,
 		size_t *len)
 {
 	char *ptr = buf;
@@ -147,6 +147,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	css_fixed len1, len2;
 	css_unit unit1, unit2;
 
+	/* background-attachment */
 	val = css_computed_background_attachment(style);
 	switch (val) {
 	case CSS_BACKGROUND_ATTACHMENT_FIXED:
@@ -162,6 +163,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	ptr += wrote;
 	*len -= wrote;
 
+	/* background-color */
 	val = css_computed_background_color(style, &color);
 	switch (val) {
 	case CSS_BACKGROUND_COLOR_TRANSPARENT:
@@ -177,6 +179,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	ptr += wrote;
 	*len -= wrote;
 
+	/* background-image */
 	val = css_computed_background_image(style, &url);
 	if (val == CSS_BACKGROUND_IMAGE_IMAGE && url->data != NULL) {
 		wrote = snprintf(ptr, *len, "background-image: url('%.*s')\n",
@@ -189,7 +192,8 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	ptr += wrote;
 	*len -= wrote;
 
-	val = css_computed_background_position(style, &len1, &unit1, 
+	/* background-position */
+	val = css_computed_background_position(style, &len1, &unit1,
 			&len2, &unit2);
 	if (val == CSS_BACKGROUND_POSITION_SET) {
 		wrote = snprintf(ptr, *len, "background-position: ");
@@ -213,6 +217,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		*len -= wrote;
 	}
 
+	/* background-repeat */
 	val = css_computed_background_repeat(style);
 	switch (val) {
 	case CSS_BACKGROUND_REPEAT_REPEAT_X:
@@ -234,6 +239,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	ptr += wrote;
 	*len -= wrote;
 
+	/* border-collapse */
 	val = css_computed_border_collapse(style);
 	switch (val) {
 	case CSS_BORDER_COLLAPSE_SEPARATE:
@@ -249,6 +255,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	ptr += wrote;
 	*len -= wrote;
 
+	/* border-spacing */
 	if (style->uncommon != NULL) {
 		val = css_computed_border_spacing(style, &len1, &unit1,
 				&len2, &unit2);
@@ -275,6 +282,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		}
 	}
 
+	/* border-top-color */
 	val = css_computed_border_top_color(style, &color);
 	switch (val) {
 	case CSS_BORDER_COLOR_TRANSPARENT:
@@ -290,14 +298,15 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	ptr += wrote;
 	*len -= wrote;
 
+	/* border-right-color */
 	val = css_computed_border_right_color(style, &color);
 	switch (val) {
 	case CSS_BORDER_COLOR_TRANSPARENT:
-		wrote = snprintf(ptr, *len, 
+		wrote = snprintf(ptr, *len,
 				"border-right-color: transparent\n");
 		break;
 	case CSS_BORDER_COLOR_COLOR:
-		wrote = snprintf(ptr, *len, 
+		wrote = snprintf(ptr, *len,
 				"border-right-color: #%08x\n", color);
 		break;
 	default:
@@ -307,14 +316,15 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	ptr += wrote;
 	*len -= wrote;
 
+	/* border-bottom-color */
 	val = css_computed_border_bottom_color(style, &color);
 	switch (val) {
 	case CSS_BORDER_COLOR_TRANSPARENT:
-		wrote = snprintf(ptr, *len, 
+		wrote = snprintf(ptr, *len,
 				"border-bottom-color: transparent\n");
 		break;
 	case CSS_BORDER_COLOR_COLOR:
-		wrote = snprintf(ptr, *len, 
+		wrote = snprintf(ptr, *len,
 				"border-bottom-color: #%08x\n", color);
 		break;
 	default:
@@ -324,13 +334,14 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	ptr += wrote;
 	*len -= wrote;
 
+	/* border-left-color */
 	val = css_computed_border_left_color(style, &color);
 	switch (val) {
 	case CSS_BORDER_COLOR_TRANSPARENT:
 		wrote = snprintf(ptr, *len, "border-left-color: transparent\n");
 		break;
 	case CSS_BORDER_COLOR_COLOR:
-		wrote = snprintf(ptr, *len, 
+		wrote = snprintf(ptr, *len,
 				"border-left-color: #%08x\n", color);
 		break;
 	default:
@@ -340,6 +351,263 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	ptr += wrote;
 	*len -= wrote;
 
+	/* border-top-style */
+	val = css_computed_border_top_style(style);
+	switch (val) {
+	case CSS_BORDER_STYLE_NONE:
+		wrote = snprintf(ptr, *len, "border-top-style: none\n");
+		break;
+	case CSS_BORDER_STYLE_HIDDEN:
+		wrote = snprintf(ptr, *len, "border-top-style: hidden\n");
+		break;
+	case CSS_BORDER_STYLE_DOTTED:
+		wrote = snprintf(ptr, *len, "border-top-style: dotted\n");
+		break;
+	case CSS_BORDER_STYLE_DASHED:
+		wrote = snprintf(ptr, *len, "border-top-style: dashed\n");
+		break;
+	case CSS_BORDER_STYLE_SOLID:
+		wrote = snprintf(ptr, *len, "border-top-style: solid\n");
+		break;
+	case CSS_BORDER_STYLE_DOUBLE:
+		wrote = snprintf(ptr, *len, "border-top-style: double\n");
+		break;
+	case CSS_BORDER_STYLE_GROOVE:
+		wrote = snprintf(ptr, *len, "border-top-style: groove\n");
+		break;
+	case CSS_BORDER_STYLE_RIDGE:
+		wrote = snprintf(ptr, *len, "border-top-style: ridge\n");
+		break;
+	case CSS_BORDER_STYLE_INSET
+		wrote = snprintf(ptr, *len, "border-top-style: inset\n");
+		break;
+	case CSS_BORDER_STYLE_OUTSET:
+		wrote = snprintf(ptr, *len, "border-top-style: outset\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* border-right-style */
+	val = css_computed_border_right_style(style);
+	switch (val) {
+	case CSS_BORDER_STYLE_NONE:
+		wrote = snprintf(ptr, *len, "border-right-style: none\n");
+		break;
+	case CSS_BORDER_STYLE_HIDDEN:
+		wrote = snprintf(ptr, *len, "border-right-style: hidden\n");
+		break;
+	case CSS_BORDER_STYLE_DOTTED:
+		wrote = snprintf(ptr, *len, "border-right-style: dotted\n");
+		break;
+	case CSS_BORDER_STYLE_DASHED:
+		wrote = snprintf(ptr, *len, "border-right-style: dashed\n");
+		break;
+	case CSS_BORDER_STYLE_SOLID:
+		wrote = snprintf(ptr, *len, "border-right-style: solid\n");
+		break;
+	case CSS_BORDER_STYLE_DOUBLE:
+		wrote = snprintf(ptr, *len, "border-right-style: double\n");
+		break;
+	case CSS_BORDER_STYLE_GROOVE:
+		wrote = snprintf(ptr, *len, "border-right-style: groove\n");
+		break;
+	case CSS_BORDER_STYLE_RIDGE:
+		wrote = snprintf(ptr, *len, "border-right-style: ridge\n");
+		break;
+	case CSS_BORDER_STYLE_INSET
+		wrote = snprintf(ptr, *len, "border-right-style: inset\n");
+		break;
+	case CSS_BORDER_STYLE_OUTSET:
+		wrote = snprintf(ptr, *len, "border-right-style: outset\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* border-bottom-style */
+	val = css_computed_border_bottom_style(style);
+	switch (val) {
+	case CSS_BORDER_STYLE_NONE:
+		wrote = snprintf(ptr, *len, "border-bottom-style: none\n");
+		break;
+	case CSS_BORDER_STYLE_HIDDEN:
+		wrote = snprintf(ptr, *len, "border-bottom-style: hidden\n");
+		break;
+	case CSS_BORDER_STYLE_DOTTED:
+		wrote = snprintf(ptr, *len, "border-bottom-style: dotted\n");
+		break;
+	case CSS_BORDER_STYLE_DASHED:
+		wrote = snprintf(ptr, *len, "border-bottom-style: dashed\n");
+		break;
+	case CSS_BORDER_STYLE_SOLID:
+		wrote = snprintf(ptr, *len, "border-bottom-style: solid\n");
+		break;
+	case CSS_BORDER_STYLE_DOUBLE:
+		wrote = snprintf(ptr, *len, "border-bottom-style: double\n");
+		break;
+	case CSS_BORDER_STYLE_GROOVE:
+		wrote = snprintf(ptr, *len, "border-bottom-style: groove\n");
+		break;
+	case CSS_BORDER_STYLE_RIDGE:
+		wrote = snprintf(ptr, *len, "border-bottom-style: ridge\n");
+		break;
+	case CSS_BORDER_STYLE_INSET
+		wrote = snprintf(ptr, *len, "border-bottom-style: inset\n");
+		break;
+	case CSS_BORDER_STYLE_OUTSET:
+		wrote = snprintf(ptr, *len, "border-bottom-style: outset\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* border-left-style */
+	val = css_computed_border_left_style(style);
+	switch (val) {
+	case CSS_BORDER_STYLE_NONE:
+		wrote = snprintf(ptr, *len, "border-left-style: none\n");
+		break;
+	case CSS_BORDER_STYLE_HIDDEN:
+		wrote = snprintf(ptr, *len, "border-left-style: hidden\n");
+		break;
+	case CSS_BORDER_STYLE_DOTTED:
+		wrote = snprintf(ptr, *len, "border-left-style: dotted\n");
+		break;
+	case CSS_BORDER_STYLE_DASHED:
+		wrote = snprintf(ptr, *len, "border-left-style: dashed\n");
+		break;
+	case CSS_BORDER_STYLE_SOLID:
+		wrote = snprintf(ptr, *len, "border-left-style: solid\n");
+		break;
+	case CSS_BORDER_STYLE_DOUBLE:
+		wrote = snprintf(ptr, *len, "border-left-style: double\n");
+		break;
+	case CSS_BORDER_STYLE_GROOVE:
+		wrote = snprintf(ptr, *len, "border-left-style: groove\n");
+		break;
+	case CSS_BORDER_STYLE_RIDGE:
+		wrote = snprintf(ptr, *len, "border-left-style: ridge\n");
+		break;
+	case CSS_BORDER_STYLE_INSET
+		wrote = snprintf(ptr, *len, "border-left-style: inset\n");
+		break;
+	case CSS_BORDER_STYLE_OUTSET:
+		wrote = snprintf(ptr, *len, "border-left-style: outset\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* border-top-width */
+	val = css_computed_border_top_width(style, &len1, &unit1);
+	switch (val) {
+	case CSS_BORDER_WIDTH_THIN:
+		wrote = snprintf(ptr, *len, "border-top-width: thin\n");
+		break;
+	case CSS_BORDER_WIDTH_MEDIUM:
+		wrote = snprintf(ptr, *len, "border-top-width: medium\n");
+		break;
+	case CSS_BORDER_WIDTH_THICK:
+		wrote = snprintf(ptr, *len, "border-top-width: thick\n");
+		break;
+	case CSS_BORDER_WIDTH_WIDTH:
+		wrote = snprintf(ptr, *len, "border-top-width: \n");
+
+		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* border-right-width */
+	val = css_computed_border_right_width(style, &len1, &unit1);
+	switch (val) {
+	case CSS_BORDER_WIDTH_THIN:
+		wrote = snprintf(ptr, *len, "border-right-width: thin\n");
+		break;
+	case CSS_BORDER_WIDTH_MEDIUM:
+		wrote = snprintf(ptr, *len, "border-right-width: medium\n");
+		break;
+	case CSS_BORDER_WIDTH_THICK:
+		wrote = snprintf(ptr, *len, "border-right-width: thick\n");
+		break;
+	case CSS_BORDER_WIDTH_WIDTH:
+		wrote = snprintf(ptr, *len, "border-right-width: \n");
+
+		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* border-bottom-width */
+	val = css_computed_border_bottom_width(style, &len1, &unit1);
+	switch (val) {
+	case CSS_BORDER_WIDTH_THIN:
+		wrote = snprintf(ptr, *len, "border-bottom-width: thin\n");
+		break;
+	case CSS_BORDER_WIDTH_MEDIUM:
+		wrote = snprintf(ptr, *len, "border-bottom-width: medium\n");
+		break;
+	case CSS_BORDER_WIDTH_THICK:
+		wrote = snprintf(ptr, *len, "border-bottom-width: thick\n");
+		break;
+	case CSS_BORDER_WIDTH_WIDTH:
+		wrote = snprintf(ptr, *len, "border-bottom-width: \n");
+
+		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* border-left-width */
+	val = css_computed_border_left_width(style, &len1, &unit1);
+	switch (val) {
+	case CSS_BORDER_WIDTH_THIN:
+		wrote = snprintf(ptr, *len, "border-left-width: thin\n");
+		break;
+	case CSS_BORDER_WIDTH_MEDIUM:
+		wrote = snprintf(ptr, *len, "border-left-width: medium\n");
+		break;
+	case CSS_BORDER_WIDTH_THICK:
+		wrote = snprintf(ptr, *len, "border-left-width: thick\n");
+		break;
+	case CSS_BORDER_WIDTH_WIDTH:
+		wrote = snprintf(ptr, *len, "border-left-width: \n");
+
+		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* color */
 	val = css_computed_color(style, &color);
 	if (val == CSS_COLOR_COLOR) {
 		wrote = snprintf(ptr, *len, "color: #%08x\n", color);
@@ -347,6 +615,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		*len -= wrote;
 	}
 
+	/* display */
 	val = css_computed_display(style);
 	switch (val) {
 	case CSS_DISPLAY_INLINE:
