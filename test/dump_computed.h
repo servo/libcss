@@ -628,10 +628,10 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* caption-side */
 	val = css_computed_caption_side(style);
 	switch (val) {
-	case CSS_BOTTOM_TOP:
+	case CSS_CAPTION_SIDE_TOP:
 		wrote = snprintf(ptr, *len, "caption_side: top\n");
 		break;
-	case CSS_BOTTOM_BOTTOM:
+	case CSS_CAPTION_SIDE_BOTTOM:
 		wrote = snprintf(ptr, *len, "caption_side: bottom\n");
 		break;
 	default:
@@ -665,12 +665,13 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 
 	/* clip */
 	if (style->uncommon != NULL) {
+#if 0
 		val = css_computed_clip(style);
 		switch (val) {
-		case CSS_CLEAR_AUTO:
+		case CSS_CLIP_AUTO:
 			wrote = snprintf(ptr, *len, "clip: auto\n");
 			break;
-		case CSS_CLEAR_RECT:
+		case CSS_CLIP_RECT:
 			wrote = snprintf(ptr, *len, "clip: rect\n");
 			break;
 		default:
@@ -679,6 +680,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		}
 		ptr += wrote;
 		*len -= wrote;
+#endif
 	}
 
 	/* color */
