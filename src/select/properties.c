@@ -15,7 +15,7 @@
 
 static css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 		css_select_state *state, 
-		css_error (*fun)(css_computed_style *, uint8_t, css_color));
+		css_error (*fun)(css_computed_style *, uint8_t, css_colour));
 static css_error cascade_uri_none(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, 
@@ -613,11 +613,11 @@ css_error cascade_color(uint32_t opv, css_style *style,
 		css_select_state *state)
 {
 	uint16_t value = CSS_COLOR_INHERIT;
-	css_color color = 0;
+	css_colour color = 0;
 
 	if (isInherit(opv) == false) {
 		value = CSS_COLOR_COLOR;
-		color = *((css_color *) style->bytecode);
+		color = *((css_colour *) style->bytecode);
 		advance_bytecode(style, sizeof(color));
 	}
 
@@ -1736,13 +1736,13 @@ css_error cascade_outline_color(uint32_t opv, css_style *style,
 		css_select_state *state)
 {
 	uint16_t value = CSS_OUTLINE_COLOR_INHERIT;
-	css_color color = 0;
+	css_colour color = 0;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
 		case OUTLINE_COLOR_SET:
 			value = CSS_OUTLINE_COLOR_COLOR;
-			color = *((css_color *) style->bytecode);
+			color = *((css_colour *) style->bytecode);
 			advance_bytecode(style, sizeof(color));
 			break;
 		case OUTLINE_COLOR_INVERT:
@@ -2900,10 +2900,10 @@ css_error initial_z_index(css_computed_style *style)
  ******************************************************************************/
 css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 		css_select_state *state, 
-		css_error (*fun)(css_computed_style *, uint8_t, css_color))
+		css_error (*fun)(css_computed_style *, uint8_t, css_colour))
 {
 	uint16_t value = CSS_BACKGROUND_COLOR_INHERIT;
-	css_color color = 0;
+	css_colour color = 0;
 
 	assert(CSS_BACKGROUND_COLOR_INHERIT == CSS_BORDER_COLOR_INHERIT);
 	assert(CSS_BACKGROUND_COLOR_TRANSPARENT == 
@@ -2917,7 +2917,7 @@ css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 			break;
 		case BACKGROUND_COLOR_SET:
 			value = CSS_BACKGROUND_COLOR_COLOR;
-			color = *((css_color *) style->bytecode);
+			color = *((css_colour *) style->bytecode);
 			advance_bytecode(style, sizeof(color));
 			break;
 		}

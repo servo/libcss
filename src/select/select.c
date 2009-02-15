@@ -291,6 +291,7 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	 * Those properties which are inherited need to be set as inherit.
 	 * Those which are not inherited need to be set to their default value.
 	 */
+	/** \todo If node is tree root, everything should be defaulted. */
 	for (i = 0; i < N_OPCODES; i++) {
 		/* Do nothing if this property is set */
 		if (state.props[i].set)

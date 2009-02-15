@@ -131,7 +131,7 @@ typedef struct css_computed_uncommon {
 
 	css_fixed letter_spacing;
 
-	css_color outline_color;
+	css_colour outline_color;
 	css_fixed outline_width;
 
 	css_fixed word_spacing;
@@ -277,11 +277,11 @@ struct css_computed_style {
 
 	uint8_t unused[2];
 
-	css_color background_color;
+	css_colour background_color;
 	lwc_string *background_image;
 	css_fixed background_position[2];
 
-	css_color border_color[4];
+	css_colour border_color[4];
 	css_fixed border_width[4];
 
 	css_fixed top;
@@ -289,7 +289,7 @@ struct css_computed_style {
 	css_fixed bottom;
 	css_fixed left;
 
-	css_color color;
+	css_colour color;
 
 	css_fixed font_size;
 
@@ -371,7 +371,7 @@ static inline uint8_t css_computed_letter_spacing(
 #define OUTLINE_COLOR_SHIFT 0
 #define OUTLINE_COLOR_MASK  0x3
 static inline uint8_t css_computed_outline_color(
-		const css_computed_style *style, css_color *color)
+		const css_computed_style *style, css_colour *color)
 {
 	if (style->uncommon != NULL) {
 		uint8_t bits = style->uncommon->bits[OUTLINE_COLOR_INDEX];
@@ -854,7 +854,7 @@ static inline uint8_t css_computed_background_image(
 #define COLOR_MASK  0x1
 static inline uint8_t css_computed_color(
 		const css_computed_style *style, 
-		css_color *color)
+		css_colour *color)
 {
 	uint8_t bits = style->bits[COLOR_INDEX];
 	bits &= COLOR_MASK;
@@ -986,7 +986,7 @@ static inline uint8_t css_computed_left(
 #define BORDER_TOP_COLOR_MASK  0x3
 static inline uint8_t css_computed_border_top_color(
 		const css_computed_style *style, 
-		css_color *color)
+		css_colour *color)
 {
 	uint8_t bits = style->bits[BORDER_TOP_COLOR_INDEX];
 	bits &= BORDER_TOP_COLOR_MASK;
@@ -1006,7 +1006,7 @@ static inline uint8_t css_computed_border_top_color(
 #define BORDER_RIGHT_COLOR_MASK  0x3
 static inline uint8_t css_computed_border_right_color(
 		const css_computed_style *style, 
-		css_color *color)
+		css_colour *color)
 {
 	uint8_t bits = style->bits[BORDER_RIGHT_COLOR_INDEX];
 	bits &= BORDER_RIGHT_COLOR_MASK;
@@ -1026,7 +1026,7 @@ static inline uint8_t css_computed_border_right_color(
 #define BORDER_BOTTOM_COLOR_MASK  0x3
 static inline uint8_t css_computed_border_bottom_color(
 		const css_computed_style *style, 
-		css_color *color)
+		css_colour *color)
 {
 	uint8_t bits = style->bits[BORDER_BOTTOM_COLOR_INDEX];
 	bits &= BORDER_BOTTOM_COLOR_MASK;
@@ -1046,7 +1046,7 @@ static inline uint8_t css_computed_border_bottom_color(
 #define BORDER_LEFT_COLOR_MASK  0x3
 static inline uint8_t css_computed_border_left_color(
 		const css_computed_style *style, 
-		css_color *color)
+		css_colour *color)
 {
 	uint8_t bits = style->bits[BORDER_LEFT_COLOR_INDEX];
 	bits &= BORDER_LEFT_COLOR_MASK;
@@ -1116,7 +1116,7 @@ static inline uint8_t css_computed_line_height(
 #define BACKGROUND_COLOR_MASK  0x3
 static inline uint8_t css_computed_background_color(
 		const css_computed_style *style, 
-		css_color *color)
+		css_colour *color)
 {
 	uint8_t bits = style->bits[BACKGROUND_COLOR_INDEX];
 	bits &= BACKGROUND_COLOR_MASK;

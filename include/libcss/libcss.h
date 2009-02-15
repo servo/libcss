@@ -14,7 +14,9 @@
 #include <libcss/types.h>
 #include <libcss/functypes.h>
 #include <libcss/computed.h>
+#include <libcss/properties.h>
 #include <libcss/select.h>
+#include <libcss/stylesheet.h>
 
 /* Initialise the CSS library for use */
 css_error css_initialise(const char *aliases_file,

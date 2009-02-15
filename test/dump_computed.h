@@ -141,7 +141,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	char *ptr = buf;
 	size_t wrote = 0;
 	uint8_t val;
-	css_color color;
+	css_colour color;
 	lwc_string *url;
 	css_fixed len1, len2;
 	css_unit unit1, unit2;

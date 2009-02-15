@@ -69,7 +69,7 @@ typedef enum css_origin {
 } css_origin;
 
 /** CSS colour -- RRGGBBAA */
-typedef uint32_t css_color;
+typedef uint32_t css_colour;
 
 /* CSS unit */
 typedef enum css_unit {
