@@ -442,9 +442,11 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	state.pw = pw;
 
 	/* Iterate through the top-level stylesheets, selecting styles
-	 * from those which apply to our current media requirements */
+	 * from those which apply to our current media requirements and
+	 * are not disabled */
 	for (i = 0; i < ctx->n_sheets; i++) {
-		if ((ctx->sheets[i]->media & media) != 0) {
+		if ((ctx->sheets[i]->media & media) != 0 &&
+				ctx->sheets[i]->disabled == false) {
 			error = select_from_sheet(ctx, ctx->sheets[i], &state);
 			if (error != CSS_OK)
                                 goto cleanup;
