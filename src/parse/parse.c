@@ -145,6 +145,8 @@ static inline css_error parseMalformedDeclaration(css_parser *parser);
 static inline css_error parseMalformedSelector(css_parser *parser);
 static inline css_error parseMalformedAtRule(css_parser *parser);
 
+static inline void unref_interned_strings_in_tokens(css_parser *parser);
+
 /**
  * Dispatch table for parsing, indexed by major state number
  */
@@ -612,7 +614,8 @@ css_error getToken(css_parser *parser, const css_token **token)
                                                     t->data.len, &t->idata);
                         
 			if (t->ilower == NULL)
-				t->ilower = t->idata;
+				t->ilower = lwc_context_string_ref(parser->dictionary,
+                                                                   t->idata);
 
                         if (lerror != lwc_error_ok)
                                 return css_error_from_lwc_error(lerror);
@@ -647,7 +650,7 @@ css_error pushBack(css_parser *parser, const css_token *token)
 
 	/* The pushback buffer depth is 1 token. Assert this. */
 	assert(parser->pushback == NULL);
-
+        
 	perror = parserutils_vector_remove_last(parser->tokens);
 	if (perror != PARSERUTILS_OK)
 		return css_error_from_parserutils_error(perror);
@@ -731,7 +734,8 @@ css_error parseStart(css_parser *parser)
 		parser->event(CSS_PARSER_END_STYLESHEET, NULL, 
 				parser->event_pw);
 	}
-
+        
+        unref_interned_strings_in_tokens(parser);
 	parserutils_vector_clear(parser->tokens);
 
 	return done(parser);
@@ -763,6 +767,7 @@ css_error parseStylesheet(css_parser *parser)
 				if (error != CSS_OK)
 					return error;
 
+                                unref_interned_strings_in_tokens(parser);
 				parserutils_vector_clear(parser->tokens);
 
 				return done(parser);
@@ -832,6 +837,7 @@ css_error parseRuleset(css_parser *parser)
 
 	switch (state->substate) {
 	case Initial:
+                unref_interned_strings_in_tokens(parser);
 		parserutils_vector_clear(parser->tokens);
 
 		error = getToken(parser, &token);
@@ -1004,6 +1010,7 @@ css_error parseAtRule(css_parser *parser)
 
 	switch (state->substate) {
 	case Initial:
+                unref_interned_strings_in_tokens(parser);
 		parserutils_vector_clear(parser->tokens);
 
 		error = getToken(parser, &token);
@@ -1158,13 +1165,14 @@ css_error parseBlock(css_parser *parser)
 					parser->event_pw);
 		}
 
-		parserutils_vector_clear(parser->tokens);
-
 		if (token->type != CSS_TOKEN_CHAR || lwc_string_length(token->ilower) != 1 ||
 				lwc_string_data(token->ilower)[0] != '{') {
 			/* This should never happen, as FIRST(block) == '{' */
 			assert(0 && "Expected {");
 		}
+
+                unref_interned_strings_in_tokens(parser);
+		parserutils_vector_clear(parser->tokens);
 
 		state->substate = WS;
 		/* Fall through */
@@ -1214,6 +1222,7 @@ css_error parseBlock(css_parser *parser)
 		parser->event(CSS_PARSER_END_BLOCK, NULL, parser->event_pw);
 	}
 
+        unref_interned_strings_in_tokens(parser);
 	parserutils_vector_clear(parser->tokens);
 
 	return done(parser);
@@ -1345,6 +1354,7 @@ css_error parseSelector(css_parser *parser)
 		parser_state to = { sAny1, Initial };
 		parser_state subsequent = { sSelector, AfterAny1 };
 
+                unref_interned_strings_in_tokens(parser);
 		parserutils_vector_clear(parser->tokens);
 
 		return transition(parser, to, subsequent);
@@ -1371,6 +1381,7 @@ css_error parseDeclaration(css_parser *parser)
 		parser_state to = { sProperty, Initial };
 		parser_state subsequent = { sDeclaration, Colon };
 
+                unref_interned_strings_in_tokens(parser);
 		parserutils_vector_clear(parser->tokens);
 
 		return transition(parser, to, subsequent);
@@ -2040,6 +2051,7 @@ css_error parseMalformedDeclaration(css_parser *parser)
 		return error;
 
 	/* Discard the tokens we've read */
+        unref_interned_strings_in_tokens(parser);
 	parserutils_vector_clear(parser->tokens);
 
 	return done(parser);
@@ -2134,6 +2146,7 @@ css_error parseMalformedSelector(css_parser *parser)
 		return error;
 
 	/* Discard the tokens we've read */
+        unref_interned_strings_in_tokens(parser);
 	parserutils_vector_clear(parser->tokens);
 
 	return done(parser);
@@ -2241,11 +2254,30 @@ css_error parseMalformedAtRule(css_parser *parser)
 		return error;
 
 	/* Discard the tokens we've read */
+        unref_interned_strings_in_tokens(parser);
 	parserutils_vector_clear(parser->tokens);
 
 	return done(parser);
 }
 
+
+/**
+ * Iterate the token vector and unref any interned strings in the tokens.
+ *
+ * \param parser The parser whose tokens we are cleaning up.
+ */
+static inline void unref_interned_strings_in_tokens(css_parser *parser)
+{
+        int32_t ctx = 0;
+        const css_token *tok;
+        
+        while ((tok = parserutils_vector_iterate(parser->tokens, &ctx)) != NULL) {
+                if (tok->idata != NULL)
+                        lwc_context_string_unref(parser->dictionary, tok->idata);
+                if (tok->ilower != NULL)
+                        lwc_context_string_unref(parser->dictionary, tok->ilower);
+        }
+}
 
 #ifndef NDEBUG
 #ifdef DEBUG_STACK

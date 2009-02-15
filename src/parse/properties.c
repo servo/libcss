@@ -764,6 +764,7 @@ css_error parse_background_image(css_language *c,
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && value == BACKGROUND_IMAGE_URI) {
+                lwc_context_string_ref(c->sheet->dictionary, token->idata);
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&token->idata, 
 				sizeof(lwc_string *));
@@ -1760,8 +1761,11 @@ css_error parse_counter_increment(css_language *c,
 				memcpy(ptr, &opv, sizeof(opv));
 				ptr += sizeof(opv);
 			}
+                        
+                        lwc_context_string_ref(c->sheet->dictionary, name);
 			memcpy(ptr, &name, sizeof(name));
 			ptr += sizeof(name);
+                        
 			memcpy(ptr, &increment, sizeof(increment));
 			ptr += sizeof(increment);
 
@@ -1925,8 +1929,11 @@ css_error parse_counter_reset(css_language *c,
 				memcpy(ptr, &opv, sizeof(opv));
 				ptr += sizeof(opv);
 			}
+                        
+                        lwc_context_string_ref(c->sheet->dictionary, name);
 			memcpy(ptr, &name, sizeof(name));
 			ptr += sizeof(name);
+                        
 			memcpy(ptr, &increment, sizeof(increment));
 			ptr += sizeof(increment);
 
@@ -2001,6 +2008,7 @@ css_error parse_cue_after(css_language *c,
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && value == CUE_AFTER_URI) {
+                lwc_context_string_ref(c->sheet->dictionary, token->idata);
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&token->idata, 
 				sizeof(lwc_string *));
@@ -2055,6 +2063,7 @@ css_error parse_cue_before(css_language *c,
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && value == CUE_BEFORE_URI) {
+                lwc_context_string_ref(c->sheet->dictionary, token->idata);
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&token->idata, 
 				sizeof(lwc_string *));
@@ -2246,7 +2255,8 @@ css_error parse_cursor(css_language *c,
 				memcpy(ptr, &opv, sizeof(opv));
 				ptr += sizeof(opv);
 			}
-
+                        
+                        lwc_context_string_ref(c->sheet->dictionary, uri);
 			memcpy(ptr, &uri, sizeof(uri));
 			ptr += sizeof(uri);
 
@@ -2793,7 +2803,8 @@ css_error parse_font_family(css_language *c,
 
 		while (token != NULL) {
 			if (token->type == CSS_TOKEN_IDENT) {
-				lwc_string *name = token->idata;
+				lwc_string *tok_idata = token->idata;
+                                lwc_string *name = tok_idata;
                                 lwc_string *newname;
 			
 				if (token->ilower == c->strings[SERIF]) {
@@ -2903,6 +2914,12 @@ css_error parse_font_family(css_language *c,
 				}
 
 				if (opv == FONT_FAMILY_IDENT_LIST) {
+                                        /* Only ref 'name' again if the token owns it,
+                                         * otherwise we already own the only ref to the
+                                         * new name generated above.
+                                         */
+                                        if (name == tok_idata)
+                                                lwc_context_string_ref(c->sheet->dictionary, name);
 					memcpy(ptr, &name, sizeof(name));
 					ptr += sizeof(name);
 				}
@@ -2913,7 +2930,8 @@ css_error parse_font_family(css_language *c,
 					memcpy(ptr, &opv, sizeof(opv));
 					ptr += sizeof(opv);
 				}
-
+                                
+                                lwc_context_string_ref(c->sheet->dictionary, token->idata);
 				memcpy(ptr, &token->idata, 
 						sizeof(token->idata));
 				ptr += sizeof(token->idata);
@@ -3554,6 +3572,7 @@ css_error parse_list_style_image(css_language *c,
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && value == LIST_STYLE_IMAGE_URI) {
+                lwc_context_string_ref(c->sheet->dictionary, token->idata);
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&token->idata, 
 				sizeof(lwc_string *));
@@ -4655,7 +4674,8 @@ css_error parse_play_during(css_language *c,
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && 
 			(value & PLAY_DURING_TYPE_MASK)  == PLAY_DURING_URI) {
-		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
+		lwc_context_string_ref(c->sheet->dictionary, uri);
+                memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&uri, sizeof(lwc_string *));
 	}
 
@@ -4829,10 +4849,13 @@ css_error parse_quotes(css_language *c,
 				memcpy(ptr, &opv, sizeof(opv));
 				ptr += sizeof(opv);
 			}
-
+                        
+                        lwc_context_string_ref(c->sheet->dictionary, open);
 			memcpy(ptr, &open, sizeof(open));
 			ptr += sizeof(open);
-			memcpy(ptr, &close, sizeof(close));
+			
+                        lwc_context_string_ref(c->sheet->dictionary, close);
+                        memcpy(ptr, &close, sizeof(close));
 			ptr += sizeof(close);
 
 			first = false;
@@ -5964,7 +5987,8 @@ css_error parse_voice_family(css_language *c,
 
 		while (token != NULL) {
 			if (token->type == CSS_TOKEN_IDENT) {
-				lwc_string *name = token->idata;
+                                lwc_string *tok_idata = token->idata;
+				lwc_string *name = tok_idata;
                                 lwc_string *newname;
 			
 				if (token->ilower == c->strings[MALE]) {
@@ -6064,6 +6088,12 @@ css_error parse_voice_family(css_language *c,
 				}
 
 				if (opv == VOICE_FAMILY_IDENT_LIST) {
+                                        /* Only ref 'name' again if the token owns it,
+                                         * otherwise we already own the only ref to the
+                                         * new name generated above.
+                                         */
+                                        if (name == tok_idata)
+                                                lwc_context_string_ref(c->sheet->dictionary, name);
 					memcpy(ptr, &name, sizeof(name));
 					ptr += sizeof(name);
 				}
@@ -6074,7 +6104,8 @@ css_error parse_voice_family(css_language *c,
 					memcpy(ptr, &opv, sizeof(opv));
 					ptr += sizeof(opv);
 				}
-
+                                
+                                lwc_context_string_ref(c->sheet->dictionary, token->idata);
 				memcpy(ptr, &token->idata, 
 						sizeof(token->idata));
 				ptr += sizeof(token->idata);
@@ -7296,6 +7327,7 @@ css_error parse_content_list(css_language *c,
 			}
 
 			if (buffer != NULL) {
+                                lwc_context_string_ref(c->sheet->dictionary, token->idata);
 				memcpy(buffer + offset, &token->idata,
 						sizeof(token->idata));
 			}
@@ -7314,6 +7346,7 @@ css_error parse_content_list(css_language *c,
 			}
 
 			if (buffer != NULL) {
+                                lwc_context_string_ref(c->sheet->dictionary, token->idata);
 				memcpy(buffer + offset, &token->idata,
 						sizeof(token->idata));
 			}
@@ -7340,6 +7373,7 @@ css_error parse_content_list(css_language *c,
 				return CSS_INVALID;
 
 			if (buffer != NULL) {
+                                lwc_context_string_ref(c->sheet->dictionary, token->idata);
 				memcpy(buffer + offset, &token->idata, 
 						sizeof(token->idata));
 			}
@@ -7419,6 +7453,7 @@ css_error parse_content_list(css_language *c,
 			}
 
 			if (buffer != NULL) {
+                                lwc_context_string_ref(c->sheet->dictionary, name);
 				memcpy(buffer + offset, &name, sizeof(name));
 			}
 
@@ -7507,12 +7542,14 @@ css_error parse_content_list(css_language *c,
 			}
 
 			if (buffer != NULL) {
+                                lwc_context_string_ref(c->sheet->dictionary, name);
 				memcpy(buffer + offset, &name, sizeof(name));
 			}
 
 			offset += sizeof(name);
 
 			if (buffer != NULL) {
+                                lwc_context_string_ref(c->sheet->dictionary, sep);
 				memcpy(buffer + offset, &sep, sizeof(sep));
 			}
 

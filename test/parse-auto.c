@@ -64,7 +64,7 @@ static void dump_string(lwc_string *string, char **ptr);
 static void *myrealloc(void *data, size_t len, void *pw)
 {
 	UNUSED(pw);
-
+        
 	return realloc(data, len);
 }
 

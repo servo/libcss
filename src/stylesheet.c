@@ -526,6 +526,8 @@ css_error css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len,
  * \param sheet  The stylesheet context
  * \param style  The style to destroy
  * \return CSS_OK on success, appropriate error otherwise
+ *
+ * \todo This really ought to unref all the strings in the bytecode.
  */
 css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style)
 {
@@ -562,7 +564,7 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 	memset(sel, 0, sizeof(css_selector));
 
 	sel->data.type = CSS_SELECTOR_ELEMENT;
-	sel->data.name = name;
+	sel->data.name = lwc_context_string_ref(sheet->dictionary, name);
 	sel->data.value = NULL;
 
 	/* Initial specificity -- 1 for an element, 0 for universal */
@@ -589,6 +591,7 @@ css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 		css_selector *selector)
 {
 	css_selector *c, *d;
+        css_selector_detail *detail;
 
 	if (sheet == NULL || selector == NULL)
 		return CSS_BADPARM;
@@ -600,9 +603,30 @@ css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 	for (c = selector->combinator; c != NULL; c = d) {
 		d = c->combinator;
 
+                for (detail = &c->data; detail;) {
+                        lwc_context_string_unref(sheet->dictionary, detail->name);
+                        if (detail->value != NULL)
+                                lwc_context_string_unref(sheet->dictionary, detail->value);
+                        if (detail->next)
+                                detail++;
+                        else
+                                detail = NULL;
+                }
+                
 		sheet->alloc(c, 0, sheet->pw);
 	}
-
+        
+        for (detail = &selector->data; detail;) {
+                lwc_context_string_unref(sheet->dictionary, detail->name);
+                if (detail->value != NULL)
+                        lwc_context_string_unref(sheet->dictionary, detail->value);
+                if (detail->next)
+                        detail++;
+                else
+                        detail = NULL;
+        }
+                     
+        
 	/* Destroy this selector */
 	sheet->alloc(selector, 0, sheet->pw);
 
@@ -675,7 +699,12 @@ css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
 	(&temp->data)[num_details + 1] = *detail;
 	/* Flag that there's another block */
 	(&temp->data)[num_details].next = 1;
-
+        
+        /* Ref the strings */
+        lwc_context_string_ref(sheet->dictionary, detail->name);
+        if (detail->value != NULL)
+                lwc_context_string_ref(sheet->dictionary, detail->value);
+        
 	(*parent) = temp;
 
 	/* Update parent's specificity */
@@ -839,11 +868,17 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 	}
 		break;
 	case CSS_RULE_CHARSET:
+        {
+                css_rule_charset *charset = (css_rule_charset *) rule;
+                lwc_context_string_unref(sheet->dictionary, charset->encoding);
+        }
 		break;
 	case CSS_RULE_IMPORT:
 	{
 		css_rule_import *import = (css_rule_import *) rule;
-
+                
+                lwc_context_string_unref(sheet->dictionary, import->url);
+                
 		if (import->sheet != NULL)
 			css_stylesheet_destroy(import->sheet);
 	}
@@ -1015,7 +1050,7 @@ css_error css_stylesheet_rule_set_charset(css_stylesheet *sheet,
 	assert(rule->type == CSS_RULE_CHARSET);
 
 	/* Set rule's encoding field */
-	r->encoding = charset;
+	r->encoding = lwc_context_string_ref(sheet->dictionary, charset);
 	
 	return CSS_OK;
 }
@@ -1043,7 +1078,7 @@ css_error css_stylesheet_rule_set_nascent_import(css_stylesheet *sheet,
 	assert(rule->type == CSS_RULE_IMPORT);
 
 	/* Set the rule's sheet field */
-	r->url = url;
+	r->url = lwc_context_string_ref(sheet->dictionary, url);
 	r->media = media;
 
 	return CSS_OK;
