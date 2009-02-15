@@ -75,12 +75,10 @@ css_error css_computed_style_destroy(css_computed_style *style)
 	}
 
 	if (style->page != NULL) {
-		/** \todo clean up members */
 		style->alloc(style->page, 0, style->pw);
 	}
 
 	if (style->aural != NULL) {
-		/** \todo clean up members */
 		style->alloc(style->aural, 0, style->pw);
 	}
 
