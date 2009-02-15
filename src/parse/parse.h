@@ -71,6 +71,7 @@ css_error css_parser_completed(css_parser *parser);
 
 const char *css_parser_read_charset(css_parser *parser, 
 		css_charset_source *source);
+bool css_parser_quirks_permitted(css_parser *parser);
 
 #endif
 

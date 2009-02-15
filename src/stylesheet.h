@@ -170,6 +170,9 @@ struct css_stylesheet {
 
 	lwc_context *dictionary;		/**< String dictionary */
 
+	bool quirks_allowed;			/**< Quirks permitted */
+	bool quirks_used;			/**< Quirks actually used */
+
 	css_allocator_fn alloc;			/**< Allocation function */
 	void *pw;				/**< Private word */
 };

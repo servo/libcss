@@ -43,8 +43,8 @@ int main(int argc, char **argv)
 	for (int count = 0; count < ITERATIONS; count++) {
 
 		assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", argv[2], 
-				NULL, CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, ctx,
-				myrealloc, NULL, &sheet) == CSS_OK);
+				NULL, CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, false,
+				ctx, myrealloc, NULL, &sheet) == CSS_OK);
 
 		fp = fopen(argv[2], "rb");
 		if (fp == NULL) {
@@ -92,13 +92,14 @@ int main(int argc, char **argv)
 				css_stylesheet *import;
 				char buf[lwc_string_length(url) + 1];
 
-				memcpy(buf, lwc_string_data(url), lwc_string_length(url));
+				memcpy(buf, lwc_string_data(url), 
+						lwc_string_length(url));
 				buf[lwc_string_length(url)] = '\0';
 
 				assert(css_stylesheet_create(CSS_LEVEL_21,
 					"UTF-8", buf, NULL, CSS_ORIGIN_AUTHOR,
-					media, ctx, myrealloc, NULL, &import) == 
-					CSS_OK);
+					media, false, ctx, myrealloc, NULL, 
+					&import) == CSS_OK);
 
 				assert(css_stylesheet_data_done(import) == 
 					CSS_OK);

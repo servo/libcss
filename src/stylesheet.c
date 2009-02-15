@@ -26,6 +26,8 @@ static css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule);
  * \param title            Title of stylesheet
  * \param origin           Origin of stylesheet
  * \param media            Media stylesheet applies to
+ * \param allow_quirks     Permit quirky parsing of stylesheets
+ * \param dict             Dictionary in which to intern strings
  * \param alloc            Memory (de)allocation function
  * \param alloc_pw         Client private data for alloc
  * \param stylesheet       Pointer to location to receive stylesheet
@@ -35,10 +37,11 @@ static css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule);
  */
 css_error css_stylesheet_create(css_language_level level,
 		const char *charset, const char *url, const char *title,
-		css_origin origin, uint64_t media, lwc_context *dict,
-		css_allocator_fn alloc, void *alloc_pw, 
+		css_origin origin, uint64_t media, bool allow_quirks,
+		lwc_context *dict, css_allocator_fn alloc, void *alloc_pw, 
 		css_stylesheet **stylesheet)
 {
+	css_parser_optparams params;
 	css_error error;
 	css_stylesheet *sheet;
 	size_t len;
@@ -60,6 +63,19 @@ css_error css_stylesheet_create(css_language_level level,
 	if (error != CSS_OK) {
 		alloc(sheet, 0, alloc_pw);
 		return error;
+	}
+
+	sheet->quirks_allowed = allow_quirks;
+	if (allow_quirks) {
+		params.quirks = true;
+
+		error = css_parser_setopt(sheet->parser, CSS_PARSER_QUIRKS,
+				&params);
+		if (error != CSS_OK) {
+			css_parser_destroy(sheet->parser);
+			alloc(sheet, 0, alloc_pw);
+			return error;
+		}
 	}
 
 	sheet->level = level;
@@ -394,6 +410,41 @@ css_error css_stylesheet_get_media(css_stylesheet *sheet, uint64_t *media)
 		return CSS_BADPARM;
 
 	*media = sheet->media;
+
+	return CSS_OK;
+}
+
+/**
+ * Determine whether quirky parsing was permitted on a stylesheet
+ *
+ * \param sheet   The stylesheet to consider
+ * \param quirks  Pointer to location to receive quirkyness
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_quirks_allowed(css_stylesheet *sheet, bool *allowed)
+{
+	if (sheet == NULL || allowed == NULL)
+		return CSS_BADPARM;
+
+	*allowed = sheet->quirks_allowed;
+
+	return CSS_OK;
+}
+
+
+/**
+ * Determine whether quirky parsing was used on a stylesheet
+ *
+ * \param sheet   The stylesheet to consider
+ * \param quirks  Pointer to location to receive quirkyness
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_used_quirks(css_stylesheet *sheet, bool *quirks)
+{
+	if (sheet == NULL || quirks == NULL)
+		return CSS_BADPARM;
+
+	*quirks = sheet->quirks_used;
 
 	return CSS_OK;
 }

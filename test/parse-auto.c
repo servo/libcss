@@ -312,7 +312,7 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
         lwc_context_ref(ctx);
         
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", NULL,
-			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, ctx,
+			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, false, ctx,
 			myrealloc, NULL, &sheet) == CSS_OK);
 
 	error = css_stylesheet_append_data(sheet, data, len);
@@ -336,12 +336,13 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 			css_stylesheet *import;
 			char buf[lwc_string_length(url) + 1];
 
-			memcpy(buf, lwc_string_data(url), lwc_string_length(url));
+			memcpy(buf, lwc_string_data(url), 
+					lwc_string_length(url));
 			buf[lwc_string_length(url)] = '\0';
 
 			assert(css_stylesheet_create(CSS_LEVEL_21,
 				"UTF-8", buf, NULL, CSS_ORIGIN_AUTHOR,
-				media, ctx, myrealloc, NULL, &import) == 
+				media, false, ctx, myrealloc, NULL, &import) == 
 				CSS_OK);
 
 			assert(css_stylesheet_register_import(sheet,
@@ -443,8 +444,7 @@ void validate_rule_selector(css_rule_selector *s, exp_entry *e, int testnum)
 			}
 
 			if (j != e->stused) {
-				lwc_string **p =
-						(void *) ((uint8_t *) 
+				lwc_string **p = (void *) ((uint8_t *) 
 						s->style->bytecode + i);
 
 				if (lwc_string_length(*p) != 
@@ -452,8 +452,10 @@ void validate_rule_selector(css_rule_selector *s, exp_entry *e, int testnum)
 					memcmp(lwc_string_data(*p), 
 						e->stringtab[j].string,
 						lwc_string_length(*p)) != 0) {
-					printf("%d: Got string '%.*s'. Expected '%s'\n",
-						testnum, (int) lwc_string_length(*p), 
+					printf("%d: Got string '%.*s'. "
+						"Expected '%s'\n",
+						testnum, 
+						(int) lwc_string_length(*p), 
 						lwc_string_data(*p), 
 						e->stringtab[j].string);
 					assert(0 && "Strings differ");
@@ -496,7 +498,8 @@ void validate_rule_import(css_rule_import *s, exp_entry *e, int testnum)
         if (strncmp(lwc_string_data(s->url), e->name,
                     lwc_string_length(s->url)) != 0) {
 		printf("%d: Got URL '%.*s'. Expected '%s'\n",
-                       testnum, (int) lwc_string_length(s->url), lwc_string_data(s->url),
+			testnum, (int) lwc_string_length(s->url), 
+			lwc_string_data(s->url),
 		e->name);
 		assert(0 && "Mismatched URLs");
 	}
@@ -547,7 +550,8 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 {
 	switch (detail->type) {
 	case CSS_SELECTOR_ELEMENT:
-		if (lwc_string_length(detail->name) == 1 && lwc_string_data(detail->name)[0] == '*' &&
+		if (lwc_string_length(detail->name) == 1 && 
+				lwc_string_data(detail->name)[0] == '*' &&
 				detail->next == 0) {
 			dump_string(detail->name, ptr);
 		} else if (lwc_string_length(detail->name) != 1 ||
@@ -628,6 +632,7 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 
 void dump_string(lwc_string *string, char **ptr)
 {
-	*ptr += sprintf(*ptr, "%.*s", (int) lwc_string_length(string), lwc_string_data(string));
+	*ptr += sprintf(*ptr, "%.*s", (int) lwc_string_length(string), 
+			lwc_string_data(string));
 }
 

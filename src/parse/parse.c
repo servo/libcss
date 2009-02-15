@@ -413,6 +413,17 @@ const char *css_parser_read_charset(css_parser *parser,
 	return parserutils_inputstream_read_charset(parser->stream, source);
 }
 
+/**
+ * Quirks permitted when parsing
+ *
+ * \param parser  Parser to query
+ * \return True if quirks permitted, false otherwise
+ */
+bool css_parser_quirks_permitted(css_parser *parser)
+{
+	return parser->quirks;
+}
+
 /******************************************************************************
  * Helper functions                                                           *
  ******************************************************************************/

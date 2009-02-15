@@ -441,7 +441,8 @@ void parse_sheet(line_ctx *ctx, const char *data, size_t len)
 
 	/** \todo How are we going to handle @import? */
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", "foo", 
-			origin, media, ctx->dict, myrealloc, NULL, &sheet) == CSS_OK);
+			origin, media, false, ctx->dict, myrealloc, NULL, 
+			&sheet) == CSS_OK);
 
 	/* Extend array of sheets and append new sheet to it */
 	temp = realloc(ctx->sheets, 
@@ -697,7 +698,7 @@ css_error named_ancestor_node(void *pw, void *n,
 	for (node = node->parent; node != NULL; node = node->parent) {
                 bool match;
 		assert(lwc_context_string_caseless_isequal(ctx->dict,
-                                                           name, node->name, &match) == lwc_error_ok);
+				name, node->name, &match) == lwc_error_ok);
                 if (match == true)
 			break;
 	}
@@ -718,8 +719,8 @@ css_error named_parent_node(void *pw, void *n,
 	if (node->parent != NULL) {
                 bool match;
                 assert(lwc_context_string_caseless_isequal(ctx->dict,
-                                                           name, node->parent->name,
-                                                           &match) == lwc_error_ok);
+				name, node->parent->name, &match) == 
+				lwc_error_ok);
                 if (match == true)
                         *parent = (void *) node->parent;
         }
@@ -738,8 +739,8 @@ css_error named_sibling_node(void *pw, void *n,
 	if (node->prev != NULL) {
                 bool match;
                 assert(lwc_context_string_caseless_isequal(ctx->dict,
-                                                           name, node->prev->name,
-                                                           &match) == lwc_error_ok);
+				name, node->prev->name, &match) == 
+				lwc_error_ok);
                 if (match == true)
                         *sibling = (void *) node->prev;
         }
@@ -779,8 +780,9 @@ css_error node_has_class(void *pw, void *n,
 
 	for (i = 0; i < node->n_attrs; i++) {
                 bool amatch;
-                assert(lwc_context_string_caseless_isequal(ctx->dict, node->attrs[i].name,
-                                                           ctx->attr_class, &amatch) == lwc_error_ok);
+                assert(lwc_context_string_caseless_isequal(ctx->dict, 
+				node->attrs[i].name, ctx->attr_class, 
+				&amatch) == lwc_error_ok);
                 if (amatch == true)
 			break;
 	}
@@ -804,8 +806,9 @@ css_error node_has_id(void *pw, void *n,
 
 	for (i = 0; i < node->n_attrs; i++) {
                 bool amatch;
-                assert(lwc_context_string_caseless_isequal(ctx->dict, node->attrs[i].name,
-                                                           ctx->attr_id, &amatch) == lwc_error_ok);
+		assert(lwc_context_string_caseless_isequal(ctx->dict, 
+				node->attrs[i].name, ctx->attr_id, &amatch) == 
+				lwc_error_ok);
                 if (amatch == true)
 			break;
 	}
@@ -829,8 +832,9 @@ css_error node_has_attribute(void *pw, void *n,
         
         *match = false;
 	for (i = 0; i < node->n_attrs; i++) {
-                assert(lwc_context_string_caseless_isequal(ctx->dict, node->attrs[i].name,
-                                                           name, match) == lwc_error_ok);
+                assert(lwc_context_string_caseless_isequal(ctx->dict, 
+				node->attrs[i].name, name, match) == 
+				lwc_error_ok);
                 if (*match == true)
                         break;
 	}
@@ -850,15 +854,17 @@ css_error node_has_attribute_equal(void *pw, void *n,
         *match = false;
         
 	for (i = 0; i < node->n_attrs; i++) {
-                assert(lwc_context_string_caseless_isequal(ctx->dict, node->attrs[i].name,
-                                                           name, match) == lwc_error_ok);
+                assert(lwc_context_string_caseless_isequal(ctx->dict, 
+				node->attrs[i].name, name, match) == 
+				lwc_error_ok);
                 if (*match == true)
                         break;
 	}
         
         if (*match == true) {
-                assert(lwc_context_string_caseless_isequal(ctx->dict, node->attrs[i].name,
-                                                           value, match) == lwc_error_ok);
+                assert(lwc_context_string_caseless_isequal(ctx->dict, 
+				node->attrs[i].name, value, match) == 
+				lwc_error_ok);
         }
         
 	return CSS_OK;
@@ -877,8 +883,9 @@ css_error node_has_attribute_includes(void *pw, void *n,
         *match = false;
         
 	for (i = 0; i < node->n_attrs; i++) {
-                assert(lwc_context_string_caseless_isequal(ctx->dict, node->attrs[i].name,
-                                                           name, match) == lwc_error_ok);
+                assert(lwc_context_string_caseless_isequal(ctx->dict, 
+				node->attrs[i].name, name, match) == 
+				lwc_error_ok);
                 if (*match == true)
                         break;
 	}
@@ -886,7 +893,8 @@ css_error node_has_attribute_includes(void *pw, void *n,
 	if (*match == true) {
 		const char *p;
 		const char *start = lwc_string_data(node->attrs[i].value);
-		const char *end = start + lwc_string_length(node->attrs[i].value);
+		const char *end = start + 
+				lwc_string_length(node->attrs[i].value);
                 
                 *match = false;
                 
@@ -894,8 +902,8 @@ css_error node_has_attribute_includes(void *pw, void *n,
 			if (*p == ' ') {
 				if ((size_t) (p - start) == vlen && 
 						strncasecmp(start,
-                                                            lwc_string_data(value), 
-                                                            vlen) == 0) {
+							lwc_string_data(value),
+							vlen) == 0) {
 					*match = true;
 					break;
 				}
@@ -921,8 +929,9 @@ css_error node_has_attribute_dashmatch(void *pw, void *n,
         *match = false;
         
 	for (i = 0; i < node->n_attrs; i++) {
-                assert(lwc_context_string_caseless_isequal(ctx->dict, node->attrs[i].name,
-                                                           name, match) == lwc_error_ok);
+                assert(lwc_context_string_caseless_isequal(ctx->dict, 
+				node->attrs[i].name, name, match) == 
+				lwc_error_ok);
                 if (*match == true)
                         break;
 	}
@@ -930,7 +939,8 @@ css_error node_has_attribute_dashmatch(void *pw, void *n,
 	if (*match == true) {
 		const char *p;
 		const char *start = lwc_string_data(node->attrs[i].value);
-		const char *end = start + lwc_string_length(node->attrs[i].value);
+		const char *end = start + 
+				lwc_string_length(node->attrs[i].value);
                 
                 *match = false;
                 
@@ -938,8 +948,8 @@ css_error node_has_attribute_dashmatch(void *pw, void *n,
 			if (*p == '-') {
 				if ((size_t) (p - start) == vlen && 
 						strncasecmp(start,
-                                                            lwc_string_data(value), 
-                                                            vlen) == 0) {
+							lwc_string_data(value), 
+							vlen) == 0) {
 					*match = true;
 					break;
 				}

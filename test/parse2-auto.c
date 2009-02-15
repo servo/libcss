@@ -176,7 +176,7 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
         lwc_context_ref(ctx);
         
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", NULL,
-			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, ctx,
+			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, false, ctx,
 			myrealloc, NULL, &sheet) == CSS_OK);
 
 	error = css_stylesheet_append_data(sheet, data, len);

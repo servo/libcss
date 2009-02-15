@@ -315,10 +315,13 @@ static inline css_error parse_important(css_language *c,
 static inline css_error parse_colour_specifier(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint32_t *result);
+static inline css_error parse_hash_colour(lwc_string *data, uint32_t *result);
 static inline css_error parse_unit_specifier(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint32_t default_unit,
 		css_fixed *length, uint32_t *unit);
+static inline css_error parse_unit_keyword(const char *ptr, size_t len, 
+		css_unit *unit);
 
 static inline css_error parse_border_side_color(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -6569,6 +6572,7 @@ css_error parse_colour_specifier(css_language *c,
 {
 	const css_token *token;
 	uint8_t r = 0, g = 0, b = 0;
+	css_error error;
 
 	UNUSED(c);
 
@@ -6583,38 +6587,36 @@ css_error parse_colour_specifier(css_language *c,
 	token = parserutils_vector_iterate(vector, ctx);
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
 			token->type != CSS_TOKEN_HASH &&
-			token->type != CSS_TOKEN_FUNCTION))
-		return CSS_INVALID;
+			token->type != CSS_TOKEN_FUNCTION)) {
+		if (c->sheet->quirks_allowed == false ||
+				(token->type != CSS_TOKEN_NUMBER && 
+				token->type != CSS_TOKEN_DIMENSION))
+			return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT) {
 		/** \todo Parse colour names */
-	} else if (token->type == CSS_TOKEN_HASH) {
-		if (lwc_string_length(token->idata) == 3 &&
-				isHex(lwc_string_data(token->idata)[0]) &&
-				isHex(lwc_string_data(token->idata)[1]) &&
-				isHex(lwc_string_data(token->idata)[2])) {
-			r = charToHex(lwc_string_data(token->idata)[0]);
-			g = charToHex(lwc_string_data(token->idata)[1]);
-			b = charToHex(lwc_string_data(token->idata)[2]);
 
-			r |= (r << 4);
-			g |= (g << 4);
-			b |= (b << 4);
-		} else if (lwc_string_length(token->idata) == 6 &&
-				isHex(lwc_string_data(token->idata)[0]) &&
-				isHex(lwc_string_data(token->idata)[1]) &&
-				isHex(lwc_string_data(token->idata)[2]) &&
-				isHex(lwc_string_data(token->idata)[3]) &&
-				isHex(lwc_string_data(token->idata)[4]) &&
-				isHex(lwc_string_data(token->idata)[5])) {
-			r = (charToHex(lwc_string_data(token->idata)[0]) << 4);
-			r |= charToHex(lwc_string_data(token->idata)[1]);
-			g = (charToHex(lwc_string_data(token->idata)[2]) << 4);
-			g |= charToHex(lwc_string_data(token->idata)[3]);
-			b = (charToHex(lwc_string_data(token->idata)[4]) << 4);
-			b |= charToHex(lwc_string_data(token->idata)[5]);
-		} else
-			return CSS_INVALID;
+		if (c->sheet->quirks_allowed) {
+			error = parse_hash_colour(token->idata, result);
+			if (error == CSS_OK)
+				c->sheet->quirks_used = true;
+			return error;
+		}
+	} else if (token->type == CSS_TOKEN_HASH) {
+		return parse_hash_colour(token->idata, result);
+	} else if (c->sheet->quirks_allowed && 
+			token->type == CSS_TOKEN_NUMBER) {
+		error = parse_hash_colour(token->idata, result);
+		if (error == CSS_OK)
+			c->sheet->quirks_used = true;
+		return error;
+	} else if (c->sheet->quirks_allowed && 
+			token->type == CSS_TOKEN_DIMENSION) {
+		error = parse_hash_colour(token->idata, result);
+		if (error == CSS_OK)
+			c->sheet->quirks_used = true;
+		return error;
 	} else if (token->type == CSS_TOKEN_FUNCTION) {
 		if (token->ilower == c->strings[RGB]) {
 			css_token_type valid = CSS_TOKEN_NUMBER;
@@ -6684,6 +6686,38 @@ css_error parse_colour_specifier(css_language *c,
 	return CSS_OK;
 }
 
+css_error parse_hash_colour(lwc_string *data, uint32_t *result)
+{
+	uint8_t r = 0, g = 0, b = 0;
+	size_t len = lwc_string_length(data);
+	const char *input = lwc_string_data(data);
+
+	if (len == 3 &&	isHex(input[0]) && isHex(input[1]) &&
+			isHex(input[2])) {
+		r = charToHex(input[0]);
+		g = charToHex(input[1]);
+		b = charToHex(input[2]);
+
+		r |= (r << 4);
+		g |= (g << 4);
+		b |= (b << 4);
+	} else if (len == 6 && isHex(input[0]) && isHex(input[1]) &&
+			isHex(input[2]) && isHex(input[3]) &&
+			isHex(input[4]) && isHex(input[5])) {
+		r = (charToHex(input[0]) << 4);
+		r |= charToHex(input[1]);
+		g = (charToHex(input[2]) << 4);
+		g |= charToHex(input[3]);
+		b = (charToHex(input[4]) << 4);
+		b |= charToHex(input[5]);
+	} else
+		return CSS_INVALID;
+
+	*result = (r << 24) | (g << 16) | (b << 8);
+
+	return CSS_OK;
+}
+
 css_error parse_unit_specifier(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint32_t default_unit,
@@ -6692,6 +6726,7 @@ css_error parse_unit_specifier(css_language *c,
 	const css_token *token;
 	css_fixed num;
 	size_t consumed = 0;
+	css_error error;
 
 	UNUSED(c);
 
@@ -6706,73 +6741,48 @@ css_error parse_unit_specifier(css_language *c,
 	num = number_from_lwc_string(token->idata, false, &consumed);
 
 	if (token->type == CSS_TOKEN_DIMENSION) {
-		if (lwc_string_length(token->idata) - consumed == 4) {
-			if (strncasecmp((char *) lwc_string_data(token->idata) + consumed, 
-					"grad", 4) == 0)
-				*unit = UNIT_GRAD;
-			else
-				return CSS_INVALID;
-		} else if (lwc_string_length(token->idata) - consumed == 3) {
-			if (strncasecmp((char *) lwc_string_data(token->idata) + consumed,
-					"kHz", 3) == 0)
-				*unit = UNIT_KHZ;
-			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
-					consumed, "deg", 3) == 0)
-				*unit = UNIT_DEG;
-			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
-					consumed, "rad", 3) == 0)
-				*unit = UNIT_RAD;
-			else
-				return CSS_INVALID;
-		} else if (lwc_string_length(token->idata) - consumed == 2) {
-			if (strncasecmp((char *) lwc_string_data(token->idata) + consumed,
-					"Hz", 2) == 0)
-				*unit = UNIT_HZ;
-			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
-					consumed, "ms", 2) == 0)
-				*unit = UNIT_MS;
-			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
-					consumed, "px", 2) == 0)
-				*unit = UNIT_PX;
-			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
-					consumed, "ex", 2) == 0)
-				*unit = UNIT_EX;
-			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
-					consumed, "em", 2) == 0)
-				*unit = UNIT_EM;
-			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
-					consumed, "in", 2) == 0)
-				*unit = UNIT_IN;
-			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
-					consumed, "cm", 2) == 0)
-				*unit = UNIT_CM;
-			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
-					consumed, "mm", 2) == 0)
-				*unit = UNIT_MM;
-			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
-					consumed, "pt", 2) == 0)
-				*unit = UNIT_PT;
-			else if (strncasecmp((char *) lwc_string_data(token->idata) + 
-					consumed, "pc", 2) == 0)
-				*unit = UNIT_PC;
-			else
-				return CSS_INVALID;
-		} else if (lwc_string_length(token->idata) - consumed == 1) {
-			if (strncasecmp((char *) lwc_string_data(token->idata) + consumed,
-					"s", 1) == 0)
-				*unit = UNIT_S;
-			else
-				return CSS_INVALID;
-		} else
-			return CSS_INVALID;
+		size_t len = lwc_string_length(token->idata);
+		const char *data = lwc_string_data(token->idata);
+
+		error = parse_unit_keyword(data + consumed, len - consumed, 
+				unit);
+		if (error != CSS_OK)
+			return error;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
-		/** \todo In quirks mode, non-zero units should be 
-		 * treated as default_unit too */
-		/** \todo also, in quirks mode, we need to cater for dimensions
-		 * separated from their units by whitespace (e.g. "0 px") */
-		if (num != 0)
-			return CSS_INVALID;
+		/* Non-zero values are permitted in quirks mode */
+		if (num != 0) {
+			if (c->sheet->quirks_allowed)
+				c->sheet->quirks_used = true;
+			else
+				return CSS_INVALID;
+		}
+
 		*unit = default_unit;
+
+		if (c->sheet->quirks_allowed) {
+			/* Also, in quirks mode, we need to cater for 
+			 * dimensions separated from their units by whitespace
+			 * (e.g. "0 px")
+			 */
+			int temp_ctx = *ctx;
+			uint32_t temp_unit;
+
+			consumeWhitespace(vector, &temp_ctx);
+
+			token = parserutils_vector_iterate(vector, &temp_ctx);
+			if (token != NULL && token->type == CSS_TOKEN_IDENT) {
+				error = parse_unit_keyword(
+						lwc_string_data(token->idata),
+						lwc_string_length(token->idata),
+						&temp_unit);
+				if (error == CSS_OK) {
+					c->sheet->quirks_used = true;
+					*ctx = temp_ctx;
+					*unit = temp_unit;
+				}
+			}
+		}
+
 	} else {
 		if (consumed != lwc_string_length(token->idata))
 			return CSS_INVALID;
@@ -6780,6 +6790,56 @@ css_error parse_unit_specifier(css_language *c,
 	}
 
 	*length = num;
+
+	return CSS_OK;
+}
+
+css_error parse_unit_keyword(const char *ptr, size_t len, css_unit *unit)
+{
+	if (len == 4) {
+		if (strncasecmp(ptr, "grad", 4) == 0)
+			*unit = UNIT_GRAD;
+		else
+			return CSS_INVALID;
+	} else if (len == 3) {
+		if (strncasecmp(ptr, "kHz", 3) == 0)
+			*unit = UNIT_KHZ;
+		else if (strncasecmp(ptr, "deg", 3) == 0)
+			*unit = UNIT_DEG;
+		else if (strncasecmp(ptr, "rad", 3) == 0)
+			*unit = UNIT_RAD;
+		else
+			return CSS_INVALID;
+	} else if (len == 2) {
+		if (strncasecmp(ptr, "Hz", 2) == 0)
+			*unit = UNIT_HZ;
+		else if (strncasecmp(ptr, "ms", 2) == 0)
+			*unit = UNIT_MS;
+		else if (strncasecmp(ptr, "px", 2) == 0)
+			*unit = UNIT_PX;
+		else if (strncasecmp(ptr, "ex", 2) == 0)
+			*unit = UNIT_EX;
+		else if (strncasecmp(ptr, "em", 2) == 0)
+			*unit = UNIT_EM;
+		else if (strncasecmp(ptr, "in", 2) == 0)
+			*unit = UNIT_IN;
+		else if (strncasecmp(ptr, "cm", 2) == 0)
+			*unit = UNIT_CM;
+		else if (strncasecmp(ptr, "mm", 2) == 0)
+			*unit = UNIT_MM;
+		else if (strncasecmp(ptr, "pt", 2) == 0)
+			*unit = UNIT_PT;
+		else if (strncasecmp(ptr, "pc", 2) == 0)
+			*unit = UNIT_PC;
+		else
+			return CSS_INVALID;
+	} else if (len == 1) {
+		if (strncasecmp(ptr, "s", 1) == 0)
+			*unit = UNIT_S;
+		else
+			return CSS_INVALID;
+	} else
+		return CSS_INVALID;
 
 	return CSS_OK;
 }
