@@ -1931,8 +1931,10 @@ css_error parseAny(css_parser *parser)
 			return error;
 
 		/* Match correct close bracket (grammar ambiguity) */
-		if (token->type == CSS_TOKEN_CHAR && lwc_string_length(token->ilower) == 1 &&
-				lwc_string_data(token->ilower)[0] == parser->match_char) {
+		if (token->type == CSS_TOKEN_CHAR && 
+				lwc_string_length(token->ilower) == 1 &&
+				lwc_string_data(token->ilower)[0] == 
+				parser->match_char) {
 			state->substate = WS2;
 			goto ws2;
 		}
@@ -1967,6 +1969,9 @@ css_error parseMalformedDeclaration(css_parser *parser)
 	}
 	case Go:
 		while (1) {
+			const char *data;
+			size_t len;
+
 			error = getToken(parser, &token);
 			if (error != CSS_OK)
 				return error;
@@ -1974,15 +1979,16 @@ css_error parseMalformedDeclaration(css_parser *parser)
 			if (token->type == CSS_TOKEN_EOF)
 				break;
 
-			if (token->type != CSS_TOKEN_CHAR || 
-					lwc_string_length(token->ilower) != 1 ||
-					(lwc_string_data(token->ilower)[0] != '{' &&
-					lwc_string_data(token->ilower)[0] != '}' &&
-					lwc_string_data(token->ilower)[0] != '[' &&
-					lwc_string_data(token->ilower)[0] != ']' &&
-					lwc_string_data(token->ilower)[0] != '(' &&
-					lwc_string_data(token->ilower)[0] != ')' &&
-					lwc_string_data(token->ilower)[0] != ';'))
+			if (token->type != CSS_TOKEN_CHAR)
+				continue;
+
+			len = lwc_string_length(token->ilower);
+			data = lwc_string_data(token->ilower);
+
+			if (len != 1 || (data[0] != '{' && data[0] != '}' &&
+					data[0] != '[' && data[0] != ']' &&
+					data[0] != '(' && data[0] != ')' &&
+					data[0] != ';'))
 				continue;
 
 			char want;
@@ -1992,17 +1998,16 @@ css_error parseMalformedDeclaration(css_parser *parser)
 			/* If the stack is empty, then we're done if we've got
 			 * either a ';' or '}' */
 			if (match == NULL) {
-				if (lwc_string_data(token->ilower)[0] == ';' ||
-						lwc_string_data(token->ilower)[0] == '}')
+				if (data[0] == ';' || data[0] == '}')
 					break;
 			}
 
 			/* Regardless, if we've got a semicolon, ignore it */
-			if (lwc_string_data(token->ilower)[0] == ';')
+			if (data[0] == ';')
 				continue;
 
 			/* Get corresponding start tokens for end tokens */
-			switch (lwc_string_data(token->ilower)[0]) {
+			switch (data[0]) {
 			case '}':
 				want = '{';
 				break;
@@ -2024,7 +2029,7 @@ css_error parseMalformedDeclaration(css_parser *parser)
 					parser->open_items, NULL);
 			} else if (want == 0) {
 				parserutils_stack_push(parser->open_items, 
-						&lwc_string_data(token->ilower)[0]);
+						&data[0]);
 			}
 		}
 	}
@@ -2061,6 +2066,9 @@ css_error parseMalformedSelector(css_parser *parser)
 		/* Fall through */
 	case Go:
 		while (1) {
+			const char *data;
+			size_t len;
+
 			error = getToken(parser, &token);
 			if (error != CSS_OK)
 				return error;
@@ -2068,14 +2076,15 @@ css_error parseMalformedSelector(css_parser *parser)
 			if (token->type == CSS_TOKEN_EOF)
 				break;
 
-			if (token->type != CSS_TOKEN_CHAR || 
-					lwc_string_length(token->ilower) != 1 ||
-					(lwc_string_data(token->ilower)[0] != '{' &&
-					lwc_string_data(token->ilower)[0] != '}' &&
-					lwc_string_data(token->ilower)[0] != '[' &&
-					lwc_string_data(token->ilower)[0] != ']' &&
-					lwc_string_data(token->ilower)[0] != '(' &&
-					lwc_string_data(token->ilower)[0] != ')'))
+			if (token->type != CSS_TOKEN_CHAR)
+				continue;
+
+			len = lwc_string_length(token->ilower);
+			data = lwc_string_data(token->ilower);
+
+			if (len != 1 || (data[0] != '{' && data[0] != '}' &&
+					data[0] != '[' && data[0] != ']' &&
+					data[0] != '(' && data[0] != ')'))
 				continue;
 
 			char want;
@@ -2083,7 +2092,7 @@ css_error parseMalformedSelector(css_parser *parser)
 					parser->open_items);
 
 			/* Get corresponding start tokens for end tokens */
-			switch (lwc_string_data(token->ilower)[0]) {
+			switch (data[0]) {
 			case '}':
 				want = '{';
 				break;
@@ -2105,7 +2114,7 @@ css_error parseMalformedSelector(css_parser *parser)
 					parser->open_items, NULL);
 			} else if (want == 0) {
 				parserutils_stack_push(parser->open_items, 
-						&lwc_string_data(token->ilower)[0]);
+						&data[0]);
 			}
 
 			/* If we encountered a '}', there was data on the stack
@@ -2154,6 +2163,9 @@ css_error parseMalformedAtRule(css_parser *parser)
 	}
 	case Go:
 		while (1) {
+			const char *data;
+			size_t len;
+
 			error = getToken(parser, &token);
 			if (error != CSS_OK)
 				return error;
@@ -2161,15 +2173,16 @@ css_error parseMalformedAtRule(css_parser *parser)
 			if (token->type == CSS_TOKEN_EOF)
 				break;
 
-			if (token->type != CSS_TOKEN_CHAR || 
-					lwc_string_length(token->ilower) != 1 ||
-					(lwc_string_data(token->ilower)[0] != '{' &&
-					lwc_string_data(token->ilower)[0] != '}' &&
-					lwc_string_data(token->ilower)[0] != '[' &&
-					lwc_string_data(token->ilower)[0] != ']' &&
-					lwc_string_data(token->ilower)[0] != '(' &&
-					lwc_string_data(token->ilower)[0] != ')' &&
-					lwc_string_data(token->ilower)[0] != ';'))
+			if (token->type != CSS_TOKEN_CHAR)
+				continue;
+
+			len = lwc_string_length(token->ilower);
+			data = lwc_string_data(token->ilower);
+
+			if (len != 1 || (data[0] != '{' && data[0] != '}' &&
+					data[0] != '[' && data[0] != ']' &&
+					data[0] != '(' && data[0] != ')' &&
+					data[0] != ';'))
 				continue;
 
 			char want;
@@ -2178,7 +2191,7 @@ css_error parseMalformedAtRule(css_parser *parser)
 
 			/* If we have a semicolon, then we're either done or
 			 * need to ignore it */
-			if (lwc_string_data(token->ilower)[0] == ';') {
+			if (data[0] == ';') {
 				if (match == NULL)
 					break;
 				else
@@ -2186,7 +2199,7 @@ css_error parseMalformedAtRule(css_parser *parser)
 			}
 
 			/* Get corresponding start tokens for end tokens */
-			switch (lwc_string_data(token->ilower)[0]) {
+			switch (data[0]) {
 			case '}':
 				want = '{';
 				break;
@@ -2208,7 +2221,7 @@ css_error parseMalformedAtRule(css_parser *parser)
 					parser->open_items, NULL);
 			} else if (want == 0) {
 				parserutils_stack_push(parser->open_items, 
-						&lwc_string_data(token->ilower)[0]);
+						&data[0]);
 			}
 
 			/* If we encountered a '}', there was data on the stack
