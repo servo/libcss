@@ -9,6 +9,7 @@
 
 #include <libcss/computed.h>
 
+#include "select/dispatch.h"
 #include "utils/utils.h"
 
 /**

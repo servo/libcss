@@ -8,6 +8,8 @@
 #ifndef css_select_propset_h_
 #define css_select_propset_h_
 
+#include <string.h>
+
 #include <libcss/computed.h>
 
 /* Important: keep this file in sync with computed.h */

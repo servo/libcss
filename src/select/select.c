@@ -14,8 +14,10 @@
 #include "bytecode/bytecode.h"
 #include "bytecode/opcodes.h"
 #include "stylesheet.h"
+#include "select/dispatch.h"
 #include "select/hash.h"
 #include "select/propset.h"
+#include "select/select.h"
 #include "utils/parserutilserror.h"
 #include "utils/utils.h"
 
@@ -30,46 +32,6 @@ struct css_select_ctx {
 	css_allocator_fn alloc;		/**< Allocation routine */
 	void *pw;			/**< Client-specific private data */
 };
-
-typedef struct prop_state {
-	uint32_t specificity;		/* Specificity of property in result */
-	uint32_t set       : 1,		/* Whether property is set in result */
-	         origin    : 2,		/* Origin of property in result */
-	         important : 1;		/* Importance of property in result */
-} prop_state;
-
-/**
- * Selection state
- */
-typedef struct css_select_state {
-	void *node;			/* Node we're selecting for */
-	uint32_t pseudo_element;	/* Pseudo element to select for */
-	uint64_t media;			/* Currently active media types */
-	css_computed_style *result;	/* Style to populate */
-
-	css_select_handler *handler;	/* Handler functions */
-	void *pw;			/* Client data for handlers */
-
-	const css_stylesheet *sheet;	/* Current sheet being processed */
-
-	css_origin current_origin;	/* Origin of current sheet */
-	uint32_t current_specificity;	/* Specificity of current rule */
-
-	/* Useful interned strings */
-	lwc_string *universal;
-	lwc_string *first_child;
-	lwc_string *link;
-	lwc_string *visited;
-	lwc_string *hover;
-	lwc_string *active;
-	lwc_string *focus;
-	lwc_string *first_line;
-	lwc_string *first_letter;
-	lwc_string *before;
-	lwc_string *after;
-
-	prop_state props[N_OPCODES];
-} css_select_state;
 
 static css_error select_from_sheet(css_select_ctx *ctx, 
 		const css_stylesheet *sheet, css_select_state *state);
@@ -92,134 +54,6 @@ static css_error match_detail(css_select_ctx *ctx, void *node,
 		const css_selector_detail *detail, css_select_state *state, 
 		bool *match);
 static css_error cascade_style(const css_style *style, css_select_state *state);
-static inline void advance_bytecode(css_style *style, uint32_t n_bytes);
-static bool outranks_existing(uint16_t op, bool important, 
-		css_select_state *state);
-
-/* Property handlers */
-#include "select/properties.c"
-
-/**
- * Enumeration of property groups
- */
-enum prop_group {
-	GROUP_NORMAL	= 0x0,
-	GROUP_UNCOMMON	= 0x1,
-	GROUP_PAGE	= 0x2,
-	GROUP_AURAL	= 0x3
-};
-
-/**
- * Dispatch table for properties, indexed by opcode
- */
-static struct prop_table {
-	css_error (*cascade)(uint32_t opv, css_style *style, 
-			css_select_state *state);
-	css_error (*initial)(css_computed_style *style);
-
-	uint32_t inherited : 1,
-	         group : 2;
-} properties[N_OPCODES] = {
-	{ cascade_azimuth,               initial_azimuth,               1, GROUP_AURAL},
-	{ cascade_background_attachment, initial_background_attachment, 0, GROUP_NORMAL },
-	{ cascade_background_color,      initial_background_color,      0, GROUP_NORMAL },
-	{ cascade_background_image,      initial_background_image,      0, GROUP_NORMAL },
-	{ cascade_background_position,   initial_background_position,   0, GROUP_NORMAL },
-	{ cascade_background_repeat,     initial_background_repeat,     0, GROUP_NORMAL },
-	{ cascade_border_collapse,       initial_border_collapse,       1, GROUP_NORMAL },
-	{ cascade_border_spacing,        initial_border_spacing,        1, GROUP_UNCOMMON },
-	{ cascade_border_top_color,      initial_border_top_color,      0, GROUP_NORMAL },
-	{ cascade_border_right_color,    initial_border_right_color,    0, GROUP_NORMAL },
-	{ cascade_border_bottom_color,   initial_border_bottom_color,   0, GROUP_NORMAL },
-	{ cascade_border_left_color,     initial_border_left_color,     0, GROUP_NORMAL },
-	{ cascade_border_top_style,      initial_border_top_style,      0, GROUP_NORMAL },
-	{ cascade_border_right_style,    initial_border_right_style,    0, GROUP_NORMAL },
-	{ cascade_border_bottom_style,   initial_border_bottom_style,   0, GROUP_NORMAL },
-	{ cascade_border_left_style,     initial_border_left_style,     0, GROUP_NORMAL },
-	{ cascade_border_top_width,      initial_border_top_width,      0, GROUP_NORMAL },
-	{ cascade_border_right_width,    initial_border_right_width,    0, GROUP_NORMAL },
-	{ cascade_border_bottom_width,   initial_border_bottom_width,   0, GROUP_NORMAL },
-	{ cascade_border_left_width,     initial_border_left_width,     0, GROUP_NORMAL },
-	{ cascade_bottom,                initial_bottom,                0, GROUP_NORMAL },
-	{ cascade_caption_side,          initial_caption_side,          1, GROUP_NORMAL },
-	{ cascade_clear,                 initial_clear,                 0, GROUP_NORMAL },
-	{ cascade_clip,                  initial_clip,                  0, GROUP_UNCOMMON },
-	{ cascade_color,                 initial_color,                 1, GROUP_NORMAL },
-	{ cascade_content,               initial_content,               0, GROUP_UNCOMMON },
-	{ cascade_counter_increment,     initial_counter_increment,     0, GROUP_UNCOMMON },
-	{ cascade_counter_reset,         initial_counter_reset,         0, GROUP_UNCOMMON },
-	{ cascade_cue_after,             initial_cue_after,             0, GROUP_AURAL },
-	{ cascade_cue_before,            initial_cue_before,            0, GROUP_AURAL },
-	{ cascade_cursor,                initial_cursor,                1, GROUP_UNCOMMON },
-	{ cascade_direction,             initial_direction,             1, GROUP_NORMAL },
-	{ cascade_display,               initial_display,               0, GROUP_NORMAL },
-	{ cascade_elevation,             initial_elevation,             1, GROUP_AURAL },
-	{ cascade_empty_cells,           initial_empty_cells,           1, GROUP_NORMAL },
-	{ cascade_float,                 initial_float,                 0, GROUP_NORMAL },
-	{ cascade_font_family,           initial_font_family,           1, GROUP_NORMAL },
-	{ cascade_font_size,             initial_font_size,             1, GROUP_NORMAL },
-	{ cascade_font_style,            initial_font_style,            1, GROUP_NORMAL },
-	{ cascade_font_variant,          initial_font_variant,          1, GROUP_NORMAL },
-	{ cascade_font_weight,           initial_font_weight,           1, GROUP_NORMAL },
-	{ cascade_height,                initial_height,                0, GROUP_NORMAL },
-	{ cascade_left,                  initial_left,                  0, GROUP_NORMAL },
-	{ cascade_letter_spacing,        initial_letter_spacing,        1, GROUP_UNCOMMON },
-	{ cascade_line_height,           initial_line_height,           1, GROUP_NORMAL },
-	{ cascade_list_style_image,      initial_list_style_image,      1, GROUP_NORMAL },
-	{ cascade_list_style_position,   initial_list_style_position,   1, GROUP_NORMAL },
-	{ cascade_list_style_type,       initial_list_style_type,       1, GROUP_NORMAL },
-	{ cascade_margin_top,            initial_margin_top,            0, GROUP_NORMAL },
-	{ cascade_margin_right,          initial_margin_right,          0, GROUP_NORMAL },
-	{ cascade_margin_bottom,         initial_margin_bottom,         0, GROUP_NORMAL },
-	{ cascade_margin_left,           initial_margin_left,           0, GROUP_NORMAL },
-	{ cascade_max_height,            initial_max_height,            0, GROUP_NORMAL },
-	{ cascade_max_width,             initial_max_width,             0, GROUP_NORMAL },
-	{ cascade_min_height,            initial_min_height,            0, GROUP_NORMAL },
-	{ cascade_min_width,             initial_min_width,             0, GROUP_NORMAL },
-	{ cascade_orphans,               initial_orphans,               1, GROUP_PAGE },
-	{ cascade_outline_color,         initial_outline_color,         0, GROUP_UNCOMMON },
-	{ cascade_outline_style,         initial_outline_style,         0, GROUP_NORMAL },
-	{ cascade_outline_width,         initial_outline_width,         0, GROUP_UNCOMMON },
-	{ cascade_overflow,              initial_overflow,              0, GROUP_NORMAL },
-	{ cascade_padding_top,           initial_padding_top,           0, GROUP_NORMAL },
-	{ cascade_padding_right,         initial_padding_right,         0, GROUP_NORMAL },
-	{ cascade_padding_bottom,        initial_padding_bottom,        0, GROUP_NORMAL },
-	{ cascade_padding_left,          initial_padding_left,          0, GROUP_NORMAL },
-	{ cascade_page_break_after,      initial_page_break_after,      0, GROUP_PAGE },
-	{ cascade_page_break_before,     initial_page_break_before,     0, GROUP_PAGE },
-	{ cascade_page_break_inside,     initial_page_break_inside,     1, GROUP_PAGE },
-	{ cascade_pause_after,           initial_pause_after,           0, GROUP_AURAL },
-	{ cascade_pause_before,          initial_pause_before,          0, GROUP_AURAL },
-	{ cascade_pitch_range,           initial_pitch_range,           1, GROUP_AURAL },
-	{ cascade_pitch,                 initial_pitch,                 1, GROUP_AURAL },
-	{ cascade_play_during,           initial_play_during,           0, GROUP_AURAL },
-	{ cascade_position,              initial_position,              0, GROUP_NORMAL },
-	{ cascade_quotes,                initial_quotes,                1, GROUP_UNCOMMON },
-	{ cascade_richness,              initial_richness,              1, GROUP_AURAL },
-	{ cascade_right,                 initial_right,                 0, GROUP_NORMAL },
-	{ cascade_speak_header,          initial_speak_header,          1, GROUP_AURAL },
-	{ cascade_speak_numeral,         initial_speak_numeral,         1, GROUP_AURAL },
-	{ cascade_speak_punctuation,     initial_speak_punctuation,     1, GROUP_AURAL },
-	{ cascade_speak,                 initial_speak,                 1, GROUP_AURAL },
-	{ cascade_speech_rate,           initial_speech_rate,           1, GROUP_AURAL },
-	{ cascade_stress,                initial_stress,                1, GROUP_AURAL },
-	{ cascade_table_layout,          initial_table_layout,          0, GROUP_NORMAL },
-	{ cascade_text_align,            initial_text_align,            1, GROUP_NORMAL },
-	{ cascade_text_decoration,       initial_text_decoration,       0, GROUP_NORMAL },
-	{ cascade_text_indent,           initial_text_indent,           1, GROUP_NORMAL },
-	{ cascade_text_transform,        initial_text_transform,        1, GROUP_NORMAL },
-	{ cascade_top,                   initial_top,                   0, GROUP_NORMAL },
-	{ cascade_unicode_bidi,          initial_unicode_bidi,          0, GROUP_NORMAL },
-	{ cascade_vertical_align,        initial_vertical_align,        0, GROUP_NORMAL },
-	{ cascade_visibility,            initial_visibility,            1, GROUP_NORMAL },
-	{ cascade_voice_family,          initial_voice_family,          1, GROUP_AURAL },
-	{ cascade_volume,                initial_volume,                1, GROUP_AURAL },
-	{ cascade_white_space,           initial_white_space,           1, GROUP_NORMAL },
-	{ cascade_widows,                initial_widows,                1, GROUP_PAGE },
-	{ cascade_width,                 initial_width,                 0, GROUP_NORMAL },
-	{ cascade_word_spacing,          initial_word_spacing,          1, GROUP_UNCOMMON },
-	{ cascade_z_index,               initial_z_index,               0, GROUP_NORMAL }
-};
 
 /**
  * Create a selection context
@@ -465,7 +299,7 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 		/* Do nothing if this property is inherited (the default state 
 		 * of a clean computed style is for everything to be set to 
 		 * inherit) */
-		if (properties[i].inherited)
+		if (prop_dispatch[i].inherited)
 			continue;
 
 		/* Remaining properties are neither inherited nor already set.
@@ -475,23 +309,23 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 		 * allocated. In that case, we do nothing and leave it to the 
 		 * property accessors to return the initial values for the 
 		 * property. */
-		if (properties[i].group == GROUP_NORMAL) {
-			error = properties[i].initial(result);
+		if (prop_dispatch[i].group == GROUP_NORMAL) {
+			error = prop_dispatch[i].initial(result);
 			if (error != CSS_OK)
 				goto cleanup;
-		} else if (properties[i].group == GROUP_UNCOMMON &&
+		} else if (prop_dispatch[i].group == GROUP_UNCOMMON &&
 				result->uncommon != NULL) {
-			error = properties[i].initial(result);
+			error = prop_dispatch[i].initial(result);
 			if (error != CSS_OK)
 				goto cleanup;
-		} else if (properties[i].group == GROUP_PAGE &&
+		} else if (prop_dispatch[i].group == GROUP_PAGE &&
 				result->page != NULL) {
-			error = properties[i].initial(result);
+			error = prop_dispatch[i].initial(result);
 			if (error != CSS_OK)
 				goto cleanup;
-		} else if (properties[i].group == GROUP_AURAL &&
+		} else if (prop_dispatch[i].group == GROUP_AURAL &&
 				result->aural != NULL) {
-			error = properties[i].initial(result);
+			error = prop_dispatch[i].initial(result);
 			if (error != CSS_OK)
 				goto cleanup;
 		}
@@ -689,7 +523,8 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 	css_error error;
 
 	/* Get node's name */
-	error = state->handler->node_name(state->pw, state->node, sheet->dictionary, &element);
+	error = state->handler->node_name(state->pw, state->node, 
+			sheet->dictionary, &element);
 	if (error != CSS_OK)
 		return error;
 
@@ -1007,18 +842,12 @@ css_error cascade_style(const css_style *style, css_select_state *state)
 
 		op = getOpcode(opv);
 
-		error = properties[op].cascade(opv, &s, state);
+		error = prop_dispatch[op].cascade(opv, &s, state);
 		if (error != CSS_OK)
 			return error;
 	}
 
 	return CSS_OK;
-}
-
-void advance_bytecode(css_style *style, uint32_t n_bytes)
-{
-	style->length -= n_bytes;
-	style->bytecode = ((uint8_t *) style->bytecode) + n_bytes;
 }
 
 bool outranks_existing(uint16_t op, bool important, css_select_state *state)

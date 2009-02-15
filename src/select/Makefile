@@ -35,7 +35,7 @@ d              := $(DIR)
 CFLAGS := $(CFLAGS) -I$(d)
 
 # Sources
-SRCS_$(d) := computed.c hash.c select.c
+SRCS_$(d) := computed.c dispatch.c hash.c properties.c select.c
 
 # Append to sources for component
 SOURCES += $(addprefix $(d), $(SRCS_$(d)))
