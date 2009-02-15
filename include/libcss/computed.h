@@ -183,7 +183,7 @@ struct css_computed_style {
  * Dimensions are encoded as a fixed point value + 4 bits of unit data
  *
  * background_color		  2		  4
- * background_image		  1		  sizeof(lwc_string)
+ * background_image		  1		  sizeof(ptr)
  * background_position		  1 + 2(4)	  2(4)
  * border_top_color		  2		  4
  * border_right_color		  2		  4
@@ -201,7 +201,7 @@ struct css_computed_style {
  * font_size			  4 + 4		  4
  * height			  2 + 4		  4
  * line_height			  2 + 4		  4
- * list_style_image		  1		  sizeof(lwc_string)
+ * list_style_image		  1		  sizeof(ptr)
  * margin_top			  2 + 4		  4
  * margin_right			  2 + 4		  4
  * margin_bottom		  2 + 4		  4
@@ -219,7 +219,7 @@ struct css_computed_style {
  * width			  2 + 4		  4
  * z_index			  2		  4
  * 				---		---
- *				181 bits	140 + 2sizeof(lwc_string) bytes
+ *				181 bits	140 + 2sizeof(ptr) bytes
  *
  * Encode font family as an array of string objects, terminated with a 
  * blank entry.
@@ -229,13 +229,11 @@ struct css_computed_style {
  * 				  3 bits	  sizeof(ptr)
  *
  * 				___		___
- *				267 bits	140 + 2sizeof(lwc_string) + 
- *							sizeof(ptr) bytes
+ *				267 bits	140 + 3sizeof(ptr) bytes
  *
- *				 34 bytes	140 + 2sizeof(lwc_string) +
- *				 			sizeof(ptr) bytes
+ *				 34 bytes	140 + 3sizeof(ptr) bytes
  *				===================
- *				174 + 2sizeof(lwc_string) + sizeof(ptr) bytes
+ *				174 + 3sizeof(ptr) bytes
  *
  * Bit allocations:
  *
