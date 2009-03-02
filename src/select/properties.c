@@ -461,6 +461,22 @@ css_error initial_border_top_color(css_computed_style *style)
 	return set_border_top_color(style, CSS_BORDER_COLOR_COLOR, 0);
 }
 
+css_error compose_border_top_color(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_colour color;
+
+	if (css_computed_border_top_color(child, &color) == 
+			CSS_BORDER_COLOR_INHERIT) {
+		uint8_t p = css_computed_border_top_color(parent, &color);
+
+		return set_border_top_color(result, p, color);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_border_right_color(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -471,6 +487,22 @@ css_error cascade_border_right_color(uint32_t opv, css_style *style,
 css_error initial_border_right_color(css_computed_style *style)
 {
 	return set_border_right_color(style, CSS_BORDER_COLOR_COLOR, 0);
+}
+
+css_error compose_border_right_color(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_colour color;
+
+	if (css_computed_border_right_color(child, &color) == 
+			CSS_BORDER_COLOR_INHERIT) {
+		uint8_t p = css_computed_border_right_color(parent, &color);
+
+		return set_border_right_color(result, p, color);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_border_bottom_color(uint32_t opv, css_style *style, 
@@ -485,6 +517,22 @@ css_error initial_border_bottom_color(css_computed_style *style)
 	return set_border_bottom_color(style, CSS_BORDER_COLOR_COLOR, 0);
 }
 
+css_error compose_border_bottom_color(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_colour color;
+
+	if (css_computed_border_bottom_color(child, &color) == 
+			CSS_BORDER_COLOR_INHERIT) {
+		uint8_t p = css_computed_border_bottom_color(parent, &color);
+
+		return set_border_bottom_color(result, p, color);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_border_left_color(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -495,6 +543,22 @@ css_error cascade_border_left_color(uint32_t opv, css_style *style,
 css_error initial_border_left_color(css_computed_style *style)
 {
 	return set_border_left_color(style, CSS_BORDER_COLOR_COLOR, 0);
+}
+
+css_error compose_border_left_color(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_colour color;
+
+	if (css_computed_border_left_color(child, &color) == 
+			CSS_BORDER_COLOR_INHERIT) {
+		uint8_t p = css_computed_border_left_color(parent, &color);
+
+		return set_border_left_color(result, p, color);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_border_top_style(uint32_t opv, css_style *style, 
@@ -508,6 +572,19 @@ css_error initial_border_top_style(css_computed_style *style)
 	return set_border_top_style(style, CSS_BORDER_STYLE_NONE);
 }
 
+css_error compose_border_top_style(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_border_top_style(child) == 
+			CSS_BORDER_STYLE_INHERIT) {
+		return set_border_top_style(result,
+				css_computed_border_top_style(parent));
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_border_right_style(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -517,6 +594,19 @@ css_error cascade_border_right_style(uint32_t opv, css_style *style,
 css_error initial_border_right_style(css_computed_style *style)
 {
 	return set_border_right_style(style, CSS_BORDER_STYLE_NONE);
+}
+
+css_error compose_border_right_style(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_border_right_style(child) == 
+			CSS_BORDER_STYLE_INHERIT) {
+		return set_border_right_style(result,
+				css_computed_border_right_style(parent));
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_border_bottom_style(uint32_t opv, css_style *style, 
@@ -530,6 +620,19 @@ css_error initial_border_bottom_style(css_computed_style *style)
 	return set_border_bottom_style(style, CSS_BORDER_STYLE_NONE);
 }
 
+css_error compose_border_bottom_style(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_border_bottom_style(child) == 
+			CSS_BORDER_STYLE_INHERIT) {
+		return set_border_bottom_style(result,
+				css_computed_border_bottom_style(parent));
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_border_left_style(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -539,6 +642,19 @@ css_error cascade_border_left_style(uint32_t opv, css_style *style,
 css_error initial_border_left_style(css_computed_style *style)
 {
 	return set_border_left_style(style, CSS_BORDER_STYLE_NONE);
+}
+
+css_error compose_border_left_style(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_border_left_style(child) == 
+			CSS_BORDER_STYLE_INHERIT) {
+		return set_border_left_style(result,
+				css_computed_border_left_style(parent));
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_border_top_width(uint32_t opv, css_style *style, 
@@ -553,6 +669,24 @@ css_error initial_border_top_width(css_computed_style *style)
 			0, CSS_UNIT_PX);
 }
 
+css_error compose_border_top_width(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_border_top_width(child, &length, &unit) == 
+			CSS_BORDER_WIDTH_INHERIT) {
+		uint8_t p = css_computed_border_top_width(parent, 
+				&length, &unit);
+
+		return set_border_top_width(result, p, length, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_border_right_width(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -563,6 +697,24 @@ css_error initial_border_right_width(css_computed_style *style)
 {
 	return set_border_right_width(style, CSS_BORDER_WIDTH_MEDIUM,
 			0, CSS_UNIT_PX);
+}
+
+css_error compose_border_right_width(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_border_right_width(child, &length, &unit) == 
+			CSS_BORDER_WIDTH_INHERIT) {
+		uint8_t p = css_computed_border_right_width(parent, 
+				&length, &unit);
+
+		return set_border_right_width(result, p, length, unit);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_border_bottom_width(uint32_t opv, css_style *style, 
@@ -577,6 +729,24 @@ css_error initial_border_bottom_width(css_computed_style *style)
 			0, CSS_UNIT_PX);
 }
 
+css_error compose_border_bottom_width(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_border_bottom_width(child, &length, &unit) == 
+			CSS_BORDER_WIDTH_INHERIT) {
+		uint8_t p = css_computed_border_bottom_width(parent, 
+				&length, &unit);
+
+		return set_border_bottom_width(result, p, length, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_border_left_width(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -587,6 +757,24 @@ css_error initial_border_left_width(css_computed_style *style)
 {
 	return set_border_left_width(style, CSS_BORDER_WIDTH_MEDIUM,
 			0, CSS_UNIT_PX);
+}
+
+css_error compose_border_left_width(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_border_left_width(child, &length, &unit) == 
+			CSS_BORDER_WIDTH_INHERIT) {
+		uint8_t p = css_computed_border_left_width(parent, 
+				&length, &unit);
+
+		return set_border_left_width(result, p, length, unit);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_bottom(uint32_t opv, css_style *style, 
