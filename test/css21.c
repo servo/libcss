@@ -4,12 +4,14 @@
 #include <libcss/libcss.h>
 #include "stylesheet.h"
 
-#include "dump.h"
-#include "testutils.h"
-
 #define ITERATIONS (1)
-#define DUMP_HASH (1)
 #define DUMP_CSS (1)
+
+#if DUMP_CSS
+#include "dump.h"
+#endif
+
+#include "testutils.h"
 
 static void *myrealloc(void *ptr, size_t len, void *pw)
 {

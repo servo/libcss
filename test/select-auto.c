@@ -407,7 +407,7 @@ void parse_sheet(line_ctx *ctx, const char *data, size_t len)
 {
 	const char *p;
 	const char *end = data + len;
-	css_origin origin;
+	css_origin origin = CSS_ORIGIN_AUTHOR;
 	uint64_t media = CSS_MEDIA_ALL;
 	css_stylesheet *sheet;
 	css_stylesheet **temp;
