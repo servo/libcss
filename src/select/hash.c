@@ -301,7 +301,7 @@ css_error css_selector_hash_iterate(css_selector_hash *hash,
  */
 uint32_t _hash(const css_selector *sel)
 {
-	return (uint32_t) (((uintptr_t) sel->data.name) & 0xffffffff);
+	return _hash_name(sel->data.name);
 }
 
 /**
