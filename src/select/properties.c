@@ -788,6 +788,23 @@ css_error initial_bottom(css_computed_style *style)
 	return set_bottom(style, CSS_BOTTOM_AUTO, 0, CSS_UNIT_PX);
 }
 
+css_error compose_bottom(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_bottom(child, &length, &unit) == 
+			CSS_BOTTOM_INHERIT) {
+		uint8_t p = css_computed_bottom(parent, &length, &unit);
+
+		return set_bottom(result, p, length, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_caption_side(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -1780,6 +1797,23 @@ css_error initial_left(css_computed_style *style)
 	return set_left(style, CSS_LEFT_AUTO, 0, CSS_UNIT_PX);
 }
 
+css_error compose_left(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_left(child, &length, &unit) == 
+			CSS_LEFT_INHERIT) {
+		uint8_t p = css_computed_left(parent, &length, &unit);
+
+		return set_left(result, p, length, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_letter_spacing(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2490,6 +2524,23 @@ css_error initial_right(css_computed_style *style)
 	return set_right(style, CSS_RIGHT_AUTO, 0, CSS_UNIT_PX);
 }
 
+css_error compose_right(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_right(child, &length, &unit) == 
+			CSS_RIGHT_INHERIT) {
+		uint8_t p = css_computed_right(parent, &length, &unit);
+
+		return set_right(result, p, length, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_speak_header(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2827,6 +2878,23 @@ css_error cascade_top(uint32_t opv, css_style *style,
 css_error initial_top(css_computed_style *style)
 {
 	return set_top(style, CSS_TOP_AUTO, 0, CSS_UNIT_PX);
+}
+
+css_error compose_top(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_top(child, &length, &unit) == 
+			CSS_TOP_INHERIT) {
+		uint8_t p = css_computed_top(parent, &length, &unit);
+
+		return set_top(result, p, length, unit);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_unicode_bidi(uint32_t opv, css_style *style, 
