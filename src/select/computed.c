@@ -106,12 +106,31 @@ css_error css_computed_style_compose(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	UNUSED(parent);
-	UNUSED(child);
-	UNUSED(result);
+	css_error error = CSS_OK;
+	size_t i;
 
-	/** \todo implement */
+	/* Iterate through the properties */
+	for (i = 0; i < N_OPCODES; i++) {
+		/* Skip any in extension blocks if the block does not exist */	
+		if (prop_dispatch[i].group == GROUP_UNCOMMON &&
+				parent->uncommon == NULL && 
+				child->uncommon == NULL)
+			continue;
 
-	return CSS_OK;
+		if (prop_dispatch[i].group == GROUP_PAGE &&
+				parent->page == NULL && child->page == NULL)
+			continue;
+
+		if (prop_dispatch[i].group == GROUP_AURAL &&
+				parent->aural == NULL && child->aural == NULL)
+			continue;
+
+		/* Compose the property */
+		error = prop_dispatch[i].compose(parent, child, result);
+		if (error != CSS_OK)
+			break;
+	}
+
+	return error;
 }
 
