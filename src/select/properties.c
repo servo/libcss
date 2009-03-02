@@ -103,6 +103,17 @@ css_error initial_azimuth(css_computed_style *style)
 	return CSS_OK;
 }
 
+css_error compose_azimuth(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
 css_error cascade_background_attachment(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -134,6 +145,19 @@ css_error initial_background_attachment(css_computed_style *style)
 			CSS_BACKGROUND_ATTACHMENT_SCROLL);
 }
 
+css_error compose_background_attachment(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_background_attachment(child) == 
+			CSS_BACKGROUND_ATTACHMENT_INHERIT) {
+		return set_background_attachment(result, 
+				css_computed_background_attachment(parent));
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_background_color(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -145,6 +169,22 @@ css_error initial_background_color(css_computed_style *style)
 	return set_background_color(style, CSS_BACKGROUND_COLOR_TRANSPARENT, 0);
 }
 
+css_error compose_background_color(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_colour color;
+
+	if (css_computed_background_color(child, &color) == 
+			CSS_BACKGROUND_COLOR_INHERIT) {
+		uint8_t p = css_computed_background_color(parent, &color);
+
+		return set_background_color(result, p, color);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_background_image(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -154,6 +194,22 @@ css_error cascade_background_image(uint32_t opv, css_style *style,
 css_error initial_background_image(css_computed_style *style)
 {
 	return set_background_image(style, CSS_BACKGROUND_IMAGE_NONE, NULL);
+}
+
+css_error compose_background_image(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	lwc_string *url;
+
+	if (css_computed_background_image(child, &url) == 
+			CSS_BACKGROUND_IMAGE_INHERIT) {
+		uint8_t p = css_computed_background_image(parent, &url);
+
+		return set_background_image(result, p, url);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_background_position(uint32_t opv, css_style *style, 
@@ -225,6 +281,26 @@ css_error initial_background_position(css_computed_style *style)
 			0, CSS_UNIT_PCT, 0, CSS_UNIT_PCT);
 }
 
+css_error compose_background_position(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed hlength = 0, vlength = 0;
+	css_unit hunit = CSS_UNIT_PX, vunit = CSS_UNIT_PX;
+
+	if (css_computed_background_position(child, &hlength, &hunit,
+			&vlength, &vunit) == CSS_BACKGROUND_POSITION_INHERIT) {
+		uint8_t p = css_computed_background_position(parent,
+				&hlength, &hunit, &vlength, &vunit);
+
+		return set_background_position(result, p, hlength, hunit,
+				vlength, vunit);
+	}
+
+	return CSS_OK;
+}
+
+
 css_error cascade_background_repeat(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -261,6 +337,19 @@ css_error initial_background_repeat(css_computed_style *style)
 	return set_background_repeat(style, CSS_BACKGROUND_REPEAT_REPEAT);
 }
 
+css_error compose_background_repeat(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_background_repeat(child) == 
+			CSS_BACKGROUND_REPEAT_INHERIT) {
+		return set_background_repeat(result,
+				css_computed_background_repeat(parent));
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_border_collapse(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -289,6 +378,19 @@ css_error cascade_border_collapse(uint32_t opv, css_style *style,
 css_error initial_border_collapse(css_computed_style *style)
 {
 	return set_border_collapse(style, CSS_BORDER_COLLAPSE_SEPARATE);
+}
+
+css_error compose_border_collapse(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_border_collapse(child) == 
+			CSS_BORDER_COLLAPSE_INHERIT) {
+		return set_border_collapse(result,
+				css_computed_border_collapse(parent));
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_border_spacing(uint32_t opv, css_style *style, 
@@ -325,6 +427,27 @@ css_error initial_border_spacing(css_computed_style *style)
 {
 	return set_border_spacing(style, CSS_BORDER_SPACING_SET,
 			0, CSS_UNIT_PX, 0, CSS_UNIT_PX);
+}
+
+css_error compose_border_spacing(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed hlength = 0, vlength = 0;
+	css_unit hunit = CSS_UNIT_PX, vunit = CSS_UNIT_PX;
+
+	if ((child->uncommon == NULL && parent->uncommon != NULL) || 
+			css_computed_border_spacing(child, 
+			&hlength, &hunit, &vlength, &vunit) == 
+			CSS_BORDER_SPACING_INHERIT) {
+		uint8_t p = css_computed_border_spacing(parent, 
+				&hlength, &hunit, &vlength, &vunit);
+
+		return set_border_spacing(result, p, hlength, hunit, 
+				vlength, vunit);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_border_top_color(uint32_t opv, css_style *style, 
