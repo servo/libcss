@@ -1157,6 +1157,47 @@ css_error initial_content(css_computed_style *style)
 	return set_content(style, CSS_CONTENT_NORMAL, NULL);
 }
 
+css_error compose_content(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_error error;
+	const css_computed_content_item *items = NULL;
+
+	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
+			css_computed_content(child, &items) ==
+				CSS_CONTENT_INHERIT) {
+		uint8_t p = css_computed_content(parent, &items);
+		size_t n_items = 0;
+		css_computed_content_item *copy = NULL;
+
+		if (p == CSS_CONTENT_SET) {
+			const css_computed_content_item *i;
+
+			for (i = items; i->type != CSS_COMPUTED_CONTENT_NONE; 
+					i++)
+				n_items++;
+
+			copy = result->alloc(NULL, (n_items + 1) * 
+					sizeof(css_computed_content_item),
+					result->pw);
+			if (i == NULL)
+				return CSS_NOMEM;
+
+			memcpy(copy, items, (n_items + 1) * 
+					sizeof(css_computed_content_item));
+		}
+
+		error = set_content(result, p, copy);
+		if (error != CSS_OK && copy != NULL)
+			result->alloc(copy, 0, result->pw);
+
+		return error;
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_counter_increment(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {	
