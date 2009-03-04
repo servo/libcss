@@ -1154,9 +1154,7 @@ css_error cascade_content(uint32_t opv, css_style *style,
 
 css_error initial_content(css_computed_style *style)
 {
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_content(style, CSS_CONTENT_NORMAL, NULL);
 }
 
 css_error cascade_counter_increment(uint32_t opv, css_style *style, 
