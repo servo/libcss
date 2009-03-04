@@ -501,7 +501,7 @@ static inline uint8_t css_computed_word_spacing(
 #define COUNTER_INCREMENT_MASK  0x2
 static inline uint8_t css_computed_counter_increment(
 		const css_computed_style *style, 
-		css_computed_counter **counters)
+		const css_computed_counter **counters)
 {
 	if (style->uncommon != NULL) {
 		uint8_t bits = style->uncommon->bits[COUNTER_INCREMENT_INDEX];
@@ -525,7 +525,7 @@ static inline uint8_t css_computed_counter_increment(
 #define COUNTER_RESET_MASK  0x1
 static inline uint8_t css_computed_counter_reset(
 		const css_computed_style *style, 
-		css_computed_counter **counters)
+		const css_computed_counter **counters)
 {
 	if (style->uncommon != NULL) {
 		uint8_t bits = style->uncommon->bits[COUNTER_RESET_INDEX];

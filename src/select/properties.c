@@ -1181,7 +1181,7 @@ css_error compose_content(const css_computed_style *parent,
 			copy = result->alloc(NULL, (n_items + 1) * 
 					sizeof(css_computed_content_item),
 					result->pw);
-			if (i == NULL)
+			if (copy == NULL)
 				return CSS_NOMEM;
 
 			memcpy(copy, items, (n_items + 1) * 
@@ -1210,6 +1210,46 @@ css_error initial_counter_increment(css_computed_style *style)
 	return set_counter_increment(style, CSS_COUNTER_INCREMENT_NONE, NULL);
 }
 
+css_error compose_counter_increment(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_error error;
+	const css_computed_counter *items = NULL;
+
+	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
+			css_computed_counter_increment(child, &items) ==
+				CSS_COUNTER_INCREMENT_INHERIT) {
+		uint8_t p = css_computed_counter_increment(parent, &items);
+		size_t n_items = 0;
+		css_computed_counter *copy = NULL;
+
+		if (p == CSS_COUNTER_INCREMENT_NAMED && items != NULL) {
+			const css_computed_counter *i;
+
+			for (i = items; i->name != NULL; i++)
+				n_items++;
+
+			copy = result->alloc(NULL, (n_items + 1) * 
+					sizeof(css_computed_counter),
+					result->pw);
+			if (copy == NULL)
+				return CSS_NOMEM;
+
+			memcpy(copy, items, (n_items + 1) * 
+					sizeof(css_computed_counter));
+		}
+
+		error = set_counter_increment(result, p, copy);
+		if (error != CSS_OK && copy != NULL)
+			result->alloc(copy, 0, result->pw);
+
+		return error;
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_counter_reset(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -1220,6 +1260,46 @@ css_error cascade_counter_reset(uint32_t opv, css_style *style,
 css_error initial_counter_reset(css_computed_style *style)
 {
 	return set_counter_reset(style, CSS_COUNTER_RESET_NONE, NULL);
+}
+
+css_error compose_counter_reset(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_error error;
+	const css_computed_counter *items = NULL;
+
+	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
+			css_computed_counter_reset(child, &items) ==
+				CSS_COUNTER_RESET_INHERIT) {
+		uint8_t p = css_computed_counter_reset(parent, &items);
+		size_t n_items = 0;
+		css_computed_counter *copy = NULL;
+
+		if (p == CSS_COUNTER_RESET_NAMED && items != NULL) {
+			const css_computed_counter *i;
+
+			for (i = items; i->name != NULL; i++)
+				n_items++;
+
+			copy = result->alloc(NULL, (n_items + 1) * 
+					sizeof(css_computed_counter),
+					result->pw);
+			if (copy == NULL)
+				return CSS_NOMEM;
+
+			memcpy(copy, items, (n_items + 1) * 
+					sizeof(css_computed_counter));
+		}
+
+		error = set_counter_reset(result, p, copy);
+		if (error != CSS_OK && copy != NULL)
+			result->alloc(copy, 0, result->pw);
+
+		return error;
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_cue_after(uint32_t opv, css_style *style, 
