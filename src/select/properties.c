@@ -1316,6 +1316,17 @@ css_error initial_cue_after(css_computed_style *style)
 	return CSS_OK;
 }
 
+css_error compose_cue_after(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
 css_error cascade_cue_before(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -1326,6 +1337,17 @@ css_error cascade_cue_before(uint32_t opv, css_style *style,
 css_error initial_cue_before(css_computed_style *style)
 {
 	UNUSED(style);
+
+	return CSS_OK;
+}
+
+css_error compose_cue_before(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
 
 	return CSS_OK;
 }
@@ -1453,6 +1475,46 @@ css_error cascade_cursor(uint32_t opv, css_style *style,
 css_error initial_cursor(css_computed_style *style)
 {
 	return set_cursor(style, CSS_CURSOR_AUTO, NULL);
+}
+
+css_error compose_cursor(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_error error;
+	lwc_string **urls = NULL;
+
+	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
+			css_computed_cursor(child, &urls) ==
+				CSS_CURSOR_INHERIT) {
+		uint8_t p = css_computed_cursor(parent, &urls);
+		size_t n_urls = 0;
+		lwc_string **copy = NULL;
+
+		if (urls != NULL) {
+			lwc_string **i;
+
+			for (i = urls; (*i) != NULL; i++)
+				n_urls++;
+
+			copy = result->alloc(NULL, (n_urls + 1) * 
+					sizeof(lwc_string *),
+					result->pw);
+			if (copy == NULL)
+				return CSS_NOMEM;
+
+			memcpy(copy, urls, (n_urls + 1) * 
+					sizeof(lwc_string *));
+		}
+
+		error = set_cursor(result, p, copy);
+		if (error != CSS_OK && copy != NULL)
+			result->alloc(copy, 0, result->pw);
+
+		return error;
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_direction(uint32_t opv, css_style *style, 
