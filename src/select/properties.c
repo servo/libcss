@@ -835,6 +835,19 @@ css_error initial_caption_side(css_computed_style *style)
 	return set_caption_side(style, CSS_CAPTION_SIDE_TOP);
 }
 
+css_error compose_caption_side(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_caption_side(child) == 
+			CSS_CAPTION_SIDE_INHERIT) {
+		return set_caption_side(result, 
+				css_computed_caption_side(parent));
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_clear(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -869,6 +882,17 @@ css_error cascade_clear(uint32_t opv, css_style *style,
 css_error initial_clear(css_computed_style *style)
 {
 	return set_clear(style, CSS_CLEAR_NONE);
+}
+
+css_error compose_clear(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_clear(child) == CSS_CLEAR_INHERIT) {
+		return set_clear(result, css_computed_clear(parent));
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_clip(uint32_t opv, css_style *style, 
@@ -937,6 +961,24 @@ css_error initial_clip(css_computed_style *style)
 	return set_clip(style, CSS_CLIP_AUTO, &rect);
 }
 
+css_error compose_clip(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_computed_clip_rect rect = { 0, 0, 0, 0, 
+			CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX,
+			false, false, false, false };
+
+	if ((child->uncommon == NULL && parent->uncommon != NULL) || 
+			css_computed_clip(child, &rect) ==
+				CSS_CLIP_INHERIT) {
+		uint8_t p = css_computed_clip(parent, &rect);
+		return set_clip(result, p, &rect);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_color(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -959,6 +1001,21 @@ css_error cascade_color(uint32_t opv, css_style *style,
 css_error initial_color(css_computed_style *style)
 {
 	return set_color(style, CSS_COLOR_COLOR, 0);
+}
+
+css_error compose_color(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_colour color;
+
+	if (css_computed_color(child, &color) == CSS_COLOR_INHERIT) {
+		uint8_t p = css_computed_color(parent, &color);
+
+		return set_color(result, p, color);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_content(uint32_t opv, css_style *style, 
