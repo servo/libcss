@@ -3961,6 +3961,18 @@ css_error initial_unicode_bidi(css_computed_style *style)
 	return set_unicode_bidi(style, CSS_UNICODE_BIDI_NORMAL);
 }
 
+css_error compose_unicode_bidi(const css_computed_style *parent,	
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_unicode_bidi(child) == CSS_UNICODE_BIDI_INHERIT) {
+		return set_unicode_bidi(result, 
+				css_computed_unicode_bidi(parent));
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_vertical_align(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -4018,6 +4030,23 @@ css_error initial_vertical_align(css_computed_style *style)
 			0, CSS_UNIT_PX);
 }
 
+css_error compose_vertical_align(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_vertical_align(child, &length, &unit) ==
+			CSS_VERTICAL_ALIGN_INHERIT) {
+		uint8_t p = css_computed_vertical_align(parent, &length, &unit);
+
+		return set_vertical_align(result, p, length, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_visibility(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -4049,6 +4078,17 @@ css_error cascade_visibility(uint32_t opv, css_style *style,
 css_error initial_visibility(css_computed_style *style)
 {
 	return set_visibility(style, CSS_VISIBILITY_VISIBLE);
+}
+
+css_error compose_visibility(const css_computed_style *parent,	
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_visibility(child) == CSS_VISIBILITY_INHERIT) {
+		return set_visibility(result, css_computed_visibility(parent));
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_voice_family(uint32_t opv, css_style *style, 
@@ -4150,6 +4190,17 @@ css_error initial_voice_family(css_computed_style *style)
 	return CSS_OK;
 }
 
+css_error compose_voice_family(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
 css_error cascade_volume(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -4198,6 +4249,17 @@ css_error initial_volume(css_computed_style *style)
 	return CSS_OK;
 }
 
+css_error compose_volume(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
 css_error cascade_white_space(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -4237,6 +4299,18 @@ css_error initial_white_space(css_computed_style *style)
 	return set_white_space(style, CSS_WHITE_SPACE_NORMAL);
 }
 
+css_error compose_white_space(const css_computed_style *parent,	
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_white_space(child) == CSS_WHITE_SPACE_INHERIT) {
+		return set_white_space(result, 
+				css_computed_white_space(parent));
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_widows(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -4247,6 +4321,17 @@ css_error cascade_widows(uint32_t opv, css_style *style,
 css_error initial_widows(css_computed_style *style)
 {
 	UNUSED(style);
+
+	return CSS_OK;
+}
+
+css_error compose_widows(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
 
 	return CSS_OK;
 }
