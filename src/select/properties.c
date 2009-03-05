@@ -2575,6 +2575,23 @@ css_error initial_max_height(css_computed_style *style)
 	return set_max_height(style, CSS_MAX_HEIGHT_NONE, 0, CSS_UNIT_PX);
 }
 
+css_error compose_max_height(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_max_height(child, &length, &unit) ==
+			CSS_MAX_HEIGHT_INHERIT) {
+		uint8_t p = css_computed_max_height(parent, &length, &unit);
+
+		return set_max_height(result, p, length, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_max_width(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2584,6 +2601,23 @@ css_error cascade_max_width(uint32_t opv, css_style *style,
 css_error initial_max_width(css_computed_style *style)
 {
 	return set_max_width(style, CSS_MAX_WIDTH_NONE, 0, CSS_UNIT_PX);
+}
+
+css_error compose_max_width(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_max_width(child, &length, &unit) ==
+			CSS_MAX_WIDTH_INHERIT) {
+		uint8_t p = css_computed_max_width(parent, &length, &unit);
+
+		return set_max_width(result, p, length, unit);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_min_height(uint32_t opv, css_style *style, 
@@ -2597,6 +2631,23 @@ css_error initial_min_height(css_computed_style *style)
 	return set_min_height(style, CSS_MIN_HEIGHT_SET, 0, CSS_UNIT_PX);
 }
 
+css_error compose_min_height(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_min_height(child, &length, &unit) ==
+			CSS_MIN_HEIGHT_INHERIT) {
+		uint8_t p = css_computed_min_height(parent, &length, &unit);
+
+		return set_min_height(result, p, length, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_min_width(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2606,6 +2657,23 @@ css_error cascade_min_width(uint32_t opv, css_style *style,
 css_error initial_min_width(css_computed_style *style)
 {
 	return set_min_width(style, CSS_MIN_WIDTH_SET, 0, CSS_UNIT_PX);
+}
+
+css_error compose_min_width(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_min_width(child, &length, &unit) ==
+			CSS_MIN_WIDTH_INHERIT) {
+		uint8_t p = css_computed_min_width(parent, &length, &unit);
+
+		return set_min_width(result, p, length, unit);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_orphans(uint32_t opv, css_style *style, 
