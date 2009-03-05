@@ -2690,6 +2690,17 @@ css_error initial_orphans(css_computed_style *style)
 	return CSS_OK;
 }
 
+css_error compose_orphans(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
 css_error cascade_outline_color(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2721,6 +2732,23 @@ css_error initial_outline_color(css_computed_style *style)
 	return set_outline_color(style, CSS_OUTLINE_COLOR_INVERT, 0);
 }
 
+css_error compose_outline_color(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_colour color = 0;
+
+	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
+			css_computed_outline_color(child, &color) ==
+			CSS_OUTLINE_COLOR_INHERIT) {
+		uint8_t p = css_computed_outline_color(parent, &color);
+
+		return set_outline_color(result, p, color);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_outline_style(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2730,6 +2758,18 @@ css_error cascade_outline_style(uint32_t opv, css_style *style,
 css_error initial_outline_style(css_computed_style *style)
 {
 	return set_outline_style(style, CSS_OUTLINE_STYLE_NONE);
+}
+
+css_error compose_outline_style(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_outline_style(child) == CSS_OUTLINE_STYLE_INHERIT) {
+		return set_outline_style(result, 
+				css_computed_outline_style(parent));
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_outline_width(uint32_t opv, css_style *style, 
@@ -2742,6 +2782,24 @@ css_error initial_outline_width(css_computed_style *style)
 {
 	return set_outline_width(style, CSS_OUTLINE_WIDTH_MEDIUM,
 			0, CSS_UNIT_PX);
+}
+
+css_error compose_outline_width(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
+			css_computed_outline_width(child, &length, &unit) ==
+			CSS_OUTLINE_WIDTH_INHERIT) {
+		uint8_t p = css_computed_outline_width(parent, &length, &unit);
+
+		return set_outline_width(result, p, length, unit);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_overflow(uint32_t opv, css_style *style, 
