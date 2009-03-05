@@ -2838,6 +2838,17 @@ css_error initial_overflow(css_computed_style *style)
 	return set_overflow(style, CSS_OVERFLOW_VISIBLE);
 }
 
+css_error compose_overflow(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_overflow(child) == CSS_OVERFLOW_INHERIT) {
+		return set_overflow(result, css_computed_overflow(parent));
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_padding_top(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2847,6 +2858,23 @@ css_error cascade_padding_top(uint32_t opv, css_style *style,
 css_error initial_padding_top(css_computed_style *style)
 {
 	return set_padding_top(style, CSS_PADDING_SET, 0, CSS_UNIT_PX);
+}
+
+css_error compose_padding_top(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_padding_top(child, &length, &unit) ==
+			CSS_PADDING_INHERIT) {
+		uint8_t p = css_computed_padding_top(parent, &length, &unit);
+
+		return set_padding_top(result, p, length, unit);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_padding_right(uint32_t opv, css_style *style, 
@@ -2860,6 +2888,23 @@ css_error initial_padding_right(css_computed_style *style)
 	return set_padding_right(style, CSS_PADDING_SET, 0, CSS_UNIT_PX);
 }
 
+css_error compose_padding_right(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_padding_right(child, &length, &unit) ==
+			CSS_PADDING_INHERIT) {
+		uint8_t p = css_computed_padding_right(parent, &length, &unit);
+
+		return set_padding_right(result, p, length, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_padding_bottom(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2871,6 +2916,23 @@ css_error initial_padding_bottom(css_computed_style *style)
 	return set_padding_bottom(style, CSS_PADDING_SET, 0, CSS_UNIT_PX);
 }
 
+css_error compose_padding_bottom(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_padding_bottom(child, &length, &unit) ==
+			CSS_PADDING_INHERIT) {
+		uint8_t p = css_computed_padding_bottom(parent, &length, &unit);
+
+		return set_padding_bottom(result, p, length, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_padding_left(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2880,6 +2942,23 @@ css_error cascade_padding_left(uint32_t opv, css_style *style,
 css_error initial_padding_left(css_computed_style *style)
 {
 	return set_padding_left(style, CSS_PADDING_SET, 0, CSS_UNIT_PX);
+}
+
+css_error compose_padding_left(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_padding_left(child, &length, &unit) ==
+			CSS_PADDING_INHERIT) {
+		uint8_t p = css_computed_padding_left(parent, &length, &unit);
+
+		return set_padding_left(result, p, length, unit);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_page_break_after(uint32_t opv, css_style *style, 
