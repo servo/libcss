@@ -3264,6 +3264,17 @@ css_error initial_position(css_computed_style *style)
 	return set_position(style, CSS_POSITION_STATIC);
 }
 
+css_error compose_position(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_position(child) == CSS_POSITION_INHERIT) {
+		return set_position(result, css_computed_position(parent));
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_quotes(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3335,6 +3346,46 @@ css_error cascade_quotes(uint32_t opv, css_style *style,
 css_error initial_quotes(css_computed_style *style)
 {
 	return set_quotes(style, CSS_QUOTES_DEFAULT, NULL);
+}
+
+css_error compose_quotes(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_error error;
+	lwc_string **quotes = NULL;
+
+	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
+			css_computed_quotes(child, &quotes) ==
+				CSS_QUOTES_INHERIT) {
+		uint8_t p = css_computed_quotes(parent, &quotes);
+		size_t n_quotes = 0;
+		lwc_string **copy = NULL;
+
+		if (quotes != NULL) {
+			lwc_string **i;
+
+			for (i = quotes; (*i) != NULL; i++)
+				n_quotes++;
+
+			copy = result->alloc(NULL, (n_quotes + 1) * 
+					sizeof(lwc_string *),
+					result->pw);
+			if (copy == NULL)
+				return CSS_NOMEM;
+
+			memcpy(copy, quotes, (n_quotes + 1) * 
+					sizeof(lwc_string *));
+		}
+
+		error = set_quotes(result, p, copy);
+		if (error != CSS_OK && copy != NULL)
+			result->alloc(copy, 0, result->pw);
+
+		return error;
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_richness(uint32_t opv, css_style *style, 
