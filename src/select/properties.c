@@ -1547,6 +1547,17 @@ css_error initial_direction(css_computed_style *style)
 	return set_direction(style, CSS_DIRECTION_LTR);
 }
 
+css_error compose_direction(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_direction(child) == CSS_DIRECTION_INHERIT) {
+		return set_direction(result, css_computed_direction(parent));
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_display(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -1619,6 +1630,17 @@ css_error initial_display(css_computed_style *style)
 	return set_display(style, CSS_DISPLAY_INLINE);
 }
 
+css_error compose_display(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_display(child) == CSS_DISPLAY_INHERIT) {
+		return set_display(result, css_computed_display(parent));
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_elevation(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -1661,6 +1683,17 @@ css_error initial_elevation(css_computed_style *style)
 	return CSS_OK;
 }
 
+css_error compose_elevation(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
 css_error cascade_empty_cells(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -1689,6 +1722,18 @@ css_error cascade_empty_cells(uint32_t opv, css_style *style,
 css_error initial_empty_cells(css_computed_style *style)
 {
 	return set_empty_cells(style, CSS_EMPTY_CELLS_SHOW);
+}
+
+css_error compose_empty_cells(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_empty_cells(child) == CSS_EMPTY_CELLS_INHERIT) {
+		return set_empty_cells(result, 
+				css_computed_empty_cells(parent));
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_float(uint32_t opv, css_style *style, 
@@ -1722,6 +1767,17 @@ css_error cascade_float(uint32_t opv, css_style *style,
 css_error initial_float(css_computed_style *style)
 {
 	return set_float(style, CSS_FLOAT_NONE);
+}
+
+css_error compose_float(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_float(child) == CSS_FLOAT_INHERIT) {
+		return set_float(result, css_computed_float(parent));
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_font_family(uint32_t opv, css_style *style, 
