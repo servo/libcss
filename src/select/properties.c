@@ -1981,6 +1981,22 @@ css_error initial_font_size(css_computed_style *style)
 	return set_font_size(style, CSS_FONT_SIZE_MEDIUM, 0, CSS_UNIT_PX);
 }
 
+css_error compose_font_size(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed size = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_font_size(child, &size, &unit) ==
+			CSS_FONT_SIZE_INHERIT) {
+		uint8_t p = css_computed_font_size(parent, &size, &unit);
+		return set_font_size(result, p, size, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_font_style(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2014,6 +2030,17 @@ css_error initial_font_style(css_computed_style *style)
 	return set_font_style(style, CSS_FONT_STYLE_NORMAL);
 }
 
+css_error compose_font_style(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_font_style(child) == CSS_FONT_STYLE_INHERIT) {
+		return set_font_style(result, css_computed_font_style(parent));
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_font_variant(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2042,6 +2069,18 @@ css_error cascade_font_variant(uint32_t opv, css_style *style,
 css_error initial_font_variant(css_computed_style *style)
 {
 	return set_font_variant(style, CSS_FONT_VARIANT_NORMAL);
+}
+
+css_error compose_font_variant(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_font_variant(child) == CSS_FONT_VARIANT_INHERIT) {
+		return set_font_variant(result, 
+				css_computed_font_variant(parent));
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_font_weight(uint32_t opv, css_style *style, 
@@ -2105,6 +2144,18 @@ css_error cascade_font_weight(uint32_t opv, css_style *style,
 css_error initial_font_weight(css_computed_style *style)
 {
 	return set_font_weight(style, CSS_FONT_WEIGHT_NORMAL);
+}
+
+css_error compose_font_weight(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_font_weight(child) == CSS_FONT_WEIGHT_INHERIT) {
+		return set_font_weight(result, 
+				css_computed_font_weight(parent));
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_height(uint32_t opv, css_style *style, 
