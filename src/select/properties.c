@@ -1883,6 +1883,44 @@ css_error initial_font_family(css_computed_style *style)
 	return set_font_family(style, CSS_FONT_FAMILY_DEFAULT, NULL);
 }
 
+css_error compose_font_family(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_error error;
+	lwc_string **urls = NULL;
+
+	if (css_computed_font_family(child, &urls) == CSS_FONT_FAMILY_INHERIT) {
+		uint8_t p = css_computed_font_family(parent, &urls);
+		size_t n_urls = 0;
+		lwc_string **copy = NULL;
+
+		if (urls != NULL) {
+			lwc_string **i;
+
+			for (i = urls; (*i) != NULL; i++)
+				n_urls++;
+
+			copy = result->alloc(NULL, (n_urls + 1) * 
+					sizeof(lwc_string *),
+					result->pw);
+			if (copy == NULL)
+				return CSS_NOMEM;
+
+			memcpy(copy, urls, (n_urls + 1) * 
+					sizeof(lwc_string *));
+		}
+
+		error = set_font_family(result, p, copy);
+		if (error != CSS_OK && copy != NULL)
+			result->alloc(copy, 0, result->pw);
+
+		return error;
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_font_size(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
