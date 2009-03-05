@@ -3716,6 +3716,18 @@ css_error initial_table_layout(css_computed_style *style)
 	return set_table_layout(style, CSS_TABLE_LAYOUT_AUTO);
 }
 
+css_error compose_table_layout(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_table_layout(child) == CSS_TABLE_LAYOUT_INHERIT) {
+		return set_table_layout(result,
+				css_computed_table_layout(parent));
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_text_align(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3750,6 +3762,17 @@ css_error cascade_text_align(uint32_t opv, css_style *style,
 css_error initial_text_align(css_computed_style *style)
 {
 	return set_text_align(style, CSS_TEXT_ALIGN_DEFAULT);
+}
+
+css_error compose_text_align(const css_computed_style *parent,	
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_text_align(child) == CSS_TEXT_ALIGN_INHERIT) {
+		return set_text_align(result, css_computed_text_align(parent));
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_text_decoration(uint32_t opv, css_style *style, 
@@ -3788,6 +3811,19 @@ css_error initial_text_decoration(css_computed_style *style)
 	return set_text_decoration(style, CSS_TEXT_DECORATION_NONE);
 }
 
+css_error compose_text_decoration(const css_computed_style *parent,	
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_text_decoration(child) == 
+			CSS_TEXT_DECORATION_INHERIT) {
+		return set_text_decoration(result, 
+				css_computed_text_decoration(parent));
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_text_indent(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3797,6 +3833,23 @@ css_error cascade_text_indent(uint32_t opv, css_style *style,
 css_error initial_text_indent(css_computed_style *style)
 {
 	return set_text_indent(style, CSS_TEXT_INDENT_SET, 0, CSS_UNIT_PX);
+}
+
+css_error compose_text_indent(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_text_indent(child, &length, &unit) ==
+			CSS_TEXT_INDENT_INHERIT) {
+		uint8_t p = css_computed_text_indent(parent, &length, &unit);
+
+		return set_text_indent(result, p, length, unit);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_text_transform(uint32_t opv, css_style *style, 
@@ -3833,6 +3886,18 @@ css_error cascade_text_transform(uint32_t opv, css_style *style,
 css_error initial_text_transform(css_computed_style *style)
 {
 	return set_text_transform(style, CSS_TEXT_TRANSFORM_NONE);
+}
+
+css_error compose_text_transform(const css_computed_style *parent,	
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_text_transform(child) == CSS_TEXT_TRANSFORM_INHERIT) {
+		return set_text_transform(result, 
+				css_computed_text_transform(parent));
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_top(uint32_t opv, css_style *style, 
