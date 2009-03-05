@@ -315,7 +315,7 @@ struct css_computed_style {
 
 	css_fixed width;
 
-	css_fixed z_index;
+	int32_t z_index;
 
 	lwc_string **font_family;
 

@@ -4347,6 +4347,22 @@ css_error initial_width(css_computed_style *style)
 	return set_width(style, CSS_WIDTH_AUTO, 0, CSS_UNIT_PX);
 }
 
+css_error compose_width(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_width(child, &length, &unit) == CSS_WIDTH_INHERIT) {
+		uint8_t p = css_computed_width(parent, &length, &unit);
+
+		return set_width(result, p, length, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_word_spacing(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -4356,6 +4372,24 @@ css_error cascade_word_spacing(uint32_t opv, css_style *style,
 css_error initial_word_spacing(css_computed_style *style)
 {
 	return set_word_spacing(style, CSS_WORD_SPACING_NORMAL, 0, CSS_UNIT_PX);
+}
+
+css_error compose_word_spacing(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
+			css_computed_word_spacing(child, &length, &unit) == 
+			CSS_WORD_SPACING_INHERIT) {
+		uint8_t p = css_computed_word_spacing(parent, &length, &unit);
+
+		return set_word_spacing(result, p, length, unit);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_z_index(uint32_t opv, css_style *style, 
@@ -4388,6 +4422,21 @@ css_error cascade_z_index(uint32_t opv, css_style *style,
 css_error initial_z_index(css_computed_style *style)
 {
 	return set_z_index(style, CSS_Z_INDEX_AUTO, 0);
+}
+
+css_error compose_z_index(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	int32_t index = 0;
+
+	if (css_computed_z_index(child, &index) == CSS_Z_INDEX_INHERIT) {
+		uint8_t p = css_computed_z_index(parent, &index);
+
+		return set_z_index(result, p, index);
+	}
+
+	return CSS_OK;
 }
 
 /******************************************************************************
