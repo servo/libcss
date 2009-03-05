@@ -2169,6 +2169,23 @@ css_error initial_height(css_computed_style *style)
 	return set_height(style, CSS_HEIGHT_AUTO, 0, CSS_UNIT_PX);
 }
 
+css_error compose_height(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_height(child, &length, &unit) == 
+			CSS_HEIGHT_INHERIT) {
+		uint8_t p = css_computed_height(parent, &length, &unit);
+
+		return set_height(result, p, length, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_left(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2207,6 +2224,24 @@ css_error initial_letter_spacing(css_computed_style *style)
 {
 	return set_letter_spacing(style, CSS_LETTER_SPACING_NORMAL, 
 			0, CSS_UNIT_PX);
+}
+
+css_error compose_letter_spacing(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if ((child->uncommon == NULL && parent->uncommon != NULL) || 
+			css_computed_letter_spacing(child, &length, &unit) == 
+			CSS_LETTER_SPACING_INHERIT) {
+		uint8_t p = css_computed_letter_spacing(parent, &length, &unit);
+
+		return set_letter_spacing(result, p, length, unit);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_line_height(uint32_t opv, css_style *style, 
@@ -2248,6 +2283,23 @@ css_error initial_line_height(css_computed_style *style)
 	return set_line_height(style, CSS_LINE_HEIGHT_NORMAL, 0, CSS_UNIT_PX);
 }
 
+css_error compose_line_height(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_line_height(child, &length, &unit) == 
+			CSS_LINE_HEIGHT_INHERIT) {
+		uint8_t p = css_computed_line_height(parent, &length, &unit);
+
+		return set_line_height(result, p, length, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_list_style_image(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2257,6 +2309,22 @@ css_error cascade_list_style_image(uint32_t opv, css_style *style,
 css_error initial_list_style_image(css_computed_style *style)
 {
 	return set_list_style_image(style, CSS_LIST_STYLE_IMAGE_NONE, NULL);
+}
+
+css_error compose_list_style_image(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	lwc_string *url;
+
+	if (css_computed_list_style_image(child, &url) == 
+			CSS_LIST_STYLE_IMAGE_INHERIT) {
+		uint8_t p = css_computed_list_style_image(parent, &url);
+
+		return set_list_style_image(result, p, url);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_list_style_position(uint32_t opv, css_style *style, 
@@ -2287,6 +2355,19 @@ css_error cascade_list_style_position(uint32_t opv, css_style *style,
 css_error initial_list_style_position(css_computed_style *style)
 {
 	return set_list_style_position(style, CSS_LIST_STYLE_POSITION_OUTSIDE);
+}
+
+css_error compose_list_style_position(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_list_style_position(child) == 
+			CSS_LIST_STYLE_POSITION_INHERIT) {
+		return set_list_style_position(result,
+				css_computed_list_style_position(parent));
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_list_style_type(uint32_t opv, css_style *style, 
@@ -2358,6 +2439,19 @@ css_error initial_list_style_type(css_computed_style *style)
 	return set_list_style_type(style, CSS_LIST_STYLE_TYPE_DISC);
 }
 
+css_error compose_list_style_type(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	if (css_computed_list_style_type(child) == 
+			CSS_LIST_STYLE_TYPE_INHERIT) {
+		return set_list_style_type(result,
+				css_computed_list_style_type(parent));
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_margin_top(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2367,6 +2461,23 @@ css_error cascade_margin_top(uint32_t opv, css_style *style,
 css_error initial_margin_top(css_computed_style *style)
 {
 	return set_margin_top(style, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
+}
+
+css_error compose_margin_top(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_margin_top(child, &length, &unit) ==
+			CSS_MARGIN_INHERIT) {
+		uint8_t p = css_computed_margin_top(parent, &length, &unit);
+
+		return set_margin_top(result, p, length, unit);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_margin_right(uint32_t opv, css_style *style, 
@@ -2380,6 +2491,23 @@ css_error initial_margin_right(css_computed_style *style)
 	return set_margin_right(style, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
 }
 
+css_error compose_margin_right(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_margin_right(child, &length, &unit) ==
+			CSS_MARGIN_INHERIT) {
+		uint8_t p = css_computed_margin_right(parent, &length, &unit);
+
+		return set_margin_right(result, p, length, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_margin_bottom(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2391,6 +2519,23 @@ css_error initial_margin_bottom(css_computed_style *style)
 	return set_margin_bottom(style, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
 }
 
+css_error compose_margin_bottom(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_margin_bottom(child, &length, &unit) ==
+			CSS_MARGIN_INHERIT) {
+		uint8_t p = css_computed_margin_bottom(parent, &length, &unit);
+
+		return set_margin_bottom(result, p, length, unit);
+	}
+
+	return CSS_OK;
+}
+
 css_error cascade_margin_left(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2400,6 +2545,23 @@ css_error cascade_margin_left(uint32_t opv, css_style *style,
 css_error initial_margin_left(css_computed_style *style)
 {
 	return set_margin_left(style, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
+}
+
+css_error compose_margin_left(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_fixed length = 0;
+	css_unit unit = CSS_UNIT_PX;
+
+	if (css_computed_margin_left(child, &length, &unit) ==
+			CSS_MARGIN_INHERIT) {
+		uint8_t p = css_computed_margin_left(parent, &length, &unit);
+
+		return set_margin_left(result, p, length, unit);
+	}
+
+	return CSS_OK;
 }
 
 css_error cascade_max_height(uint32_t opv, css_style *style, 
