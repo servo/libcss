@@ -3402,6 +3402,17 @@ css_error initial_richness(css_computed_style *style)
 	return CSS_OK;
 }
 
+css_error compose_richness(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
 css_error cascade_right(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3461,6 +3472,17 @@ css_error initial_speak_header(css_computed_style *style)
 	return CSS_OK;
 }
 
+css_error compose_speak_header(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
 css_error cascade_speak_numeral(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3488,6 +3510,17 @@ css_error cascade_speak_numeral(uint32_t opv, css_style *style,
 css_error initial_speak_numeral(css_computed_style *style)
 {
 	UNUSED(style);
+
+	return CSS_OK;
+}
+
+css_error compose_speak_numeral(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
 
 	return CSS_OK;
 }
@@ -3523,6 +3556,17 @@ css_error initial_speak_punctuation(css_computed_style *style)
 	return CSS_OK;
 }
 
+css_error compose_speak_punctuation(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
 css_error cascade_speak(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3551,6 +3595,17 @@ css_error cascade_speak(uint32_t opv, css_style *style,
 css_error initial_speak(css_computed_style *style)
 {
 	UNUSED(style);
+
+	return CSS_OK;
+}
+
+css_error compose_speak(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
 
 	return CSS_OK;
 }
@@ -3595,6 +3650,17 @@ css_error initial_speech_rate(css_computed_style *style)
 	return CSS_OK;
 }
 
+css_error compose_speech_rate(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
 css_error cascade_stress(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3605,6 +3671,17 @@ css_error cascade_stress(uint32_t opv, css_style *style,
 css_error initial_stress(css_computed_style *style)
 {
 	UNUSED(style);
+
+	return CSS_OK;
+}
+
+css_error compose_stress(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
 
 	return CSS_OK;
 }
