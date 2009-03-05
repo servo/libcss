@@ -2975,6 +2975,17 @@ css_error initial_page_break_after(css_computed_style *style)
 	return CSS_OK;
 }
 
+css_error compose_page_break_after(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
 css_error cascade_page_break_before(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2985,6 +2996,17 @@ css_error cascade_page_break_before(uint32_t opv, css_style *style,
 css_error initial_page_break_before(css_computed_style *style)
 {
 	UNUSED(style);
+
+	return CSS_OK;
+}
+
+css_error compose_page_break_before(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
 
 	return CSS_OK;
 }
@@ -3020,6 +3042,17 @@ css_error initial_page_break_inside(css_computed_style *style)
 	return CSS_OK;
 }
 
+css_error compose_page_break_inside(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
 css_error cascade_pause_after(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3030,6 +3063,17 @@ css_error cascade_pause_after(uint32_t opv, css_style *style,
 css_error initial_pause_after(css_computed_style *style)
 {
 	UNUSED(style);
+
+	return CSS_OK;
+}
+
+css_error compose_pause_after(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
 
 	return CSS_OK;
 }
@@ -3048,6 +3092,17 @@ css_error initial_pause_before(css_computed_style *style)
 	return CSS_OK;
 }
 
+css_error compose_pause_before(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
 css_error cascade_pitch_range(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3058,6 +3113,17 @@ css_error cascade_pitch_range(uint32_t opv, css_style *style,
 css_error initial_pitch_range(css_computed_style *style)
 {
 	UNUSED(style);
+
+	return CSS_OK;
+}
+
+css_error compose_pitch_range(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
 
 	return CSS_OK;
 }
@@ -3103,6 +3169,17 @@ css_error initial_pitch(css_computed_style *style)
 	return CSS_OK;
 }
 
+css_error compose_pitch(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
+
+	return CSS_OK;
+}
+
 css_error cascade_play_during(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3136,6 +3213,17 @@ css_error cascade_play_during(uint32_t opv, css_style *style,
 css_error initial_play_during(css_computed_style *style)
 {
 	UNUSED(style);
+
+	return CSS_OK;
+}
+
+css_error compose_play_during(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	UNUSED(parent);
+	UNUSED(child);
+	UNUSED(result);
 
 	return CSS_OK;
 }
