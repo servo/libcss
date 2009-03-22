@@ -12,6 +12,7 @@
 
 #include <libcss/errors.h>
 #include <libcss/functypes.h>
+#include <libcss/hint.h>
 #include <libcss/types.h>
 
 enum css_pseudo_element {
@@ -79,7 +80,7 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
 
 css_error css_select_style(css_select_ctx *ctx, void *node,
 		uint32_t pseudo_element, uint64_t media, 
-		css_computed_style *result,
+		const css_hint *hints, css_computed_style *result,
 		css_select_handler *handler, void *pw);
 
 #endif
