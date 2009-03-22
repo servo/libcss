@@ -70,7 +70,8 @@ static void parse_expected(line_ctx *ctx, const char *data, size_t len);
 static void run_test(line_ctx *ctx, const char *exp, size_t explen);
 static void destroy_tree(node *root);
 
-static css_error node_name(void *pw, void *node, lwc_context *ctx, lwc_string **name);
+static css_error node_name(void *pw, void *node, lwc_context *ctx, 
+		lwc_string **name);
 static css_error named_ancestor_node(void *pw, void *node,
 		lwc_string *name,
 		void **ancestor);
@@ -156,6 +157,9 @@ int main(int argc, char **argv)
 
         assert(lwc_create_context(myrealloc, NULL, &ctx.dict) == lwc_error_ok);
         lwc_context_ref(ctx.dict);
+
+	lwc_context_intern(ctx.dict, "class", SLEN("class"), &ctx.attr_class);
+	lwc_context_intern(ctx.dict, "id", SLEN("id"), &ctx.attr_id);
         
 	assert(parse_testfile(argv[2], handle_line, &ctx) == true);
         
@@ -230,7 +234,6 @@ bool handle_line(const char *data, size_t datalen, void *pw)
 			run_test(ctx, ctx->exp, ctx->expused);
 
 			ctx->expused = 0;
-
 
 			ctx->intree = false;
 			ctx->insheet = false;
@@ -628,7 +631,8 @@ void run_test(line_ctx *ctx, const char *exp, size_t explen)
 	testnum++;
 
 	assert(css_select_style(select, ctx->target, ctx->pseudo_element,
-			ctx->media, computed, &select_handler, ctx) == CSS_OK);
+			ctx->media, NULL, computed, &select_handler, ctx) == 
+			CSS_OK);
 
 	dump_computed_style(computed, buf, &buflen);
 
