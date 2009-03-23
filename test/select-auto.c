@@ -1065,6 +1065,6 @@ css_error node_presentational_hint(void *pw, void *node,
 	UNUSED(property);
 	UNUSED(hint);
 
-	return CSS_OK;
+	return CSS_PROPERTY_NOT_SET;
 }
 
