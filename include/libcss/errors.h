@@ -20,7 +20,8 @@ typedef enum css_error {
 	CSS_NEEDDATA         = 5,
 	CSS_BADCHARSET       = 6,
 	CSS_EOF              = 7,
-	CSS_IMPORTS_PENDING  = 8
+	CSS_IMPORTS_PENDING  = 8,
+	CSS_PROPERTY_NOT_SET = 9
 } css_error;
 
 /* Convert a libcss error value to a string */

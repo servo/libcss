@@ -596,7 +596,7 @@ css_error parse_azimuth(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_AZIMUTH, flags, value);
+	opv = buildOPV(CSS_PROP_AZIMUTH, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == AZIMUTH_ANGLE)
@@ -647,7 +647,7 @@ css_error parse_background_attachment(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_BACKGROUND_ATTACHMENT, flags, value);
+	opv = buildOPV(CSS_PROP_BACKGROUND_ATTACHMENT, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -697,7 +697,7 @@ css_error parse_background_color(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_BACKGROUND_COLOR, flags, value);
+	opv = buildOPV(CSS_PROP_BACKGROUND_COLOR, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == BACKGROUND_COLOR_SET)
@@ -750,7 +750,7 @@ css_error parse_background_image(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_BACKGROUND_IMAGE, flags, value);
+	opv = buildOPV(CSS_PROP_BACKGROUND_IMAGE, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == BACKGROUND_IMAGE_URI)
@@ -893,7 +893,7 @@ css_error parse_background_position(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_BACKGROUND_POSITION, flags, value[0] | value[1]);
+	opv = buildOPV(CSS_PROP_BACKGROUND_POSITION, flags, value[0] | value[1]);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false) { 
@@ -960,7 +960,7 @@ css_error parse_background_repeat(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_BACKGROUND_REPEAT, flags, value);
+	opv = buildOPV(CSS_PROP_BACKGROUND_REPEAT, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -978,7 +978,7 @@ css_error parse_border_bottom_color(css_language *c,
 		css_style **result)
 {
 	return parse_border_side_color(c, vector, ctx, 
-			OP_BORDER_BOTTOM_COLOR, result);
+			CSS_PROP_BORDER_BOTTOM_COLOR, result);
 }
 
 css_error parse_border_bottom_style(css_language *c, 
@@ -986,7 +986,7 @@ css_error parse_border_bottom_style(css_language *c,
 		css_style **result)
 {
 	return parse_border_side_style(c, vector, ctx, 
-			OP_BORDER_BOTTOM_STYLE, result);
+			CSS_PROP_BORDER_BOTTOM_STYLE, result);
 }
 
 css_error parse_border_bottom_width(css_language *c, 
@@ -994,7 +994,7 @@ css_error parse_border_bottom_width(css_language *c,
 		css_style **result)
 {
 	return parse_border_side_width(c, vector, ctx, 
-			OP_BORDER_BOTTOM_WIDTH, result);
+			CSS_PROP_BORDER_BOTTOM_WIDTH, result);
 }
 
 css_error parse_border_collapse(css_language *c, 
@@ -1025,7 +1025,7 @@ css_error parse_border_collapse(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_BORDER_COLLAPSE, flags, value);
+	opv = buildOPV(CSS_PROP_BORDER_COLLAPSE, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -1043,7 +1043,7 @@ css_error parse_border_left_color(css_language *c,
 		css_style **result)
 {
 	return parse_border_side_color(c, vector, ctx, 
-			OP_BORDER_LEFT_COLOR, result);
+			CSS_PROP_BORDER_LEFT_COLOR, result);
 }
 
 css_error parse_border_left_style(css_language *c, 
@@ -1051,7 +1051,7 @@ css_error parse_border_left_style(css_language *c,
 		css_style **result)
 {
 	return parse_border_side_style(c, vector, ctx, 
-			OP_BORDER_LEFT_STYLE, result);
+			CSS_PROP_BORDER_LEFT_STYLE, result);
 }
 
 css_error parse_border_left_width(css_language *c, 
@@ -1059,7 +1059,7 @@ css_error parse_border_left_width(css_language *c,
 		css_style **result)
 {
 	return parse_border_side_width(c, vector, ctx, 
-			OP_BORDER_LEFT_WIDTH, result);
+			CSS_PROP_BORDER_LEFT_WIDTH, result);
 }
 
 css_error parse_border_right_color(css_language *c, 
@@ -1067,7 +1067,7 @@ css_error parse_border_right_color(css_language *c,
 		css_style **result)
 {
 	return parse_border_side_color(c, vector, ctx, 
-			OP_BORDER_RIGHT_COLOR, result);
+			CSS_PROP_BORDER_RIGHT_COLOR, result);
 }
 
 css_error parse_border_right_style(css_language *c, 
@@ -1075,7 +1075,7 @@ css_error parse_border_right_style(css_language *c,
 		css_style **result)
 {
 	return parse_border_side_style(c, vector, ctx, 
-			OP_BORDER_RIGHT_STYLE, result);
+			CSS_PROP_BORDER_RIGHT_STYLE, result);
 }
 
 css_error parse_border_right_width(css_language *c, 
@@ -1083,7 +1083,7 @@ css_error parse_border_right_width(css_language *c,
 		css_style **result)
 {
 	return parse_border_side_width(c, vector, ctx, 
-			OP_BORDER_RIGHT_WIDTH, result);
+			CSS_PROP_BORDER_RIGHT_WIDTH, result);
 }
 
 css_error parse_border_spacing(css_language *c, 
@@ -1156,7 +1156,7 @@ css_error parse_border_spacing(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_BORDER_SPACING, flags, value);
+	opv = buildOPV(CSS_PROP_BORDER_SPACING, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == BORDER_SPACING_SET)
@@ -1189,7 +1189,7 @@ css_error parse_border_top_color(css_language *c,
 		css_style **result)
 {
 	return parse_border_side_color(c, vector, ctx, 
-			OP_BORDER_TOP_COLOR, result);
+			CSS_PROP_BORDER_TOP_COLOR, result);
 }
 
 css_error parse_border_top_style(css_language *c, 
@@ -1197,7 +1197,7 @@ css_error parse_border_top_style(css_language *c,
 		css_style **result)
 {
 	return parse_border_side_style(c, vector, ctx, 
-			OP_BORDER_TOP_STYLE, result);
+			CSS_PROP_BORDER_TOP_STYLE, result);
 }
 
 css_error parse_border_top_width(css_language *c, 
@@ -1205,7 +1205,7 @@ css_error parse_border_top_width(css_language *c,
 		css_style **result)
 {
 	return parse_border_side_width(c, vector, ctx, 
-			OP_BORDER_TOP_WIDTH, result);
+			CSS_PROP_BORDER_TOP_WIDTH, result);
 }
 
 css_error parse_bottom(css_language *c, 
@@ -1250,7 +1250,7 @@ css_error parse_bottom(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_BOTTOM, flags, value);
+	opv = buildOPV(CSS_PROP_BOTTOM, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == BOTTOM_SET)
@@ -1301,7 +1301,7 @@ css_error parse_caption_side(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_CAPTION_SIDE, flags, value);
+	opv = buildOPV(CSS_PROP_CAPTION_SIDE, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -1346,7 +1346,7 @@ css_error parse_clear(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_CLEAR, flags, value);
+	opv = buildOPV(CSS_PROP_CLEAR, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -1450,7 +1450,7 @@ css_error parse_clip(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_CLIP, flags, value);
+	opv = buildOPV(CSS_PROP_CLIP, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && 
@@ -1514,7 +1514,7 @@ css_error parse_color(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_COLOR, flags, value);
+	opv = buildOPV(CSS_PROP_COLOR, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == COLOR_SET)
@@ -1590,7 +1590,7 @@ css_error parse_content(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_CONTENT, flags, value);
+	opv = buildOPV(CSS_PROP_CONTENT, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -1706,7 +1706,7 @@ css_error parse_counter_increment(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_COUNTER_INCREMENT, flags, value);
+	opv = buildOPV(CSS_PROP_COUNTER_INCREMENT, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -1874,7 +1874,7 @@ css_error parse_counter_reset(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_COUNTER_RESET, flags, value);
+	opv = buildOPV(CSS_PROP_COUNTER_RESET, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -1994,7 +1994,7 @@ css_error parse_cue_after(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_CUE_AFTER, flags, value);
+	opv = buildOPV(CSS_PROP_CUE_AFTER, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == CUE_AFTER_URI)
@@ -2049,7 +2049,7 @@ css_error parse_cue_before(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_CUE_BEFORE, flags, value);
+	opv = buildOPV(CSS_PROP_CUE_BEFORE, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == CUE_BEFORE_URI)
@@ -2222,7 +2222,7 @@ css_error parse_cursor(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_CURSOR, flags, value);
+	opv = buildOPV(CSS_PROP_CURSOR, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -2366,7 +2366,7 @@ css_error parse_direction(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_DIRECTION, flags, value);
+	opv = buildOPV(CSS_PROP_DIRECTION, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -2438,7 +2438,7 @@ css_error parse_display(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_DISPLAY, flags, value);
+	opv = buildOPV(CSS_PROP_DISPLAY, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -2521,7 +2521,7 @@ css_error parse_elevation(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_ELEVATION, flags, value);
+	opv = buildOPV(CSS_PROP_ELEVATION, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == ELEVATION_ANGLE)
@@ -2572,7 +2572,7 @@ css_error parse_empty_cells(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_EMPTY_CELLS, flags, value);
+	opv = buildOPV(CSS_PROP_EMPTY_CELLS, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -2615,7 +2615,7 @@ css_error parse_float(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_FLOAT, flags, value);
+	opv = buildOPV(CSS_PROP_FLOAT, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -2774,7 +2774,7 @@ css_error parse_font_family(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_FONT_FAMILY, flags, value);
+	opv = buildOPV(CSS_PROP_FONT_FAMILY, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -3069,7 +3069,7 @@ css_error parse_font_size(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_FONT_SIZE, flags, value);
+	opv = buildOPV(CSS_PROP_FONT_SIZE, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == FONT_SIZE_DIMENSION)
@@ -3122,7 +3122,7 @@ css_error parse_font_style(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_FONT_STYLE, flags, value);
+	opv = buildOPV(CSS_PROP_FONT_STYLE, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -3163,7 +3163,7 @@ css_error parse_font_variant(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_FONT_VARIANT, flags, value);
+	opv = buildOPV(CSS_PROP_FONT_VARIANT, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -3228,7 +3228,7 @@ css_error parse_font_weight(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_FONT_WEIGHT, flags, value);
+	opv = buildOPV(CSS_PROP_FONT_WEIGHT, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -3287,7 +3287,7 @@ css_error parse_height(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_HEIGHT, flags, value);
+	opv = buildOPV(CSS_PROP_HEIGHT, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == HEIGHT_SET)
@@ -3352,7 +3352,7 @@ css_error parse_left(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_LEFT, flags, value);
+	opv = buildOPV(CSS_PROP_LEFT, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == LEFT_SET)
@@ -3418,7 +3418,7 @@ css_error parse_letter_spacing(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_LETTER_SPACING, flags, value);
+	opv = buildOPV(CSS_PROP_LETTER_SPACING, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == LETTER_SPACING_SET)
@@ -3499,7 +3499,7 @@ css_error parse_line_height(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_LINE_HEIGHT, flags, value);
+	opv = buildOPV(CSS_PROP_LINE_HEIGHT, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == LINE_HEIGHT_NUMBER)
@@ -3558,7 +3558,7 @@ css_error parse_list_style_image(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_LIST_STYLE_IMAGE, flags, value);
+	opv = buildOPV(CSS_PROP_LIST_STYLE_IMAGE, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == LIST_STYLE_IMAGE_URI)
@@ -3609,7 +3609,7 @@ css_error parse_list_style_position(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_LIST_STYLE_POSITION, flags, value);
+	opv = buildOPV(CSS_PROP_LIST_STYLE_POSITION, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -3653,7 +3653,7 @@ css_error parse_list_style_type(css_language *c,
 			return error;
 	}
 
-	opv = buildOPV(OP_LIST_STYLE_TYPE, flags, value);
+	opv = buildOPV(CSS_PROP_LIST_STYLE_TYPE, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -3670,28 +3670,29 @@ css_error parse_margin_bottom(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_margin_side(c, vector, ctx, OP_MARGIN_BOTTOM, result);
+	return parse_margin_side(c, vector, ctx, 
+			CSS_PROP_MARGIN_BOTTOM, result);
 }
 
 css_error parse_margin_left(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_margin_side(c, vector, ctx, OP_MARGIN_LEFT, result);
+	return parse_margin_side(c, vector, ctx, CSS_PROP_MARGIN_LEFT, result);
 }
 
 css_error parse_margin_right(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_margin_side(c, vector, ctx, OP_MARGIN_RIGHT, result);
+	return parse_margin_side(c, vector, ctx, CSS_PROP_MARGIN_RIGHT, result);
 }
 
 css_error parse_margin_top(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_margin_side(c, vector, ctx, OP_MARGIN_TOP, result);
+	return parse_margin_side(c, vector, ctx, CSS_PROP_MARGIN_TOP, result);
 }
 
 css_error parse_max_height(css_language *c, 
@@ -3740,7 +3741,7 @@ css_error parse_max_height(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_MAX_HEIGHT, flags, value);
+	opv = buildOPV(CSS_PROP_MAX_HEIGHT, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == MAX_HEIGHT_SET)
@@ -3809,7 +3810,7 @@ css_error parse_max_width(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_MAX_WIDTH, flags, value);
+	opv = buildOPV(CSS_PROP_MAX_WIDTH, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == MAX_WIDTH_SET)
@@ -3874,7 +3875,7 @@ css_error parse_min_height(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_MIN_HEIGHT, flags, value);
+	opv = buildOPV(CSS_PROP_MIN_HEIGHT, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == MIN_HEIGHT_SET)
@@ -3939,7 +3940,7 @@ css_error parse_min_width(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_MIN_WIDTH, flags, value);
+	opv = buildOPV(CSS_PROP_MIN_WIDTH, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == MIN_WIDTH_SET)
@@ -4001,7 +4002,7 @@ css_error parse_orphans(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_ORPHANS, flags, value);
+	opv = buildOPV(CSS_PROP_ORPHANS, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == ORPHANS_SET)
@@ -4059,7 +4060,7 @@ css_error parse_outline_color(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_OUTLINE_COLOR, flags, value);
+	opv = buildOPV(CSS_PROP_OUTLINE_COLOR, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == OUTLINE_COLOR_SET)
@@ -4090,7 +4091,7 @@ css_error parse_outline_style(css_language *c,
 
 	/* Parse as a border style  */
 	error = parse_border_side_style(c, vector, ctx, 
-			OP_OUTLINE_STYLE, result);
+			CSS_PROP_OUTLINE_STYLE, result);
 	if (error != CSS_OK)
 		return error;
 
@@ -4111,7 +4112,7 @@ css_error parse_outline_width(css_language *c,
 {
 	/* Parse as border width */
 	return parse_border_side_width(c, vector, ctx, 
-			OP_OUTLINE_WIDTH, result);
+			CSS_PROP_OUTLINE_WIDTH, result);
 }
 
 css_error parse_overflow(css_language *c, 
@@ -4146,7 +4147,7 @@ css_error parse_overflow(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_OVERFLOW, flags, value);
+	opv = buildOPV(CSS_PROP_OVERFLOW, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -4163,28 +4164,32 @@ css_error parse_padding_bottom(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_padding_side(c, vector, ctx, OP_PADDING_BOTTOM, result);
+	return parse_padding_side(c, vector, ctx, 
+			CSS_PROP_PADDING_BOTTOM, result);
 }
 
 css_error parse_padding_left(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_padding_side(c, vector, ctx, OP_PADDING_LEFT, result);
+	return parse_padding_side(c, vector, ctx, 
+			CSS_PROP_PADDING_LEFT, result);
 }
 
 css_error parse_padding_right(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_padding_side(c, vector, ctx, OP_PADDING_RIGHT, result);
+	return parse_padding_side(c, vector, ctx, 
+			CSS_PROP_PADDING_RIGHT, result);
 }
 
 css_error parse_padding_top(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	return parse_padding_side(c, vector, ctx, OP_PADDING_TOP, result);
+	return parse_padding_side(c, vector, ctx, 
+			CSS_PROP_PADDING_TOP, result);
 }
 
 css_error parse_page_break_after(css_language *c, 
@@ -4221,7 +4226,7 @@ css_error parse_page_break_after(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_PAGE_BREAK_AFTER, flags, value);
+	opv = buildOPV(CSS_PROP_PAGE_BREAK_AFTER, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -4268,7 +4273,7 @@ css_error parse_page_break_before(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_PAGE_BREAK_BEFORE, flags, value);
+	opv = buildOPV(CSS_PROP_PAGE_BREAK_BEFORE, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -4309,7 +4314,7 @@ css_error parse_page_break_inside(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_PAGE_BREAK_INSIDE, flags, value);
+	opv = buildOPV(CSS_PROP_PAGE_BREAK_INSIDE, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -4364,7 +4369,7 @@ css_error parse_pause_after(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_PAUSE_AFTER, flags, value);
+	opv = buildOPV(CSS_PROP_PAUSE_AFTER, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == PAUSE_AFTER_SET)
@@ -4429,7 +4434,7 @@ css_error parse_pause_before(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_PAUSE_BEFORE, flags, value);
+	opv = buildOPV(CSS_PROP_PAUSE_BEFORE, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == PAUSE_BEFORE_SET)
@@ -4491,7 +4496,7 @@ css_error parse_pitch_range(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_PITCH_RANGE, flags, value);
+	opv = buildOPV(CSS_PROP_PITCH_RANGE, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == PITCH_RANGE_SET)
@@ -4574,7 +4579,7 @@ css_error parse_pitch(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_PITCH, flags, value);
+	opv = buildOPV(CSS_PROP_PITCH, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == PITCH_FREQUENCY)
@@ -4658,7 +4663,7 @@ css_error parse_play_during(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_PLAY_DURING, flags, value);
+	opv = buildOPV(CSS_PROP_PLAY_DURING, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && 
@@ -4714,7 +4719,7 @@ css_error parse_position(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_POSITION, flags, value);
+	opv = buildOPV(CSS_PROP_POSITION, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -4804,7 +4809,7 @@ css_error parse_quotes(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_QUOTES, flags, value);
+	opv = buildOPV(CSS_PROP_QUOTES, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -4924,7 +4929,7 @@ css_error parse_richness(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_RICHNESS, flags, value);
+	opv = buildOPV(CSS_PROP_RICHNESS, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == RICHNESS_SET)
@@ -4987,7 +4992,7 @@ css_error parse_right(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_RIGHT, flags, value);
+	opv = buildOPV(CSS_PROP_RIGHT, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == RIGHT_SET)
@@ -5038,7 +5043,7 @@ css_error parse_speak_header(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_SPEAK_HEADER, flags, value);
+	opv = buildOPV(CSS_PROP_SPEAK_HEADER, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -5079,7 +5084,7 @@ css_error parse_speak_numeral(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_SPEAK_NUMERAL, flags, value);
+	opv = buildOPV(CSS_PROP_SPEAK_NUMERAL, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -5120,7 +5125,7 @@ css_error parse_speak_punctuation(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_SPEAK_PUNCTUATION, flags, value);
+	opv = buildOPV(CSS_PROP_SPEAK_PUNCTUATION, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -5163,7 +5168,7 @@ css_error parse_speak(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_SPEAK, flags, value);
+	opv = buildOPV(CSS_PROP_SPEAK, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -5239,7 +5244,7 @@ css_error parse_speech_rate(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_SPEECH_RATE, flags, value);
+	opv = buildOPV(CSS_PROP_SPEECH_RATE, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == SPEECH_RATE_SET)
@@ -5298,7 +5303,7 @@ css_error parse_stress(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_STRESS, flags, value);
+	opv = buildOPV(CSS_PROP_STRESS, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == STRESS_SET)
@@ -5347,7 +5352,7 @@ css_error parse_table_layout(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_TABLE_LAYOUT, flags, value);
+	opv = buildOPV(CSS_PROP_TABLE_LAYOUT, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -5392,7 +5397,7 @@ css_error parse_text_align(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_TEXT_ALIGN, flags, value);
+	opv = buildOPV(CSS_PROP_TEXT_ALIGN, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -5463,7 +5468,7 @@ css_error parse_text_decoration(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_TEXT_DECORATION, flags, value);
+	opv = buildOPV(CSS_PROP_TEXT_DECORATION, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -5514,7 +5519,7 @@ css_error parse_text_indent(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_TEXT_INDENT, flags, value);
+	opv = buildOPV(CSS_PROP_TEXT_INDENT, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == TEXT_INDENT_SET)
@@ -5569,7 +5574,7 @@ css_error parse_text_transform(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_TEXT_TRANSFORM, flags, value);
+	opv = buildOPV(CSS_PROP_TEXT_TRANSFORM, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -5624,7 +5629,7 @@ css_error parse_top(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_TOP, flags, value);
+	opv = buildOPV(CSS_PROP_TOP, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == TOP_SET)
@@ -5677,7 +5682,7 @@ css_error parse_unicode_bidi(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_UNICODE_BIDI, flags, value);
+	opv = buildOPV(CSS_PROP_UNICODE_BIDI, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -5762,7 +5767,7 @@ css_error parse_vertical_align(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_VERTICAL_ALIGN, flags, value);
+	opv = buildOPV(CSS_PROP_VERTICAL_ALIGN, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == VERTICAL_ALIGN_SET)
@@ -5815,7 +5820,7 @@ css_error parse_visibility(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_VISIBILITY, flags, value);
+	opv = buildOPV(CSS_PROP_VISIBILITY, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -5958,7 +5963,7 @@ css_error parse_voice_family(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_VOICE_FAMILY, flags, value);
+	opv = buildOPV(CSS_PROP_VOICE_FAMILY, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
@@ -6245,7 +6250,7 @@ css_error parse_volume(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_VOLUME, flags, value);
+	opv = buildOPV(CSS_PROP_VOLUME, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == VOLUME_NUMBER)
@@ -6305,7 +6310,7 @@ css_error parse_white_space(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_WHITE_SPACE, flags, value);
+	opv = buildOPV(CSS_PROP_WHITE_SPACE, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
@@ -6357,7 +6362,7 @@ css_error parse_widows(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_WIDOWS, flags, value);
+	opv = buildOPV(CSS_PROP_WIDOWS, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == WIDOWS_SET)
@@ -6424,7 +6429,7 @@ css_error parse_width(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_WIDTH, flags, value);
+	opv = buildOPV(CSS_PROP_WIDTH, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == WIDTH_SET)
@@ -6490,7 +6495,7 @@ css_error parse_word_spacing(css_language *c,
 	if (error != CSS_OK)
 		return error;
 
-	opv = buildOPV(OP_WORD_SPACING, flags, value);
+	opv = buildOPV(CSS_PROP_WORD_SPACING, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == WORD_SPACING_SET)
@@ -6552,7 +6557,7 @@ css_error parse_z_index(css_language *c,
 	} else
 		return CSS_INVALID;
 
-	opv = buildOPV(OP_Z_INDEX, flags, value);
+	opv = buildOPV(CSS_PROP_Z_INDEX, flags, value);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false && value == Z_INDEX_SET)

@@ -240,7 +240,6 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
  * \param node            Node to select style for
  * \param pseudo_element  Pseudo element to select for, instead
  * \param media           Currently active media types
- * \param hint            Presentational hints, or NULL for none
  * \param result          Pointer to style to populate (assumed clean)
  * \param handler         Dispatch table of handler functions
  * \param pw              Client-specific private data for handler functions
@@ -257,11 +256,12 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
  */
 css_error css_select_style(css_select_ctx *ctx, void *node,
 		uint32_t pseudo_element, uint64_t media,
-		const css_hint *hints, css_computed_style *result,
+		css_computed_style *result,
 		css_select_handler *handler, void *pw)
 {
 	uint32_t i;
 	css_error error;
+	css_hint hint;
 	css_select_state state;
 
 	if (ctx == NULL || node == NULL || result == NULL || handler == NULL)
@@ -288,23 +288,44 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 		}
 	}
 
-	/** \todo take account of presentational hints:
-	 * 
-	 *  foreach property in hints:
-	 *    if !state.property.set || (state.property.origin == UA || 
-	 *    		(state.property.origin == USER && 
-	 *    		!state.property.important)):
-	 *      result.property = property
-	 *      state.property.set = true
-	 */
-	UNUSED(hints);
+	/* Take account of presentational hints */
+	/** \todo Optimisation: merge this loop and the next together */
+	for (i = 0; i < CSS_N_PROPERTIES; i++) {
+		/* If the existing property value came from an author 
+		 * stylesheet or a user sheet using !important, then leave 
+		 * it alone. */
+		if (state.props[i].set && 
+				(state.props[i].origin == CSS_ORIGIN_AUTHOR ||
+				state.props[i].important))
+			continue;
+
+		/* Retrieve this property's hint from the client */
+		error = handler->node_presentational_hint(pw, node, i, &hint);
+		if (error != CSS_OK && error != CSS_PROPERTY_NOT_SET)
+			goto cleanup;
+
+		/* Ignore if there isn't one */
+		if (error != CSS_OK)
+			continue;
+
+		/* Set it in the result */
+		error = prop_dispatch[i].set_from_hint(&hint, result);
+		if (error != CSS_OK)
+			goto cleanup;
+
+		/* Keep selection state in sync with reality */
+		state.props[i].set = 1;
+		state.props[i].specificity = 0;
+		state.props[i].origin = CSS_ORIGIN_AUTHOR;
+		state.props[i].important = 0;
+	}
 
 	/* Finally, fix up any remaining unset properties.
 	 * Those properties which are inherited need to be set as inherit.
 	 * Those which are not inherited need to be set to their default value.
 	 */
 	/** \todo If node is tree root, everything should be defaulted. */
-	for (i = 0; i < N_OPCODES; i++) {
+	for (i = 0; i < CSS_N_PROPERTIES; i++) {
 		/* Do nothing if this property is set */
 		if (state.props[i].set)
 			continue;

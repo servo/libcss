@@ -61,6 +61,9 @@ typedef struct css_select_handler {
 	css_error (*node_is_focus)(void *pw, void *node, bool *match);
 	css_error (*node_is_lang)(void *pw, void *node,
 			lwc_string *lang, bool *match);
+
+	css_error (*node_presentational_hint)(void *pw, void *node, 
+			uint32_t property, css_hint *hint);
 } css_select_handler;
 
 css_error css_select_ctx_create(css_allocator_fn alloc, void *pw,
@@ -80,7 +83,7 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
 
 css_error css_select_style(css_select_ctx *ctx, void *node,
 		uint32_t pseudo_element, uint64_t media, 
-		const css_hint *hints, css_computed_style *result,
+		css_computed_style *result,
 		css_select_handler *handler, void *pw);
 
 #endif

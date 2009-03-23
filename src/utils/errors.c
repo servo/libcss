@@ -47,6 +47,9 @@ const char *css_error_to_string(css_error error)
 	case CSS_IMPORTS_PENDING:
 		result = "Imports pending";
 		break;
+	case CSS_PROPERTY_NOT_SET:
+		result = "Property not set";
+		break;
 	}
 
 	return result;

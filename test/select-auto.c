@@ -112,6 +112,8 @@ static css_error node_is_active(void *pw, void *node, bool *match);
 static css_error node_is_focus(void *pw, void *node, bool *match);
 static css_error node_is_lang(void *pw, void *node,
 		lwc_string *lang, bool *match);
+static css_error node_presentational_hint(void *pw, void *node,
+		uint32_t property, css_hint *hint);
 
 static css_select_handler select_handler = {
 	node_name,
@@ -132,7 +134,8 @@ static css_select_handler select_handler = {
 	node_is_hover,
 	node_is_active,
 	node_is_focus,
-	node_is_lang
+	node_is_lang,
+	node_presentational_hint
 };
 
 static void *myrealloc(void *data, size_t len, void *pw)
@@ -150,6 +153,9 @@ int main(int argc, char **argv)
 		printf("Usage: %s <aliases_file> <filename>\n", argv[0]);
 		return 1;
 	}
+
+	printf("css_hint: %lu\n", sizeof(css_hint));
+	printf("computed: %lu\n", sizeof(css_computed_style));
 
 	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
 
@@ -631,8 +637,7 @@ void run_test(line_ctx *ctx, const char *exp, size_t explen)
 	testnum++;
 
 	assert(css_select_style(select, ctx->target, ctx->pseudo_element,
-			ctx->media, NULL, computed, &select_handler, ctx) == 
-			CSS_OK);
+			ctx->media, computed, &select_handler, ctx) == CSS_OK);
 
 	dump_computed_style(computed, buf, &buflen);
 
@@ -1048,6 +1053,17 @@ css_error node_is_lang(void *pw, void *n,
 	UNUSED(lang);
 
 	*match = false;
+
+	return CSS_OK;
+}
+
+css_error node_presentational_hint(void *pw, void *node,
+		uint32_t property, css_hint *hint)
+{
+	UNUSED(pw);
+	UNUSED(node);
+	UNUSED(property);
+	UNUSED(hint);
 
 	return CSS_OK;
 }

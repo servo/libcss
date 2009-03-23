@@ -596,7 +596,7 @@ void dump_bytecode(css_style *style, char **ptr)
 			value = getValue(opv);
 
 			switch (op) {
-			case OP_AZIMUTH:
+			case CSS_PROP_AZIMUTH:
 				switch (value & ~AZIMUTH_BEHIND) {
 				case AZIMUTH_ANGLE:
 				{
@@ -645,7 +645,7 @@ void dump_bytecode(css_style *style, char **ptr)
 				if (value & AZIMUTH_BEHIND)
 					*ptr += sprintf(*ptr, " behind");
 				break;
-			case OP_BACKGROUND_ATTACHMENT:
+			case CSS_PROP_BACKGROUND_ATTACHMENT:
 				switch (value) {
 				case BACKGROUND_ATTACHMENT_FIXED:
 					*ptr += sprintf(*ptr, "fixed");
@@ -655,11 +655,11 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_BORDER_TOP_COLOR:
-			case OP_BORDER_RIGHT_COLOR:
-			case OP_BORDER_BOTTOM_COLOR:
-			case OP_BORDER_LEFT_COLOR:
-			case OP_BACKGROUND_COLOR:
+			case CSS_PROP_BORDER_TOP_COLOR:
+			case CSS_PROP_BORDER_RIGHT_COLOR:
+			case CSS_PROP_BORDER_BOTTOM_COLOR:
+			case CSS_PROP_BORDER_LEFT_COLOR:
+			case CSS_PROP_BACKGROUND_COLOR:
 				assert(BACKGROUND_COLOR_TRANSPARENT == 
 						BORDER_COLOR_TRANSPARENT);
 				assert(BACKGROUND_COLOR_SET ==
@@ -679,10 +679,10 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_BACKGROUND_IMAGE:
-			case OP_CUE_AFTER:
-			case OP_CUE_BEFORE:
-			case OP_LIST_STYLE_IMAGE:
+			case CSS_PROP_BACKGROUND_IMAGE:
+			case CSS_PROP_CUE_AFTER:
+			case CSS_PROP_CUE_BEFORE:
+			case CSS_PROP_LIST_STYLE_IMAGE:
 				assert(BACKGROUND_IMAGE_NONE == CUE_AFTER_NONE);
 				assert(BACKGROUND_IMAGE_URI == CUE_AFTER_URI);
 				assert(BACKGROUND_IMAGE_NONE == CUE_BEFORE_NONE);
@@ -709,7 +709,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_BACKGROUND_POSITION:
+			case CSS_PROP_BACKGROUND_POSITION:
 				switch (value & 0xf0) {
 				case BACKGROUND_POSITION_HORZ_SET:
 				{
@@ -754,7 +754,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_BACKGROUND_REPEAT:
+			case CSS_PROP_BACKGROUND_REPEAT:
 				switch (value) {
 				case BACKGROUND_REPEAT_NO_REPEAT:
 					*ptr += sprintf(*ptr, "no-repeat");
@@ -770,7 +770,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_BORDER_COLLAPSE:
+			case CSS_PROP_BORDER_COLLAPSE:
 				switch (value) {
 				case BORDER_COLLAPSE_SEPARATE:
 					*ptr += sprintf(*ptr, "separate");
@@ -780,7 +780,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_BORDER_SPACING:
+			case CSS_PROP_BORDER_SPACING:
 				switch (value) {
 				case BORDER_SPACING_SET:
 				{
@@ -800,11 +800,11 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_BORDER_TOP_STYLE:
-			case OP_BORDER_RIGHT_STYLE:
-			case OP_BORDER_BOTTOM_STYLE:
-			case OP_BORDER_LEFT_STYLE:
-			case OP_OUTLINE_STYLE:
+			case CSS_PROP_BORDER_TOP_STYLE:
+			case CSS_PROP_BORDER_RIGHT_STYLE:
+			case CSS_PROP_BORDER_BOTTOM_STYLE:
+			case CSS_PROP_BORDER_LEFT_STYLE:
+			case CSS_PROP_OUTLINE_STYLE:
 				assert(BORDER_STYLE_NONE == OUTLINE_STYLE_NONE);
 				assert(BORDER_STYLE_HIDDEN == 
 						OUTLINE_STYLE_HIDDEN);
@@ -858,11 +858,11 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_BORDER_TOP_WIDTH:
-			case OP_BORDER_RIGHT_WIDTH:
-			case OP_BORDER_BOTTOM_WIDTH:
-			case OP_BORDER_LEFT_WIDTH:
-			case OP_OUTLINE_WIDTH:
+			case CSS_PROP_BORDER_TOP_WIDTH:
+			case CSS_PROP_BORDER_RIGHT_WIDTH:
+			case CSS_PROP_BORDER_BOTTOM_WIDTH:
+			case CSS_PROP_BORDER_LEFT_WIDTH:
+			case CSS_PROP_OUTLINE_WIDTH:
 				assert(BORDER_WIDTH_SET == OUTLINE_WIDTH_SET);
 				assert(BORDER_WIDTH_THIN == OUTLINE_WIDTH_THIN);
 				assert(BORDER_WIDTH_MEDIUM ==
@@ -892,16 +892,16 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_MARGIN_TOP:
-			case OP_MARGIN_RIGHT:
-			case OP_MARGIN_BOTTOM:
-			case OP_MARGIN_LEFT:
-			case OP_BOTTOM:
-			case OP_LEFT:
-			case OP_RIGHT:
-			case OP_TOP:
-			case OP_HEIGHT:
-			case OP_WIDTH:
+			case CSS_PROP_MARGIN_TOP:
+			case CSS_PROP_MARGIN_RIGHT:
+			case CSS_PROP_MARGIN_BOTTOM:
+			case CSS_PROP_MARGIN_LEFT:
+			case CSS_PROP_BOTTOM:
+			case CSS_PROP_LEFT:
+			case CSS_PROP_RIGHT:
+			case CSS_PROP_TOP:
+			case CSS_PROP_HEIGHT:
+			case CSS_PROP_WIDTH:
 				assert(BOTTOM_SET == LEFT_SET);
 				assert(BOTTOM_AUTO == LEFT_AUTO);
 				assert(BOTTOM_SET == RIGHT_SET);
@@ -931,7 +931,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_CAPTION_SIDE:
+			case CSS_PROP_CAPTION_SIDE:
 				switch (value) {
 				case CAPTION_SIDE_TOP:
 					*ptr += sprintf(*ptr, "top");
@@ -941,7 +941,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_CLEAR:
+			case CSS_PROP_CLEAR:
 				switch (value) {
 				case CLEAR_NONE:
 					*ptr += sprintf(*ptr, "none");
@@ -957,7 +957,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_CLIP:
+			case CSS_PROP_CLIP:
 				if ((value & CLIP_SHAPE_MASK) == 
 						CLIP_SHAPE_RECT) {
 					*ptr += sprintf(*ptr, "rect(");
@@ -1012,7 +1012,7 @@ void dump_bytecode(css_style *style, char **ptr)
 				} else
 					*ptr += sprintf(*ptr, "auto");
 				break;
-			case OP_COLOR:
+			case CSS_PROP_COLOR:
 				switch (value) {
 				case COLOR_SET:
 				{
@@ -1024,7 +1024,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_CONTENT:
+			case CSS_PROP_CONTENT:
 				if (value == CONTENT_NORMAL) {
 					*ptr += sprintf(*ptr, "normal");
 					break;
@@ -1095,8 +1095,8 @@ void dump_bytecode(css_style *style, char **ptr)
 						*ptr += sprintf(*ptr, " ");
 				}
 				break;
-			case OP_COUNTER_INCREMENT:
-			case OP_COUNTER_RESET:
+			case CSS_PROP_COUNTER_INCREMENT:
+			case CSS_PROP_COUNTER_RESET:
 				assert(COUNTER_INCREMENT_NONE == 
 						COUNTER_RESET_NONE);
 				assert(COUNTER_INCREMENT_NAMED ==
@@ -1131,7 +1131,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_CURSOR:
+			case CSS_PROP_CURSOR:
 				while (value == CURSOR_URI) {
 					lwc_string *he = 
 						*((lwc_string **) 
@@ -1199,7 +1199,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_DIRECTION:
+			case CSS_PROP_DIRECTION:
 				switch (value) {
 				case DIRECTION_LTR:
 					*ptr += sprintf(*ptr, "ltr");
@@ -1209,7 +1209,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_DISPLAY:
+			case CSS_PROP_DISPLAY:
 				switch (value) {
 				case DISPLAY_INLINE:
 					*ptr += sprintf(*ptr, "inline");
@@ -1261,7 +1261,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_ELEVATION:
+			case CSS_PROP_ELEVATION:
 				switch (value) {
 				case ELEVATION_ANGLE:
 				{
@@ -1290,7 +1290,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_EMPTY_CELLS:
+			case CSS_PROP_EMPTY_CELLS:
 				switch (value) {
 				case EMPTY_CELLS_SHOW:
 					*ptr += sprintf(*ptr, "show");
@@ -1300,7 +1300,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_FLOAT:
+			case CSS_PROP_FLOAT:
 				switch (value) {
 				case FLOAT_LEFT:
 					*ptr += sprintf(*ptr, "left");
@@ -1313,7 +1313,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_FONT_FAMILY:
+			case CSS_PROP_FONT_FAMILY:
 				while (value != FONT_FAMILY_END) {
 					switch (value) {
 					case FONT_FAMILY_STRING:
@@ -1352,7 +1352,7 @@ void dump_bytecode(css_style *style, char **ptr)
 						*ptr += sprintf(*ptr, ", ");
 				}
 				break;
-			case OP_FONT_SIZE:
+			case CSS_PROP_FONT_SIZE:
 				switch (value) {
 				case FONT_SIZE_DIMENSION:
 				{
@@ -1393,7 +1393,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_FONT_STYLE:
+			case CSS_PROP_FONT_STYLE:
 				switch (value) {
 				case FONT_STYLE_NORMAL:
 					*ptr += sprintf(*ptr, "normal");
@@ -1406,7 +1406,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_FONT_VARIANT:
+			case CSS_PROP_FONT_VARIANT:
 				switch (value) {
 				case FONT_VARIANT_NORMAL:
 					*ptr += sprintf(*ptr, "normal");
@@ -1416,7 +1416,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_FONT_WEIGHT:
+			case CSS_PROP_FONT_WEIGHT:
 				switch (value) {
 				case FONT_WEIGHT_NORMAL:
 					*ptr += sprintf(*ptr, "normal");
@@ -1459,8 +1459,8 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_LETTER_SPACING:
-			case OP_WORD_SPACING:
+			case CSS_PROP_LETTER_SPACING:
+			case CSS_PROP_WORD_SPACING:
 				assert(LETTER_SPACING_SET == WORD_SPACING_SET);
 				assert(LETTER_SPACING_NORMAL ==
 						WORD_SPACING_NORMAL);
@@ -1481,7 +1481,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_LINE_HEIGHT:
+			case CSS_PROP_LINE_HEIGHT:
 				switch (value) {
 				case LINE_HEIGHT_NUMBER:
 				{
@@ -1505,7 +1505,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_LIST_STYLE_POSITION:
+			case CSS_PROP_LIST_STYLE_POSITION:
 				switch (value) {
 				case LIST_STYLE_POSITION_INSIDE:
 					*ptr += sprintf(*ptr, "inside");
@@ -1515,7 +1515,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_LIST_STYLE_TYPE:
+			case CSS_PROP_LIST_STYLE_TYPE:
 				switch (value) {
 				case LIST_STYLE_TYPE_DISC:
 					*ptr += sprintf(*ptr, "disc");
@@ -1564,8 +1564,8 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_MAX_HEIGHT:
-			case OP_MAX_WIDTH:
+			case CSS_PROP_MAX_HEIGHT:
+			case CSS_PROP_MAX_WIDTH:
 				assert(MAX_HEIGHT_SET == MAX_WIDTH_SET);
 				assert(MAX_HEIGHT_NONE == MAX_WIDTH_NONE);
 
@@ -1585,15 +1585,15 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_PADDING_TOP:
-			case OP_PADDING_RIGHT:
-			case OP_PADDING_BOTTOM:
-			case OP_PADDING_LEFT:
-			case OP_MIN_HEIGHT:
-			case OP_MIN_WIDTH:
-			case OP_PAUSE_AFTER:
-			case OP_PAUSE_BEFORE:
-			case OP_TEXT_INDENT:
+			case CSS_PROP_PADDING_TOP:
+			case CSS_PROP_PADDING_RIGHT:
+			case CSS_PROP_PADDING_BOTTOM:
+			case CSS_PROP_PADDING_LEFT:
+			case CSS_PROP_MIN_HEIGHT:
+			case CSS_PROP_MIN_WIDTH:
+			case CSS_PROP_PAUSE_AFTER:
+			case CSS_PROP_PAUSE_BEFORE:
+			case CSS_PROP_TEXT_INDENT:
 				assert(MIN_HEIGHT_SET == MIN_WIDTH_SET);
 				assert(MIN_HEIGHT_SET == PADDING_SET);
 				assert(MIN_HEIGHT_SET == PAUSE_AFTER_SET);
@@ -1613,11 +1613,11 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_ORPHANS:
-			case OP_PITCH_RANGE:
-			case OP_RICHNESS:
-			case OP_STRESS:
-			case OP_WIDOWS:
+			case CSS_PROP_ORPHANS:
+			case CSS_PROP_PITCH_RANGE:
+			case CSS_PROP_RICHNESS:
+			case CSS_PROP_STRESS:
+			case CSS_PROP_WIDOWS:
 				assert(ORPHANS_SET == PITCH_RANGE_SET);
 				assert(ORPHANS_SET == RICHNESS_SET);
 				assert(ORPHANS_SET == STRESS_SET);
@@ -1633,7 +1633,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_OUTLINE_COLOR:
+			case CSS_PROP_OUTLINE_COLOR:
 				switch (value) {
 				case OUTLINE_COLOR_SET:
 				{
@@ -1648,7 +1648,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_OVERFLOW:
+			case CSS_PROP_OVERFLOW:
 				switch (value) {
 				case OVERFLOW_VISIBLE:
 					*ptr += sprintf(*ptr, "visible");
@@ -1664,8 +1664,8 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_PAGE_BREAK_AFTER:
-			case OP_PAGE_BREAK_BEFORE:
+			case CSS_PROP_PAGE_BREAK_AFTER:
+			case CSS_PROP_PAGE_BREAK_BEFORE:
 				assert(PAGE_BREAK_AFTER_AUTO == 
 						PAGE_BREAK_BEFORE_AUTO);
 				assert(PAGE_BREAK_AFTER_ALWAYS ==
@@ -1695,7 +1695,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_PAGE_BREAK_INSIDE:
+			case CSS_PROP_PAGE_BREAK_INSIDE:
 				switch (value) {
 				case PAGE_BREAK_INSIDE_AUTO:
 					*ptr += sprintf(*ptr, "auto");
@@ -1705,7 +1705,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_PITCH:
+			case CSS_PROP_PITCH:
 				switch (value) {
 				case PITCH_FREQUENCY:
 				{
@@ -1734,7 +1734,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_PLAY_DURING:
+			case CSS_PROP_PLAY_DURING:
 				switch (value) {
 				case PLAY_DURING_URI:
 				{
@@ -1760,7 +1760,7 @@ void dump_bytecode(css_style *style, char **ptr)
 				if (value & PLAY_DURING_REPEAT)
 					*ptr += sprintf(*ptr, " repeat");
 				break;
-			case OP_POSITION:
+			case CSS_PROP_POSITION:
 				switch (value) {
 				case POSITION_STATIC:
 					*ptr += sprintf(*ptr, "static");
@@ -1776,7 +1776,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_QUOTES:
+			case CSS_PROP_QUOTES:
 				switch (value) {
 				case QUOTES_STRING:
 					while (value != QUOTES_NONE) {
@@ -1805,7 +1805,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_SPEAK_HEADER:
+			case CSS_PROP_SPEAK_HEADER:
 				switch (value) {
 				case SPEAK_HEADER_ONCE:
 					*ptr += sprintf(*ptr, "once");
@@ -1815,7 +1815,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_SPEAK_NUMERAL:
+			case CSS_PROP_SPEAK_NUMERAL:
 				switch (value) {
 				case SPEAK_NUMERAL_DIGITS:
 					*ptr += sprintf(*ptr, "digits");
@@ -1825,7 +1825,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_SPEAK_PUNCTUATION:
+			case CSS_PROP_SPEAK_PUNCTUATION:
 				switch (value) {
 				case SPEAK_PUNCTUATION_CODE:
 					*ptr += sprintf(*ptr, "code");
@@ -1835,7 +1835,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_SPEAK:
+			case CSS_PROP_SPEAK:
 				switch (value) {
 				case SPEAK_NORMAL:
 					*ptr += sprintf(*ptr, "normal");
@@ -1848,7 +1848,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_SPEECH_RATE:
+			case CSS_PROP_SPEECH_RATE:
 				switch (value) {
 				case SPEECH_RATE_SET:
 				{
@@ -1880,7 +1880,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_TABLE_LAYOUT:
+			case CSS_PROP_TABLE_LAYOUT:
 				switch (value) {
 				case TABLE_LAYOUT_AUTO:
 					*ptr += sprintf(*ptr, "auto");
@@ -1890,7 +1890,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_TEXT_ALIGN:
+			case CSS_PROP_TEXT_ALIGN:
 				switch (value) {
 				case TEXT_ALIGN_LEFT:
 					*ptr += sprintf(*ptr, "left");
@@ -1906,7 +1906,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_TEXT_DECORATION:
+			case CSS_PROP_TEXT_DECORATION:
 				if (value == TEXT_DECORATION_NONE)
 					*ptr += sprintf(*ptr, "none");
 
@@ -1919,7 +1919,7 @@ void dump_bytecode(css_style *style, char **ptr)
 				if (value & TEXT_DECORATION_BLINK)
 					*ptr += sprintf(*ptr, " blink");
 				break;
-			case OP_TEXT_TRANSFORM:
+			case CSS_PROP_TEXT_TRANSFORM:
 				switch (value) {
 				case TEXT_TRANSFORM_CAPITALIZE:
 					*ptr += sprintf(*ptr, "capitalize");
@@ -1935,7 +1935,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_UNICODE_BIDI:
+			case CSS_PROP_UNICODE_BIDI:
 				switch (value) {
 				case UNICODE_BIDI_NORMAL:
 					*ptr += sprintf(*ptr, "normal");
@@ -1948,7 +1948,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_VERTICAL_ALIGN:
+			case CSS_PROP_VERTICAL_ALIGN:
 				switch (value) {
 				case VERTICAL_ALIGN_SET:
 				{
@@ -1986,7 +1986,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_VISIBILITY:
+			case CSS_PROP_VISIBILITY:
 				switch (value) {
 				case VISIBILITY_VISIBLE:
 					*ptr += sprintf(*ptr, "visible");
@@ -1999,7 +1999,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_VOICE_FAMILY:
+			case CSS_PROP_VOICE_FAMILY:
 				while (value != VOICE_FAMILY_END) {
 					switch (value) {
 					case VOICE_FAMILY_STRING:
@@ -2032,7 +2032,7 @@ void dump_bytecode(css_style *style, char **ptr)
 						*ptr += sprintf(*ptr, ", ");
 				}
 				break;
-			case OP_VOLUME:
+			case CSS_PROP_VOLUME:
 				switch (value) {
 				case VOLUME_NUMBER:
 				{
@@ -2071,7 +2071,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_WHITE_SPACE:
+			case CSS_PROP_WHITE_SPACE:
 				switch (value) {
 				case WHITE_SPACE_NORMAL:
 					*ptr += sprintf(*ptr, "normal");
@@ -2090,7 +2090,7 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				}
 				break;
-			case OP_Z_INDEX:
+			case CSS_PROP_Z_INDEX:
 				switch (value) {
 				case Z_INDEX_SET:
 				{

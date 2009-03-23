@@ -110,7 +110,7 @@ css_error css_computed_style_compose(const css_computed_style *parent,
 	size_t i;
 
 	/* Iterate through the properties */
-	for (i = 0; i < N_OPCODES; i++) {
+	for (i = 0; i < CSS_N_PROPERTIES; i++) {
 		/* Skip any in extension blocks if the block does not exist */	
 		if (prop_dispatch[i].group == GROUP_UNCOMMON &&
 				parent->uncommon == NULL && 

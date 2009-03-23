@@ -52,7 +52,7 @@ typedef struct css_select_state {
 	lwc_string *before;
 	lwc_string *after;
 
-	prop_state props[N_OPCODES];
+	prop_state props[CSS_N_PROPERTIES];
 } css_select_state;
 
 static inline void advance_bytecode(css_style *style, uint32_t n_bytes)
