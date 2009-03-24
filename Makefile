@@ -15,12 +15,12 @@ WARNFLAGS := -Wall -Wextra -Wundef -Wpointer-arith -Wcast-align \
 CFLAGS := $(CFLAGS) -std=c99 -D_BSD_SOURCE -I$(CURDIR)/include/ \
 	-I$(CURDIR)/src $(WARNFLAGS) 
 
-# Parserutils
+# Parserutils & wapcaplet
 ifneq ($(PKGCONFIG),)
-  CFLAGS := $(CFLAGS) $(shell $(PKGCONFIG) libparserutils --cflags)
-  LDFLAGS := $(LDFLAGS) $(shell $(PKGCONFIG) libparserutils --libs)
+  CFLAGS := $(CFLAGS) $(shell $(PKGCONFIG) libparserutils libwapcaplet --cflags)
+  LDFLAGS := $(LDFLAGS) $(shell $(PKGCONFIG) libparserutils libwapcaplet --libs)
 else
-  LDFLAGS := $(LDFLAGS) -lparserutils
+  LDFLAGS := $(LDFLAGS) -lparserutils -lwapcaplet
 endif
 
 include build/makefiles/Makefile.top
