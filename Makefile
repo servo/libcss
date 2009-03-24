@@ -1,46 +1,40 @@
-# Toolchain definitions for building on the destination platform
-CC := gcc
-AR := ar
-LD := gcc
+# Component settings
+COMPONENT := css
+# Default to a static library
+COMPONENT_TYPE ?= lib-static
 
-CP := cp
-RM := rm
-MKDIR := mkdir
-MV := mv
-ECHO := echo
-MAKE := make
-PERL := perl
-PKGCONFIG := pkg-config
-INSTALL := install
-SED := sed
-TOUCH := touch
-LCOV := lcov
-GENHTML := genhtml
+# Setup the tooling
+include build/makefiles/Makefile.tools
+
+TESTRUNNER := $(PERL) build/testtools/testrunner.pl
 
 # Toolchain flags
 WARNFLAGS := -Wall -Wextra -Wundef -Wpointer-arith -Wcast-align \
 	-Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes \
 	-Wmissing-declarations -Wnested-externs -Werror -pedantic
-CFLAGS += -std=c99 -D_BSD_SOURCE -I$(TOP)/include/ $(WARNFLAGS) \
-	`$(PKGCONFIG) --cflags libparserutils libwapcaplet`
-RELEASECFLAGS = $(CFLAGS) -DNDEBUG -O2
-DEBUGCFLAGS = $(CFLAGS) -O0 -g
-ARFLAGS := -cru
-LDFLAGS += `$(PKGCONFIG) --libs libparserutils libwapcaplet` -L$(TOP)/
+CFLAGS := $(CFLAGS) -std=c99 -D_BSD_SOURCE -I$(CURDIR)/include/ \
+	-I$(CURDIR)/src $(WARNFLAGS) 
 
-CPFLAGS :=
-RMFLAGS := -f
-MKDIRFLAGS := -p
-MVFLAGS :=
-ECHOFLAGS := 
-MAKEFLAGS :=
-PKGCONFIGFLAGS :=
-TOUCHFLAGS :=
+# Parserutils
+ifneq ($(PKGCONFIG),)
+  CFLAGS := $(CFLAGS) $(shell $(PKGCONFIG) libparserutils --cflags)
+  LDFLAGS := $(LDFLAGS) $(shell $(PKGCONFIG) libparserutils --libs)
+else
+  LDFLAGS := $(LDFLAGS) -lparserutils
+endif
 
-EXEEXT :=
+include build/makefiles/Makefile.top
 
-# Default installation prefix
-PREFIX ?= /usr/local
-
-
-include build/Makefile.common
+# Extra installation rules
+INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/computed.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/errors.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/fpmath.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/functypes.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/hint.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/libcss.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/properties.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/select.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/stylesheet.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/types.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) /lib/pkgconfig:lib$(COMPONENT).pc.in
+INSTALL_ITEMS := $(INSTALL_ITEMS) /lib:$(BUILDDIR)/lib$(COMPONENT)$(LIBEXT)
