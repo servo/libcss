@@ -614,3 +614,24 @@ IDENT:
 EOF
 #reset
 
+#data
+tes\
+t
+#expected
+IDENT:tes
+CHAR:\
+S
+IDENT:t
+S
+EOF
+#reset
+
+#data
+"tes\
+t"
+#expected
+STRING:tes\nt
+S
+EOF
+#reset
+
