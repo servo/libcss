@@ -6,5 +6,6 @@ includedir=${prefix}/include
 Name: libcss
 Description: CSS parsing and selection library
 Version: 0.0.1
-Libs: -L${libdir} -lcss -lparserutils -lwapcaplet
+Requires: libparserutils, libwapcaplet
+Libs: -L${libdir} -lcss
 Cflags: -I${includedir}
