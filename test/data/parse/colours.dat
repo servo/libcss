@@ -1,12 +1,12 @@
 ## Simple colour values
 
-##data
-#* { color: red }
-##errors
-##expected
-#| 1 *
-#|   0x02000018 0xff000000
-##reset
+#data
+* { color: red }
+#errors
+#expected
+| 1 *
+|   0x02000018 0xff000000
+#reset
 
 #data
 * { color: #f00 }

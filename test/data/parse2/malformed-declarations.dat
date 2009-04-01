@@ -75,32 +75,30 @@
 |  color: #bbbbcc00
 #reset
 
-##data
-#* { background-color: black; :; color: white; }
-##errors
-##expected
-#| *
-#|  background-color: #00000000
-#|  color: #ffffff00
-##reset
+#data
+* { background-color: black; :; color: white; }
+#errors
+#expected
+| *
+|  background-color: #00000000
+|  color: #ffffff00
+#reset
 
-##data
-#* { background-color: black; : color: white; }
-##errors
-##expected
-#| *
-#|  background-color: #00000000
-#|  color: #ffffff00
-##reset
+#data
+* { background-color: black; : color: white; }
+#errors
+#expected
+| *
+|  background-color: #00000000
+#reset
 
-##data
-#* { background-color: black; dentist: color: white; }
-##errors
-##expected
-#| *
-#|  background-color: #00000000
-#|  color: #ffffff00
-##reset
+#data
+* { background-color: black; dentist: color: white; }
+#errors
+#expected
+| *
+|  background-color: #00000000
+#reset
 
 #data
 *{f():{
