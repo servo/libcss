@@ -15,6 +15,12 @@
 
 static parserutils_error css_charset_read_bom_or_charset(const uint8_t *data, 
 		size_t len, uint16_t *mibenum);
+static parserutils_error try_utf32_charset(const uint8_t *data, 
+		size_t len, uint16_t *result);
+static parserutils_error try_utf16_charset(const uint8_t *data, 
+		size_t len, uint16_t *result);
+static parserutils_error try_ascii_compatible_charset(const uint8_t *data, 
+		size_t len, uint16_t *result);
 
 /**
  * Extract a charset from a chunk of data
@@ -32,7 +38,7 @@ static parserutils_error css_charset_read_bom_or_charset(const uint8_t *data,
 parserutils_error css_charset_extract(const uint8_t *data, size_t len,
 		uint16_t *mibenum, uint32_t *source)
 {
-	css_error error;
+	parserutils_error error;
 	uint16_t charset = 0;
 
 	if (data == NULL || mibenum == NULL || source == NULL)
@@ -41,10 +47,6 @@ parserutils_error css_charset_extract(const uint8_t *data, size_t len,
 	/* If the charset was dictated by the client, we've nothing to detect */
 	if (*source == CSS_CHARSET_DICTATED)
 		return PARSERUTILS_OK;
-
-	/* We need at least 4 bytes of data */
-	if (len < 4)
-		goto default_encoding;
 
 	/* Look for a BOM and/or @charset */
 	error = css_charset_read_bom_or_charset(data, len, &charset);
@@ -64,8 +66,6 @@ parserutils_error css_charset_extract(const uint8_t *data, size_t len,
 		return PARSERUTILS_OK;
 
 	/* We've not yet found a charset, so use the default fallback */
-default_encoding:
-
 	charset = parserutils_charset_mibenum_from_name("UTF-8", SLEN("UTF-8"));
 
 	*mibenum = charset;
@@ -87,6 +87,7 @@ default_encoding:
 parserutils_error css_charset_read_bom_or_charset(const uint8_t *data, 
 		size_t len, uint16_t *mibenum)
 {
+	parserutils_error error;
 	uint16_t charset = 0;
 
 	if (data == NULL)
@@ -130,15 +131,276 @@ parserutils_error css_charset_read_bom_or_charset(const uint8_t *data,
 		return PARSERUTILS_OK;
 	}
 
-	/** \todo UTF-32 and UTF-16 @charset support */
+	error = try_utf32_charset(data, len, &charset);
+	if (error == PARSERUTILS_OK && charset != 0) {
+		*mibenum = charset;
+		return PARSERUTILS_OK;
+	}
+
+	error = try_utf16_charset(data, len, &charset);
+	if (error == PARSERUTILS_OK && charset != 0) {
+		*mibenum = charset;
+		return PARSERUTILS_OK;
+	}
+
+	error = try_ascii_compatible_charset(data, len, &charset);
+	if (error != PARSERUTILS_OK)
+		return error;
+
+	*mibenum = charset;
+
+	return PARSERUTILS_OK;
+}
+
+static parserutils_error try_utf32_charset(const uint8_t *data, 
+		size_t len, uint16_t *result)
+{
+	uint16_t charset = 0;
+
+#define CHARSET_BE "\0\0\0@\0\0\0c\0\0\0h\0\0\0a\0\0\0r\0\0\0s\0\0\0e\0\0\0t\0\0\0 \0\0\0\""
+#define CHARSET_LE "@\0\0\0c\0\0\0h\0\0\0a\0\0\0r\0\0\0s\0\0\0e\0\0\0t\0\0\0 \0\0\0\"\0\0\0"
+
+	if (len <= SLEN(CHARSET_LE))
+		return PARSERUTILS_NEEDDATA;
+
+	/* Look for @charset, assuming UTF-32 source data */
+	if (memcmp(data, CHARSET_LE, SLEN(CHARSET_LE)) == 0) {
+		const uint8_t *start = data + SLEN(CHARSET_LE);
+		const uint8_t *end;
+		char buf[8];
+		char *ptr = buf;
+
+		/* Look for "; at end of charset declaration */
+		for (end = start; end < data + len - 4; end += 4) {
+			uint32_t c = end[0] | (end[1] << 8) | 
+				     (end[2] << 16) | (end[3] << 24);
+
+			/* Bail if non-ASCII */
+			if (c > 0x007f)
+				break;
+
+			/* Reached the end? */
+			if (c == '"' && end < data + len - 8) {
+				uint32_t d = end[4] | (end[5] << 8) |
+				    (end[6] << 16) | (end[7] << 24);
+
+				if (d == ';')
+					break;
+			}
+
+			/* Append to buf, if there's space */
+			if ((size_t) (ptr - buf) < sizeof(buf)) {
+				/* Uppercase */
+				if ('a' <= c && c <= 'z')
+					*ptr++ = c & ~0x20;
+				else
+					*ptr++ = c;
+			}
+		}
+
+		if (end == data + len - 4) {
+			/* Ran out of input */
+			return PARSERUTILS_NEEDDATA;
+		}
+
+		/* Ensure we have something that looks like UTF-32(LE)? */
+		if ((ptr - buf == SLEN("UTF-32LE") && 
+				memcmp(buf, "UTF-32LE", ptr - buf) == 0) ||
+				(ptr - buf == SLEN("UTF-32") &&
+				memcmp(buf, "UTF-32", ptr - buf) == 0)) {
+			/* Convert to MIB enum */
+			charset = parserutils_charset_mibenum_from_name(
+					"UTF-32LE", SLEN("UTF-32LE"));
+		}
+	} else if (memcmp(data, CHARSET_BE, SLEN(CHARSET_BE)) == 0) {
+		const uint8_t *start = data + SLEN(CHARSET_BE);
+		const uint8_t *end;
+		char buf[8];
+		char *ptr = buf;
+
+		/* Look for "; at end of charset declaration */
+		for (end = start; end < data + len - 4; end += 4) {
+			uint32_t c = end[3] | (end[2] << 8) | 
+				     (end[1] << 16) | (end[0] << 24);
+
+			/* Bail if non-ASCII */
+			if (c > 0x007f)
+				break;
+
+			/* Reached the end? */
+			if (c == '"' && end < data + len - 8) {
+				uint32_t d = end[7] | (end[6] << 8) |
+				    (end[5] << 16) | (end[4] << 24);
+
+				if (d == ';')
+					break;
+			}
+
+			/* Append to buf, if there's space */
+			if ((size_t) (ptr - buf) < sizeof(buf)) {
+				/* Uppercase */
+				if ('a' <= c && c <= 'z')
+					*ptr++ = c & ~0x20;
+				else
+					*ptr++ = c;
+			}
+		}
+
+		if (end == data + len - 4) {
+			/* Ran out of input */
+			return PARSERUTILS_NEEDDATA;
+		}
+
+		/* Ensure we have something that looks like UTF-32(BE)? */
+		if ((ptr - buf == SLEN("UTF-32BE") && 
+				memcmp(buf, "UTF-32BE", ptr - buf) == 0) ||
+				(ptr - buf == SLEN("UTF-32") &&
+				memcmp(buf, "UTF-32", ptr - buf) == 0)) {
+			/* Convert to MIB enum */
+			charset = parserutils_charset_mibenum_from_name(
+					"UTF-32BE", SLEN("UTF-32BE"));
+		}
+	}
+
+#undef CHARSET_LE
+#undef CHARSET_BE
+
+	*result = charset;
+
+	return PARSERUTILS_OK;
+}
+
+static parserutils_error try_utf16_charset(const uint8_t *data, 
+		size_t len, uint16_t *result)
+{
+	uint16_t charset = 0;
+
+#define CHARSET_BE "\0@\0c\0h\0a\0r\0s\0e\0t\0 \0\""
+#define CHARSET_LE "@\0c\0h\0a\0r\0s\0e\0t\0 \0\"\0"
+
+	if (len <= SLEN(CHARSET_LE))
+		return PARSERUTILS_NEEDDATA;
+
+	/* Look for @charset, assuming UTF-16 source data */
+	if (memcmp(data, CHARSET_LE, SLEN(CHARSET_LE)) == 0) {
+		const uint8_t *start = data + SLEN(CHARSET_LE);
+		const uint8_t *end;
+		char buf[8];
+		char *ptr = buf;
+
+		/* Look for "; at end of charset declaration */
+		for (end = start; end < data + len - 2; end += 2) {
+			uint32_t c = end[0] | (end[1] << 8);
+
+			/* Bail if non-ASCII */
+			if (c > 0x007f)
+				break;
+
+			/* Reached the end? */
+			if (c == '"' && end < data + len - 4) {
+				uint32_t d = end[2] | (end[3] << 8);
+
+				if (d == ';')
+					break;
+			}
+
+			/* Append to buf, if there's space */
+			if ((size_t) (ptr - buf) < sizeof(buf)) {
+				/* Uppercase */
+				if ('a' <= c && c <= 'z')
+					*ptr++ = c & ~0x20;
+				else
+					*ptr++ = c;
+			}
+		}
+
+		if (end == data + len - 2) {
+			/* Ran out of input */
+			return PARSERUTILS_NEEDDATA;
+		}
+
+		/* Ensure we have something that looks like UTF-16(LE)? */
+		if ((ptr - buf == SLEN("UTF-16LE") && 
+				memcmp(buf, "UTF-16LE", ptr - buf) == 0) ||
+				(ptr - buf == SLEN("UTF-16") &&
+				memcmp(buf, "UTF-16", ptr - buf) == 0)) {
+			/* Convert to MIB enum */
+			charset = parserutils_charset_mibenum_from_name(
+					"UTF-16LE", SLEN("UTF-16LE"));
+		}
+	} else if (memcmp(data, CHARSET_BE, SLEN(CHARSET_BE)) == 0) {
+		const uint8_t *start = data + SLEN(CHARSET_BE);
+		const uint8_t *end;
+		char buf[8];
+		char *ptr = buf;
+
+		/* Look for "; at end of charset declaration */
+		for (end = start; end < data + len - 2; end += 2) {
+			uint32_t c = end[1] | (end[0] << 8);
+
+			/* Bail if non-ASCII */
+			if (c > 0x007f)
+				break;
+
+			/* Reached the end? */
+			if (c == '"' && end < data + len - 4) {
+				uint32_t d = end[3] | (end[2] << 8);
+
+				if (d == ';')
+					break;
+			}
+
+			/* Append to buf, if there's space */
+			if ((size_t) (ptr - buf) < sizeof(buf)) {
+				/* Uppercase */
+				if ('a' <= c && c <= 'z')
+					*ptr++ = c & ~0x20;
+				else
+					*ptr++ = c;
+			}
+		}
+
+		if (end == data + len - 2) {
+			/* Ran out of input */
+			return PARSERUTILS_NEEDDATA;
+		}
+
+		/* Ensure we have something that looks like UTF-16(BE)? */
+		if ((ptr - buf == SLEN("UTF-16BE") && 
+				memcmp(buf, "UTF-16BE", ptr - buf) == 0) ||
+				(ptr - buf == SLEN("UTF-16") &&
+				memcmp(buf, "UTF-16", ptr - buf) == 0)) {
+			/* Convert to MIB enum */
+			charset = parserutils_charset_mibenum_from_name(
+					"UTF-16BE", SLEN("UTF-16BE"));
+		}
+	}
+
+#undef CHARSET_LE
+#undef CHARSET_BE
+
+	*result = charset;
+
+	return PARSERUTILS_OK;
+}
+
+parserutils_error try_ascii_compatible_charset(const uint8_t *data, size_t len,
+		uint16_t *result)
+{
+	uint16_t charset = 0;
+
+#define CHARSET "@charset \""
+
+	if (len <= SLEN(CHARSET))
+		return PARSERUTILS_NEEDDATA;
 
 	/* Look for @charset, assuming ASCII-compatible source data */
-	if (len > 10 &&	strncmp((const char *) data, "@charset \"", 
-			SLEN("@charset \"")) == 0) {
+	if (memcmp(data, CHARSET, SLEN(CHARSET)) == 0) {
+		const uint8_t *start = data + SLEN(CHARSET);
 		const uint8_t *end;
 
 		/* Look for "; at end of charset declaration */
-		for (end = data + 10; end < data + len; end++) {
+		for (end = start; end < data + len; end++) {
 			if (*end == '"' && end < data + len - 1 && 
 					*(end + 1) == ';')
 				break;
@@ -151,11 +413,12 @@ parserutils_error css_charset_read_bom_or_charset(const uint8_t *data,
 
 		/* Convert to MIB enum */
 		charset = parserutils_charset_mibenum_from_name(
-				(char *) data + 10,  end - data - 10);
+				(const char *) start,  end - start);
 	}
 
-	*mibenum = charset;
+#undef CHARSET
+
+	*result = charset;
 
 	return PARSERUTILS_OK;
 }
-
