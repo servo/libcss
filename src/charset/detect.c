@@ -414,6 +414,24 @@ parserutils_error try_ascii_compatible_charset(const uint8_t *data, size_t len,
 		/* Convert to MIB enum */
 		charset = parserutils_charset_mibenum_from_name(
 				(const char *) start,  end - start);
+
+		/* Any non-ASCII compatible charset must be ignored, as
+		 * we've just used an ASCII parser to read it. */
+		if (charset == parserutils_charset_mibenum_from_name(
+					"UTF-32", SLEN("UTF-32")) ||
+			charset == parserutils_charset_mibenum_from_name(
+					"UTF-32LE", SLEN("UTF-32LE")) ||
+			charset == parserutils_charset_mibenum_from_name(
+					"UTF-32BE", SLEN("UTF-32BE")) ||
+			charset == parserutils_charset_mibenum_from_name(
+					"UTF-16", SLEN("UTF-16")) ||
+			charset == parserutils_charset_mibenum_from_name(
+					"UTF-16LE", SLEN("UTF-16LE")) ||
+			charset == parserutils_charset_mibenum_from_name(
+					"UTF-16BE", SLEN("UTF-16BE"))) {
+
+			charset = 0;
+		}
 	}
 
 #undef CHARSET
