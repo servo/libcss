@@ -1,5 +1,6 @@
 # Component settings
 COMPONENT := css
+COMPONENT_VERSION := 0.0.1
 # Default to a static library
 COMPONENT_TYPE ?= lib-static
 
@@ -17,24 +18,26 @@ CFLAGS := $(CFLAGS) -std=c99 -D_BSD_SOURCE -I$(CURDIR)/include/ \
 
 # Parserutils & wapcaplet
 ifneq ($(PKGCONFIG),)
-  CFLAGS := $(CFLAGS) $(shell $(PKGCONFIG) libparserutils libwapcaplet --cflags)
-  LDFLAGS := $(LDFLAGS) $(shell $(PKGCONFIG) libparserutils libwapcaplet --libs)
+  CFLAGS := $(CFLAGS) $(shell $(PKGCONFIG) libparserutils-0 libwapcaplet-0 --cflags)
+  LDFLAGS := $(LDFLAGS) $(shell $(PKGCONFIG) libparserutils-0 libwapcaplet-0 --libs)
 else
-  LDFLAGS := $(LDFLAGS) -lparserutils -lwapcaplet
+  LDFLAGS := $(LDFLAGS) -lparserutils0 -lwapcaplet0
 endif
 
 include build/makefiles/Makefile.top
 
 # Extra installation rules
-INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/computed.h
-INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/errors.h
-INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/fpmath.h
-INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/functypes.h
-INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/hint.h
-INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/libcss.h
-INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/properties.h
-INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/select.h
-INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/stylesheet.h
-INSTALL_ITEMS := $(INSTALL_ITEMS) /include/libcss:include/libcss/types.h
+I := /include/libcss$(major-version)/libcss
+
+INSTALL_ITEMS := $(INSTALL_ITEMS) $(I):include/libcss/computed.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) $(I):include/libcss/errors.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) $(I):include/libcss/fpmath.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) $(I):include/libcss/functypes.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) $(I):include/libcss/hint.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) $(I):include/libcss/libcss.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) $(I):include/libcss/properties.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) $(I):include/libcss/select.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) $(I):include/libcss/stylesheet.h
+INSTALL_ITEMS := $(INSTALL_ITEMS) $(I):include/libcss/types.h
 INSTALL_ITEMS := $(INSTALL_ITEMS) /lib/pkgconfig:lib$(COMPONENT).pc.in
-INSTALL_ITEMS := $(INSTALL_ITEMS) /lib:$(BUILDDIR)/lib$(COMPONENT)$(LIBEXT)
+INSTALL_ITEMS := $(INSTALL_ITEMS) /lib:$(OUTPUT)
