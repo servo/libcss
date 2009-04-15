@@ -583,10 +583,11 @@ css_error getToken(css_parser *parser, const css_token **token)
 
 		if (t->type < CSS_TOKEN_LAST_INTERN && t->data.data != NULL) {
 			if (t->type < CSS_TOKEN_LAST_INTERN_LOWER) {
-				uint8_t temp[t->data.len];
+				uint8_t *temp = alloca(t->data.len);
 				bool lower = false;
+				size_t i;
 
-				for (size_t i = 0; i < t->data.len; i++) {
+				for (i = 0; i < t->data.len; i++) {
 					uint8_t c = t->data.data[i];
 
 					if ('A' <= c && c <= 'Z') {
@@ -828,6 +829,7 @@ css_error parseRuleset(css_parser *parser)
 {
 	enum { Initial = 0, Brace = 1, WS = 2 };
 	parser_state *state = parserutils_stack_get_current(parser->states);
+	parser_state to = { sRulesetEnd, Initial };
 	const css_token *token;
 	css_error error;
 
@@ -916,8 +918,6 @@ css_error parseRuleset(css_parser *parser)
 		break;
 	}
 
-	parser_state to = { sRulesetEnd, Initial };
-
 	return transitionNoRet(parser, to);
 }
 
@@ -1003,6 +1003,7 @@ css_error parseAtRule(css_parser *parser)
 {
 	enum { Initial = 0, WS = 1, Any = 2, AfterAny = 3 };
 	parser_state *state = parserutils_stack_get_current(parser->states);
+	parser_state to = { sAtRuleEnd, Initial };
 	const css_token *token;
 	css_error error;
 
@@ -1064,8 +1065,6 @@ css_error parseAtRule(css_parser *parser)
 
 		break;
 	}
-
-	parser_state to = { sAtRuleEnd, Initial };
 
 	return transitionNoRet(parser, to);
 }
@@ -1450,6 +1449,7 @@ css_error parseDeclList(css_parser *parser)
 {
 	enum { Initial = 0, WS = 1 };
 	parser_state *state = parserutils_stack_get_current(parser->states);
+	parser_state to = { sDeclListEnd, Initial };
 	const css_token *token;
 	css_error error;
 
@@ -1493,8 +1493,6 @@ css_error parseDeclList(css_parser *parser)
 		break;
 	}
 
-	parser_state to = { sDeclListEnd, Initial };
-
 	return transitionNoRet(parser, to);
 }
 
@@ -1502,6 +1500,7 @@ css_error parseDeclListEnd(css_parser *parser)
 {
 	enum { Initial = 0, AfterDeclaration = 1 };
 	parser_state *state = parserutils_stack_get_current(parser->states);
+	parser_state to = { sDeclList, Initial };
 	const css_token *token;
 	css_error error;
 
@@ -1539,8 +1538,6 @@ css_error parseDeclListEnd(css_parser *parser)
 	case AfterDeclaration:
 		break;
 	}
-
-	parser_state to = { sDeclList, Initial };
 
 	return transitionNoRet(parser, to);
 }
@@ -1584,6 +1581,7 @@ css_error parseValue1(css_parser *parser)
 {
 	enum { Initial = 0, AfterValue = 1 };
 	parser_state *state = parserutils_stack_get_current(parser->states);
+	parser_state to = { sValue0, Initial };
 	const css_token *token;
 	css_error error;
 
@@ -1621,8 +1619,6 @@ css_error parseValue1(css_parser *parser)
 			return done(parser);
 		break;
 	}
-
-	parser_state to = { sValue0, Initial };
 
 	return transitionNoRet(parser, to);
 }
@@ -1980,6 +1976,8 @@ css_error parseMalformedDeclaration(css_parser *parser)
 	}
 	case Go:
 		while (1) {
+			char want;
+			char *match;
 			const char *data;
 			size_t len;
 
@@ -2002,8 +2000,7 @@ css_error parseMalformedDeclaration(css_parser *parser)
 					data[0] != ';'))
 				continue;
 
-			char want;
-			char *match = parserutils_stack_get_current(
+			match = parserutils_stack_get_current(
 					parser->open_items);
 
 			/* If the stack is empty, then we're done if we've got
@@ -2078,6 +2075,8 @@ css_error parseMalformedSelector(css_parser *parser)
 		/* Fall through */
 	case Go:
 		while (1) {
+			char want;
+			char *match;
 			const char *data;
 			size_t len;
 
@@ -2099,8 +2098,7 @@ css_error parseMalformedSelector(css_parser *parser)
 					data[0] != '(' && data[0] != ')'))
 				continue;
 
-			char want;
-			char *match = parserutils_stack_get_current(
+			match = parserutils_stack_get_current(
 					parser->open_items);
 
 			/* Get corresponding start tokens for end tokens */
@@ -2176,6 +2174,8 @@ css_error parseMalformedAtRule(css_parser *parser)
 	}
 	case Go:
 		while (1) {
+			char want;
+			char *match;
 			const char *data;
 			size_t len;
 
@@ -2198,8 +2198,7 @@ css_error parseMalformedAtRule(css_parser *parser)
 					data[0] != ';'))
 				continue;
 
-			char want;
-			char *match = parserutils_stack_get_current(
+			match = parserutils_stack_get_current(
 					parser->open_items);
 
 			/* If we have a semicolon, then we're either done or

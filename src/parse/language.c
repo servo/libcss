@@ -36,7 +36,7 @@ struct css_language {
 	enum {
 		BEFORE_CHARSET,
 		BEFORE_RULES,
-		HAD_RULE,
+		HAD_RULE
 	} state;			/**< State flag, for at-rule handling */
 
 	/** \todo These should be statically allocated */
@@ -129,6 +129,7 @@ css_error css_language_create(css_stylesheet *sheet, css_parser *parser,
 	parserutils_error perror;
         lwc_error lerror;
 	css_error error;
+	int i;
 
 	if (sheet == NULL || parser == NULL || alloc == NULL || 
 			language == NULL)
@@ -147,7 +148,7 @@ css_error css_language_create(css_stylesheet *sheet, css_parser *parser,
 	}
 
 	/* Intern all known strings */
-	for (int i = 0; i < LAST_KNOWN; i++) {
+	for (i = 0; i < LAST_KNOWN; i++) {
                 lerror = lwc_context_intern(sheet->dictionary,
                                             stringmap[i].data,
                                             stringmap[i].len,
@@ -354,13 +355,13 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 {
 	parserutils_error perror;
 	context_entry entry = { CSS_PARSER_START_ATRULE, NULL };
-
-	assert(c != NULL);
-
-	/* vector contains: ATKEYWORD ws any0 */
 	const css_token *token = NULL;
 	const css_token *atkeyword = NULL;
 	int32_t ctx = 0;
+
+	/* vector contains: ATKEYWORD ws any0 */
+
+	assert(c != NULL);
 
 	atkeyword = parserutils_vector_iterate(vector, &ctx);
 

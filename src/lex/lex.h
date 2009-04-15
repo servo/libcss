@@ -22,7 +22,7 @@ typedef struct css_lexer css_lexer;
  * Lexer option types
  */
 typedef enum css_lexer_opttype {
-	CSS_LEXER_EMIT_COMMENTS,
+	CSS_LEXER_EMIT_COMMENTS
 } css_lexer_opttype;
 
 /**

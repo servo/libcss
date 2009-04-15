@@ -25,22 +25,22 @@ enum op_azimuth {
 	AZIMUTH_CENTER_RIGHT		= 0x0005,
 	AZIMUTH_RIGHT			= 0x0006,
 	AZIMUTH_FAR_RIGHT		= 0x0007,
-	AZIMUTH_RIGHT_SIDE		= 0x0008,
+	AZIMUTH_RIGHT_SIDE		= 0x0008
 };
 
 enum op_background_attachment {
 	BACKGROUND_ATTACHMENT_FIXED	= 0x0000,
-	BACKGROUND_ATTACHMENT_SCROLL	= 0x0001,
+	BACKGROUND_ATTACHMENT_SCROLL	= 0x0001
 };
 
 enum op_background_color {
 	BACKGROUND_COLOR_TRANSPARENT	= 0x0000,
-	BACKGROUND_COLOR_SET		= 0x0080,
+	BACKGROUND_COLOR_SET		= 0x0080
 };
 
 enum op_background_image {
 	BACKGROUND_IMAGE_URI		= 0x0080,
-	BACKGROUND_IMAGE_NONE		= 0x0000,
+	BACKGROUND_IMAGE_NONE		= 0x0000
 };
 
 enum op_background_position {
@@ -52,28 +52,28 @@ enum op_background_position {
 	BACKGROUND_POSITION_VERT_SET	= 0x0008,
 	BACKGROUND_POSITION_VERT_CENTER	= 0x0000,
 	BACKGROUND_POSITION_VERT_BOTTOM	= 0x0001,
-	BACKGROUND_POSITION_VERT_TOP	= 0x0002,
+	BACKGROUND_POSITION_VERT_TOP	= 0x0002
 };
 
 enum op_background_repeat {
 	BACKGROUND_REPEAT_NO_REPEAT	= 0x0000,
 	BACKGROUND_REPEAT_REPEAT_X	= 0x0001,
 	BACKGROUND_REPEAT_REPEAT_Y	= 0x0002,
-	BACKGROUND_REPEAT_REPEAT	= 0x0003,
+	BACKGROUND_REPEAT_REPEAT	= 0x0003
 };
 
 enum op_border_collapse {
 	BORDER_COLLAPSE_SEPARATE	= 0x0000,
-	BORDER_COLLAPSE_COLLAPSE	= 0x0001,
+	BORDER_COLLAPSE_COLLAPSE	= 0x0001
 };
 
 enum op_border_spacing {
-	BORDER_SPACING_SET		= 0x0080,
+	BORDER_SPACING_SET		= 0x0080
 };
 
 enum op_border_color {
 	BORDER_COLOR_SET		= 0x0080,
-	BORDER_COLOR_TRANSPARENT	= 0x0000,
+	BORDER_COLOR_TRANSPARENT	= 0x0000
 };
 
 enum op_border_style {
@@ -86,31 +86,31 @@ enum op_border_style {
 	BORDER_STYLE_GROOVE		= 0x0006,
 	BORDER_STYLE_RIDGE		= 0x0007,
 	BORDER_STYLE_INSET		= 0x0008,
-	BORDER_STYLE_OUTSET		= 0x0009,
+	BORDER_STYLE_OUTSET		= 0x0009
 };
 
 enum op_border_width {
 	BORDER_WIDTH_SET		= 0x0080,
 	BORDER_WIDTH_THIN		= 0x0000,
 	BORDER_WIDTH_MEDIUM		= 0x0001,
-	BORDER_WIDTH_THICK		= 0x0002,
+	BORDER_WIDTH_THICK		= 0x0002
 };
 
 enum op_bottom {
 	BOTTOM_SET			= 0x0080,
-	BOTTOM_AUTO			= 0x0000,
+	BOTTOM_AUTO			= 0x0000
 };
 
 enum op_caption_side {
 	CAPTION_SIDE_TOP		= 0x0000,
-	CAPTION_SIDE_BOTTOM		= 0x0001,
+	CAPTION_SIDE_BOTTOM		= 0x0001
 };
 
 enum op_clear {
 	CLEAR_NONE			= 0x0000,
 	CLEAR_LEFT			= 0x0001,
 	CLEAR_RIGHT			= 0x0002,
-	CLEAR_BOTH			= 0x0003,
+	CLEAR_BOTH			= 0x0003
 };
 
 enum op_clip {
@@ -122,11 +122,11 @@ enum op_clip {
 	CLIP_RECT_BOTTOM_AUTO		= 0x0020,
 	CLIP_RECT_LEFT_AUTO		= 0x0040,
 
-	CLIP_AUTO			= 0x0000,
+	CLIP_AUTO			= 0x0000
 };
 
 enum op_color {
-	COLOR_SET			= 0x0080,
+	COLOR_SET			= 0x0080
 };
 
 enum op_content {
@@ -144,29 +144,29 @@ enum op_content {
 	CONTENT_OPEN_QUOTE		= 0x0002,
 	CONTENT_CLOSE_QUOTE		= 0x0003,
 	CONTENT_NO_OPEN_QUOTE		= 0x0004,
-	CONTENT_NO_CLOSE_QUOTE		= 0x0005,
+	CONTENT_NO_CLOSE_QUOTE		= 0x0005
 };
 
 enum op_counter_increment {
 	COUNTER_INCREMENT_NAMED		= 0x0080,
 
-	COUNTER_INCREMENT_NONE		= 0x0000,
+	COUNTER_INCREMENT_NONE		= 0x0000
 };
 
 enum op_counter_reset {
 	COUNTER_RESET_NAMED		= 0x0080,
 
-	COUNTER_RESET_NONE		= 0x0000,
+	COUNTER_RESET_NONE		= 0x0000
 };
 
 enum op_cue_after {
 	CUE_AFTER_URI			= 0x0080,
-	CUE_AFTER_NONE			= 0x0000,
+	CUE_AFTER_NONE			= 0x0000
 };
 
 enum op_cue_before {
 	CUE_BEFORE_URI			= 0x0080,
-	CUE_BEFORE_NONE			= 0x0000,
+	CUE_BEFORE_NONE			= 0x0000
 };
 
 enum op_cursor {
@@ -188,12 +188,12 @@ enum op_cursor {
 	CURSOR_TEXT			= 0x000d,
 	CURSOR_WAIT			= 0x000e,
 	CURSOR_HELP			= 0x000f,
-	CURSOR_PROGRESS			= 0x0010,
+	CURSOR_PROGRESS			= 0x0010
 };
 
 enum op_direction {
 	DIRECTION_LTR			= 0x0000,
-	DIRECTION_RTL			= 0x0001,
+	DIRECTION_RTL			= 0x0001
 };
 
 enum op_display {
@@ -212,7 +212,7 @@ enum op_display {
 	DISPLAY_TABLE_COLUMN		= 0x000c,
 	DISPLAY_TABLE_CELL		= 0x000d,
 	DISPLAY_TABLE_CAPTION		= 0x000e,
-	DISPLAY_NONE			= 0x000f,
+	DISPLAY_NONE			= 0x000f
 };
 
 enum op_elevation {
@@ -221,18 +221,18 @@ enum op_elevation {
 	ELEVATION_LEVEL			= 0x0001,
 	ELEVATION_ABOVE			= 0x0002,
 	ELEVATION_HIGHER		= 0x0003,
-	ELEVATION_LOWER			= 0x0004,
+	ELEVATION_LOWER			= 0x0004
 };
 
 enum op_empty_cells {
 	EMPTY_CELLS_SHOW		= 0x0000,
-	EMPTY_CELLS_HIDE		= 0x0001,
+	EMPTY_CELLS_HIDE		= 0x0001
 };
 
 enum op_float {
 	FLOAT_LEFT			= 0x0000,
 	FLOAT_RIGHT			= 0x0001,
-	FLOAT_NONE			= 0x0002,
+	FLOAT_NONE			= 0x0002
 };
 
 enum op_font_family {
@@ -245,7 +245,7 @@ enum op_font_family {
 	FONT_FAMILY_SANS_SERIF		= 0x0002,
 	FONT_FAMILY_CURSIVE		= 0x0003,
 	FONT_FAMILY_FANTASY		= 0x0004,
-	FONT_FAMILY_MONOSPACE		= 0x0005,
+	FONT_FAMILY_MONOSPACE		= 0x0005
 };
 
 enum op_font_size {
@@ -259,18 +259,18 @@ enum op_font_size {
 	FONT_SIZE_X_LARGE		= 0x0005,
 	FONT_SIZE_XX_LARGE		= 0x0006,
 	FONT_SIZE_LARGER		= 0x0007,
-	FONT_SIZE_SMALLER		= 0x0008,
+	FONT_SIZE_SMALLER		= 0x0008
 };
 
 enum op_font_style {
 	FONT_STYLE_NORMAL		= 0x0000,
 	FONT_STYLE_ITALIC		= 0x0001,
-	FONT_STYLE_OBLIQUE		= 0x0002,
+	FONT_STYLE_OBLIQUE		= 0x0002
 };
 
 enum op_font_variant {
 	FONT_VARIANT_NORMAL		= 0x0000,
-	FONT_VARIANT_SMALL_CAPS		= 0x0001,
+	FONT_VARIANT_SMALL_CAPS		= 0x0001
 };
 
 enum op_font_weight {
@@ -286,22 +286,22 @@ enum op_font_weight {
 	FONT_WEIGHT_600			= 0x0009,
 	FONT_WEIGHT_700			= 0x000a,
 	FONT_WEIGHT_800			= 0x000b,
-	FONT_WEIGHT_900			= 0x000c,
+	FONT_WEIGHT_900			= 0x000c
 };
 
 enum op_height {
 	HEIGHT_SET			= 0x0080,
-	HEIGHT_AUTO			= 0x0000,
+	HEIGHT_AUTO			= 0x0000
 };
 
 enum op_left {
 	LEFT_SET			= 0x0080,
-	LEFT_AUTO			= 0x0000,
+	LEFT_AUTO			= 0x0000
 };
 
 enum op_letter_spacing {
 	LETTER_SPACING_SET		= 0x0080,
-	LETTER_SPACING_NORMAL		= 0x0000,
+	LETTER_SPACING_NORMAL		= 0x0000
 };
 
 enum op_line_height {
@@ -312,12 +312,12 @@ enum op_line_height {
 
 enum op_list_style_image {
 	LIST_STYLE_IMAGE_URI		= 0x0080,
-	LIST_STYLE_IMAGE_NONE		= 0x0000,
+	LIST_STYLE_IMAGE_NONE		= 0x0000
 };
 
 enum op_list_style_position {
 	LIST_STYLE_POSITION_INSIDE	= 0x0000,
-	LIST_STYLE_POSITION_OUTSIDE	= 0x0001,
+	LIST_STYLE_POSITION_OUTSIDE	= 0x0001
 };
 
 enum op_list_style_type {
@@ -335,39 +335,39 @@ enum op_list_style_type {
 	LIST_STYLE_TYPE_GEORGIAN	= 0x000b,
 	LIST_STYLE_TYPE_LOWER_ALPHA	= 0x000c,
 	LIST_STYLE_TYPE_UPPER_ALPHA	= 0x000d,
-	LIST_STYLE_TYPE_NONE		= 0x000e,
+	LIST_STYLE_TYPE_NONE		= 0x000e
 };
 
 enum op_margin {
 	MARGIN_SET			= 0x0080,
-	MARGIN_AUTO			= 0x0000,
+	MARGIN_AUTO			= 0x0000
 };
 
 enum op_max_height {
 	MAX_HEIGHT_SET			= 0x0080,
-	MAX_HEIGHT_NONE			= 0x0000,
+	MAX_HEIGHT_NONE			= 0x0000
 };
 
 enum op_max_width {
 	MAX_WIDTH_SET			= 0x0080,
-	MAX_WIDTH_NONE			= 0x0000,
+	MAX_WIDTH_NONE			= 0x0000
 };
 
 enum op_min_height {
-	MIN_HEIGHT_SET			= 0x0080,
+	MIN_HEIGHT_SET			= 0x0080
 };
 
 enum op_min_width {
-	MIN_WIDTH_SET			= 0x0080,
+	MIN_WIDTH_SET			= 0x0080
 };
 
 enum op_orphans {
-	ORPHANS_SET			= 0x0080,
+	ORPHANS_SET			= 0x0080
 };
 
 enum op_outline_color {
 	OUTLINE_COLOR_SET		= 0x0080,
-	OUTLINE_COLOR_INVERT		= 0x0000,
+	OUTLINE_COLOR_INVERT		= 0x0000
 };
 
 enum op_outline_style {
@@ -380,25 +380,25 @@ enum op_outline_style {
 	OUTLINE_STYLE_GROOVE		= BORDER_STYLE_GROOVE,
 	OUTLINE_STYLE_RIDGE		= BORDER_STYLE_RIDGE,
 	OUTLINE_STYLE_INSET		= BORDER_STYLE_INSET,
-	OUTLINE_STYLE_OUTSET		= BORDER_STYLE_OUTSET,
+	OUTLINE_STYLE_OUTSET		= BORDER_STYLE_OUTSET
 };
 
 enum op_outline_width {
 	OUTLINE_WIDTH_SET		= BORDER_WIDTH_SET,
 	OUTLINE_WIDTH_THIN		= BORDER_WIDTH_THIN,
 	OUTLINE_WIDTH_MEDIUM		= BORDER_WIDTH_MEDIUM,
-	OUTLINE_WIDTH_THICK		= BORDER_WIDTH_THICK,
+	OUTLINE_WIDTH_THICK		= BORDER_WIDTH_THICK
 };
 
 enum op_overflow {
 	OVERFLOW_VISIBLE		= 0x0000,
 	OVERFLOW_HIDDEN			= 0x0001,
 	OVERFLOW_SCROLL			= 0x0002,
-	OVERFLOW_AUTO			= 0x0003,
+	OVERFLOW_AUTO			= 0x0003
 };
 
 enum op_padding {
-	PADDING_SET			= 0x0080,
+	PADDING_SET			= 0x0080
 };
 
 enum op_page_break_after {
@@ -406,7 +406,7 @@ enum op_page_break_after {
 	PAGE_BREAK_AFTER_ALWAYS		= 0x0001,
 	PAGE_BREAK_AFTER_AVOID		= 0x0002,
 	PAGE_BREAK_AFTER_LEFT		= 0x0003,
-	PAGE_BREAK_AFTER_RIGHT		= 0x0004,
+	PAGE_BREAK_AFTER_RIGHT		= 0x0004
 };
 
 enum op_page_break_before {
@@ -414,24 +414,24 @@ enum op_page_break_before {
 	PAGE_BREAK_BEFORE_ALWAYS	= 0x0001,
 	PAGE_BREAK_BEFORE_AVOID		= 0x0002,
 	PAGE_BREAK_BEFORE_LEFT		= 0x0003,
-	PAGE_BREAK_BEFORE_RIGHT		= 0x0004,
+	PAGE_BREAK_BEFORE_RIGHT		= 0x0004
 };
 
 enum op_page_break_inside {
 	PAGE_BREAK_INSIDE_AUTO		= 0x0000,
-	PAGE_BREAK_INSIDE_AVOID		= 0x0001,
+	PAGE_BREAK_INSIDE_AVOID		= 0x0001
 };
 
 enum op_pause_after {
-	PAUSE_AFTER_SET			= 0x0080,
+	PAUSE_AFTER_SET			= 0x0080
 };
 
 enum op_pause_before {
-	PAUSE_BEFORE_SET		= 0x0080,
+	PAUSE_BEFORE_SET		= 0x0080
 };
 
 enum op_pitch_range {
-	PITCH_RANGE_SET			= 0x0080,
+	PITCH_RANGE_SET			= 0x0080
 };
 
 enum op_pitch {
@@ -441,7 +441,7 @@ enum op_pitch {
 	PITCH_LOW			= 0x0001,
 	PITCH_MEDIUM			= 0x0002,
 	PITCH_HIGH			= 0x0003,
-	PITCH_X_HIGH			= 0x0004,
+	PITCH_X_HIGH			= 0x0004
 };
 
 enum op_play_during {
@@ -451,51 +451,51 @@ enum op_play_during {
 	PLAY_DURING_REPEAT		= (1<<5),
 
 	PLAY_DURING_AUTO		= 0x0000,
-	PLAY_DURING_NONE		= 0x0001,
+	PLAY_DURING_NONE		= 0x0001
 };
 
 enum op_position {
 	POSITION_STATIC			= 0x0000,
 	POSITION_RELATIVE		= 0x0001,
 	POSITION_ABSOLUTE		= 0x0002,
-	POSITION_FIXED			= 0x0003,
+	POSITION_FIXED			= 0x0003
 };
 
 enum op_quotes {
 	QUOTES_STRING			= 0x0080,
 
-	QUOTES_NONE			= 0x0000,
+	QUOTES_NONE			= 0x0000
 };
 
 enum op_richness {
-	RICHNESS_SET			= 0x0080,
+	RICHNESS_SET			= 0x0080
 };
 
 enum op_right {
 	RIGHT_SET			= 0x0080,
 
-	RIGHT_AUTO			= 0x0000,
+	RIGHT_AUTO			= 0x0000
 };
 
 enum op_speak_header {
 	SPEAK_HEADER_ONCE		= 0x0000,
-	SPEAK_HEADER_ALWAYS		= 0x0001,
+	SPEAK_HEADER_ALWAYS		= 0x0001
 };
 
 enum op_speak_numeral {
 	SPEAK_NUMERAL_DIGITS		= 0x0000,
-	SPEAK_NUMERAL_CONTINUOUS	= 0x0001,
+	SPEAK_NUMERAL_CONTINUOUS	= 0x0001
 };
 
 enum op_speak_punctuation {
 	SPEAK_PUNCTUATION_CODE		= 0x0000,
-	SPEAK_PUNCTUATION_NONE		= 0x0001,
+	SPEAK_PUNCTUATION_NONE		= 0x0001
 };
 
 enum op_speak {
 	SPEAK_NORMAL			= 0x0000,
 	SPEAK_NONE			= 0x0001,
-	SPEAK_SPELL_OUT			= 0x0002,
+	SPEAK_SPELL_OUT			= 0x0002
 };
 
 enum op_speech_rate {
@@ -507,23 +507,23 @@ enum op_speech_rate {
 	SPEECH_RATE_FAST		= 0x0003,
 	SPEECH_RATE_X_FAST		= 0x0004,
 	SPEECH_RATE_FASTER		= 0x0005,
-	SPEECH_RATE_SLOWER		= 0x0006,
+	SPEECH_RATE_SLOWER		= 0x0006
 };
 
 enum op_stress {
-	STRESS_SET			= 0x0080,
+	STRESS_SET			= 0x0080
 };
 
 enum op_table_layout {
 	TABLE_LAYOUT_AUTO		= 0x0000,
-	TABLE_LAYOUT_FIXED		= 0x0001,
+	TABLE_LAYOUT_FIXED		= 0x0001
 };
 
 enum op_text_align {
 	TEXT_ALIGN_LEFT			= 0x0000,
 	TEXT_ALIGN_RIGHT		= 0x0001,
 	TEXT_ALIGN_CENTER		= 0x0002,
-	TEXT_ALIGN_JUSTIFY		= 0x0003,
+	TEXT_ALIGN_JUSTIFY		= 0x0003
 };
 
 enum op_text_decoration {
@@ -532,30 +532,30 @@ enum op_text_decoration {
 	TEXT_DECORATION_BLINK		= (1<<3),
 	TEXT_DECORATION_LINE_THROUGH	= (1<<2),
 	TEXT_DECORATION_OVERLINE	= (1<<1),
-	TEXT_DECORATION_UNDERLINE	= (1<<0),
+	TEXT_DECORATION_UNDERLINE	= (1<<0)
 };
 
 enum op_text_indent {
-	TEXT_INDENT_SET			= 0x0080,
+	TEXT_INDENT_SET			= 0x0080
 };
 
 enum op_text_transform {
 	TEXT_TRANSFORM_CAPITALIZE	= 0x0000,
 	TEXT_TRANSFORM_UPPERCASE	= 0x0001,
 	TEXT_TRANSFORM_LOWERCASE	= 0x0002,
-	TEXT_TRANSFORM_NONE		= 0x0003,
+	TEXT_TRANSFORM_NONE		= 0x0003
 };
 
 enum op_top {
 	TOP_SET				= 0x0080,
 
-	TOP_AUTO			= 0x0000,
+	TOP_AUTO			= 0x0000
 };
 
 enum op_unicode_bidi {
 	UNICODE_BIDI_NORMAL		= 0x0000,
 	UNICODE_BIDI_EMBED		= 0x0001,
-	UNICODE_BIDI_BIDI_OVERRIDE	= 0x0002,
+	UNICODE_BIDI_BIDI_OVERRIDE	= 0x0002
 };
 
 enum op_vertical_align {
@@ -568,13 +568,13 @@ enum op_vertical_align {
 	VERTICAL_ALIGN_TEXT_TOP		= 0x0004,
 	VERTICAL_ALIGN_MIDDLE		= 0x0005,
 	VERTICAL_ALIGN_BOTTOM		= 0x0006,
-	VERTICAL_ALIGN_TEXT_BOTTOM	= 0x0007,
+	VERTICAL_ALIGN_TEXT_BOTTOM	= 0x0007
 };
 
 enum op_visibility {
 	VISIBILITY_VISIBLE		= 0x0000,
 	VISIBILITY_HIDDEN		= 0x0001,
-	VISIBILITY_COLLAPSE		= 0x0002,
+	VISIBILITY_COLLAPSE		= 0x0002
 };
 
 enum op_voice_family {
@@ -585,7 +585,7 @@ enum op_voice_family {
 
 	VOICE_FAMILY_MALE		= 0x0001,
 	VOICE_FAMILY_FEMALE		= 0x0002,
-	VOICE_FAMILY_CHILD		= 0x0003,
+	VOICE_FAMILY_CHILD		= 0x0003
 };
 
 enum op_volume {
@@ -597,7 +597,7 @@ enum op_volume {
 	VOLUME_SOFT			= 0x0002,
 	VOLUME_MEDIUM			= 0x0003,
 	VOLUME_LOUD			= 0x0004,
-	VOLUME_X_LOUD			= 0x0005,
+	VOLUME_X_LOUD			= 0x0005
 };
 
 enum op_white_space {
@@ -605,29 +605,29 @@ enum op_white_space {
 	WHITE_SPACE_PRE			= 0x0001,
 	WHITE_SPACE_NOWRAP		= 0x0002,
 	WHITE_SPACE_PRE_WRAP		= 0x0003,
-	WHITE_SPACE_PRE_LINE		= 0x0004,
+	WHITE_SPACE_PRE_LINE		= 0x0004
 };
 
 enum op_widows {
-	WIDOWS_SET			= 0x0080,
+	WIDOWS_SET			= 0x0080
 };
 
 enum op_width {
 	WIDTH_SET			= 0x0080,
 
-	WIDTH_AUTO			= 0x0000,
+	WIDTH_AUTO			= 0x0000
 };
 
 enum op_word_spacing {
 	WORD_SPACING_SET		= 0x0080,
 
-	WORD_SPACING_NORMAL		= 0x0000,
+	WORD_SPACING_NORMAL		= 0x0000
 };
 
 enum op_z_index {
 	Z_INDEX_SET			= 0x0080,
 
-	Z_INDEX_AUTO			= 0x0000,
+	Z_INDEX_AUTO			= 0x0000
 };
 
 #endif

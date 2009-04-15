@@ -18,7 +18,7 @@ typedef enum css_properties opcode;
 
 enum flag {
 	FLAG_IMPORTANT			= (1<<0),
-	FLAG_INHERIT			= (1<<1),
+	FLAG_INHERIT			= (1<<1)
 };
 
 typedef enum unit {

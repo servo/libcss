@@ -1390,9 +1390,10 @@ css_error parse_clip(css_language *c,
 		value = CLIP_AUTO;
 	} else if (token->type == CSS_TOKEN_FUNCTION &&
 			token->ilower == c->strings[RECT]) {
+		int i;
 		value = CLIP_SHAPE_RECT;
 
-		for (int i = 0; i < 4; i++) {
+		for (i = 0; i < 4; i++) {
 			consumeWhitespace(vector, ctx);
 
 			token = parserutils_vector_peek(vector, *ctx);
@@ -1470,9 +1471,10 @@ css_error parse_clip(css_language *c,
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && 
 			(value & CLIP_SHAPE_MASK) == CLIP_SHAPE_RECT) {
+		int i;
 		uint8_t *ptr = ((uint8_t *) (*result)->bytecode) + sizeof(opv);
 
-		for (int i = 0; i < num_lengths; i++) {
+		for (i = 0; i < num_lengths; i++) {
 			memcpy(ptr, &length[i], sizeof(length[i]));
 			ptr += sizeof(length[i]);
 			memcpy(ptr, &unit[i], sizeof(unit[i]));
@@ -2827,7 +2829,8 @@ css_error parse_font_family(css_language *c,
 					uint16_t len = lwc_string_length(token->idata);
 					const css_token *temp_token = token;
 					lwc_error lerror;
-                                        
+					uint8_t *buf;
+					uint8_t *p;
 
 					temp_ctx = *ctx;
 
@@ -2856,8 +2859,8 @@ css_error parse_font_family(css_language *c,
 								vector, &temp_ctx);
 					}
 
-					uint8_t buf[len];
-					uint8_t *p = buf;
+					buf = alloca(len);
+					p = buf;
 
 					memcpy(p, lwc_string_data(token->idata), lwc_string_length(token->idata));
 					p += lwc_string_length(token->idata);
@@ -6009,6 +6012,8 @@ css_error parse_voice_family(css_language *c,
 					uint16_t len = lwc_string_length(token->idata);
 					const css_token *temp_token = token;
                                         lwc_error lerror;
+					uint8_t *buf;
+					uint8_t *p;
 
 					temp_ctx = *ctx;
 
@@ -6036,8 +6041,8 @@ css_error parse_voice_family(css_language *c,
 								vector, &temp_ctx);
 					}
 
-					uint8_t buf[len];
-					uint8_t *p = buf;
+					buf = alloca(len);
+					p = buf;
 
 					memcpy(p, lwc_string_data(token->idata), lwc_string_length(token->idata));
 					p += lwc_string_length(token->idata);
@@ -6657,9 +6662,10 @@ css_error parse_colour_specifier(css_language *c,
 		return error;
 	} else if (token->type == CSS_TOKEN_FUNCTION) {
 		if (token->ilower == c->strings[RGB]) {
+			int i;
 			css_token_type valid = CSS_TOKEN_NUMBER;
 
-			for (int i = 0; i < 3; i++) {
+			for (i = 0; i < 3; i++) {
 				css_fixed num;
 				size_t consumed = 0;
 				uint8_t *component = i == 0 ? &r 

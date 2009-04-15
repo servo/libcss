@@ -24,7 +24,7 @@ typedef enum css_charset_source {
 	CSS_CHARSET_REFERRED         = 1,	/**< From referring document */
 	CSS_CHARSET_METADATA         = 2,	/**< From linking metadata */
 	CSS_CHARSET_DOCUMENT         = 3,	/**< Defined in document */
-	CSS_CHARSET_DICTATED         = 4,	/**< Dictated by client */
+	CSS_CHARSET_DICTATED         = 4	/**< Dictated by client */
 } css_charset_source;
 
 /**

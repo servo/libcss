@@ -31,7 +31,7 @@ typedef enum css_parser_event {
 	CSS_PARSER_START_BLOCK,
 	CSS_PARSER_END_BLOCK,
 	CSS_PARSER_BLOCK_CONTENT,
-	CSS_PARSER_DECLARATION,
+	CSS_PARSER_DECLARATION
 } css_parser_event;
 
 typedef css_error (*css_parser_event_handler)(css_parser_event type, 
@@ -42,7 +42,7 @@ typedef css_error (*css_parser_event_handler)(css_parser_event type,
  */
 typedef enum css_parser_opttype {
 	CSS_PARSER_QUIRKS,
-	CSS_PARSER_EVENT_HANDLER,
+	CSS_PARSER_EVENT_HANDLER
 } css_parser_opttype;
 
 /**
