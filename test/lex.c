@@ -128,6 +128,7 @@ int main(int argc, char **argv)
 	uint8_t buf[CHUNK_SIZE];
 	css_token *tok;
 	css_error error;
+	int i;
 
 	if (argc != 3) {
 		printf("Usage: %s <aliases_file> <filename>\n", argv[0]);
@@ -137,7 +138,7 @@ int main(int argc, char **argv)
 	/* Initialise library */
 	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
 
-	for (int i = 0; i < ITERATIONS; i++) {
+	for (i = 0; i < ITERATIONS; i++) {
 		assert(parserutils_inputstream_create("UTF-8", 
 			CSS_CHARSET_DICTATED,css_charset_extract, 
 			(parserutils_alloc) myrealloc, NULL, &stream) == 

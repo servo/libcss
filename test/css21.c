@@ -29,6 +29,7 @@ int main(int argc, char **argv)
 	uint8_t buf[CHUNK_SIZE];
 	css_error error;
         lwc_context *ctx;
+	int count;
 
 	if (argc != 3) {
 		printf("Usage: %s <aliases_file> <filename>\n", argv[0]);
@@ -42,7 +43,7 @@ int main(int argc, char **argv)
         
         lwc_context_ref(ctx); /* Transform weak ref to a strong ref */
         
-	for (int count = 0; count < ITERATIONS; count++) {
+	for (count = 0; count < ITERATIONS; count++) {
 
 		assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", argv[2], 
 				NULL, CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, false,
@@ -92,7 +93,7 @@ int main(int argc, char **argv)
 
 			if (error == CSS_OK) {
 				css_stylesheet *import;
-				char buf[lwc_string_length(url) + 1];
+				char *buf = alloca(lwc_string_length(url) + 1);
 
 				memcpy(buf, lwc_string_data(url), 
 						lwc_string_length(url));
@@ -114,13 +115,15 @@ int main(int argc, char **argv)
 		}
 
 #if DUMP_CSS
-		char *out;
-		size_t outlen = origlen * 2;
-		out = malloc(outlen);
-		assert(out != NULL);
-		dump_sheet(sheet, out, &outlen);
-		fwrite(out, origlen * 2 - outlen, 1, stdout);
-		free(out);
+		{
+			char *out;
+			size_t outlen = origlen * 2;
+			out = malloc(outlen);
+			assert(out != NULL);
+			dump_sheet(sheet, out, &outlen);
+			fwrite(out, origlen * 2 - outlen, 1, stdout);
+			free(out);
+		}
 #endif
 
 		css_stylesheet_destroy(sheet);

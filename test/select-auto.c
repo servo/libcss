@@ -154,8 +154,8 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	printf("css_hint: %lu\n", sizeof(css_hint));
-	printf("computed: %lu\n", sizeof(css_computed_style));
+	printf("css_hint: %u\n", (int) sizeof(css_hint));
+	printf("computed: %u\n", (int) sizeof(css_computed_style));
 
 	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
 
@@ -642,8 +642,9 @@ void run_test(line_ctx *ctx, const char *exp, size_t explen)
 	dump_computed_style(computed, buf, &buflen);
 
 	if (8192 - buflen != explen || memcmp(buf, exp, explen) != 0) {
-		printf("Expected (%zu):\n%.*s\n", explen, (int) explen, exp);
-		printf("Result (%zu):\n%.*s\n", 8192 - buflen,
+		printf("Expected (%u):\n%.*s\n", 
+				(int) explen, (int) explen, exp);
+		printf("Result (%u):\n%.*s\n", (int) (8192 - buflen),
 			(int) (8192 - buflen), buf);
 		assert(0 && "Result doesn't match expected");
 	}

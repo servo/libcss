@@ -83,6 +83,7 @@ int main(int argc, char **argv)
 	uint8_t buf[CHUNK_SIZE];
 	css_error error;
         lwc_context *ctx;
+	int i;
 
 	if (argc != 3) {
 		printf("Usage: %s <aliases_file> <filename>\n", argv[0]);
@@ -94,7 +95,7 @@ int main(int argc, char **argv)
         assert(lwc_create_context(myrealloc, NULL, &ctx) == lwc_error_ok);
         lwc_context_ref(ctx);
 
-	for (int i = 0; i < ITERATIONS; i++) {
+	for (i = 0; i < ITERATIONS; i++) {
 		assert(css_parser_create("UTF-8", CSS_CHARSET_DICTATED, ctx,
 				myrealloc, NULL, &parser) == CSS_OK);
 

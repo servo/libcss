@@ -334,7 +334,7 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 
 		if (error == CSS_OK) {
 			css_stylesheet *import;
-			char buf[lwc_string_length(url) + 1];
+			char *buf = alloca(lwc_string_length(url) + 1);
 
 			memcpy(buf, lwc_string_data(url), 
 					lwc_string_length(url));
@@ -356,8 +356,8 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 	testnum++;
 
 	if (sheet->rule_count != explen) {
-		printf("%d: Got %d rules. Expected %zu\n",
-				testnum, sheet->rule_count, explen);
+		printf("%d: Got %d rules. Expected %u\n",
+				testnum, sheet->rule_count, (int) explen);
 		assert(0 && "Unexpected number of rules");
 	}
 
@@ -400,9 +400,10 @@ void validate_rule_selector(css_rule_selector *s, exp_entry *e, int testnum)
 {
 	char name[MAX_RULE_NAME_LEN];
 	char *ptr = name;
+	uint32_t i;
 
 	/* Build selector string */
-	for (uint32_t i = 0; i < s->base.items; i++) {
+	for (i = 0; i < s->base.items; i++) {
 		dump_selector_list(s->selectors[i], &ptr);
 		if (i != (uint32_t) (s->base.items - 1)) {
 			memcpy(ptr, ", ", 2);
@@ -428,14 +429,16 @@ void validate_rule_selector(css_rule_selector *s, exp_entry *e, int testnum)
 			testnum);
 		assert(0 && "Unexpected bytecode");
 	} else if (e->bytecode != NULL && s->style != NULL) {
+		size_t i;
+
 		if (s->style->length != e->bcused) {
-			printf("%d: Got length %d, Expected %zu\n",
+			printf("%d: Got length %d, Expected %u\n",
 				testnum, s->style->length, 
-				e->bcused);
+				(int) e->bcused);
 			assert(0 && "Bytecode lengths differ");
 		}
 
-		for (size_t i = 0; i < e->bcused; i++) {
+		for (i = 0; i < e->bcused; i++) {
 			size_t j;
 
 			for (j = 0; j < e->stused; j++) {
@@ -464,8 +467,8 @@ void validate_rule_selector(css_rule_selector *s, exp_entry *e, int testnum)
 				i += sizeof (void *) - 1;
 			} else if (((uint8_t *) s->style->bytecode)[i] != 
 					e->bytecode[i]) {
-				printf("%d: Bytecode differs at %zu\n",
-					testnum, i);
+				printf("%d: Bytecode differs at %u\n",
+					testnum, (int) i);
 				while (i < e->bcused) {
 					printf("%.2x ", 
 						((uint8_t *) s->style->bytecode)[i]);

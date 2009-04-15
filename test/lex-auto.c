@@ -138,11 +138,13 @@ bool handle_line(const char *data, size_t datalen, void *pw)
 
 void parse_expected(line_ctx *ctx, const char *data, size_t len)
 {
+	css_token_type type;
 	const char *colon = parse_strnchr(data, len, ':');
+
 	if (colon == NULL)
 		colon = data + len;
 
-	css_token_type type = string_to_type(data, colon - data);
+	type = string_to_type(data, colon - data);
 
 	/* Append to list of expected tokens */
 	if (ctx->expused == ctx->explen) {
@@ -297,8 +299,9 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 
 		if (exp[e].textLen > 0) {
 			if (tok->data.len != exp[e].textLen) {
-				printf("%d: Got length %zd, Expected %zd\n",
-					testnum, tok->data.len, exp[e].textLen);
+				printf("%d: Got length %d, Expected %d\n",
+					testnum, (int) tok->data.len, 
+					(int) exp[e].textLen);
 				assert(0 && "Text lengths differ");
 			}
 

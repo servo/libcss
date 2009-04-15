@@ -49,13 +49,14 @@ void dump_sheet(css_stylesheet *sheet, char *buf, size_t *buflen)
 
 void dump_rule_selector(css_rule_selector *s, char **buf, size_t *buflen)
 {
+	uint32_t i;
 	char *ptr = *buf;
 
 	*ptr++ = '|';
 	*ptr++ = ' ';
 
 	/* Build selector string */
-	for (uint32_t i = 0; i < s->base.items; i++) {
+	for (i = 0; i < s->base.items; i++) {
 		dump_selector_list(s->selectors[i], &ptr);
 		if (i != (uint32_t) (s->base.items - 1)) {
 			memcpy(ptr, ", ", 2);
@@ -600,10 +601,10 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value & ~AZIMUTH_BEHIND) {
 				case AZIMUTH_ANGLE:
 				{
+					uint32_t unit;
 					css_fixed val = *((css_fixed *) bytecode);
 					ADVANCE(sizeof(val));
-					uint32_t unit = 
-						*((uint32_t *) bytecode);
+					unit = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(unit));
 					dump_unit(val, unit, ptr);
 				}
@@ -713,10 +714,10 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value & 0xf0) {
 				case BACKGROUND_POSITION_HORZ_SET:
 				{
+					uint32_t unit;
 					css_fixed val = *((css_fixed *) bytecode);
 					ADVANCE(sizeof(val));
-					uint32_t unit = 
-						*((uint32_t *) bytecode);
+					unit = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(unit));
 					dump_unit(val, unit, ptr);
 				}
@@ -735,10 +736,10 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value & 0x0f) {
 				case BACKGROUND_POSITION_VERT_SET:
 				{
+					uint32_t unit;
 					css_fixed val = *((css_fixed *) bytecode);
 					ADVANCE(sizeof(val));
-					uint32_t unit = 
-						*((uint32_t *) bytecode);
+					unit = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(unit));
 					dump_unit(val, unit, ptr);
 				}
@@ -784,10 +785,10 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value) {
 				case BORDER_SPACING_SET:
 				{
+					uint32_t unit;
 					css_fixed val = *((css_fixed *) bytecode);
 					ADVANCE(sizeof(val));
-					uint32_t unit = 
-						*((uint32_t *) bytecode);
+					unit = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(unit));
 					dump_unit(val, unit, ptr);
 
@@ -873,10 +874,10 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value) {
 				case BORDER_WIDTH_SET:
 				{
+					uint32_t unit;
 					css_fixed val = *((css_fixed *) bytecode);
 					ADVANCE(sizeof(val));
-					uint32_t unit = 
-						*((uint32_t *) bytecode);
+					unit = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(unit));
 					dump_unit(val, unit, ptr);
 				}
@@ -918,10 +919,10 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value) {
 				case BOTTOM_SET:
 				{
+					uint32_t unit;
 					css_fixed val = *((css_fixed *) bytecode);
 					ADVANCE(sizeof(val));
-					uint32_t unit = 
-						*((uint32_t *) bytecode);
+					unit = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(unit));
 					dump_unit(val, unit, ptr);
 				}
@@ -964,11 +965,11 @@ void dump_bytecode(css_style *style, char **ptr)
 					if (value & CLIP_RECT_TOP_AUTO) {
 						*ptr += sprintf(*ptr, "auto");
 					} else {
+						uint32_t unit;
 						css_fixed val = 
 							*((css_fixed *) bytecode);
 						ADVANCE(sizeof(val));
-						uint32_t unit = 
-							*((uint32_t *) bytecode);
+						unit = *((uint32_t *) bytecode);
 						ADVANCE(sizeof(unit));
 						dump_unit(val, unit, ptr);
 					}
@@ -976,11 +977,11 @@ void dump_bytecode(css_style *style, char **ptr)
 					if (value & CLIP_RECT_RIGHT_AUTO) {
 						*ptr += sprintf(*ptr, "auto");
 					} else {
+						uint32_t unit;
 						css_fixed val = 
 							*((css_fixed *) bytecode);
 						ADVANCE(sizeof(val));
-						uint32_t unit = 
-							*((uint32_t *) bytecode);
+						unit = *((uint32_t *) bytecode);
 						ADVANCE(sizeof(unit));
 						dump_unit(val, unit, ptr);
 					}
@@ -988,11 +989,11 @@ void dump_bytecode(css_style *style, char **ptr)
 					if (value & CLIP_RECT_BOTTOM_AUTO) {
 						*ptr += sprintf(*ptr, "auto");
 					} else {
+						uint32_t unit;
 						css_fixed val = 
 							*((css_fixed *) bytecode);
 						ADVANCE(sizeof(val));
-						uint32_t unit = 
-							*((uint32_t *) bytecode);
+						unit = *((uint32_t *) bytecode);
 						ADVANCE(sizeof(unit));
 						dump_unit(val, unit, ptr);
 					}
@@ -1000,11 +1001,11 @@ void dump_bytecode(css_style *style, char **ptr)
 					if (value & CLIP_RECT_LEFT_AUTO) {
 						*ptr += sprintf(*ptr, "auto");
 					} else {
+						uint32_t unit;
 						css_fixed val = 
 							*((css_fixed *) bytecode);
 						ADVANCE(sizeof(val));
-						uint32_t unit = 
-							*((uint32_t *) bytecode);
+						unit = *((uint32_t *) bytecode);
 						ADVANCE(sizeof(unit));
 						dump_unit(val, unit, ptr);
 					}
@@ -1105,15 +1106,15 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value) {
 				case COUNTER_INCREMENT_NAMED:
 					while (value != COUNTER_INCREMENT_NONE) {
+						css_fixed val;
 						lwc_string *he = 
-						*((lwc_string **) 
-						bytecode);
+							*((lwc_string **) 
+							bytecode);
 						ADVANCE(sizeof(he));
 						*ptr += sprintf(*ptr, "%.*s ", 
                                                                 (int)lwc_string_length(he),
                                                                 lwc_string_data(he));
-						css_fixed val =
-							*((css_fixed *) bytecode);
+						val = *((css_fixed *) bytecode);
 						ADVANCE(sizeof(val));
 						dump_number(val, ptr);
 
@@ -1265,10 +1266,10 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value) {
 				case ELEVATION_ANGLE:
 				{
+					uint32_t unit;
 					css_fixed val = *((css_fixed *) bytecode);
 					ADVANCE(sizeof(val));
-					uint32_t unit = 
-						*((uint32_t *) bytecode);
+					unit = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(unit));
 					dump_unit(val, unit, ptr);
 				}
@@ -1356,10 +1357,10 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value) {
 				case FONT_SIZE_DIMENSION:
 				{
+					uint32_t unit;
 					css_fixed val = *((css_fixed *) bytecode);
 					ADVANCE(sizeof(val));
-					uint32_t unit = 
-						*((uint32_t *) bytecode);
+					unit = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(unit));
 					dump_unit(val, unit, ptr);
 				}
@@ -1468,10 +1469,10 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value) {
 				case LETTER_SPACING_SET:
 				{
+					uint32_t unit;
 					css_fixed val = *((css_fixed *) bytecode);
 					ADVANCE(sizeof(val));
-					uint32_t unit = 
-						*((uint32_t *) bytecode);
+					unit = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(unit));
 					dump_unit(val, unit, ptr);
 				}
@@ -1492,10 +1493,10 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				case LINE_HEIGHT_DIMENSION:
 				{
+					uint32_t unit;
 					css_fixed val = *((css_fixed *) bytecode);
 					ADVANCE(sizeof(val));
-					uint32_t unit = 
-						*((uint32_t *) bytecode);
+					unit = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(unit));
 					dump_unit(val, unit, ptr);
 				}
@@ -1572,10 +1573,10 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value) {
 				case MAX_HEIGHT_SET:
 				{
+					uint32_t unit;
 					css_fixed val = *((css_fixed *) bytecode);
 					ADVANCE(sizeof(val));
-					uint32_t unit = 
-						*((uint32_t *) bytecode);
+					unit = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(unit));
 					dump_unit(val, unit, ptr);
 				}
@@ -1603,10 +1604,10 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value) {
 				case MIN_HEIGHT_SET:
 				{
+					uint32_t unit;
 					css_fixed val = *((css_fixed *) bytecode);
 					ADVANCE(sizeof(val));
-					uint32_t unit = 
-						*((uint32_t *) bytecode);
+					unit = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(unit));
 					dump_unit(val, unit, ptr);
 				}
@@ -1709,10 +1710,10 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value) {
 				case PITCH_FREQUENCY:
 				{
+					uint32_t unit;
 					css_fixed val = *((css_fixed *) bytecode);
 					ADVANCE(sizeof(val));
-					uint32_t unit = 
-						*((uint32_t *) bytecode);
+					unit = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(unit));
 					dump_unit(val, unit, ptr);
 				}
@@ -1952,10 +1953,10 @@ void dump_bytecode(css_style *style, char **ptr)
 				switch (value) {
 				case VERTICAL_ALIGN_SET:
 				{
+					uint32_t unit;
 					css_fixed val = *((css_fixed *) bytecode);
 					ADVANCE(sizeof(val));
-					uint32_t unit = 
-						*((uint32_t *) bytecode);
+					unit = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(unit));
 					dump_unit(val, unit, ptr);
 				}
@@ -2043,10 +2044,10 @@ void dump_bytecode(css_style *style, char **ptr)
 					break;
 				case VOLUME_DIMENSION:
 				{
+					uint32_t unit;
 					css_fixed val = *((css_fixed *) bytecode);
 					ADVANCE(sizeof(val));
-					uint32_t unit = 
-						*((uint32_t *) bytecode);
+					unit = *((uint32_t *) bytecode);
 					ADVANCE(sizeof(unit));
 					dump_unit(val, unit, ptr);
 				}
