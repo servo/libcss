@@ -582,7 +582,11 @@ css_error getToken(css_parser *parser, const css_token **token)
 		 */
 
 		if (t->type < CSS_TOKEN_LAST_INTERN && t->data.data != NULL) {
+			/** \todo Why are we interning lower cased versions, 
+			 * too? lwc_strings can easily be compared case 
+			 * insensitively */
 			if (t->type < CSS_TOKEN_LAST_INTERN_LOWER) {
+				/** \todo Don't use alloca */
 				uint8_t *temp = alloca(t->data.len);
 				bool lower = false;
 				size_t i;

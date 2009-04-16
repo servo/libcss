@@ -2859,6 +2859,7 @@ css_error parse_font_family(css_language *c,
 								vector, &temp_ctx);
 					}
 
+					/** \todo Don't use alloca */
 					buf = alloca(len);
 					p = buf;
 
@@ -6041,6 +6042,7 @@ css_error parse_voice_family(css_language *c,
 								vector, &temp_ctx);
 					}
 
+					/** \todo Don't use alloca */
 					buf = alloca(len);
 					p = buf;
 
