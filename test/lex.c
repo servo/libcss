@@ -158,7 +158,8 @@ int main(int argc, char **argv)
 		fseek(fp, 0, SEEK_SET);
 
 		while (len >= CHUNK_SIZE) {
-			fread(buf, 1, CHUNK_SIZE, fp);
+			size_t read = fread(buf, 1, CHUNK_SIZE, fp);
+			assert(read == CHUNK_SIZE);
 
 			assert(parserutils_inputstream_append(stream,
 					buf, CHUNK_SIZE) == PARSERUTILS_OK);
@@ -175,7 +176,8 @@ int main(int argc, char **argv)
 		}
 
 		if (len > 0) {
-			fread(buf, 1, len, fp);
+			size_t read = fread(buf, 1, len, fp);
+			assert(read == len);
 
 			assert(parserutils_inputstream_append(stream,
 					buf, len) == PARSERUTILS_OK);
