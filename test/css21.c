@@ -60,7 +60,8 @@ int main(int argc, char **argv)
 		fseek(fp, 0, SEEK_SET);
 
 		while (len >= CHUNK_SIZE) {
-			fread(buf, 1, CHUNK_SIZE, fp);
+			size_t read = fread(buf, 1, CHUNK_SIZE, fp);
+			assert(read == CHUNK_SIZE);
 
 			error = css_stylesheet_append_data(sheet, buf, 
 					CHUNK_SIZE);
@@ -70,7 +71,8 @@ int main(int argc, char **argv)
 		}
 
 		if (len > 0) {
-			fread(buf, 1, len, fp);
+			size_t read = fread(buf, 1, len, fp);
+			assert(read == len);
 
 			error = css_stylesheet_append_data(sheet, buf, len);
 			assert(error == CSS_OK || error == CSS_NEEDDATA);
@@ -118,10 +120,12 @@ int main(int argc, char **argv)
 		{
 			char *out;
 			size_t outlen = origlen * 2;
+			size_t written;
 			out = malloc(outlen);
 			assert(out != NULL);
 			dump_sheet(sheet, out, &outlen);
-			fwrite(out, origlen * 2 - outlen, 1, stdout);
+			written = fwrite(out, 1, origlen * 2 - outlen, stdout);
+			assert(written == origlen * 2 - outlen);
 			free(out);
 		}
 #endif
