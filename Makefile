@@ -30,6 +30,8 @@ ifneq ($(PKGCONFIG),)
   CFLAGS := $(CFLAGS) $(shell $(PKGCONFIG) libparserutils-0 libwapcaplet-0 --cflags)
   LDFLAGS := $(LDFLAGS) $(shell $(PKGCONFIG) libparserutils-0 libwapcaplet-0 --libs)
 else
+  CFLAGS := $(CFLAGS) -I$(PREFIX)/include/parserutils0 \
+	-I$(PREFIX)/include/wapcaplet0
   LDFLAGS := $(LDFLAGS) -lparserutils0 -lwapcaplet0
 endif
 
