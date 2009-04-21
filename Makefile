@@ -27,18 +27,17 @@ endif
 
 # Parserutils & wapcaplet
 ifneq ($(PKGCONFIG),)
-  CFLAGS := $(CFLAGS) $(shell $(PKGCONFIG) libparserutils-0 libwapcaplet-0 --cflags)
-  LDFLAGS := $(LDFLAGS) $(shell $(PKGCONFIG) libparserutils-0 libwapcaplet-0 --libs)
+  CFLAGS := $(CFLAGS) $(shell $(PKGCONFIG) libparserutils libwapcaplet --cflags)
+  LDFLAGS := $(LDFLAGS) $(shell $(PKGCONFIG) libparserutils libwapcaplet --libs)
 else
-  CFLAGS := $(CFLAGS) -I$(PREFIX)/include/parserutils0 \
-	-I$(PREFIX)/include/wapcaplet0
-  LDFLAGS := $(LDFLAGS) -lparserutils0 -lwapcaplet0
+  CFLAGS := $(CFLAGS) -I$(PREFIX)/include
+  LDFLAGS := $(LDFLAGS) -lparserutils -lwapcaplet
 endif
 
 include build/makefiles/Makefile.top
 
 # Extra installation rules
-I := /include/libcss$(major-version)/libcss
+I := /include/libcss
 
 INSTALL_ITEMS := $(INSTALL_ITEMS) $(I):include/libcss/computed.h
 INSTALL_ITEMS := $(INSTALL_ITEMS) $(I):include/libcss/errors.h
