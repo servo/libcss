@@ -1117,7 +1117,8 @@ void consumeWhitespace(const parserutils_vector *vector, int *ctx)
 bool tokenIsChar(const css_token *token, uint8_t c)
 {
 	return token != NULL && token->type == CSS_TOKEN_CHAR && 
-                lwc_string_length(token->ilower) == 1 && lwc_string_data(token->ilower)[0] == c;
+	                lwc_string_length(token->ilower) == 1 && 
+			lwc_string_data(token->ilower)[0] == c;
 }
 
 
