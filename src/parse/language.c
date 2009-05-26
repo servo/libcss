@@ -15,6 +15,7 @@
 #include "parse/language.h"
 #include "parse/parse.h"
 #include "parse/propstrings.h"
+#include "parse/properties/properties.h"
 
 #include "utils/parserutilserror.h"
 #include "utils/utils.h"
@@ -1045,8 +1046,6 @@ css_error parseSelectorList(css_language *c, const parserutils_vector *vector,
 /******************************************************************************
  * Property parsing functions                                                 *
  ******************************************************************************/
-
-#include "parse/properties.c"
 
 css_error parseProperty(css_language *c, const css_token *property, 
 		const parserutils_vector *vector, int *ctx, css_rule *rule)
