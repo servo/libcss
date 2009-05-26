@@ -117,7 +117,7 @@ struct css_lexer
 do {									\
 	css_error error;						\
 	error = appendToTokenData((lexer), 				\
-			(const uint8_t*) (data), (len));		\
+			(const uint8_t *) (data), (len));		\
 	if (error != CSS_OK)						\
 		return error;						\
 	(lexer)->bytesReadForToken += (len);				\
@@ -1981,11 +1981,55 @@ css_error consumeUnicode(css_lexer *lexer, uint32_t ucs)
 		}
 	}
 
+	/* Sanitise UCS4 character */
+	if (ucs > 0x10FFFF || ucs <= 0x0008 || ucs == 0x000B ||
+			(0x000E <= ucs && ucs <= 0x001F) ||
+			(0x007F <= ucs && ucs <= 0x009F) ||
+			(0xD800 <= ucs && ucs <= 0xDFFF) ||
+			(0xFDD0 <= ucs && ucs <= 0xFDEF) ||
+			(ucs & 0xFFFE) == 0xFFFE) {
+		ucs = 0xFFFD;
+	} else if (ucs == 0x000D) {
+		ucs = 0x000A;
+	}
+
 	/* Convert our UCS4 character to UTF-8 */
 	perror = parserutils_charset_utf8_from_ucs4(ucs, &utf8data, &utf8len);
 	assert(perror == PARSERUTILS_OK);
 
-	/* Append it to the token data (unescaped buffer already set up) */
+	/* Attempt to read a trailing whitespace character */
+	perror = parserutils_inputstream_peek(lexer->input,
+			lexer->bytesReadForToken, &cptr, &clen);
+	if (perror != PARSERUTILS_OK && perror != PARSERUTILS_EOF) {
+		/* Rewind what we've read */
+		lexer->bytesReadForToken = bytesReadInit;
+		return css_error_from_parserutils_error(perror);
+	}
+
+	if (perror == PARSERUTILS_OK && *cptr == '\r') {
+		/* Potential CRLF */
+		const uint8_t *pCR = cptr;
+
+		perror = parserutils_inputstream_peek(lexer->input,
+				lexer->bytesReadForToken + 1, &cptr, &clen);
+		if (perror != PARSERUTILS_OK && perror != PARSERUTILS_EOF) {
+			/* Rewind what we've read */
+			lexer->bytesReadForToken = bytesReadInit;
+			return css_error_from_parserutils_error(perror);
+		}
+
+		if (perror == PARSERUTILS_OK && *cptr == '\n') {
+			/* CRLF -- account for CR */
+			lexer->bytesReadForToken += 1;
+		} else {
+			/* Stray CR -- restore for later */
+			cptr = pCR;
+			clen = 1;
+			perror = PARSERUTILS_OK;
+		}
+	}
+
+	/* Append char. to the token data (unescaped buffer already set up) */
 	/* We can't use the APPEND() macro here as we want to rewind correctly
 	 * on error. Additionally, lexer->bytesReadForToken has already been
 	 * advanced */
@@ -1997,16 +2041,23 @@ css_error consumeUnicode(css_lexer *lexer, uint32_t ucs)
 		return error;
 	}
 
-	/* Finally, attempt to skip a whitespace character */
+	/* Deal with the whitespace character */
 	if (perror == PARSERUTILS_EOF)
 		return CSS_OK;
 
-	if (isSpace(c)) {
+	if (isSpace(*cptr)) {
 		lexer->bytesReadForToken += clen;
 	}
 
-	/* +2 for '\' and first digit */
-	lexer->currentCol += lexer->bytesReadForToken - bytesReadInit + 2;
+	/* Fixup cursor position */
+	if (*cptr == '\r' || *cptr == '\n' || *cptr == '\f') {
+		lexer->currentCol = 1;
+		lexer->currentLine++;
+	} else {
+		/* +2 for '\' and first digit */
+		lexer->currentCol += lexer->bytesReadForToken - 
+				bytesReadInit + 2;
+	}
 
 	return CSS_OK;
 }
