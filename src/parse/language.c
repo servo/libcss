@@ -25,29 +25,6 @@ typedef struct context_entry {
 	void *data;			/**< Data for context */
 } context_entry;
 
-/**
- * Context for a CSS language parser
- */
-struct css_language {
-	css_stylesheet *sheet;		/**< The stylesheet to parse for */
-
-#define STACK_CHUNK 32
-	parserutils_stack *context;	/**< Context stack */
-
-	enum {
-		BEFORE_CHARSET,
-		BEFORE_RULES,
-		HAD_RULE
-	} state;			/**< State flag, for at-rule handling */
-
-	/** \todo These should be statically allocated */
-	/** Interned strings */
-	lwc_string *strings[LAST_KNOWN];
-
-	css_allocator_fn alloc;		/**< Memory (de)allocation function */
-	void *pw;			/**< Client's private data */
-};
-
 /* Event handlers */
 static css_error language_handle_event(css_parser_event type, 
 		const parserutils_vector *tokens, void *pw);
@@ -104,11 +81,6 @@ static inline css_error parseSelectorList(css_language *c,
 static inline css_error parseProperty(css_language *c,
 		const css_token *property, const parserutils_vector *vector,
 		int *ctx, css_rule *rule);
-
-/* Helpers */
-static inline void consumeWhitespace(const parserutils_vector *vector, 
-		int *ctx);
-static inline bool tokenIsChar(const css_token *token, uint8_t c);
 
 /**
  * Create a CSS language parser
@@ -1086,38 +1058,4 @@ css_error parseProperty(css_language *c, const css_token *property,
 
 	return CSS_OK;
 }
-
-/******************************************************************************
- * Helper functions                                                           *
- ******************************************************************************/
-
-/**
- * Consume all leading whitespace tokens
- *
- * \param vector  The vector to consume from
- * \param ctx     The vector's context
- */
-void consumeWhitespace(const parserutils_vector *vector, int *ctx)
-{
-	const css_token *token = NULL;
-
-	while ((token = parserutils_vector_peek(vector, *ctx)) != NULL &&
-			token->type == CSS_TOKEN_S)
-		token = parserutils_vector_iterate(vector, ctx);
-}
-
-/**
- * Determine if a token is a character
- *
- * \param token  The token to consider
- * \param c      The character to match (lowercase ASCII only)
- * \return True if the token matches, false otherwise
- */
-bool tokenIsChar(const css_token *token, uint8_t c)
-{
-	return token != NULL && token->type == CSS_TOKEN_CHAR && 
-	                lwc_string_length(token->ilower) == 1 && 
-			lwc_string_data(token->ilower)[0] == c;
-}
-
 
