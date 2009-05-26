@@ -1,4 +1,4 @@
 # Sources
-DIR_SOURCES := aural.c properties.c utils.c
+DIR_SOURCES := aural.c background.c properties.c utils.c
 
 include build/makefiles/Makefile.subdir
