@@ -19,6 +19,7 @@ typedef struct exp_entry {
 #define EXP_ENTRY_TEXT_LEN (128)
 	char text[EXP_ENTRY_TEXT_LEN];
 	size_t textLen;
+	bool hasText;
 } exp_entry;
 
 typedef struct line_ctx {
@@ -162,6 +163,8 @@ void parse_expected(line_ctx *ctx, const char *data, size_t len)
 
 	ctx->exp[ctx->expused].type = type;
 	ctx->exp[ctx->expused].textLen = 0;
+	ctx->exp[ctx->expused].hasText = (colon != data + len);
+
 	if (colon != data + len) {
 		const char *p = colon + 1;
 		bool escape = false;
@@ -169,7 +172,7 @@ void parse_expected(line_ctx *ctx, const char *data, size_t len)
 		for (len = len - (colon + 1 - data); len > 0; len--, p++) {
 			char c;
 
-			if (*p == '\\') {
+			if (escape == false && *p == '\\') {
 				escape = true;
 				continue;
 			}
@@ -297,7 +300,7 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 			assert(0 && "Types differ");
 		}
 
-		if (exp[e].textLen > 0) {
+		if (exp[e].hasText) {
 			if (tok->data.len != exp[e].textLen) {
 				printf("%d: Got length %d, Expected %d\n",
 					testnum, (int) tok->data.len, 
