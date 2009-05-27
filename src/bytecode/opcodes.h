@@ -295,8 +295,8 @@ enum op_height {
 };
 
 enum op_left {
-	LEFT_SET			= 0x0080,
-	LEFT_AUTO			= 0x0000
+	LEFT_SET			= BOTTOM_SET,
+	LEFT_AUTO			= BOTTOM_AUTO
 };
 
 enum op_letter_spacing {
@@ -472,9 +472,8 @@ enum op_richness {
 };
 
 enum op_right {
-	RIGHT_SET			= 0x0080,
-
-	RIGHT_AUTO			= 0x0000
+	RIGHT_SET			= BOTTOM_SET,
+	RIGHT_AUTO			= BOTTOM_AUTO
 };
 
 enum op_speak_header {
@@ -547,9 +546,8 @@ enum op_text_transform {
 };
 
 enum op_top {
-	TOP_SET				= 0x0080,
-
-	TOP_AUTO			= 0x0000
+	TOP_SET				= BOTTOM_SET,
+	TOP_AUTO			= BOTTOM_AUTO
 };
 
 enum op_unicode_bidi {
