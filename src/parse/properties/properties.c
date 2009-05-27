@@ -119,60 +119,6 @@ const css_prop_handler property_handlers[LAST_PROP + 1 - FIRST_PROP] =
 	parse_z_index,
 };
 
-css_error parse_color(css_language *c, 
-		const parserutils_vector *vector, int *ctx, 
-		css_style **result)
-{
-	css_error error;
-	const css_token *token;
-	uint8_t flags = 0;
-	uint16_t value = 0;
-	uint32_t opv;
-	uint32_t colour = 0;
-	uint32_t required_size;
-
-	/* colour | IDENT (inherit) */
-	token= parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
-		return CSS_INVALID;
-
-	if (token->type == CSS_TOKEN_IDENT && 
-			token->ilower == c->strings[INHERIT]) {
-		parserutils_vector_iterate(vector, ctx);
-		flags |= FLAG_INHERIT;
-	} else {
-		error = parse_colour_specifier(c, vector, ctx, &colour);
-		if (error != CSS_OK)
-			return error;
-
-		value = COLOR_SET;
-	}
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
-	opv = buildOPV(CSS_PROP_COLOR, flags, value);
-
-	required_size = sizeof(opv);
-	if ((flags & FLAG_INHERIT) == false && value == COLOR_SET)
-		required_size += sizeof(colour);
-
-	/* Allocate result */
-	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
-		return error;
-
-	/* Copy the bytecode to it */
-	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if ((flags & FLAG_INHERIT) == false && value == COLOR_SET) {
-		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
-				&colour, sizeof(colour));
-	}
-
-	return CSS_OK;
-}
-
 css_error parse_cursor(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
