@@ -984,7 +984,7 @@ css_error parseSelectorList(css_language *c, const parserutils_vector *vector,
 		return error;
 	}
 
-	while ((token = parserutils_vector_peek(vector, ctx)) != NULL) {
+	while (parserutils_vector_peek(vector, ctx) != NULL) {
 		token = parserutils_vector_iterate(vector, &ctx);
 		if (tokenIsChar(token, ',') == false)
 			return CSS_INVALID;
