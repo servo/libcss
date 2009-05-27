@@ -59,7 +59,8 @@ css_error parse_colour_specifier(css_language *c,
 			token->type != CSS_TOKEN_HASH &&
 			token->type != CSS_TOKEN_FUNCTION)) {
 		if (c->sheet->quirks_allowed == false ||
-				(token->type != CSS_TOKEN_NUMBER && 
+				(token != NULL &&
+				token->type != CSS_TOKEN_NUMBER && 
 				token->type != CSS_TOKEN_DIMENSION))
 			return CSS_INVALID;
 	}
