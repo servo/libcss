@@ -5,13 +5,7 @@
  * Copyright 2008 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
-#include <assert.h>
-#include <string.h>
-
-#include "bytecode/bytecode.h"
-#include "bytecode/opcodes.h"
 #include "parse/properties/properties.h"
-#include "parse/properties/utils.h"
 
 /**
  * Dispatch table of property handlers, indexed by property enum
@@ -118,5 +112,4 @@ const css_prop_handler property_handlers[LAST_PROP + 1 - FIRST_PROP] =
 	parse_word_spacing,
 	parse_z_index,
 };
-
 
