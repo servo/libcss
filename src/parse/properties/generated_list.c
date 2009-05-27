@@ -12,9 +12,9 @@
 #include "parse/properties/properties.h"
 #include "parse/properties/utils.h"
 
-static inline css_error parse_list_style_type_value(css_language *c,
+static css_error parse_list_style_type_value(css_language *c,
 		const css_token *token, uint16_t *value);
-static inline css_error parse_content_list(css_language *c,
+static css_error parse_content_list(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint16_t *value, uint8_t *buffer, uint32_t *buflen);
 

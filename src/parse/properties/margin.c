@@ -12,7 +12,7 @@
 #include "parse/properties/properties.h"
 #include "parse/properties/utils.h"
 
-static inline css_error parse_margin_side(css_language *c,
+static css_error parse_margin_side(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint16_t op, css_style **result);
 
