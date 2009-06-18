@@ -67,7 +67,7 @@ css_error parse_background_color(css_language *c,
 	uint32_t required_size;
 
 	/* colour | IDENT (transparent, inherit) */
-	token= parserutils_vector_peek(vector, *ctx);
+	token = parserutils_vector_peek(vector, *ctx);
 	if (token == NULL)
 		return CSS_INVALID;
 
