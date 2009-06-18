@@ -263,15 +263,10 @@ css_error parse_background_position(css_language *c,
 
 		for (i = 0; i < 2; i++) {
 			token = parserutils_vector_peek(vector, *ctx);
-			/* This can only occur on the second attempt */
-			/* Also detect start of !important on second attempt */
-			if (token == NULL || 
-					(i == 1 && tokenIsChar(token, '!')))
+			if (token == NULL)
 				break;
 
 			if (token->type == CSS_TOKEN_IDENT) {
-				parserutils_vector_iterate(vector, ctx);
-
 				if (token->ilower == c->strings[LEFT]) {
 					value[i] = 
 						BACKGROUND_POSITION_HORZ_LEFT;
@@ -289,11 +284,19 @@ css_error parse_background_position(css_language *c,
 					/* We'll fix this up later */
 					value[i] = 
 						BACKGROUND_POSITION_VERT_CENTER;
+				} else if (i == 1) {
+					/* Second pass, so ignore this one */
+					break;
 				} else {
+					/* First pass, so invalid */
 					*ctx = orig_ctx;
 					return CSS_INVALID;
 				}
-			} else {
+
+				parserutils_vector_iterate(vector, ctx);
+			} else if (token->type == CSS_TOKEN_DIMENSION ||
+					token->type == CSS_TOKEN_NUMBER ||
+					token->type == CSS_TOKEN_PERCENTAGE) {
 				error = parse_unit_specifier(c, vector, ctx, 
 						UNIT_PX, &length[i], &unit[i]);
 				if (error != CSS_OK) {
@@ -310,10 +313,21 @@ css_error parse_background_position(css_language *c,
 
 				/* We'll fix this up later, too */
 				value[i] = BACKGROUND_POSITION_VERT_SET;
+			} else {
+				if (i == 1) {
+					/* Second pass, so ignore */
+					break;
+				} else {
+					/* First pass, so invalid */
+					*ctx = orig_ctx;
+					return CSS_INVALID;
+				}
 			}
 
 			consumeWhitespace(vector, ctx);
 		}
+
+		assert(i != 0);
 
 		/* Now, sort out the mess we've got */
 		if (i == 1) {
@@ -331,9 +345,6 @@ css_error parse_background_position(css_language *c,
 			case BACKGROUND_POSITION_VERT_SET:
 				value[0] = BACKGROUND_POSITION_HORZ_SET;
 				break;
-			default:
-				*ctx = orig_ctx;
-				return CSS_INVALID;
 			}
 
 			value[1] = BACKGROUND_POSITION_VERT_CENTER;
@@ -361,7 +372,8 @@ css_error parse_background_position(css_language *c,
 		}
 	}
 
-	opv = buildOPV(CSS_PROP_BACKGROUND_POSITION, flags, value[0] | value[1]);
+	opv = buildOPV(CSS_PROP_BACKGROUND_POSITION, flags, 
+			value[0] | value[1]);
 
 	required_size = sizeof(opv);
 	if ((flags & FLAG_INHERIT) == false) { 

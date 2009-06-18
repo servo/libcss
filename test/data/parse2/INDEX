@@ -9,3 +9,4 @@ selectors.dat			Invalid selector tests
 illegal-values.dat		Illegal value tests
 malformed-declarations.dat	Malformed declaration tests
 unknown-properties.dat		Unknown property tests
+bgpos.dat			Illegal background-position values
