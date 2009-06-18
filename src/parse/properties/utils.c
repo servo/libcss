@@ -12,10 +12,24 @@
 #include "bytecode/opcodes.h"
 #include "parse/properties/utils.h"
 
+/**
+ * Parse !important
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive result
+ * \return CSS_OK on success,
+ *         CSS_INVALID if "S* ! S* important" is not at the start of the vector
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_important(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint8_t *result)
 {
+	int orig_ctx = *ctx;
 	const css_token *token;
 
 	consumeWhitespace(vector, ctx);
@@ -25,26 +39,46 @@ css_error parse_important(css_language *c,
 		consumeWhitespace(vector, ctx);
 
 		token = parserutils_vector_iterate(vector, ctx);
-		if (token == NULL || token->type != CSS_TOKEN_IDENT)
+		if (token == NULL || token->type != CSS_TOKEN_IDENT) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
-		if (token->ilower == c->strings[IMPORTANT])
+		if (token->ilower == c->strings[IMPORTANT]) {
 			*result |= FLAG_IMPORTANT;
-	} else if (token != NULL)
+		} else {
+			*ctx = orig_ctx;
+			return CSS_INVALID;
+		}
+	} else if (token != NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	return CSS_OK;
 }
 
+/**
+ * Parse a colour specifier
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive result (RRGGBBAA)
+ * \return CSS_OK      on success,
+ *         CSS_INVALID if the input is invalid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_colour_specifier(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint32_t *result)
 {
+	int orig_ctx = *ctx;
 	const css_token *token;
 	uint8_t r = 0, g = 0, b = 0;
 	css_error error;
-
-	UNUSED(c);
 
 	consumeWhitespace(vector, ctx);
 
@@ -62,7 +96,7 @@ css_error parse_colour_specifier(css_language *c,
 				(token != NULL &&
 				token->type != CSS_TOKEN_NUMBER && 
 				token->type != CSS_TOKEN_DIMENSION))
-			return CSS_INVALID;
+			goto invalid;
 	}
 
 	if (token->type == CSS_TOKEN_IDENT) {
@@ -72,21 +106,34 @@ css_error parse_colour_specifier(css_language *c,
 			if (error == CSS_OK)
 				c->sheet->quirks_used = true;
 		}
-			
+
+		if (error != CSS_OK)
+			*ctx = orig_ctx;
+
 		return error;
 	} else if (token->type == CSS_TOKEN_HASH) {
-		return parse_hash_colour(token->idata, result);
+		error = parse_hash_colour(token->idata, result);
+		if (error != CSS_OK)
+			*ctx = orig_ctx;
+
+		return error;
 	} else if (c->sheet->quirks_allowed && 
 			token->type == CSS_TOKEN_NUMBER) {
 		error = parse_hash_colour(token->idata, result);
 		if (error == CSS_OK)
 			c->sheet->quirks_used = true;
+		else
+			*ctx = orig_ctx;
+
 		return error;
 	} else if (c->sheet->quirks_allowed && 
 			token->type == CSS_TOKEN_DIMENSION) {
 		error = parse_hash_colour(token->idata, result);
 		if (error == CSS_OK)
 			c->sheet->quirks_used = true;
+		else
+			*ctx = orig_ctx;
+
 		return error;
 	} else if (token->type == CSS_TOKEN_FUNCTION) {
 		if (token->ilower == c->strings[RGB]) {
@@ -107,18 +154,18 @@ css_error parse_colour_specifier(css_language *c,
 						CSS_TOKEN_NUMBER && 
 						token->type != 
 						CSS_TOKEN_PERCENTAGE))
-					return CSS_INVALID;
+					goto invalid;
 
 				if (i == 0)
 					valid = token->type;
 				else if (token->type != valid)
-					return CSS_INVALID;
+					goto invalid;
 
 				num = number_from_lwc_string(token->idata,
 						valid == CSS_TOKEN_NUMBER, 
 						&consumed);
 				if (consumed != lwc_string_length(token->idata))
-					return CSS_INVALID;
+					goto invalid;
 
 				if (valid == CSS_TOKEN_NUMBER) {
 					intval = FIXTOINT(num);
@@ -140,24 +187,38 @@ css_error parse_colour_specifier(css_language *c,
 
 				token = parserutils_vector_peek(vector, *ctx);
 				if (token == NULL)
-					return CSS_INVALID;
+					goto invalid;
 
 				if (i != 2 && tokenIsChar(token, ','))
 					parserutils_vector_iterate(vector, ctx);
 				else if (i == 2 && tokenIsChar(token, ')'))
 					parserutils_vector_iterate(vector, ctx);
 				else
-					return CSS_INVALID;
+					goto invalid;
 			}
 		} else
-			return CSS_INVALID;
+			goto invalid;
 	}
 
+	/** \todo Is this endian safe? */
 	*result = (r << 24) | (g << 16) | (b << 8);
 
 	return CSS_OK;
+
+invalid:
+	*ctx = orig_ctx;
+	return CSS_INVALID;
 }
 
+/**
+ * Parse a named colour
+ *
+ * \param c       Parsing context
+ * \param data    Colour name string
+ * \param result  Pointer to location to receive result
+ * \return CSS_OK      on success,
+ *         CSS_INVALID if the colour name is unknown
+ */
 css_error parse_named_colour(css_language *c, lwc_string *data, 
 		uint32_t *result)
 {
@@ -327,6 +388,14 @@ css_error parse_named_colour(css_language *c, lwc_string *data,
 	return CSS_OK;
 }
 
+/**
+ * Parse a hash colour (#rgb or #rrggbb)
+ *
+ * \param data    Pointer to colour string
+ * \param result  Pointer to location to receive result
+ * \return CSS_OK      on success,
+ *         CSS_INVALID if the input is invalid
+ */
 css_error parse_hash_colour(lwc_string *data, uint32_t *result)
 {
 	uint8_t r = 0, g = 0, b = 0;
@@ -354,30 +423,47 @@ css_error parse_hash_colour(lwc_string *data, uint32_t *result)
 	} else
 		return CSS_INVALID;
 
+	/** \todo Is this endian safe? */
 	*result = (r << 24) | (g << 16) | (b << 8);
 
 	return CSS_OK;
 }
 
+/**
+ * Parse a unit specifier
+ *
+ * \param c             Parsing context
+ * \param vector        Vector of tokens to process
+ * \param ctx           Pointer to current vector iteration context
+ * \param default_unit  The default unit to use if none specified
+ * \param length        Pointer to location to receive length
+ * \param unit          Pointer to location to receive unit
+ * \return CSS_OK      on success,
+ *         CSS_INVALID if the tokens do not form a valid unit
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_unit_specifier(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint32_t default_unit,
 		css_fixed *length, uint32_t *unit)
 {
+	int orig_ctx = *ctx;
 	const css_token *token;
 	css_fixed num;
 	size_t consumed = 0;
 	css_error error;
-
-	UNUSED(c);
 
 	consumeWhitespace(vector, ctx);
 
 	token = parserutils_vector_iterate(vector, ctx);
 	if (token == NULL || (token->type != CSS_TOKEN_DIMENSION &&
 			token->type != CSS_TOKEN_NUMBER &&
-			token->type != CSS_TOKEN_PERCENTAGE))
+			token->type != CSS_TOKEN_PERCENTAGE)) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	num = number_from_lwc_string(token->idata, false, &consumed);
 
@@ -387,15 +473,19 @@ css_error parse_unit_specifier(css_language *c,
 
 		error = parse_unit_keyword(data + consumed, len - consumed, 
 				unit);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		/* Non-zero values are permitted in quirks mode */
 		if (num != 0) {
-			if (c->sheet->quirks_allowed)
+			if (c->sheet->quirks_allowed) {
 				c->sheet->quirks_used = true;
-			else
+			} else {
+				*ctx = orig_ctx;
 				return CSS_INVALID;
+			}
 		}
 
 		*unit = default_unit;
@@ -410,6 +500,7 @@ css_error parse_unit_specifier(css_language *c,
 
 			consumeWhitespace(vector, &temp_ctx);
 
+			/* Try to parse the unit keyword, ignoring errors */
 			token = parserutils_vector_iterate(vector, &temp_ctx);
 			if (token != NULL && token->type == CSS_TOKEN_IDENT) {
 				error = parse_unit_keyword(
@@ -423,10 +514,12 @@ css_error parse_unit_specifier(css_language *c,
 				}
 			}
 		}
-
 	} else {
-		if (consumed != lwc_string_length(token->idata))
+		/* Percentage -- number must be entire token data */
+		if (consumed != lwc_string_length(token->idata)) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 		*unit = UNIT_PCT;
 	}
 
@@ -435,6 +528,15 @@ css_error parse_unit_specifier(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse a unit keyword
+ *
+ * \param ptr   Pointer to keyword string
+ * \param len   Length, in bytes, of string
+ * \param unit  Pointer to location to receive computed unit
+ * \return CSS_OK      on success, 
+ *         CSS_INVALID on encountering an unknown keyword
+ */
 css_error parse_unit_keyword(const char *ptr, size_t len, css_unit *unit)
 {
 	if (len == 4) {
