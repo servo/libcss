@@ -30,10 +30,6 @@ css_error parse_orphans(css_language *c,
 			token->type != CSS_TOKEN_NUMBER))
 		return CSS_INVALID;
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	if (token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
@@ -87,10 +83,6 @@ css_error parse_page_break_after(css_language *c,
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (ident->ilower == c->strings[AUTO]) {
@@ -133,10 +125,6 @@ css_error parse_page_break_before(css_language *c,
 	ident = parserutils_vector_iterate(vector, ctx);
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -181,10 +169,6 @@ css_error parse_page_break_inside(css_language *c,
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (ident->ilower == c->strings[AUTO]) {
@@ -224,10 +208,6 @@ css_error parse_widows(css_language *c,
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
 			token->type != CSS_TOKEN_NUMBER))
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;

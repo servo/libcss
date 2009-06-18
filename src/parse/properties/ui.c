@@ -158,10 +158,6 @@ css_error parse_cursor(css_language *c,
 			return CSS_INVALID;
 	}
 
-	error = parse_important(c, vector, &temp_ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_CURSOR, flags, value);
 
 	/* Allocate result */
@@ -270,10 +266,6 @@ css_error parse_cursor(css_language *c,
 		if (token != NULL && tokenIsChar(token, '!') == false)
 			return CSS_INVALID;
 	}
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	return CSS_OK;
 }

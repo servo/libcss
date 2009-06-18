@@ -86,10 +86,6 @@ css_error parse_padding_side(css_language *c,
 		value = PADDING_SET;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(op, flags, value);
 
 	required_size = sizeof(opv);

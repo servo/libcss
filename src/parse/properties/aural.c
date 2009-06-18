@@ -147,10 +147,6 @@ css_error parse_azimuth(css_language *c,
 		value = AZIMUTH_ANGLE;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_AZIMUTH, flags, value);
 
 	required_size = sizeof(opv);
@@ -190,10 +186,6 @@ css_error parse_cue_after(css_language *c,
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
 			token->type != CSS_TOKEN_URI))
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (token->type == CSS_TOKEN_IDENT && 
 			token->ilower == c->strings[INHERIT]) {
@@ -245,10 +237,6 @@ css_error parse_cue_before(css_language *c,
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
 			token->type != CSS_TOKEN_URI))
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (token->type == CSS_TOKEN_IDENT && 
 			token->ilower == c->strings[INHERIT]) {
@@ -350,10 +338,6 @@ css_error parse_elevation(css_language *c,
 		value = ELEVATION_ANGLE;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_ELEVATION, flags, value);
 
 	required_size = sizeof(opv);
@@ -414,10 +398,6 @@ css_error parse_pause_after(css_language *c,
 
 		value = PAUSE_AFTER_SET;
 	}
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	opv = buildOPV(CSS_PROP_PAUSE_AFTER, flags, value);
 
@@ -480,10 +460,6 @@ css_error parse_pause_before(css_language *c,
 		value = PAUSE_BEFORE_SET;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_PAUSE_BEFORE, flags, value);
 
 	required_size = sizeof(opv);
@@ -524,10 +500,6 @@ css_error parse_pitch_range(css_language *c,
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
 			token->type != CSS_TOKEN_NUMBER))
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -625,10 +597,6 @@ css_error parse_pitch(css_language *c,
 		value = PITCH_FREQUENCY;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_PITCH, flags, value);
 
 	required_size = sizeof(opv);
@@ -709,10 +677,6 @@ css_error parse_play_during(css_language *c,
 		}
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_PLAY_DURING, flags, value);
 
 	required_size = sizeof(opv);
@@ -754,10 +718,6 @@ css_error parse_richness(css_language *c,
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
 			token->type != CSS_TOKEN_NUMBER))
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -812,10 +772,6 @@ css_error parse_speak_header(css_language *c,
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (ident->ilower == c->strings[ONCE]) {
@@ -852,10 +808,6 @@ css_error parse_speak_numeral(css_language *c,
 	ident = parserutils_vector_iterate(vector, ctx);
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -894,10 +846,6 @@ css_error parse_speak_punctuation(css_language *c,
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (ident->ilower == c->strings[CODE]) {
@@ -934,10 +882,6 @@ css_error parse_speak(css_language *c,
 	ident = parserutils_vector_iterate(vector, ctx);
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -982,10 +926,6 @@ css_error parse_speech_rate(css_language *c,
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
 			token->type != CSS_TOKEN_NUMBER))
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -1064,10 +1004,6 @@ css_error parse_stress(css_language *c,
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
 			token->type != CSS_TOKEN_NUMBER))
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (token->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -1231,10 +1167,6 @@ css_error parse_voice_family(css_language *c,
 
 		required_size += sizeof(opv);
 	}
-
-	error = parse_important(c, vector, &temp_ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	opv = buildOPV(CSS_PROP_VOICE_FAMILY, flags, value);
 
@@ -1435,13 +1367,6 @@ css_error parse_voice_family(css_language *c,
 		ptr += sizeof(opv);
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(c->sheet, *result);
-		*result = NULL;
-		return error;
-	}
-
 	return CSS_OK;
 }
 
@@ -1521,10 +1446,6 @@ css_error parse_volume(css_language *c,
 
 		value = VOLUME_DIMENSION;
 	}
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	opv = buildOPV(CSS_PROP_VOLUME, flags, value);
 

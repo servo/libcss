@@ -13,52 +13,6 @@
 #include "parse/properties/utils.h"
 
 /**
- * Parse !important
- *
- * \param c       Parsing context
- * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
- * \param result  Pointer to location to receive result
- * \return CSS_OK on success,
- *         CSS_INVALID if "S* ! S* important" is not at the start of the vector
- *
- * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
- */
-css_error parse_important(css_language *c,
-		const parserutils_vector *vector, int *ctx,
-		uint8_t *result)
-{
-	int orig_ctx = *ctx;
-	const css_token *token;
-
-	consumeWhitespace(vector, ctx);
-
-	token = parserutils_vector_iterate(vector, ctx);
-	if (token != NULL && tokenIsChar(token, '!')) {
-		consumeWhitespace(vector, ctx);
-
-		token = parserutils_vector_iterate(vector, ctx);
-		if (token == NULL || token->type != CSS_TOKEN_IDENT) {
-			*ctx = orig_ctx;
-			return CSS_INVALID;
-		}
-
-		if (token->ilower == c->strings[IMPORTANT]) {
-			*result |= FLAG_IMPORTANT;
-		} else {
-			*ctx = orig_ctx;
-			return CSS_INVALID;
-		}
-	} else if (token != NULL) {
-		*ctx = orig_ctx;
-		return CSS_INVALID;
-	}
-
-	return CSS_OK;
-}
-
-/**
  * Parse a colour specifier
  *
  * \param c       Parsing context

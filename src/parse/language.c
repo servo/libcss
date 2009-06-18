@@ -12,10 +12,12 @@
 
 #include "stylesheet.h"
 #include "lex/lex.h"
+#include "parse/important.h"
 #include "parse/language.h"
 #include "parse/parse.h"
 #include "parse/propstrings.h"
 #include "parse/properties/properties.h"
+#include "parse/properties/utils.h"
 
 #include "utils/parserutilserror.h"
 #include "utils/utils.h"
@@ -1025,6 +1027,7 @@ css_error parseProperty(css_language *c, const css_token *property,
 	css_error error;
 	css_prop_handler handler = NULL;
 	int i = 0;
+	uint8_t flags = 0;
 	css_style *style = NULL;
 
 	/* Find property index */
@@ -1046,6 +1049,17 @@ css_error parseProperty(css_language *c, const css_token *property,
 		return error;
 
 	assert (style != NULL);
+
+	/* Determine if this is important or not */
+	error = parse_important(c, vector, ctx, &flags);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(c->sheet, style);
+		return error;
+	}
+
+	/* If it's important, then mark the style appropriately */
+	if (flags != 0)
+		make_style_important(style);
 
 	/* Append style to rule */
 	error = css_stylesheet_rule_append_style(c->sheet, rule, style);

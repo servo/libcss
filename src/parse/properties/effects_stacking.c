@@ -100,10 +100,6 @@ css_error parse_clip(css_language *c,
 		return CSS_INVALID;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_CLIP, flags, value);
 
 	required_size = sizeof(opv);
@@ -151,10 +147,6 @@ css_error parse_overflow(css_language *c,
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (ident->ilower == c->strings[VISIBLE]) {
@@ -195,10 +187,6 @@ css_error parse_visibility(css_language *c,
 	ident = parserutils_vector_iterate(vector, ctx);
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -241,10 +229,6 @@ css_error parse_z_index(css_language *c,
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
 			token->type != CSS_TOKEN_NUMBER))
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {

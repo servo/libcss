@@ -30,10 +30,6 @@ css_error parse_display(css_language *c,
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (ident->ilower == c->strings[INLINE]) {
@@ -126,10 +122,6 @@ css_error parse_height(css_language *c,
 		value = HEIGHT_SET;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_HEIGHT, flags, value);
 
 	required_size = sizeof(opv);
@@ -207,10 +199,6 @@ css_error parse_line_height(css_language *c,
 		value = LINE_HEIGHT_DIMENSION;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_LINE_HEIGHT, flags, value);
 
 	required_size = sizeof(opv);
@@ -280,10 +268,6 @@ css_error parse_max_height(css_language *c,
 		value = MAX_HEIGHT_SET;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_MAX_HEIGHT, flags, value);
 
 	required_size = sizeof(opv);
@@ -349,10 +333,6 @@ css_error parse_max_width(css_language *c,
 		value = MAX_WIDTH_SET;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_MAX_WIDTH, flags, value);
 
 	required_size = sizeof(opv);
@@ -414,10 +394,6 @@ css_error parse_min_height(css_language *c,
 		value = MIN_HEIGHT_SET;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_MIN_HEIGHT, flags, value);
 
 	required_size = sizeof(opv);
@@ -478,10 +454,6 @@ css_error parse_min_width(css_language *c,
 
 		value = MIN_WIDTH_SET;
 	}
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	opv = buildOPV(CSS_PROP_MIN_WIDTH, flags, value);
 
@@ -547,10 +519,6 @@ css_error parse_width(css_language *c,
 
 		value = WIDTH_SET;
 	}
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	opv = buildOPV(CSS_PROP_WIDTH, flags, value);
 

@@ -41,10 +41,6 @@ css_error parse_color(css_language *c,
 		value = COLOR_SET;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_COLOR, flags, value);
 
 	required_size = sizeof(opv);
@@ -80,10 +76,6 @@ css_error parse_direction(css_language *c,
 	ident = parserutils_vector_iterate(vector, ctx);
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -146,10 +138,6 @@ css_error parse_letter_spacing(css_language *c,
 		value = LETTER_SPACING_SET;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_LETTER_SPACING, flags, value);
 
 	required_size = sizeof(opv);
@@ -187,10 +175,6 @@ css_error parse_text_align(css_language *c,
 	ident = parserutils_vector_iterate(vector, ctx);
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -272,10 +256,6 @@ css_error parse_text_decoration(css_language *c,
 		}
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_TEXT_DECORATION, flags, value);
 
 	/* Allocate result */
@@ -323,10 +303,6 @@ css_error parse_text_indent(css_language *c,
 		value = TEXT_INDENT_SET;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_TEXT_INDENT, flags, value);
 
 	required_size = sizeof(opv);
@@ -364,10 +340,6 @@ css_error parse_text_transform(css_language *c,
 	ident = parserutils_vector_iterate(vector, ctx);
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -410,10 +382,6 @@ css_error parse_unicode_bidi(css_language *c,
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (ident->ilower == c->strings[NORMAL]) {
@@ -452,10 +420,6 @@ css_error parse_white_space(css_language *c,
 	ident = parserutils_vector_iterate(vector, ctx);
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -523,10 +487,6 @@ css_error parse_word_spacing(css_language *c,
 
 		value = WORD_SPACING_SET;
 	}
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	opv = buildOPV(CSS_PROP_WORD_SPACING, flags, value);
 

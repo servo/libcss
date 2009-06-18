@@ -61,10 +61,6 @@ css_error parse_border_collapse(css_language *c,
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (ident->ilower == c->strings[COLLAPSE]) {
@@ -201,10 +197,6 @@ css_error parse_border_spacing(css_language *c,
 		value = BORDER_SPACING_SET;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_BORDER_SPACING, flags, value);
 
 	required_size = sizeof(opv);
@@ -289,10 +281,6 @@ css_error parse_outline_color(css_language *c,
 
 		value = OUTLINE_COLOR_SET;
 	}
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	opv = buildOPV(CSS_PROP_OUTLINE_COLOR, flags, value);
 
@@ -382,10 +370,6 @@ css_error parse_border_side_color(css_language *c,
 		value = BORDER_COLOR_SET;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(op, flags, value);
 
 	required_size = sizeof(opv);
@@ -422,10 +406,6 @@ css_error parse_border_side_style(css_language *c,
 	ident = parserutils_vector_iterate(vector, ctx);
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -515,10 +495,6 @@ css_error parse_border_side_width(css_language *c,
 
 		value = BORDER_WIDTH_SET;
 	}
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	opv = buildOPV(op, flags, value);
 

@@ -69,10 +69,6 @@ css_error parse_content(css_language *c,
 		required_size += len;
 	}
 
-	error = parse_important(c, vector, &temp_ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_CONTENT, flags, value);
 
 	/* Allocate result */
@@ -100,11 +96,6 @@ css_error parse_content(css_language *c,
 		if (error != CSS_OK)
 			return error;
 	}
-
-	/* Ensure we skip past !important */
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	return CSS_OK;
 }
@@ -184,10 +175,6 @@ css_error parse_counter_increment(css_language *c,
 		/* And for the terminator */
 		required_size += sizeof(opv);
 	}
-
-	error = parse_important(c, vector, &temp_ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	opv = buildOPV(CSS_PROP_COUNTER_INCREMENT, flags, value);
 
@@ -270,10 +257,6 @@ css_error parse_counter_increment(css_language *c,
 		ptr += sizeof(opv);
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	return CSS_OK;
 }
 
@@ -352,10 +335,6 @@ css_error parse_counter_reset(css_language *c,
 		/* And for the terminator */
 		required_size += sizeof(opv);
 	}
-
-	error = parse_important(c, vector, &temp_ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	opv = buildOPV(CSS_PROP_COUNTER_RESET, flags, value);
 
@@ -438,10 +417,6 @@ css_error parse_counter_reset(css_language *c,
 		ptr += sizeof(opv);
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	return CSS_OK;
 }
 
@@ -461,10 +436,6 @@ css_error parse_list_style_image(css_language *c,
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
 			token->type != CSS_TOKEN_URI))
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (token->type == CSS_TOKEN_IDENT && 
 			token->ilower == c->strings[INHERIT]) {
@@ -515,10 +486,6 @@ css_error parse_list_style_position(css_language *c,
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
 	} else if (ident->ilower == c->strings[INSIDE]) {
@@ -559,10 +526,6 @@ css_error parse_list_style_type(css_language *c,
 	ident = parserutils_vector_iterate(vector, ctx);
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -658,10 +621,6 @@ css_error parse_quotes(css_language *c,
 		required_size += sizeof(opv);
 	}
 
-	error = parse_important(c, vector, &temp_ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(CSS_PROP_QUOTES, flags, value);
 
 	/* Allocate result */
@@ -735,10 +694,6 @@ css_error parse_quotes(css_language *c,
 		memcpy(ptr, &opv, sizeof(opv));
 		ptr += sizeof(opv);
 	}
-
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
 
 	return CSS_OK;
 }

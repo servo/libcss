@@ -83,10 +83,6 @@ css_error parse_margin_side(css_language *c,
 		value = MARGIN_SET;
 	}
 
-	error = parse_important(c, vector, ctx, &flags);
-	if (error != CSS_OK)
-		return error;
-
 	opv = buildOPV(op, flags, value);
 
 	required_size = sizeof(opv);

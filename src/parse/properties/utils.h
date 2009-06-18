@@ -10,9 +10,6 @@
 
 #include "parse/language.h"
 
-css_error parse_important(css_language *c,
-		const parserutils_vector *vector, int *ctx,
-		uint8_t *result);
 css_error parse_colour_specifier(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint32_t *result);
