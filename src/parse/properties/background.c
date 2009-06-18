@@ -16,7 +16,7 @@
 /**
  * Parse background-attachment
  *
- * \param c  Parsing context
+ * \param c       Parsing context
  * \param vector  Vector of tokens to process
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
@@ -71,10 +71,25 @@ css_error parse_background_attachment(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse background-color
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not a valid background-attachment
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_background_color(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -85,8 +100,10 @@ css_error parse_background_color(css_language *c,
 
 	/* colour | IDENT (transparent, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT && 
 			token->ilower == c->strings[INHERIT]) {
@@ -98,8 +115,10 @@ css_error parse_background_color(css_language *c,
 		value = BACKGROUND_COLOR_TRANSPARENT;
 	} else {
 		error = parse_colour_specifier(c, vector, ctx, &colour);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
 		value = BACKGROUND_COLOR_SET;
 	}
@@ -112,8 +131,10 @@ css_error parse_background_color(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -125,10 +146,25 @@ css_error parse_background_color(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse background-image
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not a valid background-attachment
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_background_image(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -139,8 +175,10 @@ css_error parse_background_image(css_language *c,
 	/* URI | IDENT (none, inherit) */
 	token = parserutils_vector_iterate(vector, ctx);
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-			token->type != CSS_TOKEN_URI))
+			token->type != CSS_TOKEN_URI)) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT && 
 			token->ilower == c->strings[INHERIT]) {
@@ -150,8 +188,10 @@ css_error parse_background_image(css_language *c,
 		value = BACKGROUND_IMAGE_NONE;
 	} else if (token->type == CSS_TOKEN_URI) {
 		value = BACKGROUND_IMAGE_URI;
-	} else
+	} else {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	opv = buildOPV(CSS_PROP_BACKGROUND_IMAGE, flags, value);
 
@@ -161,8 +201,10 @@ css_error parse_background_image(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -176,10 +218,25 @@ css_error parse_background_image(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse background-position
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not a valid background-attachment
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_background_position(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -192,8 +249,10 @@ css_error parse_background_position(css_language *c,
 	/* [length | percentage | IDENT(left, right, top, bottom, center)]{1,2}
 	 * | IDENT(inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -231,18 +290,23 @@ css_error parse_background_position(css_language *c,
 					value[i] = 
 						BACKGROUND_POSITION_VERT_CENTER;
 				} else {
+					*ctx = orig_ctx;
 					return CSS_INVALID;
 				}
 			} else {
 				error = parse_unit_specifier(c, vector, ctx, 
 						UNIT_PX, &length[i], &unit[i]);
-				if (error != CSS_OK)
+				if (error != CSS_OK) {
+					*ctx = orig_ctx;
 					return error;
+				}
 
 				if (unit[i] & UNIT_ANGLE || 
 						unit[i] & UNIT_TIME || 
-						unit[i] & UNIT_FREQ)
+						unit[i] & UNIT_FREQ) {
+					*ctx = orig_ctx;
 					return CSS_INVALID;
+				}
 
 				/* We'll fix this up later, too */
 				value[i] = BACKGROUND_POSITION_VERT_SET;
@@ -268,6 +332,7 @@ css_error parse_background_position(css_language *c,
 				value[0] = BACKGROUND_POSITION_HORZ_SET;
 				break;
 			default:
+				*ctx = orig_ctx;
 				return CSS_INVALID;
 			}
 
@@ -277,8 +342,10 @@ css_error parse_background_position(css_language *c,
 			/* Two keywords. Verify the axes differ */
 			if (((value[0] & 0xf) != 0 && (value[1] & 0xf) != 0) ||
 					((value[0] & 0xf0) != 0 && 
-						(value[1] & 0xf0) != 0))
+						(value[1] & 0xf0) != 0)) {
+				*ctx = orig_ctx;
 				return CSS_INVALID;
+			}
 		} else {
 			/* One or two non-keywords. First is horizontal */
 			if (value[0] == BACKGROUND_POSITION_VERT_SET)
@@ -287,8 +354,10 @@ css_error parse_background_position(css_language *c,
 			/* Verify the axes differ */
 			if (((value[0] & 0xf) != 0 && (value[1] & 0xf) != 0) ||
 					((value[0] & 0xf0) != 0 && 
-						(value[1] & 0xf0) != 0))
+						(value[1] & 0xf0) != 0)) {
+				*ctx = orig_ctx;
 				return CSS_INVALID;
+			}
 		}
 	}
 
@@ -304,8 +373,10 @@ css_error parse_background_position(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -327,10 +398,25 @@ css_error parse_background_position(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse background-repeat
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not a valid background-attachment
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_background_repeat(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *ident;
 	uint8_t flags = 0;
@@ -339,8 +425,10 @@ css_error parse_background_repeat(css_language *c,
 
 	/* IDENT (no-repeat, repeat-x, repeat-y, repeat, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
-	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -352,15 +440,19 @@ css_error parse_background_repeat(css_language *c,
 		value = BACKGROUND_REPEAT_REPEAT_Y;
 	} else if (ident->ilower == c->strings[REPEAT]) {
 		value = BACKGROUND_REPEAT_REPEAT;
-	} else
+	} else {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	opv = buildOPV(CSS_PROP_BACKGROUND_REPEAT, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
