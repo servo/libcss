@@ -17,7 +17,8 @@ css_fixed number_from_lwc_string(lwc_string *string,
 	int32_t fracpart = 0;
 	int32_t pwr = 1;
 
-	if (string == NULL || lwc_string_length(string) == 0 || consumed == NULL)
+	if (string == NULL || lwc_string_length(string) == 0 || 
+			consumed == NULL)
 		return 0;
 
 	len = lwc_string_length(string);
