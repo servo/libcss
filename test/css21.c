@@ -119,13 +119,13 @@ int main(int argc, char **argv)
 #if DUMP_CSS
 		{
 			char *out;
-			size_t outlen = origlen * 2;
+			size_t outlen = origlen * 4;
 			size_t written;
 			out = malloc(outlen);
 			assert(out != NULL);
 			dump_sheet(sheet, out, &outlen);
-			written = fwrite(out, 1, origlen * 2 - outlen, stdout);
-			assert(written == origlen * 2 - outlen);
+			written = fwrite(out, 1, origlen * 4 - outlen, stdout);
+			assert(written == origlen * 4 - outlen);
 			free(out);
 		}
 #endif
