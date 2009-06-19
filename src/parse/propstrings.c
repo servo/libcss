@@ -43,6 +43,7 @@ const stringmap_entry stringmap[LAST_KNOWN] = {
 	{ "after", SLEN("after") },
 
 	{ "azimuth", SLEN("azimuth") },
+	{ "background", SLEN("background") },
 	{ "background-attachment", SLEN("background-attachment") },
 	{ "background-color", SLEN("background-color") },
 	{ "background-image", SLEN("background-image") },

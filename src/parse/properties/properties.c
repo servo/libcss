@@ -13,6 +13,7 @@
 const css_prop_handler property_handlers[LAST_PROP + 1 - FIRST_PROP] =
 {
 	parse_azimuth,
+	parse_background,
 	parse_background_attachment,
 	parse_background_color,
 	parse_background_image,

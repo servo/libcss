@@ -25,6 +25,9 @@ extern const css_prop_handler property_handlers[LAST_PROP + 1 - FIRST_PROP];
 css_error parse_azimuth(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
+css_error parse_background(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		css_style **result);
 css_error parse_background_attachment(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
