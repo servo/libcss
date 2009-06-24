@@ -46,10 +46,25 @@ css_error parse_border_bottom_width(css_language *c,
 			CSS_PROP_BORDER_BOTTOM_WIDTH, result);
 }
 
+/**
+ * Parse border-collapse
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_border_collapse(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *ident;
 	uint8_t flags = 0;
@@ -58,8 +73,10 @@ css_error parse_border_collapse(css_language *c,
 
 	/* IDENT (collapse, separate, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
-	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -67,15 +84,19 @@ css_error parse_border_collapse(css_language *c,
 		value = BORDER_COLLAPSE_COLLAPSE;
 	} else if (ident->ilower == c->strings[SEPARATE]) {
 		value = BORDER_COLLAPSE_SEPARATE;
-	} else
+	} else {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	opv = buildOPV(CSS_PROP_BORDER_COLLAPSE, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -131,10 +152,25 @@ css_error parse_border_right_width(css_language *c,
 			CSS_PROP_BORDER_RIGHT_WIDTH, result);
 }
 
+/**
+ * Parse border-spacing
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_border_spacing(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -146,8 +182,10 @@ css_error parse_border_spacing(css_language *c,
 
 	/* length length? | IDENT(inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -158,30 +196,41 @@ css_error parse_border_spacing(css_language *c,
 
 		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
 				&length[0], &unit[0]);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
 		if (unit[0] & UNIT_ANGLE || unit[0] & UNIT_TIME || 
-				unit[0] & UNIT_FREQ || unit[0] & UNIT_PCT)
+				unit[0] & UNIT_FREQ || unit[0] & UNIT_PCT) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		num_lengths = 1;
 
 		consumeWhitespace(vector, ctx);
 
 		token = parserutils_vector_peek(vector, *ctx);
-		if (token != NULL && tokenIsChar(token, '!') == false) {
+		if (token != NULL) {
+			/* Attempt second length, ignoring errors.
+			 * The core !important parser will ensure 
+			 * any remaining junk is thrown out.
+			 * Ctx will be preserved on error, as usual
+			 */
 			error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
 					&length[1], &unit[1]);
-			if (error != CSS_OK)
-				return error;
+			if (error == CSS_OK) {
+				if (unit[1] & UNIT_ANGLE || 
+						unit[1] & UNIT_TIME ||
+						unit[1] & UNIT_FREQ || 
+						unit[1] & UNIT_PCT) {
+					*ctx = orig_ctx;
+					return CSS_INVALID;
+				}
 
-			if (unit[1] & UNIT_ANGLE || unit[1] & UNIT_TIME ||
-					unit[1] & UNIT_FREQ || 
-					unit[1] & UNIT_PCT)
-				return CSS_INVALID;
-
-			num_lengths = 2;
+				num_lengths = 2;
+			}
 		}
 
 		if (num_lengths == 1) {
@@ -191,8 +240,10 @@ css_error parse_border_spacing(css_language *c,
 		}
 
 		/* Lengths must not be negative */
-		if (length[0] < 0 || length[1] < 0)
+		if (length[0] < 0 || length[1] < 0) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		value = BORDER_SPACING_SET;
 	}
@@ -205,8 +256,10 @@ css_error parse_border_spacing(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -249,10 +302,25 @@ css_error parse_border_top_width(css_language *c,
 			CSS_PROP_BORDER_TOP_WIDTH, result);
 }
 
+/**
+ * Parse outline-color
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_outline_color(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -262,9 +330,11 @@ css_error parse_outline_color(css_language *c,
 	uint32_t required_size;
 
 	/* colour | IDENT (invert, inherit) */
-	token= parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT && 
 			token->ilower == c->strings[INHERIT]) {
@@ -276,8 +346,10 @@ css_error parse_outline_color(css_language *c,
 		value = OUTLINE_COLOR_INVERT;
 	} else {
 		error = parse_colour_specifier(c, vector, ctx, &colour);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
 		value = OUTLINE_COLOR_SET;
 	}
@@ -290,8 +362,10 @@ css_error parse_outline_color(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -303,10 +377,25 @@ css_error parse_outline_color(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse outline-style
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_outline_style(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	uint32_t opv;
 	uint16_t value;
@@ -314,16 +403,20 @@ css_error parse_outline_style(css_language *c,
 	/* Parse as a border style  */
 	error = parse_border_side_style(c, vector, ctx, 
 			CSS_PROP_OUTLINE_STYLE, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	opv = *((uint32_t *) (*result)->bytecode);
 
 	value = getValue(opv);
 
 	/* Hidden is invalid */
-	if (value == BORDER_STYLE_HIDDEN)
+	if (value == BORDER_STYLE_HIDDEN) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	return CSS_OK;
 }
@@ -337,10 +430,25 @@ css_error parse_outline_width(css_language *c,
 			CSS_PROP_OUTLINE_WIDTH, result);
 }
 
+/**
+ * Parse border-{top,right,bottom,left}-color
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_border_side_color(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint16_t op, css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint32_t opv;
@@ -351,8 +459,10 @@ css_error parse_border_side_color(css_language *c,
 
 	/* colour | IDENT (transparent, inherit) */
 	token= parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT && 
 			token->ilower == c->strings[INHERIT]) {
@@ -364,8 +474,10 @@ css_error parse_border_side_color(css_language *c,
 		value = BORDER_COLOR_TRANSPARENT;
 	} else {
 		error = parse_colour_specifier(c, vector, ctx, &colour);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
 		value = BORDER_COLOR_SET;
 	}
@@ -378,8 +490,10 @@ css_error parse_border_side_color(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -391,10 +505,25 @@ css_error parse_border_side_color(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse border-{top,right,bottom,left}-style
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_border_side_style(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint16_t op, css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *ident;
 	uint8_t flags = 0;
@@ -404,8 +533,10 @@ css_error parse_border_side_style(css_language *c,
 	/* IDENT (none, hidden, dotted, dashed, solid, double, groove, 
 	 * ridge, inset, outset, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
-	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -429,15 +560,19 @@ css_error parse_border_side_style(css_language *c,
 		value = BORDER_STYLE_INSET;
 	} else if (ident->ilower == c->strings[OUTSET]) {
 		value = BORDER_STYLE_OUTSET;
-	} else
+	} else {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	opv = buildOPV(op, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -445,10 +580,25 @@ css_error parse_border_side_style(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse border-{top,right,bottom,left}-width
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_border_side_width(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint16_t op, css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -460,8 +610,10 @@ css_error parse_border_side_width(css_language *c,
 
 	/* length | IDENT(thin, medium, thick, inherit) */
 	token= parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT && 
 			token->ilower == c->strings[INHERIT]) {
@@ -482,16 +634,22 @@ css_error parse_border_side_width(css_language *c,
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
 				&length, &unit);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
 		if (unit == UNIT_PCT || unit & UNIT_ANGLE ||
-				unit & UNIT_TIME || unit & UNIT_FREQ)
+				unit & UNIT_TIME || unit & UNIT_FREQ) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		/* Length must be positive */
-		if (length < 0)
+		if (length < 0) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		value = BORDER_WIDTH_SET;
 	}
@@ -504,8 +662,10 @@ css_error parse_border_side_width(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
