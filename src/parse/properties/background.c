@@ -22,7 +22,7 @@
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not a valid background-attachment
+ *         CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
  *                 If the input is invalid, then \a *ctx remains unchanged.
@@ -251,7 +251,7 @@ cleanup:
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not a valid background-attachment
+ *         CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
  *                 If the input is invalid, then \a *ctx remains unchanged.
@@ -309,7 +309,7 @@ css_error parse_background_attachment(css_language *c,
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not a valid background-attachment
+ *         CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
  *                 If the input is invalid, then \a *ctx remains unchanged.
@@ -384,7 +384,7 @@ css_error parse_background_color(css_language *c,
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not a valid background-attachment
+ *         CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
  *                 If the input is invalid, then \a *ctx remains unchanged.
@@ -456,7 +456,7 @@ css_error parse_background_image(css_language *c,
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not a valid background-attachment
+ *         CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
  *                 If the input is invalid, then \a *ctx remains unchanged.
@@ -648,7 +648,7 @@ css_error parse_background_position(css_language *c,
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not a valid background-attachment
+ *         CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
  *                 If the input is invalid, then \a *ctx remains unchanged.
