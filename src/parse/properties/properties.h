@@ -43,6 +43,12 @@ css_error parse_background_position(css_language *c,
 css_error parse_background_repeat(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
+css_error parse_border(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		css_style **result);
+css_error parse_border_bottom(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		css_style **result);
 css_error parse_border_bottom_color(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
@@ -52,8 +58,14 @@ css_error parse_border_bottom_style(css_language *c,
 css_error parse_border_bottom_width(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
+css_error parse_border_color(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		css_style **result);
 css_error parse_border_collapse(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
+		css_style **result);
+css_error parse_border_left(css_language *c,
+		const parserutils_vector *vector, int *ctx,
 		css_style **result);
 css_error parse_border_left_color(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
@@ -63,6 +75,9 @@ css_error parse_border_left_style(css_language *c,
 		css_style **result);
 css_error parse_border_left_width(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
+		css_style **result);
+css_error parse_border_right(css_language *c,
+		const parserutils_vector *vector, int *ctx,
 		css_style **result);
 css_error parse_border_right_color(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
@@ -76,6 +91,12 @@ css_error parse_border_right_width(css_language *c,
 css_error parse_border_spacing(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
+css_error parse_border_style(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		css_style **result);
+css_error parse_border_top(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		css_style **result);
 css_error parse_border_top_color(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
@@ -84,6 +105,9 @@ css_error parse_border_top_style(css_language *c,
 		css_style **result);
 css_error parse_border_top_width(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
+		css_style **result);
+css_error parse_border_width(css_language *c,
+		const parserutils_vector *vector, int *ctx,
 		css_style **result);
 css_error parse_bottom(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
@@ -194,6 +218,9 @@ css_error parse_min_width(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
 css_error parse_orphans(css_language *c,
+		const parserutils_vector *vector, int *ctx, 
+		css_style **result);
+css_error parse_outline(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
 css_error parse_outline_color(css_language *c,

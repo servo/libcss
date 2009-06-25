@@ -118,14 +118,18 @@ int main(int argc, char **argv)
 
 #if DUMP_CSS
 		{
+#ifndef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#endif
 			char *out;
-			size_t outlen = origlen * 4;
+			size_t outsize = max(16384, origlen * 8);
+			size_t outlen = outsize;
 			size_t written;
-			out = malloc(outlen);
+			out = malloc(outsize);
 			assert(out != NULL);
 			dump_sheet(sheet, out, &outlen);
-			written = fwrite(out, 1, origlen * 4 - outlen, stdout);
-			assert(written == origlen * 4 - outlen);
+			written = fwrite(out, 1, outsize - outlen, stdout);
+			assert(written == outsize - outlen);
 			free(out);
 		}
 #endif
