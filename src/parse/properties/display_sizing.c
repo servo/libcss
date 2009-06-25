@@ -12,10 +12,25 @@
 #include "parse/properties/properties.h"
 #include "parse/properties/utils.h"
 
+/**
+ * Parse display
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_display(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *ident;
 	uint8_t flags = 0;
@@ -27,8 +42,10 @@ css_error parse_display(css_language *c,
 	 * table-footer-group, table-row, table-column-group, table-column,
 	 * table-cell, table-caption, none, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
-	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -64,15 +81,19 @@ css_error parse_display(css_language *c,
 		value = DISPLAY_TABLE_CAPTION;
 	} else if (ident->ilower == c->strings[NONE]) {
 		value = DISPLAY_NONE;
-	} else
+	} else {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	opv = buildOPV(CSS_PROP_DISPLAY, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -80,10 +101,25 @@ css_error parse_display(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse height
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_height(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -95,8 +131,10 @@ css_error parse_height(css_language *c,
 
 	/* length | percentage | IDENT(auto, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -109,15 +147,21 @@ css_error parse_height(css_language *c,
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
 				&length, &unit);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
-		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		/* Negative height is illegal */
-		if (length < 0)
+		if (length < 0) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		value = HEIGHT_SET;
 	}
@@ -130,8 +174,10 @@ css_error parse_height(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -145,10 +191,25 @@ css_error parse_height(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse line-height
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_line_height(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -160,8 +221,10 @@ css_error parse_line_height(css_language *c,
 
 	/* number | length | percentage | IDENT(normal, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -173,28 +236,39 @@ css_error parse_line_height(css_language *c,
 		value = LINE_HEIGHT_NORMAL;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		length = number_from_lwc_string(token->ilower, false, &consumed);
-		if (consumed != lwc_string_length(token->ilower))
+		length = number_from_lwc_string(token->ilower, 
+				false, &consumed);
+		if (consumed != lwc_string_length(token->ilower)) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		/* Negative values are illegal */
-		if (length < 0)
+		if (length < 0) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		parserutils_vector_iterate(vector, ctx);
 		value = LINE_HEIGHT_NUMBER;
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
 				&length, &unit);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
-		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		/* Negative values are illegal */
-		if (length < 0)
+		if (length < 0) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		value = LINE_HEIGHT_DIMENSION;
 	}
@@ -210,8 +284,10 @@ css_error parse_line_height(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -226,10 +302,25 @@ css_error parse_line_height(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse max-height
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_max_height(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -241,8 +332,10 @@ css_error parse_max_height(css_language *c,
 
 	/* length | percentage | IDENT(none, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -255,15 +348,21 @@ css_error parse_max_height(css_language *c,
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
 				&length, &unit);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
-		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		/* Negative values are illegal */
-		if (length < 0)
+		if (length < 0) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		value = MAX_HEIGHT_SET;
 	}
@@ -276,8 +375,10 @@ css_error parse_max_height(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -291,10 +392,25 @@ css_error parse_max_height(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse max-width
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_max_width(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -306,8 +422,10 @@ css_error parse_max_width(css_language *c,
 
 	/* length | percentage | IDENT(none, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -320,15 +438,21 @@ css_error parse_max_width(css_language *c,
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
 				&length, &unit);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
-		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		/* Negative values are illegal */
-		if (length < 0)
+		if (length < 0) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		value = MAX_WIDTH_SET;
 	}
@@ -341,8 +465,10 @@ css_error parse_max_width(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -356,10 +482,25 @@ css_error parse_max_width(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse min-height
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_min_height(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -371,8 +512,10 @@ css_error parse_min_height(css_language *c,
 
 	/* length | percentage | IDENT(inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -381,15 +524,21 @@ css_error parse_min_height(css_language *c,
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
 				&length, &unit);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
-		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		/* Negative values are illegal */
-		if (length < 0)
+		if (length < 0) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		value = MIN_HEIGHT_SET;
 	}
@@ -402,8 +551,10 @@ css_error parse_min_height(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -417,10 +568,25 @@ css_error parse_min_height(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse min-width
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_min_width(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -432,8 +598,10 @@ css_error parse_min_width(css_language *c,
 
 	/* length | percentage | IDENT(inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -442,15 +610,21 @@ css_error parse_min_width(css_language *c,
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
 				&length, &unit);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
-		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		/* Negative values are illegal */
-		if (length < 0)
+		if (length < 0) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		value = MIN_WIDTH_SET;
 	}
@@ -463,8 +637,10 @@ css_error parse_min_width(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -478,10 +654,25 @@ css_error parse_min_width(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse width
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_width(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -493,8 +684,10 @@ css_error parse_width(css_language *c,
 
 	/* length | percentage | IDENT(auto, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -507,15 +700,21 @@ css_error parse_width(css_language *c,
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
 				&length, &unit);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
-		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		/* Must be positive */
-		if (length < 0)
+		if (length < 0) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		value = WIDTH_SET;
 	}
@@ -528,8 +727,10 @@ css_error parse_width(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
