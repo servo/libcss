@@ -12,10 +12,25 @@
 #include "parse/properties/properties.h"
 #include "parse/properties/utils.h"
 
+/**
+ * Parse color
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_color(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -26,8 +41,10 @@ css_error parse_color(css_language *c,
 
 	/* colour | IDENT (inherit) */
 	token= parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT && 
 			token->ilower == c->strings[INHERIT]) {
@@ -35,8 +52,10 @@ css_error parse_color(css_language *c,
 		flags |= FLAG_INHERIT;
 	} else {
 		error = parse_colour_specifier(c, vector, ctx, &colour);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
 		value = COLOR_SET;
 	}
@@ -49,8 +68,10 @@ css_error parse_color(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -62,10 +83,25 @@ css_error parse_color(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse direction
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_direction(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *ident;
 	uint8_t flags = 0;
@@ -74,8 +110,10 @@ css_error parse_direction(css_language *c,
 
 	/* IDENT (ltr, rtl, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
-	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -83,15 +121,19 @@ css_error parse_direction(css_language *c,
 		value = DIRECTION_LTR;
 	} else if (ident->ilower == c->strings[RTL]) {
 		value = DIRECTION_RTL;
-	} else
+	} else {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	opv = buildOPV(CSS_PROP_DIRECTION, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -99,10 +141,25 @@ css_error parse_direction(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse letter-spacing
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_letter_spacing(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -114,8 +171,10 @@ css_error parse_letter_spacing(css_language *c,
 
 	/* length | IDENT(normal, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -128,12 +187,16 @@ css_error parse_letter_spacing(css_language *c,
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
 				&length, &unit);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
 		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ ||
-				unit & UNIT_PCT)
+				unit & UNIT_PCT) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		value = LETTER_SPACING_SET;
 	}
@@ -146,8 +209,10 @@ css_error parse_letter_spacing(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -161,10 +226,25 @@ css_error parse_letter_spacing(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse text-align
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_text_align(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *ident;
 	uint8_t flags = 0;
@@ -173,8 +253,10 @@ css_error parse_text_align(css_language *c,
 
 	/* IDENT (left, right, center, justify, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
-	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -186,15 +268,19 @@ css_error parse_text_align(css_language *c,
 		value = TEXT_ALIGN_CENTER;
 	} else if (ident->ilower == c->strings[JUSTIFY]) {
 		value = TEXT_ALIGN_JUSTIFY;
-	} else
+	} else {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	opv = buildOPV(CSS_PROP_TEXT_ALIGN, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -202,10 +288,25 @@ css_error parse_text_align(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse text-decoration
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_text_decoration(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *ident;
 	uint8_t flags = 0;
@@ -215,8 +316,10 @@ css_error parse_text_decoration(css_language *c,
 	/* IDENT([ underline || overline || line-through || blink ])
 	 * | IDENT (none, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
-	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -227,25 +330,35 @@ css_error parse_text_decoration(css_language *c,
 			if (ident->ilower == c->strings[UNDERLINE]) {
 				if ((value & TEXT_DECORATION_UNDERLINE) == 0)
 					value |= TEXT_DECORATION_UNDERLINE;
-				else
+				else {
+					*ctx = orig_ctx;
 					return CSS_INVALID;
+				}
 			} else if (ident->ilower == c->strings[OVERLINE]) {
 				if ((value & TEXT_DECORATION_OVERLINE) == 0)
 					value |= TEXT_DECORATION_OVERLINE;
-				else
+				else {
+					*ctx = orig_ctx;
 					return CSS_INVALID;
+				}
 			} else if (ident->ilower == c->strings[LINE_THROUGH]) {
 				if ((value & TEXT_DECORATION_LINE_THROUGH) == 0)
 					value |= TEXT_DECORATION_LINE_THROUGH;
-				else
+				else {
+					*ctx = orig_ctx;
 					return CSS_INVALID;
+				}
 			} else if (ident->ilower == c->strings[BLINK]) {
 				if ((value & TEXT_DECORATION_BLINK) == 0)
 					value |= TEXT_DECORATION_BLINK;
-				else
+				else {
+					*ctx = orig_ctx;
 					return CSS_INVALID;
-			} else
+				}
+			} else {
+				*ctx = orig_ctx;
 				return CSS_INVALID;
+			}
 
 			consumeWhitespace(vector, ctx);
 
@@ -260,8 +373,10 @@ css_error parse_text_decoration(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -269,10 +384,25 @@ css_error parse_text_decoration(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse text-indent
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_text_indent(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -284,8 +414,10 @@ css_error parse_text_indent(css_language *c,
 
 	/* length | percentage | IDENT(inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -294,11 +426,15 @@ css_error parse_text_indent(css_language *c,
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
 				&length, &unit);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
-		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ)
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		value = TEXT_INDENT_SET;
 	}
@@ -311,8 +447,10 @@ css_error parse_text_indent(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -326,10 +464,25 @@ css_error parse_text_indent(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse text-transform
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_text_transform(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *ident;
 	uint8_t flags = 0;
@@ -338,8 +491,10 @@ css_error parse_text_transform(css_language *c,
 
 	/* IDENT (capitalize, uppercase, lowercase, none, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
-	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -351,15 +506,19 @@ css_error parse_text_transform(css_language *c,
 		value = TEXT_TRANSFORM_LOWERCASE;
 	} else if (ident->ilower == c->strings[NONE]) {
 		value = TEXT_TRANSFORM_NONE;
-	} else
+	} else {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	opv = buildOPV(CSS_PROP_TEXT_TRANSFORM, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -367,10 +526,25 @@ css_error parse_text_transform(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse unicode-bidi
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_unicode_bidi(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *ident;
 	uint8_t flags = 0;
@@ -379,8 +553,10 @@ css_error parse_unicode_bidi(css_language *c,
 
 	/* IDENT (normal, embed, bidi-override, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
-	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -390,15 +566,19 @@ css_error parse_unicode_bidi(css_language *c,
 		value = UNICODE_BIDI_EMBED;
 	} else if (ident->ilower == c->strings[BIDI_OVERRIDE]) {
 		value = UNICODE_BIDI_BIDI_OVERRIDE;
-	} else
+	} else {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	opv = buildOPV(CSS_PROP_UNICODE_BIDI, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -406,10 +586,25 @@ css_error parse_unicode_bidi(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse white-space
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_white_space(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *ident;
 	uint8_t flags = 0;
@@ -418,8 +613,10 @@ css_error parse_white_space(css_language *c,
 
 	/* IDENT (normal, pre, nowrap, pre-wrap, pre-line, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
-	if (ident == NULL || ident->type != CSS_TOKEN_IDENT)
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (ident->ilower == c->strings[INHERIT]) {
 		flags |= FLAG_INHERIT;
@@ -433,15 +630,19 @@ css_error parse_white_space(css_language *c,
 		value = WHITE_SPACE_PRE_WRAP;
 	} else if (ident->ilower == c->strings[PRE_LINE]) {
 		value = WHITE_SPACE_PRE_LINE;
-	} else
+	} else {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	opv = buildOPV(CSS_PROP_WHITE_SPACE, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
@@ -449,10 +650,25 @@ css_error parse_white_space(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Parse word-spacing
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_word_spacing(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -464,8 +680,10 @@ css_error parse_word_spacing(css_language *c,
 
 	/* length | IDENT(normal, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token == NULL)
+	if (token == NULL) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -478,12 +696,16 @@ css_error parse_word_spacing(css_language *c,
 	} else {
 		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
 				&length, &unit);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
 			return error;
+		}
 
 		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ ||
-				unit & UNIT_PCT)
+				unit & UNIT_PCT) {
+			*ctx = orig_ctx;
 			return CSS_INVALID;
+		}
 
 		value = WORD_SPACING_SET;
 	}
@@ -496,8 +718,10 @@ css_error parse_word_spacing(css_language *c,
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
