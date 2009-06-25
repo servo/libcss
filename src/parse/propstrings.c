@@ -88,6 +88,7 @@ const stringmap_entry stringmap[LAST_KNOWN] = {
 	{ "elevation", SLEN("elevation") },
 	{ "empty-cells", SLEN("empty-cells") },
 	{ "float", SLEN("float") },
+	{ "font", SLEN("font") },
 	{ "font-family", SLEN("font-family") },
 	{ "font-size", SLEN("font-size") },
 	{ "font-style", SLEN("font-style") },

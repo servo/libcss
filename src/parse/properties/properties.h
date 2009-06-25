@@ -160,6 +160,9 @@ css_error parse_empty_cells(css_language *c,
 css_error parse_float(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
+css_error parse_font(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		css_style **result);
 css_error parse_font_family(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);

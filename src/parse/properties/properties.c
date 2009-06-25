@@ -58,6 +58,7 @@ const css_prop_handler property_handlers[LAST_PROP + 1 - FIRST_PROP] =
 	parse_elevation,
 	parse_empty_cells,
 	parse_float,
+	parse_font,
 	parse_font_family,
 	parse_font_size,
 	parse_font_style,
