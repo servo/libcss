@@ -1029,6 +1029,7 @@ css_error parseProperty(css_language *c, const css_token *property,
 	int i = 0;
 	uint8_t flags = 0;
 	css_style *style = NULL;
+	const css_token *token;
 
 	/* Find property index */
 	/** \todo improve on this linear search */
@@ -1050,11 +1051,20 @@ css_error parseProperty(css_language *c, const css_token *property,
 
 	assert (style != NULL);
 
-	/* Determine if this is important or not */
+	/* Determine if this declaration is important or not */
 	error = parse_important(c, vector, ctx, &flags);
 	if (error != CSS_OK) {
 		css_stylesheet_style_destroy(c->sheet, style);
 		return error;
+	}
+
+	/* Ensure that we've exhausted all the input */
+	consumeWhitespace(vector, ctx);
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token != NULL) {
+		/* Trailing junk, so discard declaration */
+		css_stylesheet_style_destroy(c->sheet, style);
+		return CSS_INVALID;
 	}
 
 	/* If it's important, then mark the style appropriately */
