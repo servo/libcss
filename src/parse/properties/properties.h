@@ -247,6 +247,9 @@ css_error parse_outline_width(css_language *c,
 css_error parse_overflow(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
+css_error parse_padding(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		css_style **result);
 css_error parse_padding_bottom(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);

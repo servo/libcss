@@ -87,6 +87,7 @@ const css_prop_handler property_handlers[LAST_PROP + 1 - FIRST_PROP] =
 	parse_outline_style,
 	parse_outline_width,
 	parse_overflow,
+	parse_padding,
 	parse_padding_bottom,
 	parse_padding_left,
 	parse_padding_right,
