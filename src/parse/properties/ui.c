@@ -12,10 +12,25 @@
 #include "parse/properties/properties.h"
 #include "parse/properties/utils.h"
 
+/**
+ * Parse cursor
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
 css_error parse_cursor(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
+	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
@@ -34,8 +49,10 @@ css_error parse_cursor(css_language *c,
 	/* Pass 1: validate input and calculate bytecode size */
 	token = parserutils_vector_iterate(vector, &temp_ctx);
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-			token->type != CSS_TOKEN_URI))
+			token->type != CSS_TOKEN_URI)) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -58,16 +75,20 @@ css_error parse_cursor(css_language *c,
 
 			/* Expect ',' */
 			token = parserutils_vector_iterate(vector, &temp_ctx);
-			if (token == NULL || tokenIsChar(token, ',') == false)
+			if (token == NULL || tokenIsChar(token, ',') == false) {
+				*ctx = orig_ctx;
 				return CSS_INVALID;
+			}
 
 			consumeWhitespace(vector, &temp_ctx);
 
 			/* Expect either URI or IDENT */
 			token = parserutils_vector_iterate(vector, &temp_ctx);
 			if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-					token->type != CSS_TOKEN_URI))
+					token->type != CSS_TOKEN_URI)) {
+				*ctx = orig_ctx;
 				return CSS_INVALID;
+			}
 
 			first = false;
 		}
@@ -143,6 +164,7 @@ css_error parse_cursor(css_language *c,
 					value = CURSOR_PROGRESS;
 				}
 			} else {
+				*ctx = orig_ctx;
 				return CSS_INVALID;
 			}
 
@@ -150,20 +172,16 @@ css_error parse_cursor(css_language *c,
 				required_size += sizeof(opv);
 			}
 		}
-
-		consumeWhitespace(vector, &temp_ctx);
-
-		token = parserutils_vector_peek(vector, temp_ctx);
-		if (token != NULL && tokenIsChar(token, '!') == false)
-			return CSS_INVALID;
 	}
 
 	opv = buildOPV(CSS_PROP_CURSOR, flags, value);
 
 	/* Allocate result */
 	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK)
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
 		return error;
+	}
 
 	/* Copy OPV to bytecode */
 	ptr = (*result)->bytecode;
@@ -173,8 +191,10 @@ css_error parse_cursor(css_language *c,
 	/* Pass 2: construct bytecode */
 	token = parserutils_vector_iterate(vector, ctx);
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-			token->type != CSS_TOKEN_URI))
+			token->type != CSS_TOKEN_URI)) {
+		*ctx = orig_ctx;
 		return CSS_INVALID;
+	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
 			token->ilower == c->strings[INHERIT]) {
@@ -200,16 +220,20 @@ css_error parse_cursor(css_language *c,
 
 			/* Expect ',' */
 			token = parserutils_vector_iterate(vector, ctx);
-			if (token == NULL || tokenIsChar(token, ',') == false)
+			if (token == NULL || tokenIsChar(token, ',') == false) {
+				*ctx = orig_ctx;
 				return CSS_INVALID;
+			}
 
 			consumeWhitespace(vector, ctx);
 
 			/* Expect either URI or IDENT */
 			token = parserutils_vector_iterate(vector, ctx);
 			if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-					token->type != CSS_TOKEN_URI))
+					token->type != CSS_TOKEN_URI)) {
+				*ctx = orig_ctx;
 				return CSS_INVALID;
+			}
 
 			first = false;
 		}
@@ -251,6 +275,7 @@ css_error parse_cursor(css_language *c,
 			} else if (token->ilower == c->strings[PROGRESS]) {
 				opv = CURSOR_PROGRESS;
 			} else {
+				*ctx = orig_ctx;
 				return CSS_INVALID;
 			}
 
@@ -259,12 +284,6 @@ css_error parse_cursor(css_language *c,
 				ptr += sizeof(opv);
 			}
 		}
-
-		consumeWhitespace(vector, ctx);
-
-		token = parserutils_vector_peek(vector, *ctx);
-		if (token != NULL && tokenIsChar(token, '!') == false)
-			return CSS_INVALID;
 	}
 
 	return CSS_OK;
