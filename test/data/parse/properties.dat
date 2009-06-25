@@ -103,7 +103,7 @@
 #errors
 #expected
 | 1 *
-|   0x00800000
+|   0x00900000
 #reset
 
 #data
@@ -127,7 +127,7 @@
 #errors
 #expected
 | 1 *
-|   0x009c0400
+|   0x001c0000
 #reset
 
 #data
@@ -135,9 +135,7 @@
 #errors
 #expected
 | 1 *
-|   0x001c0400
 #reset
-
 
 #data
 * { azimuth: leftwards; }
