@@ -68,6 +68,7 @@ const css_prop_handler property_handlers[LAST_PROP + 1 - FIRST_PROP] =
 	parse_left,
 	parse_letter_spacing,
 	parse_line_height,
+	parse_list_style,
 	parse_list_style_image,
 	parse_list_style_position,
 	parse_list_style_type,

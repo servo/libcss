@@ -98,6 +98,7 @@ const stringmap_entry stringmap[LAST_KNOWN] = {
 	{ "left", SLEN("left") },
 	{ "letter-spacing", SLEN("letter-spacing") },
 	{ "line-height", SLEN("line-height") },
+	{ "list-style", SLEN("list-style") },
 	{ "list-style-image", SLEN("list-style-image") },
 	{ "list-style-position", SLEN("list-style-position") },
 	{ "list-style-type", SLEN("list-style-type") },

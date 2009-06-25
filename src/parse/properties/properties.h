@@ -190,6 +190,9 @@ css_error parse_letter_spacing(css_language *c,
 css_error parse_line_height(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
+css_error parse_list_style(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		css_style **result);
 css_error parse_list_style_image(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
