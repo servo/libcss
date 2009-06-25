@@ -126,15 +126,15 @@ Opcodes
 		bits 6 & 7 clear => keyword position:
 			bit 5   : set => behind, clear => in front
 			bits 0-4:
-				0000  => left-side
-				0001  => far-left
-				0010  => left
-				0011  => center-left
-				0100  => center
-				0101  => center-right
-				0110  => right
-				0111  => far-right
-				1000  => right-side
+				00000  => left-side
+				00001  => far-left
+				00010  => left
+				00011  => center-left
+				00100  => center
+				00101  => center-right
+				00110  => right
+				00111  => far-right
+				01000  => right-side
 				other => Reserved for future expansion.
 
 01 - background-attachment
