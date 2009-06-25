@@ -22,6 +22,22 @@
 #reset
 
 #data
+* { color: inherit ! important }
+#errors
+#expected
+| 1 *
+|   0x00000c18
+#reset
+
+#data
+* { color: inherit !important }
+#errors
+#expected
+| 1 *
+|   0x00000c18
+#reset
+
+#data
 * { background-image: url("foo.png"); color: inherit }
 #errors
 #expected

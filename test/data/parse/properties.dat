@@ -35,6 +35,30 @@
 #reset
 
 #data
+* { azimuth: center-left; !important }
+#errors
+#expected
+| 1 *
+|   0x000c0000
+#reset
+
+#data
+* { azimuth: center-left !important; }
+#errors
+#expected
+| 1 *
+|   0x000c0400
+#reset
+
+#data
+* { azimuth: center-left ! important; }
+#errors
+#expected
+| 1 *
+|   0x000c0400
+#reset
+
+#data
 * { azimuth: center; }
 #errors
 #expected
@@ -73,6 +97,47 @@
 | 1 *
 |   0x00200000
 #reset
+
+#data
+* { azimuth: behind; }
+#errors
+#expected
+| 1 *
+|   0x00800000
+#reset
+
+#data
+* { azimuth: behind far-right; }
+#errors
+#expected
+| 1 *
+|   0x009c0000
+#reset
+
+#data
+* { azimuth: far-right behind; }
+#errors
+#expected
+| 1 *
+|   0x009c0000
+#reset
+
+#data
+* { azimuth: far-right; }
+#errors
+#expected
+| 1 *
+|   0x009c0400
+#reset
+
+#data
+* { azimuth: far-right !important behind; }
+#errors
+#expected
+| 1 *
+|   0x001c0400
+#reset
+
 
 #data
 * { azimuth: leftwards; }
