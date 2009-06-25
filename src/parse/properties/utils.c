@@ -541,3 +541,319 @@ css_error parse_unit_keyword(const char *ptr, size_t len, css_unit *unit)
 	return CSS_OK;
 }
 
+/**
+ * Parse a comma separated list, calculating the storage space required
+ *
+ * \param c         Parsing context
+ * \param vector    Vector of tokens to process
+ * \param ctx       Pointer to vector iteration context
+ * \param token     Pointer to current token
+ * \param reserved  Callback to determine if an identifier is reserved
+ * \param size      Pointer to location to receive required storage
+ * \return CSS_OK      on success,
+ *         CSS_INVALID if the input is invalid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error comma_list_length(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		const css_token *token, 
+		bool (*reserved)(css_language *c, const css_token *ident),
+		uint32_t *size)
+{
+	int orig_ctx = *ctx;
+	uint32_t opv;
+	uint32_t required_size = 0;
+	bool first = true;
+
+	while (token != NULL) {
+		if (token->type == CSS_TOKEN_IDENT) {
+			/* IDENT+ */
+			required_size += first ? 0 : sizeof(opv);
+
+			if (reserved(c, token) == false) {
+				required_size += sizeof(lwc_string *);
+
+				/* Skip past [ IDENT* S* ]* */
+				while (token != NULL) {
+					token = parserutils_vector_peek(
+							vector, *ctx);
+					if (token != NULL && 
+						token->type != 
+							CSS_TOKEN_IDENT &&
+							token->type != 
+							CSS_TOKEN_S) {
+						break;
+					}
+
+					/* Idents must not be reserved */
+					if (token != NULL && token->type == 
+							CSS_TOKEN_IDENT && 
+							reserved(c, token)) {
+						*ctx = orig_ctx;
+						return CSS_INVALID;
+					}
+
+					token = parserutils_vector_iterate(
+						vector, ctx);
+				}
+			}
+		} else if (token->type == CSS_TOKEN_STRING) {
+			/* STRING */
+			required_size += first ? 0 : sizeof(opv);
+
+			required_size += sizeof(lwc_string *);
+		} else {
+			/* Invalid token */
+			*ctx = orig_ctx;
+			return CSS_INVALID;
+		}
+
+		consumeWhitespace(vector, ctx);
+
+		/* Look for a comma */
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && tokenIsChar(token, ',')) {
+			/* Got one. Move past it */
+			parserutils_vector_iterate(vector, ctx);
+
+			consumeWhitespace(vector, ctx);
+
+			/* Ensure that a valid token follows */
+			token = parserutils_vector_peek(vector, *ctx);
+			if (token == NULL || (token->type != CSS_TOKEN_IDENT && 
+					token->type != CSS_TOKEN_STRING)) {
+				*ctx = orig_ctx;
+				return CSS_INVALID;
+			}
+		} else {
+			/* No comma, so we're done */
+			break;
+		}
+
+		/* Flag that this is no longer the first pass */
+		first = false;
+
+		/* Iterate for next chunk */
+		token = parserutils_vector_iterate(vector, ctx);
+	}
+
+	required_size += sizeof(opv);
+
+	*size = required_size;
+
+	return CSS_OK;
+}
+
+/**
+ * Parse a comma separated list, converting to bytecode
+ *
+ * \param c          Parsing context
+ * \param vector     Vector of tokens to process
+ * \param ctx        Pointer to vector iteration context
+ * \param token      Pointer to current token
+ * \param reserved   Callback to determine if an identifier is reserved
+ * \param get_value  Callback to retrieve bytecode value for a token
+ * \param bytecode   Pointer to pointer to bytecode buffer. Updated on exit.
+ * \return CSS_OK      on success,
+ *         CSS_INVALID if the input is invalid
+ *
+ * \note The bytecode buffer must be at least comma_list_length() bytes long.
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error comma_list_to_bytecode(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		const css_token *token, 
+		bool (*reserved)(css_language *c, const css_token *ident),
+		uint16_t (*get_value)(css_language *c, const css_token *token),
+		uint8_t **bytecode)
+{
+	int orig_ctx = *ctx;
+	uint8_t *ptr = *bytecode;
+	bool first = true;
+	uint32_t opv;
+	uint8_t *buf = NULL;
+	uint32_t buflen = 0;
+	css_error error = CSS_OK;
+
+	while (token != NULL) {
+		if (token->type == CSS_TOKEN_IDENT) {
+			lwc_string *tok_idata = token->idata;
+			lwc_string *name = tok_idata;
+			lwc_string *newname;
+
+			opv = get_value(c, token);
+
+			if (first == false) {
+				memcpy(ptr, &opv, sizeof(opv));
+				ptr += sizeof(opv);
+			}
+
+			if (reserved(c, token) == false) {
+				uint32_t len = lwc_string_length(token->idata);
+				const css_token *temp_token = token;
+				int temp_ctx = *ctx;
+				lwc_error lerror;
+				uint8_t *p;
+
+				/* Calculate required length of temp buffer */
+				while (temp_token != NULL) {
+					temp_token = parserutils_vector_peek(
+							vector, temp_ctx);
+					if (temp_token != NULL && 
+						temp_token->type != 
+						CSS_TOKEN_IDENT &&
+							temp_token->type != 
+							CSS_TOKEN_S) {
+						break;
+					}
+
+					if (temp_token != NULL && 
+						temp_token->type == 
+							CSS_TOKEN_IDENT) {
+						len += lwc_string_length(
+							temp_token->idata);
+					} else if (temp_token != NULL) {
+						len += 1;
+					}
+
+					temp_token = parserutils_vector_iterate(
+							vector, &temp_ctx);
+				}
+
+				if (len > buflen) {
+					/* Allocate buffer */
+					uint8_t *b = c->alloc(buf, len, c->pw);
+					if (b == NULL) {
+						error = CSS_NOMEM;
+						goto cleanup;
+					}
+
+					buf = b;
+					buflen = len;
+				}
+
+				p = buf;
+
+				/* Populate buffer with string data */
+				memcpy(p, lwc_string_data(token->idata), 
+					lwc_string_length(token->idata));
+				p += lwc_string_length(token->idata);
+
+				while (token != NULL) {
+					token = parserutils_vector_peek(
+							vector, *ctx);
+					if (token != NULL && token->type != 
+							CSS_TOKEN_IDENT &&
+							token->type !=
+							CSS_TOKEN_S) {
+						break;
+					}
+
+					if (token != NULL && token->type == 
+							CSS_TOKEN_IDENT) {
+						memcpy(p, lwc_string_data(
+								token->idata),
+							lwc_string_length(
+								token->idata));
+						p += lwc_string_length(
+								token->idata);
+					} else if (token != NULL) {
+						*p++ = ' ';
+					}
+
+					token = parserutils_vector_iterate(
+							vector, ctx);
+				}
+
+				/* Strip trailing whitespace */
+				while (p > buf && p[-1] == ' ')
+					p--;
+
+				/* Insert into hash, if it's different
+				 * from the name we already have */
+				lerror = lwc_context_intern(
+						c->sheet->dictionary,
+						(char *) buf, len, &newname);
+				if (lerror != lwc_error_ok) {
+					error = css_error_from_lwc_error(
+							lerror);
+					goto cleanup;
+				}
+					
+				if (newname == name) {
+					lwc_context_string_unref(
+							c->sheet->dictionary,
+							newname);
+				}
+				
+				name = newname;
+
+				/* Only ref 'name' again if the token owns it,
+				 * otherwise we already own the only ref to the
+				 * new name generated above.
+				 */
+				if (name == tok_idata) {
+					lwc_context_string_ref(
+						c->sheet->dictionary, name);
+				}
+
+				memcpy(ptr, &name, sizeof(name));
+				ptr += sizeof(name);
+			}
+		} else if (token->type == CSS_TOKEN_STRING) {
+			opv = get_value(c, token);
+
+			if (first == false) {
+				memcpy(ptr, &opv, sizeof(opv));
+				ptr += sizeof(opv);
+			}
+			
+			lwc_context_string_ref(c->sheet->dictionary, 
+					token->idata);
+
+			memcpy(ptr, &token->idata, sizeof(token->idata));
+			ptr += sizeof(token->idata);
+		} else {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
+
+		consumeWhitespace(vector, ctx);
+
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && tokenIsChar(token, ',')) {
+			parserutils_vector_iterate(vector, ctx);
+
+			consumeWhitespace(vector, ctx);
+
+			token = parserutils_vector_peek(vector, *ctx);
+			if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+					token->type != CSS_TOKEN_STRING)) {
+				error = CSS_INVALID;
+				goto cleanup;
+			}
+		} else {
+			break;
+		}
+
+		first = false;
+
+		token = parserutils_vector_iterate(vector, ctx);
+	}
+
+	*bytecode = ptr;
+
+cleanup:
+	if (buf)
+		c->alloc(buf, 0, c->pw);
+
+	if (error != CSS_OK)
+		*ctx = orig_ctx;
+
+	return error;
+}
+

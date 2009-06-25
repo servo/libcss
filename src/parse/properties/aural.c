@@ -1,7 +1,7 @@
 /*
  * This file is part of LibCSS.
  * Licensed under the MIT License,
- *                http://www.opensource.org/licenses/mit-license.php
+ *		http://www.opensource.org/licenses/mit-license.php
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
@@ -20,11 +20,11 @@
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_azimuth(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -41,9 +41,9 @@ css_error parse_azimuth(css_language *c,
 	uint32_t required_size;
 
 	/* angle | [ IDENT(left-side, far-left, left, center-left, center, 
-	 *                 center-right, right, far-right, right-side) || 
-	 *           IDENT(behind) 
-	 *         ] 
+	 *		   center-right, right, far-right, right-side) || 
+	 *	   IDENT(behind) 
+	 *	 ] 
 	 *       | IDENT(leftwards, rightwards, inherit)
 	 */
 	token = parserutils_vector_peek(vector, *ctx);
@@ -207,11 +207,11 @@ css_error parse_azimuth(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_cue_after(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -262,7 +262,7 @@ css_error parse_cue_after(css_language *c,
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && value == CUE_AFTER_URI) {
-                lwc_context_string_ref(c->sheet->dictionary, token->idata);
+		lwc_context_string_ref(c->sheet->dictionary, token->idata);
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&token->idata, 
 				sizeof(lwc_string *));
@@ -279,11 +279,11 @@ css_error parse_cue_after(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_cue_before(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -334,7 +334,7 @@ css_error parse_cue_before(css_language *c,
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && value == CUE_BEFORE_URI) {
-                lwc_context_string_ref(c->sheet->dictionary, token->idata);
+		lwc_context_string_ref(c->sheet->dictionary, token->idata);
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&token->idata, 
 				sizeof(lwc_string *));
@@ -351,11 +351,11 @@ css_error parse_cue_before(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_elevation(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -469,11 +469,11 @@ css_error parse_elevation(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_pause_after(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -555,11 +555,11 @@ css_error parse_pause_after(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_pause_before(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -641,11 +641,11 @@ css_error parse_pause_before(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_pitch_range(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -722,11 +722,11 @@ css_error parse_pitch_range(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_pitch(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -828,11 +828,11 @@ css_error parse_pitch(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_play_during(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -921,7 +921,7 @@ css_error parse_play_during(css_language *c,
 	if ((flags & FLAG_INHERIT) == false && 
 			(value & PLAY_DURING_TYPE_MASK)  == PLAY_DURING_URI) {
 		lwc_context_string_ref(c->sheet->dictionary, uri);
-                memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
+		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&uri, sizeof(lwc_string *));
 	}
 
@@ -936,11 +936,11 @@ css_error parse_play_during(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_richness(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1017,11 +1017,11 @@ css_error parse_richness(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_speak_header(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1075,11 +1075,11 @@ css_error parse_speak_header(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_speak_numeral(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1133,11 +1133,11 @@ css_error parse_speak_numeral(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_speak_punctuation(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1191,11 +1191,11 @@ css_error parse_speak_punctuation(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_speak(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1251,11 +1251,11 @@ css_error parse_speak(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_speech_rate(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1271,7 +1271,7 @@ css_error parse_speech_rate(css_language *c,
 	uint32_t required_size;
 
 	/* number | IDENT (x-slow, slow, medium, fast, x-fast, faster, slower, 
-	 *                 inherit)
+	 *		 inherit)
 	 */
 	token = parserutils_vector_iterate(vector, ctx);
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
@@ -1356,11 +1356,11 @@ css_error parse_speech_rate(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_stress(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1429,6 +1429,47 @@ css_error parse_stress(css_language *c,
 }
 
 /**
+ * Determine if a given voice-family ident is reserved
+ *
+ * \param c      Parsing context
+ * \param ident  IDENT to consider
+ * \return True if IDENT is reserved, false otherwise
+ */
+static bool voice_family_reserved(css_language *c, const css_token *ident)
+{
+	return ident->ilower == c->strings[MALE] ||
+		ident->ilower == c->strings[FEMALE] ||
+		ident->ilower == c->strings[CHILD];
+}
+
+/**
+ * Convert a voice-family token into a bytecode value
+ *
+ * \param c      Parsing context
+ * \param token  Token to consider
+ * \return Bytecode value
+ */
+static uint16_t voice_family_value(css_language *c, const css_token *token)
+{
+	uint16_t value;
+
+	if (token->type == CSS_TOKEN_IDENT) {
+		if (token->ilower == c->strings[MALE])
+			value = VOICE_FAMILY_MALE;
+		else if (token->ilower == c->strings[FEMALE])
+			value = VOICE_FAMILY_FEMALE;
+		else if (token->ilower == c->strings[CHILD])
+			value = VOICE_FAMILY_CHILD;
+		else
+			value = VOICE_FAMILY_IDENT_LIST;
+	} else {
+		value = VOICE_FAMILY_STRING;
+	}
+
+	return value;
+}
+
+/**
  * Parse voice-family
  *
  * \param c       Parsing context
@@ -1436,11 +1477,11 @@ css_error parse_stress(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	 CSS_NOMEM on memory exhaustion,
+ *	 CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		 If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_voice_family(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1474,111 +1515,18 @@ css_error parse_voice_family(css_language *c,
 			token->ilower == c->strings[INHERIT]) {
 		flags = FLAG_INHERIT;
 	} else {
-		bool first = true;
+		uint32_t list_size;
 
-		while (token != NULL) {
-			if (token->type == CSS_TOKEN_IDENT) {
-				/* IDENT+ */
-				if (first == false) {
-					required_size += sizeof(opv);
-				}
+		value = voice_family_value(c, token);
 
-				if (token->ilower == c->strings[MALE]) {
-					if (first) {
-						value = VOICE_FAMILY_MALE;
-					}
-				} else if (token->ilower == 
-						c->strings[FEMALE]) {
-					if (first) {
-						value = VOICE_FAMILY_FEMALE;
-					}
-				} else if (token->ilower == c->strings[CHILD]) {
-					if (first) {
-						value = VOICE_FAMILY_CHILD;
-					}
-				} else {
-					if (first) {
-						value = VOICE_FAMILY_IDENT_LIST;
-					}
-
-					required_size +=
-						sizeof(lwc_string *);
-
-					/* Skip past [ IDENT* S* ]* */
-					while (token != NULL) {
-						token = parserutils_vector_peek(
-								vector, 
-								temp_ctx);
-						if (token != NULL && 
-							token->type != 
-							CSS_TOKEN_IDENT &&
-								token->type != 
-								CSS_TOKEN_S) {
-							break;
-						}
-
-						/* idents must not match 
-						 * generic families */
-						if (token != NULL && token->type == CSS_TOKEN_IDENT && 
-								(token->ilower == c->strings[MALE] || 
-								token->ilower == c->strings[FEMALE] || 
-								token->ilower == c->strings[CHILD])) {
-							*ctx = orig_ctx;
-							return CSS_INVALID;
-						}
-						token = parserutils_vector_iterate(
-							vector, &temp_ctx);
-					}
-				}
-			} else if (token->type == CSS_TOKEN_STRING) {
-				/* STRING */
-				if (first == false) {
-					required_size += sizeof(opv);
-				} else {
-					value = VOICE_FAMILY_STRING;
-				}
-
-				required_size += 
-					sizeof(lwc_string *);
-			} else {
-				/* Invalid token */
-				*ctx = orig_ctx;
-				return CSS_INVALID;
-			}
-
-			consumeWhitespace(vector, &temp_ctx);
-
-			/* Look for a comma */
-			token = parserutils_vector_peek(vector, temp_ctx);
-			if (token != NULL && tokenIsChar(token, ',')) {
-				/* Got one. Move past it */
-				parserutils_vector_iterate(vector, &temp_ctx);
-
-				consumeWhitespace(vector, &temp_ctx);
-
-				/* Ensure that a valid token follows */
-				token = parserutils_vector_peek(vector, 
-						temp_ctx);
-				if (token == NULL || 
-					(token->type != CSS_TOKEN_IDENT && 
-						token->type != 
-						CSS_TOKEN_STRING)) {
-					*ctx = orig_ctx;
-					return CSS_INVALID;
-				}
-			} else {
-				/* No comma, so we're done */
-				break;
-			}
-
-			/* Flag that this is no longer the first pass */
-			first = false;
-
-			/* Iterate for next chunk */
-			token = parserutils_vector_iterate(vector, &temp_ctx);
+		error = comma_list_length(c, vector, &temp_ctx, 
+				token, voice_family_reserved, &list_size);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
 		}
 
-		required_size += sizeof(opv);
+		required_size += list_size;
 	}
 
 	opv = buildOPV(CSS_PROP_VOICE_FAMILY, flags, value);
@@ -1609,169 +1557,14 @@ css_error parse_voice_family(css_language *c,
 			token->ilower == c->strings[INHERIT]) {
 		/* Nothing to do */
 	} else {
-		bool first = true;
-
-		while (token != NULL) {
-			if (token->type == CSS_TOKEN_IDENT) {
-                                lwc_string *tok_idata = token->idata;
-				lwc_string *name = tok_idata;
-                                lwc_string *newname;
-			
-				if (token->ilower == c->strings[MALE]) {
-					opv = VOICE_FAMILY_MALE;
-				} else if (token->ilower == 
-						c->strings[FEMALE]) {
-					opv = VOICE_FAMILY_FEMALE;
-				} else if (token->ilower == c->strings[CHILD]) {
-					opv = VOICE_FAMILY_CHILD;
-				} else {
-					uint16_t len = lwc_string_length(token->idata);
-					const css_token *temp_token = token;
-                                        lwc_error lerror;
-					uint8_t *buf;
-					uint8_t *p;
-
-					temp_ctx = *ctx;
-
-					opv = VOICE_FAMILY_IDENT_LIST;
-
-					/* Build string from idents */
-					while (temp_token != NULL) {
-						temp_token = parserutils_vector_peek(
-								vector, temp_ctx);
-						if (temp_token != NULL && 
-							temp_token->type != 
-							CSS_TOKEN_IDENT &&
-								temp_token->type != 
-								CSS_TOKEN_S) {
-							break;
-						}
-
-						if (temp_token != NULL && temp_token->type == CSS_TOKEN_IDENT) {
-							len += lwc_string_length(temp_token->idata);
-						} else if (temp_token != NULL) {
-							len += 1;
-						}
-
-						temp_token = parserutils_vector_iterate(
-								vector, &temp_ctx);
-					}
-
-					/** \todo Don't use alloca */
-					buf = alloca(len);
-					p = buf;
-
-					memcpy(p, lwc_string_data(token->idata), lwc_string_length(token->idata));
-					p += lwc_string_length(token->idata);
-
-					while (token != NULL) {
-						token = parserutils_vector_peek(
-								vector, *ctx);
-						if (token != NULL &&
-							token->type != 
-							CSS_TOKEN_IDENT &&
-								token->type !=
-								CSS_TOKEN_S) {
-							break;
-						}
-
-						if (token != NULL && 
-							token->type == 
-								CSS_TOKEN_IDENT) {
-							memcpy(p,
-								lwc_string_data(token->idata),
-								lwc_string_length(token->idata));
-							p += lwc_string_length(token->idata);
-						} else if (token != NULL) {
-							*p++ = ' ';
-						}
-
-						token = parserutils_vector_iterate(
-							vector, ctx);
-					}
-
-					/* Strip trailing whitespace */
-					while (p > buf && p[-1] == ' ')
-						p--;
-
-					/* Insert into hash, if it's different
-					 * from the name we already have */
-                                        lerror = lwc_context_intern(c->sheet->dictionary,
-                                                                    (char *)buf, len, &newname);
-                                        if (lerror != lwc_error_ok) {
-                                                css_stylesheet_style_destroy(c->sheet, *result);
-                                                *result = NULL;
-						*ctx = orig_ctx;
-                                                return css_error_from_lwc_error(lerror);
-                                        }
-                                        
-                                        if (newname == name)
-                                                lwc_context_string_unref(c->sheet->dictionary,
-                                                                         newname);
-                                        
-                                        name = newname;
-                                }
-
-				if (first == false) {
-					memcpy(ptr, &opv, sizeof(opv));
-					ptr += sizeof(opv);
-				}
-
-				if (opv == VOICE_FAMILY_IDENT_LIST) {
-                                        /* Only ref 'name' again if the token owns it,
-                                         * otherwise we already own the only ref to the
-                                         * new name generated above.
-                                         */
-                                        if (name == tok_idata)
-                                                lwc_context_string_ref(c->sheet->dictionary, name);
-					memcpy(ptr, &name, sizeof(name));
-					ptr += sizeof(name);
-				}
-			} else if (token->type == CSS_TOKEN_STRING) {
-				opv = VOICE_FAMILY_STRING;
-
-				if (first == false) {
-					memcpy(ptr, &opv, sizeof(opv));
-					ptr += sizeof(opv);
-				}
-                                
-                                lwc_context_string_ref(c->sheet->dictionary, token->idata);
-				memcpy(ptr, &token->idata, 
-						sizeof(token->idata));
-				ptr += sizeof(token->idata);
-			} else {
-				css_stylesheet_style_destroy(c->sheet, *result);
-				*result = NULL;
-				*ctx = orig_ctx;
-				return CSS_INVALID;
-			}
-
-			consumeWhitespace(vector, ctx);
-
-			token = parserutils_vector_peek(vector, *ctx);
-			if (token != NULL && tokenIsChar(token, ',')) {
-				parserutils_vector_iterate(vector, ctx);
-
-				consumeWhitespace(vector, ctx);
-
-				token = parserutils_vector_peek(vector, *ctx);
-				if (token == NULL || 
-					(token->type != CSS_TOKEN_IDENT &&
-						token->type !=
-						CSS_TOKEN_STRING)) {
-					css_stylesheet_style_destroy(c->sheet,
-							*result);
-					*result = NULL;
-					*ctx = orig_ctx;
-					return CSS_INVALID;
-				}
-			} else {
-				break;
-			}
-
-			first = false;
-
-			token = parserutils_vector_iterate(vector, ctx);
+		error = comma_list_to_bytecode(c, vector, ctx, token, 
+				voice_family_reserved, voice_family_value,
+				&ptr);
+		if (error != CSS_OK) {
+			css_stylesheet_style_destroy(c->sheet, *result);
+			*result = NULL;
+			*ctx = orig_ctx;
+			return error;
 		}
 
 		/* Write terminator */
@@ -1791,11 +1584,11 @@ css_error parse_voice_family(css_language *c,
  * \param ctx     Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	 CSS_NOMEM on memory exhaustion,
+ *	 CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		 If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_volume(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1812,7 +1605,7 @@ css_error parse_volume(css_language *c,
 	uint32_t required_size;
 
 	/* number | percentage | IDENT(silent, x-soft, soft, medium, loud, 
-	 *                             x-loud, inherit)
+	 *			       x-loud, inherit)
 	 */
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token == NULL) {
