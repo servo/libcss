@@ -12,6 +12,10 @@
 #include "parse/properties/properties.h"
 #include "parse/properties/utils.h"
 
+static css_error parse_cue_common(css_language *c, 
+		const parserutils_vector *vector, int *ctx, 
+		uint16_t op, css_style **result);
+
 /**
  * Parse azimuth
  *
@@ -217,58 +221,7 @@ css_error parse_cue_after(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	int orig_ctx = *ctx;
-	css_error error;
-	const css_token *token;
-	uint8_t flags = 0;
-	uint16_t value = 0;
-	uint32_t opv;
-	uint32_t required_size;
-
-	/* URI | IDENT (none, inherit) */
-	token = parserutils_vector_iterate(vector, ctx);
-	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-			token->type != CSS_TOKEN_URI)) {
-		*ctx = orig_ctx;
-		return CSS_INVALID;
-	}
-
-	if (token->type == CSS_TOKEN_IDENT && 
-			token->ilower == c->strings[INHERIT]) {
-		flags |= FLAG_INHERIT;
-	} else if (token->type == CSS_TOKEN_IDENT && 
-			token->ilower == c->strings[NONE]) {
-		value = CUE_AFTER_NONE;
-	} else if (token->type == CSS_TOKEN_URI) {
-		value = CUE_AFTER_URI;
-	} else {
-		*ctx = orig_ctx;
-		return CSS_INVALID;
-	}
-
-	opv = buildOPV(CSS_PROP_CUE_AFTER, flags, value);
-
-	required_size = sizeof(opv);
-	if ((flags & FLAG_INHERIT) == false && value == CUE_AFTER_URI)
-		required_size += sizeof(lwc_string *);
-
-	/* Allocate result */
-	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK) {
-		*ctx = orig_ctx;
-		return error;
-	}
-
-	/* Copy the bytecode to it */
-	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if ((flags & FLAG_INHERIT) == false && value == CUE_AFTER_URI) {
-		lwc_context_string_ref(c->sheet->dictionary, token->idata);
-		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
-				&token->idata, 
-				sizeof(lwc_string *));
-	}
-
-	return CSS_OK;
+	return parse_cue_common(c, vector, ctx, CSS_PROP_CUE_AFTER, result);
 }
 
 /**
@@ -289,58 +242,7 @@ css_error parse_cue_before(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	int orig_ctx = *ctx;
-	css_error error;
-	const css_token *token;
-	uint8_t flags = 0;
-	uint16_t value = 0;
-	uint32_t opv;
-	uint32_t required_size;
-
-	/* URI | IDENT (none, inherit) */
-	token = parserutils_vector_iterate(vector, ctx);
-	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-			token->type != CSS_TOKEN_URI)) {
-		*ctx = orig_ctx;
-		return CSS_INVALID;
-	}
-
-	if (token->type == CSS_TOKEN_IDENT && 
-			token->ilower == c->strings[INHERIT]) {
-		flags |= FLAG_INHERIT;
-	} else if (token->type == CSS_TOKEN_IDENT && 
-			token->ilower == c->strings[NONE]) {
-		value = CUE_BEFORE_NONE;
-	} else if (token->type == CSS_TOKEN_URI) {
-		value = CUE_BEFORE_URI;
-	} else {
-		*ctx = orig_ctx;
-		return CSS_INVALID;
-	}
-
-	opv = buildOPV(CSS_PROP_CUE_BEFORE, flags, value);
-
-	required_size = sizeof(opv);
-	if ((flags & FLAG_INHERIT) == false && value == CUE_BEFORE_URI)
-		required_size += sizeof(lwc_string *);
-
-	/* Allocate result */
-	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK) {
-		*ctx = orig_ctx;
-		return error;
-	}
-
-	/* Copy the bytecode to it */
-	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if ((flags & FLAG_INHERIT) == false && value == CUE_BEFORE_URI) {
-		lwc_context_string_ref(c->sheet->dictionary, token->idata);
-		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
-				&token->idata, 
-				sizeof(lwc_string *));
-	}
-
-	return CSS_OK;
+	return parse_cue_common(c, vector, ctx, CSS_PROP_CUE_BEFORE, result);
 }
 
 /**
@@ -1705,6 +1607,78 @@ css_error parse_volume(css_language *c,
 	if ((flags & FLAG_INHERIT) == false && value == VOLUME_DIMENSION)
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
 				sizeof(length), &unit, sizeof(unit));
+
+	return CSS_OK;
+}
+
+/**
+ * Common parser for cue-after and cue-before
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *		   If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error parse_cue_common(css_language *c, 
+		const parserutils_vector *vector, int *ctx, 
+		uint16_t op, css_style **result)
+{
+	int orig_ctx = *ctx;
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	uint32_t required_size;
+
+	/* URI | IDENT (none, inherit) */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			token->type != CSS_TOKEN_URI)) {
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	if (token->type == CSS_TOKEN_IDENT && 
+			token->ilower == c->strings[INHERIT]) {
+		flags |= FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT && 
+			token->ilower == c->strings[NONE]) {
+		value = CUE_AFTER_NONE;
+	} else if (token->type == CSS_TOKEN_URI) {
+		value = CUE_AFTER_URI;
+	} else {
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	opv = buildOPV(op, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == CUE_AFTER_URI)
+		required_size += sizeof(lwc_string *);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
+		return error;
+	}
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == CUE_AFTER_URI) {
+		lwc_context_string_ref(c->sheet->dictionary, token->idata);
+		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
+				&token->idata, 
+				sizeof(lwc_string *));
+	}
 
 	return CSS_OK;
 }
