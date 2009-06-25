@@ -265,7 +265,6 @@ cleanup:
 	return error;
 }
 
-
 /**
  * Determine if a given font-family ident is reserved
  *
