@@ -5,6 +5,7 @@
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
+#include <assert.h>
 #include <string.h>
 
 #include "bytecode/bytecode.h"
@@ -13,6 +14,9 @@
 #include "parse/properties/utils.h"
 
 static css_error parse_cue_common(css_language *c, 
+		const parserutils_vector *vector, int *ctx, 
+		uint16_t op, css_style **result);
+static css_error parse_pause_common(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		uint16_t op, css_style **result);
 
@@ -204,6 +208,148 @@ css_error parse_azimuth(css_language *c,
 }
 
 /**
+ * Parse cue shorthand
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *		   If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error parse_cue(css_language *c, 
+		const parserutils_vector *vector, int *ctx, 
+		css_style **result)
+{
+	int orig_ctx = *ctx;
+	const css_token *token;
+	css_style *before = NULL;
+	css_style *after = NULL;
+	css_style *ret = NULL;
+	int num_read = 0;
+	int prev_ctx;
+	uint32_t required_size;
+	css_error error;
+
+	/* Deal with inherit */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+			token->ilower == c->strings[INHERIT]) {
+		uint32_t *bytecode;
+
+		error = css_stylesheet_style_create(c->sheet,
+				2 * sizeof(uint32_t), &ret);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
+
+		bytecode = (uint32_t *) ret->bytecode;
+
+		*(bytecode++) = buildOPV(CSS_PROP_CUE_BEFORE, FLAG_INHERIT, 0);
+		*(bytecode++) = buildOPV(CSS_PROP_CUE_AFTER, FLAG_INHERIT, 0);
+
+		parserutils_vector_iterate(vector, ctx);
+
+		*result = ret;
+
+		return CSS_OK;
+	} else if (token == NULL) {
+		/* No tokens -- clearly garbage */
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	/* Attempt to read 1 or 2 cues */
+	do {
+		prev_ctx = *ctx;
+		error = CSS_OK;
+
+		if (before == NULL && (error = parse_cue_before(c, vector, ctx, 
+				&before)) == CSS_OK) {
+			num_read = 1;
+		} else if (after == NULL &&
+				(error = parse_cue_after(c, vector, ctx, 
+				&after)) == CSS_OK) {
+			num_read = 2;
+		}
+
+		if (error == CSS_OK) {
+			consumeWhitespace(vector, ctx);
+
+			token = parserutils_vector_peek(vector, *ctx);
+		} else {
+			token = NULL;
+		}
+	} while (*ctx != prev_ctx && token != NULL);
+
+	if (num_read == 0) {
+		error = CSS_INVALID;
+		goto cleanup;
+	}
+
+	/* Calculate size of resultant style */
+	if (num_read == 1)
+		required_size = 2 * before->length;
+	else
+		required_size = before->length + after->length;
+
+	error = css_stylesheet_style_create(c->sheet, required_size, &ret);
+	if (error != CSS_OK)
+		goto cleanup;
+
+	required_size = 0;
+
+	if (num_read == 1) {
+		uint32_t *opv = ((uint32_t *) before->bytecode);
+		uint8_t flags = getFlags(*opv);
+		uint16_t value = getValue(*opv);
+
+		memcpy(((uint8_t *) ret->bytecode) + required_size,
+				before->bytecode, before->length);
+		required_size += before->length;
+
+		*opv = buildOPV(CSS_PROP_CUE_AFTER, flags, value);
+		memcpy(((uint8_t *) ret->bytecode) + required_size,
+				before->bytecode, before->length);
+		required_size += before->length;
+	} else {
+		memcpy(((uint8_t *) ret->bytecode) + required_size,
+				before->bytecode, before->length);
+		required_size += before->length;
+
+		memcpy(((uint8_t *) ret->bytecode) + required_size,
+				after->bytecode, after->length);
+		required_size += after->length;
+	}
+
+	assert(required_size == ret->length);
+
+	/* Write the result */
+	*result = ret;
+	/* Invalidate ret so that cleanup doesn't destroy it */
+	ret = NULL;
+
+	/* Clean up after ourselves */
+cleanup:
+	if (before)
+		css_stylesheet_style_destroy(c->sheet, before);
+	if (after)
+		css_stylesheet_style_destroy(c->sheet, after);
+	if (ret)
+		css_stylesheet_style_destroy(c->sheet, ret);
+
+	if (error != CSS_OK)
+		*ctx = orig_ctx;
+
+	return error;
+}
+
+/**
  * Parse cue-after
  *
  * \param c       Parsing context
@@ -364,6 +510,150 @@ css_error parse_elevation(css_language *c,
 }
 
 /**
+ * Parse pause shorthand
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *		   If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error parse_pause(css_language *c, 
+		const parserutils_vector *vector, int *ctx, 
+		css_style **result)
+{
+	int orig_ctx = *ctx;
+	const css_token *token;
+	css_style *before = NULL;
+	css_style *after = NULL;
+	css_style *ret = NULL;
+	int num_read = 0;
+	int prev_ctx;
+	uint32_t required_size;
+	css_error error;
+
+	/* Deal with inherit */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+			token->ilower == c->strings[INHERIT]) {
+		uint32_t *bytecode;
+
+		error = css_stylesheet_style_create(c->sheet,
+				2 * sizeof(uint32_t), &ret);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
+
+		bytecode = (uint32_t *) ret->bytecode;
+
+		*(bytecode++) = buildOPV(CSS_PROP_PAUSE_BEFORE, 
+				FLAG_INHERIT, 0);
+		*(bytecode++) = buildOPV(CSS_PROP_PAUSE_AFTER, 
+				FLAG_INHERIT, 0);
+
+		parserutils_vector_iterate(vector, ctx);
+
+		*result = ret;
+
+		return CSS_OK;
+	} else if (token == NULL) {
+		/* No tokens -- clearly garbage */
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	/* Attempt to read 1 or 2 pauses */
+	do {
+		prev_ctx = *ctx;
+		error = CSS_OK;
+
+		if (before == NULL && (error = parse_pause_before(c, vector, 
+				ctx, &before)) == CSS_OK) {
+			num_read = 1;
+		} else if (after == NULL && 
+				(error = parse_pause_after(c, vector, ctx, 
+				&after)) == CSS_OK) {
+			num_read = 2;
+		}
+
+		if (error == CSS_OK) {
+			consumeWhitespace(vector, ctx);
+
+			token = parserutils_vector_peek(vector, *ctx);
+		} else {
+			token = NULL;
+		}
+	} while (*ctx != prev_ctx && token != NULL);
+
+	if (num_read == 0) {
+		error = CSS_INVALID;
+		goto cleanup;
+	}
+
+	/* Calculate size of resultant style */
+	if (num_read == 1)
+		required_size = 2 * before->length;
+	else
+		required_size = before->length + after->length;
+
+	error = css_stylesheet_style_create(c->sheet, required_size, &ret);
+	if (error != CSS_OK)
+		goto cleanup;
+
+	required_size = 0;
+
+	if (num_read == 1) {
+		uint32_t *opv = ((uint32_t *) before->bytecode);
+		uint8_t flags = getFlags(*opv);
+		uint16_t value = getValue(*opv);
+
+		memcpy(((uint8_t *) ret->bytecode) + required_size,
+				before->bytecode, before->length);
+		required_size += before->length;
+
+		*opv = buildOPV(CSS_PROP_PAUSE_AFTER, flags, value);
+		memcpy(((uint8_t *) ret->bytecode) + required_size,
+				before->bytecode, before->length);
+		required_size += before->length;
+	} else {
+		memcpy(((uint8_t *) ret->bytecode) + required_size,
+				before->bytecode, before->length);
+		required_size += before->length;
+
+		memcpy(((uint8_t *) ret->bytecode) + required_size,
+				after->bytecode, after->length);
+		required_size += after->length;
+	}
+
+	assert(required_size == ret->length);
+
+	/* Write the result */
+	*result = ret;
+	/* Invalidate ret so that cleanup doesn't destroy it */
+	ret = NULL;
+
+	/* Clean up after ourselves */
+cleanup:
+	if (before)
+		css_stylesheet_style_destroy(c->sheet, before);
+	if (after)
+		css_stylesheet_style_destroy(c->sheet, after);
+	if (ret)
+		css_stylesheet_style_destroy(c->sheet, ret);
+
+	if (error != CSS_OK)
+		*ctx = orig_ctx;
+
+	return error;
+}
+
+/**
  * Parse pause-after
  *
  * \param c       Parsing context
@@ -381,72 +671,7 @@ css_error parse_pause_after(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	int orig_ctx = *ctx;
-	css_error error;
-	const css_token *token;
-	uint8_t flags = 0;
-	uint16_t value = 0;
-	uint32_t opv;
-	css_fixed length = 0;
-	uint32_t unit = 0;
-	uint32_t required_size;
-
-	/* time | percentage | IDENT(inherit) */
-	token = parserutils_vector_peek(vector, *ctx);
-	if (token == NULL) {
-		*ctx = orig_ctx;
-		return CSS_INVALID;
-	}
-
-	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
-		parserutils_vector_iterate(vector, ctx);
-		flags = FLAG_INHERIT;
-	} else {
-		error = parse_unit_specifier(c, vector, ctx, UNIT_S,
-				&length, &unit);
-		if (error != CSS_OK) {
-			*ctx = orig_ctx;
-			return error;
-		}
-
-		if ((unit & UNIT_TIME) == false && (unit & UNIT_PCT) == false) {
-			*ctx = orig_ctx;
-			return CSS_INVALID;
-		}
-
-		/* Negative values are illegal */
-		if (length < 0) {
-			*ctx = orig_ctx;
-			return CSS_INVALID;
-		}
-
-		value = PAUSE_AFTER_SET;
-	}
-
-	opv = buildOPV(CSS_PROP_PAUSE_AFTER, flags, value);
-
-	required_size = sizeof(opv);
-	if ((flags & FLAG_INHERIT) == false && value == PAUSE_AFTER_SET)
-		required_size += sizeof(length) + sizeof(unit);
-
-	/* Allocate result */
-	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK) {
-		*ctx = orig_ctx;
-		return error;
-	}
-
-	/* Copy the bytecode to it */
-	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if ((flags & FLAG_INHERIT) == false && value == PAUSE_AFTER_SET) {
-		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
-				&length, sizeof(length));
-		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
-				sizeof(length), &unit, sizeof(unit));
-	}
-
-	return CSS_OK;
+	return parse_pause_common(c, vector, ctx, CSS_PROP_PAUSE_AFTER, result);
 }
 
 /**
@@ -467,72 +692,8 @@ css_error parse_pause_before(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result)
 {
-	int orig_ctx = *ctx;
-	css_error error;
-	const css_token *token;
-	uint8_t flags = 0;
-	uint16_t value = 0;
-	uint32_t opv;
-	css_fixed length = 0;
-	uint32_t unit = 0;
-	uint32_t required_size;
-
-	/* time | percentage | IDENT(inherit) */
-	token = parserutils_vector_peek(vector, *ctx);
-	if (token == NULL) {
-		*ctx = orig_ctx;
-		return CSS_INVALID;
-	}
-
-	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
-		parserutils_vector_iterate(vector, ctx);
-		flags = FLAG_INHERIT;
-	} else {
-		error = parse_unit_specifier(c, vector, ctx, UNIT_S,
-				&length, &unit);
-		if (error != CSS_OK) {
-			*ctx = orig_ctx;
-			return error;
-		}
-
-		if ((unit & UNIT_TIME) == false && (unit & UNIT_PCT) == false) {
-			*ctx = orig_ctx;
-			return CSS_INVALID;
-		}
-
-		/* Negative values are illegal */
-		if (length < 0) {
-			*ctx = orig_ctx;
-			return CSS_INVALID;
-		}
-
-		value = PAUSE_BEFORE_SET;
-	}
-
-	opv = buildOPV(CSS_PROP_PAUSE_BEFORE, flags, value);
-
-	required_size = sizeof(opv);
-	if ((flags & FLAG_INHERIT) == false && value == PAUSE_BEFORE_SET)
-		required_size += sizeof(length) + sizeof(unit);
-
-	/* Allocate result */
-	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK) {
-		*ctx = orig_ctx;
-		return error;
-	}
-
-	/* Copy the bytecode to it */
-	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if ((flags & FLAG_INHERIT) == false && value == PAUSE_BEFORE_SET) {
-		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
-				&length, sizeof(length));
-		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
-				sizeof(length), &unit, sizeof(unit));
-	}
-
-	return CSS_OK;
+	return parse_pause_common(c, vector, ctx, 
+			CSS_PROP_PAUSE_BEFORE, result);
 }
 
 /**
@@ -1617,6 +1778,7 @@ css_error parse_volume(css_language *c,
  * \param c       Parsing context
  * \param vector  Vector of tokens to process
  * \param ctx     Pointer to vector iteration context
+ * \param op      Opcode to parse for
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -1678,6 +1840,93 @@ css_error parse_cue_common(css_language *c,
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&token->idata, 
 				sizeof(lwc_string *));
+	}
+
+	return CSS_OK;
+}
+
+/**
+ * Common parser for pause-after and pause-before
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param op      Opcode to parse for
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *		   If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error parse_pause_common(css_language *c, 
+		const parserutils_vector *vector, int *ctx, 
+		uint16_t op, css_style **result)
+{
+	int orig_ctx = *ctx;
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	css_fixed length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+
+	/* time | percentage | IDENT(inherit) */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL) {
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			token->ilower == c->strings[INHERIT]) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, UNIT_S,
+				&length, &unit);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
+
+		if ((unit & UNIT_TIME) == false && (unit & UNIT_PCT) == false) {
+			*ctx = orig_ctx;
+			return CSS_INVALID;
+		}
+
+		/* Negative values are illegal */
+		if (length < 0) {
+			*ctx = orig_ctx;
+			return CSS_INVALID;
+		}
+
+		value = PAUSE_AFTER_SET;
+	}
+
+	opv = buildOPV(op, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == PAUSE_AFTER_SET)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
+		return error;
+	}
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == PAUSE_AFTER_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
 	}
 
 	return CSS_OK;

@@ -133,6 +133,9 @@ css_error parse_counter_increment(css_language *c,
 css_error parse_counter_reset(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
+css_error parse_cue(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		css_style **result);
 css_error parse_cue_after(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
@@ -255,6 +258,9 @@ css_error parse_page_break_before(css_language *c,
 		css_style **result);
 css_error parse_page_break_inside(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
+		css_style **result);
+css_error parse_pause(css_language *c,
+		const parserutils_vector *vector, int *ctx,
 		css_style **result);
 css_error parse_pause_after(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
