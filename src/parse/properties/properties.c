@@ -72,6 +72,7 @@ const css_prop_handler property_handlers[LAST_PROP + 1 - FIRST_PROP] =
 	parse_list_style_image,
 	parse_list_style_position,
 	parse_list_style_type,
+	parse_margin,
 	parse_margin_bottom,
 	parse_margin_left,
 	parse_margin_right,

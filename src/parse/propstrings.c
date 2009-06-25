@@ -102,6 +102,7 @@ const stringmap_entry stringmap[LAST_KNOWN] = {
 	{ "list-style-image", SLEN("list-style-image") },
 	{ "list-style-position", SLEN("list-style-position") },
 	{ "list-style-type", SLEN("list-style-type") },
+	{ "margin", SLEN("margin") },
 	{ "margin-bottom", SLEN("margin-bottom") },
 	{ "margin-left", SLEN("margin-left") },
 	{ "margin-right", SLEN("margin-right") },

@@ -202,6 +202,9 @@ css_error parse_list_style_position(css_language *c,
 css_error parse_list_style_type(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
+css_error parse_margin(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		css_style **result);
 css_error parse_margin_bottom(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
