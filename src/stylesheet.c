@@ -27,6 +27,7 @@ static css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule);
  * \param origin           Origin of stylesheet
  * \param media            Media stylesheet applies to
  * \param allow_quirks     Permit quirky parsing of stylesheets
+ * \param inline_style     This stylesheet is an inline style
  * \param dict             Dictionary in which to intern strings
  * \param alloc            Memory (de)allocation function
  * \param alloc_pw         Client private data for alloc
@@ -38,7 +39,8 @@ static css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule);
 css_error css_stylesheet_create(css_language_level level,
 		const char *charset, const char *url, const char *title,
 		css_origin origin, uint64_t media, bool allow_quirks,
-		lwc_context *dict, css_allocator_fn alloc, void *alloc_pw, 
+		bool inline_style, lwc_context *dict, 
+		css_allocator_fn alloc, void *alloc_pw, 
 		css_stylesheet **stylesheet)
 {
 	css_parser_optparams params;
@@ -56,10 +58,18 @@ css_error css_stylesheet_create(css_language_level level,
 	memset(sheet, 0, sizeof(css_stylesheet));
         
         sheet->dictionary = dict;
+	sheet->inline_style = inline_style;
 
-	error = css_parser_create(charset, 
+	if (inline_style) {
+		error = css_parser_create_for_inline_style(charset, 
 			charset ? CSS_CHARSET_DICTATED : CSS_CHARSET_DEFAULT,
 			sheet->dictionary, alloc, alloc_pw, &sheet->parser);
+	} else {
+		error = css_parser_create(charset,
+			charset ? CSS_CHARSET_DICTATED : CSS_CHARSET_DEFAULT,
+			sheet->dictionary, alloc, alloc_pw, &sheet->parser);
+	}
+
 	if (error != CSS_OK) {
 		alloc(sheet, 0, alloc_pw);
 		return error;
@@ -568,11 +578,16 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 	sel->data.name = lwc_context_string_ref(sheet->dictionary, name);
 	sel->data.value = NULL;
 
-	/* Initial specificity -- 1 for an element, 0 for universal */
-	if (lwc_string_length(name) != 1 || lwc_string_data(name)[0] != '*')
-		sel->specificity = CSS_SPECIFICITY_D;
-	else
-		sel->specificity = 0;
+	if (sheet->inline_style) {
+		sel->specificity = CSS_SPECIFICITY_A;
+	} else {
+		/* Initial specificity -- 1 for an element, 0 for universal */
+		if (lwc_string_length(name) != 1 || 
+				lwc_string_data(name)[0] != '*')
+			sel->specificity = CSS_SPECIFICITY_D;
+		else
+			sel->specificity = 0;
+	}
 
 	sel->data.comb = CSS_COMBINATOR_NONE;
 

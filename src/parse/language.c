@@ -287,10 +287,13 @@ css_error handleStartRuleset(css_language *c, const parserutils_vector *vector)
 	if (error != CSS_OK)
 		return error;
 
-	error = parseSelectorList(c, vector, rule);
-	if (error != CSS_OK) {
-		css_stylesheet_rule_destroy(c->sheet, rule);
-		return error;
+	if (vector != NULL) {
+		/* Parse selectors, if there are any */
+		error = parseSelectorList(c, vector, rule);
+		if (error != CSS_OK) {
+			css_stylesheet_rule_destroy(c->sheet, rule);
+			return error;
+		}
 	}
 
 	entry.data = rule;

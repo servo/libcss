@@ -137,6 +137,10 @@ css_error css_select_ctx_insert_sheet(css_select_ctx *ctx,
 	if (ctx == NULL || sheet == NULL)
 		return CSS_BADPARM;
 
+	/* Inline styles cannot be inserted into a selection context */
+	if (sheet->inline_style)
+		return CSS_INVALID;
+
 	/* Index must be in the range [0, n_sheets]
 	 * The latter being equivalent to append */
 	if (index > ctx->n_sheets)
@@ -240,6 +244,7 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
  * \param node            Node to select style for
  * \param pseudo_element  Pseudo element to select for, instead
  * \param media           Currently active media types
+ * \param inline_style    Corresponding inline style for node, or NULL
  * \param result          Pointer to style to populate (assumed clean)
  * \param handler         Dispatch table of handler functions
  * \param pw              Client-specific private data for handler functions
@@ -256,6 +261,7 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
  */
 css_error css_select_style(css_select_ctx *ctx, void *node,
 		uint32_t pseudo_element, uint64_t media,
+		const css_stylesheet *inline_style,
 		css_computed_style *result,
 		css_select_handler *handler, void *pw)
 {
@@ -286,6 +292,25 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 			if (error != CSS_OK)
                                 goto cleanup;
 		}
+	}
+
+	/* Consider any inline style for the node */
+	if (inline_style != NULL) {
+		css_rule_selector *sel = 
+				(css_rule_selector *) inline_style->rule_list;
+
+		/* Sanity check style */
+		if (inline_style->rule_count != 1 ||
+			inline_style->rule_list->type != CSS_RULE_SELECTOR || 
+				inline_style->rule_list->items != 0 ||
+				sel->style == NULL) {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
+
+		error = cascade_style(sel->style, &state);
+		if (error != CSS_OK)
+			goto cleanup;
 	}
 
 	/* Take account of presentational hints */

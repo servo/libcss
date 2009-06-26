@@ -450,8 +450,8 @@ void parse_sheet(line_ctx *ctx, const char *data, size_t len)
 
 	/** \todo How are we going to handle @import? */
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", "foo", 
-			origin, media, false, ctx->dict, myrealloc, NULL, 
-			&sheet) == CSS_OK);
+			origin, media, false, false, ctx->dict, 
+			myrealloc, NULL, &sheet) == CSS_OK);
 
 	/* Extend array of sheets and append new sheet to it */
 	temp = realloc(ctx->sheets, 
@@ -637,7 +637,8 @@ void run_test(line_ctx *ctx, const char *exp, size_t explen)
 	testnum++;
 
 	assert(css_select_style(select, ctx->target, ctx->pseudo_element,
-			ctx->media, computed, &select_handler, ctx) == CSS_OK);
+			ctx->media, NULL, computed, &select_handler, ctx) == 
+			CSS_OK);
 
 	dump_computed_style(computed, buf, &buflen);
 

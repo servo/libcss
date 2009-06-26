@@ -312,7 +312,7 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
         lwc_context_ref(ctx);
         
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", NULL,
-			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, false, ctx,
+			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, false, false, ctx,
 			myrealloc, NULL, &sheet) == CSS_OK);
 
 	error = css_stylesheet_append_data(sheet, data, len);
@@ -342,8 +342,8 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 
 			assert(css_stylesheet_create(CSS_LEVEL_21,
 				"UTF-8", buf, NULL, CSS_ORIGIN_AUTHOR,
-				media, false, ctx, myrealloc, NULL, &import) == 
-				CSS_OK);
+				media, false, false, ctx, myrealloc, NULL, 
+				&import) == CSS_OK);
 
 			assert(css_stylesheet_register_import(sheet,
 				import) == CSS_OK);

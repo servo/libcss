@@ -173,6 +173,8 @@ struct css_stylesheet {
 	bool quirks_allowed;			/**< Quirks permitted */
 	bool quirks_used;			/**< Quirks actually used */
 
+	bool inline_style;			/**< Is an inline style */
+
 	css_allocator_fn alloc;			/**< Allocation function */
 	void *pw;				/**< Private word */
 };

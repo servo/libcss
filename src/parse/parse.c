@@ -22,7 +22,7 @@
 #include "utils/utils.h"
 
 #undef DEBUG_STACK
-#undef DEBUG_EVENTS
+#define DEBUG_EVENTS
 
 /** \todo The CSSOM expects us to preserve unknown rules. We currently discard 
  * all of their content, so the higher levels never see them. */
@@ -67,7 +67,10 @@ enum {
 	sAny = 19,
 	sMalformedDecl = 20,
 	sMalformedSelector = 21,
-	sMalformedAtRule = 22
+	sMalformedAtRule = 22,
+	sInlineStyle = 23,
+	sISBody0 = 24,
+	sISBody = 25
 };
 
 /**
@@ -112,6 +115,11 @@ struct css_parser
 	void *pw;			/**< Client-specific private data */
 };
 
+static css_error css_parser_create_internal(const char *charset, 
+		css_charset_source cs_source, lwc_context *dictionary, 
+		css_allocator_fn alloc, void *pw, parser_state initial, 
+		css_parser **parser);
+
 static inline css_error transition(css_parser *parser, parser_state to,
 		parser_state subsequent);
 static inline css_error transitionNoRet(css_parser *parser, parser_state to);
@@ -144,6 +152,9 @@ static inline css_error parseAny(css_parser *parser);
 static inline css_error parseMalformedDeclaration(css_parser *parser);
 static inline css_error parseMalformedSelector(css_parser *parser);
 static inline css_error parseMalformedAtRule(css_parser *parser);
+static inline css_error parseInlineStyle(css_parser *parser);
+static inline css_error parseISBody0(css_parser *parser);
+static inline css_error parseISBody(css_parser *parser);
 
 static inline void unref_interned_strings_in_tokens(css_parser *parser);
 
@@ -173,7 +184,10 @@ static css_error (*parseFuncs[])(css_parser *parser) = {
 	parseAny,
 	parseMalformedDeclaration,
 	parseMalformedSelector,
-	parseMalformedAtRule
+	parseMalformedAtRule,
+	parseInlineStyle,
+	parseISBody0,
+	parseISBody
 };
 
 /**
@@ -193,92 +207,33 @@ css_error css_parser_create(const char *charset, css_charset_source cs_source,
 		lwc_context *dictionary, css_allocator_fn alloc, void *pw, 
 		css_parser **parser)
 {
-	css_parser *p;
 	parser_state initial = { sStart, 0 };
-	parserutils_error perror;
-	css_error error;
 
-	if (alloc == NULL || parser == NULL)
-		return CSS_BADPARM;
+	return css_parser_create_internal(charset, cs_source, dictionary,
+			alloc, pw, initial, parser);
+}
 
-	p = alloc(NULL, sizeof(css_parser), pw);
-	if (p == NULL)
-		return CSS_NOMEM;
+/**
+ * Create a CSS parser for an inline style
+ *
+ * \param charset     Charset of data, if known, or NULL
+ * \param cs_source   Source of charset information, or CSS_CHARSET_DEFAULT
+ * \param dictionary  Dictionary in which to intern strings (not copied)
+ * \param alloc       Memory (de)allocation function
+ * \param pw          Pointer to client-specific private data
+ * \param parser      Pointer to location to receive parser instance
+ * \return CSS_OK on success,
+ *         CSS_BADPARM on bad parameters,
+ *         CSS_NOMEM on memory exhaustion
+ */
+css_error css_parser_create_for_inline_style(const char *charset,
+		css_charset_source cs_source, lwc_context *dictionary,
+		css_allocator_fn alloc, void *pw, css_parser **parser)
+{
+	parser_state initial = { sInlineStyle, 0 };
 
-	perror = parserutils_inputstream_create(charset, cs_source,
-			css_charset_extract, (parserutils_alloc) alloc, pw,
-			&p->stream);
-	if (perror != PARSERUTILS_OK) {
-		alloc(p, 0, pw);
-		return css_error_from_parserutils_error(perror);
-	}
-
-	error = css_lexer_create(p->stream, alloc, pw, &p->lexer);
-	if (error != CSS_OK) {
-		parserutils_inputstream_destroy(p->stream);
-		alloc(p, 0, pw);
-		return error;
-	}
-
-	perror = parserutils_stack_create(sizeof(parser_state), 
-			STACK_CHUNK, (parserutils_alloc) alloc, pw,
-			&p->states);
-	if (perror != PARSERUTILS_OK) {
-		css_lexer_destroy(p->lexer);
-		parserutils_inputstream_destroy(p->stream);
-		alloc(p, 0, pw);
-		return css_error_from_parserutils_error(perror);
-	}
-
-	p->dictionary = dictionary;
-
-	perror = parserutils_vector_create(sizeof(css_token), 
-			STACK_CHUNK, (parserutils_alloc) alloc, pw,
-			&p->tokens);
-	if (perror != PARSERUTILS_OK) {
-		parserutils_stack_destroy(p->states);
-		css_lexer_destroy(p->lexer);
-		parserutils_inputstream_destroy(p->stream);
-		alloc(p, 0, pw);
-		return css_error_from_parserutils_error(perror);
-	}
-
-	perror = parserutils_stack_create(sizeof(char), 
-			STACK_CHUNK, (parserutils_alloc) alloc, pw,
-			&p->open_items);
-	if (perror != PARSERUTILS_OK) {
-		parserutils_vector_destroy(p->tokens);
-		parserutils_stack_destroy(p->states);
-		css_lexer_destroy(p->lexer);
-		parserutils_inputstream_destroy(p->stream);
-		alloc(p, 0, pw);
-		return css_error_from_parserutils_error(perror);
-	}
-
-	perror = parserutils_stack_push(p->states, (void *) &initial);
-	if (perror != PARSERUTILS_OK) {
-		parserutils_stack_destroy(p->open_items);
-		parserutils_vector_destroy(p->tokens);
-		parserutils_stack_destroy(p->states);
-		css_lexer_destroy(p->lexer);
-		parserutils_inputstream_destroy(p->stream);
-		alloc(p, 0, pw);
-		return css_error_from_parserutils_error(perror);
-	}
-
-	p->quirks = false;
-	p->pushback = NULL;
-	p->parseError = false;
-	p->match_char = 0;
-	p->event = NULL;
-	p->last_was_ws = false;
-	p->event_pw = NULL;
-	p->alloc = alloc;
-	p->pw = pw;
-
-	*parser = p;
-
-	return CSS_OK;
+	return css_parser_create_internal(charset, cs_source, dictionary,
+			alloc, pw, initial, parser);
 }
 
 /**
@@ -424,6 +379,116 @@ const char *css_parser_read_charset(css_parser *parser,
 bool css_parser_quirks_permitted(css_parser *parser)
 {
 	return parser->quirks;
+}
+
+/******************************************************************************
+ * Parser creation helper                                                     *
+ ******************************************************************************/
+
+/**
+ * Create a CSS parser (internal)
+ *
+ * \param charset     Charset of data, if known, or NULL
+ * \param cs_source   Source of charset information, or CSS_CHARSET_DEFAULT
+ * \param dictionary  Dictionary in which to intern strings (not copied)
+ * \param alloc       Memory (de)allocation function
+ * \param pw          Pointer to client-specific private data
+ * \param initial     The required initial state of the parser
+ * \param parser      Pointer to location to receive parser instance
+ * \return CSS_OK on success,
+ *         CSS_BADPARM on bad parameters,
+ *         CSS_NOMEM on memory exhaustion
+ */
+css_error css_parser_create_internal(const char *charset, 
+		css_charset_source cs_source, lwc_context *dictionary, 
+		css_allocator_fn alloc, void *pw, parser_state initial, 
+		css_parser **parser)
+{
+	css_parser *p;
+	parserutils_error perror;
+	css_error error;
+
+	if (alloc == NULL || parser == NULL)
+		return CSS_BADPARM;
+
+	p = alloc(NULL, sizeof(css_parser), pw);
+	if (p == NULL)
+		return CSS_NOMEM;
+
+	perror = parserutils_inputstream_create(charset, cs_source,
+			css_charset_extract, (parserutils_alloc) alloc, pw,
+			&p->stream);
+	if (perror != PARSERUTILS_OK) {
+		alloc(p, 0, pw);
+		return css_error_from_parserutils_error(perror);
+	}
+
+	error = css_lexer_create(p->stream, alloc, pw, &p->lexer);
+	if (error != CSS_OK) {
+		parserutils_inputstream_destroy(p->stream);
+		alloc(p, 0, pw);
+		return error;
+	}
+
+	perror = parserutils_stack_create(sizeof(parser_state), 
+			STACK_CHUNK, (parserutils_alloc) alloc, pw,
+			&p->states);
+	if (perror != PARSERUTILS_OK) {
+		css_lexer_destroy(p->lexer);
+		parserutils_inputstream_destroy(p->stream);
+		alloc(p, 0, pw);
+		return css_error_from_parserutils_error(perror);
+	}
+
+	p->dictionary = dictionary;
+
+	perror = parserutils_vector_create(sizeof(css_token), 
+			STACK_CHUNK, (parserutils_alloc) alloc, pw,
+			&p->tokens);
+	if (perror != PARSERUTILS_OK) {
+		parserutils_stack_destroy(p->states);
+		css_lexer_destroy(p->lexer);
+		parserutils_inputstream_destroy(p->stream);
+		alloc(p, 0, pw);
+		return css_error_from_parserutils_error(perror);
+	}
+
+	perror = parserutils_stack_create(sizeof(char), 
+			STACK_CHUNK, (parserutils_alloc) alloc, pw,
+			&p->open_items);
+	if (perror != PARSERUTILS_OK) {
+		parserutils_vector_destroy(p->tokens);
+		parserutils_stack_destroy(p->states);
+		css_lexer_destroy(p->lexer);
+		parserutils_inputstream_destroy(p->stream);
+		alloc(p, 0, pw);
+		return css_error_from_parserutils_error(perror);
+	}
+
+	perror = parserutils_stack_push(p->states, (void *) &initial);
+	if (perror != PARSERUTILS_OK) {
+		parserutils_stack_destroy(p->open_items);
+		parserutils_vector_destroy(p->tokens);
+		parserutils_stack_destroy(p->states);
+		css_lexer_destroy(p->lexer);
+		parserutils_inputstream_destroy(p->stream);
+		alloc(p, 0, pw);
+		return css_error_from_parserutils_error(perror);
+	}
+
+	p->quirks = false;
+	p->pushback = NULL;
+	p->parseError = false;
+	p->match_char = 0;
+	p->event = NULL;
+	p->last_was_ws = false;
+	p->event_pw = NULL;
+	p->alloc = alloc;
+	p->pw = pw;
+
+	*parser = p;
+
+	return CSS_OK;
 }
 
 /******************************************************************************
@@ -2318,6 +2383,180 @@ css_error parseMalformedAtRule(css_parser *parser)
 	return done(parser);
 }
 
+css_error parseInlineStyle(css_parser *parser)
+{
+	enum { Initial = 0, AfterISBody0 = 1 };
+	parser_state *state = parserutils_stack_get_current(parser->states);
+	css_error error;
+
+	/* inline-style = ws is-body0 */
+
+	switch (state->substate) {
+	case Initial:
+	{
+		parser_state to = { sISBody0, Initial };
+		parser_state subsequent = { sInlineStyle, AfterISBody0 };
+
+		/* Emit fake events such that the language parser knows 
+		 * no different from a normal parse. */
+
+		if (parser->event != NULL) {
+			/* 1) begin stylesheet */
+			parser->event(CSS_PARSER_START_STYLESHEET, NULL,
+					parser->event_pw);
+
+			/* 2) begin ruleset */
+			parser->event(CSS_PARSER_START_RULESET, NULL,
+					parser->event_pw);
+		}
+
+		/* Consume leading whitespace */
+		error = eatWS(parser);
+		if (error != CSS_OK)
+			return error;
+
+		return transition(parser, to, subsequent);
+	}
+	case AfterISBody0:
+		/* Emit remaining fake events to end the parse */
+
+		if (parser->event != NULL) {
+			/* 1) end ruleset */
+			parser->event(CSS_PARSER_END_RULESET, NULL, 
+					parser->event_pw);
+
+			/* 2) end stylesheet */
+			parser->event(CSS_PARSER_END_STYLESHEET, NULL,
+					parser->event_pw);
+		}
+
+		break;
+	}
+
+	return done(parser);
+}
+
+css_error parseISBody0(css_parser *parser)
+{
+	enum { Initial = 0, AfterISBody = 1 };
+	parser_state *state = parserutils_stack_get_current(parser->states);
+	const css_token *token;
+	css_error error;
+
+	/* is-body0     -> is-body is-body0
+	 *              ->
+	 */
+
+	while (1) {
+		switch (state->substate) {
+		case Initial:
+		{
+			parser_state to = { sISBody, Initial };
+			parser_state subsequent = { sISBody0, AfterISBody };
+
+			error = getToken(parser, &token);
+			if (error != CSS_OK)
+				return error;
+
+			error = pushBack(parser, token);
+			if (error != CSS_OK)
+				return error;
+
+			/* EOF is the only way out */
+			if (token->type == CSS_TOKEN_EOF)
+				return done(parser);
+
+			return transition(parser, to, subsequent);
+		}
+		case AfterISBody:
+			/* Unless there's a parse error */
+			if (parser->parseError)
+				return done(parser);
+
+			state->substate = Initial;
+
+			break;
+		}
+	}
+
+	return done(parser);
+}
+
+css_error parseISBody(css_parser *parser)
+{
+	enum { Initial = 0, DeclList = 1, Brace = 2, WS = 3 };
+	parser_state *state = parserutils_stack_get_current(parser->states);
+	const css_token *token;
+	css_error error;
+
+	/* is-body      -> declaration decl-list '}' ws 
+	 *              -> decl-list '}' ws
+	 *
+	 * Note that this looks suspiciously similar to ruleset-end.
+	 * The difference here, however, is that we never end the ruleset.
+	 */
+
+	switch (state->substate) {
+	case Initial:
+		error = getToken(parser, &token);
+		if (error != CSS_OK)
+			return error;
+
+		error = pushBack(parser, token);
+		if (error != CSS_OK)
+			return error;
+
+		/* If this can't possibly be the start of a decl-list, then
+		 * attempt to parse a declaration. This will catch any invalid
+		 * input at this point and read to the start of the next
+		 * declaration. FIRST(decl-list) = (';', '}') */
+		if (token->type != CSS_TOKEN_CHAR || 
+				lwc_string_length(token->ilower) != 1 ||
+				(lwc_string_data(token->ilower)[0] != '}' &&
+				lwc_string_data(token->ilower)[0] != ';')) {
+			parser_state to = { sDeclaration, Initial };
+			parser_state subsequent = { sISBody, DeclList };
+
+			return transition(parser, to, subsequent);
+		}
+
+		state->substate = DeclList;
+		/* Fall through */
+	case DeclList:
+	{
+		parser_state to = { sDeclList, Initial };
+		parser_state subsequent = { sISBody, Brace };
+
+		return transition(parser, to, subsequent);
+	}
+	case Brace:
+		error = getToken(parser, &token);
+		if (error != CSS_OK)
+			return error;
+
+		if (token->type == CSS_TOKEN_EOF)
+			break;
+
+		if (token->type != CSS_TOKEN_CHAR || 
+				lwc_string_length(token->ilower) != 1 ||
+				lwc_string_data(token->ilower)[0] != '}') {
+			/* This should never happen, as FOLLOW(decl-list)
+			 * contains only '}' */
+			assert(0 && "Expected }");
+		}
+
+		state->substate = WS;
+		/* Fall through */
+	case WS:
+		error = eatWS(parser);
+		if (error != CSS_OK)
+			return error;
+
+		break;
+	}
+
+	return done(parser);
+}
 
 /**
  * Iterate the token vector and unref any interned strings in the tokens.
