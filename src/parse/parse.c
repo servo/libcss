@@ -1273,7 +1273,7 @@ css_error parseBlockContent(css_parser *parser)
 					if (parser->event != NULL) {
 						parser->event(
 							CSS_PARSER_BLOCK_CONTENT,
-							parser->tokens,
+							parser->tokens, 
 							parser->event_pw);
 					}
 
@@ -1282,6 +1282,30 @@ css_error parseBlockContent(css_parser *parser)
 				} else if (lwc_string_length(token->ilower) == 1 &&
 						lwc_string_data(token->ilower)[0] == ';') {
 					/* Grammar ambiguity. Assume semi */
+					error = pushBack(parser, token);
+					if (error != CSS_OK)
+						return error;
+
+#if !defined(NDEBUG) && defined(DEBUG_EVENTS)
+					parserutils_vector_dump(parser->tokens,
+							__func__, tprinter);
+#endif
+					if (parser->event != NULL) {
+						parser->event(
+							CSS_PARSER_BLOCK_CONTENT,
+							parser->tokens, 
+							parser->event_pw);
+					}
+
+					error = getToken(parser, &token);
+					if (error != CSS_OK)
+						return error;
+
+					unref_interned_strings_in_tokens(
+							parser);
+					parserutils_vector_clear(
+							parser->tokens);
+
 					state->substate = WS;
 				} else if (lwc_string_length(token->ilower) == 1 &&
 						lwc_string_data(token->ilower)[0] == '}') {
@@ -2298,7 +2322,7 @@ static void tprinter(void *token)
 	css_token *t = token;
 
 	if (t->data.data)
-		printf("%d: %.*s", t->type, t->data.len, t->data.data);
+		printf("%d: %.*s", t->type, (int) t->data.len, t->data.data);
 	else
 		printf("%d", t->type);
 }

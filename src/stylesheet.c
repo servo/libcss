@@ -281,7 +281,8 @@ css_error css_stylesheet_next_pending_import(css_stylesheet *parent,
 			break;
 
 		if (r->type == CSS_RULE_IMPORT && i->sheet == NULL) {
-                        *url = lwc_context_string_ref(parent->dictionary, i->url);
+                        *url = lwc_context_string_ref(parent->dictionary, 
+					i->url);
 			*media = i->media;
 
 			return CSS_OK;
@@ -604,9 +605,14 @@ css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 		d = c->combinator;
 
                 for (detail = &c->data; detail;) {
-                        lwc_context_string_unref(sheet->dictionary, detail->name);
-                        if (detail->value != NULL)
-                                lwc_context_string_unref(sheet->dictionary, detail->value);
+                        lwc_context_string_unref(sheet->dictionary, 
+					detail->name);
+
+                        if (detail->value != NULL) {
+                                lwc_context_string_unref(sheet->dictionary, 
+						detail->value);
+			}
+
                         if (detail->next)
                                 detail++;
                         else
@@ -618,8 +624,12 @@ css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
         
         for (detail = &selector->data; detail;) {
                 lwc_context_string_unref(sheet->dictionary, detail->name);
-                if (detail->value != NULL)
-                        lwc_context_string_unref(sheet->dictionary, detail->value);
+
+                if (detail->value != NULL) {
+                        lwc_context_string_unref(sheet->dictionary, 
+					detail->value);
+		}
+
                 if (detail->next)
                         detail++;
                 else
@@ -911,19 +921,11 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 	case CSS_RULE_PAGE:
 	{
 		css_rule_page *page = (css_rule_page *) rule;
-		uint32_t i;
 
-		for (i = 0; i < rule->items; i++) {
-			css_selector *sel = page->selectors[i];
-
-			/* Detach from rule */
-			sel->rule = NULL;
-
-			css_stylesheet_selector_destroy(sheet, sel);
+		if (page->selector != NULL) {
+			page->selector->rule = NULL;
+			css_stylesheet_selector_destroy(sheet, page->selector);
 		}
-
-		if (page->selectors != NULL)
-			sheet->alloc(page->selectors, 0, sheet->pw);
 
 		if (page->style != NULL)
 			css_stylesheet_style_destroy(sheet, page->style);
@@ -1085,13 +1087,70 @@ css_error css_stylesheet_rule_set_nascent_import(css_stylesheet *sheet,
 }
 
 /**
- * Add a rule to a stylesheet
+ * Set the media of an @media rule
  *
- * \param sheet  The stylesheet to add to
- * \param rule   The rule to add
+ * \param sheet  The stylesheet context
+ * \param rule   The rule to add to (must be of type CSS_RULE_MEDIA)
+ * \param media  The applicable media types for the rule
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule)
+css_error css_stylesheet_rule_set_media(css_stylesheet *sheet,
+		css_rule *rule, uint64_t media)
+{
+	css_rule_media *r = (css_rule_media *) rule;
+
+	if (sheet == NULL || rule == NULL)
+		return CSS_BADPARM;
+
+	/* Ensure rule is a CSS_RULE_MEDIA */
+	assert(rule->type == CSS_RULE_MEDIA);
+
+	/* Set the rule's media */
+	r->media = media;
+
+	return CSS_OK;
+}
+
+/**
+ * Set an @page rule selector
+ *
+ * \param sheet     The stylesheet context
+ * \param rule      The rule to add to (must be of type CSS_RULE_PAGE)
+ * \param selector  The page selector
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_rule_set_page_selector(css_stylesheet *sheet,
+		css_rule *rule, css_selector *selector)
+{
+	css_rule_page *r = (css_rule_page *) rule;
+
+	if (sheet == NULL || rule == NULL || selector == NULL)
+		return CSS_BADPARM;
+
+	/* Ensure rule is a CSS_RULE_PAGE */
+	assert(rule->type == CSS_RULE_PAGE);
+
+	/** \todo validate selector */
+
+	/* Set the rule's selector */
+	r->selector = selector;
+
+	/* Set selector's rule field */
+	selector->rule = rule;
+
+	return CSS_OK;
+}
+
+/**
+ * Add a rule to a stylesheet
+ *
+ * \param sheet   The stylesheet to add to
+ * \param rule    The rule to add
+ * \param parent  The parent rule, or NULL for a top-level rule
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule,
+		css_rule *parent)
 {
 	css_error error;
 
@@ -1108,19 +1167,41 @@ css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule)
 	if (error != CSS_OK)
 		return error;
 
-	/* Add rule to sheet */
-	rule->ptype = CSS_RULE_PARENT_STYLESHEET;
-	rule->parent = sheet;
-	sheet->rule_count++;
+	if (parent != NULL) {
+		css_rule_media *media = (css_rule_media *) parent;
 
-	if (sheet->last_rule == NULL) {
-		rule->prev = rule->next = NULL;
-		sheet->rule_list = sheet->last_rule = rule;
+		/* Parent must be an @media rule, or NULL */
+		assert(parent->type == CSS_RULE_MEDIA);
+
+		/* Add rule to parent */
+		rule->ptype = CSS_RULE_PARENT_RULE;
+		rule->parent = parent;
+		sheet->rule_count++;
+
+		if (media->last_child == NULL) {
+			rule->prev = rule->next = NULL;
+			media->first_child = media->last_child = rule;
+		} else {
+			media->last_child->next = rule;
+			rule->prev = media->last_child;
+			rule->next = NULL;
+			media->last_child = rule;
+		}
 	} else {
-		sheet->last_rule->next = rule;
-		rule->prev = sheet->last_rule;
-		rule->next = NULL;
-		sheet->last_rule = rule;
+		/* Add rule to sheet */
+		rule->ptype = CSS_RULE_PARENT_STYLESHEET;
+		rule->parent = sheet;
+		sheet->rule_count++;
+
+		if (sheet->last_rule == NULL) {
+			rule->prev = rule->next = NULL;
+			sheet->rule_list = sheet->last_rule = rule;
+		} else {
+			sheet->last_rule->next = rule;
+			rule->prev = sheet->last_rule;
+			rule->next = NULL;
+			sheet->last_rule = rule;
+		}
 	}
 
 	/** \todo needs to trigger some event announcing styles have changed */
@@ -1225,35 +1306,11 @@ css_error _add_selectors(css_stylesheet *sheet, css_rule *rule)
 		for (r = m->first_child; r != NULL; r = r->next) {
 			error = _add_selectors(sheet, r);
 			if (error != CSS_OK) {
-				/* Failed, revert out changes */
+				/* Failed, revert our changes */
 				for (r = r->prev; r != NULL; r = r->prev) {
 					_remove_selectors(sheet, r);
 				}
 
-				return error;
-			}
-		}
-	}
-		break;
-	case CSS_RULE_PAGE:
-	{
-		css_rule_page *p = (css_rule_page *) rule;
-		int32_t i;
-
-		for (i = 0; i < rule->items; i++) {
-			css_selector *sel = p->selectors[i];
-
-			error = css_selector_hash_insert(sheet->selectors, sel);
-			if (error != CSS_OK) {
-				/* Failed, revert our changes */
-				for (i--; i >= 0; i--) {
-					sel = p->selectors[i];
-
-					/* Ignore errors */
-					css_selector_hash_remove(
-							sheet->selectors, sel);
-				}
-				
 				return error;
 			}
 		}
@@ -1300,20 +1357,6 @@ css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule)
 
 		for (r = m->first_child; r != NULL; r = r->next) {
 			error = _remove_selectors(sheet, r);
-			if (error != CSS_OK)
-				return error;
-		}
-	}
-		break;
-	case CSS_RULE_PAGE:
-	{
-		css_rule_page *p = (css_rule_page *) rule;
-		int32_t i;
-
-		for (i = 0; i < rule->items; i++) {
-			css_selector *sel = p->selectors[i];
-
-			error = css_selector_hash_remove(sheet->selectors, sel);
 			if (error != CSS_OK)
 				return error;
 		}

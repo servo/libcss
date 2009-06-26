@@ -51,6 +51,11 @@ static inline css_error handleBlockContent(css_language *c,
 static inline css_error handleDeclaration(css_language *c, 
 		const parserutils_vector *vector);
 
+/* At-rule parsing */
+static inline css_error parseMediaList(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint64_t *media);
+
 /* Selector list parsing */
 static inline css_error parseClass(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -267,9 +272,16 @@ css_error handleStartRuleset(css_language *c, const parserutils_vector *vector)
 	parserutils_error perror;
 	css_error error;
 	context_entry entry = { CSS_PARSER_START_RULESET, NULL };
+	context_entry *cur;
+	css_rule *parent_rule = NULL;
 	css_rule *rule = NULL;
 
 	assert(c != NULL);
+
+	/* Retrieve parent rule from stack, if any */
+	cur = parserutils_stack_get_current(c->context);
+	if (cur != NULL && cur->type != CSS_PARSER_START_STYLESHEET)
+		parent_rule = cur->data;
 
 	error = css_stylesheet_rule_create(c->sheet, CSS_RULE_SELECTOR, &rule);
 	if (error != CSS_OK)
@@ -289,7 +301,7 @@ css_error handleStartRuleset(css_language *c, const parserutils_vector *vector)
 		return css_error_from_parserutils_error(perror);
 	}
 
-	error = css_stylesheet_add_rule(c->sheet, rule);
+	error = css_stylesheet_add_rule(c->sheet, rule, parent_rule);
 	if (error != CSS_OK) {
 		parserutils_stack_pop(c->context, NULL);
 		css_stylesheet_rule_destroy(c->sheet, rule);
@@ -333,6 +345,8 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 	const css_token *token = NULL;
 	const css_token *atkeyword = NULL;
 	int32_t ctx = 0;
+	css_rule *rule;
+	css_error error;
 
 	/* vector contains: ATKEYWORD ws any0 */
 
@@ -349,8 +363,6 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 	if (atkeyword->ilower == c->strings[CHARSET]) {
 		if (c->state == BEFORE_CHARSET) {
 			const css_token *charset;
-			css_rule *rule;
-			css_error error;
 
 			/* any0 = STRING */
 			if (ctx == 0)
@@ -377,7 +389,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 				return error;
 			}
 
-			error = css_stylesheet_add_rule(c->sheet, rule);
+			error = css_stylesheet_add_rule(c->sheet, rule, NULL);
 			if (error != CSS_OK) {
 				css_stylesheet_rule_destroy(c->sheet, rule);
 				return error;
@@ -392,9 +404,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 		}
 	} else if (atkeyword->ilower == c->strings[IMPORT]) {
 		if (c->state != HAD_RULE) {
-			css_rule *rule;
-			css_media_type media = 0;
-			css_error error;
+			uint64_t media = 0;
 
 			/* any0 = (STRING | URI) ws 
 			 *        (IDENT ws (',' ws IDENT ws)* )? */
@@ -407,54 +417,9 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 			consumeWhitespace(vector, &ctx);
 
 			/* Parse media list */
-			token = parserutils_vector_iterate(vector, &ctx);
-
-			while (token != NULL) {
-				if (token->type != CSS_TOKEN_IDENT)
-					return CSS_INVALID;
-
-				if (token->ilower == c->strings[AURAL]) {
-					media |= CSS_MEDIA_AURAL;
-				} else if (token->ilower == 
-						c->strings[BRAILLE]) {
-					media |= CSS_MEDIA_BRAILLE;
-				} else if (token->ilower ==
-						c->strings[EMBOSSED]) {
-					media |= CSS_MEDIA_EMBOSSED;
-				} else if (token->ilower ==
-						c->strings[HANDHELD]) {
-					media |= CSS_MEDIA_HANDHELD;
-				} else if (token->ilower ==
-						c->strings[PRINT]) {
-					media |= CSS_MEDIA_PRINT;
-				} else if (token->ilower ==
-						c->strings[PROJECTION]) {
-					media |= CSS_MEDIA_PROJECTION;
-				} else if (token->ilower ==
-						c->strings[SCREEN]) {
-					media |= CSS_MEDIA_SCREEN;
-				} else if (token->ilower ==
-						c->strings[SPEECH]) {
-					media |= CSS_MEDIA_SPEECH;
-				} else if (token->ilower == c->strings[TTY]) {
-					media |= CSS_MEDIA_TTY;
-				} else if (token->ilower == c->strings[TV]) {
-					media |= CSS_MEDIA_TV;
-				} else if (token->ilower == c->strings[ALL]) {
-					media |= CSS_MEDIA_ALL;
-				} else
-					return CSS_INVALID;
-
-				consumeWhitespace(vector, &ctx);
-
-				token = parserutils_vector_iterate(vector, 
-						&ctx);
-				if (token != NULL && tokenIsChar(token, ',') == 
-						false)
-					return CSS_INVALID;
-
-				consumeWhitespace(vector, &ctx);
-			}
+			error = parseMediaList(c, vector, &ctx, &media);
+			if (error != CSS_OK)
+				return error;
 
 			error = css_stylesheet_rule_create(c->sheet, 
 					CSS_RULE_IMPORT, &rule);
@@ -468,7 +433,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 				return error;
 			}
 
-			error = css_stylesheet_add_rule(c->sheet, rule);
+			error = css_stylesheet_add_rule(c->sheet, rule, NULL);
 			if (error != CSS_OK) {
 				css_stylesheet_rule_destroy(c->sheet, rule);
 				return error;
@@ -481,22 +446,82 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 		} else {
 			return CSS_INVALID;
 		}
-#if 0
-	/** \todo these depend on nested block support, so we'll disable them
-	 * until we have such a thing. This means that we'll ignore the entire
-	 * at-rule until then */
 	} else if (atkeyword->ilower == c->strings[MEDIA]) {
-		/** \todo any0 = IDENT ws (',' ws IDENT ws)* */
+		uint64_t media = 0;
+
+		/* any0 = IDENT ws (',' ws IDENT ws)* */
+
+		error = parseMediaList(c, vector, &ctx, &media);
+		if (error != CSS_OK)
+			return error;
+
+		error = css_stylesheet_rule_create(c->sheet, 
+				CSS_RULE_MEDIA, &rule);
+		if (error != CSS_OK)
+			return error;
+
+		error = css_stylesheet_rule_set_media(c->sheet, rule, media);
+		if (error != CSS_OK) {
+			css_stylesheet_rule_destroy(c->sheet, rule);
+			return error;
+		}
+
+		error = css_stylesheet_add_rule(c->sheet, rule, NULL);
+		if (error != CSS_OK) {
+			css_stylesheet_rule_destroy(c->sheet, rule);
+			return error;
+		}
+
+		/* Rule is now owned by the sheet, 
+		 * so no need to destroy it */
+
 		c->state = HAD_RULE;
 	} else if (atkeyword->ilower == c->strings[PAGE]) {
-		/** \todo any0 = (':' IDENT)? ws */
+		const css_token *token;
+
+		/* any0 = (':' IDENT)? ws */
+
+		error = css_stylesheet_rule_create(c->sheet,
+				CSS_RULE_PAGE, &rule);
+		if (error != CSS_OK)
+			return error;
+
+		consumeWhitespace(vector, &ctx);
+
+		token = parserutils_vector_peek(vector, ctx);
+		if (token != NULL) {
+			css_selector *sel = NULL;
+
+			error = parseSelector(c, vector, &ctx, &sel);
+			if (error != CSS_OK) {
+				css_stylesheet_rule_destroy(c->sheet, rule);
+				return error;
+			}
+
+			error = css_stylesheet_rule_set_page_selector(c->sheet,
+					rule, sel);
+			if (error != CSS_OK) {
+				css_stylesheet_selector_destroy(c->sheet, sel);
+				css_stylesheet_rule_destroy(c->sheet, rule);
+				return error;
+			}
+		}
+
+		error = css_stylesheet_add_rule(c->sheet, rule, NULL);
+		if (error != CSS_OK) {
+			css_stylesheet_rule_destroy(c->sheet, rule);
+			return error;
+		}
+
+		/* Rule is now owned by the sheet, 
+		 * so no need to destroy it */
+
 		c->state = HAD_RULE;
-#endif
 	} else {
 		return CSS_INVALID;
 	}
 
-	entry.data = (void *) atkeyword->ilower;
+	entry.data = rule;
 
 	perror = parserutils_stack_push(c->context, (void *) &entry);
 	if (perror != PARSERUTILS_OK) {
@@ -529,36 +554,83 @@ css_error handleEndAtRule(css_language *c, const parserutils_vector *vector)
 
 css_error handleStartBlock(css_language *c, const parserutils_vector *vector)
 {
-	UNUSED(c);
+	parserutils_error perror;
+	context_entry entry = { CSS_PARSER_START_BLOCK, NULL };
+	context_entry *cur;
+
 	UNUSED(vector);
 
-	/* We don't care about blocks. In CSS2.1 they're always attached to 
-	 * rulesets or at-rules. */
+	/* If the current item on the stack isn't a block, 
+	 * then clone its data field. This ensures that the relevant rule
+	 * is available when parsing the block contents. */
+	cur = parserutils_stack_get_current(c->context);
+	if (cur != NULL && cur->type != CSS_PARSER_START_BLOCK)
+		entry.data = cur->data;
+
+	perror = parserutils_stack_push(c->context, (void *) &entry);
+	if (perror != PARSERUTILS_OK) {
+		return css_error_from_parserutils_error(perror);
+	}
 
 	return CSS_OK;
 }
 
 css_error handleEndBlock(css_language *c, const parserutils_vector *vector)
 {
-	UNUSED(c);
+	parserutils_error perror;
+	context_entry *entry;
+	css_rule *rule;
+
 	UNUSED(vector);
 
-	/* We don't care about blocks. In CSS 2.1 they're always attached to 
-	 * rulesets or at-rules. */
+	entry = parserutils_stack_get_current(c->context);
+	if (entry == NULL || entry->type != CSS_PARSER_START_BLOCK)
+		return CSS_INVALID;
+
+	rule = entry->data;
+
+	perror = parserutils_stack_pop(c->context, NULL);
+	if (perror != PARSERUTILS_OK) {
+		return css_error_from_parserutils_error(perror);
+	}
+
+	/* If the block we just popped off the stack was associated with a 
+	 * non-block stack entry, and that entry is not a top-level statement,
+	 * then report the end of that entry, too. */
+	if (rule != NULL && rule->ptype != CSS_RULE_PARENT_STYLESHEET) {
+		if (rule->type == CSS_RULE_SELECTOR)
+			return handleEndRuleset(c, vector);
+	}
 
 	return CSS_OK;
 }
 
 css_error handleBlockContent(css_language *c, const parserutils_vector *vector)
 {
-	UNUSED(c);
-	UNUSED(vector);
+	context_entry *entry;
+	css_rule *rule;
 
 	/* In CSS 2.1, block content comprises either declarations (if the 
 	 * current block is associated with @page or a selector), or rulesets 
 	 * (if the current block is associated with @media). */
 
-	/** \todo implement nested blocks */
+	entry = parserutils_stack_get_current(c->context);
+	if (entry == NULL || entry->data == NULL)
+		return CSS_INVALID;
+
+	rule = entry->data;
+	if (rule == NULL || (rule->type != CSS_RULE_SELECTOR && 
+			rule->type != CSS_RULE_PAGE &&
+			rule->type != CSS_RULE_MEDIA))
+		return CSS_INVALID;
+
+	if (rule->type == CSS_RULE_MEDIA) {
+		/* Expect rulesets */
+		return handleStartRuleset(c, vector);
+	} else {
+		/* Expect declarations */
+		return handleDeclaration(c, vector);
+	}
 
 	return CSS_OK;
 }
@@ -577,14 +649,16 @@ css_error handleDeclaration(css_language *c, const parserutils_vector *vector)
 	 * + In ruleset
 	 */
 	entry = parserutils_stack_get_current(c->context);
-	if (entry == NULL || (entry->type != CSS_PARSER_START_RULESET &&
-			entry->type != CSS_PARSER_START_ATRULE))
+	if (entry == NULL || entry->data == NULL)
 		return CSS_INVALID;
 
 	rule = entry->data;
 	if (rule == NULL || (rule->type != CSS_RULE_SELECTOR && 
 			rule->type != CSS_RULE_PAGE))
 		return CSS_INVALID;
+
+	/* Strip any leading whitespace (can happen if in nested block) */
+	consumeWhitespace(vector, &ctx);
 
 	/* IDENT ws ':' ws value 
 	 * 
@@ -605,6 +679,61 @@ css_error handleDeclaration(css_language *c, const parserutils_vector *vector)
 	error = parseProperty(c, ident, vector, &ctx, rule);
 	if (error != CSS_OK)
 		return error;
+
+	return CSS_OK;
+}
+
+/******************************************************************************
+ * At-rule parsing functions                                                  *
+ ******************************************************************************/
+css_error parseMediaList(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint64_t *media)
+{
+	uint64_t ret = 0;
+	const css_token *token;
+
+	token = parserutils_vector_iterate(vector, ctx);
+
+	while (token != NULL) {
+		if (token->type != CSS_TOKEN_IDENT)
+			return CSS_INVALID;
+
+		if (token->ilower == c->strings[AURAL]) {
+			ret |= CSS_MEDIA_AURAL;
+		} else if (token->ilower == c->strings[BRAILLE]) {
+			ret |= CSS_MEDIA_BRAILLE;
+		} else if (token->ilower == c->strings[EMBOSSED]) {
+			ret |= CSS_MEDIA_EMBOSSED;
+		} else if (token->ilower == c->strings[HANDHELD]) {
+			ret |= CSS_MEDIA_HANDHELD;
+		} else if (token->ilower == c->strings[PRINT]) {
+			ret |= CSS_MEDIA_PRINT;
+		} else if (token->ilower == c->strings[PROJECTION]) {
+			ret |= CSS_MEDIA_PROJECTION;
+		} else if (token->ilower == c->strings[SCREEN]) {
+			ret |= CSS_MEDIA_SCREEN;
+		} else if (token->ilower == c->strings[SPEECH]) {
+			ret |= CSS_MEDIA_SPEECH;
+		} else if (token->ilower == c->strings[TTY]) {
+			ret |= CSS_MEDIA_TTY;
+		} else if (token->ilower == c->strings[TV]) {
+			ret |= CSS_MEDIA_TV;
+		} else if (token->ilower == c->strings[ALL]) {
+			ret |= CSS_MEDIA_ALL;
+		} else
+			return CSS_INVALID;
+
+		consumeWhitespace(vector, ctx);
+
+		token = parserutils_vector_iterate(vector, ctx);
+		if (token != NULL && tokenIsChar(token, ',') == false)
+			return CSS_INVALID;
+
+		consumeWhitespace(vector, ctx);
+	}
+
+	*media = ret;
 
 	return CSS_OK;
 }
@@ -968,6 +1097,9 @@ css_error parseSelectorList(css_language *c, const parserutils_vector *vector,
 	const css_token *token = NULL;
 	css_selector *selector = NULL;
 	int ctx = 0;
+
+	/* Strip any leading whitespace (can happen if in nested block) */
+	consumeWhitespace(vector, &ctx);
 
 	/* selector_list   -> selector [ ',' ws selector ]* */
 

@@ -111,7 +111,7 @@ typedef struct css_rule_selector {
 typedef struct css_rule_media {
 	css_rule base;
 
-	uint32_t media;
+	uint64_t media;
 
 	css_rule *first_child;
 	css_rule *last_child;
@@ -126,7 +126,7 @@ typedef struct css_rule_font_face {
 typedef struct css_rule_page {
 	css_rule base;
 
-	css_selector **selectors;
+	css_selector *selector;
 	css_style *style;
 } css_rule_page;
 
@@ -213,9 +213,14 @@ css_error css_stylesheet_rule_set_charset(css_stylesheet *sheet,
 css_error css_stylesheet_rule_set_nascent_import(css_stylesheet *sheet,
 		css_rule *rule, lwc_string *url, uint64_t media);
 
-/** \todo registering other rule-type data with css_rules */
+css_error css_stylesheet_rule_set_media(css_stylesheet *sheet,
+		css_rule *rule, uint64_t media);
 
-css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule);
+css_error css_stylesheet_rule_set_page_selector(css_stylesheet *sheet,
+		css_rule *rule, css_selector *sel);
+
+css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule,
+		css_rule *parent);
 css_error css_stylesheet_remove_rule(css_stylesheet *sheet, css_rule *rule);
 
 #endif

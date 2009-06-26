@@ -12,13 +12,16 @@
 #include "testutils.h"
 
 static void dump_sheet(css_stylesheet *sheet, char *buf, size_t *len);
-static void dump_rule_selector(css_rule_selector *s, char **buf, size_t *buflen);
+static void dump_rule_selector(css_rule_selector *s, char **buf, 
+		size_t *buflen, uint32_t depth);
 static void dump_rule_charset(css_rule_charset *s, char **buf, size_t *buflen);
 static void dump_rule_import(css_rule_import *s, char **buf, size_t *buflen);
+static void dump_rule_media(css_rule_media *s, char **buf, size_t *buflen);
+static void dump_rule_page(css_rule_page *s, char **buf, size_t *buflen);
 static void dump_selector_list(css_selector *list, char **ptr);
 static void dump_selector(css_selector *selector, char **ptr);
 static void dump_selector_detail(css_selector_detail *detail, char **ptr);
-static void dump_bytecode(css_style *style, char **ptr);
+static void dump_bytecode(css_style *style, char **ptr, uint32_t depth);
 static void dump_string(lwc_string *string, char **ptr);
 
 void dump_sheet(css_stylesheet *sheet, char *buf, size_t *buflen)
@@ -29,7 +32,7 @@ void dump_sheet(css_stylesheet *sheet, char *buf, size_t *buflen)
 		switch (rule->type) {
 		case CSS_RULE_SELECTOR:
 			dump_rule_selector((css_rule_selector *) rule, 
-				&buf, buflen);
+				&buf, buflen, 1);
 			break;
 		case CSS_RULE_CHARSET:
 			dump_rule_charset((css_rule_charset *) rule, 
@@ -39,21 +42,36 @@ void dump_sheet(css_stylesheet *sheet, char *buf, size_t *buflen)
 			dump_rule_import((css_rule_import *) rule, 
 				&buf, buflen);
 			break;
+		case CSS_RULE_MEDIA:
+			dump_rule_media((css_rule_media *) rule,
+				&buf, buflen);
+			break;
+		case CSS_RULE_PAGE:
+			dump_rule_page((css_rule_page *) rule,
+				&buf, buflen);
+			break;
 		default:
-			*buflen -= sprintf(buf, "Unhandled rule type %d",
+		{
+			int written = sprintf(buf, "Unhandled rule type %d\n",
 				rule->type);
+
+			*buflen -= written;
+			buf += written;
+		}
 			break;
 		}
 	}
 }
 
-void dump_rule_selector(css_rule_selector *s, char **buf, size_t *buflen)
+void dump_rule_selector(css_rule_selector *s, char **buf, size_t *buflen, 
+		uint32_t depth)
 {
 	uint32_t i;
 	char *ptr = *buf;
 
 	*ptr++ = '|';
-	*ptr++ = ' ';
+	for (i = 0; i < depth; i++)
+		*ptr++ = ' ';
 
 	/* Build selector string */
 	for (i = 0; i < s->base.items; i++) {
@@ -66,7 +84,7 @@ void dump_rule_selector(css_rule_selector *s, char **buf, size_t *buflen)
 	*ptr++ = '\n';
 
 	if (s->style != NULL)
-		dump_bytecode(s->style, &ptr);
+		dump_bytecode(s->style, &ptr, depth + 1);
 
 	*buflen -= ptr - *buf;
 	*buf = ptr;
@@ -95,6 +113,45 @@ void dump_rule_import(css_rule_import *s, char **buf, size_t *buflen)
 	/** \todo media list */
 
 	*ptr++ = '\n';
+
+	*buflen -= ptr - *buf;
+	*buf = ptr;
+}
+
+void dump_rule_media(css_rule_media *s, char **buf, size_t *buflen)
+{
+	char *ptr = *buf;
+	css_rule *rule;
+
+	ptr += sprintf(ptr, "| @media ");
+
+	/* \todo media list */
+
+	*ptr++ = '\n';
+
+	for (rule = s->first_child; rule != NULL; rule = rule->next) {
+		size_t len = *buflen - (ptr - *buf);
+
+		dump_rule_selector((css_rule_selector *) rule, &ptr, &len, 2);
+	}
+
+	*buflen -= ptr - *buf;
+	*buf = ptr;
+}
+
+void dump_rule_page(css_rule_page *s, char **buf, size_t *buflen)
+{
+	char *ptr = *buf;
+
+	ptr += sprintf(ptr, "| @page ");
+
+	if (s->selector != NULL)
+		dump_selector_list(s->selector, &ptr);
+
+	*ptr++ = '\n';
+
+	if (s->style != NULL)
+		dump_bytecode(s->style, &ptr, 2);
 
 	*buflen -= ptr - *buf;
 	*buf = ptr;
@@ -569,7 +626,7 @@ static void dump_counters(lwc_string *name, lwc_string *separator,
 	*ptr += sprintf(*ptr, ")");
 }
 
-void dump_bytecode(css_style *style, char **ptr)
+void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 {
 	void *bytecode = style->bytecode;
 	size_t length = style->length;
@@ -589,7 +646,10 @@ void dump_bytecode(css_style *style, char **ptr)
 
 		op = getOpcode(opv);
 
-		*ptr += sprintf(*ptr, "|  %s: ", opcode_names[op]);
+		*((*ptr)++) = '|';
+		for (uint32_t i = 0; i < depth; i++)
+			*((*ptr)++) = ' ';
+		*ptr += sprintf(*ptr, "%s: ", opcode_names[op]);
 
 		if (isInherit(opv)) {
 			*ptr += sprintf(*ptr, "inherit");

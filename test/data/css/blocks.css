@@ -8,7 +8,29 @@
 
 @media screen
 {
-	body { background-color: green; }
+	body
+	{ 
+		background-color: green;
+		color: yellow;
+		background-image: url("foo");
+		color: [ ( { ] ) };
+	}
+
+	@page :left
+	{
+		@margin { 10mm, 20mm, 30mm, 40mm };
+		margin-top: 50mm;
+	}
+
+	div
+	{
+		color: blue;
+	}
+
+	border-left: 10mm
 }
 
-
+@page
+{
+	margin-left: 50mm;
+}
