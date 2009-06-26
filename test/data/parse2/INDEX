@@ -10,4 +10,5 @@ illegal-values.dat		Illegal value tests
 malformed-declarations.dat	Malformed declaration tests
 unknown-properties.dat		Unknown property tests
 bgpos.dat			Illegal background-position values
-margin.dat			Margin shorthand tests
+bg.dat				Background property tests
+margin.dat			Margin property tests
