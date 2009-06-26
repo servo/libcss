@@ -27,7 +27,7 @@
 | *
 |  margin-top: auto
 |  margin-right: auto
-|  margin-bottom: 0
+|  margin-bottom: 0px
 |  margin-left: auto
 #reset
 
@@ -36,10 +36,10 @@
 #errors
 #expected
 | *
-|  margin-top: 
-|  margin-right: 
-|  margin-bottom: 
-|  margin-left: 
+|  margin-top: auto
+|  margin-right: auto
+|  margin-bottom: 10px
+|  margin-left: 0px
 #reset
 
 
@@ -72,7 +72,7 @@
 | *
 |  margin-top: auto !important
 |  margin-right: auto !important
-|  margin-bottom: 0 !important
+|  margin-bottom: 0px !important
 |  margin-left: auto !important
 #reset
 
@@ -84,7 +84,7 @@
 |  margin-top: auto !important
 |  margin-right: auto !important
 |  margin-bottom: 10px !important
-|  margin-left: 0 !important
+|  margin-left: 0px !important
 #reset
 
 
