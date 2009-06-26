@@ -22,7 +22,7 @@
 #include "utils/utils.h"
 
 #undef DEBUG_STACK
-#define DEBUG_EVENTS
+#undef DEBUG_EVENTS
 
 /** \todo The CSSOM expects us to preserve unknown rules. We currently discard 
  * all of their content, so the higher levels never see them. */
