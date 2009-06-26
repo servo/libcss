@@ -87,6 +87,13 @@ css_error parse_margin(css_language *c,
 		prev_ctx = *ctx;
 		error = CSS_OK;
 
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				token->ilower == c->strings[INHERIT]) {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
+
 		if (top == NULL &&
 				(error = parse_margin_side(c, vector, ctx, 
 				CSS_PROP_MARGIN_TOP, &top)) == CSS_OK) {
