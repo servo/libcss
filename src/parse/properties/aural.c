@@ -269,6 +269,14 @@ css_error parse_cue(css_language *c,
 		prev_ctx = *ctx;
 		error = CSS_OK;
 
+		/* Ensure that we're not about to parse another inherit */
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				token->ilower == c->strings[INHERIT]) {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
+
 		if (before == NULL && (error = parse_cue_before(c, vector, ctx, 
 				&before)) == CSS_OK) {
 			num_read = 1;
@@ -572,6 +580,14 @@ css_error parse_pause(css_language *c,
 	do {
 		prev_ctx = *ctx;
 		error = CSS_OK;
+
+		/* Ensure that we're not about to parse another inherit */
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				token->ilower == c->strings[INHERIT]) {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
 
 		if (before == NULL && (error = parse_pause_before(c, vector, 
 				ctx, &before)) == CSS_OK) {
