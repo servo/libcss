@@ -89,6 +89,14 @@ css_error parse_font(css_language *c,
 		prev_ctx = *ctx;
 		error = CSS_OK;
 
+		/* Ensure that we're not about to parse another inherit */
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				token->ilower == c->strings[INHERIT]) {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
+
 		if (style == NULL && 
 				(error = parse_font_style(c, vector,
 				ctx, &style)) == CSS_OK) {
@@ -114,6 +122,14 @@ css_error parse_font(css_language *c,
 
 	consumeWhitespace(vector, ctx);
 
+	/* Ensure that we're not about to parse another inherit */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+			token->ilower == c->strings[INHERIT]) {
+		error = CSS_INVALID;
+		goto cleanup;
+	}
+
 	/* Now expect a font-size */
 	error = parse_font_size(c, vector, ctx, &size);
 	if (error != CSS_OK)
@@ -128,12 +144,28 @@ css_error parse_font(css_language *c,
 
 		consumeWhitespace(vector, ctx);
 
+		/* Ensure that we're not about to parse another inherit */
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				token->ilower == c->strings[INHERIT]) {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
+
 		error = parse_line_height(c, vector, ctx, &line_height);
 		if (error != CSS_OK)
 			goto cleanup;
 	}
 
 	consumeWhitespace(vector, ctx);
+
+	/* Ensure that we're not about to parse another inherit */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+			token->ilower == c->strings[INHERIT]) {
+		error = CSS_INVALID;
+		goto cleanup;
+	}
 
 	/* Now expect a font-family */
 	error = parse_font_family(c, vector, ctx, &family);
