@@ -1,0 +1,353 @@
+#data
+* { cue: inherit; }
+#errors
+#expected
+| *
+|  cue-before: inherit
+|  cue-after: inherit
+#reset
+
+#data
+* { cue: none; }
+#errors
+#expected
+| *
+|  cue-before: none
+|  cue-after: none
+#reset
+
+#data
+* { cue: url(foo); }
+#errors
+#expected
+| *
+|  cue-before: url('foo')
+|  cue-after: url('foo')
+#reset
+
+#data
+* { cue: none url(foo); }
+#errors
+#expected
+| *
+|  cue-before: none
+|  cue-after: url('foo')
+#reset
+
+#data
+* { cue: url(foo) none; }
+#errors
+#expected
+| *
+|  cue-before: url('foo')
+|  cue-after: none
+#reset
+
+
+#data
+* { cue: inherit !important; }
+#errors
+#expected
+| *
+|  cue-before: inherit !important
+|  cue-after: inherit !important
+#reset
+
+#data
+* { cue: none !important; }
+#errors
+#expected
+| *
+|  cue-before: none !important
+|  cue-after: none !important
+#reset
+
+#data
+* { cue: url(foo) !important; }
+#errors
+#expected
+| *
+|  cue-before: url('foo') !important
+|  cue-after: url('foo') !important
+#reset
+
+#data
+* { cue: none url(foo) !important; }
+#errors
+#expected
+| *
+|  cue-before: none !important
+|  cue-after: url('foo') !important
+#reset
+
+#data
+* { cue: url(foo) none !important; }
+#errors
+#expected
+| *
+|  cue-before: url('foo') !important
+|  cue-after: none !important
+#reset
+
+
+#data
+* { cue: invalid; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue: ; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue:}
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue: url(foo) inherit none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue: inherit url(foo) none !important;}
+#errors
+#expected
+| *
+#reset
+
+
+#data
+* { pause: inherit; }
+#errors
+#expected
+| *
+|  pause-before: inherit
+|  pause-after: inherit
+#reset
+
+#data
+* { pause: 0; }
+#errors
+#expected
+| *
+|  pause-before: 0s
+|  pause-after: 0s
+#reset
+
+#data
+* { pause: 50%; }
+#errors
+#expected
+| *
+|  pause-before: 50%
+|  pause-after: 50%
+#reset
+
+#data
+* { pause: 0 10ms; }
+#errors
+#expected
+| *
+|  pause-before: 0s
+|  pause-after: 10ms
+#reset
+
+#data
+* { pause: 10s 0; }
+#errors
+#expected
+| *
+|  pause-before: 10s
+|  pause-after: 0s
+#reset
+
+#data
+* { pause: 0 50%; }
+#errors
+#expected
+| *
+|  pause-before: 0s
+|  pause-after: 50%
+#reset
+
+#data
+* { pause: 50% 0; }
+#errors
+#expected
+| *
+|  pause-before: 50%
+|  pause-after: 0s
+#reset
+
+#data
+* { pause: 50% 0 5s; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause: inherit 0 5s; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause: 50% inherit 5s; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause: 50% 0 inherit; }
+#errors
+#expected
+| *
+#reset
+
+
+#data
+* { pause: inherit !important; }
+#errors
+#expected
+| *
+|  pause-before: inherit !important
+|  pause-after: inherit !important
+#reset
+
+#data
+* { pause: 0 !important; }
+#errors
+#expected
+| *
+|  pause-before: 0s !important
+|  pause-after: 0s !important
+#reset
+
+#data
+* { pause: 50% !important; }
+#errors
+#expected
+| *
+|  pause-before: 50% !important
+|  pause-after: 50% !important
+#reset
+
+#data
+* { pause: 0 10s !important; }
+#errors
+#expected
+| *
+|  pause-before: 0s !important
+|  pause-after: 10s !important
+#reset
+
+#data
+* { pause: 10s 0 !important; }
+#errors
+#expected
+| *
+|  pause-before: 10s !important
+|  pause-after: 0s !important
+#reset
+
+#data
+* { pause: 0 50% !important; }
+#errors
+#expected
+| *
+|  pause-before: 0s !important
+|  pause-after: 50% !important
+#reset
+
+#data
+* { pause: 50% 0 !important; }
+#errors
+#expected
+| *
+|  pause-before: 50% !important
+|  pause-after: 0s !important
+#reset
+
+
+#data
+* { pause: invalid; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause: ; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause:}
+#errors
+#expected
+| *
+#reset
+
+
+
+
+
+
+#data
+* { cue: none inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue: inherit url(Sonic.png); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause: 0 inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause: 7ms inherit !important; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause: inherit 4%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { pause: inherit 0 !important; }
+#errors
+#expected
+| *
+#reset
+
+

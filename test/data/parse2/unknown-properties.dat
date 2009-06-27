@@ -20,3 +20,10 @@
 |  color: #bbbbcc00
 #reset
 
+#data
+* { padding-: 4em; }
+#errors
+#expected
+| *
+#reset
+
