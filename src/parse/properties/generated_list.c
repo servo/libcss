@@ -239,6 +239,14 @@ css_error parse_list_style(css_language *c,
 		prev_ctx = *ctx;
 		error = CSS_OK;
 
+		/* Ensure that we're not about to parse another inherit */
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				token->ilower == c->strings[INHERIT]) {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
+
 		if (image == NULL && (error = parse_list_style_image(c, vector,
 				ctx, &image)) == CSS_OK) {
 		} else if (position == NULL && 
