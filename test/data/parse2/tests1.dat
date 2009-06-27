@@ -62,6 +62,77 @@
 #reset
 
 #data
+* { display: inherit; }
+#errors
+#expected
+| *
+|  display: inherit
+#reset
+
+#data
+* { height: inherit; }
+#errors
+#expected
+| *
+|  height: inherit
+#reset
+
+#data
+* { line-height: inherit; }
+#errors
+#expected
+| *
+|  line-height: inherit
+#reset
+
+#data
+* { max-height: inherit; }
+#errors
+#expected
+| *
+|  max-height: inherit
+#reset
+
+#data
+* { max-width: inherit; }
+#errors
+#expected
+| *
+|  max-width: inherit
+#reset
+
+#data
+* { min-height: inherit; }
+#errors
+#expected
+| *
+|  min-height: inherit
+#reset
+
+#data
+* { min-width: inherit; }
+#errors
+#expected
+| *
+|  min-width: inherit
+#reset
+
+#data
+* { width: inherit; }
+#errors
+#expected
+| *
+|  width: inherit
+#reset
+
+#data
+* { display: block inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
 * { cursor: url("foo.png"), url("bar.gif"), pointer; }
 #errors
 #expected
