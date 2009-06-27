@@ -15,7 +15,7 @@
 
 static css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 		css_select_state *state, 
-		css_error (*fun)(css_computed_style *, uint8_t, css_colour));
+		css_error (*fun)(css_computed_style *, uint8_t, css_color));
 static css_error cascade_uri_none(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, 
@@ -194,7 +194,7 @@ css_error compose_background_color(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	css_colour color;
+	css_color color;
 
 	if (css_computed_background_color(child, &color) == 
 			CSS_BACKGROUND_COLOR_INHERIT) {
@@ -526,7 +526,7 @@ css_error compose_border_top_color(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	css_colour color;
+	css_color color;
 
 	if (css_computed_border_top_color(child, &color) == 
 			CSS_BORDER_COLOR_INHERIT) {
@@ -560,7 +560,7 @@ css_error compose_border_right_color(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	css_colour color;
+	css_color color;
 
 	if (css_computed_border_right_color(child, &color) == 
 			CSS_BORDER_COLOR_INHERIT) {
@@ -594,7 +594,7 @@ css_error compose_border_bottom_color(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	css_colour color;
+	css_color color;
 
 	if (css_computed_border_bottom_color(child, &color) == 
 			CSS_BORDER_COLOR_INHERIT) {
@@ -628,7 +628,7 @@ css_error compose_border_left_color(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	css_colour color;
+	css_color color;
 
 	if (css_computed_border_left_color(child, &color) == 
 			CSS_BORDER_COLOR_INHERIT) {
@@ -1139,11 +1139,11 @@ css_error cascade_color(uint32_t opv, css_style *style,
 		css_select_state *state)
 {
 	uint16_t value = CSS_COLOR_INHERIT;
-	css_colour color = 0;
+	css_color color = 0;
 
 	if (isInherit(opv) == false) {
 		value = CSS_COLOR_COLOR;
-		color = *((css_colour *) style->bytecode);
+		color = *((css_color *) style->bytecode);
 		advance_bytecode(style, sizeof(color));
 	}
 
@@ -1169,7 +1169,7 @@ css_error compose_color(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	css_colour color;
+	css_color color;
 
 	if (css_computed_color(child, &color) == CSS_COLOR_INHERIT) {
 		uint8_t p = css_computed_color(parent, &color);
@@ -3224,13 +3224,13 @@ css_error cascade_outline_color(uint32_t opv, css_style *style,
 		css_select_state *state)
 {
 	uint16_t value = CSS_OUTLINE_COLOR_INHERIT;
-	css_colour color = 0;
+	css_color color = 0;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
 		case OUTLINE_COLOR_SET:
 			value = CSS_OUTLINE_COLOR_COLOR;
-			color = *((css_colour *) style->bytecode);
+			color = *((css_color *) style->bytecode);
 			advance_bytecode(style, sizeof(color));
 			break;
 		case OUTLINE_COLOR_INVERT:
@@ -3261,7 +3261,7 @@ css_error compose_outline_color(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	css_colour color = 0;
+	css_color color = 0;
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
 			css_computed_outline_color(child, &color) ==
@@ -5309,10 +5309,10 @@ css_error compose_z_index(const css_computed_style *parent,
  ******************************************************************************/
 css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 		css_select_state *state, 
-		css_error (*fun)(css_computed_style *, uint8_t, css_colour))
+		css_error (*fun)(css_computed_style *, uint8_t, css_color))
 {
 	uint16_t value = CSS_BACKGROUND_COLOR_INHERIT;
-	css_colour color = 0;
+	css_color color = 0;
 
 	assert(CSS_BACKGROUND_COLOR_INHERIT == CSS_BORDER_COLOR_INHERIT);
 	assert(CSS_BACKGROUND_COLOR_TRANSPARENT == 
@@ -5326,7 +5326,7 @@ css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 			break;
 		case BACKGROUND_COLOR_SET:
 			value = CSS_BACKGROUND_COLOR_COLOR;
-			color = *((css_colour *) style->bytecode);
+			color = *((css_color *) style->bytecode);
 			advance_bytecode(style, sizeof(color));
 			break;
 		}

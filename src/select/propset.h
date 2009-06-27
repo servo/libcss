@@ -56,7 +56,7 @@ static inline css_error set_letter_spacing(
 #define OUTLINE_COLOR_SHIFT 0
 #define OUTLINE_COLOR_MASK  0x3
 static inline css_error set_outline_color(
-		css_computed_style *style, uint8_t type, css_colour color)
+		css_computed_style *style, uint8_t type, css_color color)
 {
 	uint8_t *bits;
 
@@ -507,7 +507,7 @@ static inline css_error set_background_image(
 #define COLOR_MASK  0x1
 static inline css_error set_color(
 		css_computed_style *style, uint8_t type, 
-		css_colour color)
+		css_color color)
 {
 	uint8_t *bits = &style->bits[COLOR_INDEX];
 
@@ -637,7 +637,7 @@ static inline css_error set_left(
 #define BORDER_TOP_COLOR_MASK  0x3
 static inline css_error set_border_top_color(
 		css_computed_style *style, uint8_t type, 
-		css_colour color)
+		css_color color)
 {
 	uint8_t *bits = &style->bits[BORDER_TOP_COLOR_INDEX];
 
@@ -658,7 +658,7 @@ static inline css_error set_border_top_color(
 #define BORDER_RIGHT_COLOR_MASK  0x3
 static inline css_error set_border_right_color(
 		css_computed_style *style, uint8_t type, 
-		css_colour color)
+		css_color color)
 {
 	uint8_t *bits = &style->bits[BORDER_RIGHT_COLOR_INDEX];
 
@@ -679,7 +679,7 @@ static inline css_error set_border_right_color(
 #define BORDER_BOTTOM_COLOR_MASK  0x3
 static inline css_error set_border_bottom_color(
 		css_computed_style *style, uint8_t type, 
-		css_colour color)
+		css_color color)
 {
 	uint8_t *bits = &style->bits[BORDER_BOTTOM_COLOR_INDEX];
 
@@ -700,7 +700,7 @@ static inline css_error set_border_bottom_color(
 #define BORDER_LEFT_COLOR_MASK  0x3
 static inline css_error set_border_left_color(
 		css_computed_style *style, uint8_t type, 
-		css_colour color)
+		css_color color)
 {
 	uint8_t *bits = &style->bits[BORDER_LEFT_COLOR_INDEX];
 
@@ -763,7 +763,7 @@ static inline css_error set_line_height(
 #define BACKGROUND_COLOR_MASK  0x3
 static inline css_error set_background_color(
 		css_computed_style *style, uint8_t type, 
-		css_colour color)
+		css_color color)
 {
 	uint8_t *bits = &style->bits[BACKGROUND_COLOR_INDEX];
 

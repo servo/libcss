@@ -41,7 +41,7 @@ typedef struct css_hint {
 	 */
 	union {
 		css_computed_clip_rect *clip;
-		css_colour color;
+		css_color color;
 		css_computed_content_item *content;
 		css_computed_counter *counter;
 		int32_t integer;
