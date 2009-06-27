@@ -160,3 +160,44 @@
 #reset
 
 
+
+#data
+* { margin-top: inherit;}
+#errors
+#expected
+| *
+|  margin-top: inherit
+#reset
+
+#data
+* { margin-right: inherit;}
+#errors
+#expected
+| *
+|  margin-right: inherit
+#reset
+
+#data
+* { margin-bottom: inherit;}
+#errors
+#expected
+| *
+|  margin-bottom: inherit
+#reset
+
+#data
+* { margin-bottom: 2em inherit;}
+#errors
+#expected
+| *
+#reset
+
+#data
+* { margin-left: inherit;}
+#errors
+#expected
+| *
+|  margin-left: inherit
+#reset
+
+
