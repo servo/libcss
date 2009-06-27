@@ -12,5 +12,7 @@ unknown-properties.dat		Unknown property tests
 bgpos.dat			Illegal background-position values
 au.dat				Aural property tests
 bg.dat				Background property tests
+border.dat			Border property tests
 margin.dat			Margin property tests
+outline.dat			Outline property tests
 padding.dat			Padding property tests
