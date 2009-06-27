@@ -338,6 +338,14 @@ css_error parse_border_color(css_language *c,
 		prev_ctx = *ctx;
 		error = CSS_OK;
 
+		/* Ensure that we're not about to parse another inherit */
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				token->ilower == c->strings[INHERIT]) {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
+
 		if (top == NULL &&
 				(error = parse_border_side_color(c, vector, 
 				ctx, CSS_PROP_BORDER_TOP_COLOR, &top)) == 
@@ -877,6 +885,14 @@ css_error parse_border_style(css_language *c,
 		prev_ctx = *ctx;
 		error = CSS_OK;
 
+		/* Ensure that we're not about to parse another inherit */
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				token->ilower == c->strings[INHERIT]) {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
+
 		if (top == NULL &&
 				(error = parse_border_side_style(c, vector, 
 				ctx, CSS_PROP_BORDER_TOP_STYLE, &top)) == 
@@ -1203,6 +1219,14 @@ css_error parse_border_width(css_language *c,
 		prev_ctx = *ctx;
 		error = CSS_OK;
 
+		/* Ensure that we're not about to parse another inherit */
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				token->ilower == c->strings[INHERIT]) {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
+
 		if (top == NULL &&
 				(error = parse_border_side_width(c, vector, 
 				ctx, CSS_PROP_BORDER_TOP_WIDTH, &top)) == 
@@ -1437,6 +1461,14 @@ css_error parse_outline(css_language *c,
 	do {
 		prev_ctx = *ctx;
 		error = CSS_OK;
+
+		/* Ensure that we're not about to parse another inherit */
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				token->ilower == c->strings[INHERIT]) {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
 
 		if (color == NULL &&
 				(error = parse_outline_color(c, vector, 
@@ -1750,6 +1782,14 @@ css_error parse_border_side(css_language *c,
 	do {
 		prev_ctx = *ctx;
 		error = CSS_OK;
+
+		/* Ensure that we're not about to parse another inherit */
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				token->ilower == c->strings[INHERIT]) {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
 
 		if (color == NULL &&
 				(error = parse_border_side_color(c, vector, ctx,
