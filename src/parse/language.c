@@ -30,62 +30,62 @@ typedef struct context_entry {
 /* Event handlers */
 static css_error language_handle_event(css_parser_event type, 
 		const parserutils_vector *tokens, void *pw);
-static inline css_error handleStartStylesheet(css_language *c, 
+static css_error handleStartStylesheet(css_language *c, 
 		const parserutils_vector *vector);
-static inline css_error handleEndStylesheet(css_language *c, 
+static css_error handleEndStylesheet(css_language *c, 
 		const parserutils_vector *vector);
-static inline css_error handleStartRuleset(css_language *c, 
+static css_error handleStartRuleset(css_language *c, 
 		const parserutils_vector *vector);
-static inline css_error handleEndRuleset(css_language *c, 
+static css_error handleEndRuleset(css_language *c, 
 		const parserutils_vector *vector);
-static inline css_error handleStartAtRule(css_language *c, 
+static css_error handleStartAtRule(css_language *c, 
 		const parserutils_vector *vector);
-static inline css_error handleEndAtRule(css_language *c, 
+static css_error handleEndAtRule(css_language *c, 
 		const parserutils_vector *vector);
-static inline css_error handleStartBlock(css_language *c, 
+static css_error handleStartBlock(css_language *c, 
 		const parserutils_vector *vector);
-static inline css_error handleEndBlock(css_language *c, 
+static css_error handleEndBlock(css_language *c, 
 		const parserutils_vector *vector);
-static inline css_error handleBlockContent(css_language *c, 
+static css_error handleBlockContent(css_language *c, 
 		const parserutils_vector *vector);
-static inline css_error handleDeclaration(css_language *c, 
+static css_error handleDeclaration(css_language *c, 
 		const parserutils_vector *vector);
 
 /* At-rule parsing */
-static inline css_error parseMediaList(css_language *c,
+static css_error parseMediaList(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint64_t *media);
 
 /* Selector list parsing */
-static inline css_error parseClass(css_language *c,
+static css_error parseClass(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_selector_detail *specific);
-static inline css_error parseAttrib(css_language *c, 
+static css_error parseAttrib(css_language *c, 
 		const parserutils_vector *vector, int *ctx,
 		css_selector_detail *specific);
-static inline css_error parsePseudo(css_language *c,
+static css_error parsePseudo(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_selector_detail *specific);
-static inline css_error parseSpecific(css_language *c,
+static css_error parseSpecific(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_selector **parent);
-static inline css_error parseSelectorSpecifics(css_language *c,
+static css_error parseSelectorSpecifics(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_selector **parent);
-static inline css_error parseSimpleSelector(css_language *c, 
+static css_error parseSimpleSelector(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_selector **result);
-static inline css_error parseCombinator(css_language *c, 
+static css_error parseCombinator(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_combinator *result);
-static inline css_error parseSelector(css_language *c, 
+static css_error parseSelector(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_selector **result);
-static inline css_error parseSelectorList(css_language *c, 
+static css_error parseSelectorList(css_language *c, 
 		const parserutils_vector *vector, css_rule *rule);
 
 /* Declaration parsing */
-static inline css_error parseProperty(css_language *c,
+static css_error parseProperty(css_language *c,
 		const css_token *property, const parserutils_vector *vector,
 		int *ctx, css_rule *rule);
 

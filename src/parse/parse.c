@@ -120,43 +120,43 @@ static css_error css_parser_create_internal(const char *charset,
 		css_allocator_fn alloc, void *pw, parser_state initial, 
 		css_parser **parser);
 
-static inline css_error transition(css_parser *parser, parser_state to,
+static css_error transition(css_parser *parser, parser_state to,
 		parser_state subsequent);
-static inline css_error transitionNoRet(css_parser *parser, parser_state to);
-static inline css_error done(css_parser *parser);
-static inline css_error expect(css_parser *parser, css_token_type type);
-static inline css_error getToken(css_parser *parser, const css_token **token);
-static inline css_error pushBack(css_parser *parser, const css_token *token);
-static inline css_error eatWS(css_parser *parser);
+static css_error transitionNoRet(css_parser *parser, parser_state to);
+static css_error done(css_parser *parser);
+static css_error expect(css_parser *parser, css_token_type type);
+static css_error getToken(css_parser *parser, const css_token **token);
+static css_error pushBack(css_parser *parser, const css_token *token);
+static css_error eatWS(css_parser *parser);
 
-static inline css_error parseStart(css_parser *parser);
-static inline css_error parseStylesheet(css_parser *parser);
-static inline css_error parseStatement(css_parser *parser);
-static inline css_error parseRuleset(css_parser *parser);
-static inline css_error parseRulesetEnd(css_parser *parser);
-static inline css_error parseAtRule(css_parser *parser);
-static inline css_error parseAtRuleEnd(css_parser *parser);
-static inline css_error parseBlock(css_parser *parser);
-static inline css_error parseBlockContent(css_parser *parser);
-static inline css_error parseSelector(css_parser *parser);
-static inline css_error parseDeclaration(css_parser *parser);
-static inline css_error parseDeclList(css_parser *parser);
-static inline css_error parseDeclListEnd(css_parser *parser);
-static inline css_error parseProperty(css_parser *parser);
-static inline css_error parseValue0(css_parser *parser);
-static inline css_error parseValue1(css_parser *parser);
-static inline css_error parseValue(css_parser *parser);
-static inline css_error parseAny0(css_parser *parser);
-static inline css_error parseAny1(css_parser *parser);
-static inline css_error parseAny(css_parser *parser);
-static inline css_error parseMalformedDeclaration(css_parser *parser);
-static inline css_error parseMalformedSelector(css_parser *parser);
-static inline css_error parseMalformedAtRule(css_parser *parser);
-static inline css_error parseInlineStyle(css_parser *parser);
-static inline css_error parseISBody0(css_parser *parser);
-static inline css_error parseISBody(css_parser *parser);
+static css_error parseStart(css_parser *parser);
+static css_error parseStylesheet(css_parser *parser);
+static css_error parseStatement(css_parser *parser);
+static css_error parseRuleset(css_parser *parser);
+static css_error parseRulesetEnd(css_parser *parser);
+static css_error parseAtRule(css_parser *parser);
+static css_error parseAtRuleEnd(css_parser *parser);
+static css_error parseBlock(css_parser *parser);
+static css_error parseBlockContent(css_parser *parser);
+static css_error parseSelector(css_parser *parser);
+static css_error parseDeclaration(css_parser *parser);
+static css_error parseDeclList(css_parser *parser);
+static css_error parseDeclListEnd(css_parser *parser);
+static css_error parseProperty(css_parser *parser);
+static css_error parseValue0(css_parser *parser);
+static css_error parseValue1(css_parser *parser);
+static css_error parseValue(css_parser *parser);
+static css_error parseAny0(css_parser *parser);
+static css_error parseAny1(css_parser *parser);
+static css_error parseAny(css_parser *parser);
+static css_error parseMalformedDeclaration(css_parser *parser);
+static css_error parseMalformedSelector(css_parser *parser);
+static css_error parseMalformedAtRule(css_parser *parser);
+static css_error parseInlineStyle(css_parser *parser);
+static css_error parseISBody0(css_parser *parser);
+static css_error parseISBody(css_parser *parser);
 
-static inline void unref_interned_strings_in_tokens(css_parser *parser);
+static void unref_interned_strings_in_tokens(css_parser *parser);
 
 /**
  * Dispatch table for parsing, indexed by major state number
@@ -2563,7 +2563,7 @@ css_error parseISBody(css_parser *parser)
  *
  * \param parser The parser whose tokens we are cleaning up.
  */
-static inline void unref_interned_strings_in_tokens(css_parser *parser)
+void unref_interned_strings_in_tokens(css_parser *parser)
 {
         int32_t ctx = 0;
         const css_token *tok;
