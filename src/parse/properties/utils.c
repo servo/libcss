@@ -777,7 +777,8 @@ css_error comma_list_to_bytecode(css_language *c,
 				 * from the name we already have */
 				lerror = lwc_context_intern(
 						c->sheet->dictionary,
-						(char *) buf, len, &newname);
+						(char *) buf, p - buf, 
+						&newname);
 				if (lerror != lwc_error_ok) {
 					error = css_error_from_lwc_error(
 							lerror);
