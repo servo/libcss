@@ -696,4 +696,36 @@
 |  pause-after: inherit !important
 #reset
 
+#data
+* { cue-before: inherit; }
+#errors
+#expected
+| *
+|  cue-before: inherit
+#reset
+
+#data
+* { cue-before: inherit !important; }
+#errors
+#expected
+| *
+|  cue-before: inherit !important
+#reset
+
+#data
+* { cue-after: inherit; }
+#errors
+#expected
+| *
+|  cue-after: inherit
+#reset
+
+#data
+* { cue-after: inherit !important; }
+#errors
+#expected
+| *
+|  cue-after: inherit !important
+#reset
+
 
