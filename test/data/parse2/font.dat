@@ -631,12 +631,6 @@
 #errors
 #expected
 | *
-|  font-style: italic
-|  font-variant: normal
-|  font-weight: bold
-|  font-size: 10pt
-|  line-height: normal
-|  font-family: serif
 #reset
 
 #data
@@ -644,12 +638,6 @@
 #errors
 #expected
 | *
-|  font-style: italic
-|  font-variant: normal
-|  font-weight: bold
-|  font-size: 10pt
-|  line-height: normal
-|  font-family: serif
 #reset
 
 #data
@@ -657,12 +645,6 @@
 #errors
 #expected
 | *
-|  font-style: italic
-|  font-variant: normal
-|  font-weight: bold
-|  font-size: 10pt
-|  line-height: normal
-|  font-family: serif
 #reset
 
 #data
@@ -691,12 +673,6 @@
 #errors
 #expected
 | *
-|  font-style: italic
-|  font-variant: normal
-|  font-weight: normal
-|  font-size: 10pt
-|  line-height: normal
-|  font-family: serif
 #reset
 
 #data
@@ -704,12 +680,6 @@
 #errors
 #expected
 | *
-|  font-style: italic
-|  font-variant: normal
-|  font-weight: normal
-|  font-size: 10pt
-|  line-height: normal
-|  font-family: serif
 #reset
 
 #data
@@ -717,12 +687,6 @@
 #errors
 #expected
 | *
-|  font-style: italic
-|  font-variant: normal
-|  font-weight: normal
-|  font-size: 10pt
-|  line-height: normal
-|  font-family: serif
 #reset
 
 
