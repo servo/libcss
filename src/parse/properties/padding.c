@@ -87,6 +87,14 @@ css_error parse_padding(css_language *c,
 		prev_ctx = *ctx;
 		error = CSS_OK;
 
+		/* Ensure that we're not about to parse another inherit */
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				token->ilower == c->strings[INHERIT]) {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
+
 		if (top == NULL &&
 				(error = parse_padding_side(c, vector, ctx, 
 				CSS_PROP_PADDING_TOP, &top)) == CSS_OK) {
