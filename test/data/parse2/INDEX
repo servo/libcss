@@ -13,6 +13,7 @@ bgpos.dat			Illegal background-position values
 au.dat				Aural property tests
 bg.dat				Background property tests
 border.dat			Border property tests
+font.dat			Font property tests
 margin.dat			Margin property tests
 outline.dat			Outline property tests
 padding.dat			Padding property tests
