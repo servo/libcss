@@ -22,6 +22,28 @@
 #reset
 
 #data
+* { cursor: inherit }
+#errors
+#expected
+| *
+|  cursor: inherit
+#reset
+
+#data
+* { cursor: text inherit }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cursor: inherit auto }
+#errors
+#expected
+| *
+#reset
+
+#data
 * { background-image: url("foo.png"); color: inherit }
 #errors
 #expected
