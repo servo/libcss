@@ -124,40 +124,40 @@ do {									\
 	(lexer)->currentCol += (len);					\
 } while(0)								\
 
-static inline css_error appendToTokenData(css_lexer *lexer, 
+static css_error appendToTokenData(css_lexer *lexer, 
 		const uint8_t *data, size_t len);
-static inline css_error emitToken(css_lexer *lexer, css_token_type type,
+static css_error emitToken(css_lexer *lexer, css_token_type type,
 		css_token **token);
 
-static inline css_error AtKeyword(css_lexer *lexer, css_token **token);
-static inline css_error CDCOrIdentOrFunctionOrNPD(css_lexer *lexer,
+static css_error AtKeyword(css_lexer *lexer, css_token **token);
+static css_error CDCOrIdentOrFunctionOrNPD(css_lexer *lexer,
 		css_token **token);
-static inline css_error CDO(css_lexer *lexer, css_token **token);
-static inline css_error Comment(css_lexer *lexer, css_token **token);
-static inline css_error EscapedIdentOrFunction(css_lexer *lexer,
+static css_error CDO(css_lexer *lexer, css_token **token);
+static css_error Comment(css_lexer *lexer, css_token **token);
+static css_error EscapedIdentOrFunction(css_lexer *lexer,
 		css_token **token);
-static inline css_error Hash(css_lexer *lexer, css_token **token);
-static inline css_error IdentOrFunction(css_lexer *lexer,
+static css_error Hash(css_lexer *lexer, css_token **token);
+static css_error IdentOrFunction(css_lexer *lexer,
 		css_token **token);
-static inline css_error Match(css_lexer *lexer, css_token **token);
-static inline css_error NumberOrPercentageOrDimension(css_lexer *lexer,
+static css_error Match(css_lexer *lexer, css_token **token);
+static css_error NumberOrPercentageOrDimension(css_lexer *lexer,
 		css_token **token);
-static inline css_error S(css_lexer *lexer, css_token **token);
-static inline css_error Start(css_lexer *lexer, css_token **token);
-static inline css_error String(css_lexer *lexer, css_token **token);
-static inline css_error URIOrUnicodeRangeOrIdentOrFunction(
+static css_error S(css_lexer *lexer, css_token **token);
+static css_error Start(css_lexer *lexer, css_token **token);
+static css_error String(css_lexer *lexer, css_token **token);
+static css_error URIOrUnicodeRangeOrIdentOrFunction(
 		css_lexer *lexer, css_token **token);
-static inline css_error URI(css_lexer *lexer, css_token **token);
-static inline css_error UnicodeRange(css_lexer *lexer, css_token **token);
+static css_error URI(css_lexer *lexer, css_token **token);
+static css_error UnicodeRange(css_lexer *lexer, css_token **token);
 
-static inline css_error consumeDigits(css_lexer *lexer);
-static inline css_error consumeEscape(css_lexer *lexer, bool nl);
-static inline css_error consumeNMChars(css_lexer *lexer);
-static inline css_error consumeString(css_lexer *lexer);
-static inline css_error consumeStringChars(css_lexer *lexer);
-static inline css_error consumeUnicode(css_lexer *lexer, uint32_t ucs);
-static inline css_error consumeURLChars(css_lexer *lexer);
-static inline css_error consumeWChars(css_lexer *lexer);
+static css_error consumeDigits(css_lexer *lexer);
+static css_error consumeEscape(css_lexer *lexer, bool nl);
+static css_error consumeNMChars(css_lexer *lexer);
+static css_error consumeString(css_lexer *lexer);
+static css_error consumeStringChars(css_lexer *lexer);
+static css_error consumeUnicode(css_lexer *lexer, uint32_t ucs);
+static css_error consumeURLChars(css_lexer *lexer);
+static css_error consumeWChars(css_lexer *lexer);
 
 static inline bool startNMChar(uint8_t c);
 static inline bool startNMStart(uint8_t c);
