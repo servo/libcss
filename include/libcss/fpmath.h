@@ -32,7 +32,7 @@ typedef int32_t css_fixed;
 #define FDIVI(a, b) ((a) / (b))
 
 /* Convert a floating point value to fixed point */
-#define FLTTOFIX(a) ((fixed) ((a) * (float) (1 << 10)))
+#define FLTTOFIX(a) ((css_fixed) ((a) * (float) (1 << 10)))
 /* Convert a fixed point value to floating point */
 #define FIXTOFLT(a) ((float) (a) / (float) (1 << 10))
 
