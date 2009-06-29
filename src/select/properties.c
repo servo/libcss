@@ -1934,7 +1934,7 @@ css_error cascade_display(uint32_t opv, css_style *style,
 			value = CSS_DISPLAY_TABLE_CAPTION;
 			break;
 		case DISPLAY_NONE:
-			value = DISPLAY_NONE;
+			value = CSS_DISPLAY_NONE;
 			break;
 		}
 	}
