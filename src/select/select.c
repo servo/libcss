@@ -269,6 +269,7 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	css_error error;
 	css_hint hint;
 	css_select_state state;
+	void *parent = NULL;
 
 	if (ctx == NULL || node == NULL || result == NULL || handler == NULL)
 		return CSS_BADPARM;
@@ -281,6 +282,10 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	state.result = result;
 	state.handler = handler;
 	state.pw = pw;
+
+	error = handler->parent_node(pw, node, &parent);
+	if (error)
+		return error;
 
 	/* Iterate through the top-level stylesheets, selecting styles
 	 * from those which apply to our current media requirements and
@@ -349,7 +354,6 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	 * Those properties which are inherited need to be set as inherit.
 	 * Those which are not inherited need to be set to their default value.
 	 */
-	/** \todo If node is tree root, everything should be defaulted. */
 	for (i = 0; i < CSS_N_PROPERTIES; i++) {
 		/* Do nothing if this property is set */
 		if (state.props[i].set)
@@ -357,8 +361,11 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 
 		/* Do nothing if this property is inherited (the default state 
 		 * of a clean computed style is for everything to be set to 
-		 * inherit) */
-		if (prop_dispatch[i].inherited)
+		 * inherit)
+		 *
+		 * If the node is tree root, everything should be defaulted.
+		 */
+		if (prop_dispatch[i].inherited && parent != NULL)
 			continue;
 
 		/* Remaining properties are neither inherited nor already set.
