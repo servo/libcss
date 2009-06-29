@@ -146,8 +146,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	css_fixed len1 = 0, len2 = 0;
 	css_unit unit1 = CSS_UNIT_PX, unit2 = CSS_UNIT_PX;
 	css_computed_clip_rect rect;
-	const css_computed_content_item *content;
-	const css_computed_counter *counter;
+	const css_computed_content_item *content = NULL;
+	const css_computed_counter *counter = NULL;
+	lwc_string **string_list = NULL;
 
 	/* background-attachment */
 	val = css_computed_background_attachment(style);
@@ -824,6 +825,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 
 		wrote = snprintf(ptr, *len, "\n");
 		break;
+	default:
+		wrote = 0;
+		break;
 	}
 	ptr += wrote;
 	*len -= wrote;
@@ -880,6 +884,98 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		}
 
 		wrote = snprintf(ptr, *len, "\n");
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* cursor */
+	val = css_computed_cursor(style, &string_list);
+	wrote = snprintf(ptr, *len, "cursor:");
+	ptr += wrote;
+	*len -= wrote;
+
+	if (string_list != NULL) {
+		while (*string_list != NULL) {
+			wrote = snprintf(ptr, *len, " url\"%.*s\")",
+					(int) lwc_string_length(*string_list),
+					lwc_string_data(*string_list));
+			ptr += wrote;
+			*len -= wrote;
+
+			string_list++;
+		}
+	}
+	switch (val) {
+	case CSS_CURSOR_AUTO:
+		wrote = snprintf(ptr, *len, " auto\n");
+		break;
+	case CSS_CURSOR_CROSSHAIR:
+		wrote = snprintf(ptr, *len, " crosshair\n");
+		break;
+	case CSS_CURSOR_DEFAULT:
+		wrote = snprintf(ptr, *len, " default\n");
+		break;
+	case CSS_CURSOR_POINTER:
+		wrote = snprintf(ptr, *len, " pointer\n");
+		break;
+	case CSS_CURSOR_MOVE:
+		wrote = snprintf(ptr, *len, " move\n");
+		break;
+	case CSS_CURSOR_E_RESIZE:
+		wrote = snprintf(ptr, *len, " e-resize\n");
+		break;
+	case CSS_CURSOR_NE_RESIZE:
+		wrote = snprintf(ptr, *len, " ne-resize\n");
+		break;
+	case CSS_CURSOR_NW_RESIZE:
+		wrote = snprintf(ptr, *len, " nw-resize\n");
+		break;
+	case CSS_CURSOR_N_RESIZE:
+		wrote = snprintf(ptr, *len, " n-resize\n");
+		break;
+	case CSS_CURSOR_SE_RESIZE:
+		wrote = snprintf(ptr, *len, " se-resize\n");
+		break;
+	case CSS_CURSOR_SW_RESIZE:
+		wrote = snprintf(ptr, *len, " sw-resize\n");
+		break;
+	case CSS_CURSOR_S_RESIZE:
+		wrote = snprintf(ptr, *len, " s-resize\n");
+		break;
+	case CSS_CURSOR_W_RESIZE:
+		wrote = snprintf(ptr, *len, " w-resize\n");
+		break;
+	case CSS_CURSOR_TEXT:
+		wrote = snprintf(ptr, *len, " text\n");
+		break;
+	case CSS_CURSOR_WAIT:
+		wrote = snprintf(ptr, *len, " wait\n");
+		break;
+	case CSS_CURSOR_HELP:
+		wrote = snprintf(ptr, *len, " help\n");
+		break;
+	case CSS_CURSOR_PROGRESS:
+		wrote = snprintf(ptr, *len, " progress\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* direction */
+	val = css_computed_direction(style);
+	switch (val) {
+	case CSS_DIRECTION_LTR:
+		wrote = snprintf(ptr, *len, "direction: ltr\n");
+		break;
+	case CSS_DIRECTION_RTL:
+		wrote = snprintf(ptr, *len, "direction: rtl\n");
+		break;
+	default:
+		wrote = 0;
+		break;
 	}
 	ptr += wrote;
 	*len -= wrote;
@@ -941,5 +1037,82 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	}
 	ptr += wrote;
 	*len -= wrote;
+
+	/* empty-cells */
+	val = css_computed_empty_cells(style);
+	switch (val) {
+	case CSS_EMPTY_CELLS_SHOW:
+		wrote = snprintf(ptr, *len, "empty-cells: show\n");
+		break;
+	case CSS_EMPTY_CELLS_HIDE:
+		wrote = snprintf(ptr, *len, "empty-cells: hide\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* float */
+	val = css_computed_float(style);
+	switch (val) {
+	case CSS_FLOAT_LEFT:
+		wrote = snprintf(ptr, *len, "float: left\n");
+		break;
+	case CSS_FLOAT_RIGHT:
+		wrote = snprintf(ptr, *len, "float: right\n");
+		break;
+	case CSS_FLOAT_NONE:
+		wrote = snprintf(ptr, *len, "float: none\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* font-family */
+	val = css_computed_font_family(style, &string_list);
+	if (val != CSS_FONT_FAMILY_INHERIT) {
+		wrote = snprintf(ptr, *len, "font-family:");
+		ptr += wrote;
+		*len -= wrote;
+
+		if (string_list != NULL) {
+			while (*string_list != NULL) {
+				wrote = snprintf(ptr, *len, " \"%.*s\"",
+					(int) lwc_string_length(*string_list),
+					lwc_string_data(*string_list));
+				ptr += wrote;
+				*len -= wrote;
+
+				string_list++;
+			}
+		}
+		switch (val) {
+		case CSS_FONT_FAMILY_SERIF:
+			wrote = snprintf(ptr, *len, " serif\n");
+			break;
+		case CSS_FONT_FAMILY_SANS_SERIF:
+			wrote = snprintf(ptr, *len, " sans-serif\n");
+			break;
+		case CSS_FONT_FAMILY_CURSIVE:
+			wrote = snprintf(ptr, *len, " cursive\n");
+			break;
+		case CSS_FONT_FAMILY_FANTASY:
+			wrote = snprintf(ptr, *len, " fantasy\n");
+			break;
+		case CSS_FONT_FAMILY_MONOSPACE:
+			wrote = snprintf(ptr, *len, " monospace\n");
+			break;
+		case CSS_FONT_FAMILY_DEFAULT:
+			wrote = snprintf(ptr, *len, " default\n");
+			break;
+		}
+		ptr += wrote;
+		*len -= wrote;
+	}
 }
 
