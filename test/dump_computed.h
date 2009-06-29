@@ -1114,5 +1114,209 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		ptr += wrote;
 		*len -= wrote;
 	}
+
+	/* font-size */
+	val = css_computed_font_size(style, &len1, &unit1);
+	switch (val) {
+	case CSS_FONT_SIZE_XX_SMALL:
+		wrote = snprintf(ptr, *len, "font-size: xx-small\n");
+		break;
+	case CSS_FONT_SIZE_X_SMALL:
+		wrote = snprintf(ptr, *len, "font-size: x-small\n");
+		break;
+	case CSS_FONT_SIZE_SMALL:
+		wrote = snprintf(ptr, *len, "font-size: small\n");
+		break;
+	case CSS_FONT_SIZE_MEDIUM:
+		wrote = snprintf(ptr, *len, "font-size: medium\n");
+		break;
+	case CSS_FONT_SIZE_LARGE:
+		wrote = snprintf(ptr, *len, "font-size: large\n");
+		break;
+	case CSS_FONT_SIZE_X_LARGE:
+		wrote = snprintf(ptr, *len, "font-size: x-large\n");
+		break;
+	case CSS_FONT_SIZE_XX_LARGE:
+		wrote = snprintf(ptr, *len, "font-size: xx-large\n");
+		break;
+	case CSS_FONT_SIZE_LARGER:
+		wrote = snprintf(ptr, *len, "font-size: larger\n");
+		break;
+	case CSS_FONT_SIZE_SMALLER:
+		wrote = snprintf(ptr, *len, "font-size: smaller\n");
+		break;
+	case CSS_FONT_SIZE_DIMENSION:
+		wrote = snprintf(ptr, *len, "font-size: \n");
+
+		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* font-style */
+	val = css_computed_font_style(style);
+	switch (val) {
+	case CSS_FONT_STYLE_NORMAL:
+		wrote = snprintf(ptr, *len, "font-style: normal\n");
+		break;
+	case CSS_FONT_STYLE_ITALIC:
+		wrote = snprintf(ptr, *len, "font-style: italic\n");
+		break;
+	case CSS_FONT_STYLE_OBLIQUE:
+		wrote = snprintf(ptr, *len, "font-style: oblique\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* font-variant */
+	val = css_computed_font_variant(style);
+	switch (val) {
+	case CSS_FONT_VARIANT_NORMAL:
+		wrote = snprintf(ptr, *len, "font-variant: normal\n");
+		break;
+	case CSS_FONT_VARIANT_SMALL_CAPS:
+		wrote = snprintf(ptr, *len, "font-variant: small-caps\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* font-weight */
+	val = css_computed_font_weight(style);
+	switch (val) {
+	case CSS_FONT_WEIGHT_NORMAL:
+		wrote = snprintf(ptr, *len, "font-weight: normal\n");
+		break;
+	case CSS_FONT_WEIGHT_BOLD:
+		wrote = snprintf(ptr, *len, "font-weight: bold\n");
+		break;
+	case CSS_FONT_WEIGHT_BOLDER:
+		wrote = snprintf(ptr, *len, "font-weight: bolder\n");
+		break;
+	case CSS_FONT_WEIGHT_LIGHTER:
+		wrote = snprintf(ptr, *len, "font-weight: lighter\n");
+		break;
+	case CSS_FONT_WEIGHT_100:
+		wrote = snprintf(ptr, *len, "font-weight: 100\n");
+		break;
+	case CSS_FONT_WEIGHT_200:
+		wrote = snprintf(ptr, *len, "font-weight: 200\n");
+		break;
+	case CSS_FONT_WEIGHT_300:
+		wrote = snprintf(ptr, *len, "font-weight: 300\n");
+		break;
+	case CSS_FONT_WEIGHT_400:
+		wrote = snprintf(ptr, *len, "font-weight: 400\n");
+		break;
+	case CSS_FONT_WEIGHT_500:
+		wrote = snprintf(ptr, *len, "font-weight: 500\n");
+		break;
+	case CSS_FONT_WEIGHT_600:
+		wrote = snprintf(ptr, *len, "font-weight: 600\n");
+		break;
+	case CSS_FONT_WEIGHT_700:
+		wrote = snprintf(ptr, *len, "font-weight: 700\n");
+		break;
+	case CSS_FONT_WEIGHT_800:
+		wrote = snprintf(ptr, *len, "font-weight: 800\n");
+		break;
+	case CSS_FONT_WEIGHT_900:
+		wrote = snprintf(ptr, *len, "font-weight: 900\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* height */
+	val = css_computed_height(style, &len1, &unit1);
+	switch (val) {
+	case CSS_HEIGHT_AUTO:
+		wrote = snprintf(ptr, *len, "height: auto\n");
+		break;
+	case CSS_HEIGHT_SET:
+		wrote = snprintf(ptr, *len, "height: \n");
+
+		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* left */
+	val = css_computed_left(style, &len1, &unit1);
+	switch (val) {
+	case CSS_LEFT_AUTO:
+		wrote = snprintf(ptr, *len, "left: auto\n");
+		break;
+	case CSS_LEFT_SET:
+		wrote = snprintf(ptr, *len, "left: \n");
+
+		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* letter-spacing */
+	val = css_computed_letter_spacing(style, &len1, &unit1);
+	switch (val) {
+	case CSS_LETTER_SPACING_NORMAL:
+		wrote = snprintf(ptr, *len, "letter-spacing: normal\n");
+		break;
+	case CSS_LETTER_SPACING_SET:
+		wrote = snprintf(ptr, *len, "letter-spacing: \n");
+
+		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* line-height */
+	val = css_computed_line_height(style, &len1, &unit1);
+	switch (val) {
+	case CSS_LINE_HEIGHT_NORMAL:
+		wrote = snprintf(ptr, *len, "line-height: normal\n");
+		break;
+	case CSS_LINE_HEIGHT_NUMBER:
+		wrote = snprintf(ptr, *len, "line-height: \n");
+
+		wrote += dump_css_fixed(len1, ptr, *len);
+		break;
+	case CSS_LINE_HEIGHT_DIMENSION:
+		wrote = snprintf(ptr, *len, "line-height: \n");
+
+		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
 }
 
