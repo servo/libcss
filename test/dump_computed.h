@@ -145,6 +145,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	lwc_string *url = NULL;
 	css_fixed len1 = 0, len2 = 0;
 	css_unit unit1 = CSS_UNIT_PX, unit2 = CSS_UNIT_PX;
+	css_computed_clip_rect rect;
+	const css_computed_content_item *content;
+	const css_computed_counter *counter;
 
 	/* background-attachment */
 	val = css_computed_background_attachment(style);
@@ -182,7 +185,8 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	val = css_computed_background_image(style, &url);
 	if (val == CSS_BACKGROUND_IMAGE_IMAGE && url != NULL) {
 		wrote = snprintf(ptr, *len, "background-image: url('%.*s')\n",
-                                 (int) lwc_string_length(url), lwc_string_data(url));
+				(int) lwc_string_length(url), 
+				lwc_string_data(url));
 	} else if (val == CSS_BACKGROUND_IMAGE_NONE) {
 		wrote = snprintf(ptr, *len, "background-image: none\n");
 	} else {
@@ -663,24 +667,56 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	*len -= wrote;
 
 	/* clip */
-	if (style->uncommon != NULL) {
-#if 0
-		val = css_computed_clip(style);
-		switch (val) {
-		case CSS_CLIP_AUTO:
-			wrote = snprintf(ptr, *len, "clip: auto\n");
-			break;
-		case CSS_CLIP_RECT:
-			wrote = snprintf(ptr, *len, "clip: rect\n");
-			break;
-		default:
-			wrote = 0;
-			break;
-		}
+	val = css_computed_clip(style, &rect);
+	switch (val) {
+	case CSS_CLIP_AUTO:
+		wrote = snprintf(ptr, *len, "clip: auto\n");
+		break;
+	case CSS_CLIP_RECT:
+		wrote = snprintf(ptr, *len, "clip: rect( ");
 		ptr += wrote;
 		*len -= wrote;
-#endif
+
+		if (rect.top_auto)
+			wrote = snprintf(ptr, *len, "auto");
+		else
+			wrote = dump_css_unit(rect.top, rect.tunit,
+					ptr, *len);
+		wrote += snprintf(ptr + wrote, *len - wrote, ", ");
+		ptr += wrote;
+		*len -= wrote;
+
+		if (rect.right_auto)
+			wrote = snprintf(ptr, *len, "auto");
+		else
+			wrote = dump_css_unit(rect.right, rect.runit,
+					ptr, *len);
+		wrote += snprintf(ptr + wrote, *len - wrote, ", ");
+		ptr += wrote;
+		*len -= wrote;
+
+		if (rect.bottom_auto)
+			wrote = snprintf(ptr, *len, "auto");
+		else
+			wrote = dump_css_unit(rect.bottom, rect.bunit,
+					ptr, *len);
+		wrote += snprintf(ptr + wrote, *len - wrote, ", ");
+		ptr += wrote;
+		*len -= wrote;
+
+		if (rect.left_auto)
+			wrote = snprintf(ptr, *len, "auto");
+		else
+			wrote = dump_css_unit(rect.left, rect.lunit,
+					ptr, *len);
+		wrote += snprintf(ptr + wrote, *len - wrote, ")\n");
+		break;
+	default:
+		wrote = 0;
+		break;
 	}
+	ptr += wrote;
+	*len -= wrote;
 
 	/* color */
 	val = css_computed_color(style, &color);
@@ -689,6 +725,164 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		ptr += wrote;
 		*len -= wrote;
 	}
+
+	/* content */
+	val = css_computed_content(style, &content);
+	switch (val) {
+	case CSS_CONTENT_NONE:
+		wrote = snprintf(ptr, *len, "content: none\n");
+		break;
+	case CSS_CONTENT_NORMAL:
+		wrote = snprintf(ptr, *len, "content: normal\n");
+		break;
+	case CSS_CONTENT_SET:
+		wrote = snprintf(ptr, *len, "content:");
+		ptr += wrote;
+		*len -= wrote;
+
+		while (content->type != CSS_COMPUTED_CONTENT_NONE) {
+			wrote = snprintf(ptr, *len, " ");
+
+			switch (content->type) {
+			case CSS_COMPUTED_CONTENT_STRING:
+				wrote += snprintf(ptr + wrote, 
+						*len - wrote,
+						"\"%.*s\"",
+						(int) lwc_string_length(
+						content->data.string),
+						lwc_string_data(
+						content->data.string));
+				break;
+			case CSS_COMPUTED_CONTENT_URI:
+				wrote += snprintf(ptr + wrote, 
+						*len - wrote,
+						"uri(\"%.*s\")",
+						(int) lwc_string_length(
+						content->data.uri),
+						lwc_string_data(
+						content->data.uri));
+				break;
+			case CSS_COMPUTED_CONTENT_COUNTER:
+				wrote += snprintf(ptr + wrote, 
+						*len - wrote,
+						"counter(%.*s)",
+						(int) lwc_string_length(
+						content->data.counter.name),
+						lwc_string_data(
+						content->data.counter.name));
+				break;
+			case CSS_COMPUTED_CONTENT_COUNTERS:
+				wrote += snprintf(ptr + wrote, 
+						*len - wrote,
+						"counters(%.*s, "
+							"\"%.*s\")",
+						(int) lwc_string_length(
+						content->data.counters.name),
+						lwc_string_data(
+						content->data.counters.name),
+						(int) lwc_string_length(
+						content->data.counters.sep),
+						lwc_string_data(
+						content->data.counters.sep));
+				break;
+			case CSS_COMPUTED_CONTENT_ATTR:
+				wrote += snprintf(ptr + wrote, 
+						*len - wrote,
+						"attr(%.*s)",
+						(int) lwc_string_length(
+						content->data.attr),
+						lwc_string_data(
+						content->data.attr));
+				break;
+			case CSS_COMPUTED_CONTENT_OPEN_QUOTE:
+				wrote += snprintf(ptr + wrote,
+						*len - wrote,
+						"open-quote");
+				break;
+			case CSS_COMPUTED_CONTENT_CLOSE_QUOTE:
+				wrote += snprintf(ptr + wrote,
+						*len - wrote,
+						"close-quote");
+				break;
+			case CSS_COMPUTED_CONTENT_NO_OPEN_QUOTE:
+				wrote += snprintf(ptr + wrote,
+						*len - wrote,
+						"no-open-quote");
+				break;
+			case CSS_COMPUTED_CONTENT_NO_CLOSE_QUOTE:
+				wrote += snprintf(ptr + wrote,
+						*len - wrote,
+						"no-close-quote");
+				break;
+			}
+
+			ptr += wrote;
+			*len -= wrote;
+
+			content++;
+		}
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* counter-increment */
+	val = css_computed_counter_increment(style, &counter);
+	if (counter == NULL) {
+		wrote = snprintf(ptr, *len, "counter-increment: none\n");
+	} else {
+		wrote = snprintf(ptr, *len, "counter-increment:");
+		ptr += wrote;
+		*len -= wrote;
+
+		while (counter->name != NULL) {
+			wrote = snprintf(ptr, *len, " %.*s ",
+					(int) lwc_string_length(counter->name),
+					lwc_string_data(counter->name));
+			ptr += wrote;
+			*len -= wrote;
+
+			wrote = dump_css_fixed(counter->value, ptr, *len);
+			ptr += wrote;
+			*len -= wrote;
+
+			counter++;
+		}
+
+		wrote = snprintf(ptr, *len, "\n");
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* counter-reset */
+	val = css_computed_counter_reset(style, &counter);
+	if (counter == NULL) {
+		wrote = snprintf(ptr, *len, "counter-reset: none\n");
+	} else {
+		wrote = snprintf(ptr, *len, "counter-reset:");
+		ptr += wrote;
+		*len -= wrote;
+
+		while (counter->name != NULL) {
+			wrote = snprintf(ptr, *len, " %.*s ",
+					(int) lwc_string_length(counter->name),
+					lwc_string_data(counter->name));
+			ptr += wrote;
+			*len -= wrote;
+
+			wrote = dump_css_fixed(counter->value, ptr, *len);
+			ptr += wrote;
+			*len -= wrote;
+
+			counter++;
+		}
+
+		wrote = snprintf(ptr, *len, "\n");
+	}
+	ptr += wrote;
+	*len -= wrote;
 
 	/* display */
 	val = css_computed_display(style);
