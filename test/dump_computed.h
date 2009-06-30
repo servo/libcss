@@ -1399,11 +1399,11 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* list-style-image */
 	val = css_computed_list_style_image(style, &url);
 	if (url != NULL) {
-		wrote = snprintf(ptr, *len, "background-image: url('%.*s')\n",
+		wrote = snprintf(ptr, *len, "list-style-image: url('%.*s')\n",
 				(int) lwc_string_length(url), 
 				lwc_string_data(url));
 	} else if (val == CSS_LIST_STYLE_IMAGE_NONE) {
-		wrote = snprintf(ptr, *len, "background-image: none\n");
+		wrote = snprintf(ptr, *len, "list-style-image: none\n");
 	} else {
 		wrote = 0;
 	}
