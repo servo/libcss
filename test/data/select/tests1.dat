@@ -18,10 +18,10 @@ background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: #00000000
-border-right-color: #00000000
-border-bottom-color: #00000000
-border-left-color: #00000000
+border-top-color: #ff000000
+border-right-color: #ff000000
+border-bottom-color: #ff000000
+border-left-color: #ff000000
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -33,7 +33,7 @@ border-left-width: medium
 bottom: auto
 clear: none
 clip: auto
-color: default
+color: #ff000000
 content: normal
 counter-increment: none
 counter-reset: none
