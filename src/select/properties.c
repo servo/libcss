@@ -519,7 +519,7 @@ css_error set_border_top_color_from_hint(const css_hint *hint,
 
 css_error initial_border_top_color(css_computed_style *style)
 {
-	return set_border_top_color(style, CSS_BORDER_COLOR_COLOR, 0);
+	return set_border_top_color(style, CSS_BORDER_COLOR_INITIAL, 0);
 }
 
 css_error compose_border_top_color(const css_computed_style *parent,
@@ -553,7 +553,7 @@ css_error set_border_right_color_from_hint(const css_hint *hint,
 
 css_error initial_border_right_color(css_computed_style *style)
 {
-	return set_border_right_color(style, CSS_BORDER_COLOR_COLOR, 0);
+	return set_border_right_color(style, CSS_BORDER_COLOR_INITIAL, 0);
 }
 
 css_error compose_border_right_color(const css_computed_style *parent,
@@ -587,7 +587,7 @@ css_error set_border_bottom_color_from_hint(const css_hint *hint,
 
 css_error initial_border_bottom_color(css_computed_style *style)
 {
-	return set_border_bottom_color(style, CSS_BORDER_COLOR_COLOR, 0);
+	return set_border_bottom_color(style, CSS_BORDER_COLOR_INITIAL, 0);
 }
 
 css_error compose_border_bottom_color(const css_computed_style *parent,
@@ -621,7 +621,7 @@ css_error set_border_left_color_from_hint(const css_hint *hint,
 
 css_error initial_border_left_color(css_computed_style *style)
 {
-	return set_border_left_color(style, CSS_BORDER_COLOR_COLOR, 0);
+	return set_border_left_color(style, CSS_BORDER_COLOR_INITIAL, 0);
 }
 
 css_error compose_border_left_color(const css_computed_style *parent,

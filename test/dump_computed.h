@@ -145,7 +145,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	lwc_string *url = NULL;
 	css_fixed len1 = 0, len2 = 0;
 	css_unit unit1 = CSS_UNIT_PX, unit2 = CSS_UNIT_PX;
-	css_computed_clip_rect rect;
+	css_computed_clip_rect rect = { 0, 0, 0, 0, CSS_UNIT_PX, CSS_UNIT_PX,
+					CSS_UNIT_PX, CSS_UNIT_PX, true, true,
+					true, true };
 	const css_computed_content_item *content = NULL;
 	const css_computed_counter *counter = NULL;
 	lwc_string **string_list = NULL;
@@ -287,6 +289,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-top-color */
 	val = css_computed_border_top_color(style, &color);
 	switch (val) {
+	case CSS_BORDER_COLOR_INITIAL:
+		wrote = snprintf(ptr, *len, "border-top-color: initial\n");
+		break;
 	case CSS_BORDER_COLOR_TRANSPARENT:
 		wrote = snprintf(ptr, *len, "border-top-color: transparent\n");
 		break;
@@ -303,6 +308,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-right-color */
 	val = css_computed_border_right_color(style, &color);
 	switch (val) {
+	case CSS_BORDER_COLOR_INITIAL:
+		wrote = snprintf(ptr, *len, "border-right-color: initial\n");
+		break;
 	case CSS_BORDER_COLOR_TRANSPARENT:
 		wrote = snprintf(ptr, *len,
 				"border-right-color: transparent\n");
@@ -321,6 +329,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-bottom-color */
 	val = css_computed_border_bottom_color(style, &color);
 	switch (val) {
+	case CSS_BORDER_COLOR_INITIAL:
+		wrote = snprintf(ptr, *len, "border-bottom-color: initial\n");
+		break;
 	case CSS_BORDER_COLOR_TRANSPARENT:
 		wrote = snprintf(ptr, *len,
 				"border-bottom-color: transparent\n");
@@ -339,6 +350,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-left-color */
 	val = css_computed_border_left_color(style, &color);
 	switch (val) {
+	case CSS_BORDER_COLOR_INITIAL:
+		wrote = snprintf(ptr, *len, "border-left-color: initial\n");
+		break;
 	case CSS_BORDER_COLOR_TRANSPARENT:
 		wrote = snprintf(ptr, *len, "border-left-color: transparent\n");
 		break;
