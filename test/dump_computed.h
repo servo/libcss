@@ -149,6 +149,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	const css_computed_content_item *content = NULL;
 	const css_computed_counter *counter = NULL;
 	lwc_string **string_list = NULL;
+	int32_t zindex = 0;
 
 	/* background-attachment */
 	val = css_computed_background_attachment(style);
@@ -260,30 +261,27 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	*len -= wrote;
 
 	/* border-spacing */
-	if (style->uncommon != NULL) {
-		val = css_computed_border_spacing(style, &len1, &unit1,
-				&len2, &unit2);
-		if (val == CSS_BORDER_SPACING_SET) {
-			wrote = snprintf(ptr, *len, "border-spacing: ");
-			ptr += wrote;
-			*len -= wrote;
+	val = css_computed_border_spacing(style, &len1, &unit1, &len2, &unit2);
+	if (val == CSS_BORDER_SPACING_SET) {
+		wrote = snprintf(ptr, *len, "border-spacing: ");
+		ptr += wrote;
+		*len -= wrote;
 
-			wrote = dump_css_unit(len1, unit1, ptr, *len);
-			ptr += wrote;
-			*len -= wrote;
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
 
-			wrote = snprintf(ptr, *len, " ");
-			ptr += wrote;
-			*len -= wrote;
+		wrote = snprintf(ptr, *len, " ");
+		ptr += wrote;
+		*len -= wrote;
 
-			wrote = dump_css_unit(len2, unit2, ptr, *len);
-			ptr += wrote;
-			*len -= wrote;
+		wrote = dump_css_unit(len2, unit2, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
 
-			wrote = snprintf(ptr, *len, "\n");
-			ptr += wrote;
-			*len -= wrote;
-		}
+		wrote = snprintf(ptr, *len, "\n");
+		ptr += wrote;
+		*len -= wrote;
 	}
 
 	/* border-top-color */
@@ -528,9 +526,15 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		wrote = snprintf(ptr, *len, "border-top-width: thick\n");
 		break;
 	case CSS_BORDER_WIDTH_WIDTH:
-		wrote = snprintf(ptr, *len, "border-top-width: \n");
+		wrote = snprintf(ptr, *len, "border-top-width: ");
+		ptr += wrote;
+		*len -= wrote;
 
-		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
 		break;
 	default:
 		wrote = 0;
@@ -552,9 +556,15 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		wrote = snprintf(ptr, *len, "border-right-width: thick\n");
 		break;
 	case CSS_BORDER_WIDTH_WIDTH:
-		wrote = snprintf(ptr, *len, "border-right-width: \n");
+		wrote = snprintf(ptr, *len, "border-right-width: ");
+		ptr += wrote;
+		*len -= wrote;
 
-		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
 		break;
 	default:
 		wrote = 0;
@@ -576,9 +586,15 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		wrote = snprintf(ptr, *len, "border-bottom-width: thick\n");
 		break;
 	case CSS_BORDER_WIDTH_WIDTH:
-		wrote = snprintf(ptr, *len, "border-bottom-width: \n");
+		wrote = snprintf(ptr, *len, "border-bottom-width: ");
+		ptr += wrote;
+		*len -= wrote;
 
-		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
 		break;
 	default:
 		wrote = 0;
@@ -600,9 +616,15 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		wrote = snprintf(ptr, *len, "border-left-width: thick\n");
 		break;
 	case CSS_BORDER_WIDTH_WIDTH:
-		wrote = snprintf(ptr, *len, "border-left-width: \n");
+		wrote = snprintf(ptr, *len, "border-left-width: ");
+		ptr += wrote;
+		*len -= wrote;
 
-		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
 		break;
 	default:
 		wrote = 0;
@@ -618,9 +640,15 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		wrote = snprintf(ptr, *len, "bottom: auto\n");
 		break;
 	case CSS_BOTTOM_SET:
-		wrote = snprintf(ptr, *len, "bottom: \n");
+		wrote = snprintf(ptr, *len, "bottom: ");
+		ptr += wrote;
+		*len -= wrote;
 
-		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
 		break;
 	default:
 		wrote = 0;
@@ -1146,9 +1174,15 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		wrote = snprintf(ptr, *len, "font-size: smaller\n");
 		break;
 	case CSS_FONT_SIZE_DIMENSION:
-		wrote = snprintf(ptr, *len, "font-size: \n");
+		wrote = snprintf(ptr, *len, "font-size: ");
+		ptr += wrote;
+		*len -= wrote;
 
-		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
 		break;
 	default:
 		wrote = 0;
@@ -1248,9 +1282,15 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		wrote = snprintf(ptr, *len, "height: auto\n");
 		break;
 	case CSS_HEIGHT_SET:
-		wrote = snprintf(ptr, *len, "height: \n");
+		wrote = snprintf(ptr, *len, "height: ");
+		ptr += wrote;
+		*len -= wrote;
 
-		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
 		break;
 	default:
 		wrote = 0;
@@ -1266,9 +1306,15 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		wrote = snprintf(ptr, *len, "left: auto\n");
 		break;
 	case CSS_LEFT_SET:
-		wrote = snprintf(ptr, *len, "left: \n");
+		wrote = snprintf(ptr, *len, "left: ");
+		ptr += wrote;
+		*len -= wrote;
 
-		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
 		break;
 	default:
 		wrote = 0;
@@ -1284,9 +1330,15 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		wrote = snprintf(ptr, *len, "letter-spacing: normal\n");
 		break;
 	case CSS_LETTER_SPACING_SET:
-		wrote = snprintf(ptr, *len, "letter-spacing: \n");
+		wrote = snprintf(ptr, *len, "letter-spacing: ");
+		ptr += wrote;
+		*len -= wrote;
 
-		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
 		break;
 	default:
 		wrote = 0;
@@ -1302,14 +1354,26 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		wrote = snprintf(ptr, *len, "line-height: normal\n");
 		break;
 	case CSS_LINE_HEIGHT_NUMBER:
-		wrote = snprintf(ptr, *len, "line-height: \n");
+		wrote = snprintf(ptr, *len, "line-height: ");
+		ptr += wrote;
+		*len -= wrote;
 
-		wrote += dump_css_fixed(len1, ptr, *len);
+		wrote = dump_css_fixed(len1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
 		break;
 	case CSS_LINE_HEIGHT_DIMENSION:
-		wrote = snprintf(ptr, *len, "line-height: \n");
+		wrote = snprintf(ptr, *len, "line-height: ");
+		ptr += wrote;
+		*len -= wrote;
 
-		wrote += dump_css_unit(len1, unit1, ptr, *len);
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
 		break;
 	default:
 		wrote = 0;
@@ -1318,5 +1382,859 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	ptr += wrote;
 	*len -= wrote;
 
+	/* list-style-image */
+	val = css_computed_list_style_image(style, &url);
+	if (url != NULL) {
+		wrote = snprintf(ptr, *len, "background-image: url('%.*s')\n",
+				(int) lwc_string_length(url), 
+				lwc_string_data(url));
+	} else if (val == CSS_LIST_STYLE_IMAGE_NONE) {
+		wrote = snprintf(ptr, *len, "background-image: none\n");
+	} else {
+		wrote = 0;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* list-style-position */
+	val = css_computed_list_style_position(style);
+	switch (val) {
+	case CSS_LIST_STYLE_POSITION_INSIDE:
+		wrote = snprintf(ptr, *len, "list-style-position: inside\n");
+		break;
+	case CSS_LIST_STYLE_POSITION_OUTSIDE:
+		wrote = snprintf(ptr, *len, "list-style-position: outside\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* list-style-type */
+	val = css_computed_list_style_type(style);
+	switch (val) {
+	case CSS_LIST_STYLE_TYPE_DISC:
+		wrote = snprintf(ptr, *len, "list-style-type: disc\n");
+		break;
+	case CSS_LIST_STYLE_TYPE_CIRCLE:
+		wrote = snprintf(ptr, *len, "list-style-type: circle\n");
+		break;
+	case CSS_LIST_STYLE_TYPE_SQUARE:
+		wrote = snprintf(ptr, *len, "list-style-type: square\n");
+		break;
+	case CSS_LIST_STYLE_TYPE_DECIMAL:
+		wrote = snprintf(ptr, *len, "list-style-type: decimal\n");
+		break;
+	case CSS_LIST_STYLE_TYPE_DECIMAL_LEADING_ZERO:
+		wrote = snprintf(ptr, *len, 
+				"list-style-type: decimal-leading-zero\n");
+		break;
+	case CSS_LIST_STYLE_TYPE_LOWER_ROMAN:
+		wrote = snprintf(ptr, *len, "list-style-type: lower-roman\n");
+		break;
+	case CSS_LIST_STYLE_TYPE_UPPER_ROMAN:
+		wrote = snprintf(ptr, *len, "list-style-type: upper-roman\n");
+		break;
+	case CSS_LIST_STYLE_TYPE_LOWER_GREEK:
+		wrote = snprintf(ptr, *len, "list-style-type: lower-greek\n");
+		break;
+	case CSS_LIST_STYLE_TYPE_LOWER_LATIN:
+		wrote = snprintf(ptr, *len, "list-style-type: lower-latin\n");
+		break;
+	case CSS_LIST_STYLE_TYPE_UPPER_LATIN:
+		wrote = snprintf(ptr, *len, "list-style-type: upper-latin\n");
+		break;
+	case CSS_LIST_STYLE_TYPE_ARMENIAN:
+		wrote = snprintf(ptr, *len, "list-style-type: armenian\n");
+		break;
+	case CSS_LIST_STYLE_TYPE_GEORGIAN:
+		wrote = snprintf(ptr, *len, "list-style-type: georgian\n");
+		break;
+	case CSS_LIST_STYLE_TYPE_LOWER_ALPHA:
+		wrote = snprintf(ptr, *len, "list-style-type: lower-alpha\n");
+		break;
+	case CSS_LIST_STYLE_TYPE_UPPER_ALPHA:
+		wrote = snprintf(ptr, *len, "list-style-type: upper-alpha\n");
+		break;
+	case CSS_LIST_STYLE_TYPE_NONE:
+		wrote = snprintf(ptr, *len, "list-style-type: none\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* margin-top */
+	val = css_computed_margin_top(style, &len1, &unit1);
+	switch (val) {
+	case CSS_MARGIN_AUTO:
+		wrote = snprintf(ptr, *len, "margin-top: auto\n");
+		break;
+	case CSS_MARGIN_SET:
+		wrote = snprintf(ptr, *len, "margin-top: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* margin-right */
+	val = css_computed_margin_right(style, &len1, &unit1);
+	switch (val) {
+	case CSS_MARGIN_AUTO:
+		wrote = snprintf(ptr, *len, "margin-right: auto\n");
+		break;
+	case CSS_MARGIN_SET:
+		wrote = snprintf(ptr, *len, "margin-right: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* margin-bottom */
+	val = css_computed_margin_bottom(style, &len1, &unit1);
+	switch (val) {
+	case CSS_MARGIN_AUTO:
+		wrote = snprintf(ptr, *len, "margin-bottom: auto\n");
+		break;
+	case CSS_MARGIN_SET:
+		wrote = snprintf(ptr, *len, "margin-bottom: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* margin-left */
+	val = css_computed_margin_left(style, &len1, &unit1);
+	switch (val) {
+	case CSS_MARGIN_AUTO:
+		wrote = snprintf(ptr, *len, "margin-left: auto\n");
+		break;
+	case CSS_MARGIN_SET:
+		wrote = snprintf(ptr, *len, "margin-left: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* max-height */
+	val = css_computed_max_height(style, &len1, &unit1);
+	switch (val) {
+	case CSS_MAX_HEIGHT_NONE:
+		wrote = snprintf(ptr, *len, "max-height: none\n");
+		break;
+	case CSS_MAX_HEIGHT_SET:
+		wrote = snprintf(ptr, *len, "max-height: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* max-width */
+	val = css_computed_max_width(style, &len1, &unit1);
+	switch (val) {
+	case CSS_MAX_WIDTH_NONE:
+		wrote = snprintf(ptr, *len, "max-width: none\n");
+		break;
+	case CSS_MAX_WIDTH_SET:
+		wrote = snprintf(ptr, *len, "max-width: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* min-height */
+	val = css_computed_min_height(style, &len1, &unit1);
+	switch (val) {
+	case CSS_MIN_HEIGHT_SET:
+		wrote = snprintf(ptr, *len, "min-height: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* min-width */
+	val = css_computed_min_width(style, &len1, &unit1);
+	switch (val) {
+	case CSS_MIN_WIDTH_SET:
+		wrote = snprintf(ptr, *len, "min-width: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* outline-color */
+	val = css_computed_outline_color(style, &color);
+	switch (val) {
+	case CSS_OUTLINE_COLOR_INVERT:
+		wrote = snprintf(ptr, *len, "outline-color: invert\n");
+		break;
+	case CSS_OUTLINE_COLOR_COLOR:
+		wrote = snprintf(ptr, *len, "outline-color: #%08x\n", color);
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* outline-style */
+	val = css_computed_outline_style(style);
+	switch (val) {
+	case CSS_OUTLINE_STYLE_NONE:
+		wrote = snprintf(ptr, *len, "outline-style: none\n");
+		break;
+	case CSS_OUTLINE_STYLE_DOTTED:
+		wrote = snprintf(ptr, *len, "outline-style: dotted\n");
+		break;
+	case CSS_OUTLINE_STYLE_DASHED:
+		wrote = snprintf(ptr, *len, "outline-style: dashed\n");
+		break;
+	case CSS_OUTLINE_STYLE_SOLID:
+		wrote = snprintf(ptr, *len, "outline-style: solid\n");
+		break;
+	case CSS_OUTLINE_STYLE_DOUBLE:
+		wrote = snprintf(ptr, *len, "outline-style: double\n");
+		break;
+	case CSS_OUTLINE_STYLE_GROOVE:
+		wrote = snprintf(ptr, *len, "outline-style: groove\n");
+		break;
+	case CSS_OUTLINE_STYLE_RIDGE:
+		wrote = snprintf(ptr, *len, "outline-style: ridge\n");
+		break;
+	case CSS_OUTLINE_STYLE_INSET:
+		wrote = snprintf(ptr, *len, "outline-style: inset\n");
+		break;
+	case CSS_OUTLINE_STYLE_OUTSET:
+		wrote = snprintf(ptr, *len, "outline-style: outset\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* outline-width */
+	val = css_computed_outline_width(style, &len1, &unit1);
+	switch (val) {
+	case CSS_OUTLINE_WIDTH_THIN:
+		wrote = snprintf(ptr, *len, "outline-width: thin\n");
+		break;
+	case CSS_OUTLINE_WIDTH_MEDIUM:
+		wrote = snprintf(ptr, *len, "outline-width: medium\n");
+		break;
+	case CSS_OUTLINE_WIDTH_THICK:
+		wrote = snprintf(ptr, *len, "outline-width: thick\n");
+		break;
+	case CSS_OUTLINE_WIDTH_WIDTH:
+		wrote = snprintf(ptr, *len, "outline-width: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* overflow */
+	val = css_computed_overflow(style);
+	switch (val) {
+	case CSS_OVERFLOW_VISIBLE:
+		wrote = snprintf(ptr, *len, "overflow: visible\n");
+		break;
+	case CSS_OVERFLOW_HIDDEN:
+		wrote = snprintf(ptr, *len, "overflow: hidden\n");
+		break;
+	case CSS_OVERFLOW_SCROLL:
+		wrote = snprintf(ptr, *len, "overflow: scroll\n");
+		break;
+	case CSS_OVERFLOW_AUTO:
+		wrote = snprintf(ptr, *len, "overflow: auto\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* padding-top */
+	val = css_computed_padding_top(style, &len1, &unit1);
+	switch (val) {
+	case CSS_PADDING_SET:
+		wrote = snprintf(ptr, *len, "padding-top: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* padding-right */
+	val = css_computed_padding_right(style, &len1, &unit1);
+	switch (val) {
+	case CSS_PADDING_SET:
+		wrote = snprintf(ptr, *len, "padding-right: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* padding-bottom */
+	val = css_computed_padding_bottom(style, &len1, &unit1);
+	switch (val) {
+	case CSS_PADDING_SET:
+		wrote = snprintf(ptr, *len, "padding-bottom: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* padding-left */
+	val = css_computed_padding_left(style, &len1, &unit1);
+	switch (val) {
+	case CSS_PADDING_SET:
+		wrote = snprintf(ptr, *len, "padding-left: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* position */
+	val = css_computed_position(style);
+	switch (val) {
+	case CSS_POSITION_STATIC:
+		wrote = snprintf(ptr, *len, "position: static\n");
+		break;
+	case CSS_POSITION_RELATIVE:
+		wrote = snprintf(ptr, *len, "position: relative\n");
+		break;
+	case CSS_POSITION_ABSOLUTE:
+		wrote = snprintf(ptr, *len, "position: absolute\n");
+		break;
+	case CSS_POSITION_FIXED:
+		wrote = snprintf(ptr, *len, "position: fixed\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* quotes */
+	val = css_computed_quotes(style, &string_list);
+	if (val == CSS_QUOTES_STRING && string_list != NULL) {
+		wrote = snprintf(ptr, *len, "quotes:");
+		ptr += wrote;
+		*len -= wrote;
+
+		while (*string_list != NULL) {
+			wrote = snprintf(ptr, *len, " \"%.*s\"",
+				(int) lwc_string_length(*string_list),
+				lwc_string_data(*string_list));
+			ptr += wrote;
+			*len -= wrote;
+
+			string_list++;
+		}
+
+		wrote = snprintf(ptr, *len, "\n");
+	} else {
+		switch (val) {
+		case CSS_QUOTES_NONE:
+			wrote = snprintf(ptr, *len, "quotes: none\n");
+			break;
+		case CSS_QUOTES_DEFAULT:
+			wrote = snprintf(ptr, *len, "quotes: default\n");
+			break;
+		}
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* right */
+	val = css_computed_right(style, &len1, &unit1);
+	switch (val) {
+	case CSS_RIGHT_AUTO:
+		wrote = snprintf(ptr, *len, "right: auto\n");
+		break;
+	case CSS_RIGHT_SET:
+		wrote = snprintf(ptr, *len, "right: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* table-layout */
+	val = css_computed_table_layout(style);
+	switch (val) {
+	case CSS_TABLE_LAYOUT_AUTO:
+		wrote = snprintf(ptr, *len, "table-layout: auto\n");
+		break;
+	case CSS_TABLE_LAYOUT_FIXED:
+		wrote = snprintf(ptr, *len, "table-layout: fixed\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* text-align */
+	val = css_computed_text_align(style);
+	switch (val) {
+	case CSS_TEXT_ALIGN_LEFT:
+		wrote = snprintf(ptr, *len, "text-align: left\n");
+		break;
+	case CSS_TEXT_ALIGN_RIGHT:
+		wrote = snprintf(ptr, *len, "text-align: right\n");
+		break;
+	case CSS_TEXT_ALIGN_CENTER:
+		wrote = snprintf(ptr, *len, "text-align: center\n");
+		break;
+	case CSS_TEXT_ALIGN_JUSTIFY:
+		wrote = snprintf(ptr, *len, "text-align: justify\n");
+		break;
+	case CSS_TEXT_ALIGN_DEFAULT:
+		wrote = snprintf(ptr, *len, "text-align: default\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* text-decoration */
+	val = css_computed_text_decoration(style);
+	if (val == CSS_TEXT_DECORATION_NONE) {
+		wrote = snprintf(ptr, *len, "text-decoration: none\n");
+		ptr += wrote;
+		*len -= wrote;
+	} else {
+		wrote = snprintf(ptr, *len, "text-decoration:");
+		ptr += wrote;
+		*len -= wrote;
+
+		if (val & CSS_TEXT_DECORATION_BLINK) {
+			wrote = snprintf(ptr, *len, " blink");
+			ptr += wrote;
+			*len -= wrote;
+		}
+		if (val & CSS_TEXT_DECORATION_LINE_THROUGH) {
+			wrote = snprintf(ptr, *len, " line-through");
+			ptr += wrote;
+			*len -= wrote;
+		}
+		if (val & CSS_TEXT_DECORATION_OVERLINE) {
+			wrote = snprintf(ptr, *len, " overline");
+			ptr += wrote;
+			*len -= wrote;
+		}
+		if (val & CSS_TEXT_DECORATION_UNDERLINE) {
+			wrote = snprintf(ptr, *len, " underline");
+			ptr += wrote;
+			*len -= wrote;
+		}
+
+		wrote = snprintf(ptr, *len, "\n");
+		ptr += wrote;
+		*len -= wrote;
+	}
+
+	/* text-indent */
+	val = css_computed_text_indent(style, &len1, &unit1);
+	switch (val) {
+	case CSS_TEXT_INDENT_SET:
+		wrote = snprintf(ptr, *len, "text-indent: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* text-transform */
+	val = css_computed_text_transform(style);
+	switch (val) {
+	case CSS_TEXT_TRANSFORM_CAPITALIZE:
+		wrote = snprintf(ptr, *len, "text-transform: capitalize\n");
+		break;
+	case CSS_TEXT_TRANSFORM_UPPERCASE:
+		wrote = snprintf(ptr, *len, "text-transform: uppercase\n");
+		break;
+	case CSS_TEXT_TRANSFORM_LOWERCASE:
+		wrote = snprintf(ptr, *len, "text-transform: lowercase\n");
+		break;
+	case CSS_TEXT_TRANSFORM_NONE:
+		wrote = snprintf(ptr, *len, "text-transform: none\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* top */
+	val = css_computed_top(style, &len1, &unit1);
+	switch (val) {
+	case CSS_TOP_AUTO:
+		wrote = snprintf(ptr, *len, "top: auto\n");
+		break;
+	case CSS_TOP_SET:
+		wrote = snprintf(ptr, *len, "top: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* unicode-bidi */
+	val = css_computed_unicode_bidi(style);
+	switch (val) {
+	case CSS_UNICODE_BIDI_NORMAL:
+		wrote = snprintf(ptr, *len, "unicode-bidi: normal\n");
+		break;
+	case CSS_UNICODE_BIDI_EMBED:
+		wrote = snprintf(ptr, *len, "unicode-bidi: embed\n");
+		break;
+	case CSS_UNICODE_BIDI_BIDI_OVERRIDE:
+		wrote = snprintf(ptr, *len, "unicode-bidi: bidi-override\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* vertical-align */
+	val = css_computed_vertical_align(style, &len1, &unit1);
+	switch (val) {
+	case CSS_VERTICAL_ALIGN_BASELINE:
+		wrote = snprintf(ptr, *len, "vertical-align: baseline\n");
+		break;
+	case CSS_VERTICAL_ALIGN_SUB:
+		wrote = snprintf(ptr, *len, "vertical-align: sub\n");
+		break;
+	case CSS_VERTICAL_ALIGN_SUPER:
+		wrote = snprintf(ptr, *len, "vertical-align: super\n");
+		break;
+	case CSS_VERTICAL_ALIGN_TOP:
+		wrote = snprintf(ptr, *len, "vertical-align: top\n");
+		break;
+	case CSS_VERTICAL_ALIGN_TEXT_TOP:
+		wrote = snprintf(ptr, *len, "vertical-align: text-top\n");
+		break;
+	case CSS_VERTICAL_ALIGN_MIDDLE:
+		wrote = snprintf(ptr, *len, "vertical-align: middle\n");
+		break;
+	case CSS_VERTICAL_ALIGN_BOTTOM:
+		wrote = snprintf(ptr, *len, "vertical-align: bottom\n");
+		break;
+	case CSS_VERTICAL_ALIGN_TEXT_BOTTOM:
+		wrote = snprintf(ptr, *len, "vertical-align: text-bottom\n");
+		break;
+	case CSS_VERTICAL_ALIGN_SET:
+		wrote = snprintf(ptr, *len, "vertical-align: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* visibility */
+	val = css_computed_visibility(style);
+	switch (val) {
+	case CSS_VISIBILITY_VISIBLE:
+		wrote = snprintf(ptr, *len, "visibility: visible\n");
+		break;
+	case CSS_VISIBILITY_HIDDEN:
+		wrote = snprintf(ptr, *len, "visibility: hidden\n");
+		break;
+	case CSS_VISIBILITY_COLLAPSE:
+		wrote = snprintf(ptr, *len, "visibility: collapse\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* white-space */
+	val = css_computed_white_space(style);
+	switch (val) {
+	case CSS_WHITE_SPACE_NORMAL:
+		wrote = snprintf(ptr, *len, "white-space: normal\n");
+		break;
+	case CSS_WHITE_SPACE_PRE:
+		wrote = snprintf(ptr, *len, "white-space: pre\n");
+		break;
+	case CSS_WHITE_SPACE_NOWRAP:
+		wrote = snprintf(ptr, *len, "white-space: nowrap\n");
+		break;
+	case CSS_WHITE_SPACE_PRE_WRAP:
+		wrote = snprintf(ptr, *len, "white-space: pre-wrap\n");
+		break;
+	case CSS_WHITE_SPACE_PRE_LINE:
+		wrote = snprintf(ptr, *len, "white-space: pre-line\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* width */
+	val = css_computed_width(style, &len1, &unit1);
+	switch (val) {
+	case CSS_WIDTH_AUTO:
+		wrote = snprintf(ptr, *len, "width: auto\n");
+		break;
+	case CSS_WIDTH_SET:
+		wrote = snprintf(ptr, *len, "width: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* word-spacing */
+	val = css_computed_word_spacing(style, &len1, &unit1);
+	switch (val) {
+	case CSS_WORD_SPACING_NORMAL:
+		wrote = snprintf(ptr, *len, "word-spacing: normal\n");
+		break;
+	case CSS_WORD_SPACING_SET:
+		wrote = snprintf(ptr, *len, "word-spacing: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_unit(len1, unit1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
+	/* z-index */
+	val = css_computed_z_index(style, &zindex);
+	switch (val) {
+	case CSS_Z_INDEX_AUTO:
+		wrote = snprintf(ptr, *len, "z-index: auto\n");
+		break;
+	case CSS_Z_INDEX_SET:
+		wrote = snprintf(ptr, *len, "z-index: %d\n", zindex);
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
 }
 
