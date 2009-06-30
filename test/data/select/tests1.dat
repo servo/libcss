@@ -235,6 +235,7 @@ background-color: transparent
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
+border-collapse: separate
 border-spacing: 0px 0px
 border-top-color: initial
 border-right-color: initial
@@ -249,17 +250,30 @@ border-right-width: medium
 border-bottom-width: medium
 border-left-width: medium
 bottom: auto
+caption_side: top
 clear: none
 clip: auto
+color: #00000000
 content: normal
 counter-increment: none
 counter-reset: none
 cursor: auto
+direction: ltr
 display: block
+empty-cells: show
 float: none
+font-family: default
+font-size: medium
+font-style: normal
+font-variant: normal
+font-weight: normal
 height: auto
 left: auto
 letter-spacing: normal
+line-height: normal
+list-style-image: none
+list-style-position: outside
+list-style-type: disc
 margin-top: 0px
 margin-right: 0px
 margin-bottom: 0px
@@ -280,10 +294,15 @@ position: static
 quotes: default
 right: auto
 table-layout: auto
+text-align: default
 text-decoration: none
+text-indent: 0px
+text-transform: none
 top: auto
 unicode-bidi: normal
 vertical-align: baseline
+visibility: visible
+white-space: normal
 width: auto
 word-spacing: normal
 z-index: auto
@@ -302,10 +321,10 @@ background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: #00000000
+border-right-color: #00000000
+border-bottom-color: #00000000
+border-left-color: #00000000
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
