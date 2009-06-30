@@ -402,6 +402,7 @@ border-left-width: medium
 bottom: auto
 clear: none
 clip: auto
+color: #00000000
 content: normal
 counter-increment: none
 counter-reset: none
