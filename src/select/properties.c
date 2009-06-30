@@ -13,6 +13,7 @@
 #include "select/propset.h"
 #include "utils/utils.h"
 
+static css_unit to_css_unit(uint32_t u);
 static css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 		css_select_state *state, 
 		css_error (*fun)(css_computed_style *, uint8_t, css_color));
@@ -54,12 +55,36 @@ static css_error cascade_counter_increment_reset(uint32_t opv, css_style *style,
 		css_error (*fun)(css_computed_style *, uint8_t,
 				css_computed_counter *));
 
+css_unit to_css_unit(uint32_t u)
+{
+	switch (u) {
+	case UNIT_PX: return CSS_UNIT_PX;
+	case UNIT_EX: return CSS_UNIT_EX;
+	case UNIT_EM: return CSS_UNIT_EM;
+	case UNIT_IN: return CSS_UNIT_IN;
+	case UNIT_CM: return CSS_UNIT_CM;
+	case UNIT_MM: return CSS_UNIT_MM;
+	case UNIT_PT: return CSS_UNIT_PT;
+	case UNIT_PC: return CSS_UNIT_PC;
+	case UNIT_PCT: return CSS_UNIT_PCT;
+	case UNIT_DEG: return CSS_UNIT_DEG;
+	case UNIT_GRAD: return CSS_UNIT_GRAD;
+	case UNIT_RAD: return CSS_UNIT_RAD;
+	case UNIT_MS: return CSS_UNIT_MS;
+	case UNIT_S: return CSS_UNIT_S;
+	case UNIT_HZ: return CSS_UNIT_HZ;
+	case UNIT_KHZ: return CSS_UNIT_KHZ;
+	}
+
+	return 0;
+}
+
 css_error cascade_azimuth(uint32_t opv, css_style *style,
 		 css_select_state *state)
 {
 	uint16_t value = 0;
 	css_fixed val = 0;
-	uint32_t unit = CSS_UNIT_DEG;
+	uint32_t unit = UNIT_DEG;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv) & ~AZIMUTH_BEHIND) {
@@ -88,6 +113,8 @@ css_error cascade_azimuth(uint32_t opv, css_style *style,
 
 		/** \todo azimuth behind */
 	}
+
+	unit = to_css_unit(unit);
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		/** \todo set computed azimuth */
@@ -245,8 +272,8 @@ css_error cascade_background_position(uint32_t opv, css_style *style,
 	uint16_t value = CSS_BACKGROUND_POSITION_INHERIT;
 	css_fixed hlength = 0;
 	css_fixed vlength = 0;
-	uint32_t hunit = CSS_UNIT_PX;
-	uint32_t vunit = CSS_UNIT_PX;
+	uint32_t hunit = UNIT_PX;
+	uint32_t vunit = UNIT_PX;
 
 	if (isInherit(opv) == false) {
 		value = CSS_BACKGROUND_POSITION_SET;
@@ -260,15 +287,15 @@ css_error cascade_background_position(uint32_t opv, css_style *style,
 			break;
 		case BACKGROUND_POSITION_HORZ_CENTER:
 			hlength = INTTOFIX(50);
-			hunit = CSS_UNIT_PCT;
+			hunit = UNIT_PCT;
 			break;
 		case BACKGROUND_POSITION_HORZ_RIGHT:
 			hlength = INTTOFIX(100);
-			hunit = CSS_UNIT_PCT;
+			hunit = UNIT_PCT;
 			break;
 		case BACKGROUND_POSITION_HORZ_LEFT:
 			hlength = INTTOFIX(0);
-			hunit = CSS_UNIT_PCT;
+			hunit = UNIT_PCT;
 			break;
 		}
 
@@ -281,18 +308,21 @@ css_error cascade_background_position(uint32_t opv, css_style *style,
 			break;
 		case BACKGROUND_POSITION_VERT_CENTER:
 			vlength = INTTOFIX(50);
-			vunit = CSS_UNIT_PCT;
+			vunit = UNIT_PCT;
 			break;
 		case BACKGROUND_POSITION_VERT_BOTTOM:
 			vlength = INTTOFIX(100);
-			vunit = CSS_UNIT_PCT;
+			vunit = UNIT_PCT;
 			break;
 		case BACKGROUND_POSITION_VERT_TOP:
 			vlength = INTTOFIX(0);
-			vunit = CSS_UNIT_PCT;
+			vunit = UNIT_PCT;
 			break;
 		}
 	}
+
+	hunit = to_css_unit(hunit);
+	vunit = to_css_unit(vunit);
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		return set_background_position(state->result, value,
@@ -446,8 +476,8 @@ css_error cascade_border_spacing(uint32_t opv, css_style *style,
 	uint16_t value = CSS_BORDER_SPACING_INHERIT;
 	css_fixed hlength = 0;
 	css_fixed vlength = 0;
-	uint32_t hunit = CSS_UNIT_PX;
-	uint32_t vunit = CSS_UNIT_PX;
+	uint32_t hunit = UNIT_PX;
+	uint32_t vunit = UNIT_PX;
 
 	if (isInherit(opv) == false) {
 		value = CSS_BORDER_SPACING_SET;
@@ -461,6 +491,9 @@ css_error cascade_border_spacing(uint32_t opv, css_style *style,
 		vunit = *((uint32_t *) style->bytecode);
 		advance_bytecode(style, sizeof(vunit));
 	}
+
+	hunit = to_css_unit(hunit);
+	vunit = to_css_unit(vunit);
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		return set_border_spacing(state->result, value,
@@ -1050,7 +1083,7 @@ css_error cascade_clip(uint32_t opv, css_style *style,
 {
 	uint16_t value = CSS_CLIP_INHERIT;
 	css_computed_clip_rect rect = { 0, 0, 0, 0, 
-			CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX,
+			UNIT_PX, UNIT_PX, UNIT_PX, UNIT_PX,
 			false, false, false, false };
 
 	if (isInherit(opv) == false) {
@@ -1094,6 +1127,11 @@ css_error cascade_clip(uint32_t opv, css_style *style,
 			break;
 		}
 	}
+
+	rect.tunit = to_css_unit(rect.tunit);
+	rect.runit = to_css_unit(rect.runit);
+	rect.bunit = to_css_unit(rect.bunit);
+	rect.lunit = to_css_unit(rect.lunit);
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		return set_clip(state->result, value, &rect);
@@ -1973,7 +2011,7 @@ css_error cascade_elevation(uint32_t opv, css_style *style,
 {
 	uint16_t value = 0;
 	css_fixed val = 0;
-	uint32_t unit = CSS_UNIT_DEG;
+	uint32_t unit = UNIT_DEG;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
@@ -1995,6 +2033,8 @@ css_error cascade_elevation(uint32_t opv, css_style *style,
 			break;
 		}
 	}
+
+	unit = to_css_unit(unit);
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		/** \todo set computed elevation */
@@ -2309,7 +2349,7 @@ css_error cascade_font_size(uint32_t opv, css_style *style,
 {
 	uint16_t value = CSS_FONT_SIZE_INHERIT;
 	css_fixed size = 0;
-	uint32_t unit = CSS_UNIT_PX;
+	uint32_t unit = UNIT_PX;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
@@ -2351,6 +2391,8 @@ css_error cascade_font_size(uint32_t opv, css_style *style,
 			break;
 		}
 	}
+
+	unit = to_css_unit(unit);
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		return set_font_size(state->result, value, size, unit);
@@ -2678,7 +2720,7 @@ css_error cascade_line_height(uint32_t opv, css_style *style,
 {
 	uint16_t value = CSS_LINE_HEIGHT_INHERIT;
 	css_fixed val = 0;
-	uint32_t unit = CSS_UNIT_PX;
+	uint32_t unit = UNIT_PX;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
@@ -2699,6 +2741,8 @@ css_error cascade_line_height(uint32_t opv, css_style *style,
 			break;
 		}
 	}
+
+	unit = to_css_unit(unit);
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		return set_line_height(state->result, value, val, unit);
@@ -3759,7 +3803,7 @@ css_error cascade_pitch(uint32_t opv, css_style *style,
 {
 	uint16_t value = 0;
 	css_fixed freq = 0;
-	uint32_t unit = CSS_UNIT_HZ;
+	uint32_t unit = UNIT_HZ;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
@@ -3780,6 +3824,8 @@ css_error cascade_pitch(uint32_t opv, css_style *style,
 			break;
 		}
 	}
+
+	unit = to_css_unit(unit);
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		/** \todo pitch */
@@ -4777,7 +4823,7 @@ css_error cascade_vertical_align(uint32_t opv, css_style *style,
 {
 	uint16_t value = CSS_VERTICAL_ALIGN_INHERIT;
 	css_fixed length = 0;
-	uint32_t unit = CSS_UNIT_PX;
+	uint32_t unit = UNIT_PX;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
@@ -4815,6 +4861,8 @@ css_error cascade_vertical_align(uint32_t opv, css_style *style,
 			break;
 		}
 	}
+
+	unit = to_css_unit(unit);
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		return set_vertical_align(state->result, value, length, unit);
@@ -5027,7 +5075,7 @@ css_error cascade_volume(uint32_t opv, css_style *style,
 {
 	uint16_t value = 0;
 	css_fixed val = 0;
-	uint32_t unit = CSS_UNIT_PCT;
+	uint32_t unit = UNIT_PCT;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
@@ -5055,6 +5103,8 @@ css_error cascade_volume(uint32_t opv, css_style *style,
 			break;
 		}
 	}
+
+	unit = to_css_unit(unit);
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		/** \todo volume */
@@ -5426,7 +5476,7 @@ css_error cascade_border_width(uint32_t opv, css_style *style,
 {
 	uint16_t value = CSS_BORDER_WIDTH_INHERIT;
 	css_fixed length = 0;
-	uint32_t unit = CSS_UNIT_PX;
+	uint32_t unit = UNIT_PX;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
@@ -5449,6 +5499,8 @@ css_error cascade_border_width(uint32_t opv, css_style *style,
 		}
 	}
 
+	unit = to_css_unit(unit);
+
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		return fun(state->result, value, length, unit);
 	}
@@ -5463,7 +5515,7 @@ css_error cascade_length_auto(uint32_t opv, css_style *style,
 {
 	uint16_t value = CSS_BOTTOM_INHERIT;
 	css_fixed length = 0;
-	uint32_t unit = CSS_UNIT_PX;
+	uint32_t unit = UNIT_PX;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
@@ -5480,6 +5532,8 @@ css_error cascade_length_auto(uint32_t opv, css_style *style,
 		}
 	}
 
+	unit = to_css_unit(unit);
+
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		return fun(state->result, value, length, unit);
 	}
@@ -5494,7 +5548,7 @@ css_error cascade_length_normal(uint32_t opv, css_style *style,
 {
 	uint16_t value = CSS_LETTER_SPACING_INHERIT;
 	css_fixed length = 0;
-	uint32_t unit = CSS_UNIT_PX;
+	uint32_t unit = UNIT_PX;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
@@ -5511,6 +5565,8 @@ css_error cascade_length_normal(uint32_t opv, css_style *style,
 		}
 	}
 
+	unit = to_css_unit(unit);
+
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		return fun(state->result, value, length, unit);
 	}
@@ -5525,7 +5581,7 @@ css_error cascade_length_none(uint32_t opv, css_style *style,
 {
 	uint16_t value = CSS_MAX_HEIGHT_INHERIT;
 	css_fixed length = 0;
-	uint32_t unit = CSS_UNIT_PX;
+	uint32_t unit = UNIT_PX;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
@@ -5542,6 +5598,8 @@ css_error cascade_length_none(uint32_t opv, css_style *style,
 		}
 	}
 
+	unit = to_css_unit(unit);
+
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state)) {
 		return fun(state->result, value, length, unit);
 	}
@@ -5556,7 +5614,7 @@ css_error cascade_length(uint32_t opv, css_style *style,
 {
 	uint16_t value = CSS_MIN_HEIGHT_INHERIT;
 	css_fixed length = 0;
-	uint32_t unit = CSS_UNIT_PX;
+	uint32_t unit = UNIT_PX;
 
 	if (isInherit(opv) == false) {
 		value = CSS_MIN_HEIGHT_SET;
@@ -5565,6 +5623,8 @@ css_error cascade_length(uint32_t opv, css_style *style,
 		unit = *((uint32_t *) style->bytecode);
 		advance_bytecode(style, sizeof(unit));
 	}
+
+	unit = to_css_unit(unit);
 
 	/** \todo lose fun != NULL once all properties have set routines */
 	if (fun != NULL && outranks_existing(getOpcode(opv), 
