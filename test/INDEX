@@ -11,7 +11,7 @@ number		Conversion of numbers to fixed point	number
 #css21		Parsing (CSS2.1 specifics)		css
 parse-auto	Automated parser tests (bytecode)	parse
 parse2-auto	Automated parser tests (om & invalid)	parse2
-#select-auto	Automated selection engine tests	select
+select-auto	Automated selection engine tests	select
 
 # Regression tests
 

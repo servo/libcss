@@ -17,6 +17,7 @@ background-color: transparent
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
+border-spacing: 0px 0px
 border-top-color: #00000000
 border-right-color: #00000000
 border-bottom-color: #00000000
@@ -30,11 +31,45 @@ border-right-width: medium
 border-bottom-width: medium
 border-left-width: medium
 bottom: auto
-caption-side: top
 clear: none
 clip: auto
-color: #ff000000
+color: default
+content: normal
+counter-increment: none
+counter-reset: none
+cursor: auto
 display: block
+float: none
+height: auto
+left: auto
+letter-spacing: normal
+margin-top: 0px
+margin-right: 0px
+margin-bottom: 0px
+margin-left: 0px
+max-height: none
+max-width: none
+min-height: 0px
+min-width: 0px
+outline-color: invert
+outline-style: none
+outline-width: medium
+overflow: visible
+padding-top: 0px
+padding-right: 0px
+padding-bottom: 0px
+padding-left: 0px
+position: static
+quotes: default
+right: auto
+table-layout: auto
+text-decoration: none
+top: auto
+unicode-bidi: normal
+vertical-align: baseline
+width: auto
+word-spacing: normal
+z-index: auto
 #reset
 
 #tree
@@ -58,10 +93,11 @@ background-color: transparent
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
-border-top-color: #bbbbcc00
-border-right-color: #bbbbcc00
-border-bottom-color: #bbbbcc00
-border-left-color: #bbbbcc00
+border-spacing: 0px 0px
+border-top-color: #ffffff00
+border-right-color: #ffffff00
+border-bottom-color: #ffffff00
+border-left-color: #ffffff00
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -71,11 +107,45 @@ border-right-width: medium
 border-bottom-width: medium
 border-left-width: medium
 bottom: auto
-caption-side: top
 clear: none
 clip: auto
-color: #bbbbcc00
+color: #ffffff00
+content: normal
+counter-increment: none
+counter-reset: none
+cursor: auto
 display: block
+float: none
+height: auto
+left: auto
+letter-spacing: normal
+margin-top: 0px
+margin-right: 0px
+margin-bottom: 0px
+margin-left: 0px
+max-height: none
+max-width: none
+min-height: 0px
+min-width: 0px
+outline-color: invert
+outline-style: none
+outline-width: medium
+overflow: visible
+padding-top: 0px
+padding-right: 0px
+padding-bottom: 0px
+padding-left: 0px
+position: static
+quotes: default
+right: auto
+table-layout: auto
+text-decoration: none
+top: auto
+unicode-bidi: normal
+vertical-align: baseline
+width: auto
+word-spacing: normal
+z-index: auto
 #reset
 
 #tree
@@ -99,10 +169,11 @@ background-color: transparent
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
-border-top-color: #bbbbcc00
-border-right-color: #bbbbcc00
-border-bottom-color: #bbbbcc00
-border-left-color: #bbbbcc00
+border-spacing: 0px 0px
+border-top-color: #ffffff00
+border-right-color: #ffffff00
+border-bottom-color: #ffffff00
+border-left-color: #ffffff00
 border-top-style: solid
 border-right-style: none
 border-bottom-style: none
@@ -112,11 +183,45 @@ border-right-width: medium
 border-bottom-width: medium
 border-left-width: medium
 bottom: auto
-caption-side: top
 clear: none
 clip: auto
-color: #bbbbcc00
-display: block
+color: #ffffff00
+content: normal
+counter-increment: none
+counter-reset: none
+cursor: auto
+display: inline
+float: none
+height: auto
+left: auto
+letter-spacing: normal
+margin-top: 0px
+margin-right: 0px
+margin-bottom: 0px
+margin-left: 0px
+max-height: none
+max-width: none
+min-height: 0px
+min-width: 0px
+outline-color: invert
+outline-style: none
+outline-width: medium
+overflow: visible
+padding-top: 0px
+padding-right: 0px
+padding-bottom: 0px
+padding-left: 0px
+position: static
+quotes: default
+right: auto
+table-layout: auto
+text-decoration: none
+top: auto
+unicode-bidi: normal
+vertical-align: baseline
+width: auto
+word-spacing: normal
+z-index: auto
 #reset
 
 #tree screen
@@ -132,6 +237,7 @@ background-color: transparent
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
+border-spacing: 0px 0px
 border-top-color: #00000000
 border-right-color: #00000000
 border-bottom-color: #00000000
@@ -145,10 +251,45 @@ border-right-width: medium
 border-bottom-width: medium
 border-left-width: medium
 bottom: auto
-caption-side: top
 clear: none
 clip: auto
+color: default
+content: normal
+counter-increment: none
+counter-reset: none
+cursor: auto
 display: block
+float: none
+height: auto
+left: auto
+letter-spacing: normal
+margin-top: 0px
+margin-right: 0px
+margin-bottom: 0px
+margin-left: 0px
+max-height: none
+max-width: none
+min-height: 0px
+min-width: 0px
+outline-color: invert
+outline-style: none
+outline-width: medium
+overflow: visible
+padding-top: 0px
+padding-right: 0px
+padding-bottom: 0px
+padding-left: 0px
+position: static
+quotes: default
+right: auto
+table-layout: auto
+text-decoration: none
+top: auto
+unicode-bidi: normal
+vertical-align: baseline
+width: auto
+word-spacing: normal
+z-index: auto
 #reset
 
 #tree all
@@ -163,6 +304,7 @@ background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
+border-spacing: 0px 0px
 border-top-color: #00000000
 border-right-color: #00000000
 border-bottom-color: #00000000
@@ -176,10 +318,45 @@ border-right-width: medium
 border-bottom-width: medium
 border-left-width: medium
 bottom: auto
-caption-side: top
 clear: none
 clip: auto
+color: default
+content: normal
+counter-increment: none
+counter-reset: none
+cursor: auto
 display: inline
+float: none
+height: auto
+left: auto
+letter-spacing: normal
+margin-top: 0px
+margin-right: 0px
+margin-bottom: 0px
+margin-left: 0px
+max-height: none
+max-width: none
+min-height: 0px
+min-width: 0px
+outline-color: invert
+outline-style: none
+outline-width: medium
+overflow: visible
+padding-top: 0px
+padding-right: 0px
+padding-bottom: 0px
+padding-left: 0px
+position: static
+quotes: default
+right: auto
+table-layout: auto
+text-decoration: none
+top: auto
+unicode-bidi: normal
+vertical-align: baseline
+width: auto
+word-spacing: normal
+z-index: auto
 #reset
 
 #tree
@@ -190,10 +367,11 @@ p:first-child { background-color: #bbc; }
 #errors
 #expected
 background-attachment: scroll
-background-color: #bbbbcc00
+background-color: transparent
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
+border-spacing: 0px 0px
 border-top-color: #00000000
 border-right-color: #00000000
 border-bottom-color: #00000000
@@ -207,8 +385,43 @@ border-right-width: medium
 border-bottom-width: medium
 border-left-width: medium
 bottom: auto
-caption-side: top
 clear: none
 clip: auto
+color: default
+content: normal
+counter-increment: none
+counter-reset: none
+cursor: auto
 display: inline
+float: none
+height: auto
+left: auto
+letter-spacing: normal
+margin-top: 0px
+margin-right: 0px
+margin-bottom: 0px
+margin-left: 0px
+max-height: none
+max-width: none
+min-height: 0px
+min-width: 0px
+outline-color: invert
+outline-style: none
+outline-width: medium
+overflow: visible
+padding-top: 0px
+padding-right: 0px
+padding-bottom: 0px
+padding-left: 0px
+position: static
+quotes: default
+right: auto
+table-layout: auto
+text-decoration: none
+top: auto
+unicode-bidi: normal
+vertical-align: baseline
+width: auto
+word-spacing: normal
+z-index: auto
 #reset
