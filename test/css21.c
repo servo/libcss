@@ -20,6 +20,18 @@ static void *myrealloc(void *ptr, size_t len, void *pw)
 	return realloc(ptr, len);
 }
 
+static css_error resolve_url(void *pw, lwc_context *dict,
+		const char *base, lwc_string *rel, lwc_string **abs)
+{
+	UNUSED(pw);
+	UNUSED(base);
+
+	/* About as useless as possible */
+	*abs = lwc_context_string_ref(dict, rel);
+
+	return CSS_OK;
+}
+
 int main(int argc, char **argv)
 {
 	css_stylesheet *sheet;
@@ -47,7 +59,8 @@ int main(int argc, char **argv)
 
 		assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", argv[2], 
 				NULL, CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, false,
-				false, ctx, myrealloc, NULL, &sheet) == CSS_OK);
+				false, ctx, myrealloc, NULL, 
+				resolve_url, NULL, &sheet) == CSS_OK);
 
 		fp = fopen(argv[2], "rb");
 		if (fp == NULL) {
@@ -104,7 +117,8 @@ int main(int argc, char **argv)
 				assert(css_stylesheet_create(CSS_LEVEL_21,
 					"UTF-8", buf, NULL, CSS_ORIGIN_AUTHOR,
 					media, false, false, ctx, myrealloc, 
-					NULL, &import) == CSS_OK);
+					NULL, resolve_url, NULL,
+					&import) == CSS_OK);
 
 				assert(css_stylesheet_data_done(import) == 
 					CSS_OK);

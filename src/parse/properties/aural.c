@@ -949,7 +949,14 @@ css_error parse_play_during(css_language *c,
 		int modifiers;
 
 		value = PLAY_DURING_URI;
-		uri = token->idata;
+
+		error = c->sheet->resolve(c->sheet->resolve_pw,
+				c->sheet->dictionary, c->sheet->url,
+				token->idata, &uri);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
 
 		for (modifiers = 0; modifiers < 2; modifiers++) {
 			consumeWhitespace(vector, ctx);
@@ -999,7 +1006,7 @@ css_error parse_play_during(css_language *c,
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && 
 			(value & PLAY_DURING_TYPE_MASK)  == PLAY_DURING_URI) {
-		lwc_context_string_ref(c->sheet->dictionary, uri);
+		/* Don't ref URI -- we want to pass ownership to the bytecode */
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&uri, sizeof(lwc_string *));
 	}
@@ -1814,6 +1821,7 @@ css_error parse_cue_common(css_language *c,
 	uint16_t value = 0;
 	uint32_t opv;
 	uint32_t required_size;
+	lwc_string *uri = NULL;
 
 	/* URI | IDENT (none, inherit) */
 	token = parserutils_vector_iterate(vector, ctx);
@@ -1831,6 +1839,14 @@ css_error parse_cue_common(css_language *c,
 		value = CUE_AFTER_NONE;
 	} else if (token->type == CSS_TOKEN_URI) {
 		value = CUE_AFTER_URI;
+
+		error = c->sheet->resolve(c->sheet->resolve_pw,
+				c->sheet->dictionary, c->sheet->url,
+				token->idata, &uri);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
 	} else {
 		*ctx = orig_ctx;
 		return CSS_INVALID;
@@ -1852,10 +1868,9 @@ css_error parse_cue_common(css_language *c,
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && value == CUE_AFTER_URI) {
-		lwc_context_string_ref(c->sheet->dictionary, token->idata);
+		/* Don't ref URI -- we want to pass ownership to the bytecode */
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
-				&token->idata, 
-				sizeof(lwc_string *));
+				&uri, sizeof(lwc_string *));
 	}
 
 	return CSS_OK;

@@ -41,6 +41,18 @@ static void *myrealloc(void *data, size_t len, void *pw)
 	return realloc(data, len);
 }
 
+static css_error resolve_url(void *pw, lwc_context *dict,
+		const char *base, lwc_string *rel, lwc_string **abs)
+{
+	UNUSED(pw);
+	UNUSED(base);
+
+	/* About as useless as possible */
+	*abs = lwc_context_string_ref(dict, rel);
+
+	return CSS_OK;
+}
+
 int main(int argc, char **argv)
 {
 	line_ctx ctx;
@@ -177,7 +189,7 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
         
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", NULL,
 			CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, false, false, ctx,
-			myrealloc, NULL, &sheet) == CSS_OK);
+			myrealloc, NULL, resolve_url, NULL, &sheet) == CSS_OK);
 
 	error = css_stylesheet_append_data(sheet, data, len);
 	if (error != CSS_OK && error != CSS_NEEDDATA) {

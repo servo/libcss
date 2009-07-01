@@ -11,11 +11,25 @@
 #include <libcss/errors.h>
 #include <libcss/types.h>
 
+/**
+ * Callback to resolve an URL
+ *
+ * \param pw  Client data
+ * \param dict  String internment context
+ * \param base  Base URI (absolute)
+ * \param rel   URL to resolve, either absolute or relative to base
+ * \param abs   Pointer to location to receive result
+ * \return CSS_OK on success, appropriate error otherwise.
+ */
+typedef css_error (*css_url_resolution_fn)(void *pw, lwc_context *dict,
+		const char *base, lwc_string *rel, lwc_string **abs);
+
 css_error css_stylesheet_create(css_language_level level,
 		const char *charset, const char *url, const char *title,
 		css_origin origin, uint64_t media, bool allow_quirks,
 		bool inline_style, lwc_context *dict, 
 		css_allocator_fn alloc, void *alloc_pw, 
+		css_url_resolution_fn resolve, void *resolve_pw,
 		css_stylesheet **stylesheet);
 css_error css_stylesheet_destroy(css_stylesheet *sheet);
 

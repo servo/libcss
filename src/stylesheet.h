@@ -175,6 +175,9 @@ struct css_stylesheet {
 
 	bool inline_style;			/**< Is an inline style */
 
+	css_url_resolution_fn resolve;		/**< URL resolution function */
+	void *resolve_pw;			/**< Private word */
+
 	css_allocator_fn alloc;			/**< Allocation function */
 	void *pw;				/**< Private word */
 };

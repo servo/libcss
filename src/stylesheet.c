@@ -31,6 +31,8 @@ static css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule);
  * \param dict             Dictionary in which to intern strings
  * \param alloc            Memory (de)allocation function
  * \param alloc_pw         Client private data for alloc
+ * \param resolve          URL resolution function
+ * \param resolve_pw       Client private data for resolve
  * \param stylesheet       Pointer to location to receive stylesheet
  * \return CSS_OK on success,
  *         CSS_BADPARM on bad parameters,
@@ -41,6 +43,7 @@ css_error css_stylesheet_create(css_language_level level,
 		css_origin origin, uint64_t media, bool allow_quirks,
 		bool inline_style, lwc_context *dict, 
 		css_allocator_fn alloc, void *alloc_pw, 
+		css_url_resolution_fn resolve, void *resolve_pw,
 		css_stylesheet **stylesheet)
 {
 	css_parser_optparams params;
@@ -48,7 +51,8 @@ css_error css_stylesheet_create(css_language_level level,
 	css_stylesheet *sheet;
 	size_t len;
 
-	if (url == NULL || alloc == NULL || stylesheet == NULL)
+	if (url == NULL || alloc == NULL || 
+			resolve == NULL || stylesheet == NULL)
 		return CSS_BADPARM;
 
 	sheet = alloc(NULL, sizeof(css_stylesheet), alloc_pw);
@@ -115,6 +119,7 @@ css_error css_stylesheet_create(css_language_level level,
 		return CSS_NOMEM;
 	}
 	memcpy(sheet->url, url, len);
+	sheet->url[len] = '\0';
 
 	if (title != NULL) {
 		len = strlen(title) + 1;
@@ -128,10 +133,14 @@ css_error css_stylesheet_create(css_language_level level,
 			return CSS_NOMEM;
 		}
 		memcpy(sheet->title, title, len);
+		sheet->title[len] = '\0';
 	}
 
 	sheet->origin = origin;
 	sheet->media = media;
+
+	sheet->resolve = resolve;
+	sheet->resolve_pw = resolve_pw;
 
 	sheet->alloc = alloc;
 	sheet->pw = alloc_pw;

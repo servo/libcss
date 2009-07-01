@@ -378,6 +378,7 @@ css_error parse_list_style_image(css_language *c,
 	uint16_t value = 0;
 	uint32_t opv;
 	uint32_t required_size;
+	lwc_string *uri = NULL;
 
 	/* URI | IDENT (none, inherit) */
 	token = parserutils_vector_iterate(vector, ctx);
@@ -395,6 +396,14 @@ css_error parse_list_style_image(css_language *c,
 		value = LIST_STYLE_IMAGE_NONE;
 	} else if (token->type == CSS_TOKEN_URI) {
 		value = LIST_STYLE_IMAGE_URI;
+
+		error = c->sheet->resolve(c->sheet->resolve_pw,
+				c->sheet->dictionary, c->sheet->url,
+				token->idata, &uri);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
 	} else {
 		*ctx = orig_ctx;
 		return CSS_INVALID;
@@ -416,10 +425,9 @@ css_error parse_list_style_image(css_language *c,
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && value == LIST_STYLE_IMAGE_URI) {
-                lwc_context_string_ref(c->sheet->dictionary, token->idata);
+		/* Don't ref URI -- we want to pass ownership to the bytecode */
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
-				&token->idata, 
-				sizeof(lwc_string *));
+				&uri, sizeof(lwc_string *));
 	}
 
 	return CSS_OK;
@@ -874,6 +882,8 @@ css_error parse_content_list(css_language *c,
 
 			offset += sizeof(token->idata);
 		} else if (token->type == CSS_TOKEN_URI) {
+			lwc_string *uri;
+
 			opv = CONTENT_URI;
 
 			if (first == false) {
@@ -886,13 +896,20 @@ css_error parse_content_list(css_language *c,
 			}
 
 			if (buffer != NULL) {
-                                lwc_context_string_ref(c->sheet->dictionary, 
-						token->idata);
-				memcpy(buffer + offset, &token->idata,
-						sizeof(token->idata));
+				error = c->sheet->resolve(c->sheet->resolve_pw,
+					c->sheet->dictionary, c->sheet->url,
+					token->idata, &uri);
+				if (error != CSS_OK) {
+					*ctx = orig_ctx;
+					return error;
+				}
+
+				/* Don't ref URI -- we want to pass ownership 
+				 * to the bytecode */
+				memcpy(buffer + offset, &uri, sizeof(uri));
 			}
 
-			offset += sizeof(token->idata);
+			offset += sizeof(uri);
 		} else if (token->type == CSS_TOKEN_FUNCTION &&
 				token->ilower == c->strings[ATTR]) {
 			opv = CONTENT_ATTR;

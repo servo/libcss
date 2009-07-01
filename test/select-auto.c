@@ -145,6 +145,18 @@ static void *myrealloc(void *data, size_t len, void *pw)
 	return realloc(data, len);
 }
 
+static css_error resolve_url(void *pw, lwc_context *dict,
+		const char *base, lwc_string *rel, lwc_string **abs)
+{
+	UNUSED(pw);
+	UNUSED(base);
+
+	/* About as useless as possible */
+	*abs = lwc_context_string_ref(dict, rel);
+
+	return CSS_OK;
+}
+
 int main(int argc, char **argv)
 {
 	line_ctx ctx;
@@ -451,7 +463,7 @@ void parse_sheet(line_ctx *ctx, const char *data, size_t len)
 	/** \todo How are we going to handle @import? */
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", "foo", 
 			origin, media, false, false, ctx->dict, 
-			myrealloc, NULL, &sheet) == CSS_OK);
+			myrealloc, NULL, resolve_url, NULL, &sheet) == CSS_OK);
 
 	/* Extend array of sheets and append new sheet to it */
 	temp = realloc(ctx->sheets, 

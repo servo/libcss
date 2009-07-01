@@ -204,7 +204,15 @@ css_error parse_cursor(css_language *c,
 
 		/* URI* */
 		while (token != NULL && token->type == CSS_TOKEN_URI) {
-			lwc_string *uri = token->idata;
+			lwc_string *uri;
+
+			error = c->sheet->resolve(c->sheet->resolve_pw,
+					c->sheet->dictionary, c->sheet->url,
+					token->idata, &uri);
+			if (error != CSS_OK) {
+				*ctx = orig_ctx;
+				return error;
+			}
 
 			if (first == false) {
 				opv = CURSOR_URI;
@@ -212,7 +220,8 @@ css_error parse_cursor(css_language *c,
 				ptr += sizeof(opv);
 			}
                         
-                        lwc_context_string_ref(c->sheet->dictionary, uri);
+ 			/* Don't ref URI -- we want to pass ownership to the 
+			 * bytecode */
 			memcpy(ptr, &uri, sizeof(uri));
 			ptr += sizeof(uri);
 
