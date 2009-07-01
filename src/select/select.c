@@ -307,15 +307,16 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 		/* Sanity check style */
 		if (inline_style->rule_count != 1 ||
 			inline_style->rule_list->type != CSS_RULE_SELECTOR || 
-				inline_style->rule_list->items != 0 ||
-				sel->style == NULL) {
+				inline_style->rule_list->items != 0) {
 			error = CSS_INVALID;
 			goto cleanup;
 		}
 
-		error = cascade_style(sel->style, &state);
-		if (error != CSS_OK)
-			goto cleanup;
+		if (sel->style != NULL) {
+			error = cascade_style(sel->style, &state);
+			if (error != CSS_OK)
+				goto cleanup;
+		}
 	}
 
 	/* Take account of presentational hints */
