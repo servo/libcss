@@ -312,6 +312,7 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 			goto cleanup;
 		}
 
+		/* No bytecode if input was empty or wholly invalid */
 		if (sel->style != NULL) {
 			error = cascade_style(sel->style, &state);
 			if (error != CSS_OK)
@@ -730,6 +731,10 @@ css_error match_selector_chain(css_select_ctx *ctx,
 
 	/* If we got here, then the entire selector chain matched, so cascade */
 	state->current_specificity = selector->specificity;
+
+	/* No bytecode if rule body is empty or wholly invalid */
+	if (((css_rule_selector *) selector->rule)->style == NULL)
+		return CSS_OK;
 
 	return cascade_style(((css_rule_selector *) selector->rule)->style, 
 			state);
