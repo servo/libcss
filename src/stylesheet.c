@@ -119,7 +119,6 @@ css_error css_stylesheet_create(css_language_level level,
 		return CSS_NOMEM;
 	}
 	memcpy(sheet->url, url, len);
-	sheet->url[len] = '\0';
 
 	if (title != NULL) {
 		len = strlen(title) + 1;
@@ -133,7 +132,6 @@ css_error css_stylesheet_create(css_language_level level,
 			return CSS_NOMEM;
 		}
 		memcpy(sheet->title, title, len);
-		sheet->title[len] = '\0';
 	}
 
 	sheet->origin = origin;
