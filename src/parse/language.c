@@ -407,6 +407,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 		}
 	} else if (atkeyword->ilower == c->strings[IMPORT]) {
 		if (c->state != HAD_RULE) {
+			lwc_string *url;
 			uint64_t media = 0;
 
 			/* any0 = (STRING | URI) ws 
@@ -424,18 +425,35 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 			if (error != CSS_OK)
 				return error;
 
+			/* Create rule */
 			error = css_stylesheet_rule_create(c->sheet, 
 					CSS_RULE_IMPORT, &rule);
 			if (error != CSS_OK)
 				return error;
 
-			error = css_stylesheet_rule_set_nascent_import(c->sheet,
-					rule, uri->idata, media);
+			/* Resolve import URI */
+			error = c->sheet->resolve(c->sheet->resolve_pw,
+					c->sheet->dictionary, c->sheet->url,
+					uri->idata, &url);
 			if (error != CSS_OK) {
 				css_stylesheet_rule_destroy(c->sheet, rule);
 				return error;
 			}
 
+			/* Inform rule of it */
+			error = css_stylesheet_rule_set_nascent_import(c->sheet,
+					rule, url, media);
+			if (error != CSS_OK) {
+				lwc_context_string_unref(c->sheet->dictionary, 
+						url);
+				css_stylesheet_rule_destroy(c->sheet, rule);
+				return error;
+			}
+
+			/* No longer care about url */
+			lwc_context_string_unref(c->sheet->dictionary, url);
+
+			/* Add rule to sheet */
 			error = css_stylesheet_add_rule(c->sheet, rule, NULL);
 			if (error != CSS_OK) {
 				css_stylesheet_rule_destroy(c->sheet, rule);
