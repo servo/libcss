@@ -144,10 +144,8 @@ parserutils_error css_charset_read_bom_or_charset(const uint8_t *data,
 	}
 
 	error = try_ascii_compatible_charset(data, len, &charset);
-	if (error != PARSERUTILS_OK)
-		return error;
-
-	*mibenum = charset;
+	if (error == PARSERUTILS_OK)
+		*mibenum = charset;
 
 	return PARSERUTILS_OK;
 }
