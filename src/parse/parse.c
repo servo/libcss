@@ -2385,7 +2385,7 @@ css_error parseMalformedAtRule(css_parser *parser)
 
 css_error parseInlineStyle(css_parser *parser)
 {
-	enum { Initial = 0, AfterISBody0 = 1 };
+	enum { Initial = 0, WS = 1, AfterISBody0 = 2 };
 	parser_state *state = parserutils_stack_get_current(parser->states);
 	css_error error;
 
@@ -2393,10 +2393,6 @@ css_error parseInlineStyle(css_parser *parser)
 
 	switch (state->substate) {
 	case Initial:
-	{
-		parser_state to = { sISBody0, Initial };
-		parser_state subsequent = { sInlineStyle, AfterISBody0 };
-
 		/* Emit fake events such that the language parser knows 
 		 * no different from a normal parse. */
 
@@ -2409,6 +2405,14 @@ css_error parseInlineStyle(css_parser *parser)
 			parser->event(CSS_PARSER_START_RULESET, NULL,
 					parser->event_pw);
 		}
+
+		/* Fall through */
+	case WS:
+	{
+		parser_state to = { sISBody0, Initial };
+		parser_state subsequent = { sInlineStyle, AfterISBody0 };
+
+		state->substate = WS;
 
 		/* Consume leading whitespace */
 		error = eatWS(parser);
