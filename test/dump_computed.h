@@ -1899,6 +1899,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		case CSS_QUOTES_NONE:
 			wrote = snprintf(ptr, *len, "quotes: none\n");
 			break;
+		default:
+			wrote = 0;
+			break;
 		}
 	}
 	ptr += wrote;

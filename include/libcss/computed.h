@@ -87,12 +87,6 @@ typedef struct css_computed_uncommon {
  * 				---		---
  * 				  2 bits	  2sizeof(ptr) bytes
  *
- * Encode quotes as an array of string objects, terminated with a blank entry.
- *
- * quotes			  1		  sizeof(ptr)
- * 				---		---
- * 				  1 bit		  sizeof(ptr) bytes
- *
  * Encode cursor uri(s) as an array of string objects, terminated with a
  * blank entry.
  *
@@ -105,11 +99,11 @@ typedef struct css_computed_uncommon {
  * 				  2 bits	  sizeof(ptr)
  *
  * 				___		___
- * 				 62 bits	 40 + 5sizeof(ptr) bytes
+ * 				 61 bits	 40 + 4sizeof(ptr) bytes
  *
- * 				  8 bytes	 40 + 5sizeof(ptr) bytes
+ * 				  8 bytes	 40 + 4sizeof(ptr) bytes
  * 				===================
- * 				 48 + 5sizeof(ptr) bytes
+ * 				 48 + 4sizeof(ptr) bytes
  *
  * Bit allocations:
  *
@@ -118,7 +112,7 @@ typedef struct css_computed_uncommon {
  *  2 ooooooob	outline-width  | border-spacing
  *  3 bbbbbbbb	border-spacing
  *  4 wwwwwwir	word-spacing   | counter-increment | counter-reset
- *  5 uuuuuq..	cursor         | quotes            | <unused>
+ *  5 uuuuu...	cursor         | <unused>
  *  6 cccccccc	clip
  *  7 cccccccc	clip
  *  8 ccccccoo	clip           | content
@@ -138,8 +132,6 @@ typedef struct css_computed_uncommon {
 
 	css_computed_counter *counter_increment;
 	css_computed_counter *counter_reset;
-
-	lwc_string **quotes;
 
 	lwc_string **cursor;
 
@@ -228,12 +220,18 @@ struct css_computed_style {
  * 				---		---
  * 				  3 bits	  sizeof(ptr)
  *
- * 				___		___
- *				267 bits	140 + 3sizeof(ptr) bytes
+ * Encode quotes as an array of string objects, terminated with a blank entry.
  *
- *				 34 bytes	140 + 3sizeof(ptr) bytes
+ * quotes			  1		  sizeof(ptr)
+ * 				---		---
+ * 				  1 bit		  sizeof(ptr) bytes
+ *
+ * 				___		___
+ *				268 bits	140 + 4sizeof(ptr) bytes
+ *
+ *				 34 bytes	140 + 4sizeof(ptr) bytes
  *				===================
- *				174 + 3sizeof(ptr) bytes
+ *				174 + 4sizeof(ptr) bytes
  *
  * Bit allocations:
  *
@@ -243,7 +241,7 @@ struct css_computed_style {
  *  3 ttttttti	border-top-width    | background-image
  *  4 rrrrrrrc	border-right-width  | color
  *  5 bbbbbbbl	border-bottom-width | list-style-image
- *  6 lllllll.	border-left-width   | <unused>
+ *  6 lllllllq	border-left-width   | quotes
  *  7 ttttttcc	top                 | border-top-color
  *  8 rrrrrrcc	right               | border-right-color
  *  9 bbbbbbcc	bottom              | border-bottom-color
@@ -318,6 +316,8 @@ struct css_computed_style {
 	int32_t z_index;
 
 	lwc_string **font_family;
+
+	lwc_string **quotes;
 
 	css_computed_uncommon *uncommon;/**< Uncommon properties */
 	void *aural;			/**< Aural properties */
@@ -567,34 +567,6 @@ static inline uint8_t css_computed_cursor(
 #undef CURSOR_MASK
 #undef CURSOR_SHIFT
 #undef CURSOR_INDEX
-
-#define QUOTES_INDEX 4
-#define QUOTES_SHIFT 2
-#define QUOTES_MASK  0x4
-static inline uint8_t css_computed_quotes(
-		const css_computed_style *style, 
-		lwc_string ***quotes)
-{
-	if (style->uncommon != NULL) {
-		uint8_t bits = style->uncommon->bits[QUOTES_INDEX];
-		bits &= QUOTES_MASK;
-		bits >>= QUOTES_SHIFT;
-
-		/* 1bit: type */
-		*quotes = style->uncommon->quotes;
-
-		return bits;
-	}
-
-	/** \todo This should be the UA default. Quotes probably needs moving 
-	 * into the main style block, so we don't need to look up the initial 
-	 * value after selection.
-	 */
-	return CSS_QUOTES_NONE;
-}
-#undef QUOTES_MASK
-#undef QUOTES_SHIFT
-#undef QUOTES_INDEX
 
 #define CLIP_INDEX 7
 #define CLIP_SHIFT 2
@@ -892,6 +864,26 @@ static inline uint8_t css_computed_list_style_image(
 #undef LIST_STYLE_IMAGE_MASK
 #undef LIST_STYLE_IMAGE_SHIFT
 #undef LIST_STYLE_IMAGE_INDEX
+
+#define QUOTES_INDEX 5
+#define QUOTES_SHIFT 0
+#define QUOTES_MASK  0x1
+static inline uint8_t css_computed_quotes(
+		const css_computed_style *style, 
+		lwc_string ***quotes)
+{
+	uint8_t bits = style->bits[QUOTES_INDEX];
+	bits &= QUOTES_MASK;
+	bits >>= QUOTES_SHIFT;
+
+	/* 1bit: type */
+	*quotes = style->quotes;
+
+	return bits;
+}
+#undef QUOTES_MASK
+#undef QUOTES_SHIFT
+#undef QUOTES_INDEX
 
 #define TOP_INDEX 6
 #define TOP_SHIFT 2

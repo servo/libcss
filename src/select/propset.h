@@ -241,31 +241,6 @@ static inline css_error set_cursor(
 #undef CURSOR_SHIFT
 #undef CURSOR_INDEX
 
-#define QUOTES_INDEX 4
-#define QUOTES_SHIFT 2
-#define QUOTES_MASK  0x4
-static inline css_error set_quotes(
-		css_computed_style *style, uint8_t type, 
-		lwc_string **quotes)
-{
-	uint8_t *bits;
-
-	ENSURE_UNCOMMON;
-
-	bits = &style->uncommon->bits[QUOTES_INDEX];
-
-	/* 1bit: type */
-	*bits = (*bits & ~QUOTES_MASK) |
-			((type & 0x1) << QUOTES_SHIFT);
-
-	style->uncommon->quotes = quotes;
-
-	return CSS_OK;
-}
-#undef QUOTES_MASK
-#undef QUOTES_SHIFT
-#undef QUOTES_INDEX
-
 #define CLIP_INDEX 7
 #define CLIP_SHIFT 2
 #define CLIP_MASK  0xfc
@@ -547,6 +522,27 @@ static inline css_error set_list_style_image(
 #undef LIST_STYLE_IMAGE_MASK
 #undef LIST_STYLE_IMAGE_SHIFT
 #undef LIST_STYLE_IMAGE_INDEX
+
+#define QUOTES_INDEX 5
+#define QUOTES_SHIFT 0
+#define QUOTES_MASK  0x1
+static inline css_error set_quotes(
+		css_computed_style *style, uint8_t type, 
+		lwc_string **quotes)
+{
+	uint8_t *bits = &style->bits[QUOTES_INDEX];
+
+	/* 1bit: type */
+	*bits = (*bits & ~QUOTES_MASK) |
+			((type & 0x1) << QUOTES_SHIFT);
+
+	style->quotes = quotes;
+
+	return CSS_OK;
+}
+#undef QUOTES_MASK
+#undef QUOTES_SHIFT
+#undef QUOTES_INDEX
 
 #define TOP_INDEX 6
 #define TOP_SHIFT 2

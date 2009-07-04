@@ -4126,9 +4126,7 @@ css_error compose_quotes(const css_computed_style *parent,
 	css_error error;
 	lwc_string **quotes = NULL;
 
-	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
-			css_computed_quotes(child, &quotes) ==
-				CSS_QUOTES_INHERIT) {
+	if (css_computed_quotes(child, &quotes) == CSS_QUOTES_INHERIT) {
 		uint8_t p = css_computed_quotes(parent, &quotes);
 		size_t n_quotes = 0;
 		lwc_string **copy = NULL;

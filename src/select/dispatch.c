@@ -610,7 +610,7 @@ struct prop_table prop_dispatch[CSS_N_PROPERTIES] = {
 		initial_quotes,
 		compose_quotes,
 		1,
-		GROUP_UNCOMMON
+		GROUP_NORMAL
 	},
 	{
 		cascade_richness,

@@ -65,10 +65,7 @@ css_error css_computed_style_destroy(css_computed_style *style)
 			style->alloc(style->uncommon->counter_reset, 0,
 					style->pw);
 		}
-
-		if (style->uncommon->quotes != NULL)
-			style->alloc(style->uncommon->quotes, 0, style->pw);
-
+	
 		if (style->uncommon->cursor != NULL)
 			style->alloc(style->uncommon->cursor, 0, style->pw);
 
@@ -85,6 +82,9 @@ css_error css_computed_style_destroy(css_computed_style *style)
 
 	if (style->font_family != NULL)
 		style->alloc(style->font_family, 0, style->pw);
+
+	if (style->quotes != NULL)
+		style->alloc(style->quotes, 0, style->pw);
 
 	style->alloc(style, 0, style->pw);
 
