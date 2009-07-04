@@ -7,8 +7,7 @@
 
 #include <string.h>
 
-#include <libcss/computed.h>
-
+#include "select/computed.h"
 #include "select/dispatch.h"
 #include "utils/utils.h"
 
@@ -94,9 +93,11 @@ css_error css_computed_style_destroy(css_computed_style *style)
 /**
  * Compose two computed styles
  *
- * \param parent  Parent style
- * \param child   Child style
- * \param result  Pointer to style to compose into
+ * \param parent             Parent style
+ * \param child              Child style
+ * \param compute_font_size  Function to compute an absolute font size
+ * \param pw                 Client data for compute_font_size
+ * \param result             Pointer to style to compose into
  * \return CSS_OK on success, appropriate error otherwise.
  *
  * Precondition: Parent is a fully composed style (thus has no properties
@@ -104,6 +105,9 @@ css_error css_computed_style_destroy(css_computed_style *style)
  */
 css_error css_computed_style_compose(const css_computed_style *parent,
 		const css_computed_style *child,
+		css_error (*compute_font_size)(void *pw,
+				const css_hint *parent, css_hint *size),
+		void *pw,
 		css_computed_style *result)
 {
 	css_error error = CSS_OK;
@@ -131,6 +135,31 @@ css_error css_computed_style_compose(const css_computed_style *parent,
 			break;
 	}
 
-	return error;
+	/* Finally, compute absolute values for everything */
+	return compute_absolute_values(result, compute_font_size, pw);
+}
+
+/******************************************************************************
+ * Library internals                                                          *
+ ******************************************************************************/
+
+/**
+ * Compute the absolute values of a style
+ *
+ * \param style              Computed style to process
+ * \param compute_font_size  Callback to calculate an absolute font-size
+ * \param pw                 Private word for callback
+ * \return CSS_OK on success.
+ */
+css_error compute_absolute_values(css_computed_style *style,
+		css_error (*compute_font_size)(void *pw, 
+			const css_hint *parent, css_hint *size),
+		void *pw)
+{
+	UNUSED(style);
+	UNUSED(compute_font_size);
+	UNUSED(pw);
+
+	return CSS_OK;
 }
 

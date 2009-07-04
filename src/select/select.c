@@ -8,12 +8,12 @@
 #include <assert.h>
 #include <string.h>
 
-#include <libcss/computed.h>
 #include <libcss/select.h>
 
 #include "bytecode/bytecode.h"
 #include "bytecode/opcodes.h"
 #include "stylesheet.h"
+#include "select/computed.h"
 #include "select/dispatch.h"
 #include "select/hash.h"
 #include "select/propset.h"
@@ -323,10 +323,7 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	}
 
 	/* Take account of presentational hints and fix up any remaining
-	 * unset properties.
-	 * Those properties which are inherited need to be set as inherit.
-	 * Those which are not inherited need to be set to their default value.
-	 */
+	 * unset properties. */
 	for (i = 0; i < CSS_N_PROPERTIES; i++) {
 		/* If the existing property value came from an author 
 		 * stylesheet or a user sheet using !important, then leave 
@@ -347,6 +344,17 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 			if (error != CSS_OK)
 				goto cleanup;
 		}
+	}
+
+	/* If this is the root element, then we must ensure that all
+	 * length values are absolute, display and float are correctly 
+	 * computed, and the default border-{top,right,bottom,left}-color 
+	 * is set to the computed value of color. */
+	if (parent == NULL) {
+		error = compute_absolute_values(result, 
+				handler->compute_font_size, pw);
+		if (error != CSS_OK)
+			goto cleanup;
 	}
 
 	error = CSS_OK;
