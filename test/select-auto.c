@@ -114,6 +114,8 @@ static css_error node_is_lang(void *pw, void *node,
 		lwc_string *lang, bool *match);
 static css_error node_presentational_hint(void *pw, void *node,
 		uint32_t property, css_hint *hint);
+static css_error ua_default_for_property(void *pw, uint32_t property,
+		css_hint *hint);
 
 static css_select_handler select_handler = {
 	node_name,
@@ -135,7 +137,8 @@ static css_select_handler select_handler = {
 	node_is_active,
 	node_is_focus,
 	node_is_lang,
-	node_presentational_hint
+	node_presentational_hint,
+	ua_default_for_property
 };
 
 static void *myrealloc(void *data, size_t len, void *pw)
@@ -1080,5 +1083,30 @@ css_error node_presentational_hint(void *pw, void *node,
 	UNUSED(hint);
 
 	return CSS_PROPERTY_NOT_SET;
+}
+
+css_error ua_default_for_property(void *pw, uint32_t property, css_hint *hint)
+{
+	UNUSED(pw);
+
+	if (property == CSS_PROP_COLOR) {
+		hint->data.color = 0x00000000;
+		hint->status = CSS_COLOR_COLOR;
+	} else if (property == CSS_PROP_FONT_FAMILY) {
+		hint->data.strings = NULL;
+		hint->status = CSS_FONT_FAMILY_SANS_SERIF;
+	} else if (property == CSS_PROP_QUOTES) {
+		/* Not exactly useful :) */
+		hint->data.strings = NULL;
+		hint->status = CSS_QUOTES_NONE;
+	} else if (property == CSS_PROP_VOICE_FAMILY) {
+		/** \todo Fix this when we have voice-family done */
+		hint->data.strings = NULL;
+		hint->status = 0;
+	} else {
+		return CSS_INVALID;
+	}
+
+	return CSS_OK;
 }
 

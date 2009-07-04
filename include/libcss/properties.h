@@ -305,8 +305,7 @@ enum css_font_family {
 	CSS_FONT_FAMILY_SANS_SERIF		= 0x2,
 	CSS_FONT_FAMILY_CURSIVE			= 0x3,
 	CSS_FONT_FAMILY_FANTASY			= 0x4,
-	CSS_FONT_FAMILY_MONOSPACE		= 0x5,
-	CSS_FONT_FAMILY_DEFAULT			= 0x6
+	CSS_FONT_FAMILY_MONOSPACE		= 0x5
 };
 
 enum css_font_size {
@@ -490,8 +489,7 @@ enum css_quotes {
 	CSS_QUOTES_INHERIT			= 0x0,
 	/* Consult pointer in struct to determine which */
 	CSS_QUOTES_STRING			= 0x1,
-	CSS_QUOTES_NONE				= 0x1,
-	CSS_QUOTES_DEFAULT			= 0x2
+	CSS_QUOTES_NONE				= 0x1
 };
 
 enum css_right {

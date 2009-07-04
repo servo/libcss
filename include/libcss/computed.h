@@ -89,9 +89,9 @@ typedef struct css_computed_uncommon {
  *
  * Encode quotes as an array of string objects, terminated with a blank entry.
  *
- * quotes			  2		  sizeof(ptr)
+ * quotes			  1		  sizeof(ptr)
  * 				---		---
- * 				  2 bits	  sizeof(ptr) bytes
+ * 				  1 bit		  sizeof(ptr) bytes
  *
  * Encode cursor uri(s) as an array of string objects, terminated with a
  * blank entry.
@@ -105,7 +105,7 @@ typedef struct css_computed_uncommon {
  * 				  2 bits	  sizeof(ptr)
  *
  * 				___		___
- * 				 63 bits	 40 + 5sizeof(ptr) bytes
+ * 				 62 bits	 40 + 5sizeof(ptr) bytes
  *
  * 				  8 bytes	 40 + 5sizeof(ptr) bytes
  * 				===================
@@ -118,7 +118,7 @@ typedef struct css_computed_uncommon {
  *  2 ooooooob	outline-width  | border-spacing
  *  3 bbbbbbbb	border-spacing
  *  4 wwwwwwir	word-spacing   | counter-increment | counter-reset
- *  5 uuuuuqq.	cursor         | quotes            | <unused>
+ *  5 uuuuuq..	cursor         | quotes            | <unused>
  *  6 cccccccc	clip
  *  7 cccccccc	clip
  *  8 ccccccoo	clip           | content
@@ -569,8 +569,8 @@ static inline uint8_t css_computed_cursor(
 #undef CURSOR_INDEX
 
 #define QUOTES_INDEX 4
-#define QUOTES_SHIFT 1
-#define QUOTES_MASK  0x6
+#define QUOTES_SHIFT 2
+#define QUOTES_MASK  0x4
 static inline uint8_t css_computed_quotes(
 		const css_computed_style *style, 
 		lwc_string ***quotes)
@@ -580,13 +580,17 @@ static inline uint8_t css_computed_quotes(
 		bits &= QUOTES_MASK;
 		bits >>= QUOTES_SHIFT;
 
-		/* 2bits: type */
+		/* 1bit: type */
 		*quotes = style->uncommon->quotes;
 
 		return bits;
 	}
 
-	return CSS_QUOTES_DEFAULT;
+	/** \todo This should be the UA default. Quotes probably needs moving 
+	 * into the main style block, so we don't need to look up the initial 
+	 * value after selection.
+	 */
+	return CSS_QUOTES_NONE;
 }
 #undef QUOTES_MASK
 #undef QUOTES_SHIFT

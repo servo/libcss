@@ -60,7 +60,7 @@ padding-right: 0px
 padding-bottom: 0px
 padding-left: 0px
 position: static
-quotes: default
+quotes: none
 right: auto
 table-layout: auto
 text-decoration: none
@@ -135,7 +135,7 @@ padding-right: 0px
 padding-bottom: 0px
 padding-left: 0px
 position: static
-quotes: default
+quotes: none
 right: auto
 table-layout: auto
 text-decoration: none
@@ -210,7 +210,7 @@ padding-right: 0px
 padding-bottom: 0px
 padding-left: 0px
 position: static
-quotes: default
+quotes: none
 right: auto
 table-layout: auto
 text-decoration: none
@@ -262,7 +262,7 @@ direction: ltr
 display: block
 empty-cells: show
 float: none
-font-family: default
+font-family: sans-serif
 font-size: medium
 font-style: normal
 font-variant: normal
@@ -291,7 +291,7 @@ padding-right: 0px
 padding-bottom: 0px
 padding-left: 0px
 position: static
-quotes: default
+quotes: none
 right: auto
 table-layout: auto
 text-align: default
@@ -347,7 +347,7 @@ direction: ltr
 display: inline
 empty-cells: show
 float: none
-font-family: default
+font-family: sans-serif
 font-size: medium
 font-style: normal
 font-variant: normal
@@ -376,7 +376,7 @@ padding-right: 0px
 padding-bottom: 0px
 padding-left: 0px
 position: static
-quotes: default
+quotes: none
 right: auto
 table-layout: auto
 text-align: default
@@ -447,7 +447,7 @@ padding-right: 0px
 padding-bottom: 0px
 padding-left: 0px
 position: static
-quotes: default
+quotes: none
 right: auto
 table-layout: auto
 text-decoration: none

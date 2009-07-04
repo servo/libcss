@@ -425,22 +425,22 @@ css_error set_hint_or_initial(css_select_state *state, uint32_t i, void *parent)
 			 * property.
 			 */
 			if (prop_dispatch[i].group == GROUP_NORMAL) {
-				error = prop_dispatch[i].initial(state->result);
+				error = prop_dispatch[i].initial(state);
 				if (error != CSS_OK)
 					return error;
 			} else if (prop_dispatch[i].group == GROUP_UNCOMMON &&
 					state->result->uncommon != NULL) {
-				error = prop_dispatch[i].initial(state->result);
+				error = prop_dispatch[i].initial(state);
 				if (error != CSS_OK)
 					return error;
 			} else if (prop_dispatch[i].group == GROUP_PAGE &&
 					state->result->page != NULL) {
-				error = prop_dispatch[i].initial(state->result);
+				error = prop_dispatch[i].initial(state);
 				if (error != CSS_OK)
 					return error;
 			} else if (prop_dispatch[i].group == GROUP_AURAL &&
 					state->result->aural != NULL) {
-				error = prop_dispatch[i].initial(state->result);
+				error = prop_dispatch[i].initial(state);
 				if (error != CSS_OK)
 					return error;
 			}

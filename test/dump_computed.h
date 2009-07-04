@@ -1149,9 +1149,6 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		case CSS_FONT_FAMILY_MONOSPACE:
 			wrote = snprintf(ptr, *len, " monospace\n");
 			break;
-		case CSS_FONT_FAMILY_DEFAULT:
-			wrote = snprintf(ptr, *len, " default\n");
-			break;
 		}
 		ptr += wrote;
 		*len -= wrote;
@@ -1901,9 +1898,6 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		switch (val) {
 		case CSS_QUOTES_NONE:
 			wrote = snprintf(ptr, *len, "quotes: none\n");
-			break;
-		case CSS_QUOTES_DEFAULT:
-			wrote = snprintf(ptr, *len, "quotes: default\n");
 			break;
 		}
 	}

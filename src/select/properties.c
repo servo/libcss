@@ -132,9 +132,9 @@ css_error set_azimuth_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_azimuth(css_computed_style *style)
+css_error initial_azimuth(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -181,9 +181,9 @@ css_error set_background_attachment_from_hint(const css_hint *hint,
 	return set_background_attachment(style, hint->status);
 }
 
-css_error initial_background_attachment(css_computed_style *style)
+css_error initial_background_attachment(css_select_state *state)
 {
-	return set_background_attachment(style, 
+	return set_background_attachment(state->result, 
 			CSS_BACKGROUND_ATTACHMENT_SCROLL);
 }
 
@@ -212,9 +212,10 @@ css_error set_background_color_from_hint(const css_hint *hint,
 	return set_background_color(style, hint->status, hint->data.color);
 }
 
-css_error initial_background_color(css_computed_style *style)
+css_error initial_background_color(css_select_state *state)
 {
-	return set_background_color(style, CSS_BACKGROUND_COLOR_TRANSPARENT, 0);
+	return set_background_color(state->result, 
+			CSS_BACKGROUND_COLOR_TRANSPARENT, 0);
 }
 
 css_error compose_background_color(const css_computed_style *parent,
@@ -245,9 +246,10 @@ css_error set_background_image_from_hint(const css_hint *hint,
 	return set_background_image(style, hint->status, hint->data.string);
 }
 
-css_error initial_background_image(css_computed_style *style)
+css_error initial_background_image(css_select_state *state)
 {
-	return set_background_image(style, CSS_BACKGROUND_IMAGE_NONE, NULL);
+	return set_background_image(state->result, 
+			CSS_BACKGROUND_IMAGE_NONE, NULL);
 }
 
 css_error compose_background_image(const css_computed_style *parent,
@@ -340,9 +342,10 @@ css_error set_background_position_from_hint(const css_hint *hint,
 		hint->data.position.v.value, hint->data.position.v.unit);
 }
 
-css_error initial_background_position(css_computed_style *style)
+css_error initial_background_position(css_select_state *state)
 {
-	return set_background_position(style, CSS_BACKGROUND_POSITION_SET, 
+	return set_background_position(state->result, 
+			CSS_BACKGROUND_POSITION_SET, 
 			0, CSS_UNIT_PCT, 0, CSS_UNIT_PCT);
 }
 
@@ -403,9 +406,10 @@ css_error set_background_repeat_from_hint(const css_hint *hint,
 	return set_background_repeat(style, hint->status);
 }
 
-css_error initial_background_repeat(css_computed_style *style)
+css_error initial_background_repeat(css_select_state *state)
 {
-	return set_background_repeat(style, CSS_BACKGROUND_REPEAT_REPEAT);
+	return set_background_repeat(state->result, 
+			CSS_BACKGROUND_REPEAT_REPEAT);
 }
 
 css_error compose_background_repeat(const css_computed_style *parent,
@@ -452,9 +456,9 @@ css_error set_border_collapse_from_hint(const css_hint *hint,
 	return set_border_collapse(style, hint->status);
 }
 
-css_error initial_border_collapse(css_computed_style *style)
+css_error initial_border_collapse(css_select_state *state)
 {
-	return set_border_collapse(style, CSS_BORDER_COLLAPSE_SEPARATE);
+	return set_border_collapse(state->result, CSS_BORDER_COLLAPSE_SEPARATE);
 }
 
 css_error compose_border_collapse(const css_computed_style *parent,
@@ -511,9 +515,9 @@ css_error set_border_spacing_from_hint(const css_hint *hint,
 		hint->data.position.v.value, hint->data.position.v.unit);
 }
 
-css_error initial_border_spacing(css_computed_style *style)
+css_error initial_border_spacing(css_select_state *state)
 {
-	return set_border_spacing(style, CSS_BORDER_SPACING_SET,
+	return set_border_spacing(state->result, CSS_BORDER_SPACING_SET,
 			0, CSS_UNIT_PX, 0, CSS_UNIT_PX);
 }
 
@@ -550,9 +554,9 @@ css_error set_border_top_color_from_hint(const css_hint *hint,
 	return set_border_top_color(style, hint->status, hint->data.color);
 }
 
-css_error initial_border_top_color(css_computed_style *style)
+css_error initial_border_top_color(css_select_state *state)
 {
-	return set_border_top_color(style, CSS_BORDER_COLOR_INITIAL, 0);
+	return set_border_top_color(state->result, CSS_BORDER_COLOR_INITIAL, 0);
 }
 
 css_error compose_border_top_color(const css_computed_style *parent,
@@ -584,9 +588,10 @@ css_error set_border_right_color_from_hint(const css_hint *hint,
 	return set_border_right_color(style, hint->status, hint->data.color);
 }
 
-css_error initial_border_right_color(css_computed_style *style)
+css_error initial_border_right_color(css_select_state *state)
 {
-	return set_border_right_color(style, CSS_BORDER_COLOR_INITIAL, 0);
+	return set_border_right_color(state->result, 
+			CSS_BORDER_COLOR_INITIAL, 0);
 }
 
 css_error compose_border_right_color(const css_computed_style *parent,
@@ -618,9 +623,10 @@ css_error set_border_bottom_color_from_hint(const css_hint *hint,
 	return set_border_bottom_color(style, hint->status, hint->data.color);
 }
 
-css_error initial_border_bottom_color(css_computed_style *style)
+css_error initial_border_bottom_color(css_select_state *state)
 {
-	return set_border_bottom_color(style, CSS_BORDER_COLOR_INITIAL, 0);
+	return set_border_bottom_color(state->result, 
+			CSS_BORDER_COLOR_INITIAL, 0);
 }
 
 css_error compose_border_bottom_color(const css_computed_style *parent,
@@ -652,9 +658,10 @@ css_error set_border_left_color_from_hint(const css_hint *hint,
 	return set_border_left_color(style, hint->status, hint->data.color);
 }
 
-css_error initial_border_left_color(css_computed_style *style)
+css_error initial_border_left_color(css_select_state *state)
 {
-	return set_border_left_color(style, CSS_BORDER_COLOR_INITIAL, 0);
+	return set_border_left_color(state->result, 
+			CSS_BORDER_COLOR_INITIAL, 0);
 }
 
 css_error compose_border_left_color(const css_computed_style *parent,
@@ -685,9 +692,9 @@ css_error set_border_top_style_from_hint(const css_hint *hint,
 	return set_border_top_style(style, hint->status);
 }
 
-css_error initial_border_top_style(css_computed_style *style)
+css_error initial_border_top_style(css_select_state *state)
 {
-	return set_border_top_style(style, CSS_BORDER_STYLE_NONE);
+	return set_border_top_style(state->result, CSS_BORDER_STYLE_NONE);
 }
 
 css_error compose_border_top_style(const css_computed_style *parent,
@@ -715,9 +722,9 @@ css_error set_border_right_style_from_hint(const css_hint *hint,
 	return set_border_right_style(style, hint->status);
 }
 
-css_error initial_border_right_style(css_computed_style *style)
+css_error initial_border_right_style(css_select_state *state)
 {
-	return set_border_right_style(style, CSS_BORDER_STYLE_NONE);
+	return set_border_right_style(state->result, CSS_BORDER_STYLE_NONE);
 }
 
 css_error compose_border_right_style(const css_computed_style *parent,
@@ -745,9 +752,9 @@ css_error set_border_bottom_style_from_hint(const css_hint *hint,
 	return set_border_bottom_style(style, hint->status);
 }
 
-css_error initial_border_bottom_style(css_computed_style *style)
+css_error initial_border_bottom_style(css_select_state *state)
 {
-	return set_border_bottom_style(style, CSS_BORDER_STYLE_NONE);
+	return set_border_bottom_style(state->result, CSS_BORDER_STYLE_NONE);
 }
 
 css_error compose_border_bottom_style(const css_computed_style *parent,
@@ -775,9 +782,9 @@ css_error set_border_left_style_from_hint(const css_hint *hint,
 	return set_border_left_style(style, hint->status);
 }
 
-css_error initial_border_left_style(css_computed_style *style)
+css_error initial_border_left_style(css_select_state *state)
 {
-	return set_border_left_style(style, CSS_BORDER_STYLE_NONE);
+	return set_border_left_style(state->result, CSS_BORDER_STYLE_NONE);
 }
 
 css_error compose_border_left_style(const css_computed_style *parent,
@@ -806,9 +813,9 @@ css_error set_border_top_width_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_border_top_width(css_computed_style *style)
+css_error initial_border_top_width(css_select_state *state)
 {
-	return set_border_top_width(style, CSS_BORDER_WIDTH_MEDIUM, 
+	return set_border_top_width(state->result, CSS_BORDER_WIDTH_MEDIUM, 
 			0, CSS_UNIT_PX);
 }
 
@@ -843,9 +850,9 @@ css_error set_border_right_width_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_border_right_width(css_computed_style *style)
+css_error initial_border_right_width(css_select_state *state)
 {
-	return set_border_right_width(style, CSS_BORDER_WIDTH_MEDIUM,
+	return set_border_right_width(state->result, CSS_BORDER_WIDTH_MEDIUM,
 			0, CSS_UNIT_PX);
 }
 
@@ -880,9 +887,9 @@ css_error set_border_bottom_width_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_border_bottom_width(css_computed_style *style)
+css_error initial_border_bottom_width(css_select_state *state)
 {
-	return set_border_bottom_width(style, CSS_BORDER_WIDTH_MEDIUM,
+	return set_border_bottom_width(state->result, CSS_BORDER_WIDTH_MEDIUM,
 			0, CSS_UNIT_PX);
 }
 
@@ -917,9 +924,9 @@ css_error set_border_left_width_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_border_left_width(css_computed_style *style)
+css_error initial_border_left_width(css_select_state *state)
 {
-	return set_border_left_width(style, CSS_BORDER_WIDTH_MEDIUM,
+	return set_border_left_width(state->result, CSS_BORDER_WIDTH_MEDIUM,
 			0, CSS_UNIT_PX);
 }
 
@@ -954,9 +961,9 @@ css_error set_bottom_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_bottom(css_computed_style *style)
+css_error initial_bottom(css_select_state *state)
 {
-	return set_bottom(style, CSS_BOTTOM_AUTO, 0, CSS_UNIT_PX);
+	return set_bottom(state->result, CSS_BOTTOM_AUTO, 0, CSS_UNIT_PX);
 }
 
 css_error compose_bottom(const css_computed_style *parent,
@@ -1007,9 +1014,9 @@ css_error set_caption_side_from_hint(const css_hint *hint,
 	return set_caption_side(style, hint->status);
 }
 
-css_error initial_caption_side(css_computed_style *style)
+css_error initial_caption_side(css_select_state *state)
 {
-	return set_caption_side(style, CSS_CAPTION_SIDE_TOP);
+	return set_caption_side(state->result, CSS_CAPTION_SIDE_TOP);
 }
 
 css_error compose_caption_side(const css_computed_style *parent,
@@ -1062,9 +1069,9 @@ css_error set_clear_from_hint(const css_hint *hint,
 	return set_clear(style, hint->status);
 }
 
-css_error initial_clear(css_computed_style *style)
+css_error initial_clear(css_select_state *state)
 {
-	return set_clear(style, CSS_CLEAR_NONE);
+	return set_clear(state->result, CSS_CLEAR_NONE);
 }
 
 css_error compose_clear(const css_computed_style *parent,
@@ -1146,13 +1153,13 @@ css_error set_clip_from_hint(const css_hint *hint,
 	return set_clip(style, hint->status, hint->data.clip);
 }
 
-css_error initial_clip(css_computed_style *style)
+css_error initial_clip(css_select_state *state)
 {
 	css_computed_clip_rect rect = { 0, 0, 0, 0, 
 			CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX,
 			false, false, false, false };
 
-	return set_clip(style, CSS_CLIP_AUTO, &rect);
+	return set_clip(state->result, CSS_CLIP_AUTO, &rect);
 }
 
 css_error compose_clip(const css_computed_style *parent,
@@ -1198,9 +1205,17 @@ css_error set_color_from_hint(const css_hint *hint,
 	return set_color(style, hint->status, hint->data.color);
 }
 
-css_error initial_color(css_computed_style *style)
+css_error initial_color(css_select_state *state)
 {
-	return set_color(style, CSS_COLOR_COLOR, 0);
+	css_hint hint;
+	css_error error;
+
+	error = state->handler->ua_default_for_property(state->pw, 
+			CSS_PROP_COLOR, &hint);
+	if (error != CSS_OK)
+		return error;
+
+	return set_color_from_hint(&hint, state->result);
 }
 
 css_error compose_color(const css_computed_style *parent,
@@ -1390,9 +1405,9 @@ css_error set_content_from_hint(const css_hint *hint,
 	return error;
 }
 
-css_error initial_content(css_computed_style *style)
+css_error initial_content(css_select_state *state)
 {
-	return set_content(style, CSS_CONTENT_NORMAL, NULL);
+	return set_content(state->result, CSS_CONTENT_NORMAL, NULL);
 }
 
 css_error compose_content(const css_computed_style *parent,
@@ -1474,9 +1489,10 @@ css_error set_counter_increment_from_hint(const css_hint *hint,
 	return error;
 }
 
-css_error initial_counter_increment(css_computed_style *style)
+css_error initial_counter_increment(css_select_state *state)
 {
-	return set_counter_increment(style, CSS_COUNTER_INCREMENT_NONE, NULL);
+	return set_counter_increment(state->result, 
+			CSS_COUNTER_INCREMENT_NONE, NULL);
 }
 
 css_error compose_counter_increment(const css_computed_style *parent,
@@ -1557,9 +1573,9 @@ css_error set_counter_reset_from_hint(const css_hint *hint,
 	return error;
 }
 
-css_error initial_counter_reset(css_computed_style *style)
+css_error initial_counter_reset(css_select_state *state)
 {
-	return set_counter_reset(style, CSS_COUNTER_RESET_NONE, NULL);
+	return set_counter_reset(state->result, CSS_COUNTER_RESET_NONE, NULL);
 }
 
 css_error compose_counter_reset(const css_computed_style *parent,
@@ -1618,9 +1634,9 @@ css_error set_cue_after_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_cue_after(css_computed_style *style)
+css_error initial_cue_after(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -1652,9 +1668,9 @@ css_error set_cue_before_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_cue_before(css_computed_style *style)
+css_error initial_cue_before(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -1825,9 +1841,9 @@ css_error set_cursor_from_hint(const css_hint *hint,
 	return error;
 }
 
-css_error initial_cursor(css_computed_style *style)
+css_error initial_cursor(css_select_state *state)
 {
-	return set_cursor(style, CSS_CURSOR_AUTO, NULL);
+	return set_cursor(state->result, CSS_CURSOR_AUTO, NULL);
 }
 
 css_error compose_cursor(const css_computed_style *parent,
@@ -1901,9 +1917,9 @@ css_error set_direction_from_hint(const css_hint *hint,
 	return set_direction(style, hint->status);
 }
 
-css_error initial_direction(css_computed_style *style)
+css_error initial_direction(css_select_state *state)
 {
-	return set_direction(style, CSS_DIRECTION_LTR);
+	return set_direction(state->result, CSS_DIRECTION_LTR);
 }
 
 css_error compose_direction(const css_computed_style *parent,
@@ -1990,9 +2006,9 @@ css_error set_display_from_hint(const css_hint *hint,
 	return set_display(style, hint->status);
 }
 
-css_error initial_display(css_computed_style *style)
+css_error initial_display(css_select_state *state)
 {
-	return set_display(style, CSS_DISPLAY_INLINE);
+	return set_display(state->result, CSS_DISPLAY_INLINE);
 }
 
 css_error compose_display(const css_computed_style *parent,
@@ -2052,9 +2068,9 @@ css_error set_elevation_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_elevation(css_computed_style *style)
+css_error initial_elevation(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -2101,9 +2117,9 @@ css_error set_empty_cells_from_hint(const css_hint *hint,
 	return set_empty_cells(style, hint->status);
 }
 
-css_error initial_empty_cells(css_computed_style *style)
+css_error initial_empty_cells(css_select_state *state)
 {
-	return set_empty_cells(style, CSS_EMPTY_CELLS_SHOW);
+	return set_empty_cells(state->result, CSS_EMPTY_CELLS_SHOW);
 }
 
 css_error compose_empty_cells(const css_computed_style *parent,
@@ -2152,9 +2168,9 @@ css_error set_float_from_hint(const css_hint *hint,
 	return set_float(style, hint->status);
 }
 
-css_error initial_float(css_computed_style *style)
+css_error initial_float(css_select_state *state)
 {
-	return set_float(style, CSS_FLOAT_NONE);
+	return set_float(state->result, CSS_FLOAT_NONE);
 }
 
 css_error compose_float(const css_computed_style *parent,
@@ -2301,9 +2317,17 @@ css_error set_font_family_from_hint(const css_hint *hint,
 	return error;
 }
 
-css_error initial_font_family(css_computed_style *style)
+css_error initial_font_family(css_select_state *state)
 {
-	return set_font_family(style, CSS_FONT_FAMILY_DEFAULT, NULL);
+	css_hint hint;
+	css_error error;
+
+	error = state->handler->ua_default_for_property(state->pw,
+			CSS_PROP_FONT_FAMILY, &hint);
+	if (error != CSS_OK)
+		return error;
+
+	return set_font_family_from_hint(&hint, state->result);
 }
 
 css_error compose_font_family(const css_computed_style *parent,
@@ -2408,9 +2432,10 @@ css_error set_font_size_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_font_size(css_computed_style *style)
+css_error initial_font_size(css_select_state *state)
 {
-	return set_font_size(style, CSS_FONT_SIZE_MEDIUM, 0, CSS_UNIT_PX);
+	return set_font_size(state->result, CSS_FONT_SIZE_MEDIUM, 
+			0, CSS_UNIT_PX);
 }
 
 css_error compose_font_size(const css_computed_style *parent,
@@ -2463,9 +2488,9 @@ css_error set_font_style_from_hint(const css_hint *hint,
 	return set_font_style(style, hint->status);
 }
 
-css_error initial_font_style(css_computed_style *style)
+css_error initial_font_style(css_select_state *state)
 {
-	return set_font_style(style, CSS_FONT_STYLE_NORMAL);
+	return set_font_style(state->result, CSS_FONT_STYLE_NORMAL);
 }
 
 css_error compose_font_style(const css_computed_style *parent,
@@ -2510,9 +2535,9 @@ css_error set_font_variant_from_hint(const css_hint *hint,
 	return set_font_variant(style, hint->status);
 }
 
-css_error initial_font_variant(css_computed_style *style)
+css_error initial_font_variant(css_select_state *state)
 {
-	return set_font_variant(style, CSS_FONT_VARIANT_NORMAL);
+	return set_font_variant(state->result, CSS_FONT_VARIANT_NORMAL);
 }
 
 css_error compose_font_variant(const css_computed_style *parent,
@@ -2591,9 +2616,9 @@ css_error set_font_weight_from_hint(const css_hint *hint,
 	return set_font_weight(style, hint->status);
 }
 
-css_error initial_font_weight(css_computed_style *style)
+css_error initial_font_weight(css_select_state *state)
 {
-	return set_font_weight(style, CSS_FONT_WEIGHT_NORMAL);
+	return set_font_weight(state->result, CSS_FONT_WEIGHT_NORMAL);
 }
 
 css_error compose_font_weight(const css_computed_style *parent,
@@ -2621,9 +2646,9 @@ css_error set_height_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_height(css_computed_style *style)
+css_error initial_height(css_select_state *state)
 {
-	return set_height(style, CSS_HEIGHT_AUTO, 0, CSS_UNIT_PX);
+	return set_height(state->result, CSS_HEIGHT_AUTO, 0, CSS_UNIT_PX);
 }
 
 css_error compose_height(const css_computed_style *parent,
@@ -2656,9 +2681,9 @@ css_error set_left_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_left(css_computed_style *style)
+css_error initial_left(css_select_state *state)
 {
-	return set_left(style, CSS_LEFT_AUTO, 0, CSS_UNIT_PX);
+	return set_left(state->result, CSS_LEFT_AUTO, 0, CSS_UNIT_PX);
 }
 
 css_error compose_left(const css_computed_style *parent,
@@ -2691,9 +2716,9 @@ css_error set_letter_spacing_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_letter_spacing(css_computed_style *style)
+css_error initial_letter_spacing(css_select_state *state)
 {
-	return set_letter_spacing(style, CSS_LETTER_SPACING_NORMAL, 
+	return set_letter_spacing(state->result, CSS_LETTER_SPACING_NORMAL, 
 			0, CSS_UNIT_PX);
 }
 
@@ -2758,9 +2783,10 @@ css_error set_line_height_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_line_height(css_computed_style *style)
+css_error initial_line_height(css_select_state *state)
 {
-	return set_line_height(style, CSS_LINE_HEIGHT_NORMAL, 0, CSS_UNIT_PX);
+	return set_line_height(state->result, CSS_LINE_HEIGHT_NORMAL, 
+			0, CSS_UNIT_PX);
 }
 
 css_error compose_line_height(const css_computed_style *parent,
@@ -2792,9 +2818,10 @@ css_error set_list_style_image_from_hint(const css_hint *hint,
 	return set_list_style_image(style, hint->status, hint->data.string);
 }
 
-css_error initial_list_style_image(css_computed_style *style)
+css_error initial_list_style_image(css_select_state *state)
 {
-	return set_list_style_image(style, CSS_LIST_STYLE_IMAGE_NONE, NULL);
+	return set_list_style_image(state->result, 
+			CSS_LIST_STYLE_IMAGE_NONE, NULL);
 }
 
 css_error compose_list_style_image(const css_computed_style *parent,
@@ -2844,9 +2871,10 @@ css_error set_list_style_position_from_hint(const css_hint *hint,
 	return set_list_style_position(style, hint->status);
 }
 
-css_error initial_list_style_position(css_computed_style *style)
+css_error initial_list_style_position(css_select_state *state)
 {
-	return set_list_style_position(style, CSS_LIST_STYLE_POSITION_OUTSIDE);
+	return set_list_style_position(state->result, 
+			CSS_LIST_STYLE_POSITION_OUTSIDE);
 }
 
 css_error compose_list_style_position(const css_computed_style *parent,
@@ -2932,9 +2960,9 @@ css_error set_list_style_type_from_hint(const css_hint *hint,
 	return set_list_style_type(style, hint->status);
 }
 
-css_error initial_list_style_type(css_computed_style *style)
+css_error initial_list_style_type(css_select_state *state)
 {
-	return set_list_style_type(style, CSS_LIST_STYLE_TYPE_DISC);
+	return set_list_style_type(state->result, CSS_LIST_STYLE_TYPE_DISC);
 }
 
 css_error compose_list_style_type(const css_computed_style *parent,
@@ -2963,9 +2991,9 @@ css_error set_margin_top_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_margin_top(css_computed_style *style)
+css_error initial_margin_top(css_select_state *state)
 {
-	return set_margin_top(style, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
+	return set_margin_top(state->result, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
 }
 
 css_error compose_margin_top(const css_computed_style *parent,
@@ -2998,9 +3026,9 @@ css_error set_margin_right_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_margin_right(css_computed_style *style)
+css_error initial_margin_right(css_select_state *state)
 {
-	return set_margin_right(style, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
+	return set_margin_right(state->result, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
 }
 
 css_error compose_margin_right(const css_computed_style *parent,
@@ -3033,9 +3061,9 @@ css_error set_margin_bottom_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_margin_bottom(css_computed_style *style)
+css_error initial_margin_bottom(css_select_state *state)
 {
-	return set_margin_bottom(style, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
+	return set_margin_bottom(state->result, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
 }
 
 css_error compose_margin_bottom(const css_computed_style *parent,
@@ -3068,9 +3096,9 @@ css_error set_margin_left_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_margin_left(css_computed_style *style)
+css_error initial_margin_left(css_select_state *state)
 {
-	return set_margin_left(style, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
+	return set_margin_left(state->result, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
 }
 
 css_error compose_margin_left(const css_computed_style *parent,
@@ -3103,9 +3131,10 @@ css_error set_max_height_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_max_height(css_computed_style *style)
+css_error initial_max_height(css_select_state *state)
 {
-	return set_max_height(style, CSS_MAX_HEIGHT_NONE, 0, CSS_UNIT_PX);
+	return set_max_height(state->result, CSS_MAX_HEIGHT_NONE, 
+			0, CSS_UNIT_PX);
 }
 
 css_error compose_max_height(const css_computed_style *parent,
@@ -3138,9 +3167,9 @@ css_error set_max_width_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_max_width(css_computed_style *style)
+css_error initial_max_width(css_select_state *state)
 {
-	return set_max_width(style, CSS_MAX_WIDTH_NONE, 0, CSS_UNIT_PX);
+	return set_max_width(state->result, CSS_MAX_WIDTH_NONE, 0, CSS_UNIT_PX);
 }
 
 css_error compose_max_width(const css_computed_style *parent,
@@ -3173,9 +3202,10 @@ css_error set_min_height_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_min_height(css_computed_style *style)
+css_error initial_min_height(css_select_state *state)
 {
-	return set_min_height(style, CSS_MIN_HEIGHT_SET, 0, CSS_UNIT_PX);
+	return set_min_height(state->result, CSS_MIN_HEIGHT_SET, 
+			0, CSS_UNIT_PX);
 }
 
 css_error compose_min_height(const css_computed_style *parent,
@@ -3208,9 +3238,9 @@ css_error set_min_width_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_min_width(css_computed_style *style)
+css_error initial_min_width(css_select_state *state)
 {
-	return set_min_width(style, CSS_MIN_WIDTH_SET, 0, CSS_UNIT_PX);
+	return set_min_width(state->result, CSS_MIN_WIDTH_SET, 0, CSS_UNIT_PX);
 }
 
 css_error compose_min_width(const css_computed_style *parent,
@@ -3246,9 +3276,9 @@ css_error set_orphans_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_orphans(css_computed_style *style)
+css_error initial_orphans(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -3296,9 +3326,9 @@ css_error set_outline_color_from_hint(const css_hint *hint,
 	return set_outline_color(style, hint->status, hint->data.color);
 }
 
-css_error initial_outline_color(css_computed_style *style)
+css_error initial_outline_color(css_select_state *state)
 {
-	return set_outline_color(style, CSS_OUTLINE_COLOR_INVERT, 0);
+	return set_outline_color(state->result, CSS_OUTLINE_COLOR_INVERT, 0);
 }
 
 css_error compose_outline_color(const css_computed_style *parent,
@@ -3330,9 +3360,9 @@ css_error set_outline_style_from_hint(const css_hint *hint,
 	return set_outline_style(style, hint->status);
 }
 
-css_error initial_outline_style(css_computed_style *style)
+css_error initial_outline_style(css_select_state *state)
 {
-	return set_outline_style(style, CSS_OUTLINE_STYLE_NONE);
+	return set_outline_style(state->result, CSS_OUTLINE_STYLE_NONE);
 }
 
 css_error compose_outline_style(const css_computed_style *parent,
@@ -3360,9 +3390,9 @@ css_error set_outline_width_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_outline_width(css_computed_style *style)
+css_error initial_outline_width(css_select_state *state)
 {
-	return set_outline_width(style, CSS_OUTLINE_WIDTH_MEDIUM,
+	return set_outline_width(state->result, CSS_OUTLINE_WIDTH_MEDIUM,
 			0, CSS_UNIT_PX);
 }
 
@@ -3421,9 +3451,9 @@ css_error set_overflow_from_hint(const css_hint *hint,
 	return set_overflow(style, hint->status);
 }
 
-css_error initial_overflow(css_computed_style *style)
+css_error initial_overflow(css_select_state *state)
 {
-	return set_overflow(style, CSS_OVERFLOW_VISIBLE);
+	return set_overflow(state->result, CSS_OVERFLOW_VISIBLE);
 }
 
 css_error compose_overflow(const css_computed_style *parent,
@@ -3450,9 +3480,9 @@ css_error set_padding_top_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_padding_top(css_computed_style *style)
+css_error initial_padding_top(css_select_state *state)
 {
-	return set_padding_top(style, CSS_PADDING_SET, 0, CSS_UNIT_PX);
+	return set_padding_top(state->result, CSS_PADDING_SET, 0, CSS_UNIT_PX);
 }
 
 css_error compose_padding_top(const css_computed_style *parent,
@@ -3485,9 +3515,10 @@ css_error set_padding_right_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_padding_right(css_computed_style *style)
+css_error initial_padding_right(css_select_state *state)
 {
-	return set_padding_right(style, CSS_PADDING_SET, 0, CSS_UNIT_PX);
+	return set_padding_right(state->result, CSS_PADDING_SET, 
+			0, CSS_UNIT_PX);
 }
 
 css_error compose_padding_right(const css_computed_style *parent,
@@ -3520,9 +3551,10 @@ css_error set_padding_bottom_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_padding_bottom(css_computed_style *style)
+css_error initial_padding_bottom(css_select_state *state)
 {
-	return set_padding_bottom(style, CSS_PADDING_SET, 0, CSS_UNIT_PX);
+	return set_padding_bottom(state->result, CSS_PADDING_SET, 
+			0, CSS_UNIT_PX);
 }
 
 css_error compose_padding_bottom(const css_computed_style *parent,
@@ -3555,9 +3587,9 @@ css_error set_padding_left_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_padding_left(css_computed_style *style)
+css_error initial_padding_left(css_select_state *state)
 {
-	return set_padding_left(style, CSS_PADDING_SET, 0, CSS_UNIT_PX);
+	return set_padding_left(state->result, CSS_PADDING_SET, 0, CSS_UNIT_PX);
 }
 
 css_error compose_padding_left(const css_computed_style *parent,
@@ -3593,9 +3625,9 @@ css_error set_page_break_after_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_page_break_after(css_computed_style *style)
+css_error initial_page_break_after(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -3627,9 +3659,9 @@ css_error set_page_break_before_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_page_break_before(css_computed_style *style)
+css_error initial_page_break_before(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -3678,9 +3710,9 @@ css_error set_page_break_inside_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_page_break_inside(css_computed_style *style)
+css_error initial_page_break_inside(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -3712,9 +3744,9 @@ css_error set_pause_after_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_pause_after(css_computed_style *style)
+css_error initial_pause_after(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -3746,9 +3778,9 @@ css_error set_pause_before_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_pause_before(css_computed_style *style)
+css_error initial_pause_before(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -3780,9 +3812,9 @@ css_error set_pitch_range_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_pitch_range(css_computed_style *style)
+css_error initial_pitch_range(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -3843,9 +3875,9 @@ css_error set_pitch_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_pitch(css_computed_style *style)
+css_error initial_pitch(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -3900,9 +3932,9 @@ css_error set_play_during_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_play_during(css_computed_style *style)
+css_error initial_play_during(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -3955,9 +3987,9 @@ css_error set_position_from_hint(const css_hint *hint,
 	return set_position(style, hint->status);
 }
 
-css_error initial_position(css_computed_style *style)
+css_error initial_position(css_select_state *state)
 {
-	return set_position(style, CSS_POSITION_STATIC);
+	return set_position(state->result, CSS_POSITION_STATIC);
 }
 
 css_error compose_position(const css_computed_style *parent,
@@ -4074,9 +4106,17 @@ css_error set_quotes_from_hint(const css_hint *hint,
 	return error;
 }
 
-css_error initial_quotes(css_computed_style *style)
+css_error initial_quotes(css_select_state *state)
 {
-	return set_quotes(style, CSS_QUOTES_DEFAULT, NULL);
+	css_hint hint;
+	css_error error;
+
+	error = state->handler->ua_default_for_property(state->pw,
+			CSS_PROP_QUOTES, &hint);
+	if (error != CSS_OK)
+		return error;
+
+	return set_quotes_from_hint(&hint, state->result);
 }
 
 css_error compose_quotes(const css_computed_style *parent,
@@ -4135,9 +4175,9 @@ css_error set_richness_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_richness(css_computed_style *style)
+css_error initial_richness(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -4166,9 +4206,9 @@ css_error set_right_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_right(css_computed_style *style)
+css_error initial_right(css_select_state *state)
 {
-	return set_right(style, CSS_RIGHT_AUTO, 0, CSS_UNIT_PX);
+	return set_right(state->result, CSS_RIGHT_AUTO, 0, CSS_UNIT_PX);
 }
 
 css_error compose_right(const css_computed_style *parent,
@@ -4221,9 +4261,9 @@ css_error set_speak_header_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_speak_header(css_computed_style *style)
+css_error initial_speak_header(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -4272,9 +4312,9 @@ css_error set_speak_numeral_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_speak_numeral(css_computed_style *style)
+css_error initial_speak_numeral(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -4323,9 +4363,9 @@ css_error set_speak_punctuation_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_speak_punctuation(css_computed_style *style)
+css_error initial_speak_punctuation(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -4375,9 +4415,9 @@ css_error set_speak_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_speak(css_computed_style *style)
+css_error initial_speak(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -4435,9 +4475,9 @@ css_error set_speech_rate_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_speech_rate(css_computed_style *style)
+css_error initial_speech_rate(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -4469,9 +4509,9 @@ css_error set_stress_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_stress(css_computed_style *style)
+css_error initial_stress(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -4518,9 +4558,9 @@ css_error set_table_layout_from_hint(const css_hint *hint,
 	return set_table_layout(style, hint->status);
 }
 
-css_error initial_table_layout(css_computed_style *style)
+css_error initial_table_layout(css_select_state *state)
 {
-	return set_table_layout(style, CSS_TABLE_LAYOUT_AUTO);
+	return set_table_layout(state->result, CSS_TABLE_LAYOUT_AUTO);
 }
 
 css_error compose_table_layout(const css_computed_style *parent,
@@ -4572,9 +4612,9 @@ css_error set_text_align_from_hint(const css_hint *hint,
 	return set_text_align(style, hint->status);
 }
 
-css_error initial_text_align(css_computed_style *style)
+css_error initial_text_align(css_select_state *state)
 {
-	return set_text_align(style, CSS_TEXT_ALIGN_DEFAULT);
+	return set_text_align(state->result, CSS_TEXT_ALIGN_DEFAULT);
 }
 
 css_error compose_text_align(const css_computed_style *parent,	
@@ -4625,9 +4665,9 @@ css_error set_text_decoration_from_hint(const css_hint *hint,
 	return set_text_decoration(style, hint->status);
 }
 
-css_error initial_text_decoration(css_computed_style *style)
+css_error initial_text_decoration(css_select_state *state)
 {
-	return set_text_decoration(style, CSS_TEXT_DECORATION_NONE);
+	return set_text_decoration(state->result, CSS_TEXT_DECORATION_NONE);
 }
 
 css_error compose_text_decoration(const css_computed_style *parent,	
@@ -4656,9 +4696,10 @@ css_error set_text_indent_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_text_indent(css_computed_style *style)
+css_error initial_text_indent(css_select_state *state)
 {
-	return set_text_indent(style, CSS_TEXT_INDENT_SET, 0, CSS_UNIT_PX);
+	return set_text_indent(state->result, CSS_TEXT_INDENT_SET, 
+			0, CSS_UNIT_PX);
 }
 
 css_error compose_text_indent(const css_computed_style *parent,
@@ -4715,9 +4756,9 @@ css_error set_text_transform_from_hint(const css_hint *hint,
 	return set_text_transform(style, hint->status);
 }
 
-css_error initial_text_transform(css_computed_style *style)
+css_error initial_text_transform(css_select_state *state)
 {
-	return set_text_transform(style, CSS_TEXT_TRANSFORM_NONE);
+	return set_text_transform(state->result, CSS_TEXT_TRANSFORM_NONE);
 }
 
 css_error compose_text_transform(const css_computed_style *parent,	
@@ -4745,9 +4786,9 @@ css_error set_top_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_top(css_computed_style *style)
+css_error initial_top(css_select_state *state)
 {
-	return set_top(style, CSS_TOP_AUTO, 0, CSS_UNIT_PX);
+	return set_top(state->result, CSS_TOP_AUTO, 0, CSS_UNIT_PX);
 }
 
 css_error compose_top(const css_computed_style *parent,
@@ -4801,9 +4842,9 @@ css_error set_unicode_bidi_from_hint(const css_hint *hint,
 	return set_unicode_bidi(style, hint->status);
 }
 
-css_error initial_unicode_bidi(css_computed_style *style)
+css_error initial_unicode_bidi(css_select_state *state)
 {
-	return set_unicode_bidi(style, CSS_UNICODE_BIDI_NORMAL);
+	return set_unicode_bidi(state->result, CSS_UNICODE_BIDI_NORMAL);
 }
 
 css_error compose_unicode_bidi(const css_computed_style *parent,	
@@ -4878,9 +4919,9 @@ css_error set_vertical_align_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_vertical_align(css_computed_style *style)
+css_error initial_vertical_align(css_select_state *state)
 {
-	return set_vertical_align(style, CSS_VERTICAL_ALIGN_BASELINE,
+	return set_vertical_align(state->result, CSS_VERTICAL_ALIGN_BASELINE,
 			0, CSS_UNIT_PX);
 }
 
@@ -4935,9 +4976,9 @@ css_error set_visibility_from_hint(const css_hint *hint,
 	return set_visibility(style, hint->status);
 }
 
-css_error initial_visibility(css_computed_style *style)
+css_error initial_visibility(css_select_state *state)
 {
-	return set_visibility(style, CSS_VISIBILITY_VISIBLE);
+	return set_visibility(state->result, CSS_VISIBILITY_VISIBLE);
 }
 
 css_error compose_visibility(const css_computed_style *parent,	
@@ -5052,9 +5093,9 @@ css_error set_voice_family_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_voice_family(css_computed_style *style)
+css_error initial_voice_family(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -5122,9 +5163,9 @@ css_error set_volume_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_volume(css_computed_style *style)
+css_error initial_volume(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -5180,9 +5221,9 @@ css_error set_white_space_from_hint(const css_hint *hint,
 	return set_white_space(style, hint->status);
 }
 
-css_error initial_white_space(css_computed_style *style)
+css_error initial_white_space(css_select_state *state)
 {
-	return set_white_space(style, CSS_WHITE_SPACE_NORMAL);
+	return set_white_space(state->result, CSS_WHITE_SPACE_NORMAL);
 }
 
 css_error compose_white_space(const css_computed_style *parent,	
@@ -5213,9 +5254,9 @@ css_error set_widows_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_widows(css_computed_style *style)
+css_error initial_widows(css_select_state *state)
 {
-	UNUSED(style);
+	UNUSED(state);
 
 	return CSS_OK;
 }
@@ -5244,9 +5285,9 @@ css_error set_width_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_width(css_computed_style *style)
+css_error initial_width(css_select_state *state)
 {
-	return set_width(style, CSS_WIDTH_AUTO, 0, CSS_UNIT_PX);
+	return set_width(state->result, CSS_WIDTH_AUTO, 0, CSS_UNIT_PX);
 }
 
 css_error compose_width(const css_computed_style *parent,
@@ -5278,9 +5319,10 @@ css_error set_word_spacing_from_hint(const css_hint *hint,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_word_spacing(css_computed_style *style)
+css_error initial_word_spacing(css_select_state *state)
 {
-	return set_word_spacing(style, CSS_WORD_SPACING_NORMAL, 0, CSS_UNIT_PX);
+	return set_word_spacing(state->result, CSS_WORD_SPACING_NORMAL, 
+			0, CSS_UNIT_PX);
 }
 
 css_error compose_word_spacing(const css_computed_style *parent,
@@ -5334,9 +5376,9 @@ css_error set_z_index_from_hint(const css_hint *hint,
 	return set_z_index(style, hint->status, hint->data.integer);
 }
 
-css_error initial_z_index(css_computed_style *style)
+css_error initial_z_index(css_select_state *state)
 {
-	return set_z_index(style, CSS_Z_INDEX_AUTO, 0);
+	return set_z_index(state->result, CSS_Z_INDEX_AUTO, 0);
 }
 
 css_error compose_z_index(const css_computed_style *parent,
