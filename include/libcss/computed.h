@@ -421,7 +421,10 @@ static inline uint8_t css_computed_outline_width(
 		return (bits & 7);
 	}
 
-	return CSS_OUTLINE_WIDTH_MEDIUM;
+	*length = INTTOFIX(2);
+	*unit = CSS_UNIT_PX;
+
+	return CSS_OUTLINE_WIDTH_WIDTH;
 }
 #undef OUTLINE_WIDTH_MASK
 #undef OUTLINE_WIDTH_SHIFT

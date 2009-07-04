@@ -351,7 +351,7 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	 * computed, and the default border-{top,right,bottom,left}-color 
 	 * is set to the computed value of color. */
 	if (parent == NULL) {
-		error = compute_absolute_values(result, 
+		error = compute_absolute_values(NULL, result, 
 				handler->compute_font_size, pw);
 		if (error != CSS_OK)
 			goto cleanup;
