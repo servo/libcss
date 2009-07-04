@@ -33,6 +33,8 @@ struct css_select_ctx {
 	void *pw;			/**< Client-specific private data */
 };
 
+static css_error set_hint_or_initial(css_select_state *state, uint32_t i,
+		void *parent);
 static css_error select_from_sheet(css_select_ctx *ctx, 
 		const css_stylesheet *sheet, css_select_state *state);
 static css_error intern_strings_for_sheet(css_select_ctx *ctx,
@@ -267,7 +269,6 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 {
 	uint32_t i;
 	css_error error;
-	css_hint hint;
 	css_select_state state;
 	void *parent = NULL;
 
@@ -329,72 +330,12 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 		/* If the existing property value came from an author 
 		 * stylesheet or a user sheet using !important, then leave 
 		 * it alone. */
-		if (state.props[i].set && 
-				(state.props[i].origin == CSS_ORIGIN_AUTHOR ||
-				state.props[i].important))
-			continue;
-
-		/* Retrieve this property's hint from the client */
-		error = handler->node_presentational_hint(pw, node, i, &hint);
-		if (error != CSS_OK && error != CSS_PROPERTY_NOT_SET)
-			goto cleanup;
-
-		if (error == CSS_OK) {
-			/* Set it in the result */
-			error = prop_dispatch[i].set_from_hint(&hint, result);
+		if (state.props[i].set == false ||
+				(state.props[i].origin != CSS_ORIGIN_AUTHOR &&
+				state.props[i].important == false)) {
+			error = set_hint_or_initial(&state, i, parent);
 			if (error != CSS_OK)
 				goto cleanup;
-
-			/* Keep selection state in sync with reality */
-			state.props[i].set = 1;
-			state.props[i].specificity = 0;
-			state.props[i].origin = CSS_ORIGIN_AUTHOR;
-			state.props[i].important = 0;
-		} else {
-			/* No hint */
-			/* Do nothing if this property is set */
-			if (state.props[i].set)
-				continue;
-
-			/* Do nothing if this property is inherited (the 
-			 * default state of a clean computed style is for 
-			 * everything to be set to inherit)
-			 *
-			 * If the node is tree root, everything should be 
-			 * defaulted.
-			 */
-			if (prop_dispatch[i].inherited && parent != NULL)
-				continue;
-
-			/* Remaining properties are neither inherited nor 
-			 * already set. Thus, we set them to their initial 
-			 * values here. Except, however, if the property in 
-			 * question resides in one of the extension blocks and 
-			 * the extension block has yet to be allocated. In that
-			 * case, we do nothing and leave it to the property 
-			 * accessors to return the initial values for the 
-			 * property.
-			 */
-			if (prop_dispatch[i].group == GROUP_NORMAL) {
-				error = prop_dispatch[i].initial(result);
-				if (error != CSS_OK)
-					goto cleanup;
-			} else if (prop_dispatch[i].group == GROUP_UNCOMMON &&
-					result->uncommon != NULL) {
-				error = prop_dispatch[i].initial(result);
-				if (error != CSS_OK)
-					goto cleanup;
-			} else if (prop_dispatch[i].group == GROUP_PAGE &&
-					result->page != NULL) {
-				error = prop_dispatch[i].initial(result);
-				if (error != CSS_OK)
-					goto cleanup;
-			} else if (prop_dispatch[i].group == GROUP_AURAL &&
-					result->aural != NULL) {
-				error = prop_dispatch[i].initial(result);
-				if (error != CSS_OK)
-					goto cleanup;
-			}
 		}
 	}
 
@@ -441,6 +382,73 @@ cleanup:
 /******************************************************************************
  * Selection engine internals below here                                      *
  ******************************************************************************/
+
+css_error set_hint_or_initial(css_select_state *state, uint32_t i, void *parent)
+{
+	css_hint hint;
+	css_error error;
+
+	/* Retrieve this property's hint from the client */
+	error = state->handler->node_presentational_hint(state->pw, 
+			state->node, i, &hint);
+	if (error != CSS_OK && error != CSS_PROPERTY_NOT_SET)
+		return error;
+
+	if (error == CSS_OK) {
+		/* Hint defined -- set it in the result */
+		error = prop_dispatch[i].set_from_hint(&hint, state->result);
+		if (error != CSS_OK)
+			return error;
+
+		/* Keep selection state in sync with reality */
+		state->props[i].set = 1;
+		state->props[i].specificity = 0;
+		state->props[i].origin = CSS_ORIGIN_AUTHOR;
+		state->props[i].important = 0;
+	} else if (state->props[i].set == false) {
+		/* No hint and property unset */
+
+		/* Do nothing if this property is inherited (the default state 
+		 * of a clean computed style is for everything to be set to 
+		 * inherit)
+		 *
+		 * If the node is tree root, everything should be defaulted.
+		 */
+		if (prop_dispatch[i].inherited == false || parent == NULL) {
+			/* Remaining properties are neither inherited nor 
+			 * already set. Thus, we set them to their initial 
+			 * values here. Except, however, if the property in 
+			 * question resides in one of the extension blocks and 
+			 * the extension block has yet to be allocated. In that 
+			 * case, we do nothing and leave it to the property 
+			 * accessors to return the initial values for the 
+			 * property.
+			 */
+			if (prop_dispatch[i].group == GROUP_NORMAL) {
+				error = prop_dispatch[i].initial(state->result);
+				if (error != CSS_OK)
+					return error;
+			} else if (prop_dispatch[i].group == GROUP_UNCOMMON &&
+					state->result->uncommon != NULL) {
+				error = prop_dispatch[i].initial(state->result);
+				if (error != CSS_OK)
+					return error;
+			} else if (prop_dispatch[i].group == GROUP_PAGE &&
+					state->result->page != NULL) {
+				error = prop_dispatch[i].initial(state->result);
+				if (error != CSS_OK)
+					return error;
+			} else if (prop_dispatch[i].group == GROUP_AURAL &&
+					state->result->aural != NULL) {
+				error = prop_dispatch[i].initial(state->result);
+				if (error != CSS_OK)
+					return error;
+			}
+		}
+	}
+
+	return CSS_OK;
+}
 
 css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet, 
 		css_select_state *state)
