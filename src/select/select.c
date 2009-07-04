@@ -320,8 +320,11 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 		}
 	}
 
-	/* Take account of presentational hints */
-	/** \todo Optimisation: merge this loop and the next together */
+	/* Take account of presentational hints and fix up any remaining
+	 * unset properties.
+	 * Those properties which are inherited need to be set as inherit.
+	 * Those which are not inherited need to be set to their default value.
+	 */
 	for (i = 0; i < CSS_N_PROPERTIES; i++) {
 		/* If the existing property value came from an author 
 		 * stylesheet or a user sheet using !important, then leave 
@@ -336,66 +339,62 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 		if (error != CSS_OK && error != CSS_PROPERTY_NOT_SET)
 			goto cleanup;
 
-		/* Ignore if there isn't one */
-		if (error != CSS_OK)
-			continue;
-
-		/* Set it in the result */
-		error = prop_dispatch[i].set_from_hint(&hint, result);
-		if (error != CSS_OK)
-			goto cleanup;
-
-		/* Keep selection state in sync with reality */
-		state.props[i].set = 1;
-		state.props[i].specificity = 0;
-		state.props[i].origin = CSS_ORIGIN_AUTHOR;
-		state.props[i].important = 0;
-	}
-
-	/* Finally, fix up any remaining unset properties.
-	 * Those properties which are inherited need to be set as inherit.
-	 * Those which are not inherited need to be set to their default value.
-	 */
-	for (i = 0; i < CSS_N_PROPERTIES; i++) {
-		/* Do nothing if this property is set */
-		if (state.props[i].set)
-			continue;
-
-		/* Do nothing if this property is inherited (the default state 
-		 * of a clean computed style is for everything to be set to 
-		 * inherit)
-		 *
-		 * If the node is tree root, everything should be defaulted.
-		 */
-		if (prop_dispatch[i].inherited && parent != NULL)
-			continue;
-
-		/* Remaining properties are neither inherited nor already set.
-		 * Thus, we set them to their initial values here. Except, 
-		 * however, if the property in question resides in one of the 
-		 * extension blocks and the extension block has yet to be 
-		 * allocated. In that case, we do nothing and leave it to the 
-		 * property accessors to return the initial values for the 
-		 * property. */
-		if (prop_dispatch[i].group == GROUP_NORMAL) {
-			error = prop_dispatch[i].initial(result);
+		if (error == CSS_OK) {
+			/* Set it in the result */
+			error = prop_dispatch[i].set_from_hint(&hint, result);
 			if (error != CSS_OK)
 				goto cleanup;
-		} else if (prop_dispatch[i].group == GROUP_UNCOMMON &&
-				result->uncommon != NULL) {
-			error = prop_dispatch[i].initial(result);
-			if (error != CSS_OK)
-				goto cleanup;
-		} else if (prop_dispatch[i].group == GROUP_PAGE &&
-				result->page != NULL) {
-			error = prop_dispatch[i].initial(result);
-			if (error != CSS_OK)
-				goto cleanup;
-		} else if (prop_dispatch[i].group == GROUP_AURAL &&
-				result->aural != NULL) {
-			error = prop_dispatch[i].initial(result);
-			if (error != CSS_OK)
-				goto cleanup;
+
+			/* Keep selection state in sync with reality */
+			state.props[i].set = 1;
+			state.props[i].specificity = 0;
+			state.props[i].origin = CSS_ORIGIN_AUTHOR;
+			state.props[i].important = 0;
+		} else {
+			/* No hint */
+			/* Do nothing if this property is set */
+			if (state.props[i].set)
+				continue;
+
+			/* Do nothing if this property is inherited (the 
+			 * default state of a clean computed style is for 
+			 * everything to be set to inherit)
+			 *
+			 * If the node is tree root, everything should be 
+			 * defaulted.
+			 */
+			if (prop_dispatch[i].inherited && parent != NULL)
+				continue;
+
+			/* Remaining properties are neither inherited nor 
+			 * already set. Thus, we set them to their initial 
+			 * values here. Except, however, if the property in 
+			 * question resides in one of the extension blocks and 
+			 * the extension block has yet to be allocated. In that
+			 * case, we do nothing and leave it to the property 
+			 * accessors to return the initial values for the 
+			 * property.
+			 */
+			if (prop_dispatch[i].group == GROUP_NORMAL) {
+				error = prop_dispatch[i].initial(result);
+				if (error != CSS_OK)
+					goto cleanup;
+			} else if (prop_dispatch[i].group == GROUP_UNCOMMON &&
+					result->uncommon != NULL) {
+				error = prop_dispatch[i].initial(result);
+				if (error != CSS_OK)
+					goto cleanup;
+			} else if (prop_dispatch[i].group == GROUP_PAGE &&
+					result->page != NULL) {
+				error = prop_dispatch[i].initial(result);
+				if (error != CSS_OK)
+					goto cleanup;
+			} else if (prop_dispatch[i].group == GROUP_AURAL &&
+					result->aural != NULL) {
+				error = prop_dispatch[i].initial(result);
+				if (error != CSS_OK)
+					goto cleanup;
+			}
 		}
 	}
 
