@@ -18,9 +18,9 @@ typedef int32_t css_fixed;
 /* Subtract two fixed point values */
 #define FSUB(a, b) ((a) - (b))
 /* Multiply two fixed point values */
-#define FMUL(a, b) (((a) * (b)) >> 10)
+#define FMUL(a, b) ((((int64_t) (a)) * ((int64_t) (b))) >> 10)
 /* Divide two fixed point values */
-#define FDIV(a, b) (((a) << 10) / (b))
+#define FDIV(a, b) ((((int64_t) (a)) << 10) / (b))
 
 /* Add an integer to a fixed point value */
 #define FADDI(a, b) ((a) + ((b) << 10))
