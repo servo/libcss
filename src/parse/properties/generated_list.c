@@ -247,14 +247,14 @@ css_error parse_list_style(css_language *c,
 			goto cleanup;
 		}
 
-		if (image == NULL && (error = parse_list_style_image(c, vector,
-				ctx, &image)) == CSS_OK) {
+		if (type == NULL && (error = parse_list_style_type(c, vector,
+				ctx, &type)) == CSS_OK) {
 		} else if (position == NULL && 
 				(error = parse_list_style_position(c, vector, 
 				ctx, &position)) == CSS_OK) {
-		} else if (type == NULL && 
-				(error = parse_list_style_type(c, vector, ctx,
-				&type)) == CSS_OK) {
+		} else if (image == NULL && 
+				(error = parse_list_style_image(c, vector, ctx,
+				&image)) == CSS_OK) {
 		}
 
 		if (error == CSS_OK) {
