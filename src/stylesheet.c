@@ -339,6 +339,8 @@ css_error css_stylesheet_register_import(css_stylesheet *parent,
 		if (r->type == CSS_RULE_IMPORT && i->sheet == NULL) {
 			i->sheet = import;
 
+			import->ownerRule = r;
+
 			return CSS_OK;
 		}
 	}

@@ -522,8 +522,8 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 
 			/* Find next sheet to process */
 			if (s->ownerRule != NULL) {
-				s = s->ownerRule->parent;
 				rule = s->ownerRule->next;
+				s = s->ownerRule->parent;
 			} else {
 				s = NULL;
 			}
