@@ -16,6 +16,7 @@
 #include <libcss/types.h>
 
 struct css_hint;
+struct css_select_handler;
 
 enum css_computed_content_type {
 	CSS_COMPUTED_CONTENT_NONE		= 0,
@@ -332,6 +333,9 @@ struct css_computed_style {
 css_error css_computed_style_create(css_allocator_fn alloc, void *pw,
 		css_computed_style **result);
 css_error css_computed_style_destroy(css_computed_style *style);
+
+css_error css_computed_style_initialise(css_computed_style *style,
+		struct css_select_handler *handler, void *pw);
 
 css_error css_computed_style_compose(const css_computed_style *parent,
 		const css_computed_style *child,

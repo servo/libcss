@@ -164,6 +164,45 @@ css_error css_computed_style_destroy(css_computed_style *style)
 }
 
 /**
+ * Populate a blank computed style with Initial values
+ *
+ * \param style    Computed style to populate
+ * \param handler  Dispatch table of handler functions
+ * \param pw       Client-specific private data for handler functions
+ * \return CSS_OK on success.
+ */
+css_error css_computed_style_initialise(css_computed_style *style,
+		css_select_handler *handler, void *pw)
+{
+	css_select_state state;
+	uint32_t i;
+	css_error error;
+
+	if (style == NULL)
+		return CSS_BADPARM;
+
+	state.node = NULL;
+	state.pseudo_element = CSS_PSEUDO_ELEMENT_NONE;
+	state.media = CSS_MEDIA_ALL;
+	state.result = style;
+	state.handler = handler;
+	state.pw = pw;
+
+	for (i = 0; i < CSS_N_PROPERTIES; i++) {
+		/* No need to initialise anything other than the normal
+		 * properties -- the others are handled by the accessors */
+		if (prop_dispatch[i].inherited == false &&
+				prop_dispatch[i].group == GROUP_NORMAL) {
+			error = prop_dispatch[i].initial(&state);
+			if (error != CSS_OK)
+				return error;
+		}
+	}
+
+	return CSS_OK;
+}
+
+/**
  * Compose two computed styles
  *
  * \param parent             Parent style
@@ -810,6 +849,7 @@ css_error compute_absolute_sides(css_computed_style *style,
 			if (error != CSS_OK)
 				return error;
 		} else {
+			/** \todo This should be containing block's direction */
 			/* Overconstrained => consult direction */
 			if (css_computed_direction(style) == 
 					CSS_DIRECTION_LTR) {
