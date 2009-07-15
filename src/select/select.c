@@ -634,21 +634,24 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 
 	/* Process any matching selectors */
 	while (*selectors != NULL) {
-		css_rule *rule;
+		css_rule *rule, *parent;
 		bool process = true;
 
 		/* Ignore any selectors contained in rules which are a child 
 		 * of an @media block that doesn't match the current media 
 		 * requirements. */
-		for (rule = (*selectors)->rule; 
-				rule->ptype != CSS_RULE_PARENT_STYLESHEET; 
-				rule = rule->parent) {
+		for (rule = (*selectors)->rule; rule != NULL; rule = parent) {
 			if (rule->type == CSS_RULE_MEDIA && 
 					(((css_rule_media *) rule)->media & 
 					state->media) == 0) {
 				process = false;
 				break;
 			}
+
+			if (rule->ptype != CSS_RULE_PARENT_STYLESHEET)
+				parent = rule->parent;
+			else
+				parent = NULL;
 		}
 
 		if (process) {
@@ -671,21 +674,24 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 
 	/* Process any matching selectors */
 	while (*selectors != NULL) {
-		css_rule *rule;
+		css_rule *rule, *parent;
 		bool process = true;
 
 		/* Ignore any selectors contained in rules which are a child 
 		 * of an @media block that doesn't match the current media 
 		 * requirements. */
-		for (rule = (*selectors)->rule; 
-				rule->ptype != CSS_RULE_PARENT_STYLESHEET; 
-				rule = rule->parent) {
+		for (rule = (*selectors)->rule; rule != NULL; rule = parent) {
 			if (rule->type == CSS_RULE_MEDIA && 
 					(((css_rule_media *) rule)->media & 
 					state->media) == 0) {
 				process = false;
 				break;
 			}
+
+			if (rule->ptype != CSS_RULE_PARENT_STYLESHEET)
+				parent = rule->parent;
+			else
+				parent = NULL;
 		}
 
 		if (process) {
