@@ -13,8 +13,6 @@
 #include "utils/utils.h"
 
 static css_error compute_border_colors(css_computed_style *style);
-static css_error compute_display(const css_computed_style *parent,
-		css_computed_style *style);
 static css_error compute_float(css_computed_style *style);
 
 static css_error compute_absolute_border_width(css_computed_style *style,
@@ -325,11 +323,6 @@ css_error compute_absolute_values(const css_computed_style *parent,
 	if (error != CSS_OK)
 		return error;
 
-	/* Fix up display */
-	error = compute_display(parent, style);
-	if (error != CSS_OK)
-		return error;
-
 	/* Fix up float */
 	error = compute_float(style);
 	if (error != CSS_OK)
@@ -497,55 +490,6 @@ css_error compute_border_colors(css_computed_style *style)
 		if (error != CSS_OK)
 			return error;
 	}
-
-	return CSS_OK;
-}
-
-/**
- * Compute display, considering position and float ($9.7)
- *
- * \param parent  Parent style
- * \param style   Style to process
- * \return CSS_OK on success
- */
-css_error compute_display(const css_computed_style *parent,
-		css_computed_style *style)
-{
-	uint8_t display;
-	uint8_t pos;
-	css_error error;
-
-	display = css_computed_display(style);
-	if (display == CSS_DISPLAY_NONE)
-		return CSS_OK; /*1*/
-
-	pos = css_computed_position(style);
-
-	if ((pos == CSS_POSITION_ABSOLUTE || pos == CSS_POSITION_FIXED)/*2*/ ||
-			css_computed_float(style) != CSS_FLOAT_NONE /*3*/ ||
-			parent == NULL/*4*/) {
-		if (display == CSS_DISPLAY_INLINE_TABLE) {
-			display = CSS_DISPLAY_TABLE;
-		} else if (display == CSS_DISPLAY_INLINE || 
-				display == CSS_DISPLAY_RUN_IN ||
-				display == CSS_DISPLAY_TABLE_ROW_GROUP ||
-				display == CSS_DISPLAY_TABLE_COLUMN ||
-				display == CSS_DISPLAY_TABLE_COLUMN_GROUP ||
-				display == CSS_DISPLAY_TABLE_HEADER_GROUP ||
-				display == CSS_DISPLAY_TABLE_FOOTER_GROUP ||
-				display == CSS_DISPLAY_TABLE_ROW ||
-				display == CSS_DISPLAY_TABLE_CELL ||
-				display == CSS_DISPLAY_TABLE_CAPTION ||
-				display == CSS_DISPLAY_INLINE_BLOCK) {
-			display = CSS_DISPLAY_BLOCK;
-		}
-
-		error = set_display(style, display);
-		if (error != CSS_OK)
-			return error;
-	}
-
-	/*5*/
 
 	return CSS_OK;
 }

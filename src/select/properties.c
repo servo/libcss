@@ -2029,8 +2029,8 @@ css_error compose_display(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_display(child) == CSS_DISPLAY_INHERIT) {
-		return set_display(result, css_computed_display(parent));
+	if (css_computed_display_static(child) == CSS_DISPLAY_INHERIT) {
+		return set_display(result, css_computed_display_static(parent));
 	}
 
 	return CSS_OK;

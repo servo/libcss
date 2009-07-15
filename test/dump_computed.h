@@ -1023,7 +1023,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	*len -= wrote;
 
 	/* display */
-	val = css_computed_display(style);
+	val = css_computed_display_static(style);
 	switch (val) {
 	case CSS_DISPLAY_INLINE:
 		wrote = snprintf(ptr, *len, "display: inline\n");

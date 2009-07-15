@@ -1762,6 +1762,46 @@ static inline uint8_t css_computed_background_position(
 #define DISPLAY_SHIFT 2
 #define DISPLAY_MASK  0x7c
 static inline uint8_t css_computed_display(
+		const css_computed_style *style, bool root)
+{
+	uint8_t position;
+	uint8_t bits = style->bits[DISPLAY_INDEX];
+	bits &= DISPLAY_MASK;
+	bits >>= DISPLAY_SHIFT;
+
+	/* Return computed display as per $9.7 */
+	position = css_computed_position(style);
+
+	/* 5bits: type */
+	if (bits == CSS_DISPLAY_NONE)
+		return bits; /* 1. */
+
+	if ((position == CSS_POSITION_ABSOLUTE || 
+			position == CSS_POSITION_FIXED) /* 2. */ ||
+			css_computed_float(style) != CSS_FLOAT_NONE /* 3. */ ||
+			root /* 4. */) {
+		if (bits == CSS_DISPLAY_INLINE_TABLE) {
+			return CSS_DISPLAY_TABLE;
+		} else if (bits == CSS_DISPLAY_INLINE ||
+				bits == CSS_DISPLAY_RUN_IN ||
+				bits == CSS_DISPLAY_TABLE_ROW_GROUP ||
+				bits == CSS_DISPLAY_TABLE_COLUMN ||
+				bits == CSS_DISPLAY_TABLE_COLUMN_GROUP ||
+				bits == CSS_DISPLAY_TABLE_HEADER_GROUP ||
+				bits == CSS_DISPLAY_TABLE_FOOTER_GROUP ||
+				bits == CSS_DISPLAY_TABLE_ROW ||
+				bits == CSS_DISPLAY_TABLE_CELL ||
+				bits == CSS_DISPLAY_TABLE_CAPTION ||
+				bits == CSS_DISPLAY_INLINE_BLOCK) {
+			return CSS_DISPLAY_BLOCK;
+		}
+	}
+
+	/* 5. */
+	return bits;
+}
+
+static inline uint8_t css_computed_display_static(
 		const css_computed_style *style)
 {
 	uint8_t bits = style->bits[DISPLAY_INDEX];
@@ -1771,6 +1811,7 @@ static inline uint8_t css_computed_display(
 	/* 5bits: type */
 	return bits;
 }
+
 #undef DISPLAY_MASK
 #undef DISPLAY_SHIFT
 #undef DISPLAY_INDEX

@@ -341,7 +341,7 @@ counter-increment: none
 counter-reset: none
 cursor: auto
 direction: ltr
-display: block
+display: inline
 empty-cells: show
 float: none
 font-family: sans-serif
