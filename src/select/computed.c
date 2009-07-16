@@ -216,7 +216,7 @@ css_error css_computed_style_initialise(css_computed_style *style,
 css_error css_computed_style_compose(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_error (*compute_font_size)(void *pw,
-				const css_hint *parent, css_hint *size),
+			const css_hint *parent, bool may_clamp, css_hint *size),
 		void *pw,
 		css_computed_style *result)
 {
@@ -265,7 +265,7 @@ css_error css_computed_style_compose(const css_computed_style *parent,
 css_error compute_absolute_values(const css_computed_style *parent,
 		css_computed_style *style,
 		css_error (*compute_font_size)(void *pw, 
-			const css_hint *parent, css_hint *size),
+			const css_hint *parent, bool may_clamp, css_hint *size),
 		void *pw)
 {
 	css_hint psize, size, ex_size;
@@ -282,7 +282,8 @@ css_error compute_absolute_values(const css_computed_style *parent,
 			&size.data.length.value, 
 			&size.data.length.unit);
 
-	error = compute_font_size(pw, parent != NULL ? &psize : NULL, &size);
+	error = compute_font_size(pw, parent != NULL ? &psize : NULL, 
+			true, &size);
 	if (error != CSS_OK)
 		return error;
 
@@ -295,7 +296,7 @@ css_error compute_absolute_values(const css_computed_style *parent,
 	ex_size.status = CSS_FONT_SIZE_DIMENSION;
 	ex_size.data.length.value = INTTOFIX(1);
 	ex_size.data.length.unit = CSS_UNIT_EX;
-	error = compute_font_size(pw, &size, &ex_size);
+	error = compute_font_size(pw, &size, false, &ex_size);
 	if (error != CSS_OK)
 		return error;
 

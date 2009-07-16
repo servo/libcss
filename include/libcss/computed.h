@@ -341,6 +341,7 @@ css_error css_computed_style_compose(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_error (*compute_font_size)(void *pw,
 				const struct css_hint *parent, 
+				bool may_clamp,
 				struct css_hint *size),
 		void *pw,
 		css_computed_style *result);
