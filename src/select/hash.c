@@ -312,6 +312,6 @@ uint32_t _hash(const css_selector *sel)
  */
 uint32_t _hash_name(lwc_string *name)
 {
-	return (uint32_t) (((uintptr_t) name) & 0xffffffff);
+	return lwc_string_hash_value(name);
 }
 
