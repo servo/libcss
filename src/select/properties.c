@@ -10,6 +10,7 @@
 #include "bytecode/bytecode.h"
 #include "bytecode/opcodes.h"
 #include "select/properties.h"
+#include "select/propget.h"
 #include "select/propset.h"
 #include "utils/utils.h"
 
@@ -193,10 +194,10 @@ css_error compose_background_attachment(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_background_attachment(child) == 
+	if (get_background_attachment(child) == 
 			CSS_BACKGROUND_ATTACHMENT_INHERIT) {
 		return set_background_attachment(result, 
-				css_computed_background_attachment(parent));
+				get_background_attachment(parent));
 	}
 
 	return CSS_OK;
@@ -226,9 +227,9 @@ css_error compose_background_color(const css_computed_style *parent,
 {
 	css_color color;
 
-	if (css_computed_background_color(child, &color) == 
+	if (get_background_color(child, &color) == 
 			CSS_BACKGROUND_COLOR_INHERIT) {
-		uint8_t p = css_computed_background_color(parent, &color);
+		uint8_t p = get_background_color(parent, &color);
 
 		return set_background_color(result, p, color);
 	}
@@ -260,9 +261,9 @@ css_error compose_background_image(const css_computed_style *parent,
 {
 	lwc_string *url;
 
-	if (css_computed_background_image(child, &url) == 
+	if (get_background_image(child, &url) == 
 			CSS_BACKGROUND_IMAGE_INHERIT) {
-		uint8_t p = css_computed_background_image(parent, &url);
+		uint8_t p = get_background_image(parent, &url);
 
 		return set_background_image(result, p, url);
 	}
@@ -359,9 +360,9 @@ css_error compose_background_position(const css_computed_style *parent,
 	css_fixed hlength = 0, vlength = 0;
 	css_unit hunit = CSS_UNIT_PX, vunit = CSS_UNIT_PX;
 
-	if (css_computed_background_position(child, &hlength, &hunit,
+	if (get_background_position(child, &hlength, &hunit,
 			&vlength, &vunit) == CSS_BACKGROUND_POSITION_INHERIT) {
-		uint8_t p = css_computed_background_position(parent,
+		uint8_t p = get_background_position(parent,
 				&hlength, &hunit, &vlength, &vunit);
 
 		return set_background_position(result, p, hlength, hunit,
@@ -420,7 +421,7 @@ css_error compose_background_repeat(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_background_repeat(child) == 
+	if (get_background_repeat(child) == 
 			CSS_BACKGROUND_REPEAT_INHERIT) {
 		return set_background_repeat(result,
 				css_computed_background_repeat(parent));
@@ -470,7 +471,7 @@ css_error compose_border_collapse(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_border_collapse(child) == 
+	if (get_border_collapse(child) == 
 			CSS_BORDER_COLLAPSE_INHERIT) {
 		return set_border_collapse(result,
 				css_computed_border_collapse(parent));
@@ -535,10 +536,10 @@ css_error compose_border_spacing(const css_computed_style *parent,
 	css_unit hunit = CSS_UNIT_PX, vunit = CSS_UNIT_PX;
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) || 
-			css_computed_border_spacing(child, 
+			get_border_spacing(child, 
 			&hlength, &hunit, &vlength, &vunit) == 
 			CSS_BORDER_SPACING_INHERIT) {
-		uint8_t p = css_computed_border_spacing(parent, 
+		uint8_t p = get_border_spacing(parent, 
 				&hlength, &hunit, &vlength, &vunit);
 
 		return set_border_spacing(result, p, hlength, hunit, 
@@ -571,9 +572,8 @@ css_error compose_border_top_color(const css_computed_style *parent,
 {
 	css_color color;
 
-	if (css_computed_border_top_color(child, &color) == 
-			CSS_BORDER_COLOR_INHERIT) {
-		uint8_t p = css_computed_border_top_color(parent, &color);
+	if (get_border_top_color(child, &color) == CSS_BORDER_COLOR_INHERIT) {
+		uint8_t p = get_border_top_color(parent, &color);
 
 		return set_border_top_color(result, p, color);
 	}
@@ -606,9 +606,8 @@ css_error compose_border_right_color(const css_computed_style *parent,
 {
 	css_color color;
 
-	if (css_computed_border_right_color(child, &color) == 
-			CSS_BORDER_COLOR_INHERIT) {
-		uint8_t p = css_computed_border_right_color(parent, &color);
+	if (get_border_right_color(child, &color) == CSS_BORDER_COLOR_INHERIT) {
+		uint8_t p = get_border_right_color(parent, &color);
 
 		return set_border_right_color(result, p, color);
 	}
@@ -641,9 +640,9 @@ css_error compose_border_bottom_color(const css_computed_style *parent,
 {
 	css_color color;
 
-	if (css_computed_border_bottom_color(child, &color) == 
+	if (get_border_bottom_color(child, &color) == 
 			CSS_BORDER_COLOR_INHERIT) {
-		uint8_t p = css_computed_border_bottom_color(parent, &color);
+		uint8_t p = get_border_bottom_color(parent, &color);
 
 		return set_border_bottom_color(result, p, color);
 	}
@@ -676,9 +675,8 @@ css_error compose_border_left_color(const css_computed_style *parent,
 {
 	css_color color;
 
-	if (css_computed_border_left_color(child, &color) == 
-			CSS_BORDER_COLOR_INHERIT) {
-		uint8_t p = css_computed_border_left_color(parent, &color);
+	if (get_border_left_color(child, &color) == CSS_BORDER_COLOR_INHERIT) {
+		uint8_t p = get_border_left_color(parent, &color);
 
 		return set_border_left_color(result, p, color);
 	}
@@ -707,10 +705,9 @@ css_error compose_border_top_style(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_border_top_style(child) == 
-			CSS_BORDER_STYLE_INHERIT) {
+	if (get_border_top_style(child) == CSS_BORDER_STYLE_INHERIT) {
 		return set_border_top_style(result,
-				css_computed_border_top_style(parent));
+				get_border_top_style(parent));
 	}
 
 	return CSS_OK;
@@ -737,10 +734,9 @@ css_error compose_border_right_style(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_border_right_style(child) == 
-			CSS_BORDER_STYLE_INHERIT) {
+	if (get_border_right_style(child) == CSS_BORDER_STYLE_INHERIT) {
 		return set_border_right_style(result,
-				css_computed_border_right_style(parent));
+				get_border_right_style(parent));
 	}
 
 	return CSS_OK;
@@ -767,10 +763,9 @@ css_error compose_border_bottom_style(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_border_bottom_style(child) == 
-			CSS_BORDER_STYLE_INHERIT) {
+	if (get_border_bottom_style(child) == CSS_BORDER_STYLE_INHERIT) {
 		return set_border_bottom_style(result,
-				css_computed_border_bottom_style(parent));
+				get_border_bottom_style(parent));
 	}
 
 	return CSS_OK;
@@ -797,10 +792,9 @@ css_error compose_border_left_style(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_border_left_style(child) == 
-			CSS_BORDER_STYLE_INHERIT) {
+	if (get_border_left_style(child) == CSS_BORDER_STYLE_INHERIT) {
 		return set_border_left_style(result,
-				css_computed_border_left_style(parent));
+				get_border_left_style(parent));
 	}
 
 	return CSS_OK;
@@ -832,10 +826,9 @@ css_error compose_border_top_width(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_border_top_width(child, &length, &unit) == 
+	if (get_border_top_width(child, &length, &unit) == 
 			CSS_BORDER_WIDTH_INHERIT) {
-		uint8_t p = css_computed_border_top_width(parent, 
-				&length, &unit);
+		uint8_t p = get_border_top_width(parent, &length, &unit);
 
 		return set_border_top_width(result, p, length, unit);
 	}
@@ -869,10 +862,9 @@ css_error compose_border_right_width(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_border_right_width(child, &length, &unit) == 
+	if (get_border_right_width(child, &length, &unit) == 
 			CSS_BORDER_WIDTH_INHERIT) {
-		uint8_t p = css_computed_border_right_width(parent, 
-				&length, &unit);
+		uint8_t p = get_border_right_width(parent, &length, &unit);
 
 		return set_border_right_width(result, p, length, unit);
 	}
@@ -906,10 +898,9 @@ css_error compose_border_bottom_width(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_border_bottom_width(child, &length, &unit) == 
+	if (get_border_bottom_width(child, &length, &unit) == 
 			CSS_BORDER_WIDTH_INHERIT) {
-		uint8_t p = css_computed_border_bottom_width(parent, 
-				&length, &unit);
+		uint8_t p = get_border_bottom_width(parent, &length, &unit);
 
 		return set_border_bottom_width(result, p, length, unit);
 	}
@@ -943,10 +934,9 @@ css_error compose_border_left_width(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_border_left_width(child, &length, &unit) == 
+	if (get_border_left_width(child, &length, &unit) == 
 			CSS_BORDER_WIDTH_INHERIT) {
-		uint8_t p = css_computed_border_left_width(parent, 
-				&length, &unit);
+		uint8_t p = get_border_left_width(parent, &length, &unit);
 
 		return set_border_left_width(result, p, length, unit);
 	}
@@ -979,9 +969,8 @@ css_error compose_bottom(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_bottom(child, &length, &unit) == 
-			CSS_BOTTOM_INHERIT) {
-		uint8_t p = css_computed_bottom(parent, &length, &unit);
+	if (get_bottom(child, &length, &unit) == CSS_BOTTOM_INHERIT) {
+		uint8_t p = get_bottom(parent, &length, &unit);
 
 		return set_bottom(result, p, length, unit);
 	}
@@ -1030,10 +1019,8 @@ css_error compose_caption_side(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_caption_side(child) == 
-			CSS_CAPTION_SIDE_INHERIT) {
-		return set_caption_side(result, 
-				css_computed_caption_side(parent));
+	if (get_caption_side(child) == CSS_CAPTION_SIDE_INHERIT) {
+		return set_caption_side(result, get_caption_side(parent));
 	}
 
 	return CSS_OK;
@@ -1086,8 +1073,8 @@ css_error compose_clear(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_clear(child) == CSS_CLEAR_INHERIT) {
-		return set_clear(result, css_computed_clear(parent));
+	if (get_clear(child) == CSS_CLEAR_INHERIT) {
+		return set_clear(result, get_clear(parent));
 	}
 
 	return CSS_OK;
@@ -1180,9 +1167,8 @@ css_error compose_clip(const css_computed_style *parent,
 			false, false, false, false };
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) || 
-			css_computed_clip(child, &rect) ==
-				CSS_CLIP_INHERIT) {
-		uint8_t p = css_computed_clip(parent, &rect);
+			get_clip(child, &rect) == CSS_CLIP_INHERIT) {
+		uint8_t p = get_clip(parent, &rect);
 		return set_clip(result, p, &rect);
 	}
 
@@ -1234,8 +1220,8 @@ css_error compose_color(const css_computed_style *parent,
 {
 	css_color color;
 
-	if (css_computed_color(child, &color) == CSS_COLOR_INHERIT) {
-		uint8_t p = css_computed_color(parent, &color);
+	if (get_color(child, &color) == CSS_COLOR_INHERIT) {
+		uint8_t p = get_color(parent, &color);
 
 		return set_color(result, p, color);
 	}
@@ -1429,9 +1415,8 @@ css_error compose_content(const css_computed_style *parent,
 	const css_computed_content_item *items = NULL;
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
-			css_computed_content(child, &items) ==
-				CSS_CONTENT_INHERIT) {
-		uint8_t p = css_computed_content(parent, &items);
+			get_content(child, &items) == CSS_CONTENT_INHERIT) {
+		uint8_t p = get_content(parent, &items);
 		size_t n_items = 0;
 		css_computed_content_item *copy = NULL;
 
@@ -1514,9 +1499,9 @@ css_error compose_counter_increment(const css_computed_style *parent,
 	const css_computed_counter *items = NULL;
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
-			css_computed_counter_increment(child, &items) ==
+			get_counter_increment(child, &items) ==
 				CSS_COUNTER_INCREMENT_INHERIT) {
-		uint8_t p = css_computed_counter_increment(parent, &items);
+		uint8_t p = get_counter_increment(parent, &items);
 		size_t n_items = 0;
 		css_computed_counter *copy = NULL;
 
@@ -1597,9 +1582,9 @@ css_error compose_counter_reset(const css_computed_style *parent,
 	const css_computed_counter *items = NULL;
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
-			css_computed_counter_reset(child, &items) ==
+			get_counter_reset(child, &items) ==
 				CSS_COUNTER_RESET_INHERIT) {
-		uint8_t p = css_computed_counter_reset(parent, &items);
+		uint8_t p = get_counter_reset(parent, &items);
 		size_t n_items = 0;
 		css_computed_counter *copy = NULL;
 
@@ -1866,9 +1851,8 @@ css_error compose_cursor(const css_computed_style *parent,
 	lwc_string **urls = NULL;
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
-			css_computed_cursor(child, &urls) ==
-				CSS_CURSOR_INHERIT) {
-		uint8_t p = css_computed_cursor(parent, &urls);
+			get_cursor(child, &urls) == CSS_CURSOR_INHERIT) {
+		uint8_t p = get_cursor(parent, &urls);
 		size_t n_urls = 0;
 		lwc_string **copy = NULL;
 
@@ -1939,8 +1923,8 @@ css_error compose_direction(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_direction(child) == CSS_DIRECTION_INHERIT) {
-		return set_direction(result, css_computed_direction(parent));
+	if (get_direction(child) == CSS_DIRECTION_INHERIT) {
+		return set_direction(result, get_direction(parent));
 	}
 
 	return CSS_OK;
@@ -2029,8 +2013,8 @@ css_error compose_display(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_display_static(child) == CSS_DISPLAY_INHERIT) {
-		return set_display(result, css_computed_display_static(parent));
+	if (get_display_static(child) == CSS_DISPLAY_INHERIT) {
+		return set_display(result, get_display_static(parent));
 	}
 
 	return CSS_OK;
@@ -2142,9 +2126,8 @@ css_error compose_empty_cells(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_empty_cells(child) == CSS_EMPTY_CELLS_INHERIT) {
-		return set_empty_cells(result, 
-				css_computed_empty_cells(parent));
+	if (get_empty_cells(child) == CSS_EMPTY_CELLS_INHERIT) {
+		return set_empty_cells(result, get_empty_cells(parent));
 	}
 
 	return CSS_OK;
@@ -2194,8 +2177,8 @@ css_error compose_float(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_float(child) == CSS_FLOAT_INHERIT) {
-		return set_float(result, css_computed_float(parent));
+	if (get_float(child) == CSS_FLOAT_INHERIT) {
+		return set_float(result, get_float(parent));
 	}
 
 	return CSS_OK;
@@ -2355,8 +2338,8 @@ css_error compose_font_family(const css_computed_style *parent,
 	css_error error;
 	lwc_string **urls = NULL;
 
-	if (css_computed_font_family(child, &urls) == CSS_FONT_FAMILY_INHERIT) {
-		uint8_t p = css_computed_font_family(parent, &urls);
+	if (get_font_family(child, &urls) == CSS_FONT_FAMILY_INHERIT) {
+		uint8_t p = get_font_family(parent, &urls);
 		size_t n_urls = 0;
 		lwc_string **copy = NULL;
 
@@ -2464,9 +2447,8 @@ css_error compose_font_size(const css_computed_style *parent,
 	css_fixed size = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_font_size(child, &size, &unit) ==
-			CSS_FONT_SIZE_INHERIT) {
-		uint8_t p = css_computed_font_size(parent, &size, &unit);
+	if (get_font_size(child, &size, &unit) == CSS_FONT_SIZE_INHERIT) {
+		uint8_t p = get_font_size(parent, &size, &unit);
 		return set_font_size(result, p, size, unit);
 	}
 
@@ -2517,8 +2499,8 @@ css_error compose_font_style(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_font_style(child) == CSS_FONT_STYLE_INHERIT) {
-		return set_font_style(result, css_computed_font_style(parent));
+	if (get_font_style(child) == CSS_FONT_STYLE_INHERIT) {
+		return set_font_style(result, get_font_style(parent));
 	}
 
 	return CSS_OK;
@@ -2565,9 +2547,8 @@ css_error compose_font_variant(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_font_variant(child) == CSS_FONT_VARIANT_INHERIT) {
-		return set_font_variant(result, 
-				css_computed_font_variant(parent));
+	if (get_font_variant(child) == CSS_FONT_VARIANT_INHERIT) {
+		return set_font_variant(result, get_font_variant(parent));
 	}
 
 	return CSS_OK;
@@ -2647,9 +2628,8 @@ css_error compose_font_weight(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_font_weight(child) == CSS_FONT_WEIGHT_INHERIT) {
-		return set_font_weight(result, 
-				css_computed_font_weight(parent));
+	if (get_font_weight(child) == CSS_FONT_WEIGHT_INHERIT) {
+		return set_font_weight(result, get_font_weight(parent));
 	}
 
 	return CSS_OK;
@@ -2680,9 +2660,8 @@ css_error compose_height(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_height(child, &length, &unit) == 
-			CSS_HEIGHT_INHERIT) {
-		uint8_t p = css_computed_height(parent, &length, &unit);
+	if (get_height(child, &length, &unit) == CSS_HEIGHT_INHERIT) {
+		uint8_t p = get_height(parent, &length, &unit);
 
 		return set_height(result, p, length, unit);
 	}
@@ -2715,9 +2694,8 @@ css_error compose_left(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_left(child, &length, &unit) == 
-			CSS_LEFT_INHERIT) {
-		uint8_t p = css_computed_left(parent, &length, &unit);
+	if (get_left(child, &length, &unit) == CSS_LEFT_INHERIT) {
+		uint8_t p = get_left(parent, &length, &unit);
 
 		return set_left(result, p, length, unit);
 	}
@@ -2752,9 +2730,9 @@ css_error compose_letter_spacing(const css_computed_style *parent,
 	css_unit unit = CSS_UNIT_PX;
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) || 
-			css_computed_letter_spacing(child, &length, &unit) == 
+			get_letter_spacing(child, &length, &unit) == 
 			CSS_LETTER_SPACING_INHERIT) {
-		uint8_t p = css_computed_letter_spacing(parent, &length, &unit);
+		uint8_t p = get_letter_spacing(parent, &length, &unit);
 
 		return set_letter_spacing(result, p, length, unit);
 	}
@@ -2819,9 +2797,8 @@ css_error compose_line_height(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_line_height(child, &length, &unit) == 
-			CSS_LINE_HEIGHT_INHERIT) {
-		uint8_t p = css_computed_line_height(parent, &length, &unit);
+	if (get_line_height(child, &length, &unit) == CSS_LINE_HEIGHT_INHERIT) {
+		uint8_t p = get_line_height(parent, &length, &unit);
 
 		return set_line_height(result, p, length, unit);
 	}
@@ -2853,9 +2830,8 @@ css_error compose_list_style_image(const css_computed_style *parent,
 {
 	lwc_string *url;
 
-	if (css_computed_list_style_image(child, &url) == 
-			CSS_LIST_STYLE_IMAGE_INHERIT) {
-		uint8_t p = css_computed_list_style_image(parent, &url);
+	if (get_list_style_image(child, &url) == CSS_LIST_STYLE_IMAGE_INHERIT) {
+		uint8_t p = get_list_style_image(parent, &url);
 
 		return set_list_style_image(result, p, url);
 	}
@@ -2905,10 +2881,9 @@ css_error compose_list_style_position(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_list_style_position(child) == 
-			CSS_LIST_STYLE_POSITION_INHERIT) {
+	if (get_list_style_position(child) == CSS_LIST_STYLE_POSITION_INHERIT) {
 		return set_list_style_position(result,
-				css_computed_list_style_position(parent));
+				get_list_style_position(parent));
 	}
 
 	return CSS_OK;
@@ -2994,10 +2969,8 @@ css_error compose_list_style_type(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_list_style_type(child) == 
-			CSS_LIST_STYLE_TYPE_INHERIT) {
-		return set_list_style_type(result,
-				css_computed_list_style_type(parent));
+	if (get_list_style_type(child) == CSS_LIST_STYLE_TYPE_INHERIT) {
+		return set_list_style_type(result, get_list_style_type(parent));
 	}
 
 	return CSS_OK;
@@ -3028,9 +3001,8 @@ css_error compose_margin_top(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_margin_top(child, &length, &unit) ==
-			CSS_MARGIN_INHERIT) {
-		uint8_t p = css_computed_margin_top(parent, &length, &unit);
+	if (get_margin_top(child, &length, &unit) == CSS_MARGIN_INHERIT) {
+		uint8_t p = get_margin_top(parent, &length, &unit);
 
 		return set_margin_top(result, p, length, unit);
 	}
@@ -3063,9 +3035,8 @@ css_error compose_margin_right(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_margin_right(child, &length, &unit) ==
-			CSS_MARGIN_INHERIT) {
-		uint8_t p = css_computed_margin_right(parent, &length, &unit);
+	if (get_margin_right(child, &length, &unit) == CSS_MARGIN_INHERIT) {
+		uint8_t p = get_margin_right(parent, &length, &unit);
 
 		return set_margin_right(result, p, length, unit);
 	}
@@ -3098,9 +3069,8 @@ css_error compose_margin_bottom(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_margin_bottom(child, &length, &unit) ==
-			CSS_MARGIN_INHERIT) {
-		uint8_t p = css_computed_margin_bottom(parent, &length, &unit);
+	if (get_margin_bottom(child, &length, &unit) ==	CSS_MARGIN_INHERIT) {
+		uint8_t p = get_margin_bottom(parent, &length, &unit);
 
 		return set_margin_bottom(result, p, length, unit);
 	}
@@ -3133,9 +3103,8 @@ css_error compose_margin_left(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_margin_left(child, &length, &unit) ==
-			CSS_MARGIN_INHERIT) {
-		uint8_t p = css_computed_margin_left(parent, &length, &unit);
+	if (get_margin_left(child, &length, &unit) == CSS_MARGIN_INHERIT) {
+		uint8_t p = get_margin_left(parent, &length, &unit);
 
 		return set_margin_left(result, p, length, unit);
 	}
@@ -3169,9 +3138,8 @@ css_error compose_max_height(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_max_height(child, &length, &unit) ==
-			CSS_MAX_HEIGHT_INHERIT) {
-		uint8_t p = css_computed_max_height(parent, &length, &unit);
+	if (get_max_height(child, &length, &unit) == CSS_MAX_HEIGHT_INHERIT) {
+		uint8_t p = get_max_height(parent, &length, &unit);
 
 		return set_max_height(result, p, length, unit);
 	}
@@ -3204,9 +3172,8 @@ css_error compose_max_width(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_max_width(child, &length, &unit) ==
-			CSS_MAX_WIDTH_INHERIT) {
-		uint8_t p = css_computed_max_width(parent, &length, &unit);
+	if (get_max_width(child, &length, &unit) == CSS_MAX_WIDTH_INHERIT) {
+		uint8_t p = get_max_width(parent, &length, &unit);
 
 		return set_max_width(result, p, length, unit);
 	}
@@ -3240,9 +3207,8 @@ css_error compose_min_height(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_min_height(child, &length, &unit) ==
-			CSS_MIN_HEIGHT_INHERIT) {
-		uint8_t p = css_computed_min_height(parent, &length, &unit);
+	if (get_min_height(child, &length, &unit) == CSS_MIN_HEIGHT_INHERIT) {
+		uint8_t p = get_min_height(parent, &length, &unit);
 
 		return set_min_height(result, p, length, unit);
 	}
@@ -3275,9 +3241,8 @@ css_error compose_min_width(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_min_width(child, &length, &unit) ==
-			CSS_MIN_WIDTH_INHERIT) {
-		uint8_t p = css_computed_min_width(parent, &length, &unit);
+	if (get_min_width(child, &length, &unit) == CSS_MIN_WIDTH_INHERIT) {
+		uint8_t p = get_min_width(parent, &length, &unit);
 
 		return set_min_width(result, p, length, unit);
 	}
@@ -3364,9 +3329,9 @@ css_error compose_outline_color(const css_computed_style *parent,
 	css_color color = 0;
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
-			css_computed_outline_color(child, &color) ==
+			get_outline_color(child, &color) ==
 			CSS_OUTLINE_COLOR_INHERIT) {
-		uint8_t p = css_computed_outline_color(parent, &color);
+		uint8_t p = get_outline_color(parent, &color);
 
 		return set_outline_color(result, p, color);
 	}
@@ -3395,9 +3360,8 @@ css_error compose_outline_style(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_outline_style(child) == CSS_OUTLINE_STYLE_INHERIT) {
-		return set_outline_style(result, 
-				css_computed_outline_style(parent));
+	if (get_outline_style(child) == CSS_OUTLINE_STYLE_INHERIT) {
+		return set_outline_style(result, get_outline_style(parent));
 	}
 
 	return CSS_OK;
@@ -3430,9 +3394,9 @@ css_error compose_outline_width(const css_computed_style *parent,
 	css_unit unit = CSS_UNIT_PX;
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
-			css_computed_outline_width(child, &length, &unit) ==
+			get_outline_width(child, &length, &unit) ==
 			CSS_OUTLINE_WIDTH_INHERIT) {
-		uint8_t p = css_computed_outline_width(parent, &length, &unit);
+		uint8_t p = get_outline_width(parent, &length, &unit);
 
 		return set_outline_width(result, p, length, unit);
 	}
@@ -3487,8 +3451,8 @@ css_error compose_overflow(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_overflow(child) == CSS_OVERFLOW_INHERIT) {
-		return set_overflow(result, css_computed_overflow(parent));
+	if (get_overflow(child) == CSS_OVERFLOW_INHERIT) {
+		return set_overflow(result, get_overflow(parent));
 	}
 
 	return CSS_OK;
@@ -3519,9 +3483,8 @@ css_error compose_padding_top(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_padding_top(child, &length, &unit) ==
-			CSS_PADDING_INHERIT) {
-		uint8_t p = css_computed_padding_top(parent, &length, &unit);
+	if (get_padding_top(child, &length, &unit) == CSS_PADDING_INHERIT) {
+		uint8_t p = get_padding_top(parent, &length, &unit);
 
 		return set_padding_top(result, p, length, unit);
 	}
@@ -3555,9 +3518,8 @@ css_error compose_padding_right(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_padding_right(child, &length, &unit) ==
-			CSS_PADDING_INHERIT) {
-		uint8_t p = css_computed_padding_right(parent, &length, &unit);
+	if (get_padding_right(child, &length, &unit) == CSS_PADDING_INHERIT) {
+		uint8_t p = get_padding_right(parent, &length, &unit);
 
 		return set_padding_right(result, p, length, unit);
 	}
@@ -3591,9 +3553,8 @@ css_error compose_padding_bottom(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_padding_bottom(child, &length, &unit) ==
-			CSS_PADDING_INHERIT) {
-		uint8_t p = css_computed_padding_bottom(parent, &length, &unit);
+	if (get_padding_bottom(child, &length, &unit) == CSS_PADDING_INHERIT) {
+		uint8_t p = get_padding_bottom(parent, &length, &unit);
 
 		return set_padding_bottom(result, p, length, unit);
 	}
@@ -3626,9 +3587,8 @@ css_error compose_padding_left(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_padding_left(child, &length, &unit) ==
-			CSS_PADDING_INHERIT) {
-		uint8_t p = css_computed_padding_left(parent, &length, &unit);
+	if (get_padding_left(child, &length, &unit) == CSS_PADDING_INHERIT) {
+		uint8_t p = get_padding_left(parent, &length, &unit);
 
 		return set_padding_left(result, p, length, unit);
 	}
@@ -4027,8 +3987,8 @@ css_error compose_position(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_position(child) == CSS_POSITION_INHERIT) {
-		return set_position(result, css_computed_position(parent));
+	if (get_position(child) == CSS_POSITION_INHERIT) {
+		return set_position(result, get_position(parent));
 	}
 
 	return CSS_OK;
@@ -4158,8 +4118,8 @@ css_error compose_quotes(const css_computed_style *parent,
 	css_error error;
 	lwc_string **quotes = NULL;
 
-	if (css_computed_quotes(child, &quotes) == CSS_QUOTES_INHERIT) {
-		uint8_t p = css_computed_quotes(parent, &quotes);
+	if (get_quotes(child, &quotes) == CSS_QUOTES_INHERIT) {
+		uint8_t p = get_quotes(parent, &quotes);
 		size_t n_quotes = 0;
 		lwc_string **copy = NULL;
 
@@ -4248,9 +4208,8 @@ css_error compose_right(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_right(child, &length, &unit) == 
-			CSS_RIGHT_INHERIT) {
-		uint8_t p = css_computed_right(parent, &length, &unit);
+	if (get_right(child, &length, &unit) == CSS_RIGHT_INHERIT) {
+		uint8_t p = get_right(parent, &length, &unit);
 
 		return set_right(result, p, length, unit);
 	}
@@ -4603,9 +4562,8 @@ css_error compose_table_layout(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_table_layout(child) == CSS_TABLE_LAYOUT_INHERIT) {
-		return set_table_layout(result,
-				css_computed_table_layout(parent));
+	if (get_table_layout(child) == CSS_TABLE_LAYOUT_INHERIT) {
+		return set_table_layout(result, get_table_layout(parent));
 	}
 
 	return CSS_OK;
@@ -4658,8 +4616,8 @@ css_error compose_text_align(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_text_align(child) == CSS_TEXT_ALIGN_INHERIT) {
-		return set_text_align(result, css_computed_text_align(parent));
+	if (get_text_align(child) == CSS_TEXT_ALIGN_INHERIT) {
+		return set_text_align(result, get_text_align(parent));
 	}
 
 	return CSS_OK;
@@ -4712,10 +4670,8 @@ css_error compose_text_decoration(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_text_decoration(child) == 
-			CSS_TEXT_DECORATION_INHERIT) {
-		return set_text_decoration(result, 
-				css_computed_text_decoration(parent));
+	if (get_text_decoration(child) == CSS_TEXT_DECORATION_INHERIT) {
+		return set_text_decoration(result, get_text_decoration(parent));
 	}
 
 	return CSS_OK;
@@ -4747,9 +4703,8 @@ css_error compose_text_indent(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_text_indent(child, &length, &unit) ==
-			CSS_TEXT_INDENT_INHERIT) {
-		uint8_t p = css_computed_text_indent(parent, &length, &unit);
+	if (get_text_indent(child, &length, &unit) == CSS_TEXT_INDENT_INHERIT) {
+		uint8_t p = get_text_indent(parent, &length, &unit);
 
 		return set_text_indent(result, p, length, unit);
 	}
@@ -4804,9 +4759,8 @@ css_error compose_text_transform(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_text_transform(child) == CSS_TEXT_TRANSFORM_INHERIT) {
-		return set_text_transform(result, 
-				css_computed_text_transform(parent));
+	if (get_text_transform(child) == CSS_TEXT_TRANSFORM_INHERIT) {
+		return set_text_transform(result, get_text_transform(parent));
 	}
 
 	return CSS_OK;
@@ -4837,9 +4791,8 @@ css_error compose_top(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_top(child, &length, &unit) == 
-			CSS_TOP_INHERIT) {
-		uint8_t p = css_computed_top(parent, &length, &unit);
+	if (get_top(child, &length, &unit) == CSS_TOP_INHERIT) {
+		uint8_t p = get_top(parent, &length, &unit);
 
 		return set_top(result, p, length, unit);
 	}
@@ -4891,9 +4844,8 @@ css_error compose_unicode_bidi(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_unicode_bidi(child) == CSS_UNICODE_BIDI_INHERIT) {
-		return set_unicode_bidi(result, 
-				css_computed_unicode_bidi(parent));
+	if (get_unicode_bidi(child) == CSS_UNICODE_BIDI_INHERIT) {
+		return set_unicode_bidi(result, get_unicode_bidi(parent));
 	}
 
 	return CSS_OK;
@@ -4973,9 +4925,9 @@ css_error compose_vertical_align(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_vertical_align(child, &length, &unit) ==
+	if (get_vertical_align(child, &length, &unit) ==
 			CSS_VERTICAL_ALIGN_INHERIT) {
-		uint8_t p = css_computed_vertical_align(parent, &length, &unit);
+		uint8_t p = get_vertical_align(parent, &length, &unit);
 
 		return set_vertical_align(result, p, length, unit);
 	}
@@ -5027,8 +4979,8 @@ css_error compose_visibility(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_visibility(child) == CSS_VISIBILITY_INHERIT) {
-		return set_visibility(result, css_computed_visibility(parent));
+	if (get_visibility(child) == CSS_VISIBILITY_INHERIT) {
+		return set_visibility(result, get_visibility(parent));
 	}
 
 	return CSS_OK;
@@ -5275,9 +5227,8 @@ css_error compose_white_space(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (css_computed_white_space(child) == CSS_WHITE_SPACE_INHERIT) {
-		return set_white_space(result, 
-				css_computed_white_space(parent));
+	if (get_white_space(child) == CSS_WHITE_SPACE_INHERIT) {
+		return set_white_space(result, get_white_space(parent));
 	}
 
 	return CSS_OK;
@@ -5342,8 +5293,8 @@ css_error compose_width(const css_computed_style *parent,
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
 
-	if (css_computed_width(child, &length, &unit) == CSS_WIDTH_INHERIT) {
-		uint8_t p = css_computed_width(parent, &length, &unit);
+	if (get_width(child, &length, &unit) == CSS_WIDTH_INHERIT) {
+		uint8_t p = get_width(parent, &length, &unit);
 
 		return set_width(result, p, length, unit);
 	}
@@ -5378,9 +5329,9 @@ css_error compose_word_spacing(const css_computed_style *parent,
 	css_unit unit = CSS_UNIT_PX;
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
-			css_computed_word_spacing(child, &length, &unit) == 
+			get_word_spacing(child, &length, &unit) == 
 			CSS_WORD_SPACING_INHERIT) {
-		uint8_t p = css_computed_word_spacing(parent, &length, &unit);
+		uint8_t p = get_word_spacing(parent, &length, &unit);
 
 		return set_word_spacing(result, p, length, unit);
 	}
@@ -5433,8 +5384,8 @@ css_error compose_z_index(const css_computed_style *parent,
 {
 	int32_t index = 0;
 
-	if (css_computed_z_index(child, &index) == CSS_Z_INDEX_INHERIT) {
-		uint8_t p = css_computed_z_index(parent, &index);
+	if (get_z_index(child, &index) == CSS_Z_INDEX_INHERIT) {
+		uint8_t p = get_z_index(parent, &index);
 
 		return set_z_index(result, p, index);
 	}

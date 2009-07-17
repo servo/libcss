@@ -9,70 +9,57 @@
 
 #include "select/computed.h"
 #include "select/dispatch.h"
+#include "select/propget.h"
 #include "select/propset.h"
 #include "utils/utils.h"
 
 static css_error compute_border_colors(css_computed_style *style);
-static css_error compute_float(css_computed_style *style);
 
 static css_error compute_absolute_border_width(css_computed_style *style,
-		const css_hint_length *font_size,
 		const css_hint_length *ex_size);
 static css_error compute_absolute_border_side_width(css_computed_style *style,
-		const css_hint_length *font_size, 
 		const css_hint_length *ex_size,
 		uint8_t (*get)(const css_computed_style *style, 
 				css_fixed *len, css_unit *unit),
 		css_error (*set)(css_computed_style *style, uint8_t type,
 				css_fixed len, css_unit unit));
 static css_error compute_absolute_sides(css_computed_style *style,
-		const css_hint_length *font_size,
 		const css_hint_length *ex_size);
 static css_error compute_absolute_clip(css_computed_style *style,
-		const css_hint_length *font_size,
 		const css_hint_length *ex_size);
 static css_error compute_absolute_line_height(css_computed_style *style,
-		const css_hint_length *font_size,
 		const css_hint_length *ex_size);
 static css_error compute_absolute_margins(css_computed_style *style,
-		const css_hint_length *font_size,
 		const css_hint_length *ex_size);
 static css_error compute_absolute_padding(css_computed_style *style,
-		const css_hint_length *font_size,
 		const css_hint_length *ex_size);
 static css_error compute_absolute_vertical_align(css_computed_style *style,
-		const css_hint_length *font_size,
 		const css_hint_length *ex_size);
 static css_error compute_absolute_length(css_computed_style *style,
-		const css_hint_length *font_size, 
 		const css_hint_length *ex_size,
 		uint8_t (*get)(const css_computed_style *style, 
 				css_fixed *len, css_unit *unit),
 		css_error (*set)(css_computed_style *style, uint8_t type,
 				css_fixed len, css_unit unit));
 static css_error compute_absolute_length_auto(css_computed_style *style,
-		const css_hint_length *font_size, 
 		const css_hint_length *ex_size,
 		uint8_t (*get)(const css_computed_style *style, 
 				css_fixed *len, css_unit *unit),
 		css_error (*set)(css_computed_style *style, uint8_t type,
 				css_fixed len, css_unit unit));
 static css_error compute_absolute_length_none(css_computed_style *style,
-		const css_hint_length *font_size, 
 		const css_hint_length *ex_size,
 		uint8_t (*get)(const css_computed_style *style, 
 				css_fixed *len, css_unit *unit),
 		css_error (*set)(css_computed_style *style, uint8_t type,
 				css_fixed len, css_unit unit));
 static css_error compute_absolute_length_normal(css_computed_style *style,
-		const css_hint_length *font_size, 
 		const css_hint_length *ex_size,
 		uint8_t (*get)(const css_computed_style *style, 
 				css_fixed *len, css_unit *unit),
 		css_error (*set)(css_computed_style *style, uint8_t type,
 				css_fixed len, css_unit unit));
 static css_error compute_absolute_length_pair(css_computed_style *style,
-		const css_hint_length *font_size, 
 		const css_hint_length *ex_size,
 		uint8_t (*get)(const css_computed_style *style, 
 				css_fixed *len1, css_unit *unit1,
@@ -273,12 +260,12 @@ css_error compute_absolute_values(const css_computed_style *parent,
 
 	/* Ensure font-size is absolute */
 	if (parent != NULL) {
-		psize.status = css_computed_font_size(parent, 
+		psize.status = get_font_size(parent, 
 				&psize.data.length.value, 
 				&psize.data.length.unit);
 	}
 
-	size.status = css_computed_font_size(style, 
+	size.status = get_font_size(style, 
 			&size.data.length.value, 
 			&size.data.length.unit);
 
@@ -287,8 +274,9 @@ css_error compute_absolute_values(const css_computed_style *parent,
 	if (error != CSS_OK)
 		return error;
 
-	error = set_font_size(style, size.status, 
-			size.data.length.value, size.data.length.unit);
+	error = set_font_size(style, size.status,
+			size.data.length.value, 
+			size.data.length.unit);
 	if (error != CSS_OK)
 		return error;
 
@@ -300,9 +288,14 @@ css_error compute_absolute_values(const css_computed_style *parent,
 	if (error != CSS_OK)
 		return error;
 
+	/* Convert ex size into ems */
+	ex_size.data.length.value = FDIV(ex_size.data.length.value, 
+				size.data.length.value);
+	ex_size.data.length.unit = CSS_UNIT_EM;
+
 	/* Fix up background-position */
-	error = compute_absolute_length_pair(style, &size.data.length,
-			&ex_size.data.length, css_computed_background_position,
+	error = compute_absolute_length_pair(style, &ex_size.data.length, 
+			get_background_position,
 			set_background_position);
 	if (error != CSS_OK)
 		return error;
@@ -313,90 +306,74 @@ css_error compute_absolute_values(const css_computed_style *parent,
 		return error;
 
 	/* Fix up border-{top,right,bottom,left}-width */
-	error = compute_absolute_border_width(style, &size.data.length, 
-			&ex_size.data.length);
+	error = compute_absolute_border_width(style, &ex_size.data.length);
 	if (error != CSS_OK)
 		return error;
 
 	/* Fix up sides */
-	error = compute_absolute_sides(style, &size.data.length, 
-			&ex_size.data.length);
-	if (error != CSS_OK)
-		return error;
-
-	/* Fix up float */
-	error = compute_float(style);
+	error = compute_absolute_sides(style, &ex_size.data.length);
 	if (error != CSS_OK)
 		return error;
 
 	/* Fix up height */
-	error = compute_absolute_length_auto(style, &size.data.length,
-			&ex_size.data.length, css_computed_height, set_height);
+	error = compute_absolute_length_auto(style, &ex_size.data.length, 
+			get_height, set_height);
 	if (error != CSS_OK)
 		return error;
 
 	/* Fix up line-height (must be before vertical-align) */
-	error = compute_absolute_line_height(style, &size.data.length,
-			&ex_size.data.length);
+	error = compute_absolute_line_height(style, &ex_size.data.length);
 	if (error != CSS_OK)
 		return error;
 
 	/* Fix up margins */
-	error = compute_absolute_margins(style, &size.data.length,
-			&ex_size.data.length);
+	error = compute_absolute_margins(style, &ex_size.data.length);
 	if (error != CSS_OK)
 		return error;
 
 	/* Fix up max-height */
-	error = compute_absolute_length_none(style, &size.data.length,
-			&ex_size.data.length, css_computed_max_height,
-			set_max_height);
+	error = compute_absolute_length_none(style, &ex_size.data.length, 
+			get_max_height, set_max_height);
 	if (error != CSS_OK)
 		return error;
 
 	/* Fix up max-width */
-	error = compute_absolute_length_none(style, &size.data.length,
-			&ex_size.data.length, css_computed_max_width,
-			set_max_width);
+	error = compute_absolute_length_none(style, &ex_size.data.length, 
+			get_max_width, set_max_width);
 	if (error != CSS_OK)
 		return error;
 
 	/* Fix up min-height */
-	error = compute_absolute_length(style, &size.data.length,
-			&ex_size.data.length, css_computed_min_height,
-			set_min_height);
+	error = compute_absolute_length(style, &ex_size.data.length, 
+			get_min_height, set_min_height);
 	if (error != CSS_OK)
 		return error;
 
 	/* Fix up min-width */
-	error = compute_absolute_length(style, &size.data.length,
-			&ex_size.data.length, css_computed_min_width,
-			set_min_width);
+	error = compute_absolute_length(style, &ex_size.data.length, 
+			get_min_width, set_min_width);
 	if (error != CSS_OK)
 		return error;
 
 	/* Fix up padding */
-	error = compute_absolute_padding(style, &size.data.length,
-			&ex_size.data.length);
+	error = compute_absolute_padding(style, &ex_size.data.length);
 	if (error != CSS_OK)
 		return error;
 
 	/* Fix up text-indent */
-	error = compute_absolute_length(style, &size.data.length,
-			&ex_size.data.length, css_computed_text_indent,
-			set_text_indent);
+	error = compute_absolute_length(style, &ex_size.data.length, 
+			get_text_indent, set_text_indent);
 	if (error != CSS_OK)
 		return error;
 
 	/* Fix up vertical-align */
-	error = compute_absolute_vertical_align(style, &size.data.length,
-			&ex_size.data.length);
+	error = compute_absolute_vertical_align(style, &ex_size.data.length);
 	if (error != CSS_OK)
 		return error;
 
 	/* Fix up width */
-	error = compute_absolute_length_auto(style, &size.data.length,
-			&ex_size.data.length, css_computed_width, set_width);
+	error = compute_absolute_length_auto(style, &ex_size.data.length, 
+			get_width, set_width);
 	if (error != CSS_OK)
 		return error;
 
@@ -404,37 +381,38 @@ css_error compute_absolute_values(const css_computed_style *parent,
 	if (style->uncommon != NULL) {
 		/* Fix up border-spacing */
 		error = compute_absolute_length_pair(style,
-				&size.data.length, &ex_size.data.length,
-				css_computed_border_spacing,
+				&ex_size.data.length,
+				get_border_spacing,
 				set_border_spacing);
 		if (error != CSS_OK)
 			return error;
 
 		/* Fix up clip */
-		error = compute_absolute_clip(style, &size.data.length,
-				&ex_size.data.length);
+		error = compute_absolute_clip(style, &ex_size.data.length);
 		if (error != CSS_OK)
 			return error;
 
 		/* Fix up letter-spacing */
 		error = compute_absolute_length_normal(style,
-				&size.data.length, &ex_size.data.length,
-				css_computed_letter_spacing, 
+				&ex_size.data.length,
+				get_letter_spacing, 
 				set_letter_spacing);
 		if (error != CSS_OK)
 			return error;
 
 		/* Fix up outline-width */
 		error = compute_absolute_border_side_width(style, 
-				&size.data.length, &ex_size.data.length, 
-				css_computed_outline_width, set_outline_width);
+				&ex_size.data.length, 
+				get_outline_width, 
+				set_outline_width);
 		if (error != CSS_OK)
 			return error;
 
 		/* Fix up word spacing */
 		error = compute_absolute_length_normal(style,
-				&size.data.length, &ex_size.data.length,
-				css_computed_word_spacing, set_word_spacing);
+				&ex_size.data.length,
+				get_word_spacing, 
+				set_word_spacing);
 		if (error != CSS_OK)
 			return error;
 	}
@@ -460,56 +438,30 @@ css_error compute_border_colors(css_computed_style *style)
 
 	css_computed_color(style, &color);
 
-	if (css_computed_border_top_color(style, &bcol) == 
-			CSS_BORDER_COLOR_INITIAL) {
+	if (get_border_top_color(style, &bcol) == CSS_BORDER_COLOR_INITIAL) {
 		error = set_border_top_color(style, 
 				CSS_BORDER_COLOR_COLOR, color);
 		if (error != CSS_OK)
 			return error;
 	}
 
-	if (css_computed_border_right_color(style, &bcol) == 
-			CSS_BORDER_COLOR_INITIAL) {
+	if (get_border_right_color(style, &bcol) == CSS_BORDER_COLOR_INITIAL) {
 		error = set_border_right_color(style, 
 				CSS_BORDER_COLOR_COLOR, color);
 		if (error != CSS_OK)
 			return error;
 	}
 
-	if (css_computed_border_bottom_color(style, &bcol) == 
-			CSS_BORDER_COLOR_INITIAL) {
+	if (get_border_bottom_color(style, &bcol) == CSS_BORDER_COLOR_INITIAL) {
 		error = set_border_bottom_color(style, 
 				CSS_BORDER_COLOR_COLOR, color);
 		if (error != CSS_OK)
 			return error;
 	}
 
-	if (css_computed_border_left_color(style, &bcol) == 
-			CSS_BORDER_COLOR_INITIAL) {
+	if (get_border_left_color(style, &bcol) == CSS_BORDER_COLOR_INITIAL) {
 		error = set_border_left_color(style, 
 				CSS_BORDER_COLOR_COLOR, color);
-		if (error != CSS_OK)
-			return error;
-	}
-
-	return CSS_OK;
-}
-
-/**
- * Compute float, considering position ($9.7)
- *
- * \param style  Style to process
- * \return CSS_OK on success
- */
-css_error compute_float(css_computed_style *style)
-{
-	uint8_t pos;
-	css_error error;
-
-	pos = css_computed_position(style);
-
-	if (pos == CSS_POSITION_ABSOLUTE || pos == CSS_POSITION_FIXED) /*2*/ {
-		error = set_float(style, CSS_FLOAT_NONE);
 		if (error != CSS_OK)
 			return error;
 	}
@@ -521,36 +473,34 @@ css_error compute_float(css_computed_style *style)
  * Compute absolute border widths
  *
  * \param style      Style to process
- * \param font_size  Absolute font size
- * \param ex_size    Absolute ex size
+ * \param ex_size    Ex size in ems
  * \return CSS_OK on success
  */
 css_error compute_absolute_border_width(css_computed_style *style,
-		const css_hint_length *font_size,
 		const css_hint_length *ex_size)
 {
 	css_error error;
 
-	error = compute_absolute_border_side_width(style, font_size, ex_size,
-			css_computed_border_top_width, 
+	error = compute_absolute_border_side_width(style, ex_size,
+			get_border_top_width, 
 			set_border_top_width);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_border_side_width(style, font_size, ex_size,
-			css_computed_border_right_width, 
+	error = compute_absolute_border_side_width(style, ex_size,
+			get_border_right_width, 
 			set_border_right_width);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_border_side_width(style, font_size, ex_size,
-			css_computed_border_bottom_width, 
+	error = compute_absolute_border_side_width(style, ex_size,
+			get_border_bottom_width, 
 			set_border_bottom_width);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_border_side_width(style, font_size, ex_size,
-			css_computed_border_left_width, 
+	error = compute_absolute_border_side_width(style, ex_size,
+			get_border_left_width, 
 			set_border_left_width);
 	if (error != CSS_OK)
 		return error;
@@ -562,14 +512,12 @@ css_error compute_absolute_border_width(css_computed_style *style,
  * Compute an absolute border side width
  *
  * \param style      Style to process
- * \param font_size  Absolute font size
- * \param ex_size    Absolute ex size
+ * \param ex_size    Ex size, in ems
  * \param get        Function to read length
  * \param set        Function to write length
  * \return CSS_OK on success
  */
 css_error compute_absolute_border_side_width(css_computed_style *style,
-		const css_hint_length *font_size, 
 		const css_hint_length *ex_size,
 		uint8_t (*get)(const css_computed_style *style, 
 				css_fixed *len, css_unit *unit),
@@ -592,10 +540,7 @@ css_error compute_absolute_border_side_width(css_computed_style *style,
 		unit = CSS_UNIT_PX;
 	}
 
-	if (unit == CSS_UNIT_EM) {
-		length = FMUL(length, font_size->value);
-		unit = font_size->unit;
-	} else if (unit == CSS_UNIT_EX) {
+	if (unit == CSS_UNIT_EX) {
 		length = FMUL(length, ex_size->value);
 		unit = ex_size->unit;
 	}
@@ -607,55 +552,40 @@ css_error compute_absolute_border_side_width(css_computed_style *style,
  * Compute absolute clip
  *
  * \param style      Style to process
- * \param font_size  Absolute font size
- * \param ex_size    Absolute ex size
+ * \param ex_size    Ex size in ems
  * \return CSS_OK on success
  */
 css_error compute_absolute_clip(css_computed_style *style,
-		const css_hint_length *font_size,
 		const css_hint_length *ex_size)
 {
 	css_computed_clip_rect rect = { 0, 0, 0, 0, CSS_UNIT_PX, CSS_UNIT_PX,
 			CSS_UNIT_PX, CSS_UNIT_PX, false, false, false, false };
 	css_error error;
 
-	if (css_computed_clip(style, &rect) == CSS_CLIP_RECT) {
+	if (get_clip(style, &rect) == CSS_CLIP_RECT) {
 		if (rect.top_auto == false) {
-			if (rect.tunit == CSS_UNIT_EM) {
-				rect.top = FMUL(rect.top, font_size->value);
-				rect.tunit = font_size->unit;
-			} else if (rect.tunit == CSS_UNIT_EX) {
+			if (rect.tunit == CSS_UNIT_EX) {
 				rect.top = FMUL(rect.top, ex_size->value);
 				rect.tunit = ex_size->unit;
 			}
 		}
 
 		if (rect.right_auto == false) {
-			if (rect.runit == CSS_UNIT_EM) {
-				rect.right = FMUL(rect.right, font_size->value);
-				rect.runit = font_size->unit;
-			} else if (rect.runit == CSS_UNIT_EX) {
+			if (rect.runit == CSS_UNIT_EX) {
 				rect.right = FMUL(rect.right, ex_size->value);
 				rect.runit = ex_size->unit;
 			}
 		}
 
 		if (rect.bottom_auto == false) {
-			if (rect.bunit == CSS_UNIT_EM) {
-				rect.bottom = 
-					FMUL(rect.bottom, font_size->value);
-				rect.bunit = font_size->unit;
-			} else if (rect.bunit == CSS_UNIT_EX) {
+			if (rect.bunit == CSS_UNIT_EX) {
 				rect.bottom = FMUL(rect.bottom, ex_size->value);
 				rect.bunit = ex_size->unit;
 			}
 		}
 
 		if (rect.left_auto == false) {
-			if (rect.lunit == CSS_UNIT_EM) {
-				rect.left = FMUL(rect.left, font_size->value);
-				rect.lunit = font_size->unit;
-			} else if (rect.lunit == CSS_UNIT_EX) {
+			if (rect.lunit == CSS_UNIT_EX) {
 				rect.left = FMUL(rect.left, ex_size->value);
 				rect.lunit = ex_size->unit;
 			}
@@ -673,12 +603,10 @@ css_error compute_absolute_clip(css_computed_style *style,
  * Compute absolute line-height
  *
  * \param style      Style to process
- * \param font_size  Absolute font size
- * \param ex_size    Absolute ex size
+ * \param ex_size    Ex size, in ems
  * \return CSS_OK on success
  */
 css_error compute_absolute_line_height(css_computed_style *style,
-		const css_hint_length *font_size,
 		const css_hint_length *ex_size)
 {
 	css_fixed length = 0;
@@ -686,19 +614,12 @@ css_error compute_absolute_line_height(css_computed_style *style,
 	uint8_t type;
 	css_error error;
 
-	type = css_computed_line_height(style, &length, &unit);
+	type = get_line_height(style, &length, &unit);
 
 	if (type == CSS_LINE_HEIGHT_DIMENSION) {
-		if (unit == CSS_UNIT_EM) {
-			length = FMUL(length, font_size->value);
-			unit = font_size->unit;
-		} else if (unit == CSS_UNIT_EX) {
+		if (unit == CSS_UNIT_EX) {
 			length = FMUL(length, ex_size->value);
 			unit = ex_size->unit;
-		} else if (unit == CSS_UNIT_PCT) {
-			length = FDIV(FMUL(length, font_size->value), 
-					INTTOFIX(100));
-			unit = font_size->unit;
 		}
 
 		error = set_line_height(style, type, length, unit);
@@ -713,136 +634,33 @@ css_error compute_absolute_line_height(css_computed_style *style,
  * Compute the absolute values of {top,right,bottom,left}
  *
  * \param style      Style to process
- * \param font_size  Absolute font size
- * \param ex_size    Absolute ex size
+ * \param ex_size    Ex size, in ems
  * \return CSS_OK on success
  */
 css_error compute_absolute_sides(css_computed_style *style,
-		const css_hint_length *font_size,
 		const css_hint_length *ex_size)
 {
-	enum css_position pos;
 	css_error error;
 
 	/* Calculate absolute lengths for sides */
-	error = compute_absolute_length_auto(style, font_size, ex_size,
-			css_computed_top, set_top);
+	error = compute_absolute_length_auto(style, ex_size, get_top, set_top);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length_auto(style, font_size, ex_size,
-			css_computed_right, set_right);
+	error = compute_absolute_length_auto(style, ex_size,
+			get_right, set_right);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length_auto(style, font_size, ex_size,
-			css_computed_bottom, set_bottom);
+	error = compute_absolute_length_auto(style, ex_size,
+			get_bottom, set_bottom);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length_auto(style, font_size, ex_size,
-			css_computed_left, set_left);
+	error = compute_absolute_length_auto(style, ex_size,
+			get_left, set_left);
 	if (error != CSS_OK)
 		return error;
-
-	/* Now, complete computation based upon computed position */
-	pos = css_computed_position(style);
-	if (pos == CSS_POSITION_STATIC) {
-		/* Static => everything is auto */
-		error = set_top(style, CSS_TOP_AUTO, 0, CSS_UNIT_PX);
-		if (error != CSS_OK)
-			return error;
-
-		error = set_right(style, CSS_RIGHT_AUTO, 0, CSS_UNIT_PX);
-		if (error != CSS_OK)
-			return error;
-
-		error = set_bottom(style, CSS_BOTTOM_AUTO, 0, CSS_UNIT_PX);
-		if (error != CSS_OK)
-			return error;
-
-		error = set_left(style, CSS_LEFT_AUTO, 0, CSS_UNIT_PX);
-		if (error != CSS_OK)
-			return error;
-	} else if (pos == CSS_POSITION_RELATIVE) {
-		/* Relative => follow $9.4.3 */
-		css_fixed len1 = 0, len2 = 0;
-		css_unit unit1 = CSS_UNIT_PX, unit2 = CSS_UNIT_PX;
-		uint8_t type1, type2;
-
-		/* First, left and right */
-		type1 = css_computed_left(style, &len1, &unit1);
-		type2 = css_computed_right(style, &len2, &unit2);
-
-		if (type1 == CSS_LEFT_AUTO && type2 == CSS_RIGHT_AUTO) {
-			/* Both auto => 0px */
-			error = set_left(style, CSS_LEFT_SET, 0, CSS_UNIT_PX);
-			if (error != CSS_OK)
-				return error;
-
-			error = set_right(style, CSS_RIGHT_SET, 0, CSS_UNIT_PX);
-			if (error != CSS_OK)
-				return error;
-		} else if (type1 == CSS_LEFT_AUTO) {
-			/* Left is auto => set to -right */
-			error = set_left(style, CSS_LEFT_SET, -len2, unit2);
-			if (error != CSS_OK)
-				return error;
-		} else if (type2 == CSS_RIGHT_AUTO) {
-			/* Right is auto => set to -left */
-			error = set_right(style, CSS_RIGHT_SET, -len1, unit1);
-			if (error != CSS_OK)
-				return error;
-		} else {
-			/** \todo This should be containing block's direction */
-			/* Overconstrained => consult direction */
-			if (css_computed_direction(style) == 
-					CSS_DIRECTION_LTR) {
-				/* Right = -left */
-				error = set_right(style, CSS_RIGHT_SET, 
-						-len1, unit1);
-				if (error != CSS_OK)
-					return error;
-			} else {
-				/* Left = -right */
-				error = set_left(style, CSS_LEFT_SET,
-						-len2, unit2);
-				if (error != CSS_OK)
-					return error;
-			}
-		}
-
-		/* Second, top and bottom */
-		type1 = css_computed_top(style, &len1, &unit1);
-		type2 = css_computed_bottom(style, &len2, &unit2);
-
-		if (type1 == CSS_TOP_AUTO && type2 == CSS_BOTTOM_AUTO) {
-			/* Both auto => 0px */
-			error = set_top(style, CSS_TOP_SET, 0, CSS_UNIT_PX);
-			if (error != CSS_OK)
-				return error;
-
-			error = set_bottom(style, CSS_BOTTOM_SET, 
-					0, CSS_UNIT_PX);
-			if (error != CSS_OK)
-				return error;
-		} else if (type1 == CSS_TOP_AUTO) {
-			/* Top is auto => set to -bottom */
-			error = set_top(style, CSS_TOP_SET, -len2, unit2);
-			if (error != CSS_OK)
-				return error;
-		} else if (type2 == CSS_BOTTOM_AUTO) {
-			/* Bottom is auto => set to -top */
-			error = set_bottom(style, CSS_BOTTOM_SET, -len1, unit1);
-			if (error != CSS_OK)
-				return error;
-		} else {
-			/* Overconstrained => bottom = -top */
-			error = set_bottom(style, CSS_BOTTOM_SET, -len1, unit1);
-			if (error != CSS_OK)
-				return error;
-		}
-	}
 
 	return CSS_OK;
 }
@@ -851,33 +669,31 @@ css_error compute_absolute_sides(css_computed_style *style,
  * Compute absolute margins
  *
  * \param style      Style to process
- * \param font_size  Absolute font size
- * \param ex_size    Absolute ex size
+ * \param ex_size    Ex size, in ems
  * \return CSS_OK on success
  */
 css_error compute_absolute_margins(css_computed_style *style,
-		const css_hint_length *font_size,
 		const css_hint_length *ex_size)
 {
 	css_error error;
 
-	error = compute_absolute_length_auto(style, font_size, ex_size,
-			css_computed_margin_top, set_margin_top);
+	error = compute_absolute_length_auto(style, ex_size,
+			get_margin_top, set_margin_top);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length_auto(style, font_size, ex_size,
-			css_computed_margin_right, set_margin_right);
+	error = compute_absolute_length_auto(style, ex_size,
+			get_margin_right, set_margin_right);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length_auto(style, font_size, ex_size,
-			css_computed_margin_bottom, set_margin_bottom);
+	error = compute_absolute_length_auto(style, ex_size,
+			get_margin_bottom, set_margin_bottom);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length_auto(style, font_size, ex_size,
-			css_computed_margin_left, set_margin_left);
+	error = compute_absolute_length_auto(style, ex_size,
+			get_margin_left, set_margin_left);
 	if (error != CSS_OK)
 		return error;
 	
@@ -888,33 +704,31 @@ css_error compute_absolute_margins(css_computed_style *style,
  * Compute absolute padding
  *
  * \param style      Style to process
- * \param font_size  Absolute font size
- * \param ex_size    Absolute ex size
+ * \param ex_size    Ex size, in ems
  * \return CSS_OK on success
  */
 css_error compute_absolute_padding(css_computed_style *style,
-		const css_hint_length *font_size,
 		const css_hint_length *ex_size)
 {
 	css_error error;
 
-	error = compute_absolute_length(style, font_size, ex_size,
-			css_computed_padding_top, set_padding_top);
+	error = compute_absolute_length(style, ex_size,
+			get_padding_top, set_padding_top);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length(style, font_size, ex_size,
-			css_computed_padding_right, set_padding_right);
+	error = compute_absolute_length(style, ex_size,
+			get_padding_right, set_padding_right);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length(style, font_size, ex_size,
-			css_computed_padding_bottom, set_padding_bottom);
+	error = compute_absolute_length(style, ex_size,
+			get_padding_bottom, set_padding_bottom);
 	if (error != CSS_OK)
 		return error;
 
-	error = compute_absolute_length(style, font_size, ex_size,
-			css_computed_padding_left, set_padding_left);
+	error = compute_absolute_length(style, ex_size,
+			get_padding_left, set_padding_left);
 	if (error != CSS_OK)
 		return error;
 	
@@ -925,12 +739,10 @@ css_error compute_absolute_padding(css_computed_style *style,
  * Compute absolute vertical-align
  *
  * \param style      Style to process
- * \param font_size  Absolute font size
- * \param ex_size    Absolute ex size
+ * \param ex_size    Ex size, in ems
  * \return CSS_OK on success
  */
 css_error compute_absolute_vertical_align(css_computed_style *style,
-		const css_hint_length *font_size,
 		const css_hint_length *ex_size)
 {
 	css_fixed length = 0;
@@ -938,24 +750,12 @@ css_error compute_absolute_vertical_align(css_computed_style *style,
 	uint8_t type;
 	css_error error;
 
-	type = css_computed_vertical_align(style, &length, &unit);
+	type = get_vertical_align(style, &length, &unit);
 
 	if (type == CSS_VERTICAL_ALIGN_SET) {
-		if (unit == CSS_UNIT_EM) {
-			length = FMUL(length, font_size->value);
-			unit = font_size->unit;
-		} else if (unit == CSS_UNIT_EX) {
+		if (unit == CSS_UNIT_EX) {
 			length = FMUL(length, ex_size->value);
 			unit = ex_size->unit;
-		} else if (unit == CSS_UNIT_PCT) {
-			css_fixed line_height = 0;
-			css_unit lhunit = CSS_UNIT_PX;
-
-			/* Relative to line-height */
-			css_computed_line_height(style, &line_height, &lhunit);
-
-			length = FDIV(FMUL(length, line_height), INTTOFIX(100));
-			unit = lhunit;
 		}
 
 		error = set_vertical_align(style, type, length, unit);
@@ -970,14 +770,12 @@ css_error compute_absolute_vertical_align(css_computed_style *style,
  * Compute the absolute value of length
  *
  * \param style      Style to process
- * \param font_size  Absolute font size
- * \param ex_size    Absolute ex size
+ * \param ex_size    Ex size, in ems
  * \param get        Function to read length
  * \param set        Function to write length
  * \return CSS_OK on success
  */
 css_error compute_absolute_length(css_computed_style *style,
-		const css_hint_length *font_size, 
 		const css_hint_length *ex_size,
 		uint8_t (*get)(const css_computed_style *style, 
 				css_fixed *len, css_unit *unit),
@@ -990,10 +788,7 @@ css_error compute_absolute_length(css_computed_style *style,
 
 	type = get(style, &length, &unit);
 
-	if (unit == CSS_UNIT_EM) {
-		length = FMUL(length, font_size->value);
-		unit = font_size->unit;
-	} else if (unit == CSS_UNIT_EX) {
+	if (unit == CSS_UNIT_EX) {
 		length = FMUL(length, ex_size->value);
 		unit = ex_size->unit;
 	}
@@ -1005,14 +800,12 @@ css_error compute_absolute_length(css_computed_style *style,
  * Compute the absolute value of length or auto
  *
  * \param style      Style to process
- * \param font_size  Absolute font size
- * \param ex_size    Absolute ex size
+ * \param ex_size    Ex size, in ems
  * \param get        Function to read length
  * \param set        Function to write length
  * \return CSS_OK on success
  */
 css_error compute_absolute_length_auto(css_computed_style *style,
-		const css_hint_length *font_size, 
 		const css_hint_length *ex_size,
 		uint8_t (*get)(const css_computed_style *style, 
 				css_fixed *len, css_unit *unit),
@@ -1025,10 +818,7 @@ css_error compute_absolute_length_auto(css_computed_style *style,
 
 	type = get(style, &length, &unit);
 	if (type != CSS_BOTTOM_AUTO) {
-		if (unit == CSS_UNIT_EM) {
-			length = FMUL(length, font_size->value);
-			unit = font_size->unit;
-		} else if (unit == CSS_UNIT_EX) {
+		if (unit == CSS_UNIT_EX) {
 			length = FMUL(length, ex_size->value);
 			unit = ex_size->unit;
 		}
@@ -1043,14 +833,12 @@ css_error compute_absolute_length_auto(css_computed_style *style,
  * Compute the absolute value of length or none
  *
  * \param style      Style to process
- * \param font_size  Absolute font size
- * \param ex_size    Absolute ex size
+ * \param ex_size    Ex size, in ems
  * \param get        Function to read length
  * \param set        Function to write length
  * \return CSS_OK on success
  */
 css_error compute_absolute_length_none(css_computed_style *style,
-		const css_hint_length *font_size, 
 		const css_hint_length *ex_size,
 		uint8_t (*get)(const css_computed_style *style, 
 				css_fixed *len, css_unit *unit),
@@ -1063,10 +851,7 @@ css_error compute_absolute_length_none(css_computed_style *style,
 
 	type = get(style, &length, &unit);
 	if (type != CSS_MAX_HEIGHT_NONE) {
-		if (unit == CSS_UNIT_EM) {
-			length = FMUL(length, font_size->value);
-			unit = font_size->unit;
-		} else if (unit == CSS_UNIT_EX) {
+		if (unit == CSS_UNIT_EX) {
 			length = FMUL(length, ex_size->value);
 			unit = ex_size->unit;
 		}
@@ -1081,14 +866,12 @@ css_error compute_absolute_length_none(css_computed_style *style,
  * Compute the absolute value of length or normal
  *
  * \param style      Style to process
- * \param font_size  Absolute font size
- * \param ex_size    Absolute ex size
+ * \param ex_size    Ex size, in ems
  * \param get        Function to read length
  * \param set        Function to write length
  * \return CSS_OK on success
  */
 css_error compute_absolute_length_normal(css_computed_style *style,
-		const css_hint_length *font_size, 
 		const css_hint_length *ex_size,
 		uint8_t (*get)(const css_computed_style *style, 
 				css_fixed *len, css_unit *unit),
@@ -1101,10 +884,7 @@ css_error compute_absolute_length_normal(css_computed_style *style,
 
 	type = get(style, &length, &unit);
 	if (type != CSS_LETTER_SPACING_NORMAL) {
-		if (unit == CSS_UNIT_EM) {
-			length = FMUL(length, font_size->value);
-			unit = font_size->unit;
-		} else if (unit == CSS_UNIT_EX) {
+		if (unit == CSS_UNIT_EX) {
 			length = FMUL(length, ex_size->value);
 			unit = ex_size->unit;
 		}
@@ -1119,14 +899,12 @@ css_error compute_absolute_length_normal(css_computed_style *style,
  * Compute the absolute value of length pair
  *
  * \param style      Style to process
- * \param font_size  Absolute font size
- * \param ex_size    Absolute ex size
+ * \param ex_size    Ex size, in ems
  * \param get        Function to read length
  * \param set        Function to write length
  * \return CSS_OK on success
  */
 css_error compute_absolute_length_pair(css_computed_style *style,
-		const css_hint_length *font_size, 
 		const css_hint_length *ex_size,
 		uint8_t (*get)(const css_computed_style *style, 
 				css_fixed *len1, css_unit *unit1,
@@ -1141,18 +919,12 @@ css_error compute_absolute_length_pair(css_computed_style *style,
 
 	type = get(style, &length1, &unit1, &length2, &unit2);
 
-	if (unit1 == CSS_UNIT_EM) {
-		length1 = FMUL(length1, font_size->value);
-		unit1 = font_size->unit;
-	} else if (unit1 == CSS_UNIT_EX) {
+	if (unit1 == CSS_UNIT_EX) {
 		length1 = FMUL(length1, ex_size->value);
 		unit1 = ex_size->unit;
 	}
 
-	if (unit2 == CSS_UNIT_EM) {
-		length2 = FMUL(length2, font_size->value);
-		unit2 = font_size->unit;
-	} else if (unit2 == CSS_UNIT_EX) {
+	if (unit2 == CSS_UNIT_EX) {
 		length2 = FMUL(length2, ex_size->value);
 		unit2 = ex_size->unit;
 	}
