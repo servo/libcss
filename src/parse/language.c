@@ -981,11 +981,8 @@ css_error parseSimpleSelector(css_language *c,
 
 	if (token->type == CSS_TOKEN_IDENT || tokenIsChar(token, '*')) {
 		/* Have element name */
-		/** \todo We need to know the case sensitivity of element 
-		 * names in the document language. For now, assume HTML, and 
-		 * thus insensitivity. */
 		error = css_stylesheet_selector_create(c->sheet,
-				token->ilower, &selector);
+				token->idata, &selector);
 		if (error != CSS_OK)
 			return error;
 

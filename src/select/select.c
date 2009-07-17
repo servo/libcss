@@ -962,19 +962,8 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 				lwc_string_data(detail->name)[0] == '*') {
 			*match = true;
 		} else {
-			lwc_string *element;
-			error = state->handler->node_name(state->pw, node, 
-					state->sheet->dictionary, &element);
-			if (error == CSS_OK) {
-				/** \todo Consider stylesheet's case flag */
-				lwc_context_string_isequal(
-						state->sheet->dictionary,
-						element, detail->name, match);
-
-				lwc_context_string_unref(
-						state->sheet->dictionary, 
-						element);
-			}
+			error = state->handler->node_has_name(state->pw, node,
+					detail->name, match);
 		}
 		break;
 	case CSS_SELECTOR_CLASS:

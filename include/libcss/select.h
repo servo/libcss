@@ -37,6 +37,8 @@ typedef struct css_select_handler {
 	css_error (*parent_node)(void *pw, void *node, void **parent);
 	css_error (*sibling_node)(void *pw, void *node, void **sibling);
 
+	css_error (*node_has_name)(void *pw, void *node,
+			lwc_string *name, bool *match);
 	css_error (*node_has_class)(void *pw, void *node,
 			lwc_string *name, bool *match);
 	css_error (*node_has_id)(void *pw, void *node,

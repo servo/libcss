@@ -305,13 +305,26 @@ uint32_t _hash(const css_selector *sel)
 }
 
 /**
- * Name hash function
+ * Name hash function -- case-insensitive FNV.
  *
  * \param name  Name to hash
  * \return hash value
  */
 uint32_t _hash_name(lwc_string *name)
 {
-	return lwc_string_hash_value(name);
+	uint32_t z = 0x811c9dc5;
+	size_t len = lwc_string_length(name);
+	const char *data = lwc_string_data(name);
+
+	while (len > 0) {
+		const char c = *data++;
+
+		z *= 0x01000193;
+		z ^= ('A' <= c && c <= 'Z') ? (c + 'a' - 'A') : c;
+
+		len--;
+	}
+
+	return z;
 }
 
