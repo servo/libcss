@@ -10,6 +10,7 @@
 
 #include "stylesheet.h"
 #include "select/hash.h"
+#include "utils/utils.h"
 
 typedef struct hash_entry {
 	const css_selector *sel;
@@ -250,10 +251,15 @@ css_error css_selector_hash_find(css_selector_hash *hash,
 	if (head->sel != NULL) {
 		/* Search through chain for first match */
 		while (head != NULL) {
+			lwc_error lerror;
 			bool match = false;
 
-			lwc_context_string_caseless_isequal(hash->ctx, name, 
-					head->sel->data.name, &match);
+			lerror = lwc_context_string_caseless_isequal(hash->ctx, 
+					name, head->sel->data.name, &match);
+			if (lerror != lwc_error_ok)
+				return css_error_from_lwc_error(lerror);
+
+
 			if (match)
 				break;
 
@@ -290,11 +296,15 @@ css_error css_selector_hash_iterate(css_selector_hash *hash,
 
 	/* Look for the next selector with the same element name */
 	for (head = head->next; head != NULL; head = head->next) {
+		lwc_error lerror;
 		bool match = false;
 
-		lwc_context_string_caseless_isequal(hash->ctx, 
+		lerror = lwc_context_string_caseless_isequal(hash->ctx, 
 				head->sel->data.name,
 				(*current)->data.name, &match);
+		if (lerror != lwc_error_ok)
+			return css_error_from_lwc_error(lerror);
+
 		if (match)
 			break;
 	}
