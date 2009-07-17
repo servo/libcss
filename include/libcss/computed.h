@@ -376,8 +376,8 @@ static inline uint8_t css_computed_letter_spacing(
 			*unit = bits >> 2;
 
 			if (*unit == CSS_UNIT_EM) {
-				css_fixed font_size;
-				css_unit font_unit;
+				css_fixed font_size = 0;
+				css_unit font_unit = CSS_UNIT_PX;
 
 				css_computed_font_size(style, &font_size, 
 						&font_unit);
@@ -441,8 +441,8 @@ static inline uint8_t css_computed_outline_width(
 			*unit = bits >> 3;
 
 			if (*unit == CSS_UNIT_EM) {
-				css_fixed font_size;
-				css_unit font_unit;
+				css_fixed font_size = 0;
+				css_unit font_unit = CSS_UNIT_PX;
 
 				css_computed_font_size(style, &font_size, 
 						&font_unit);
@@ -496,8 +496,8 @@ static inline uint8_t css_computed_border_spacing(
 			*vunit = bits1 & 0xf;
 
 			if (*hunit == CSS_UNIT_EM || *vunit == CSS_UNIT_EM) {
-				css_fixed font_size;
-				css_unit font_unit;
+				css_fixed font_size = 0;
+				css_unit font_unit = CSS_UNIT_PX;
 
 				css_computed_font_size(style, &font_size, 
 						&font_unit);
@@ -548,8 +548,8 @@ static inline uint8_t css_computed_word_spacing(
 			*unit = bits >> 2;
 
 			if (*unit == CSS_UNIT_EM) {
-				css_fixed font_size;
-				css_unit font_unit;
+				css_fixed font_size = 0;
+				css_unit font_unit = CSS_UNIT_PX;
 
 				css_computed_font_size(style, &font_size, 
 						&font_unit);
@@ -703,8 +703,8 @@ static inline uint8_t css_computed_clip(
 					rect->runit == CSS_UNIT_EM || 
 					rect->bunit == CSS_UNIT_EM || 
 					rect->lunit == CSS_UNIT_EM) {
-				css_fixed font_size;
-				css_unit font_unit;
+				css_fixed font_size = 0;
+				css_unit font_unit = CSS_UNIT_PX;
 
 				css_computed_font_size(style, &font_size, 
 						&font_unit);
@@ -790,16 +790,16 @@ static inline uint8_t css_computed_vertical_align(
 		*unit = bits >> 4;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
 			*length = FMUL(*length, font_size);
 			*unit = font_unit;
 		} else if (*unit == CSS_UNIT_PCT) {
-			css_fixed line_height;
-			css_unit lh_unit;
+			css_fixed line_height = 0;
+			css_unit lh_unit = CSS_UNIT_PX;
 
 			css_computed_line_height(style, &line_height, &lh_unit);
 
@@ -854,8 +854,8 @@ static inline uint8_t css_computed_border_top_width(
 		*unit = bits >> 3;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -887,8 +887,8 @@ static inline uint8_t css_computed_border_right_width(
 		*unit = bits >> 3;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -920,8 +920,8 @@ static inline uint8_t css_computed_border_bottom_width(
 		*unit = bits >> 3;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -953,8 +953,8 @@ static inline uint8_t css_computed_border_left_width(
 		*unit = bits >> 3;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1102,8 +1102,8 @@ static inline uint8_t css_computed_top(
 	/* 6bits: uuuutt : units | type */
 	if ((bits & 0x3) == CSS_TOP_SET) {
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1158,8 +1158,8 @@ static inline uint8_t css_computed_right(
 	/* 6bits: uuuutt : units | type */
 	if ((bits & 0x3) == CSS_RIGHT_SET) {
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1213,8 +1213,8 @@ static inline uint8_t css_computed_bottom(
 	/* 6bits: uuuutt : units | type */
 	if ((bits & 0x3) == CSS_BOTTOM_SET) {
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1269,8 +1269,8 @@ static inline uint8_t css_computed_left(
 	/* 6bits: uuuutt : units | type */
 	if ((bits & 0x3) == CSS_RIGHT_SET) {
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1391,8 +1391,8 @@ static inline uint8_t css_computed_height(
 		*unit = bits >> 2;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1428,8 +1428,8 @@ static inline uint8_t css_computed_line_height(
 		*unit = bits >> 2;
 
 		if (*unit == CSS_UNIT_EM || *unit == CSS_UNIT_PCT) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1505,8 +1505,8 @@ static inline uint8_t css_computed_margin_top(
 		*unit = bits >> 2;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1538,8 +1538,8 @@ static inline uint8_t css_computed_margin_right(
 		*unit = bits >> 2;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1571,8 +1571,8 @@ static inline uint8_t css_computed_margin_bottom(
 		*unit = bits >> 2;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1604,8 +1604,8 @@ static inline uint8_t css_computed_margin_left(
 		*unit = bits >> 2;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1705,8 +1705,8 @@ static inline uint8_t css_computed_max_height(
 		*unit = bits >> 2;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1738,8 +1738,8 @@ static inline uint8_t css_computed_max_width(
 		*unit = bits >> 2;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1771,8 +1771,8 @@ static inline uint8_t css_computed_width(
 		*unit = bits >> 2;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1860,8 +1860,8 @@ static inline uint8_t css_computed_min_height(
 		*unit = bits >> 1;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1893,8 +1893,8 @@ static inline uint8_t css_computed_min_width(
 		*unit = bits >> 1;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1960,8 +1960,8 @@ static inline uint8_t css_computed_padding_top(
 		*unit = bits >> 1;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -1993,8 +1993,8 @@ static inline uint8_t css_computed_padding_right(
 		*unit = bits >> 1;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -2026,8 +2026,8 @@ static inline uint8_t css_computed_padding_bottom(
 		*unit = bits >> 1;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -2059,8 +2059,8 @@ static inline uint8_t css_computed_padding_left(
 		*unit = bits >> 1;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -2160,8 +2160,8 @@ static inline uint8_t css_computed_text_indent(
 		*unit = bits >> 1;
 
 		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
@@ -2222,8 +2222,8 @@ static inline uint8_t css_computed_background_position(
 		*vunit = bits1 & 0xf;
 
 		if (*hunit == CSS_UNIT_EM || *vunit == CSS_UNIT_EM) {
-			css_fixed font_size;
-			css_unit font_unit;
+			css_fixed font_size = 0;
+			css_unit font_unit = CSS_UNIT_PX;
 
 			css_computed_font_size(style, &font_size, &font_unit);
 
