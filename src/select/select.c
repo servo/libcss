@@ -626,7 +626,8 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		const css_stylesheet *sheet, css_select_state *state)
 {
 	lwc_string *element;
-	const css_selector **selectors;
+	const css_selector **node_selectors;
+	const css_selector **univ_selectors;
 	css_error error;
 
 	/* Get node's name */
@@ -636,59 +637,58 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		return error;
 
 	/* Find hash chain that applies to current node */
-	error = css_selector_hash_find(sheet->selectors, element, &selectors);
+	error = css_selector_hash_find(sheet->selectors, element, 
+			&node_selectors);
 	if (error != CSS_OK)
                 goto cleanup;
 
-	/* Process any matching selectors */
-	while (*selectors != NULL) {
-		css_rule *rule, *parent;
-		bool process = true;
-
-		/* Ignore any selectors contained in rules which are a child 
-		 * of an @media block that doesn't match the current media 
-		 * requirements. */
-		for (rule = (*selectors)->rule; rule != NULL; rule = parent) {
-			if (rule->type == CSS_RULE_MEDIA && 
-					(((css_rule_media *) rule)->media & 
-					state->media) == 0) {
-				process = false;
-				break;
-			}
-
-			if (rule->ptype != CSS_RULE_PARENT_STYLESHEET)
-				parent = rule->parent;
-			else
-				parent = NULL;
-		}
-
-		if (process) {
-			error = match_selector_chain(ctx, *selectors, state);
-			if (error != CSS_OK)
-				goto cleanup;
-		}
-
-		error = css_selector_hash_iterate(sheet->selectors, selectors,
-				&selectors);
-		if (error != CSS_OK)
-			goto cleanup;
-	}
-
 	/* Find hash chain for universal selector */
 	error = css_selector_hash_find(sheet->selectors, state->universal, 
-			&selectors);
+			&univ_selectors);
 	if (error != CSS_OK)
 		goto cleanup;
 
-	/* Process any matching selectors */
-	while (*selectors != NULL) {
+	/* Process matching selectors, if any */
+	while (*node_selectors != NULL || *univ_selectors != NULL) {
+		const css_selector *selector;
 		css_rule *rule, *parent;
 		bool process = true;
+
+		/* Selectors must be matched in ascending order of specificity
+		 * and rule index. (c.f. outranks_existing())
+		 *
+		 * Pick the least specific/earliest occurring selector.
+		 */
+		if (*node_selectors != NULL && *univ_selectors != NULL) {
+			/* Both chains have entries, so choose least specific */
+			const css_selector *node = *node_selectors;
+			const css_selector *univ = *univ_selectors;
+
+			/* Sort by specificity */
+			if (node->specificity < univ->specificity) {
+				selector = node;
+			} else if (univ->specificity < node->specificity) {
+				selector = univ;
+			} else {
+				/* Then by rule index -- earliest wins */
+				if (node->rule->index < univ->rule->index)
+					selector = node;
+				else
+					selector = univ;
+			}
+		} else if (*node_selectors != NULL) {
+			/* Universal chain is empty, so exhaust node chain */
+			selector = *node_selectors;
+		} else {
+			/* Node chain is empty, so exhaust universal chain */
+			assert(*univ_selectors != NULL);
+			selector = *univ_selectors;
+		}
 
 		/* Ignore any selectors contained in rules which are a child 
 		 * of an @media block that doesn't match the current media 
 		 * requirements. */
-		for (rule = (*selectors)->rule; rule != NULL; rule = parent) {
+		for (rule = selector->rule; rule != NULL; rule = parent) {
 			if (rule->type == CSS_RULE_MEDIA && 
 					(((css_rule_media *) rule)->media & 
 					state->media) == 0) {
@@ -703,18 +703,25 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		}
 
 		if (process) {
-			error = match_selector_chain(ctx, *selectors, state);
+			error = match_selector_chain(ctx, selector, state);
 			if (error != CSS_OK)
 				goto cleanup;
 		}
 
-		error = css_selector_hash_iterate(sheet->selectors, selectors,
-				&selectors);
+		/* Advance to next selector in whichever chain we extracted 
+		 * the processed selector from. */
+		if (selector == *node_selectors) {
+			error = css_selector_hash_iterate(sheet->selectors, 
+					node_selectors,	&node_selectors);
+		} else {
+			error = css_selector_hash_iterate(sheet->selectors,
+					univ_selectors, &univ_selectors);
+		}
+
 		if (error != CSS_OK)
 			goto cleanup;
 	}
 
-        
         error = CSS_OK;
 cleanup:
         lwc_context_string_unref(sheet->dictionary, element);
