@@ -54,7 +54,7 @@ css_error parse_colour_specifier(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT) {
-		error = parse_named_colour(c, token->idata, result);
+		error = parse_named_colour(c, token->ilower, result);
 		if (error != CSS_OK && c->sheet->quirks_allowed) {
 			error = parse_hash_colour(token->idata, result);
 			if (error == CSS_OK)
