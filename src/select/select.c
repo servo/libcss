@@ -21,6 +21,9 @@
 #include "utils/parserutilserror.h"
 #include "utils/utils.h"
 
+/* Define this to enable verbose messages when matching selector chains */
+#undef DEBUG_CHAIN_MATCHING
+
 /**
  * CSS selection context
  */
@@ -45,7 +48,7 @@ static css_error match_selectors_in_sheet(css_select_ctx *ctx,
 static css_error match_selector_chain(css_select_ctx *ctx, 
 		const css_selector *selector, css_select_state *state);
 static css_error match_named_combinator(css_select_ctx *ctx, 
-		css_combinator type, lwc_string *name, 
+		css_combinator type, const css_selector *selector, 
 		css_select_state *state, void *node, void **next_node);
 static css_error match_universal_combinator(css_select_ctx *ctx, 
 		css_combinator type, const css_selector *selector, 
@@ -57,6 +60,11 @@ static css_error match_detail(css_select_ctx *ctx, void *node,
 		const css_selector_detail *detail, css_select_state *state, 
 		bool *match);
 static css_error cascade_style(const css_style *style, css_select_state *state);
+
+#ifdef DEBUG_CHAIN_MATCHING
+static void dump_chain(const css_selector *selector);
+#endif
+
 
 /**
  * Create a selection context
@@ -720,6 +728,12 @@ css_error match_selector_chain(css_select_ctx *ctx,
 	void *node = state->node;
 	css_error error;
 
+#ifdef DEBUG_CHAIN_MATCHING
+	fprintf(stderr, "matching: ");
+	dump_chain(selector);
+	fprintf(stderr, "\n");
+#endif
+
 	do {
 		void *next_node = NULL;
 		const css_selector_detail *detail = &s->data;
@@ -729,8 +743,7 @@ css_error match_selector_chain(css_select_ctx *ctx,
 		if (s->data.comb != CSS_COMBINATOR_NONE &&
 				s->combinator->data.name != state->universal) {
 			error = match_named_combinator(ctx, s->data.comb, 
-					s->combinator->data.name, state, node, 
-					&next_node);
+					s->combinator, state, node, &next_node);
 			if (error != CSS_OK)
 				return error;
 
@@ -739,14 +752,20 @@ css_error match_selector_chain(css_select_ctx *ctx,
 				return CSS_OK;
 		}
 
-		/* Now match details on this selector */
-		error = match_details(ctx, node, detail, state, &match);
-		if (error != CSS_OK)
-			return error;
+		/* If this is the first selector in the chain, we must match 
+		 * its details. The details of subsequent selectors will be 
+		 * matched when processing the combinator. */
+		if (s == selector) {
+			/* Match details on this selector */
+			error = match_details(ctx, node, detail, state, &match);
+			if (error != CSS_OK)
+				return error;
 
-		/* Details don't match, so reject selector chain */
-		if (match == false)
-			return CSS_OK;
+			/* Details don't match, so reject selector chain */
+			if (match == false)
+				return CSS_OK;
+
+		}
 
 		/* If we had a universal combinator, then consider that */
 		if (s->data.comb != CSS_COMBINATOR_NONE &&
@@ -778,35 +797,60 @@ css_error match_selector_chain(css_select_ctx *ctx,
 }
 
 css_error match_named_combinator(css_select_ctx *ctx, css_combinator type,
-		lwc_string *name, css_select_state *state,
+		const css_selector *selector, css_select_state *state, 
 		void *node, void **next_node)
 {
+	const css_selector_detail *detail = &selector->data;
+	void *n = node;
 	css_error error;
 
-	UNUSED(ctx);
+	do {
+		bool match = false;
 
-	switch (type) {
-	case CSS_COMBINATOR_ANCESTOR:
-		error = state->handler->named_ancestor_node(state->pw, node, 
-				name, next_node);
-		if (error != CSS_OK)
-			return error;
-		break;
-	case CSS_COMBINATOR_PARENT:
-		error = state->handler->named_parent_node(state->pw, node, 
-				name, next_node);
-		if (error != CSS_OK)
-			return error;
-		break;
-	case CSS_COMBINATOR_SIBLING:
-		error = state->handler->named_sibling_node(state->pw, node, 
-				name, next_node);
-		if (error != CSS_OK)
-			return error;
-		break;
-	case CSS_COMBINATOR_NONE:
-		break;
-	}
+		/* Find candidate node */
+		switch (type) {
+		case CSS_COMBINATOR_ANCESTOR:
+			error = state->handler->named_ancestor_node(state->pw, 
+					n, selector->data.name, &n);
+			if (error != CSS_OK)
+				return error;
+			break;
+		case CSS_COMBINATOR_PARENT:
+			error = state->handler->named_parent_node(state->pw, 
+					n, selector->data.name, &n);
+			if (error != CSS_OK)
+				return error;
+			break;
+		case CSS_COMBINATOR_SIBLING:
+			error = state->handler->named_sibling_node(state->pw, 
+					n, selector->data.name, &n);
+			if (error != CSS_OK)
+				return error;
+			break;
+		case CSS_COMBINATOR_NONE:
+			break;
+		}
+
+		if (n != NULL) {
+			/* Match its details */
+			error = match_details(ctx, n, detail, state, &match);
+			if (error != CSS_OK)
+				return error;
+
+			/* If we found a match, use it */
+			if (match == true)
+				break;
+
+			/* For parent and sibling selectors, only adjacent 
+			 * nodes are valid. Thus, if we failed to match, 
+			 * give up. */
+			if (type == CSS_COMBINATOR_PARENT ||
+					type == CSS_COMBINATOR_SIBLING)
+				n = NULL;
+		}
+	} while (n != NULL);
+
+	*next_node = n;
 
 	return CSS_OK;
 }
@@ -1098,4 +1142,92 @@ bool outranks_existing(uint16_t op, bool important, css_select_state *state,
 
 	return outranks;
 }
+
+/******************************************************************************
+ * Debug helpers                                                              *
+ ******************************************************************************/
+#ifdef DEBUG_CHAIN_MATCHING
+void dump_chain(const css_selector *selector)
+{
+	const css_selector_detail *detail = &selector->data;
+
+	if (selector->data.comb != CSS_COMBINATOR_NONE)
+		dump_chain(selector->combinator);
+
+	if (selector->data.comb == CSS_COMBINATOR_ANCESTOR)
+		fprintf(stderr, " ");
+	else if (selector->data.comb == CSS_COMBINATOR_SIBLING)
+		fprintf(stderr, " + ");
+	else if (selector->data.comb == CSS_COMBINATOR_PARENT)
+		fprintf(stderr, " > ");
+
+	do {
+		switch (detail->type) {
+		case CSS_SELECTOR_ELEMENT:
+			if (lwc_string_length(detail->name) == 1 && 
+				lwc_string_data(detail->name)[0] == '*' &&
+					detail->next == 1) {
+				break;
+			}
+			fprintf(stderr, "%.*s",
+					(int) lwc_string_length(detail->name),
+					lwc_string_data(detail->name));
+			break;
+		case CSS_SELECTOR_CLASS:
+			fprintf(stderr, ".%.*s",
+					(int) lwc_string_length(detail->name),
+					lwc_string_data(detail->name));
+			break;
+		case CSS_SELECTOR_ID:
+			fprintf(stderr, "#%.*s",
+					(int) lwc_string_length(detail->name),
+					lwc_string_data(detail->name));
+			break;
+		case CSS_SELECTOR_PSEUDO_CLASS:
+		case CSS_SELECTOR_PSEUDO_ELEMENT:
+			fprintf(stderr, ":%.*s",
+					(int) lwc_string_length(detail->name),
+					lwc_string_data(detail->name));
+
+			if (detail->value != NULL) {
+				fprintf(stderr, "(%.*s)",
+					(int) lwc_string_length(detail->value),
+					lwc_string_data(detail->value));
+			}
+			break;
+		case CSS_SELECTOR_ATTRIBUTE:
+			fprintf(stderr, "[%.*s]",
+					(int) lwc_string_length(detail->name),
+					lwc_string_data(detail->name));
+			break;
+		case CSS_SELECTOR_ATTRIBUTE_EQUAL:
+			fprintf(stderr, "[%.*s=\"%.*s\"]",
+					(int) lwc_string_length(detail->name),
+					lwc_string_data(detail->name),
+					(int) lwc_string_length(detail->value),
+					lwc_string_data(detail->value));
+			break;
+		case CSS_SELECTOR_ATTRIBUTE_DASHMATCH:
+			fprintf(stderr, "[%.*s|=\"%.*s\"]",
+					(int) lwc_string_length(detail->name),
+					lwc_string_data(detail->name),
+					(int) lwc_string_length(detail->value),
+					lwc_string_data(detail->value));
+			break;
+		case CSS_SELECTOR_ATTRIBUTE_INCLUDES:
+			fprintf(stderr, "[%.*s~=\"%.*s\"]",
+					(int) lwc_string_length(detail->name),
+					lwc_string_data(detail->name),
+					(int) lwc_string_length(detail->value),
+					lwc_string_data(detail->value));
+			break;
+		}
+
+		if (detail->next)
+			detail++;
+		else
+			detail = NULL;
+	} while (detail);
+}
+#endif
 
