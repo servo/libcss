@@ -930,11 +930,7 @@ css_error match_details(css_select_ctx *ctx, void *node,
 	 * simpler details come first (and thus the expensive match routines 
 	 * can be avoided unless absolutely necessary)? */
 
-	while (detail->next != 0) {
-		/* Don't bother with the first detail, as it's the 
-		 * element selector */
-		detail++;
-
+	do {
 		error = match_detail(ctx, node, detail, state, match);
 		if (error != CSS_OK)
 			return error;
@@ -942,7 +938,12 @@ css_error match_details(css_select_ctx *ctx, void *node,
 		/* Detail doesn't match, so reject selector chain */
 		if (*match == false)
 			return CSS_OK;
-	}
+
+		if (detail->next)
+			detail++;
+		else
+			detail = NULL;
+	} while (detail != NULL);
 
 	return CSS_OK;
 }
@@ -956,6 +957,26 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 	UNUSED(ctx);
 
 	switch (detail->type) {
+	case CSS_SELECTOR_ELEMENT:
+		if (lwc_string_length(detail->name) == 1 &&
+				lwc_string_data(detail->name)[0] == '*') {
+			*match = true;
+		} else {
+			lwc_string *element;
+			error = state->handler->node_name(state->pw, node, 
+					state->sheet->dictionary, &element);
+			if (error == CSS_OK) {
+				/** \todo Consider stylesheet's case flag */
+				lwc_context_string_isequal(
+						state->sheet->dictionary,
+						element, detail->name, match);
+
+				lwc_context_string_unref(
+						state->sheet->dictionary, 
+						element);
+			}
+		}
+		break;
 	case CSS_SELECTOR_CLASS:
 		error = state->handler->node_has_class(state->pw, node,
 				detail->name, match);
