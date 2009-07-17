@@ -240,18 +240,6 @@ css_error css_selector_hash_find(css_selector_hash *hash,
 
 	head = &hash->slots[index];
 
-	if (head->sel != NULL) {
-		do {
-			if (head->sel->data.name == name)
-				break;
-
-			head = head->next;
-		} while (head != NULL);
-
-		if (head == NULL)
-			head = &empty_slot;
-	}
-
 	(*matched) = (const css_selector **) head;
 
 	return CSS_OK;
