@@ -83,6 +83,9 @@ static css_error named_sibling_node(void *pw, void *node,
 		void **sibling);
 static css_error parent_node(void *pw, void *node, void **parent);
 static css_error sibling_node(void *pw, void *node, void **sibling);
+static css_error node_has_name(void *pw, void *node, 
+		lwc_string *name, 
+		bool *match);
 static css_error node_has_class(void *pw, void *node,
 		lwc_string *name,
 		bool *match);
@@ -126,6 +129,7 @@ static css_select_handler select_handler = {
 	named_sibling_node,
 	parent_node,
 	sibling_node,
+	node_has_name,
 	node_has_class,
 	node_has_id,
 	node_has_attribute,
@@ -795,6 +799,19 @@ css_error sibling_node(void *pw, void *n, void **sibling)
 	UNUSED(pw);
 
 	*sibling = (void *) node->prev;
+
+	return CSS_OK;
+}
+
+css_error node_has_name(void *pw, void *n,
+		lwc_string *name,
+		bool *match)
+{
+	node *node = n;
+	line_ctx *ctx = pw;
+
+	assert(lwc_context_string_caseless_isequal(ctx->dict, node->name, 
+			name, match) == lwc_error_ok);
 
 	return CSS_OK;
 }
