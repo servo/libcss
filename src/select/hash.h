@@ -18,7 +18,8 @@ struct css_selector;
 
 typedef struct css_selector_hash css_selector_hash;
 
-css_error css_selector_hash_create(css_allocator_fn alloc, void *pw, 
+css_error css_selector_hash_create(lwc_context *dict,
+		css_allocator_fn alloc, void *pw, 
 		css_selector_hash **hash);
 css_error css_selector_hash_destroy(css_selector_hash *hash);
 

@@ -101,7 +101,8 @@ css_error css_stylesheet_create(css_language_level level,
 		return error;
 	}
 
-	error = css_selector_hash_create(alloc, alloc_pw, &sheet->selectors);
+	error = css_selector_hash_create(dict, alloc, alloc_pw, 
+			&sheet->selectors);
 	if (error != CSS_OK) {
 		css_language_destroy(sheet->parser_frontend);
 		css_parser_destroy(sheet->parser);

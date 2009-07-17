@@ -22,6 +22,8 @@ struct css_selector_hash {
 
 	hash_entry *slots;
 
+	lwc_context *ctx;
+
 	css_allocator_fn alloc;
 	void *pw;
 };
@@ -34,17 +36,19 @@ static inline uint32_t _hash_name(lwc_string *name);
 /**
  * Create a hash
  *
+ * \param dict   Dictionary containing interned strings
  * \param alloc  Memory (de)allocation function
  * \param pw     Pointer to client-specific private data
  * \param hash   Pointer to location to receive result
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_selector_hash_create(css_allocator_fn alloc, void *pw, 
+css_error css_selector_hash_create(lwc_context *dict,
+		css_allocator_fn alloc, void *pw, 
 		css_selector_hash **hash)
 {
 	css_selector_hash *h;
 
-	if (alloc == NULL || hash == NULL)
+	if (dict == NULL || alloc == NULL || hash == NULL)
 		return CSS_BADPARM;
 
 	h = alloc(0, sizeof(css_selector_hash), pw);
@@ -60,6 +64,7 @@ css_error css_selector_hash_create(css_allocator_fn alloc, void *pw,
 	memset(h->slots, 0, DEFAULT_SLOTS * sizeof(hash_entry));
 	h->n_slots = DEFAULT_SLOTS;
 
+	h->ctx = lwc_context_ref(dict);
 	h->alloc = alloc;
 	h->pw = pw;
 
@@ -90,6 +95,8 @@ css_error css_selector_hash_destroy(css_selector_hash *hash)
 			hash->alloc(d, 0, hash->pw);
 		}
 	}
+
+	lwc_context_unref(hash->ctx);
 
 	hash->alloc(hash->slots, 0, hash->pw);
 
@@ -240,6 +247,23 @@ css_error css_selector_hash_find(css_selector_hash *hash,
 
 	head = &hash->slots[index];
 
+	if (head->sel != NULL) {
+		/* Search through chain for first match */
+		while (head != NULL) {
+			bool match = false;
+
+			lwc_context_string_caseless_isequal(hash->ctx, name, 
+					head->sel->data.name, &match);
+			if (match)
+				break;
+
+			head = head->next;
+		}
+
+		if (head == NULL)
+			head = &empty_slot;
+	}
+
 	(*matched) = (const css_selector **) head;
 
 	return CSS_OK;
@@ -264,8 +288,14 @@ css_error css_selector_hash_iterate(css_selector_hash *hash,
 	if (hash == NULL || current == NULL || next == NULL)
 		return CSS_BADPARM;
 
+	/* Look for the next selector with the same element name */
 	for (head = head->next; head != NULL; head = head->next) {
-		if (head->sel->data.name == (*current)->data.name)
+		bool match = false;
+
+		lwc_context_string_caseless_isequal(hash->ctx, 
+				head->sel->data.name,
+				(*current)->data.name, &match);
+		if (match)
 			break;
 	}
 
