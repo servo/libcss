@@ -289,8 +289,11 @@ css_error compute_absolute_values(const css_computed_style *parent,
 		return error;
 
 	/* Convert ex size into ems */
-	ex_size.data.length.value = FDIV(ex_size.data.length.value, 
-				size.data.length.value);
+	if (size.data.length.value != 0)
+		ex_size.data.length.value = FDIV(ex_size.data.length.value, 
+					size.data.length.value);
+	else
+		ex_size.data.length.value = 0;
 	ex_size.data.length.unit = CSS_UNIT_EM;
 
 	/* Fix up background-position */
