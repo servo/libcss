@@ -71,7 +71,7 @@ typedef struct css_select_handler {
 			css_hint *hint);
 
 	css_error (*compute_font_size)(void *pw, const css_hint *parent,
-			bool may_clamp, css_hint *size);
+			css_hint *size);
 } css_select_handler;
 
 css_error css_select_ctx_create(css_allocator_fn alloc, void *pw,

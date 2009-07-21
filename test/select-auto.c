@@ -120,7 +120,7 @@ static css_error node_presentational_hint(void *pw, void *node,
 static css_error ua_default_for_property(void *pw, uint32_t property,
 		css_hint *hint);
 static css_error compute_font_size(void *pw, const css_hint *parent,
-		bool may_clamp, css_hint *size);
+		css_hint *size);
 
 static css_select_handler select_handler = {
 	node_name,
@@ -1130,8 +1130,7 @@ css_error ua_default_for_property(void *pw, uint32_t property, css_hint *hint)
 	return CSS_OK;
 }
 
-css_error compute_font_size(void *pw, const css_hint *parent, 
-		bool may_clamp, css_hint *size)
+css_error compute_font_size(void *pw, const css_hint *parent, css_hint *size)
 {
 	static css_hint_length sizes[] = {
 		{ FLTTOFIX(6.75), CSS_UNIT_PT },
@@ -1145,7 +1144,6 @@ css_error compute_font_size(void *pw, const css_hint *parent,
 	const css_hint_length *parent_size;
 
 	UNUSED(pw);
-	UNUSED(may_clamp);
 
 	/* Grab parent size, defaulting to medium if none */
 	if (parent == NULL) {
