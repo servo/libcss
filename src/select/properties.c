@@ -194,13 +194,13 @@ css_error compose_background_attachment(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_background_attachment(child) == 
-			CSS_BACKGROUND_ATTACHMENT_INHERIT) {
-		return set_background_attachment(result, 
-				get_background_attachment(parent));
+	uint8_t type = get_background_attachment(child);
+
+	if (type == CSS_BACKGROUND_ATTACHMENT_INHERIT) {
+		type = get_background_attachment(parent);
 	}
 
-	return CSS_OK;
+	return set_background_attachment(result, type);
 }
 
 css_error cascade_background_color(uint32_t opv, css_style *style, 
@@ -226,15 +226,13 @@ css_error compose_background_color(const css_computed_style *parent,
 		css_computed_style *result)
 {
 	css_color color;
+	uint8_t type = get_background_color(child, &color);
 
-	if (get_background_color(child, &color) == 
-			CSS_BACKGROUND_COLOR_INHERIT) {
-		uint8_t p = get_background_color(parent, &color);
-
-		return set_background_color(result, p, color);
+	if (type == CSS_BACKGROUND_COLOR_INHERIT) {
+		type = get_background_color(parent, &color);
 	}
 
-	return CSS_OK;
+	return set_background_color(result, type, color);
 }
 
 css_error cascade_background_image(uint32_t opv, css_style *style, 
@@ -260,15 +258,13 @@ css_error compose_background_image(const css_computed_style *parent,
 		css_computed_style *result)
 {
 	lwc_string *url;
+	uint8_t type = get_background_image(child, &url);
 
-	if (get_background_image(child, &url) == 
-			CSS_BACKGROUND_IMAGE_INHERIT) {
-		uint8_t p = get_background_image(parent, &url);
-
-		return set_background_image(result, p, url);
+	if (type == CSS_BACKGROUND_IMAGE_INHERIT) {
+		type = get_background_image(parent, &url);
 	}
 
-	return CSS_OK;
+	return set_background_image(result, type, url);
 }
 
 css_error cascade_background_position(uint32_t opv, css_style *style, 
@@ -359,17 +355,16 @@ css_error compose_background_position(const css_computed_style *parent,
 {
 	css_fixed hlength = 0, vlength = 0;
 	css_unit hunit = CSS_UNIT_PX, vunit = CSS_UNIT_PX;
+	uint8_t type = get_background_position(child, &hlength, &hunit, 
+			&vlength, &vunit);
 
-	if (get_background_position(child, &hlength, &hunit,
-			&vlength, &vunit) == CSS_BACKGROUND_POSITION_INHERIT) {
-		uint8_t p = get_background_position(parent,
+	if (type == CSS_BACKGROUND_POSITION_INHERIT) {
+		type = get_background_position(parent,
 				&hlength, &hunit, &vlength, &vunit);
-
-		return set_background_position(result, p, hlength, hunit,
-				vlength, vunit);
 	}
 
-	return CSS_OK;
+	return set_background_position(result, type, hlength, hunit,
+				vlength, vunit);
 }
 
 
@@ -421,13 +416,13 @@ css_error compose_background_repeat(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_background_repeat(child) == 
-			CSS_BACKGROUND_REPEAT_INHERIT) {
-		return set_background_repeat(result,
-				css_computed_background_repeat(parent));
+	uint8_t type = get_background_repeat(child);
+
+	if (type == CSS_BACKGROUND_REPEAT_INHERIT) {
+		type = get_background_repeat(parent);
 	}
 
-	return CSS_OK;
+	return set_background_repeat(result, type);
 }
 
 css_error cascade_border_collapse(uint32_t opv, css_style *style, 
@@ -471,13 +466,13 @@ css_error compose_border_collapse(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_border_collapse(child) == 
-			CSS_BORDER_COLLAPSE_INHERIT) {
-		return set_border_collapse(result,
-				css_computed_border_collapse(parent));
-	}
+	uint8_t type = get_border_collapse(child);
 
-	return CSS_OK;
+	if (type == CSS_BORDER_COLLAPSE_INHERIT) {
+		type = get_border_collapse(parent);
+	}
+	
+	return set_border_collapse(result, type);
 }
 
 css_error cascade_border_spacing(uint32_t opv, css_style *style, 
@@ -534,15 +529,19 @@ css_error compose_border_spacing(const css_computed_style *parent,
 {
 	css_fixed hlength = 0, vlength = 0;
 	css_unit hunit = CSS_UNIT_PX, vunit = CSS_UNIT_PX;
+	uint8_t type = get_border_spacing(child, &hlength, &hunit, 
+			&vlength, &vunit);
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) || 
-			get_border_spacing(child, 
-			&hlength, &hunit, &vlength, &vunit) == 
-			CSS_BORDER_SPACING_INHERIT) {
-		uint8_t p = get_border_spacing(parent, 
-				&hlength, &hunit, &vlength, &vunit);
+			type == CSS_BORDER_SPACING_INHERIT ||
+			(child->uncommon != NULL && result != child)) {
+		if ((child->uncommon == NULL && parent->uncommon != NULL) || 
+				type == CSS_BORDER_SPACING_INHERIT) {
+			type = get_border_spacing(parent, 
+					&hlength, &hunit, &vlength, &vunit);
+		}
 
-		return set_border_spacing(result, p, hlength, hunit, 
+		return set_border_spacing(result, type, hlength, hunit, 
 				vlength, vunit);
 	}
 
@@ -571,14 +570,13 @@ css_error compose_border_top_color(const css_computed_style *parent,
 		css_computed_style *result)
 {
 	css_color color;
+	uint8_t type = get_border_top_color(child, &color);
 
-	if (get_border_top_color(child, &color) == CSS_BORDER_COLOR_INHERIT) {
-		uint8_t p = get_border_top_color(parent, &color);
-
-		return set_border_top_color(result, p, color);
+	if (type == CSS_BORDER_COLOR_INHERIT) {
+		type = get_border_top_color(parent, &color);
 	}
 
-	return CSS_OK;
+	return set_border_top_color(result, type, color);
 }
 
 css_error cascade_border_right_color(uint32_t opv, css_style *style, 
@@ -605,14 +603,13 @@ css_error compose_border_right_color(const css_computed_style *parent,
 		css_computed_style *result)
 {
 	css_color color;
+	uint8_t type = get_border_right_color(child, &color);
 
-	if (get_border_right_color(child, &color) == CSS_BORDER_COLOR_INHERIT) {
-		uint8_t p = get_border_right_color(parent, &color);
-
-		return set_border_right_color(result, p, color);
+	if (type == CSS_BORDER_COLOR_INHERIT) {
+		type = get_border_right_color(parent, &color);
 	}
 
-	return CSS_OK;
+	return set_border_right_color(result, type, color);
 }
 
 css_error cascade_border_bottom_color(uint32_t opv, css_style *style, 
@@ -639,15 +636,13 @@ css_error compose_border_bottom_color(const css_computed_style *parent,
 		css_computed_style *result)
 {
 	css_color color;
+	uint8_t type = get_border_bottom_color(child, &color);
 
-	if (get_border_bottom_color(child, &color) == 
-			CSS_BORDER_COLOR_INHERIT) {
-		uint8_t p = get_border_bottom_color(parent, &color);
-
-		return set_border_bottom_color(result, p, color);
+	if (type == CSS_BORDER_COLOR_INHERIT) {
+		type = get_border_bottom_color(parent, &color);
 	}
 
-	return CSS_OK;
+	return set_border_bottom_color(result, type, color);
 }
 
 css_error cascade_border_left_color(uint32_t opv, css_style *style, 
@@ -674,14 +669,13 @@ css_error compose_border_left_color(const css_computed_style *parent,
 		css_computed_style *result)
 {
 	css_color color;
+	uint8_t type = get_border_left_color(child, &color);
 
-	if (get_border_left_color(child, &color) == CSS_BORDER_COLOR_INHERIT) {
-		uint8_t p = get_border_left_color(parent, &color);
-
-		return set_border_left_color(result, p, color);
+	if (type == CSS_BORDER_COLOR_INHERIT) {
+		type = get_border_left_color(parent, &color);
 	}
 
-	return CSS_OK;
+	return set_border_left_color(result, type, color);
 }
 
 css_error cascade_border_top_style(uint32_t opv, css_style *style, 
@@ -705,12 +699,13 @@ css_error compose_border_top_style(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_border_top_style(child) == CSS_BORDER_STYLE_INHERIT) {
-		return set_border_top_style(result,
-				get_border_top_style(parent));
+	uint8_t type = get_border_top_style(child);
+
+	if (type == CSS_BORDER_STYLE_INHERIT) {
+		type = get_border_top_style(parent);
 	}
 
-	return CSS_OK;
+	return set_border_top_style(result, type);
 }
 
 css_error cascade_border_right_style(uint32_t opv, css_style *style, 
@@ -734,12 +729,13 @@ css_error compose_border_right_style(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_border_right_style(child) == CSS_BORDER_STYLE_INHERIT) {
-		return set_border_right_style(result,
-				get_border_right_style(parent));
+	uint8_t type = get_border_right_style(child);
+
+	if (type == CSS_BORDER_STYLE_INHERIT) {
+		type = get_border_right_style(parent);
 	}
 
-	return CSS_OK;
+	return set_border_right_style(result, type);
 }
 
 css_error cascade_border_bottom_style(uint32_t opv, css_style *style, 
@@ -763,12 +759,13 @@ css_error compose_border_bottom_style(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_border_bottom_style(child) == CSS_BORDER_STYLE_INHERIT) {
-		return set_border_bottom_style(result,
-				get_border_bottom_style(parent));
+	uint8_t type = get_border_bottom_style(child);
+
+	if (type == CSS_BORDER_STYLE_INHERIT) {
+		type = get_border_bottom_style(parent);
 	}
 
-	return CSS_OK;
+	return set_border_bottom_style(result, type);
 }
 
 css_error cascade_border_left_style(uint32_t opv, css_style *style, 
@@ -792,12 +789,13 @@ css_error compose_border_left_style(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_border_left_style(child) == CSS_BORDER_STYLE_INHERIT) {
-		return set_border_left_style(result,
-				get_border_left_style(parent));
+	uint8_t type = get_border_left_style(child);
+
+	if (type == CSS_BORDER_STYLE_INHERIT) {
+		type = get_border_left_style(parent);
 	}
 
-	return CSS_OK;
+	return set_border_left_style(result, type);
 }
 
 css_error cascade_border_top_width(uint32_t opv, css_style *style, 
@@ -825,15 +823,13 @@ css_error compose_border_top_width(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_border_top_width(child, &length, &unit);
 
-	if (get_border_top_width(child, &length, &unit) == 
-			CSS_BORDER_WIDTH_INHERIT) {
-		uint8_t p = get_border_top_width(parent, &length, &unit);
-
-		return set_border_top_width(result, p, length, unit);
+	if (type == CSS_BORDER_WIDTH_INHERIT) {
+		type = get_border_top_width(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_border_top_width(result, type, length, unit);
 }
 
 css_error cascade_border_right_width(uint32_t opv, css_style *style, 
@@ -861,15 +857,13 @@ css_error compose_border_right_width(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_border_right_width(child, &length, &unit);
 
-	if (get_border_right_width(child, &length, &unit) == 
-			CSS_BORDER_WIDTH_INHERIT) {
-		uint8_t p = get_border_right_width(parent, &length, &unit);
-
-		return set_border_right_width(result, p, length, unit);
+	if (type == CSS_BORDER_WIDTH_INHERIT) {
+		type = get_border_right_width(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_border_right_width(result, type, length, unit);
 }
 
 css_error cascade_border_bottom_width(uint32_t opv, css_style *style, 
@@ -897,15 +891,13 @@ css_error compose_border_bottom_width(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_border_bottom_width(child, &length, &unit);
 
-	if (get_border_bottom_width(child, &length, &unit) == 
-			CSS_BORDER_WIDTH_INHERIT) {
-		uint8_t p = get_border_bottom_width(parent, &length, &unit);
-
-		return set_border_bottom_width(result, p, length, unit);
+	if (type == CSS_BORDER_WIDTH_INHERIT) {
+		type = get_border_bottom_width(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_border_bottom_width(result, type, length, unit);
 }
 
 css_error cascade_border_left_width(uint32_t opv, css_style *style, 
@@ -933,15 +925,13 @@ css_error compose_border_left_width(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_border_left_width(child, &length, &unit);
 
-	if (get_border_left_width(child, &length, &unit) == 
-			CSS_BORDER_WIDTH_INHERIT) {
-		uint8_t p = get_border_left_width(parent, &length, &unit);
-
-		return set_border_left_width(result, p, length, unit);
+	if (type == CSS_BORDER_WIDTH_INHERIT) {
+		type = get_border_left_width(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_border_left_width(result, type, length, unit);
 }
 
 css_error cascade_bottom(uint32_t opv, css_style *style, 
@@ -968,14 +958,13 @@ css_error compose_bottom(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_bottom(child, &length, &unit);
 
-	if (get_bottom(child, &length, &unit) == CSS_BOTTOM_INHERIT) {
-		uint8_t p = get_bottom(parent, &length, &unit);
-
-		return set_bottom(result, p, length, unit);
+	if (type == CSS_BOTTOM_INHERIT) {
+		type = get_bottom(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_bottom(result, type, length, unit);
 }
 
 css_error cascade_caption_side(uint32_t opv, css_style *style, 
@@ -1019,11 +1008,13 @@ css_error compose_caption_side(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_caption_side(child) == CSS_CAPTION_SIDE_INHERIT) {
-		return set_caption_side(result, get_caption_side(parent));
-	}
+	uint8_t type = get_caption_side(child);
 
-	return CSS_OK;
+	if (type == CSS_CAPTION_SIDE_INHERIT) {
+		type = get_caption_side(parent);
+	}
+	
+	return set_caption_side(result, type);
 }
 
 css_error cascade_clear(uint32_t opv, css_style *style, 
@@ -1073,11 +1064,13 @@ css_error compose_clear(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_clear(child) == CSS_CLEAR_INHERIT) {
-		return set_clear(result, get_clear(parent));
+	uint8_t type = get_clear(child);
+
+	if (type == CSS_CLEAR_INHERIT) {
+		type = get_clear(parent);
 	}
 
-	return CSS_OK;
+	return set_clear(result, type);
 }
 
 css_error cascade_clip(uint32_t opv, css_style *style, 
@@ -1165,11 +1158,17 @@ css_error compose_clip(const css_computed_style *parent,
 	css_computed_clip_rect rect = { 0, 0, 0, 0, 
 			CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX,
 			false, false, false, false };
+	uint8_t type = get_clip(child, &rect);
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) || 
-			get_clip(child, &rect) == CSS_CLIP_INHERIT) {
-		uint8_t p = get_clip(parent, &rect);
-		return set_clip(result, p, &rect);
+			type == CSS_CLIP_INHERIT ||
+			(child->uncommon != NULL && result != child)) {
+		if ((child->uncommon == NULL && parent->uncommon != NULL) || 
+				type == CSS_CLIP_INHERIT) {
+			type = get_clip(parent, &rect);
+		}
+
+		return set_clip(result, type, &rect);
 	}
 
 	return CSS_OK;
@@ -1219,14 +1218,13 @@ css_error compose_color(const css_computed_style *parent,
 		css_computed_style *result)
 {
 	css_color color;
+	uint8_t type = get_color(child, &color);
 
-	if (get_color(child, &color) == CSS_COLOR_INHERIT) {
-		uint8_t p = get_color(parent, &color);
-
-		return set_color(result, p, color);
+	if (type == CSS_COLOR_INHERIT) {
+		type = get_color(parent, &color);
 	}
 
-	return CSS_OK;
+	return set_color(result, type, color);
 }
 
 css_error cascade_content(uint32_t opv, css_style *style, 
@@ -1413,14 +1411,20 @@ css_error compose_content(const css_computed_style *parent,
 {
 	css_error error;
 	const css_computed_content_item *items = NULL;
+	uint8_t type = get_content(child, &items);
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
-			get_content(child, &items) == CSS_CONTENT_INHERIT) {
-		uint8_t p = get_content(parent, &items);
+			type == CSS_CONTENT_INHERIT ||
+			(child->uncommon != NULL && result != child)) {
 		size_t n_items = 0;
 		css_computed_content_item *copy = NULL;
 
-		if (p == CSS_CONTENT_SET) {
+		if ((child->uncommon == NULL && parent->uncommon != NULL) ||
+				type == CSS_CONTENT_INHERIT) {
+			type = get_content(parent, &items);
+		}
+
+		if (type == CSS_CONTENT_SET) {
 			const css_computed_content_item *i;
 
 			for (i = items; i->type != CSS_COMPUTED_CONTENT_NONE; 
@@ -1437,7 +1441,7 @@ css_error compose_content(const css_computed_style *parent,
 					sizeof(css_computed_content_item));
 		}
 
-		error = set_content(result, p, copy);
+		error = set_content(result, type, copy);
 		if (error != CSS_OK && copy != NULL)
 			result->alloc(copy, 0, result->pw);
 
@@ -1497,15 +1501,20 @@ css_error compose_counter_increment(const css_computed_style *parent,
 {
 	css_error error;
 	const css_computed_counter *items = NULL;
+	uint8_t type = get_counter_increment(child, &items);
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
-			get_counter_increment(child, &items) ==
-				CSS_COUNTER_INCREMENT_INHERIT) {
-		uint8_t p = get_counter_increment(parent, &items);
+			type ==	CSS_COUNTER_INCREMENT_INHERIT || 
+			(child->uncommon != NULL && result != child)) {
 		size_t n_items = 0;
 		css_computed_counter *copy = NULL;
 
-		if (p == CSS_COUNTER_INCREMENT_NAMED && items != NULL) {
+		if ((child->uncommon == NULL && parent->uncommon != NULL) ||
+				type ==	CSS_COUNTER_INCREMENT_INHERIT) {
+			type = get_counter_increment(parent, &items);
+		}
+
+		if (type == CSS_COUNTER_INCREMENT_NAMED && items != NULL) {
 			const css_computed_counter *i;
 
 			for (i = items; i->name != NULL; i++)
@@ -1521,7 +1530,7 @@ css_error compose_counter_increment(const css_computed_style *parent,
 					sizeof(css_computed_counter));
 		}
 
-		error = set_counter_increment(result, p, copy);
+		error = set_counter_increment(result, type, copy);
 		if (error != CSS_OK && copy != NULL)
 			result->alloc(copy, 0, result->pw);
 
@@ -1580,15 +1589,20 @@ css_error compose_counter_reset(const css_computed_style *parent,
 {
 	css_error error;
 	const css_computed_counter *items = NULL;
+	uint8_t type = get_counter_reset(child, &items);
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
-			get_counter_reset(child, &items) ==
-				CSS_COUNTER_RESET_INHERIT) {
-		uint8_t p = get_counter_reset(parent, &items);
+			type ==	CSS_COUNTER_RESET_INHERIT ||
+			(child->uncommon != NULL && result != child)) {
 		size_t n_items = 0;
 		css_computed_counter *copy = NULL;
 
-		if (p == CSS_COUNTER_RESET_NAMED && items != NULL) {
+		if ((child->uncommon == NULL && parent->uncommon != NULL) ||
+				type ==	CSS_COUNTER_RESET_INHERIT) {
+			type = get_counter_reset(parent, &items);
+		}
+
+		if (type == CSS_COUNTER_RESET_NAMED && items != NULL) {
 			const css_computed_counter *i;
 
 			for (i = items; i->name != NULL; i++)
@@ -1604,7 +1618,7 @@ css_error compose_counter_reset(const css_computed_style *parent,
 					sizeof(css_computed_counter));
 		}
 
-		error = set_counter_reset(result, p, copy);
+		error = set_counter_reset(result, type, copy);
 		if (error != CSS_OK && copy != NULL)
 			result->alloc(copy, 0, result->pw);
 
@@ -1849,12 +1863,18 @@ css_error compose_cursor(const css_computed_style *parent,
 {
 	css_error error;
 	lwc_string **urls = NULL;
+	uint8_t type = get_cursor(child, &urls);
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
-			get_cursor(child, &urls) == CSS_CURSOR_INHERIT) {
-		uint8_t p = get_cursor(parent, &urls);
+			type == CSS_CURSOR_INHERIT ||
+			(child->uncommon != NULL && result != child)) {
 		size_t n_urls = 0;
 		lwc_string **copy = NULL;
+
+		if ((child->uncommon == NULL && parent->uncommon != NULL) ||
+				type == CSS_CURSOR_INHERIT) {
+			type = get_cursor(parent, &urls);
+		}
 
 		if (urls != NULL) {
 			lwc_string **i;
@@ -1872,7 +1892,7 @@ css_error compose_cursor(const css_computed_style *parent,
 					sizeof(lwc_string *));
 		}
 
-		error = set_cursor(result, p, copy);
+		error = set_cursor(result, type, copy);
 		if (error != CSS_OK && copy != NULL)
 			result->alloc(copy, 0, result->pw);
 
@@ -1923,11 +1943,13 @@ css_error compose_direction(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_direction(child) == CSS_DIRECTION_INHERIT) {
-		return set_direction(result, get_direction(parent));
+	uint8_t type = get_direction(child);
+
+	if (type == CSS_DIRECTION_INHERIT) {
+		type = get_direction(parent);
 	}
 
-	return CSS_OK;
+	return set_direction(result, type);
 }
 
 css_error cascade_display(uint32_t opv, css_style *style, 
@@ -2013,11 +2035,13 @@ css_error compose_display(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_display_static(child) == CSS_DISPLAY_INHERIT) {
-		return set_display(result, get_display_static(parent));
+	uint8_t type = get_display_static(child);
+
+	if (type == CSS_DISPLAY_INHERIT) {
+		type = get_display_static(parent);
 	}
 
-	return CSS_OK;
+	return set_display(result, type);
 }
 
 css_error cascade_elevation(uint32_t opv, css_style *style, 
@@ -2126,11 +2150,13 @@ css_error compose_empty_cells(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_empty_cells(child) == CSS_EMPTY_CELLS_INHERIT) {
-		return set_empty_cells(result, get_empty_cells(parent));
+	uint8_t type = get_empty_cells(child);
+
+	if (type == CSS_EMPTY_CELLS_INHERIT) {
+		type = get_empty_cells(parent);
 	}
 
-	return CSS_OK;
+	return set_empty_cells(result, type);
 }
 
 css_error cascade_float(uint32_t opv, css_style *style, 
@@ -2177,11 +2203,13 @@ css_error compose_float(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_float(child) == CSS_FLOAT_INHERIT) {
-		return set_float(result, get_float(parent));
+	uint8_t type = get_float(child);
+
+	if (type == CSS_FLOAT_INHERIT) {
+		type = get_float(parent);
 	}
 
-	return CSS_OK;
+	return set_float(result, type);
 }
 
 css_error cascade_font_family(uint32_t opv, css_style *style, 
@@ -2337,11 +2365,14 @@ css_error compose_font_family(const css_computed_style *parent,
 {
 	css_error error;
 	lwc_string **urls = NULL;
+	uint8_t type = get_font_family(child, &urls);
 
-	if (get_font_family(child, &urls) == CSS_FONT_FAMILY_INHERIT) {
-		uint8_t p = get_font_family(parent, &urls);
+	if (type == CSS_FONT_FAMILY_INHERIT || result != child) {
 		size_t n_urls = 0;
 		lwc_string **copy = NULL;
+
+		if (type == CSS_FONT_FAMILY_INHERIT)
+			type = get_font_family(parent, &urls);
 
 		if (urls != NULL) {
 			lwc_string **i;
@@ -2359,7 +2390,7 @@ css_error compose_font_family(const css_computed_style *parent,
 					sizeof(lwc_string *));
 		}
 
-		error = set_font_family(result, p, copy);
+		error = set_font_family(result, type, copy);
 		if (error != CSS_OK && copy != NULL)
 			result->alloc(copy, 0, result->pw);
 
@@ -2446,13 +2477,13 @@ css_error compose_font_size(const css_computed_style *parent,
 {
 	css_fixed size = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_font_size(child, &size, &unit);
 
-	if (get_font_size(child, &size, &unit) == CSS_FONT_SIZE_INHERIT) {
-		uint8_t p = get_font_size(parent, &size, &unit);
-		return set_font_size(result, p, size, unit);
+	if (type == CSS_FONT_SIZE_INHERIT) {
+		type = get_font_size(parent, &size, &unit);
 	}
 
-	return CSS_OK;
+	return set_font_size(result, type, size, unit);
 }
 
 css_error cascade_font_style(uint32_t opv, css_style *style, 
@@ -2499,11 +2530,13 @@ css_error compose_font_style(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_font_style(child) == CSS_FONT_STYLE_INHERIT) {
-		return set_font_style(result, get_font_style(parent));
-	}
+	uint8_t type = get_font_style(child);
 
-	return CSS_OK;
+	if (type == CSS_FONT_STYLE_INHERIT) {
+		type= get_font_style(parent);
+	}
+	
+	return set_font_style(result, type);
 }
 
 css_error cascade_font_variant(uint32_t opv, css_style *style, 
@@ -2547,11 +2580,13 @@ css_error compose_font_variant(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_font_variant(child) == CSS_FONT_VARIANT_INHERIT) {
-		return set_font_variant(result, get_font_variant(parent));
+	uint8_t type = get_font_variant(child);
+
+	if (type == CSS_FONT_VARIANT_INHERIT) {
+		type = get_font_variant(parent);
 	}
 
-	return CSS_OK;
+	return set_font_variant(result, type);
 }
 
 css_error cascade_font_weight(uint32_t opv, css_style *style, 
@@ -2628,11 +2663,13 @@ css_error compose_font_weight(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_font_weight(child) == CSS_FONT_WEIGHT_INHERIT) {
-		return set_font_weight(result, get_font_weight(parent));
+	uint8_t type = get_font_weight(child);
+
+	if (type == CSS_FONT_WEIGHT_INHERIT) {
+		type = get_font_weight(parent);
 	}
 
-	return CSS_OK;
+	return set_font_weight(result, type);
 }
 
 css_error cascade_height(uint32_t opv, css_style *style, 
@@ -2659,14 +2696,13 @@ css_error compose_height(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_height(child, &length, &unit);
 
-	if (get_height(child, &length, &unit) == CSS_HEIGHT_INHERIT) {
-		uint8_t p = get_height(parent, &length, &unit);
-
-		return set_height(result, p, length, unit);
+	if (type == CSS_HEIGHT_INHERIT) {
+		type = get_height(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_height(result, type, length, unit);
 }
 
 css_error cascade_left(uint32_t opv, css_style *style, 
@@ -2693,14 +2729,13 @@ css_error compose_left(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_left(child, &length, &unit);
 
-	if (get_left(child, &length, &unit) == CSS_LEFT_INHERIT) {
-		uint8_t p = get_left(parent, &length, &unit);
-
-		return set_left(result, p, length, unit);
+	if (type == CSS_LEFT_INHERIT) {
+		type = get_left(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_left(result, type, length, unit);
 }
 
 css_error cascade_letter_spacing(uint32_t opv, css_style *style, 
@@ -2728,13 +2763,17 @@ css_error compose_letter_spacing(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_letter_spacing(child, &length, &unit);
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) || 
-			get_letter_spacing(child, &length, &unit) == 
-			CSS_LETTER_SPACING_INHERIT) {
-		uint8_t p = get_letter_spacing(parent, &length, &unit);
+			type == CSS_LETTER_SPACING_INHERIT ||
+			(child->uncommon != NULL && result != child)) {
+		if ((child->uncommon == NULL && parent->uncommon != NULL) || 
+				type == CSS_LETTER_SPACING_INHERIT) {
+			type = get_letter_spacing(parent, &length, &unit);
+		}
 
-		return set_letter_spacing(result, p, length, unit);
+		return set_letter_spacing(result, type, length, unit);
 	}
 
 	return CSS_OK;
@@ -2796,14 +2835,13 @@ css_error compose_line_height(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_line_height(child, &length, &unit);
 
-	if (get_line_height(child, &length, &unit) == CSS_LINE_HEIGHT_INHERIT) {
-		uint8_t p = get_line_height(parent, &length, &unit);
-
-		return set_line_height(result, p, length, unit);
+	if (type == CSS_LINE_HEIGHT_INHERIT) {
+		type = get_line_height(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_line_height(result, type, length, unit);
 }
 
 css_error cascade_list_style_image(uint32_t opv, css_style *style, 
@@ -2829,14 +2867,13 @@ css_error compose_list_style_image(const css_computed_style *parent,
 		css_computed_style *result)
 {
 	lwc_string *url;
+	uint8_t type = get_list_style_image(child, &url);
 
-	if (get_list_style_image(child, &url) == CSS_LIST_STYLE_IMAGE_INHERIT) {
-		uint8_t p = get_list_style_image(parent, &url);
-
-		return set_list_style_image(result, p, url);
+	if (type == CSS_LIST_STYLE_IMAGE_INHERIT) {
+		type = get_list_style_image(parent, &url);
 	}
 
-	return CSS_OK;
+	return set_list_style_image(result, type, url);
 }
 
 css_error cascade_list_style_position(uint32_t opv, css_style *style, 
@@ -2881,12 +2918,13 @@ css_error compose_list_style_position(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_list_style_position(child) == CSS_LIST_STYLE_POSITION_INHERIT) {
-		return set_list_style_position(result,
-				get_list_style_position(parent));
+	uint8_t type = get_list_style_position(child);
+
+	if (type == CSS_LIST_STYLE_POSITION_INHERIT) {
+		type = get_list_style_position(parent);
 	}
 
-	return CSS_OK;
+	return set_list_style_position(result, type);
 }
 
 css_error cascade_list_style_type(uint32_t opv, css_style *style, 
@@ -2969,11 +3007,13 @@ css_error compose_list_style_type(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_list_style_type(child) == CSS_LIST_STYLE_TYPE_INHERIT) {
-		return set_list_style_type(result, get_list_style_type(parent));
+	uint8_t type = get_list_style_type(child);
+
+	if (type == CSS_LIST_STYLE_TYPE_INHERIT) {
+		type = get_list_style_type(parent);
 	}
 
-	return CSS_OK;
+	return set_list_style_type(result, type);
 }
 
 css_error cascade_margin_top(uint32_t opv, css_style *style, 
@@ -3000,14 +3040,13 @@ css_error compose_margin_top(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_margin_top(child, &length, &unit);
 
-	if (get_margin_top(child, &length, &unit) == CSS_MARGIN_INHERIT) {
-		uint8_t p = get_margin_top(parent, &length, &unit);
-
-		return set_margin_top(result, p, length, unit);
+	if (type == CSS_MARGIN_INHERIT) {
+		type = get_margin_top(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_margin_top(result, type, length, unit);
 }
 
 css_error cascade_margin_right(uint32_t opv, css_style *style, 
@@ -3034,14 +3073,13 @@ css_error compose_margin_right(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_margin_right(child, &length, &unit);
 
-	if (get_margin_right(child, &length, &unit) == CSS_MARGIN_INHERIT) {
-		uint8_t p = get_margin_right(parent, &length, &unit);
-
-		return set_margin_right(result, p, length, unit);
+	if (type == CSS_MARGIN_INHERIT) {
+		type = get_margin_right(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_margin_right(result, type, length, unit);
 }
 
 css_error cascade_margin_bottom(uint32_t opv, css_style *style, 
@@ -3068,14 +3106,13 @@ css_error compose_margin_bottom(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_margin_bottom(child, &length, &unit);
 
-	if (get_margin_bottom(child, &length, &unit) ==	CSS_MARGIN_INHERIT) {
-		uint8_t p = get_margin_bottom(parent, &length, &unit);
-
-		return set_margin_bottom(result, p, length, unit);
+	if (type == CSS_MARGIN_INHERIT) {
+		type = get_margin_bottom(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_margin_bottom(result, type, length, unit);
 }
 
 css_error cascade_margin_left(uint32_t opv, css_style *style, 
@@ -3102,14 +3139,13 @@ css_error compose_margin_left(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_margin_left(child, &length, &unit);
 
-	if (get_margin_left(child, &length, &unit) == CSS_MARGIN_INHERIT) {
-		uint8_t p = get_margin_left(parent, &length, &unit);
-
-		return set_margin_left(result, p, length, unit);
+	if (type == CSS_MARGIN_INHERIT) {
+		type = get_margin_left(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_margin_left(result, type, length, unit);
 }
 
 css_error cascade_max_height(uint32_t opv, css_style *style, 
@@ -3137,14 +3173,13 @@ css_error compose_max_height(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_max_height(child, &length, &unit);
 
-	if (get_max_height(child, &length, &unit) == CSS_MAX_HEIGHT_INHERIT) {
-		uint8_t p = get_max_height(parent, &length, &unit);
-
-		return set_max_height(result, p, length, unit);
+	if (type == CSS_MAX_HEIGHT_INHERIT) {
+		type = get_max_height(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_max_height(result, type, length, unit);
 }
 
 css_error cascade_max_width(uint32_t opv, css_style *style, 
@@ -3171,14 +3206,13 @@ css_error compose_max_width(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_max_width(child, &length, &unit);
 
-	if (get_max_width(child, &length, &unit) == CSS_MAX_WIDTH_INHERIT) {
-		uint8_t p = get_max_width(parent, &length, &unit);
-
-		return set_max_width(result, p, length, unit);
+	if (type == CSS_MAX_WIDTH_INHERIT) {
+		type = get_max_width(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_max_width(result, type, length, unit);
 }
 
 css_error cascade_min_height(uint32_t opv, css_style *style, 
@@ -3206,14 +3240,13 @@ css_error compose_min_height(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_min_height(child, &length, &unit);
 
-	if (get_min_height(child, &length, &unit) == CSS_MIN_HEIGHT_INHERIT) {
-		uint8_t p = get_min_height(parent, &length, &unit);
-
-		return set_min_height(result, p, length, unit);
+	if (type == CSS_MIN_HEIGHT_INHERIT) {
+		type = get_min_height(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_min_height(result, type, length, unit);
 }
 
 css_error cascade_min_width(uint32_t opv, css_style *style, 
@@ -3240,14 +3273,13 @@ css_error compose_min_width(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_min_width(child, &length, &unit);
 
-	if (get_min_width(child, &length, &unit) == CSS_MIN_WIDTH_INHERIT) {
-		uint8_t p = get_min_width(parent, &length, &unit);
-
-		return set_min_width(result, p, length, unit);
+	if (type == CSS_MIN_WIDTH_INHERIT) {
+		type = get_min_width(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_min_width(result, type, length, unit);
 }
 
 css_error cascade_orphans(uint32_t opv, css_style *style, 
@@ -3327,13 +3359,17 @@ css_error compose_outline_color(const css_computed_style *parent,
 		css_computed_style *result)
 {
 	css_color color = 0;
+	uint8_t type = get_outline_color(child, &color);
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
-			get_outline_color(child, &color) ==
-			CSS_OUTLINE_COLOR_INHERIT) {
-		uint8_t p = get_outline_color(parent, &color);
+			type == CSS_OUTLINE_COLOR_INHERIT ||
+			(child->uncommon != NULL && result != child)) {
+		if ((child->uncommon == NULL && parent->uncommon != NULL) ||
+				type == CSS_OUTLINE_COLOR_INHERIT) {
+			type = get_outline_color(parent, &color);
+		}
 
-		return set_outline_color(result, p, color);
+		return set_outline_color(result, type, color);
 	}
 
 	return CSS_OK;
@@ -3360,11 +3396,13 @@ css_error compose_outline_style(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_outline_style(child) == CSS_OUTLINE_STYLE_INHERIT) {
-		return set_outline_style(result, get_outline_style(parent));
+	uint8_t type = get_outline_style(child);
+
+	if (type == CSS_OUTLINE_STYLE_INHERIT) {
+		type = get_outline_style(parent);
 	}
 
-	return CSS_OK;
+	return set_outline_style(result, type);
 }
 
 css_error cascade_outline_width(uint32_t opv, css_style *style, 
@@ -3392,13 +3430,17 @@ css_error compose_outline_width(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_outline_width(child, &length, &unit);
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
-			get_outline_width(child, &length, &unit) ==
-			CSS_OUTLINE_WIDTH_INHERIT) {
-		uint8_t p = get_outline_width(parent, &length, &unit);
+			type == CSS_OUTLINE_WIDTH_INHERIT ||
+			(child->uncommon != NULL && result != child)) {
+		if ((child->uncommon == NULL && parent->uncommon != NULL) ||
+				type == CSS_OUTLINE_WIDTH_INHERIT) {
+			type = get_outline_width(parent, &length, &unit);
+		}
 
-		return set_outline_width(result, p, length, unit);
+		return set_outline_width(result, type, length, unit);
 	}
 
 	return CSS_OK;
@@ -3451,11 +3493,13 @@ css_error compose_overflow(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_overflow(child) == CSS_OVERFLOW_INHERIT) {
-		return set_overflow(result, get_overflow(parent));
+	uint8_t type = get_overflow(child);
+
+	if (type == CSS_OVERFLOW_INHERIT) {
+		type = get_overflow(parent);
 	}
 
-	return CSS_OK;
+	return set_overflow(result, type);
 }
 
 css_error cascade_padding_top(uint32_t opv, css_style *style, 
@@ -3482,14 +3526,13 @@ css_error compose_padding_top(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_padding_top(child, &length, &unit);
 
-	if (get_padding_top(child, &length, &unit) == CSS_PADDING_INHERIT) {
-		uint8_t p = get_padding_top(parent, &length, &unit);
-
-		return set_padding_top(result, p, length, unit);
+	if (type == CSS_PADDING_INHERIT) {
+		type = get_padding_top(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_padding_top(result, type, length, unit);
 }
 
 css_error cascade_padding_right(uint32_t opv, css_style *style, 
@@ -3517,14 +3560,13 @@ css_error compose_padding_right(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_padding_right(child, &length, &unit);
 
-	if (get_padding_right(child, &length, &unit) == CSS_PADDING_INHERIT) {
-		uint8_t p = get_padding_right(parent, &length, &unit);
-
-		return set_padding_right(result, p, length, unit);
+	if (type == CSS_PADDING_INHERIT) {
+		type = get_padding_right(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_padding_right(result, type, length, unit);
 }
 
 css_error cascade_padding_bottom(uint32_t opv, css_style *style, 
@@ -3552,14 +3594,13 @@ css_error compose_padding_bottom(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_padding_bottom(child, &length, &unit);
 
-	if (get_padding_bottom(child, &length, &unit) == CSS_PADDING_INHERIT) {
-		uint8_t p = get_padding_bottom(parent, &length, &unit);
-
-		return set_padding_bottom(result, p, length, unit);
+	if (type == CSS_PADDING_INHERIT) {
+		type = get_padding_bottom(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_padding_bottom(result, type, length, unit);
 }
 
 css_error cascade_padding_left(uint32_t opv, css_style *style, 
@@ -3586,14 +3627,13 @@ css_error compose_padding_left(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_padding_left(child, &length, &unit);
 
-	if (get_padding_left(child, &length, &unit) == CSS_PADDING_INHERIT) {
-		uint8_t p = get_padding_left(parent, &length, &unit);
-
-		return set_padding_left(result, p, length, unit);
+	if (type == CSS_PADDING_INHERIT) {
+		type = get_padding_left(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_padding_left(result, type, length, unit);
 }
 
 css_error cascade_page_break_after(uint32_t opv, css_style *style, 
@@ -3987,11 +4027,13 @@ css_error compose_position(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_position(child) == CSS_POSITION_INHERIT) {
-		return set_position(result, get_position(parent));
+	uint8_t type = get_position(child);
+
+	if (type == CSS_POSITION_INHERIT) {
+		type = get_position(parent);
 	}
 
-	return CSS_OK;
+	return set_position(result, type);
 }
 
 css_error cascade_quotes(uint32_t opv, css_style *style, 
@@ -4117,11 +4159,15 @@ css_error compose_quotes(const css_computed_style *parent,
 {
 	css_error error;
 	lwc_string **quotes = NULL;
+	uint8_t type = get_quotes(child, &quotes);
 
-	if (get_quotes(child, &quotes) == CSS_QUOTES_INHERIT) {
-		uint8_t p = get_quotes(parent, &quotes);
+	if (type == CSS_QUOTES_INHERIT || result != child) {
 		size_t n_quotes = 0;
 		lwc_string **copy = NULL;
+
+		if (type == CSS_QUOTES_INHERIT) {
+			type = get_quotes(parent, &quotes);
+		}
 
 		if (quotes != NULL) {
 			lwc_string **i;
@@ -4139,7 +4185,7 @@ css_error compose_quotes(const css_computed_style *parent,
 					sizeof(lwc_string *));
 		}
 
-		error = set_quotes(result, p, copy);
+		error = set_quotes(result, type, copy);
 		if (error != CSS_OK && copy != NULL)
 			result->alloc(copy, 0, result->pw);
 
@@ -4207,14 +4253,13 @@ css_error compose_right(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_right(child, &length, &unit);
 
-	if (get_right(child, &length, &unit) == CSS_RIGHT_INHERIT) {
-		uint8_t p = get_right(parent, &length, &unit);
-
-		return set_right(result, p, length, unit);
+	if (type == CSS_RIGHT_INHERIT) {
+		type = get_right(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_right(result, type, length, unit);
 }
 
 css_error cascade_speak_header(uint32_t opv, css_style *style, 
@@ -4562,11 +4607,13 @@ css_error compose_table_layout(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_table_layout(child) == CSS_TABLE_LAYOUT_INHERIT) {
-		return set_table_layout(result, get_table_layout(parent));
+	uint8_t type = get_table_layout(child);
+
+	if (type == CSS_TABLE_LAYOUT_INHERIT) {
+		type = get_table_layout(parent);
 	}
 
-	return CSS_OK;
+	return set_table_layout(result, type);
 }
 
 css_error cascade_text_align(uint32_t opv, css_style *style, 
@@ -4616,11 +4663,13 @@ css_error compose_text_align(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_text_align(child) == CSS_TEXT_ALIGN_INHERIT) {
-		return set_text_align(result, get_text_align(parent));
+	uint8_t type = get_text_align(child);
+
+	if (type == CSS_TEXT_ALIGN_INHERIT) {
+		type = get_text_align(parent);
 	}
 
-	return CSS_OK;
+	return set_text_align(result, type);
 }
 
 css_error cascade_text_decoration(uint32_t opv, css_style *style, 
@@ -4670,11 +4719,13 @@ css_error compose_text_decoration(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_text_decoration(child) == CSS_TEXT_DECORATION_INHERIT) {
-		return set_text_decoration(result, get_text_decoration(parent));
+	uint8_t type = get_text_decoration(child);
+
+	if (type == CSS_TEXT_DECORATION_INHERIT) {
+		type = get_text_decoration(parent);
 	}
 
-	return CSS_OK;
+	return set_text_decoration(result, type);
 }
 
 css_error cascade_text_indent(uint32_t opv, css_style *style, 
@@ -4702,14 +4753,13 @@ css_error compose_text_indent(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_text_indent(child, &length, &unit);
 
-	if (get_text_indent(child, &length, &unit) == CSS_TEXT_INDENT_INHERIT) {
-		uint8_t p = get_text_indent(parent, &length, &unit);
-
-		return set_text_indent(result, p, length, unit);
+	if (type == CSS_TEXT_INDENT_INHERIT) {
+		type = get_text_indent(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_text_indent(result, type, length, unit);
 }
 
 css_error cascade_text_transform(uint32_t opv, css_style *style, 
@@ -4759,11 +4809,13 @@ css_error compose_text_transform(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_text_transform(child) == CSS_TEXT_TRANSFORM_INHERIT) {
-		return set_text_transform(result, get_text_transform(parent));
+	uint8_t type = get_text_transform(child);
+
+	if (type == CSS_TEXT_TRANSFORM_INHERIT) {
+		type = get_text_transform(parent);
 	}
 
-	return CSS_OK;
+	return set_text_transform(result, type);
 }
 
 css_error cascade_top(uint32_t opv, css_style *style, 
@@ -4790,14 +4842,13 @@ css_error compose_top(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_top(child, &length, &unit);
 
-	if (get_top(child, &length, &unit) == CSS_TOP_INHERIT) {
-		uint8_t p = get_top(parent, &length, &unit);
-
-		return set_top(result, p, length, unit);
+	if (type == CSS_TOP_INHERIT) {
+		type = get_top(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_top(result, type, length, unit);
 }
 
 css_error cascade_unicode_bidi(uint32_t opv, css_style *style, 
@@ -4844,11 +4895,13 @@ css_error compose_unicode_bidi(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_unicode_bidi(child) == CSS_UNICODE_BIDI_INHERIT) {
-		return set_unicode_bidi(result, get_unicode_bidi(parent));
+	uint8_t type = get_unicode_bidi(child);
+
+	if (type == CSS_UNICODE_BIDI_INHERIT) {
+		type = get_unicode_bidi(parent);
 	}
 
-	return CSS_OK;
+	return set_unicode_bidi(result, type);
 }
 
 css_error cascade_vertical_align(uint32_t opv, css_style *style, 
@@ -4924,15 +4977,13 @@ css_error compose_vertical_align(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_vertical_align(child, &length, &unit);
 
-	if (get_vertical_align(child, &length, &unit) ==
-			CSS_VERTICAL_ALIGN_INHERIT) {
-		uint8_t p = get_vertical_align(parent, &length, &unit);
-
-		return set_vertical_align(result, p, length, unit);
+	if (type == CSS_VERTICAL_ALIGN_INHERIT) {
+		type = get_vertical_align(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_vertical_align(result, type, length, unit);
 }
 
 css_error cascade_visibility(uint32_t opv, css_style *style, 
@@ -4979,11 +5030,13 @@ css_error compose_visibility(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_visibility(child) == CSS_VISIBILITY_INHERIT) {
-		return set_visibility(result, get_visibility(parent));
+	uint8_t type = get_visibility(child);
+
+	if (type == CSS_VISIBILITY_INHERIT) {
+		type = get_visibility(parent);
 	}
 
-	return CSS_OK;
+	return set_visibility(result, type);
 }
 
 css_error cascade_voice_family(uint32_t opv, css_style *style, 
@@ -5227,11 +5280,13 @@ css_error compose_white_space(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	if (get_white_space(child) == CSS_WHITE_SPACE_INHERIT) {
-		return set_white_space(result, get_white_space(parent));
+	uint8_t type = get_white_space(child);
+
+	if (type == CSS_WHITE_SPACE_INHERIT) {
+		type = get_white_space(parent);
 	}
 
-	return CSS_OK;
+	return set_white_space(result, type);
 }
 
 css_error cascade_widows(uint32_t opv, css_style *style, 
@@ -5292,14 +5347,13 @@ css_error compose_width(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_width(child, &length, &unit);
 
-	if (get_width(child, &length, &unit) == CSS_WIDTH_INHERIT) {
-		uint8_t p = get_width(parent, &length, &unit);
-
-		return set_width(result, p, length, unit);
+	if (type == CSS_WIDTH_INHERIT) {
+		type = get_width(parent, &length, &unit);
 	}
 
-	return CSS_OK;
+	return set_width(result, type, length, unit);
 }
 
 css_error cascade_word_spacing(uint32_t opv, css_style *style, 
@@ -5327,13 +5381,17 @@ css_error compose_word_spacing(const css_computed_style *parent,
 {
 	css_fixed length = 0;
 	css_unit unit = CSS_UNIT_PX;
+	uint8_t type = get_word_spacing(child, &length, &unit);
 
 	if ((child->uncommon == NULL && parent->uncommon != NULL) ||
-			get_word_spacing(child, &length, &unit) == 
-			CSS_WORD_SPACING_INHERIT) {
-		uint8_t p = get_word_spacing(parent, &length, &unit);
+			type == CSS_WORD_SPACING_INHERIT ||
+			(child->uncommon != NULL && result != child)) {
+		if ((child->uncommon == NULL && parent->uncommon != NULL) ||
+				type == CSS_WORD_SPACING_INHERIT) {
+			type = get_word_spacing(parent, &length, &unit);
+		}
 
-		return set_word_spacing(result, p, length, unit);
+		return set_word_spacing(result, type, length, unit);
 	}
 
 	return CSS_OK;
@@ -5383,14 +5441,13 @@ css_error compose_z_index(const css_computed_style *parent,
 		css_computed_style *result)
 {
 	int32_t index = 0;
+	uint8_t type = get_z_index(child, &index);
 
-	if (get_z_index(child, &index) == CSS_Z_INDEX_INHERIT) {
-		uint8_t p = get_z_index(parent, &index);
-
-		return set_z_index(result, p, index);
+	if (type == CSS_Z_INDEX_INHERIT) {
+		type = get_z_index(parent, &index);
 	}
 
-	return CSS_OK;
+	return set_z_index(result, type, index);
 }
 
 /******************************************************************************
