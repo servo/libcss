@@ -746,19 +746,6 @@ css_error match_selector_chain(css_select_ctx *ctx,
 		const css_selector_detail *detail = &s->data;
 		bool match = false;
 
-		/* First, consider any named combinator on this selector */
-		if (s->data.comb != CSS_COMBINATOR_NONE &&
-				s->combinator->data.name != state->universal) {
-			error = match_named_combinator(ctx, s->data.comb, 
-					s->combinator, state, node, &next_node);
-			if (error != CSS_OK)
-				return error;
-
-			/* No match for combinator, so reject selector chain */
-			if (next_node == NULL)
-				return CSS_OK;
-		}
-
 		/* If this is the first selector in the chain, we must match 
 		 * its details. The details of subsequent selectors will be 
 		 * matched when processing the combinator. */
@@ -774,9 +761,21 @@ css_error match_selector_chain(css_select_ctx *ctx,
 
 		}
 
-		/* If we had a universal combinator, then consider that */
+		/* Consider any combinator on this selector */
 		if (s->data.comb != CSS_COMBINATOR_NONE &&
+				s->combinator->data.name != state->universal) {
+			/* Named combinator */
+			error = match_named_combinator(ctx, s->data.comb, 
+					s->combinator, state, node, &next_node);
+			if (error != CSS_OK)
+				return error;
+
+			/* No match for combinator, so reject selector chain */
+			if (next_node == NULL)
+				return CSS_OK;
+		} else if (s->data.comb != CSS_COMBINATOR_NONE &&
 				s->combinator->data.name == state->universal) {
+			/* Universal combinator */
 			error = match_universal_combinator(ctx, s->data.comb, 
 					s->combinator, state, node, &next_node);
 			if (error != CSS_OK)
