@@ -651,10 +651,14 @@ css_error getToken(css_parser *parser, const css_token **token)
 			 * too? lwc_strings can easily be compared case 
 			 * insensitively */
 			if (t->type < CSS_TOKEN_LAST_INTERN_LOWER) {
-				/** \todo Don't use alloca */
-				uint8_t *temp = alloca(t->data.len);
+				uint8_t *temp;
 				bool lower = false;
 				size_t i;
+
+				temp = parser->alloc(NULL, t->data.len, 
+						parser->pw);
+				if (temp == NULL)
+					return CSS_NOMEM;
 
 				for (i = 0; i < t->data.len; i++) {
 					uint8_t c = t->data.data[i];
@@ -675,10 +679,14 @@ css_error getToken(css_parser *parser, const css_token **token)
 							t->data.len,
 							&t->ilower);
                                         if (lerror != lwc_error_ok) {
+						parser->alloc(temp, 0, 
+								parser->pw);
                                                 return css_error_from_lwc_error(
 								lerror);
 					}
 				}
+
+				parser->alloc(temp, 0, parser->pw);
 			}
 
 			/* Insert token text into the dictionary */
