@@ -48,7 +48,7 @@ css_error parse_colour_specifier(css_language *c,
 			token->type != CSS_TOKEN_FUNCTION)) {
 		if (c->sheet->quirks_allowed == false ||
 				(token != NULL &&
-				token->type != CSS_TOKEN_NUMBER && 
+				token->type != CSS_TOKEN_NUMBER &&
 				token->type != CSS_TOKEN_DIMENSION))
 			goto invalid;
 	}
@@ -71,7 +71,7 @@ css_error parse_colour_specifier(css_language *c,
 			*ctx = orig_ctx;
 
 		return error;
-	} else if (c->sheet->quirks_allowed && 
+	} else if (c->sheet->quirks_allowed &&
 			token->type == CSS_TOKEN_NUMBER) {
 		error = parse_hash_colour(token->idata, result);
 		if (error == CSS_OK)
@@ -80,7 +80,7 @@ css_error parse_colour_specifier(css_language *c,
 			*ctx = orig_ctx;
 
 		return error;
-	} else if (c->sheet->quirks_allowed && 
+	} else if (c->sheet->quirks_allowed &&
 			token->type == CSS_TOKEN_DIMENSION) {
 		error = parse_hash_colour(token->idata, result);
 		if (error == CSS_OK)
@@ -97,16 +97,16 @@ css_error parse_colour_specifier(css_language *c,
 			for (i = 0; i < 3; i++) {
 				css_fixed num;
 				size_t consumed = 0;
-				uint8_t *component = i == 0 ? &r 
-							    : i == 1 ? &b : &g;
+				uint8_t *component = i == 0 ? &r
+							    : i == 1 ? &g : &b;
 				int32_t intval;
 
 				consumeWhitespace(vector, ctx);
 
 				token = parserutils_vector_peek(vector, *ctx);
-				if (token == NULL || (token->type != 
-						CSS_TOKEN_NUMBER && 
-						token->type != 
+				if (token == NULL || (token->type !=
+						CSS_TOKEN_NUMBER &&
+						token->type !=
 						CSS_TOKEN_PERCENTAGE))
 					goto invalid;
 
@@ -116,7 +116,7 @@ css_error parse_colour_specifier(css_language *c,
 					goto invalid;
 
 				num = number_from_lwc_string(token->idata,
-						valid == CSS_TOKEN_NUMBER, 
+						valid == CSS_TOKEN_NUMBER,
 						&consumed);
 				if (consumed != lwc_string_length(token->idata))
 					goto invalid;
@@ -173,7 +173,7 @@ invalid:
  * \return CSS_OK      on success,
  *         CSS_INVALID if the colour name is unknown
  */
-css_error parse_named_colour(css_language *c, lwc_string *data, 
+css_error parse_named_colour(css_language *c, lwc_string *data,
 		uint32_t *result)
 {
 	static const uint32_t colourmap[LAST_COLOUR + 1 - FIRST_COLOUR] = {
@@ -425,7 +425,7 @@ css_error parse_unit_specifier(css_language *c,
 		size_t len = lwc_string_length(token->idata);
 		const char *data = lwc_string_data(token->idata);
 
-		error = parse_unit_keyword(data + consumed, len - consumed, 
+		error = parse_unit_keyword(data + consumed, len - consumed,
 				unit);
 		if (error != CSS_OK) {
 			*ctx = orig_ctx;
@@ -445,7 +445,7 @@ css_error parse_unit_specifier(css_language *c,
 		*unit = default_unit;
 
 		if (c->sheet->quirks_allowed) {
-			/* Also, in quirks mode, we need to cater for 
+			/* Also, in quirks mode, we need to cater for
 			 * dimensions separated from their units by whitespace
 			 * (e.g. "0 px")
 			 */
@@ -488,7 +488,7 @@ css_error parse_unit_specifier(css_language *c,
  * \param ptr   Pointer to keyword string
  * \param len   Length, in bytes, of string
  * \param unit  Pointer to location to receive computed unit
- * \return CSS_OK      on success, 
+ * \return CSS_OK      on success,
  *         CSS_INVALID on encountering an unknown keyword
  */
 css_error parse_unit_keyword(const char *ptr, size_t len, css_unit *unit)
@@ -558,7 +558,7 @@ css_error parse_unit_keyword(const char *ptr, size_t len, css_unit *unit)
  */
 css_error comma_list_length(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		const css_token *token, 
+		const css_token *token,
 		bool (*reserved)(css_language *c, const css_token *ident),
 		uint32_t *size)
 {
@@ -579,17 +579,17 @@ css_error comma_list_length(css_language *c,
 				while (token != NULL) {
 					token = parserutils_vector_peek(
 							vector, *ctx);
-					if (token != NULL && 
-						token->type != 
+					if (token != NULL &&
+						token->type !=
 							CSS_TOKEN_IDENT &&
-							token->type != 
+							token->type !=
 							CSS_TOKEN_S) {
 						break;
 					}
 
 					/* Idents must not be reserved */
-					if (token != NULL && token->type == 
-							CSS_TOKEN_IDENT && 
+					if (token != NULL && token->type ==
+							CSS_TOKEN_IDENT &&
 							reserved(c, token)) {
 						*ctx = orig_ctx;
 						return CSS_INVALID;
@@ -622,7 +622,7 @@ css_error comma_list_length(css_language *c,
 
 			/* Ensure that a valid token follows */
 			token = parserutils_vector_peek(vector, *ctx);
-			if (token == NULL || (token->type != CSS_TOKEN_IDENT && 
+			if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
 					token->type != CSS_TOKEN_STRING)) {
 				*ctx = orig_ctx;
 				return CSS_INVALID;
@@ -666,7 +666,7 @@ css_error comma_list_length(css_language *c,
  */
 css_error comma_list_to_bytecode(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		const css_token *token, 
+		const css_token *token,
 		bool (*reserved)(css_language *c, const css_token *ident),
 		uint16_t (*get_value)(css_language *c, const css_token *token),
 		uint8_t **bytecode)
@@ -703,16 +703,16 @@ css_error comma_list_to_bytecode(css_language *c,
 				while (temp_token != NULL) {
 					temp_token = parserutils_vector_peek(
 							vector, temp_ctx);
-					if (temp_token != NULL && 
-						temp_token->type != 
+					if (temp_token != NULL &&
+						temp_token->type !=
 						CSS_TOKEN_IDENT &&
-							temp_token->type != 
+							temp_token->type !=
 							CSS_TOKEN_S) {
 						break;
 					}
 
-					if (temp_token != NULL && 
-						temp_token->type == 
+					if (temp_token != NULL &&
+						temp_token->type ==
 							CSS_TOKEN_IDENT) {
 						len += lwc_string_length(
 							temp_token->idata);
@@ -739,21 +739,21 @@ css_error comma_list_to_bytecode(css_language *c,
 				p = buf;
 
 				/* Populate buffer with string data */
-				memcpy(p, lwc_string_data(token->idata), 
+				memcpy(p, lwc_string_data(token->idata),
 					lwc_string_length(token->idata));
 				p += lwc_string_length(token->idata);
 
 				while (token != NULL) {
 					token = parserutils_vector_peek(
 							vector, *ctx);
-					if (token != NULL && token->type != 
+					if (token != NULL && token->type !=
 							CSS_TOKEN_IDENT &&
 							token->type !=
 							CSS_TOKEN_S) {
 						break;
 					}
 
-					if (token != NULL && token->type == 
+					if (token != NULL && token->type ==
 							CSS_TOKEN_IDENT) {
 						memcpy(p, lwc_string_data(
 								token->idata),
@@ -777,20 +777,20 @@ css_error comma_list_to_bytecode(css_language *c,
 				 * from the name we already have */
 				lerror = lwc_context_intern(
 						c->sheet->dictionary,
-						(char *) buf, p - buf, 
+						(char *) buf, p - buf,
 						&newname);
 				if (lerror != lwc_error_ok) {
 					error = css_error_from_lwc_error(
 							lerror);
 					goto cleanup;
 				}
-					
+
 				if (newname == name) {
 					lwc_context_string_unref(
 							c->sheet->dictionary,
 							newname);
 				}
-				
+
 				name = newname;
 
 				/* Only ref 'name' again if the token owns it,
@@ -812,8 +812,8 @@ css_error comma_list_to_bytecode(css_language *c,
 				memcpy(ptr, &opv, sizeof(opv));
 				ptr += sizeof(opv);
 			}
-			
-			lwc_context_string_ref(c->sheet->dictionary, 
+
+			lwc_context_string_ref(c->sheet->dictionary,
 					token->idata);
 
 			memcpy(ptr, &token->idata, sizeof(token->idata));
