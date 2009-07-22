@@ -197,8 +197,9 @@ css_error css_computed_style_initialise(css_computed_style *style,
  * \param result             Pointer to style to compose into
  * \return CSS_OK on success, appropriate error otherwise.
  *
- * Precondition: Parent is a fully composed style (thus has no properties
- * marked as inherited)
+ * \pre \a parent is a fully composed style (thus has no inherited properties)
+ *
+ * \note \a child and \a result may point at the same object
  */
 css_error css_computed_style_compose(const css_computed_style *parent,
 		const css_computed_style *child,
