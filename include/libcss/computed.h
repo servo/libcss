@@ -373,17 +373,6 @@ static inline uint8_t css_computed_letter_spacing(
 		if ((bits & 3) == CSS_LETTER_SPACING_SET) {
 			*length = style->uncommon->letter_spacing;
 			*unit = bits >> 2;
-
-			if (*unit == CSS_UNIT_EM) {
-				css_fixed font_size = 0;
-				css_unit font_unit = CSS_UNIT_PX;
-
-				css_computed_font_size(style, &font_size, 
-						&font_unit);
-
-				*length = FMUL(*length, font_size);
-				*unit = font_unit;
-			}
 		}
 
 		return (bits & 3);
@@ -438,17 +427,6 @@ static inline uint8_t css_computed_outline_width(
 		if ((bits & 7) == CSS_OUTLINE_WIDTH_WIDTH) {
 			*length = style->uncommon->outline_width;
 			*unit = bits >> 3;
-
-			if (*unit == CSS_UNIT_EM) {
-				css_fixed font_size = 0;
-				css_unit font_unit = CSS_UNIT_PX;
-
-				css_computed_font_size(style, &font_size, 
-						&font_unit);
-
-				*length = FMUL(*length, font_size);
-				*unit = font_unit;
-			}
 		}
 
 		return (bits & 7);
@@ -493,24 +471,6 @@ static inline uint8_t css_computed_border_spacing(
 
 			*vlength = style->uncommon->border_spacing[1];
 			*vunit = bits1 & 0xf;
-
-			if (*hunit == CSS_UNIT_EM || *vunit == CSS_UNIT_EM) {
-				css_fixed font_size = 0;
-				css_unit font_unit = CSS_UNIT_PX;
-
-				css_computed_font_size(style, &font_size, 
-						&font_unit);
-
-				if (*hunit == CSS_UNIT_EM) {
-					*hlength = FMUL(*hlength, font_size);
-					*hunit = font_unit;
-				}
-
-				if (*vunit == CSS_UNIT_EM) {
-					*hlength = FMUL(*vunit, font_size);
-					*vunit = font_unit;
-				}
-			}
 		}
 
 		return bits;
@@ -545,17 +505,6 @@ static inline uint8_t css_computed_word_spacing(
 		if ((bits & 3) == CSS_WORD_SPACING_SET) {
 			*length = style->uncommon->word_spacing;
 			*unit = bits >> 2;
-
-			if (*unit == CSS_UNIT_EM) {
-				css_fixed font_size = 0;
-				css_unit font_unit = CSS_UNIT_PX;
-
-				css_computed_font_size(style, &font_size, 
-						&font_unit);
-
-				*length = FMUL(*length, font_size);
-				*unit = font_unit;
-			}
 		}
 
 		return (bits & 3);
@@ -697,40 +646,6 @@ static inline uint8_t css_computed_clip(
 
 			rect->left = style->uncommon->clip[3];
 			rect->lunit = bits1 & 0xf;
-
-			if (rect->tunit == CSS_UNIT_EM || 
-					rect->runit == CSS_UNIT_EM || 
-					rect->bunit == CSS_UNIT_EM || 
-					rect->lunit == CSS_UNIT_EM) {
-				css_fixed font_size = 0;
-				css_unit font_unit = CSS_UNIT_PX;
-
-				css_computed_font_size(style, &font_size, 
-						&font_unit);
-
-				if (rect->tunit == CSS_UNIT_EM) {
-					rect->top = FMUL(rect->top, font_size);
-					rect->tunit = font_unit;
-				}
-
-				if (rect->runit == CSS_UNIT_EM) {
-					rect->right = FMUL(rect->right, 
-							font_size);
-					rect->runit = font_unit;
-				}
-
-				if (rect->bunit == CSS_UNIT_EM) {
-					rect->bottom = FMUL(rect->bottom,
-							font_size);
-					rect->bunit = font_unit;
-				}
-
-				if (rect->lunit == CSS_UNIT_EM) {
-					rect->left = FMUL(rect->left, 
-							font_size);
-					rect->lunit = font_unit;
-				}
-			}
 		}
 
 		return (bits & 0x3);
@@ -787,24 +702,6 @@ static inline uint8_t css_computed_vertical_align(
 	if ((bits & 0xf) == CSS_VERTICAL_ALIGN_SET) {
 		*length = style->vertical_align;
 		*unit = bits >> 4;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		} else if (*unit == CSS_UNIT_PCT) {
-			css_fixed line_height = 0;
-			css_unit lh_unit = CSS_UNIT_PX;
-
-			css_computed_line_height(style, &line_height, &lh_unit);
-
-			*length = FDIVI(FMUL(*length, line_height), 100);
-			*unit = lh_unit;
-		}
 	}
 
 	return (bits & 0xf);
@@ -851,16 +748,6 @@ static inline uint8_t css_computed_border_top_width(
 	if ((bits & 0x7) == CSS_BORDER_WIDTH_WIDTH) {
 		*length = style->border_width[0];
 		*unit = bits >> 3;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x7);
@@ -884,16 +771,6 @@ static inline uint8_t css_computed_border_right_width(
 	if ((bits & 0x7) == CSS_BORDER_WIDTH_WIDTH) {
 		*length = style->border_width[1];
 		*unit = bits >> 3;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x7);
@@ -917,16 +794,6 @@ static inline uint8_t css_computed_border_bottom_width(
 	if ((bits & 0x7) == CSS_BORDER_WIDTH_WIDTH) {
 		*length = style->border_width[2];
 		*unit = bits >> 3;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x7);
@@ -950,16 +817,6 @@ static inline uint8_t css_computed_border_left_width(
 	if ((bits & 0x7) == CSS_BORDER_WIDTH_WIDTH) {
 		*length = style->border_width[3];
 		*unit = bits >> 3;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x7);
@@ -1099,18 +956,6 @@ static inline uint8_t css_computed_top(
 	}
 
 	/* 6bits: uuuutt : units | type */
-	if ((bits & 0x3) == CSS_TOP_SET) {
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
-	}
-
 	return (bits & 0x3);
 }
 
@@ -1155,18 +1000,6 @@ static inline uint8_t css_computed_right(
 	}
 
 	/* 6bits: uuuutt : units | type */
-	if ((bits & 0x3) == CSS_RIGHT_SET) {
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
-	}
-
 	return (bits & 0x3);
 }
 
@@ -1210,18 +1043,6 @@ static inline uint8_t css_computed_bottom(
 	}
 
 	/* 6bits: uuuutt : units | type */
-	if ((bits & 0x3) == CSS_BOTTOM_SET) {
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
-	}
-
 	return (bits & 0x3);
 }
 
@@ -1266,18 +1087,6 @@ static inline uint8_t css_computed_left(
 	}
 
 	/* 6bits: uuuutt : units | type */
-	if ((bits & 0x3) == CSS_RIGHT_SET) {
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
-	}
-
 	return (bits & 0x3);
 }
 #undef LEFT_MASK
@@ -1388,16 +1197,6 @@ static inline uint8_t css_computed_height(
 	if ((bits & 0x3) == CSS_HEIGHT_SET) {
 		*length = style->height;
 		*unit = bits >> 2;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x3);
@@ -1425,20 +1224,6 @@ static inline uint8_t css_computed_line_height(
 
 	if ((bits & 0x3) == CSS_LINE_HEIGHT_DIMENSION) {
 		*unit = bits >> 2;
-
-		if (*unit == CSS_UNIT_EM || *unit == CSS_UNIT_PCT) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-
-			if (*unit == CSS_UNIT_PCT)
-				*length = FDIVI(*length, 100);
-
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x3);
@@ -1502,16 +1287,6 @@ static inline uint8_t css_computed_margin_top(
 	if ((bits & 0x3) == CSS_MARGIN_SET) {
 		*length = style->margin[0];
 		*unit = bits >> 2;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x3);
@@ -1535,16 +1310,6 @@ static inline uint8_t css_computed_margin_right(
 	if ((bits & 0x3) == CSS_MARGIN_SET) {
 		*length = style->margin[1];
 		*unit = bits >> 2;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x3);
@@ -1568,16 +1333,6 @@ static inline uint8_t css_computed_margin_bottom(
 	if ((bits & 0x3) == CSS_MARGIN_SET) {
 		*length = style->margin[2];
 		*unit = bits >> 2;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x3);
@@ -1601,16 +1356,6 @@ static inline uint8_t css_computed_margin_left(
 	if ((bits & 0x3) == CSS_MARGIN_SET) {
 		*length = style->margin[3];
 		*unit = bits >> 2;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x3);
@@ -1702,16 +1447,6 @@ static inline uint8_t css_computed_max_height(
 	if ((bits & 0x3) == CSS_MAX_HEIGHT_SET) {
 		*length = style->max_height;
 		*unit = bits >> 2;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x3);
@@ -1735,16 +1470,6 @@ static inline uint8_t css_computed_max_width(
 	if ((bits & 0x3) == CSS_MAX_WIDTH_SET) {
 		*length = style->max_width;
 		*unit = bits >> 2;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x3);
@@ -1768,16 +1493,6 @@ static inline uint8_t css_computed_width(
 	if ((bits & 0x3) == CSS_WIDTH_SET) {
 		*length = style->width;
 		*unit = bits >> 2;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x3);
@@ -1857,16 +1572,6 @@ static inline uint8_t css_computed_min_height(
 	if ((bits & 0x1) == CSS_MIN_HEIGHT_SET) {
 		*length = style->min_height;
 		*unit = bits >> 1;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x1);
@@ -1890,16 +1595,6 @@ static inline uint8_t css_computed_min_width(
 	if ((bits & 0x1) == CSS_MIN_WIDTH_SET) {
 		*length = style->min_width;
 		*unit = bits >> 1;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x1);
@@ -1957,16 +1652,6 @@ static inline uint8_t css_computed_padding_top(
 	if ((bits & 0x1) == CSS_PADDING_SET) {
 		*length = style->padding[0];
 		*unit = bits >> 1;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x1);
@@ -1990,16 +1675,6 @@ static inline uint8_t css_computed_padding_right(
 	if ((bits & 0x1) == CSS_PADDING_SET) {
 		*length = style->padding[1];
 		*unit = bits >> 1;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x1);
@@ -2023,16 +1698,6 @@ static inline uint8_t css_computed_padding_bottom(
 	if ((bits & 0x1) == CSS_PADDING_SET) {
 		*length = style->padding[2];
 		*unit = bits >> 1;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x1);
@@ -2056,16 +1721,6 @@ static inline uint8_t css_computed_padding_left(
 	if ((bits & 0x1) == CSS_PADDING_SET) {
 		*length = style->padding[3];
 		*unit = bits >> 1;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x1);
@@ -2157,16 +1812,6 @@ static inline uint8_t css_computed_text_indent(
 	if ((bits & 0x1) == CSS_TEXT_INDENT_SET) {
 		*length = style->text_indent;
 		*unit = bits >> 1;
-
-		if (*unit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			*length = FMUL(*length, font_size);
-			*unit = font_unit;
-		}
 	}
 
 	return (bits & 0x1);
@@ -2219,23 +1864,6 @@ static inline uint8_t css_computed_background_position(
 
 		*vlength = style->background_position[1];
 		*vunit = bits1 & 0xf;
-
-		if (*hunit == CSS_UNIT_EM || *vunit == CSS_UNIT_EM) {
-			css_fixed font_size = 0;
-			css_unit font_unit = CSS_UNIT_PX;
-
-			css_computed_font_size(style, &font_size, &font_unit);
-
-			if (*hunit == CSS_UNIT_EM) {
-				*hlength = FMUL(*hlength, font_size);
-				*hunit = font_unit;
-			}
-
-			if (*vunit == CSS_UNIT_EM) {
-				*hlength = FMUL(*vunit, font_size);
-				*vunit = font_unit;
-			}
-		}
 	}
 
 	return bits;
