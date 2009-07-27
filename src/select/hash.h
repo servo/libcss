@@ -35,5 +35,7 @@ css_error css_selector_hash_iterate(css_selector_hash *hash,
 		const struct css_selector **current, 
 		const struct css_selector ***next);
 
+css_error css_selector_hash_size(css_selector_hash *hash, size_t *size);
+
 #endif
 

@@ -25,6 +25,8 @@ struct css_selector_hash {
 
 	lwc_context *ctx;
 
+	size_t hash_size;
+
 	css_allocator_fn alloc;
 	void *pw;
 };
@@ -64,6 +66,9 @@ css_error css_selector_hash_create(lwc_context *dict,
 
 	memset(h->slots, 0, DEFAULT_SLOTS * sizeof(hash_entry));
 	h->n_slots = DEFAULT_SLOTS;
+
+	h->hash_size = sizeof(css_selector_hash) + 
+			DEFAULT_SLOTS * sizeof(hash_entry);
 
 	h->ctx = lwc_context_ref(dict);
 	h->alloc = alloc;
@@ -163,6 +168,8 @@ css_error css_selector_hash_insert(css_selector_hash *hash,
 			entry->next = prev->next;
 			prev->next = entry;
 		}
+
+		hash->hash_size += sizeof(hash_entry);
 	}
 
 	return CSS_OK;
@@ -216,6 +223,8 @@ css_error css_selector_hash_remove(css_selector_hash *hash,
 		prev->next = head->next;
 
 		hash->alloc(head, 0, hash->pw);
+
+		hash->hash_size -= sizeof(hash_entry);
 	}
 
 	return CSS_OK;
@@ -313,6 +322,26 @@ css_error css_selector_hash_iterate(css_selector_hash *hash,
 		head = &empty_slot;
 
 	(*next) = (const css_selector **) head;
+
+	return CSS_OK;
+}
+
+/**
+ * Determine the memory-resident size of a hash
+ *
+ * \param hash  Hash to consider
+ * \param size  Pointer to location to receive byte count
+ * \return CSS_OK on success.
+ *
+ * \note The returned size will represent the size of the hash datastructures,
+ *       and will not include the size of the data stored in the hash.
+ */
+css_error css_selector_hash_size(css_selector_hash *hash, size_t *size)
+{
+	if (hash == NULL || size == NULL)
+		return CSS_BADPARM;
+
+	*size = hash->hash_size;
 
 	return CSS_OK;
 }

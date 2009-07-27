@@ -54,5 +54,7 @@ css_error css_stylesheet_used_quirks(css_stylesheet *sheet, bool *quirks);
 css_error css_stylesheet_get_disabled(css_stylesheet *sheet, bool *disabled);
 css_error css_stylesheet_set_disabled(css_stylesheet *sheet, bool disabled);
 
+css_error css_stylesheet_size(css_stylesheet *sheet, size_t *size);
+
 #endif
 

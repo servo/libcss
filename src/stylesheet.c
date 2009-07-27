@@ -16,6 +16,7 @@
 
 static css_error _add_selectors(css_stylesheet *sheet, css_rule *rule);
 static css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule);
+static size_t _rule_size(const css_rule *rule);
 
 /**
  * Create a stylesheet
@@ -143,6 +144,10 @@ css_error css_stylesheet_create(css_language_level level,
 
 	sheet->alloc = alloc;
 	sheet->pw = alloc_pw;
+
+	sheet->size = sizeof(css_stylesheet) + strlen(sheet->url);
+	if (sheet->title != NULL)
+		sheet->size += strlen(sheet->title);
 
 	*stylesheet = sheet;
 
@@ -502,6 +507,42 @@ css_error css_stylesheet_set_disabled(css_stylesheet *sheet, bool disabled)
 	sheet->disabled = disabled;
 
 	/** \todo needs to trigger some event announcing styles have changed */
+
+	return CSS_OK;
+}
+
+/**
+ * Determine the memory-resident size of a stylesheet
+ *
+ * \param sheet  Sheet to consider
+ * \param size   Pointer to location to receive byte count
+ * \return CSS_OK on success.
+ *
+ * \note The returned size will not include the size of interned strings
+ *       or imported stylesheets.
+ */
+css_error css_stylesheet_size(css_stylesheet *sheet, size_t *size)
+{
+	size_t bytes = 0;
+	css_error error;
+
+	if (sheet == NULL || size == NULL)
+		return CSS_BADPARM;
+
+	bytes = sheet->size;
+
+	/* Selector hash */
+	if (sheet->selectors != NULL) {
+		size_t hash_size;
+
+		error = css_selector_hash_size(sheet->selectors, &hash_size);
+		if (error != CSS_OK)
+			return error;
+
+		bytes += hash_size;
+	}
+
+	*size = bytes;
 
 	return CSS_OK;
 }
@@ -1042,11 +1083,17 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 		cur = temp;
 		cur->length += style->length;
 
+		/* Add this to the sheet's size */
+		sheet->size += style->length;
+
 		/* Done with style */
 		css_stylesheet_style_destroy(sheet, style);
 	} else {
 		/* No current style, so use this one */
 		cur = style;
+
+		/* Add to the sheet's size */
+		sheet->size += style->length;
 	}
 
 	if (rule->type == CSS_RULE_SELECTOR)
@@ -1192,6 +1239,9 @@ css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule,
 	if (error != CSS_OK)
 		return error;
 
+	/* Add to the sheet's size */
+	sheet->size += _rule_size(rule);
+
 	if (parent != NULL) {
 		css_rule_media *media = (css_rule_media *) parent;
 
@@ -1251,6 +1301,9 @@ css_error css_stylesheet_remove_rule(css_stylesheet *sheet, css_rule *rule)
 	error = _remove_selectors(sheet, rule);
 	if (error != CSS_OK)
 		return error;
+
+	/* Reduce sheet's size */
+	sheet->size -= _rule_size(rule);
 
 	if (rule->next == NULL)
 		sheet->last_rule = rule->prev;
@@ -1390,5 +1443,89 @@ css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule)
 	}
 
 	return CSS_OK;
+}
+
+/**
+ * Calculate the size of a rule
+ *
+ * \param r  Rule to consider
+ * \return Size in bytes
+ *
+ * \note The returned size does not include interned strings.
+ */
+size_t _rule_size(const css_rule *r)
+{
+	size_t bytes = 0;
+
+	if (r->type == CSS_RULE_SELECTOR) {
+		const css_rule_selector *rs = (const css_rule_selector *) r;
+		uint32_t i;
+
+		bytes += sizeof(css_rule_selector);
+
+		/* Process selector chains */
+		bytes += r->items * sizeof(css_selector *);
+		for (i = 0; i < r->items; i++) {
+			const css_selector *s = rs->selectors[i];
+
+			do {
+				const css_selector_detail *d = &s->data;
+
+				bytes += sizeof(css_selector);
+
+				while (d->next) {
+					bytes += sizeof(css_selector_detail);
+					d++;
+				}
+
+				s = s->combinator;
+			} while (s != NULL);
+		}
+
+		if (rs->style != NULL)
+			bytes += rs->style->length;
+	} else if (r->type == CSS_RULE_CHARSET) {
+		bytes += sizeof(css_rule_charset);
+	} else if (r->type == CSS_RULE_IMPORT) {
+		bytes += sizeof(css_rule_import);
+	} else if (r->type == CSS_RULE_MEDIA) {
+		const css_rule_media *rm = (const css_rule_media *) r;
+		const css_rule *c;
+
+		bytes += sizeof(css_rule_media);
+
+		/* Process children */
+		for (c = rm->first_child; c != NULL; c = c->next)
+			bytes += _rule_size(c);
+	} else if (r->type == CSS_RULE_FONT_FACE) {
+		const css_rule_font_face *rf = (const css_rule_font_face *) r;
+
+		bytes += sizeof(css_rule_font_face);
+
+		if (rf->style != NULL)
+			bytes += rf->style->length;
+	} else if (r->type == CSS_RULE_PAGE) {
+		const css_rule_page *rp = (const css_rule_page *) r;
+		const css_selector *s = rp->selector;
+
+		/* Process selector chain */
+		while (s != NULL) {
+			const css_selector_detail *d = &s->data;
+
+			bytes += sizeof(css_selector);
+
+			while (d->next) {
+				bytes += sizeof(css_selector_detail);
+				d++;
+			}
+
+			s = s->combinator;	
+		}
+
+		if (rp->style != NULL)
+			bytes += rp->style->length;
+	}
+
+	return bytes;
 }
 
