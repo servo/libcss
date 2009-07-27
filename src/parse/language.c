@@ -737,7 +737,7 @@ css_error parseMediaList(css_language *c,
 		} else if (lwc_context_string_caseless_isequal(
 				c->sheet->dictionary,
 				token->idata, c->strings[BRAILLE], 
-			&match) == lwc_error_ok && match) {
+				&match) == lwc_error_ok && match) {
 			ret |= CSS_MEDIA_BRAILLE;
 		} else if (lwc_context_string_caseless_isequal(
 				c->sheet->dictionary,
@@ -795,6 +795,11 @@ css_error parseMediaList(css_language *c,
 
 		consumeWhitespace(vector, ctx);
 	}
+
+	/* If, after parsing the media list, we still have no media, 
+	 * then it must be ALL. */
+	if (ret == 0)
+		ret = CSS_MEDIA_ALL;
 
 	*media = ret;
 
