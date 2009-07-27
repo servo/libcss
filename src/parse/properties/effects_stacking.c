@@ -40,6 +40,7 @@ css_error parse_clip(css_language *c,
 	css_fixed length[4] = { 0 };
 	uint32_t unit[4] = { 0 };
 	uint32_t required_size;
+	bool match;
 
 	/* FUNCTION(rect) [ [ IDENT(auto) | length ] CHAR(,)? ]{3} 
 	 *                [ IDENT(auto) | length ] CHAR{)} |
@@ -51,13 +52,22 @@ css_error parse_clip(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[AUTO]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[AUTO],
+			&match) == lwc_error_ok && match)) {
 		value = CLIP_AUTO;
 	} else if (token->type == CSS_TOKEN_FUNCTION &&
-			token->ilower == c->strings[RECT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[RECT],
+			&match) == lwc_error_ok && match)) {
 		int i;
 		value = CLIP_SHAPE_RECT;
 
@@ -73,7 +83,11 @@ css_error parse_clip(css_language *c,
 			if (token->type == CSS_TOKEN_IDENT) {
 				/* Slightly magical way of generating the auto 
 				 * values. These are bits 3-6 of the value. */
-				if (token->ilower == c->strings[AUTO])
+				if ((lwc_context_string_caseless_isequal(
+						c->sheet->dictionary,
+						token->idata, c->strings[AUTO],
+						&match) == lwc_error_ok && 
+						match))
 					value |= 1 << (i + 3);
 				else {
 					*ctx = orig_ctx;
@@ -188,6 +202,7 @@ css_error parse_overflow(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (visible, hidden, scroll, auto, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
@@ -196,15 +211,30 @@ css_error parse_overflow(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[VISIBLE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[VISIBLE],
+			&match) == lwc_error_ok && match)) {
 		value = OVERFLOW_VISIBLE;
-	} else if (ident->ilower == c->strings[HIDDEN]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[HIDDEN],
+			&match) == lwc_error_ok && match)) {
 		value = OVERFLOW_HIDDEN;
-	} else if (ident->ilower == c->strings[SCROLL]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[SCROLL],
+			&match) == lwc_error_ok && match)) {
 		value = OVERFLOW_SCROLL;
-	} else if (ident->ilower == c->strings[AUTO]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[AUTO],
+			&match) == lwc_error_ok && match)) {
 		value = OVERFLOW_AUTO;
 	} else {
 		*ctx = orig_ctx;
@@ -250,6 +280,7 @@ css_error parse_visibility(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (visible, hidden, collapse, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
@@ -258,13 +289,25 @@ css_error parse_visibility(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[VISIBLE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[VISIBLE],
+			&match) == lwc_error_ok && match)) {
 		value = VISIBILITY_VISIBLE;
-	} else if (ident->ilower == c->strings[HIDDEN]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[HIDDEN],
+			&match) == lwc_error_ok && match)) {
 		value = VISIBILITY_HIDDEN;
-	} else if (ident->ilower == c->strings[COLLAPSE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[COLLAPSE],
+			&match) == lwc_error_ok && match)) {
 		value = VISIBILITY_COLLAPSE;
 	} else {
 		*ctx = orig_ctx;
@@ -312,6 +355,7 @@ css_error parse_z_index(css_language *c,
 	uint32_t opv;
 	css_fixed num = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* <integer> | IDENT (auto, inherit) */
 	token = parserutils_vector_iterate(vector, ctx);
@@ -322,16 +366,22 @@ css_error parse_z_index(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[AUTO]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[AUTO],
+			&match) == lwc_error_ok && match)) {
 		value = Z_INDEX_AUTO;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		num = number_from_lwc_string(token->ilower, true, &consumed);
+		num = number_from_lwc_string(token->idata, true, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != lwc_string_length(token->ilower)) {
+		if (consumed != lwc_string_length(token->idata)) {
 			*ctx = orig_ctx;
 			return CSS_INVALID;
 		}

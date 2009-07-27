@@ -647,62 +647,14 @@ css_error getToken(css_parser *parser, const css_token **token)
 		 */
 
 		if (t->type < CSS_TOKEN_LAST_INTERN && t->data.data != NULL) {
-			/** \todo Why are we interning lower cased versions, 
-			 * too? lwc_strings can easily be compared case 
-			 * insensitively */
-			if (t->type < CSS_TOKEN_LAST_INTERN_LOWER) {
-				uint8_t *temp;
-				bool lower = false;
-				size_t i;
-
-				temp = parser->alloc(NULL, t->data.len, 
-						parser->pw);
-				if (temp == NULL)
-					return CSS_NOMEM;
-
-				for (i = 0; i < t->data.len; i++) {
-					uint8_t c = t->data.data[i];
-
-					if ('A' <= c && c <= 'Z') {
-						lower = true;
-						c |= 0x20;
-					}
-
-					temp[i] = c;
-				}
-
-				if (lower == true) {
-					/* Insert lowercase version */
-					lerror = lwc_context_intern(
-							parser->dictionary,
-							(char *) temp,
-							t->data.len,
-							&t->ilower);
-                                        if (lerror != lwc_error_ok) {
-						parser->alloc(temp, 0, 
-								parser->pw);
-                                                return css_error_from_lwc_error(
-								lerror);
-					}
-				}
-
-				parser->alloc(temp, 0, parser->pw);
-			}
-
 			/* Insert token text into the dictionary */
                         lerror = lwc_context_intern(parser->dictionary, 
                                                     (char *)t->data.data,
                                                     t->data.len, &t->idata);
-                        
-			if (t->ilower == NULL)
-				t->ilower = lwc_context_string_ref(
-						parser->dictionary,
-						t->idata);
-
                         if (lerror != lwc_error_ok)
                                 return css_error_from_lwc_error(lerror);
 		} else {
-			t->idata = t->ilower = NULL;
+			t->idata = NULL;
 		}
 
 		*token = t;
@@ -931,8 +883,8 @@ css_error parseRuleset(css_parser *parser)
 		 * brace. We're going to assume that that won't happen, 
 		 * however. */
 		if (token->type == CSS_TOKEN_CHAR && 
-				lwc_string_length(token->ilower) == 1 && 
-				lwc_string_data(token->ilower)[0] == '{') {
+				lwc_string_length(token->idata) == 1 && 
+				lwc_string_data(token->idata)[0] == '{') {
 #if !defined(NDEBUG) && defined(DEBUG_EVENTS)
 			printf("Begin ruleset\n");
 #endif
@@ -983,8 +935,8 @@ css_error parseRuleset(css_parser *parser)
 			return error;
 
 		if (token->type != CSS_TOKEN_CHAR || 
-				lwc_string_length(token->ilower) != 1 ||
-				lwc_string_data(token->ilower)[0] != '{') {
+				lwc_string_length(token->idata) != 1 ||
+				lwc_string_data(token->idata)[0] != '{') {
 			/* This should never happen, as FOLLOW(selector) 
 			 * contains only '{' */
 			assert(0 && "Expected {");
@@ -1030,9 +982,9 @@ css_error parseRulesetEnd(css_parser *parser)
 		 * input at this point and read to the start of the next
 		 * declaration. FIRST(decl-list) = (';', '}') */
 		if (token->type != CSS_TOKEN_CHAR || 
-				lwc_string_length(token->ilower) != 1 ||
-				(lwc_string_data(token->ilower)[0] != '}' &&
-				lwc_string_data(token->ilower)[0] != ';')) {
+				lwc_string_length(token->idata) != 1 ||
+				(lwc_string_data(token->idata)[0] != '}' &&
+				lwc_string_data(token->idata)[0] != ';')) {
 			parser_state to = { sDeclaration, Initial };
 			parser_state subsequent = { sRulesetEnd, DeclList };
 
@@ -1057,8 +1009,8 @@ css_error parseRulesetEnd(css_parser *parser)
 			break;
 
 		if (token->type != CSS_TOKEN_CHAR || 
-				lwc_string_length(token->ilower) != 1 ||
-				lwc_string_data(token->ilower)[0] != '}') {
+				lwc_string_length(token->idata) != 1 ||
+				lwc_string_data(token->idata)[0] != '}') {
 			/* This should never happen, as FOLLOW(decl-list)
 			 * contains only '}' */
 			assert(0 && "Expected }");
@@ -1135,10 +1087,10 @@ css_error parseAtRule(css_parser *parser)
 		/* Grammar ambiguity: any0 can be followed by '{',';',')',']'. 
 		 * at-rule can only be followed by '{' and ';'. */
 		if (token->type == CSS_TOKEN_CHAR && 
-				lwc_string_length(token->ilower) == 1) {
-			if (lwc_string_data(token->ilower)[0] == ')' ||
+				lwc_string_length(token->idata) == 1) {
+			if (lwc_string_data(token->idata)[0] == ')' ||
 					lwc_string_data(
-						token->ilower)[0] == ']') {
+						token->idata)[0] == ']') {
 				parser_state to = { sAny0, Initial };
 				parser_state subsequent = { sAtRule, AfterAny };
 
@@ -1188,12 +1140,12 @@ css_error parseAtRuleEnd(css_parser *parser)
 			return error;
 
 		if (token->type != CSS_TOKEN_CHAR || 
-				lwc_string_length(token->ilower) != 1) {
+				lwc_string_length(token->idata) != 1) {
 			/* Should never happen FOLLOW(at-rule) == '{', ';'*/
 			assert(0 && "Expected { or ;");
 		}
 		
-		if (lwc_string_data(token->ilower)[0] == '{') {
+		if (lwc_string_data(token->idata)[0] == '{') {
 			parser_state to = { sBlock, Initial };
 			parser_state subsequent = { sAtRuleEnd, AfterBlock };
 
@@ -1202,7 +1154,7 @@ css_error parseAtRuleEnd(css_parser *parser)
 				return error;
 
 			return transition(parser, to, subsequent);
-		} else if (lwc_string_data(token->ilower)[0] != ';') {
+		} else if (lwc_string_data(token->idata)[0] != ';') {
 			/* Again, should never happen */
 			assert(0 && "Expected ;");
 		}
@@ -1253,8 +1205,8 @@ css_error parseBlock(css_parser *parser)
 		}
 
 		if (token->type != CSS_TOKEN_CHAR || 
-				lwc_string_length(token->ilower) != 1 ||
-				lwc_string_data(token->ilower)[0] != '{') {
+				lwc_string_length(token->idata) != 1 ||
+				lwc_string_data(token->idata)[0] != '{') {
 			/* This should never happen, as FIRST(block) == '{' */
 			assert(0 && "Expected {");
 		}
@@ -1287,8 +1239,8 @@ css_error parseBlock(css_parser *parser)
 			break;
 
 		if (token->type != CSS_TOKEN_CHAR || 
-				lwc_string_length(token->ilower) != 1 ||
-				lwc_string_data(token->ilower)[0] != '}') {
+				lwc_string_length(token->idata) != 1 ||
+				lwc_string_data(token->idata)[0] != '}') {
 			/* This should never happen, as 
 			 * FOLLOW(block-content) == '}' */
 			assert(0 && "Expected }");
@@ -1341,9 +1293,9 @@ css_error parseBlockContent(css_parser *parser)
 			if (token->type == CSS_TOKEN_ATKEYWORD) {
 				state->substate = WS;
 			} else if (token->type == CSS_TOKEN_CHAR) {
-				if (lwc_string_length(token->ilower) == 1 && 
+				if (lwc_string_length(token->idata) == 1 && 
 						lwc_string_data(
-						token->ilower)[0] == '{') {
+						token->idata)[0] == '{') {
 					/* Grammar ambiguity. Assume block */
 					parser_state to = { sBlock, Initial };
 					parser_state subsequent = 
@@ -1367,9 +1319,9 @@ css_error parseBlockContent(css_parser *parser)
 					return transition(parser, to, 
 							subsequent);
 				} else if (lwc_string_length(
-						token->ilower) == 1 &&
+						token->idata) == 1 &&
 						lwc_string_data(
-						token->ilower)[0] == ';') {
+						token->idata)[0] == ';') {
 					/* Grammar ambiguity. Assume semi */
 					error = pushBack(parser, token);
 					if (error != CSS_OK)
@@ -1397,9 +1349,9 @@ css_error parseBlockContent(css_parser *parser)
 
 					state->substate = WS;
 				} else if (lwc_string_length(
-						token->ilower) == 1 &&
+						token->idata) == 1 &&
 						lwc_string_data(
-						token->ilower)[0] == '}') {
+						token->idata)[0] == '}') {
 					/* Grammar ambiguity. Assume end */
 					error = pushBack(parser, token);
 					if (error != CSS_OK)
@@ -1518,8 +1470,8 @@ css_error parseDeclaration(css_parser *parser)
 			return error;
 
 		if (token->type != CSS_TOKEN_CHAR || 
-				lwc_string_length(token->ilower) != 1 ||
-				lwc_string_data(token->ilower)[0] != ':') {
+				lwc_string_length(token->idata) != 1 ||
+				lwc_string_data(token->idata)[0] != ':') {
 			/* parse error -- expected : */
 			parser_state to = { sMalformedDecl, Initial };
 
@@ -1587,14 +1539,14 @@ css_error parseDeclList(css_parser *parser)
 			return done(parser);
 
 		if (token->type != CSS_TOKEN_CHAR || 
-				lwc_string_length(token->ilower) != 1 ||
-				(lwc_string_data(token->ilower)[0] != '}' && 
-				lwc_string_data(token->ilower)[0] != ';')) {
+				lwc_string_length(token->idata) != 1 ||
+				(lwc_string_data(token->idata)[0] != '}' && 
+				lwc_string_data(token->idata)[0] != ';')) {
 			/* Should never happen */
 			assert(0 && "Expected ; or  }");
 		}
 
-		if (lwc_string_data(token->ilower)[0] == '}') {
+		if (lwc_string_data(token->idata)[0] == '}') {
 			error = pushBack(parser, token);
 			if (error != CSS_OK)
 				return error;
@@ -1636,9 +1588,9 @@ css_error parseDeclListEnd(css_parser *parser)
 			return error;
 
 		if (token->type != CSS_TOKEN_CHAR || 
-				lwc_string_length(token->ilower) != 1 || 
-				(lwc_string_data(token->ilower)[0] != ';' &&
-				lwc_string_data(token->ilower)[0] != '}')) {
+				lwc_string_length(token->idata) != 1 || 
+				(lwc_string_data(token->idata)[0] != ';' &&
+				lwc_string_data(token->idata)[0] != '}')) {
 			parser_state to = { sDeclaration, Initial };
 			parser_state subsequent = 
 					{ sDeclListEnd, AfterDeclaration };
@@ -1724,9 +1676,9 @@ css_error parseValue1(css_parser *parser)
 
 		/* Grammar ambiguity -- assume ';' or '}' mark end */
 		if (token->type == CSS_TOKEN_CHAR && 
-				lwc_string_length(token->ilower) == 1 &&
-				(lwc_string_data(token->ilower)[0] == ';' ||
-				lwc_string_data(token->ilower)[0] == '}')) {
+				lwc_string_length(token->idata) == 1 &&
+				(lwc_string_data(token->idata)[0] == ';' ||
+				lwc_string_data(token->idata)[0] == '}')) {
 			/* Parse error */
 			parser->parseError = true;
 
@@ -1776,11 +1728,11 @@ css_error parseValue0(css_parser *parser)
 			/* Grammar ambiguity -- assume ';' or '}' mark end */
 			if (token->type == CSS_TOKEN_CHAR && 
 					lwc_string_length(
-						token->ilower) == 1 &&
+						token->idata) == 1 &&
 					(lwc_string_data(
-						token->ilower)[0] == ';' ||
+						token->idata)[0] == ';' ||
 					lwc_string_data(
-						token->ilower)[0] == '}')) {
+						token->idata)[0] == '}')) {
 				return done(parser);
 			}
 
@@ -1820,8 +1772,8 @@ css_error parseValue(css_parser *parser)
 		if (token->type == CSS_TOKEN_ATKEYWORD) {
 			state->substate = WS;
 		} else if (token->type == CSS_TOKEN_CHAR && 
-				lwc_string_length(token->ilower) == 1 && 
-				lwc_string_data(token->ilower)[0] == '{') {
+				lwc_string_length(token->idata) == 1 && 
+				lwc_string_data(token->idata)[0] == '{') {
 			/* Grammar ambiguity. Assume block. */
 			parser_state to = { sBlock, Initial };
 
@@ -1885,15 +1837,15 @@ css_error parseAny0(css_parser *parser)
 			 * assume '{', ';', ')', ']' mark end */
 			if (token->type == CSS_TOKEN_CHAR && 
 					lwc_string_length(
-						token->ilower) == 1 &&
+						token->idata) == 1 &&
 					(lwc_string_data(
-						token->ilower)[0] == '{' ||
+						token->idata)[0] == '{' ||
 					lwc_string_data(
-						token->ilower)[0] == ';' ||
+						token->idata)[0] == ';' ||
 					lwc_string_data(
-						token->ilower)[0] == ')' ||
+						token->idata)[0] == ')' ||
 					lwc_string_data(
-						token->ilower)[0] == ']')) {
+						token->idata)[0] == ']')) {
 				return done(parser);
 			}
 
@@ -1954,17 +1906,17 @@ css_error parseAny1(css_parser *parser)
 		/* Grammar ambiguity: any0 can be followed by 
 		 * '{', ';', ')', ']'. any1 can only be followed by '{'. */
 		if (token->type == CSS_TOKEN_CHAR && 
-				lwc_string_length(token->ilower) == 1) {
-			if (lwc_string_data(token->ilower)[0] == ';' ||
+				lwc_string_length(token->idata) == 1) {
+			if (lwc_string_data(token->idata)[0] == ';' ||
 					lwc_string_data(
-						token->ilower)[0] == ')' ||
+						token->idata)[0] == ')' ||
 					lwc_string_data(
-						token->ilower)[0] == ']') {
+						token->idata)[0] == ']') {
 				parser_state to = { sAny, Initial };
 				parser_state subsequent = { sAny1, AfterAny };
 
 				return transition(parser, to, subsequent);
-			} else if (lwc_string_data(token->ilower)[0] != '{') {
+			} else if (lwc_string_data(token->idata)[0] != '{') {
 				/* parse error */
 				parser->parseError = true;
 			}
@@ -2034,11 +1986,11 @@ css_error parseAny(css_parser *parser)
 			parser->match_char = ')';
 			state->substate = WS;
 		} else if (token->type == CSS_TOKEN_CHAR && 
-				lwc_string_length(token->ilower) == 1 && 
-				(lwc_string_data(token->ilower)[0] == '(' || 
-				lwc_string_data(token->ilower)[0] == '[')) {
+				lwc_string_length(token->idata) == 1 && 
+				(lwc_string_data(token->idata)[0] == '(' || 
+				lwc_string_data(token->idata)[0] == '[')) {
 			parser->match_char = lwc_string_data(
-					token->ilower)[0] == '(' ? ')' : ']';
+					token->idata)[0] == '(' ? ')' : ']';
 			state->substate = WS;
 		} 
 
@@ -2071,8 +2023,8 @@ css_error parseAny(css_parser *parser)
 
 		/* Match correct close bracket (grammar ambiguity) */
 		if (token->type == CSS_TOKEN_CHAR && 
-				lwc_string_length(token->ilower) == 1 &&
-				lwc_string_data(token->ilower)[0] == 
+				lwc_string_length(token->idata) == 1 &&
+				lwc_string_data(token->idata)[0] == 
 				parser->match_char) {
 			state->substate = WS2;
 			goto ws2;
@@ -2123,8 +2075,8 @@ css_error parseMalformedDeclaration(css_parser *parser)
 			if (token->type != CSS_TOKEN_CHAR)
 				continue;
 
-			len = lwc_string_length(token->ilower);
-			data = lwc_string_data(token->ilower);
+			len = lwc_string_length(token->idata);
+			data = lwc_string_data(token->idata);
 
 			if (len != 1 || (data[0] != '{' && data[0] != '}' &&
 					data[0] != '[' && data[0] != ']' &&
@@ -2222,8 +2174,8 @@ css_error parseMalformedSelector(css_parser *parser)
 			if (token->type != CSS_TOKEN_CHAR)
 				continue;
 
-			len = lwc_string_length(token->ilower);
-			data = lwc_string_data(token->ilower);
+			len = lwc_string_length(token->idata);
+			data = lwc_string_data(token->idata);
 
 			if (len != 1 || (data[0] != '{' && data[0] != '}' &&
 					data[0] != '[' && data[0] != ']' &&
@@ -2321,8 +2273,8 @@ css_error parseMalformedAtRule(css_parser *parser)
 			if (token->type != CSS_TOKEN_CHAR)
 				continue;
 
-			len = lwc_string_length(token->ilower);
-			data = lwc_string_data(token->ilower);
+			len = lwc_string_length(token->idata);
+			data = lwc_string_data(token->idata);
 
 			if (len != 1 || (data[0] != '{' && data[0] != '}' &&
 					data[0] != '[' && data[0] != ']' &&
@@ -2523,9 +2475,9 @@ css_error parseISBody(css_parser *parser)
 		 * input at this point and read to the start of the next
 		 * declaration. FIRST(decl-list) = (';', '}') */
 		if (token->type != CSS_TOKEN_CHAR || 
-				lwc_string_length(token->ilower) != 1 ||
-				(lwc_string_data(token->ilower)[0] != '}' &&
-				lwc_string_data(token->ilower)[0] != ';')) {
+				lwc_string_length(token->idata) != 1 ||
+				(lwc_string_data(token->idata)[0] != '}' &&
+				lwc_string_data(token->idata)[0] != ';')) {
 			parser_state to = { sDeclaration, Initial };
 			parser_state subsequent = { sISBody, DeclList };
 
@@ -2550,8 +2502,8 @@ css_error parseISBody(css_parser *parser)
 			break;
 
 		if (token->type != CSS_TOKEN_CHAR || 
-				lwc_string_length(token->ilower) != 1 ||
-				lwc_string_data(token->ilower)[0] != '}') {
+				lwc_string_length(token->idata) != 1 ||
+				lwc_string_data(token->idata)[0] != '}') {
 			/* This should never happen, as FOLLOW(decl-list)
 			 * contains only '}' */
 			assert(0 && "Expected }");
@@ -2585,11 +2537,6 @@ void unref_interned_strings_in_tokens(css_parser *parser)
                 if (tok->idata != NULL) {
                         lwc_context_string_unref(parser->dictionary, 
 					tok->idata);
-		}
-
-                if (tok->ilower != NULL) {
-                        lwc_context_string_unref(parser->dictionary, 
-					tok->ilower);
 		}
         }
 }

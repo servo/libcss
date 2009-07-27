@@ -1175,7 +1175,6 @@ start:
 	t->data.data = NULL;
 	t->data.len = 0;
 	t->idata = NULL;
-	t->ilower = NULL;
 	t->col = lexer->currentCol;
 	t->line = lexer->currentLine;
 	lexer->escapeSeen = false;

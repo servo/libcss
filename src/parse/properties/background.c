@@ -41,12 +41,16 @@ css_error parse_background(css_language *c,
 	css_style *repeat = NULL;
 	css_style *ret = NULL;
 	uint32_t required_size;
+	bool match;
 	css_error error;
 
 	/* Firstly, handle inherit */
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		uint32_t *bytecode;
 
 		error = css_stylesheet_style_create(c->sheet, 
@@ -266,6 +270,7 @@ css_error parse_background_attachment(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (fixed, scroll, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
@@ -274,11 +279,20 @@ css_error parse_background_attachment(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[FIXED]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[FIXED],
+			&match) == lwc_error_ok && match)) {
 		value = BACKGROUND_ATTACHMENT_FIXED;
-	} else if (ident->ilower == c->strings[SCROLL]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[SCROLL],
+			&match) == lwc_error_ok && match)) {
 		value = BACKGROUND_ATTACHMENT_SCROLL;
 	} else {
 		*ctx = orig_ctx;
@@ -326,6 +340,7 @@ css_error parse_background_color(css_language *c,
 	uint32_t opv;
 	uint32_t colour = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* colour | IDENT (transparent, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
@@ -335,11 +350,17 @@ css_error parse_background_color(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[TRANSPARENT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[TRANSPARENT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = BACKGROUND_COLOR_TRANSPARENT;
 	} else {
@@ -400,6 +421,7 @@ css_error parse_background_image(css_language *c,
 	uint16_t value = 0;
 	uint32_t opv;
 	uint32_t required_size;
+	bool match;
 	lwc_string *uri = NULL;
 
 	/* URI | IDENT (none, inherit) */
@@ -411,10 +433,16 @@ css_error parse_background_image(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT && 
-			token->ilower == c->strings[NONE]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[NONE],
+			&match) == lwc_error_ok && match)) {
 		value = BACKGROUND_IMAGE_NONE;
 	} else if (token->type == CSS_TOKEN_URI) {
 		value = BACKGROUND_IMAGE_URI;
@@ -482,6 +510,7 @@ css_error parse_background_position(css_language *c,
 	css_fixed length[2] = { 0 };
 	uint32_t unit[2] = { 0 };
 	uint32_t required_size;
+	bool match;
 
 	/* [length | percentage | IDENT(left, right, top, bottom, center)]{1,2}
 	 * | IDENT(inherit) */
@@ -492,7 +521,10 @@ css_error parse_background_position(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {
@@ -504,20 +536,40 @@ css_error parse_background_position(css_language *c,
 				break;
 
 			if (token->type == CSS_TOKEN_IDENT) {
-				if (token->ilower == c->strings[LEFT]) {
+				if ((lwc_context_string_caseless_isequal(
+						c->sheet->dictionary,
+						token->idata, c->strings[LEFT],
+						&match) == lwc_error_ok && 
+						match)) {
 					value[i] = 
 						BACKGROUND_POSITION_HORZ_LEFT;
-				} else if (token->ilower == c->strings[RIGHT]) {
+				} else if ((lwc_context_string_caseless_isequal(
+						c->sheet->dictionary,
+						token->idata, c->strings[RIGHT],
+						&match) == lwc_error_ok && 
+						match)) {
 					value[i] = 
 						BACKGROUND_POSITION_HORZ_RIGHT;
-				} else if (token->ilower == c->strings[TOP]) {
+				} else if ((lwc_context_string_caseless_isequal(
+						c->sheet->dictionary,
+						token->idata, c->strings[TOP],
+						&match) == lwc_error_ok && 
+						match)) {
 					value[i] = BACKGROUND_POSITION_VERT_TOP;
-				} else if (token->ilower == 
-						c->strings[BOTTOM]) {
+				} else if ((lwc_context_string_caseless_isequal(
+						c->sheet->dictionary,
+						token->idata, 
+						c->strings[BOTTOM],
+						&match) == lwc_error_ok && 
+						match)) {
 					value[i] = 
 						BACKGROUND_POSITION_VERT_BOTTOM;
-				} else if (token->ilower == 
-						c->strings[CENTER]) {
+				} else if ((lwc_context_string_caseless_isequal(
+						c->sheet->dictionary,
+						token->idata, 
+						c->strings[CENTER],
+						&match) == lwc_error_ok && 
+						match)) {
 					/* We'll fix this up later */
 					value[i] = 
 						BACKGROUND_POSITION_VERT_CENTER;
@@ -671,6 +723,7 @@ css_error parse_background_repeat(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (no-repeat, repeat-x, repeat-y, repeat, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
@@ -679,15 +732,30 @@ css_error parse_background_repeat(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[NO_REPEAT]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[NO_REPEAT],
+			&match) == lwc_error_ok && match)) {
 		value = BACKGROUND_REPEAT_NO_REPEAT;
-	} else if (ident->ilower == c->strings[REPEAT_X]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[REPEAT_X],
+			&match) == lwc_error_ok && match)) {
 		value = BACKGROUND_REPEAT_REPEAT_X;
-	} else if (ident->ilower == c->strings[REPEAT_Y]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[REPEAT_Y],
+			&match) == lwc_error_ok && match)) {
 		value = BACKGROUND_REPEAT_REPEAT_Y;
-	} else if (ident->ilower == c->strings[REPEAT]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[REPEAT],
+			&match) == lwc_error_ok && match)) {
 		value = BACKGROUND_REPEAT_REPEAT;
 	} else {
 		*ctx = orig_ctx;

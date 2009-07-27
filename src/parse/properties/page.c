@@ -38,6 +38,7 @@ css_error parse_orphans(css_language *c,
 	uint32_t opv;
 	css_fixed num = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* <integer> | IDENT (inherit) */
 	token = parserutils_vector_iterate(vector, ctx);
@@ -47,13 +48,16 @@ css_error parse_orphans(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (token->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		num = number_from_lwc_string(token->ilower, true, &consumed);
+		num = number_from_lwc_string(token->idata, true, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != lwc_string_length(token->ilower)) {
+		if (consumed != lwc_string_length(token->idata)) {
 			*ctx = orig_ctx;
 			return CSS_INVALID;
 		}
@@ -117,6 +121,7 @@ css_error parse_page_break_after(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (auto, always, avoid, left, right, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
@@ -125,17 +130,35 @@ css_error parse_page_break_after(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[AUTO]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[AUTO],
+			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_AFTER_AUTO;
-	} else if (ident->ilower == c->strings[ALWAYS]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[ALWAYS],
+			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_AFTER_ALWAYS;
-	} else if (ident->ilower == c->strings[AVOID]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[AVOID],
+			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_AFTER_AVOID;
-	} else if (ident->ilower == c->strings[LEFT]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[LEFT],
+			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_AFTER_LEFT;
-	} else if (ident->ilower == c->strings[RIGHT]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[RIGHT],
+			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_AFTER_RIGHT;
 	} else {
 		*ctx = orig_ctx;
@@ -181,6 +204,7 @@ css_error parse_page_break_before(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (auto, always, avoid, left, right, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
@@ -189,17 +213,35 @@ css_error parse_page_break_before(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[AUTO]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[AUTO],
+			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_BEFORE_AUTO;
-	} else if (ident->ilower == c->strings[ALWAYS]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[ALWAYS],
+			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_BEFORE_ALWAYS;
-	} else if (ident->ilower == c->strings[AVOID]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[AVOID],
+			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_BEFORE_AVOID;
-	} else if (ident->ilower == c->strings[LEFT]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[LEFT],
+			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_BEFORE_LEFT;
-	} else if (ident->ilower == c->strings[RIGHT]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[RIGHT],
+			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_BEFORE_RIGHT;
 	} else {
 		*ctx = orig_ctx;
@@ -245,6 +287,7 @@ css_error parse_page_break_inside(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (auto, avoid, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
@@ -253,11 +296,20 @@ css_error parse_page_break_inside(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[AUTO]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[AUTO],
+			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_INSIDE_AUTO;
-	} else if (ident->ilower == c->strings[AVOID]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[AVOID],
+			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_INSIDE_AVOID;
 	} else {
 		*ctx = orig_ctx;
@@ -305,6 +357,7 @@ css_error parse_widows(css_language *c,
 	uint32_t opv;
 	css_fixed num = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* <integer> | IDENT (inherit) */
 	token = parserutils_vector_iterate(vector, ctx);
@@ -314,13 +367,16 @@ css_error parse_widows(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (token->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		num = number_from_lwc_string(token->ilower, true, &consumed);
+		num = number_from_lwc_string(token->idata, true, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != lwc_string_length(token->ilower)) {
+		if (consumed != lwc_string_length(token->idata)) {
 			*ctx = orig_ctx;
 			return CSS_INVALID;
 		}

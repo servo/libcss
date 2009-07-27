@@ -348,6 +348,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 	const css_token *token = NULL;
 	const css_token *atkeyword = NULL;
 	int32_t ctx = 0;
+	bool match = false;
 	css_rule *rule;
 	css_error error;
 
@@ -363,7 +364,9 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 	 * there is one */
 	assert(atkeyword != NULL && atkeyword->type == CSS_TOKEN_ATKEYWORD);
 
-	if (atkeyword->ilower == c->strings[CHARSET]) {
+	if (lwc_context_string_caseless_isequal(c->sheet->dictionary,
+			atkeyword->idata, c->strings[CHARSET], 
+			&match) == lwc_error_ok && match) {
 		if (c->state == BEFORE_CHARSET) {
 			const css_token *charset;
 
@@ -405,7 +408,9 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 		} else {
 			return CSS_INVALID;
 		}
-	} else if (atkeyword->ilower == c->strings[IMPORT]) {
+	} else if (lwc_context_string_caseless_isequal(c->sheet->dictionary,
+			atkeyword->idata, c->strings[IMPORT], 
+			&match) == lwc_error_ok && match) {
 		if (c->state != HAD_RULE) {
 			lwc_string *url;
 			uint64_t media = 0;
@@ -467,7 +472,9 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 		} else {
 			return CSS_INVALID;
 		}
-	} else if (atkeyword->ilower == c->strings[MEDIA]) {
+	} else if (lwc_context_string_caseless_isequal(c->sheet->dictionary,
+			atkeyword->idata, c->strings[MEDIA], 
+			&match) == lwc_error_ok && match) {
 		uint64_t media = 0;
 
 		/* any0 = IDENT ws (',' ws IDENT ws)* */
@@ -497,7 +504,9 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 		 * so no need to destroy it */
 
 		c->state = HAD_RULE;
-	} else if (atkeyword->ilower == c->strings[PAGE]) {
+	} else if (lwc_context_string_caseless_isequal(c->sheet->dictionary,
+			atkeyword->idata, c->strings[PAGE], 
+			&match) == lwc_error_ok && match) {
 		const css_token *token;
 
 		/* any0 = (':' IDENT)? ws */
@@ -712,6 +721,7 @@ css_error parseMediaList(css_language *c,
 		uint64_t *media)
 {
 	uint64_t ret = 0;
+	bool match = false;
 	const css_token *token;
 
 	token = parserutils_vector_iterate(vector, ctx);
@@ -720,27 +730,59 @@ css_error parseMediaList(css_language *c,
 		if (token->type != CSS_TOKEN_IDENT)
 			return CSS_INVALID;
 
-		if (token->ilower == c->strings[AURAL]) {
+		if (lwc_context_string_caseless_isequal(c->sheet->dictionary,
+				token->idata, c->strings[AURAL], 
+				&match) == lwc_error_ok && match) {
 			ret |= CSS_MEDIA_AURAL;
-		} else if (token->ilower == c->strings[BRAILLE]) {
+		} else if (lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[BRAILLE], 
+			&match) == lwc_error_ok && match) {
 			ret |= CSS_MEDIA_BRAILLE;
-		} else if (token->ilower == c->strings[EMBOSSED]) {
+		} else if (lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[EMBOSSED], 
+				&match) == lwc_error_ok && match) {
 			ret |= CSS_MEDIA_EMBOSSED;
-		} else if (token->ilower == c->strings[HANDHELD]) {
+		} else if (lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[HANDHELD], 
+				&match) == lwc_error_ok && match) {
 			ret |= CSS_MEDIA_HANDHELD;
-		} else if (token->ilower == c->strings[PRINT]) {
+		} else if (lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[PRINT], 
+				&match) == lwc_error_ok && match) {
 			ret |= CSS_MEDIA_PRINT;
-		} else if (token->ilower == c->strings[PROJECTION]) {
+		} else if (lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[PROJECTION], 
+				&match) == lwc_error_ok && match) {
 			ret |= CSS_MEDIA_PROJECTION;
-		} else if (token->ilower == c->strings[SCREEN]) {
+		} else if (lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[SCREEN], 
+				&match) == lwc_error_ok && match) {
 			ret |= CSS_MEDIA_SCREEN;
-		} else if (token->ilower == c->strings[SPEECH]) {
+		} else if (lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[SPEECH], 
+				&match) == lwc_error_ok && match) {
 			ret |= CSS_MEDIA_SPEECH;
-		} else if (token->ilower == c->strings[TTY]) {
+		} else if (lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[TTY], 
+				&match) == lwc_error_ok && match) {
 			ret |= CSS_MEDIA_TTY;
-		} else if (token->ilower == c->strings[TV]) {
+		} else if (lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[TV], 
+				&match) == lwc_error_ok && match) {
 			ret |= CSS_MEDIA_TV;
-		} else if (token->ilower == c->strings[ALL]) {
+		} else if (lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[ALL], 
+				&match) == lwc_error_ok && match) {
 			ret |= CSS_MEDIA_ALL;
 		} else
 			return CSS_INVALID;
@@ -844,6 +886,7 @@ css_error parsePseudo(css_language *c, const parserutils_vector *vector,
 		int *ctx, css_selector_detail *specific)
 {
 	const css_token *token, *name, *value = NULL;
+	bool match = false;
 	css_selector_type type;
 
 	/* pseudo    -> ':' [ IDENT | FUNCTION ws IDENT? ws ')' ] */
@@ -876,21 +919,61 @@ css_error parsePseudo(css_language *c, const parserutils_vector *vector,
 			return CSS_INVALID;
 	}
 
-	if (name->ilower == c->strings[FIRST_CHILD] ||
-			name->ilower == c->strings[LINK] || 
-			name->ilower == c->strings[VISITED] || 
-			name->ilower == c->strings[HOVER] || 
-			name->ilower == c->strings[ACTIVE] || 
-			name->ilower == c->strings[FOCUS] || 
-			name->ilower == c->strings[LANG] || 
-			name->ilower == c->strings[LEFT] || 
-			name->ilower == c->strings[RIGHT] || 
-			name->ilower == c->strings[FIRST])
+	if ((lwc_context_string_caseless_isequal(c->sheet->dictionary,
+			name->idata, c->strings[FIRST_CHILD], 
+			&match) == lwc_error_ok && match) ||
+			(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				name->idata, c->strings[LINK], 
+				&match) == lwc_error_ok && match) ||
+			(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				name->idata, c->strings[VISITED], 
+				&match) == lwc_error_ok && match) ||
+			(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				name->idata, c->strings[HOVER], 
+				&match) == lwc_error_ok && match) ||
+			(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				name->idata, c->strings[ACTIVE], 
+				&match) == lwc_error_ok && match) ||
+			(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				name->idata, c->strings[FOCUS], 
+				&match) == lwc_error_ok && match) ||
+			(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				name->idata, c->strings[LANG], 
+				&match) == lwc_error_ok && match) ||
+			(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				name->idata, c->strings[LEFT], 
+				&match) == lwc_error_ok && match) ||
+			(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				name->idata, c->strings[RIGHT], 
+				&match) == lwc_error_ok && match) ||
+			(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				name->idata, c->strings[FIRST], 
+				&match) == lwc_error_ok && match))
 		type = CSS_SELECTOR_PSEUDO_CLASS;
-	else if (name->ilower == c->strings[FIRST_LINE] ||
-			name->ilower == c->strings[FIRST_LETTER] ||
-			name->ilower == c->strings[BEFORE] ||
-			name->ilower == c->strings[AFTER])
+	else if ((lwc_context_string_caseless_isequal(c->sheet->dictionary,
+				name->idata, c->strings[FIRST_LINE], 
+				&match) == lwc_error_ok && match) ||
+			(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				name->idata, c->strings[FIRST_LETTER], 
+				&match) == lwc_error_ok && match) ||
+			(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				name->idata, c->strings[BEFORE], 
+				&match) == lwc_error_ok && match) ||
+			(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				name->idata, c->strings[AFTER], 
+				&match) == lwc_error_ok && match))
 		type = CSS_SELECTOR_PSEUDO_ELEMENT;
 	else
 		return CSS_INVALID;
@@ -1187,7 +1270,11 @@ css_error parseProperty(css_language *c, const css_token *property,
 	/* Find property index */
 	/** \todo improve on this linear search */
 	for (i = FIRST_PROP; i <= LAST_PROP; i++) {
-		if (property->ilower == c->strings[i])
+		bool match = false;
+
+		if (lwc_context_string_caseless_isequal(c->sheet->dictionary,
+				property->idata, c->strings[i],
+				&match) == lwc_error_ok && match)
 			break;
 	}
 	if (i == LAST_PROP + 1)

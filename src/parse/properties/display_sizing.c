@@ -36,6 +36,7 @@ css_error parse_display(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (inline, block, list-item, run-in, inline-block, table,
 	 * inline-table, table-row-group, table-header-group, 
@@ -47,39 +48,90 @@ css_error parse_display(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[INLINE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INLINE],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_INLINE;
-	} else if (ident->ilower == c->strings[BLOCK]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[BLOCK],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_BLOCK;
-	} else if (ident->ilower == c->strings[LIST_ITEM]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[LIST_ITEM],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_LIST_ITEM;
-	} else if (ident->ilower == c->strings[RUN_IN]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[RUN_IN],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_RUN_IN;
-	} else if (ident->ilower == c->strings[INLINE_BLOCK]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INLINE_BLOCK],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_INLINE_BLOCK;
-	} else if (ident->ilower == c->strings[TABLE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[TABLE],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_TABLE;
-	} else if (ident->ilower == c->strings[INLINE_TABLE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INLINE_TABLE],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_INLINE_TABLE;
-	} else if (ident->ilower == c->strings[TABLE_ROW_GROUP]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[TABLE_ROW_GROUP],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_TABLE_ROW_GROUP;
-	} else if (ident->ilower == c->strings[TABLE_HEADER_GROUP]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[TABLE_HEADER_GROUP],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_TABLE_HEADER_GROUP;
-	} else if (ident->ilower == c->strings[TABLE_FOOTER_GROUP]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[TABLE_FOOTER_GROUP],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_TABLE_FOOTER_GROUP;
-	} else if (ident->ilower == c->strings[TABLE_ROW]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[TABLE_ROW],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_TABLE_ROW;
-	} else if (ident->ilower == c->strings[TABLE_COLUMN_GROUP]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[TABLE_COLUMN_GROUP],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_TABLE_COLUMN_GROUP;
-	} else if (ident->ilower == c->strings[TABLE_COLUMN]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[TABLE_COLUMN],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_TABLE_COLUMN;
-	} else if (ident->ilower == c->strings[TABLE_CELL]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[TABLE_CELL],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_TABLE_CELL;
-	} else if (ident->ilower == c->strings[TABLE_CAPTION]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[TABLE_CAPTION],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_TABLE_CAPTION;
-	} else if (ident->ilower == c->strings[NONE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[NONE],
+			&match) == lwc_error_ok && match)) {
 		value = DISPLAY_NONE;
 	} else {
 		*ctx = orig_ctx;
@@ -128,6 +180,7 @@ css_error parse_height(css_language *c,
 	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* length | percentage | IDENT(auto, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
@@ -137,11 +190,17 @@ css_error parse_height(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[AUTO]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[AUTO],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = HEIGHT_AUTO;
 	} else {
@@ -218,6 +277,7 @@ css_error parse_line_height(css_language *c,
 	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* number | length | percentage | IDENT(normal, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
@@ -227,18 +287,23 @@ css_error parse_line_height(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[NORMAL]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[NORMAL],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = LINE_HEIGHT_NORMAL;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		length = number_from_lwc_string(token->ilower, 
-				false, &consumed);
-		if (consumed != lwc_string_length(token->ilower)) {
+		length = number_from_lwc_string(token->idata, false, &consumed);
+		if (consumed != lwc_string_length(token->idata)) {
 			*ctx = orig_ctx;
 			return CSS_INVALID;
 		}
@@ -329,6 +394,7 @@ css_error parse_max_height(css_language *c,
 	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* length | percentage | IDENT(none, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
@@ -338,11 +404,17 @@ css_error parse_max_height(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[NONE]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[NONE],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = MAX_HEIGHT_NONE;
 	} else {
@@ -419,6 +491,7 @@ css_error parse_max_width(css_language *c,
 	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* length | percentage | IDENT(none, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
@@ -428,11 +501,17 @@ css_error parse_max_width(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[NONE]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[NONE],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = MAX_WIDTH_NONE;
 	} else {
@@ -509,6 +588,7 @@ css_error parse_min_height(css_language *c,
 	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* length | percentage | IDENT(inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
@@ -518,7 +598,10 @@ css_error parse_min_height(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {
@@ -595,6 +678,7 @@ css_error parse_min_width(css_language *c,
 	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* length | percentage | IDENT(inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
@@ -604,7 +688,10 @@ css_error parse_min_width(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {
@@ -681,6 +768,7 @@ css_error parse_width(css_language *c,
 	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* length | percentage | IDENT(auto, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
@@ -690,11 +778,17 @@ css_error parse_width(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[AUTO]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[AUTO],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = WIDTH_AUTO;
 	} else {

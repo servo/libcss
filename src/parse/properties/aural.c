@@ -47,6 +47,7 @@ css_error parse_azimuth(css_language *c,
 	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* angle | [ IDENT(left-side, far-left, left, center-left, center, 
 	 *		   center-right, right, far-right, right-side) || 
@@ -61,15 +62,21 @@ css_error parse_azimuth(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+		(lwc_context_string_caseless_isequal(c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[LEFTWARDS]) {
+		(lwc_context_string_caseless_isequal(c->sheet->dictionary,
+			token->idata, c->strings[LEFTWARDS],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = AZIMUTH_LEFTWARDS;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[RIGHTWARDS]) {
+		(lwc_context_string_caseless_isequal(c->sheet->dictionary,
+			token->idata, c->strings[RIGHTWARDS],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = AZIMUTH_RIGHTWARDS;
 	} else if (token->type == CSS_TOKEN_IDENT) {
@@ -78,25 +85,55 @@ css_error parse_azimuth(css_language *c,
 		/* Now, we may have one of the other keywords or behind,
 		 * potentially followed by behind or other keyword, 
 		 * respectively */
-		if (token->ilower == c->strings[LEFT_SIDE]) {
+		if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[LEFT_SIDE],
+				&match) == lwc_error_ok && match)) {
 			value = AZIMUTH_LEFT_SIDE;
-		} else if (token->ilower == c->strings[FAR_LEFT]) {
+		} else if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[FAR_LEFT],
+				&match) == lwc_error_ok && match)) {
 			value = AZIMUTH_FAR_LEFT;
-		} else if (token->ilower == c->strings[LEFT]) {
+		} else if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[LEFT],
+				&match) == lwc_error_ok && match)) {
 			value = AZIMUTH_LEFT;
-		} else if (token->ilower == c->strings[CENTER_LEFT]) {
+		} else if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[CENTER_LEFT],
+				&match) == lwc_error_ok && match)) {
 			value = AZIMUTH_CENTER_LEFT;
-		} else if (token->ilower == c->strings[CENTER]) {
+		} else if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[CENTER],
+				&match) == lwc_error_ok && match)) {
 			value = AZIMUTH_CENTER;
-		} else if (token->ilower == c->strings[CENTER_RIGHT]) {
+		} else if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[CENTER_RIGHT],
+				&match) == lwc_error_ok && match)) {
 			value = AZIMUTH_CENTER_RIGHT;
-		} else if (token->ilower == c->strings[RIGHT]) {
+		} else if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[RIGHT],
+				&match) == lwc_error_ok && match)) {
 			value = AZIMUTH_RIGHT;
-		} else if (token->ilower == c->strings[FAR_RIGHT]) {
+		} else if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[FAR_RIGHT],
+				&match) == lwc_error_ok && match)) {
 			value = AZIMUTH_FAR_RIGHT;
-		} else if (token->ilower == c->strings[RIGHT_SIDE]) {
+		} else if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[RIGHT_SIDE],
+				&match) == lwc_error_ok && match)) {
 			value = AZIMUTH_RIGHT_SIDE;
-		} else if (token->ilower == c->strings[BEHIND]) {
+		} else if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[BEHIND],
+				&match) == lwc_error_ok && match)) {
 			value = AZIMUTH_BEHIND;
 		} else {
 			*ctx = orig_ctx;
@@ -112,23 +149,50 @@ css_error parse_azimuth(css_language *c,
 				value == AZIMUTH_BEHIND) {
 			parserutils_vector_iterate(vector, ctx);
 
-			if (token->ilower == c->strings[LEFT_SIDE]) {
+			if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[LEFT_SIDE],
+					&match) == lwc_error_ok && match)) {
 				value |= AZIMUTH_LEFT_SIDE;
-			} else if (token->ilower == c->strings[FAR_LEFT]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[FAR_LEFT],
+					&match) == lwc_error_ok && match)) {
 				value |= AZIMUTH_FAR_LEFT;
-			} else if (token->ilower == c->strings[LEFT]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[LEFT],
+					&match) == lwc_error_ok && match)) {
 				value |= AZIMUTH_LEFT;
-			} else if (token->ilower == c->strings[CENTER_LEFT]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[CENTER_LEFT],
+					&match) == lwc_error_ok && match)) {
 				value |= AZIMUTH_CENTER_LEFT;
-			} else if (token->ilower == c->strings[CENTER]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[CENTER],
+					&match) == lwc_error_ok && match)) {
 				value |= AZIMUTH_CENTER;
-			} else if (token->ilower == c->strings[CENTER_RIGHT]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[CENTER_RIGHT],
+					&match) == lwc_error_ok && match)) {
 				value |= AZIMUTH_CENTER_RIGHT;
-			} else if (token->ilower == c->strings[RIGHT]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[RIGHT],
+					&match) == lwc_error_ok && match)) {
 				value |= AZIMUTH_RIGHT;
-			} else if (token->ilower == c->strings[FAR_RIGHT]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[FAR_RIGHT],
+					&match) == lwc_error_ok && match)) {
 				value |= AZIMUTH_FAR_RIGHT;
-			} else if (token->ilower == c->strings[RIGHT_SIDE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[RIGHT_SIDE],
+					&match) == lwc_error_ok && match)) {
 				value |= AZIMUTH_RIGHT_SIDE;
 			} else {
 				*ctx = orig_ctx;
@@ -138,7 +202,10 @@ css_error parse_azimuth(css_language *c,
 				value != AZIMUTH_BEHIND) {
 			parserutils_vector_iterate(vector, ctx);
 
-			if (token->ilower == c->strings[BEHIND]) {
+			if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[BEHIND],
+					&match) == lwc_error_ok && match)) {
 				value |= AZIMUTH_BEHIND;
 			} else {
 				*ctx = orig_ctx;
@@ -233,12 +300,16 @@ css_error parse_cue(css_language *c,
 	int num_read = 0;
 	int prev_ctx;
 	uint32_t required_size;
+	bool match;
 	css_error error;
 
 	/* Deal with inherit */
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		uint32_t *bytecode;
 
 		error = css_stylesheet_style_create(c->sheet,
@@ -272,7 +343,10 @@ css_error parse_cue(css_language *c,
 		/* Ensure that we're not about to parse another inherit */
 		token = parserutils_vector_peek(vector, *ctx);
 		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-				token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[INHERIT],
+				&match) == lwc_error_ok && match)) {
 			error = CSS_INVALID;
 			goto cleanup;
 		}
@@ -426,6 +500,7 @@ css_error parse_elevation(css_language *c,
 	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* angle | IDENT(below, level, above, higher, lower, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
@@ -435,27 +510,45 @@ css_error parse_elevation(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[BELOW]) {
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[BELOW],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = ELEVATION_BELOW;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[LEVEL]) {
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[LEVEL],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = ELEVATION_LEVEL;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[ABOVE]) {
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[ABOVE],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = ELEVATION_ABOVE;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[HIGHER]) {
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[HIGHER],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = ELEVATION_HIGHER;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[LOWER]) {
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[LOWER],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = ELEVATION_LOWER;
 	} else {
@@ -543,12 +636,16 @@ css_error parse_pause(css_language *c,
 	int num_read = 0;
 	int prev_ctx;
 	uint32_t required_size;
+	bool match;
 	css_error error;
 
 	/* Deal with inherit */
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		uint32_t *bytecode;
 
 		error = css_stylesheet_style_create(c->sheet,
@@ -584,7 +681,10 @@ css_error parse_pause(css_language *c,
 		/* Ensure that we're not about to parse another inherit */
 		token = parserutils_vector_peek(vector, *ctx);
 		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-				token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[INHERIT],
+				&match) == lwc_error_ok && match)) {
 			error = CSS_INVALID;
 			goto cleanup;
 		}
@@ -738,6 +838,7 @@ css_error parse_pitch_range(css_language *c,
 	uint32_t opv;
 	css_fixed num = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* number | IDENT (inherit) */
 	token = parserutils_vector_iterate(vector, ctx);
@@ -747,13 +848,16 @@ css_error parse_pitch_range(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (token->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		num = number_from_lwc_string(token->ilower, false, &consumed);
+		num = number_from_lwc_string(token->idata, false, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != lwc_string_length(token->ilower)) {
+		if (consumed != lwc_string_length(token->idata)) {
 			*ctx = orig_ctx;
 			return CSS_INVALID;
 		}
@@ -820,6 +924,7 @@ css_error parse_pitch(css_language *c,
 	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* frequency | IDENT(x-low, low, medium, high, x-high, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
@@ -829,27 +934,45 @@ css_error parse_pitch(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[X_LOW]) {
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[X_LOW],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = PITCH_X_LOW;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[LOW]) {
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[LOW],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = PITCH_LOW;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[MEDIUM]) {
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[MEDIUM],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = PITCH_MEDIUM;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[HIGH]) {
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[HIGH],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = PITCH_HIGH;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[X_HIGH]) {
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[X_HIGH],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = PITCH_X_HIGH;
 	} else {
@@ -925,6 +1048,7 @@ css_error parse_play_during(css_language *c,
 	uint32_t opv;
 	uint32_t required_size;
 	lwc_string *uri;
+	bool match;
 
 	/* URI [ IDENT(mix) || IDENT(repeat) ]? | IDENT(auto,none,inherit) */
 	token = parserutils_vector_iterate(vector, ctx);
@@ -935,11 +1059,20 @@ css_error parse_play_during(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT) {
-		if (token->ilower == c->strings[INHERIT]) {
+		if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[INHERIT],
+				&match) == lwc_error_ok && match)) {
 			flags |= FLAG_INHERIT;
-		} else if (token->ilower == c->strings[NONE]) {
+		} else if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[NONE],
+				&match) == lwc_error_ok && match)) {
 			value = PLAY_DURING_NONE;
-		} else if (token->ilower == c->strings[AUTO]) {
+		} else if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[AUTO],
+				&match) == lwc_error_ok && match)) {
 			value = PLAY_DURING_AUTO;
 		} else {
 			*ctx = orig_ctx;
@@ -963,15 +1096,23 @@ css_error parse_play_during(css_language *c,
 
 			token = parserutils_vector_peek(vector, *ctx);
 			if (token != NULL && token->type == CSS_TOKEN_IDENT) {
-				if (token->ilower == c->strings[MIX]) {
+				if ((lwc_context_string_caseless_isequal(
+						c->sheet->dictionary,
+						token->idata, c->strings[MIX],
+						&match) == lwc_error_ok && 
+						match)) {
 					if ((value & PLAY_DURING_MIX) == 0)
 						value |= PLAY_DURING_MIX;
 					else {
 						*ctx = orig_ctx;
 						return CSS_INVALID;
 					}
-				} else if (token->ilower == 
-						c->strings[REPEAT]) {
+				} else if (lwc_context_string_caseless_isequal(
+						c->sheet->dictionary,
+						token->idata, 
+						c->strings[REPEAT],
+						&match) == lwc_error_ok &&
+						match) {
 					if ((value & PLAY_DURING_REPEAT) == 0)
 						value |= PLAY_DURING_REPEAT;
 					else {
@@ -1040,6 +1181,7 @@ css_error parse_richness(css_language *c,
 	uint32_t opv;
 	css_fixed num = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* number | IDENT (inherit) */
 	token = parserutils_vector_iterate(vector, ctx);
@@ -1049,13 +1191,16 @@ css_error parse_richness(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (token->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		num = number_from_lwc_string(token->ilower, false, &consumed);
+		num = number_from_lwc_string(token->idata, false, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != lwc_string_length(token->ilower)) {
+		if (consumed != lwc_string_length(token->idata)) {
 			*ctx = orig_ctx;
 			return CSS_INVALID;
 		}
@@ -1119,6 +1264,7 @@ css_error parse_speak_header(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (once, always, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
@@ -1127,11 +1273,20 @@ css_error parse_speak_header(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[ONCE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[ONCE],
+			&match) == lwc_error_ok && match)) {
 		value = SPEAK_HEADER_ONCE;
-	} else if (ident->ilower == c->strings[ALWAYS]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[ALWAYS],
+			&match) == lwc_error_ok && match)) {
 		value = SPEAK_HEADER_ALWAYS;
 	} else {
 		*ctx = orig_ctx;
@@ -1177,6 +1332,7 @@ css_error parse_speak_numeral(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (digits, continuous, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
@@ -1185,11 +1341,20 @@ css_error parse_speak_numeral(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[DIGITS]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[DIGITS],
+			&match) == lwc_error_ok && match)) {
 		value = SPEAK_NUMERAL_DIGITS;
-	} else if (ident->ilower == c->strings[CONTINUOUS]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[CONTINUOUS],
+			&match) == lwc_error_ok && match)) {
 		value = SPEAK_NUMERAL_CONTINUOUS;
 	} else {
 		*ctx = orig_ctx;
@@ -1235,6 +1400,7 @@ css_error parse_speak_punctuation(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (code, none, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
@@ -1243,11 +1409,20 @@ css_error parse_speak_punctuation(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[CODE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[CODE],
+			&match) == lwc_error_ok && match)) {
 		value = SPEAK_PUNCTUATION_CODE;
-	} else if (ident->ilower == c->strings[NONE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[NONE],
+			&match) == lwc_error_ok && match)) {
 		value = SPEAK_PUNCTUATION_NONE;
 	} else {
 		*ctx = orig_ctx;
@@ -1293,6 +1468,7 @@ css_error parse_speak(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (normal, none, spell-out, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
@@ -1301,13 +1477,25 @@ css_error parse_speak(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[NORMAL]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[NORMAL],
+			&match) == lwc_error_ok && match)) {
 		value = SPEAK_NORMAL;
-	} else if (ident->ilower == c->strings[NONE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[NONE],
+			&match) == lwc_error_ok && match)) {
 		value = SPEAK_NONE;
-	} else if (ident->ilower == c->strings[SPELL_OUT]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[SPELL_OUT],
+			&match) == lwc_error_ok && match)) {
 		value = SPEAK_SPELL_OUT;
 	} else {
 		*ctx = orig_ctx;
@@ -1355,6 +1543,7 @@ css_error parse_speech_rate(css_language *c,
 	uint32_t opv;
 	css_fixed num = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* number | IDENT (x-slow, slow, medium, fast, x-fast, faster, slower, 
 	 *		 inherit)
@@ -1367,34 +1556,58 @@ css_error parse_speech_rate(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[X_SLOW]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[X_SLOW],
+			&match) == lwc_error_ok && match)) {
 		value = SPEECH_RATE_X_SLOW;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[SLOW]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[SLOW],
+			&match) == lwc_error_ok && match)) {
 		value = SPEECH_RATE_SLOW;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[MEDIUM]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[MEDIUM],
+			&match) == lwc_error_ok && match)) {
 		value = SPEECH_RATE_MEDIUM;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[FAST]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[FAST],
+			&match) == lwc_error_ok && match)) {
 		value = SPEECH_RATE_FAST;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[X_FAST]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[X_FAST],
+			&match) == lwc_error_ok && match)) {
 		value = SPEECH_RATE_X_FAST;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[FASTER]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[FASTER],
+			&match) == lwc_error_ok && match)) {
 		value = SPEECH_RATE_FASTER;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[SLOWER]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[SLOWER],
+			&match) == lwc_error_ok && match)) {
 		value = SPEECH_RATE_SLOWER;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		num = number_from_lwc_string(token->ilower, false, &consumed);
+		num = number_from_lwc_string(token->idata, false, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != lwc_string_length(token->ilower)) {
+		if (consumed != lwc_string_length(token->idata)) {
 			*ctx = orig_ctx;
 			return CSS_INVALID;
 		}
@@ -1460,6 +1673,7 @@ css_error parse_stress(css_language *c,
 	uint32_t opv;
 	css_fixed num = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* number | IDENT (inherit) */
 	token = parserutils_vector_iterate(vector, ctx);
@@ -1469,13 +1683,16 @@ css_error parse_stress(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (token->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		num = number_from_lwc_string(token->ilower, false, &consumed);
+		num = number_from_lwc_string(token->idata, false, &consumed);
 		/* Invalid if there are trailing characters */
-		if (consumed != lwc_string_length(token->ilower)) {
+		if (consumed != lwc_string_length(token->idata)) {
 			*ctx = orig_ctx;
 			return CSS_INVALID;
 		}
@@ -1523,9 +1740,20 @@ css_error parse_stress(css_language *c,
  */
 static bool voice_family_reserved(css_language *c, const css_token *ident)
 {
-	return ident->ilower == c->strings[MALE] ||
-		ident->ilower == c->strings[FEMALE] ||
-		ident->ilower == c->strings[CHILD];
+	bool match;
+
+	return (lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[MALE],
+			&match) == lwc_error_ok && match) ||
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[FEMALE],
+			&match) == lwc_error_ok && match) ||
+		(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[CHILD],
+			&match) == lwc_error_ok && match);
 }
 
 /**
@@ -1538,13 +1766,23 @@ static bool voice_family_reserved(css_language *c, const css_token *ident)
 static uint16_t voice_family_value(css_language *c, const css_token *token)
 {
 	uint16_t value;
+	bool match;
 
 	if (token->type == CSS_TOKEN_IDENT) {
-		if (token->ilower == c->strings[MALE])
+		if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[MALE],
+				&match) == lwc_error_ok && match))
 			value = VOICE_FAMILY_MALE;
-		else if (token->ilower == c->strings[FEMALE])
+		else if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[FEMALE],
+				&match) == lwc_error_ok && match))
 			value = VOICE_FAMILY_FEMALE;
-		else if (token->ilower == c->strings[CHILD])
+		else if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[CHILD],
+				&match) == lwc_error_ok && match))
 			value = VOICE_FAMILY_CHILD;
 		else
 			value = VOICE_FAMILY_IDENT_LIST;
@@ -1582,6 +1820,7 @@ css_error parse_voice_family(css_language *c,
 	uint32_t required_size = sizeof(opv);
 	int temp_ctx = *ctx;
 	uint8_t *ptr;
+	bool match;
 
 	/* [ IDENT+ | STRING ] [ ',' [ IDENT+ | STRING ] ]* | IDENT(inherit)
 	 * 
@@ -1598,7 +1837,10 @@ css_error parse_voice_family(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags = FLAG_INHERIT;
 	} else {
 		uint32_t list_size;
@@ -1640,7 +1882,10 @@ css_error parse_voice_family(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		/* Nothing to do */
 	} else {
 		error = comma_list_to_bytecode(c, vector, ctx, token, 
@@ -1689,6 +1934,7 @@ css_error parse_volume(css_language *c,
 	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* number | percentage | IDENT(silent, x-soft, soft, medium, loud, 
 	 *			       x-loud, inherit)
@@ -1700,38 +1946,58 @@ css_error parse_volume(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[SILENT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[SILENT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VOLUME_SILENT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[X_SOFT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[X_SOFT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VOLUME_X_SOFT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[SOFT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[SOFT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VOLUME_SOFT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[MEDIUM]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[MEDIUM],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VOLUME_MEDIUM;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[LOUD]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[LOUD],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VOLUME_LOUD;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[X_LOUD]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[X_LOUD],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = VOLUME_X_LOUD;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		length = number_from_lwc_string(token->ilower, 
-				false, &consumed);
-		if (consumed != lwc_string_length(token->ilower)) {
+		length = number_from_lwc_string(token->idata, false, &consumed);
+		if (consumed != lwc_string_length(token->idata)) {
 			*ctx = orig_ctx;
 			return CSS_INVALID;
 		}
@@ -1822,6 +2088,7 @@ css_error parse_cue_common(css_language *c,
 	uint32_t opv;
 	uint32_t required_size;
 	lwc_string *uri = NULL;
+	bool match;
 
 	/* URI | IDENT (none, inherit) */
 	token = parserutils_vector_iterate(vector, ctx);
@@ -1832,10 +2099,16 @@ css_error parse_cue_common(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT && 
-			token->ilower == c->strings[NONE]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[NONE],
+			&match) == lwc_error_ok && match)) {
 		value = CUE_AFTER_NONE;
 	} else if (token->type == CSS_TOKEN_URI) {
 		value = CUE_AFTER_URI;
@@ -1904,6 +2177,7 @@ css_error parse_pause_common(css_language *c,
 	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* time | percentage | IDENT(inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
@@ -1913,7 +2187,10 @@ css_error parse_pause_common(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {

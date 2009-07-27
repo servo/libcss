@@ -32,6 +32,7 @@ css_error parse_colour_specifier(css_language *c,
 	int orig_ctx = *ctx;
 	const css_token *token;
 	uint8_t r = 0, g = 0, b = 0;
+	bool match;
 	css_error error;
 
 	consumeWhitespace(vector, ctx);
@@ -54,7 +55,7 @@ css_error parse_colour_specifier(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT) {
-		error = parse_named_colour(c, token->ilower, result);
+		error = parse_named_colour(c, token->idata, result);
 		if (error != CSS_OK && c->sheet->quirks_allowed) {
 			error = parse_hash_colour(token->idata, result);
 			if (error == CSS_OK)
@@ -90,7 +91,10 @@ css_error parse_colour_specifier(css_language *c,
 
 		return error;
 	} else if (token->type == CSS_TOKEN_FUNCTION) {
-		if (token->ilower == c->strings[RGB]) {
+		if ((lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[RGB],
+				&match) == lwc_error_ok && match)) {
 			int i;
 			css_token_type valid = CSS_TOKEN_NUMBER;
 
@@ -329,9 +333,12 @@ css_error parse_named_colour(css_language *c, lwc_string *data,
 		0x9acd3200  /* YELLOWGREEN */
 	};
 	int i;
+	bool match;
 
 	for (i = FIRST_COLOUR; i <= LAST_COLOUR; i++) {
-		if (data == c->strings[i])
+		if (lwc_context_string_caseless_isequal(c->sheet->dictionary,
+				data, c->strings[i], &match) == lwc_error_ok &&
+				match)
 			break;
 	}
 	if (i == LAST_COLOUR + 1)

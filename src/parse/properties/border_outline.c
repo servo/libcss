@@ -234,6 +234,7 @@ css_error parse_border_collapse(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (collapse, separate, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
@@ -242,11 +243,20 @@ css_error parse_border_collapse(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[COLLAPSE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[COLLAPSE],
+			&match) == lwc_error_ok && match)) {
 		value = BORDER_COLLAPSE_COLLAPSE;
-	} else if (ident->ilower == c->strings[SEPARATE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[SEPARATE],
+			&match) == lwc_error_ok && match)) {
 		value = BORDER_COLLAPSE_SEPARATE;
 	} else {
 		*ctx = orig_ctx;
@@ -296,12 +306,16 @@ css_error parse_border_color(css_language *c,
 	css_style *ret = NULL;
 	uint32_t num_sides = 0;
 	uint32_t required_size;
+	bool match;
 	css_error error;
 
 	/* Firstly, handle inherit */
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		uint32_t *bytecode;
 
 		error = css_stylesheet_style_create(c->sheet,
@@ -341,7 +355,10 @@ css_error parse_border_color(css_language *c,
 		/* Ensure that we're not about to parse another inherit */
 		token = parserutils_vector_peek(vector, *ctx);
 		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-				token->ilower == c->strings[INHERIT]) {
+				(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[INHERIT],
+				&match) == lwc_error_ok && match)) {
 			error = CSS_INVALID;
 			goto cleanup;
 		}
@@ -716,6 +733,7 @@ css_error parse_border_spacing(css_language *c,
 	css_fixed length[2] = { 0 };
 	uint32_t unit[2] = { 0 };
 	uint32_t required_size;
+	bool match;
 
 	/* length length? | IDENT(inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
@@ -725,7 +743,10 @@ css_error parse_border_spacing(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else {
@@ -843,12 +864,16 @@ css_error parse_border_style(css_language *c,
 	css_style *ret = NULL;
 	uint32_t num_sides = 0;
 	uint32_t required_size;
+	bool match;
 	css_error error;
 
 	/* Firstly, handle inherit */
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		uint32_t *bytecode;
 
 		error = css_stylesheet_style_create(c->sheet,
@@ -888,7 +913,10 @@ css_error parse_border_style(css_language *c,
 		/* Ensure that we're not about to parse another inherit */
 		token = parserutils_vector_peek(vector, *ctx);
 		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-				token->ilower == c->strings[INHERIT]) {
+				(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[INHERIT],
+				&match) == lwc_error_ok && match)) {
 			error = CSS_INVALID;
 			goto cleanup;
 		}
@@ -1177,12 +1205,16 @@ css_error parse_border_width(css_language *c,
 	css_style *ret = NULL;
 	uint32_t num_sides = 0;
 	uint32_t required_size;
+	bool match;
 	css_error error;
 
 	/* Firstly, handle inherit */
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		uint32_t *bytecode;
 
 		error = css_stylesheet_style_create(c->sheet,
@@ -1222,7 +1254,10 @@ css_error parse_border_width(css_language *c,
 		/* Ensure that we're not about to parse another inherit */
 		token = parserutils_vector_peek(vector, *ctx);
 		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-				token->ilower == c->strings[INHERIT]) {
+				(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[INHERIT],
+				&match) == lwc_error_ok && match)) {
 			error = CSS_INVALID;
 			goto cleanup;
 		}
@@ -1422,12 +1457,16 @@ css_error parse_outline(css_language *c,
 	css_style *width = NULL;
 	css_style *ret = NULL;
 	uint32_t required_size;
+	bool match;
 	css_error error;
 
 	/* Firstly, handle inherit */
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		uint32_t *bytecode;
 
 		error = css_stylesheet_style_create(c->sheet,
@@ -1465,7 +1504,10 @@ css_error parse_outline(css_language *c,
 		/* Ensure that we're not about to parse another inherit */
 		token = parserutils_vector_peek(vector, *ctx);
 		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-				token->ilower == c->strings[INHERIT]) {
+				(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[INHERIT],
+				&match) == lwc_error_ok && match)) {
 			error = CSS_INVALID;
 			goto cleanup;
 		}
@@ -1600,6 +1642,7 @@ css_error parse_outline_color(css_language *c,
 	uint32_t opv;
 	uint32_t colour = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* colour | IDENT (invert, inherit) */
 	token = parserutils_vector_peek(vector, *ctx);
@@ -1609,11 +1652,17 @@ css_error parse_outline_color(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INVERT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INVERT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = OUTLINE_COLOR_INVERT;
 	} else {
@@ -1743,12 +1792,16 @@ css_error parse_border_side(css_language *c,
 	css_style *width = NULL;
 	css_style *ret = NULL;
 	uint32_t required_size;
+	bool match;
 	css_error error;
 
 	/* Firstly, handle inherit */
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		uint32_t *bytecode;
 
 		error = css_stylesheet_style_create(c->sheet,
@@ -1786,7 +1839,10 @@ css_error parse_border_side(css_language *c,
 		/* Ensure that we're not about to parse another inherit */
 		token = parserutils_vector_peek(vector, *ctx);
 		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-				token->ilower == c->strings[INHERIT]) {
+				(lwc_context_string_caseless_isequal(
+				c->sheet->dictionary,
+				token->idata, c->strings[INHERIT],
+				&match) == lwc_error_ok && match)) {
 			error = CSS_INVALID;
 			goto cleanup;
 		}
@@ -1917,6 +1973,7 @@ css_error parse_border_side_color(css_language *c,
 	uint16_t value = 0;
 	uint32_t colour = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* colour | IDENT (transparent, inherit) */
 	token= parserutils_vector_peek(vector, *ctx);
@@ -1926,11 +1983,17 @@ css_error parse_border_side_color(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[TRANSPARENT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[TRANSPARENT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = BORDER_COLOR_TRANSPARENT;
 	} else {
@@ -1991,6 +2054,7 @@ css_error parse_border_side_style(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (none, hidden, dotted, dashed, solid, double, groove, 
 	 * ridge, inset, outset, inherit) */
@@ -2000,27 +2064,60 @@ css_error parse_border_side_style(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[NONE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[NONE],
+			&match) == lwc_error_ok && match)) {
 		value = BORDER_STYLE_NONE;
-	} else if (ident->ilower == c->strings[HIDDEN]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[HIDDEN],
+			&match) == lwc_error_ok && match)) {
 		value = BORDER_STYLE_HIDDEN;
-	} else if (ident->ilower == c->strings[DOTTED]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[DOTTED],
+			&match) == lwc_error_ok && match)) {
 		value = BORDER_STYLE_DOTTED;
-	} else if (ident->ilower == c->strings[DASHED]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[DASHED],
+			&match) == lwc_error_ok && match)) {
 		value = BORDER_STYLE_DASHED;
-	} else if (ident->ilower == c->strings[SOLID]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[SOLID],
+			&match) == lwc_error_ok && match)) {
 		value = BORDER_STYLE_SOLID;
-	} else if (ident->ilower == c->strings[DOUBLE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[DOUBLE],
+			&match) == lwc_error_ok && match)) {
 		value = BORDER_STYLE_DOUBLE;
-	} else if (ident->ilower == c->strings[GROOVE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[GROOVE],
+			&match) == lwc_error_ok && match)) {
 		value = BORDER_STYLE_GROOVE;
-	} else if (ident->ilower == c->strings[RIDGE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[RIDGE],
+			&match) == lwc_error_ok && match)) {
 		value = BORDER_STYLE_RIDGE;
-	} else if (ident->ilower == c->strings[INSET]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INSET],
+			&match) == lwc_error_ok && match)) {
 		value = BORDER_STYLE_INSET;
-	} else if (ident->ilower == c->strings[OUTSET]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[OUTSET],
+			&match) == lwc_error_ok && match)) {
 		value = BORDER_STYLE_OUTSET;
 	} else {
 		*ctx = orig_ctx;
@@ -2070,6 +2167,7 @@ css_error parse_border_side_width(css_language *c,
 	css_fixed length = 0;
 	uint32_t unit = 0;
 	uint32_t required_size;
+	bool match;
 
 	/* length | IDENT(thin, medium, thick, inherit) */
 	token= parserutils_vector_peek(vector, *ctx);
@@ -2079,19 +2177,31 @@ css_error parse_border_side_width(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[THIN]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[THIN],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = BORDER_WIDTH_THIN;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[MEDIUM]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[MEDIUM],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = BORDER_WIDTH_MEDIUM;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[THICK]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[THICK],
+			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = BORDER_WIDTH_THICK;
 	} else {

@@ -39,6 +39,7 @@ css_error parse_cursor(css_language *c,
 	uint32_t required_size = sizeof(opv);
 	int temp_ctx = *ctx;
 	uint8_t *ptr;
+	bool match;
 
 	/* [ (URI ',')* IDENT(auto, crosshair, default, pointer, move, e-resize,
 	 *              ne-resize, nw-resize, n-resize, se-resize, sw-resize,
@@ -55,7 +56,10 @@ css_error parse_cursor(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags = FLAG_INHERIT;
 	} else {
 		bool first = true;
@@ -95,71 +99,122 @@ css_error parse_cursor(css_language *c,
 
 		/* IDENT */
 		if (token != NULL && token->type == CSS_TOKEN_IDENT) {
-			if (token->ilower == c->strings[AUTO]) {
+			if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[AUTO],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_AUTO;
 				}
-			} else if (token->ilower == c->strings[CROSSHAIR]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[CROSSHAIR],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_CROSSHAIR;
 				}
-			} else if (token->ilower == c->strings[DEFAULT]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[DEFAULT],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_DEFAULT;
 				}
-			} else if (token->ilower == c->strings[POINTER]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[POINTER],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_POINTER;
 				}
-			} else if (token->ilower == c->strings[MOVE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[MOVE],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_MOVE;
 				}
-			} else if (token->ilower == c->strings[E_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[E_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_E_RESIZE;
 				}
-			} else if (token->ilower == c->strings[NE_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[NE_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_NE_RESIZE;
 				}
-			} else if (token->ilower == c->strings[NW_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[NW_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_NW_RESIZE;
 				}
-			} else if (token->ilower == c->strings[N_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[N_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_N_RESIZE;
 				}
-			} else if (token->ilower == c->strings[SE_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[SE_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_SE_RESIZE;
 				}
-			} else if (token->ilower == c->strings[SW_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[SW_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_SW_RESIZE;
 				}
-			} else if (token->ilower == c->strings[S_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[S_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_S_RESIZE;
 				}
-			} else if (token->ilower == c->strings[W_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[W_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_W_RESIZE;
 				}
-			} else if (token->ilower == c->strings[TEXT]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[TEXT],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_TEXT;
 				}
-			} else if (token->ilower == c->strings[WAIT]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[WAIT],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_WAIT;
 				}
-			} else if (token->ilower == c->strings[HELP]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[HELP],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_HELP;
 				}
-			} else if (token->ilower == c->strings[PROGRESS]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[PROGRESS],
+					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_PROGRESS;
 				}
@@ -197,7 +252,10 @@ css_error parse_cursor(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			token->ilower == c->strings[INHERIT]) {
+			(lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		/* Nothing to do */
 	} else {
 		bool first = true;
@@ -249,39 +307,90 @@ css_error parse_cursor(css_language *c,
 
 		/* IDENT */
 		if (token != NULL && token->type == CSS_TOKEN_IDENT) {
-			if (token->ilower == c->strings[AUTO]) {
+			if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[AUTO],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_AUTO;
-			} else if (token->ilower == c->strings[CROSSHAIR]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[CROSSHAIR],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_CROSSHAIR;
-			} else if (token->ilower == c->strings[DEFAULT]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[DEFAULT],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_DEFAULT;
-			} else if (token->ilower == c->strings[POINTER]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[POINTER],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_POINTER;
-			} else if (token->ilower == c->strings[MOVE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[MOVE],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_MOVE;
-			} else if (token->ilower == c->strings[E_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[E_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_E_RESIZE;
-			} else if (token->ilower == c->strings[NE_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[NE_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_NE_RESIZE;
-			} else if (token->ilower == c->strings[NW_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[NW_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_NW_RESIZE;
-			} else if (token->ilower == c->strings[N_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[N_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_N_RESIZE;
-			} else if (token->ilower == c->strings[SE_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[SE_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_SE_RESIZE;
-			} else if (token->ilower == c->strings[SW_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[SW_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_SW_RESIZE;
-			} else if (token->ilower == c->strings[S_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[S_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_S_RESIZE;
-			} else if (token->ilower == c->strings[W_RESIZE]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[W_RESIZE],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_W_RESIZE;
-			} else if (token->ilower == c->strings[TEXT]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[TEXT],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_TEXT;
-			} else if (token->ilower == c->strings[WAIT]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[WAIT],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_WAIT;
-			} else if (token->ilower == c->strings[HELP]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[HELP],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_HELP;
-			} else if (token->ilower == c->strings[PROGRESS]) {
+			} else if ((lwc_context_string_caseless_isequal(
+					c->sheet->dictionary,
+					token->idata, c->strings[PROGRESS],
+					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_PROGRESS;
 			} else {
 				*ctx = orig_ctx;

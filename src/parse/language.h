@@ -73,9 +73,20 @@ static inline void consumeWhitespace(const parserutils_vector *vector, int *ctx)
  */
 static inline bool tokenIsChar(const css_token *token, uint8_t c)
 {
-	return token != NULL && token->type == CSS_TOKEN_CHAR && 
-	                lwc_string_length(token->ilower) == 1 && 
-			lwc_string_data(token->ilower)[0] == c;
+	bool result = false;
+
+	if (token != NULL && token->type == CSS_TOKEN_CHAR && 
+	                lwc_string_length(token->idata) == 1) {
+		char d = lwc_string_data(token->idata)[0];
+
+		/* Ensure lowercase comparison */
+		if ('A' <= d && d <= 'Z')
+			d += 'a' - 'A';
+
+		result = (d == c);
+	}
+
+	return result;
 }
 
 #endif

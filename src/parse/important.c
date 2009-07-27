@@ -29,6 +29,7 @@ css_error parse_important(css_language *c,
 		uint8_t *result)
 {
 	int orig_ctx = *ctx;
+	bool match = false;
 	const css_token *token;
 
 	consumeWhitespace(vector, ctx);
@@ -43,7 +44,9 @@ css_error parse_important(css_language *c,
 			return CSS_INVALID;
 		}
 
-		if (token->ilower == c->strings[IMPORTANT]) {
+		if (lwc_context_string_caseless_isequal(c->sheet->dictionary,
+				token->idata, c->strings[IMPORTANT],
+				&match) == lwc_error_ok && match) {
 			*result |= FLAG_IMPORTANT;
 		} else {
 			*ctx = orig_ctx;

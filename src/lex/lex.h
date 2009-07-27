@@ -37,14 +37,9 @@ typedef union css_lexer_optparams {
  */
 typedef enum css_token_type { 
 	CSS_TOKEN_IDENT, CSS_TOKEN_ATKEYWORD, CSS_TOKEN_HASH,
-	CSS_TOKEN_FUNCTION, 
-
-	/* Those tokens that want lowercase strings interned appear above */
-	CSS_TOKEN_LAST_INTERN_LOWER,
-
-	CSS_TOKEN_STRING, CSS_TOKEN_INVALID_STRING, CSS_TOKEN_URI,
-	CSS_TOKEN_UNICODE_RANGE, CSS_TOKEN_CHAR, CSS_TOKEN_NUMBER, 
-	CSS_TOKEN_PERCENTAGE, CSS_TOKEN_DIMENSION,
+	CSS_TOKEN_FUNCTION, CSS_TOKEN_STRING, CSS_TOKEN_INVALID_STRING, 
+	CSS_TOKEN_URI, CSS_TOKEN_UNICODE_RANGE, CSS_TOKEN_CHAR, 
+	CSS_TOKEN_NUMBER, CSS_TOKEN_PERCENTAGE, CSS_TOKEN_DIMENSION,
 
 	/* Those tokens that want strings interned appear above */
 	CSS_TOKEN_LAST_INTERN,
@@ -66,7 +61,6 @@ typedef struct css_token {
         } data;
 
 	lwc_string *idata;
-	lwc_string *ilower;
 	
 	uint32_t col;
 	uint32_t line;

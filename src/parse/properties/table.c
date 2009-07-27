@@ -36,6 +36,7 @@ css_error parse_caption_side(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (top, bottom, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
@@ -44,11 +45,20 @@ css_error parse_caption_side(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[TOP]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[TOP],
+			&match) == lwc_error_ok && match)) {
 		value = CAPTION_SIDE_TOP;
-	} else if (ident->ilower == c->strings[BOTTOM]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[BOTTOM],
+			&match) == lwc_error_ok && match)) {
 		value = CAPTION_SIDE_BOTTOM;
 	} else {
 		*ctx = orig_ctx;
@@ -94,6 +104,7 @@ css_error parse_empty_cells(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (show, hide, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
@@ -102,11 +113,20 @@ css_error parse_empty_cells(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[SHOW]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[SHOW],
+			&match) == lwc_error_ok && match)) {
 		value = EMPTY_CELLS_SHOW;
-	} else if (ident->ilower == c->strings[HIDE]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[HIDE],
+			&match) == lwc_error_ok && match)) {
 		value = EMPTY_CELLS_HIDE;
 	} else {
 		*ctx = orig_ctx;
@@ -152,6 +172,7 @@ css_error parse_table_layout(css_language *c,
 	uint8_t flags = 0;
 	uint16_t value = 0;
 	uint32_t opv;
+	bool match;
 
 	/* IDENT (auto, fixed, inherit) */
 	ident = parserutils_vector_iterate(vector, ctx);
@@ -160,11 +181,20 @@ css_error parse_table_layout(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (ident->ilower == c->strings[INHERIT]) {
+	if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if (ident->ilower == c->strings[AUTO]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[AUTO],
+			&match) == lwc_error_ok && match)) {
 		value = TABLE_LAYOUT_AUTO;
-	} else if (ident->ilower == c->strings[FIXED]) {
+	} else if ((lwc_context_string_caseless_isequal(
+			c->sheet->dictionary,
+			ident->idata, c->strings[FIXED],
+			&match) == lwc_error_ok && match)) {
 		value = TABLE_LAYOUT_FIXED;
 	} else {
 		*ctx = orig_ctx;
