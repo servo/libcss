@@ -72,6 +72,10 @@ static void destroy_tree(node *root);
 
 static css_error node_name(void *pw, void *node, lwc_context *ctx, 
 		lwc_string **name);
+static css_error node_classes(void *pw, void *node, lwc_context *ctx, 
+		lwc_string ***classes, uint32_t *n_classes);
+static css_error node_id(void *pw, void *node, lwc_context *ctx, 
+		lwc_string **id);
 static css_error named_ancestor_node(void *pw, void *node,
 		lwc_string *name,
 		void **ancestor);
@@ -124,6 +128,8 @@ static css_error compute_font_size(void *pw, const css_hint *parent,
 
 static css_select_handler select_handler = {
 	node_name,
+	node_classes,
+	node_id,
 	named_ancestor_node,
 	named_parent_node,
 	named_sibling_node,
@@ -718,6 +724,63 @@ css_error node_name(void *pw, void *n, lwc_context *ctx, lwc_string **name)
         
         *name = lwc_context_string_ref(ctx, node->name);
         
+	return CSS_OK;
+}
+
+css_error node_classes(void *pw, void *n, lwc_context *ctx, 
+		lwc_string ***classes, uint32_t *n_classes)
+{
+	node *node = n;
+	uint32_t i;
+        line_ctx *lc = pw;
+
+	for (i = 0; i < node->n_attrs; i++) {
+                bool amatch;
+		assert(lwc_context_string_caseless_isequal(ctx, 
+				node->attrs[i].name, lc->attr_class, &amatch) ==
+				lwc_error_ok);
+                if (amatch == true)
+			break;
+	}
+
+	if (i != node->n_attrs) {
+		*classes = realloc(NULL, sizeof(lwc_string **));
+		if (*classes == NULL)
+			return CSS_NOMEM;
+
+		*(classes[0]) = 
+			lwc_context_string_ref(ctx, node->attrs[i].value);
+		*n_classes = 1;
+	} else {
+		*classes = NULL;
+		*n_classes = 0;
+	}
+
+	return CSS_OK;
+
+}
+
+css_error node_id(void *pw, void *n, lwc_context *ctx, 
+		lwc_string **id)
+{
+	node *node = n;
+	uint32_t i;
+        line_ctx *lc = pw;
+
+	for (i = 0; i < node->n_attrs; i++) {
+                bool amatch;
+		assert(lwc_context_string_caseless_isequal(ctx, 
+				node->attrs[i].name, lc->attr_id, &amatch) == 
+				lwc_error_ok);
+                if (amatch == true)
+			break;
+	}
+
+	if (i != node->n_attrs)
+		*id = lwc_context_string_ref(ctx, node->attrs[i].value);
+	else
+		*id = NULL;
+
 	return CSS_OK;
 }
 

@@ -622,12 +622,95 @@ css_error intern_strings_for_sheet(css_select_ctx *ctx,
 	return CSS_OK;
 }
 
+static bool _selectors_pending(const css_selector **node,
+		const css_selector **id, const css_selector ***classes,
+		uint32_t n_classes, const css_selector **univ)
+{
+	bool pending = false;
+	uint32_t i;
+
+	pending |= *node != NULL;
+	pending |= *id != NULL;
+	pending |= *univ != NULL;
+
+	if (classes != NULL && n_classes > 0) {
+		for (i = 0; i < n_classes; i++)
+			pending |= *(classes[i]) != NULL;
+	}
+
+	return pending;
+}
+
+static inline bool _selector_less_specific(const css_selector *ref, 
+		const css_selector *cand)
+{
+	bool result = true;
+
+	if (cand == NULL)
+		return false;
+
+	if (ref == NULL)
+		return true;
+
+	/* Sort by specificity */
+	if (cand->specificity < ref->specificity) {
+		result = true;
+	} else if (ref->specificity < cand->specificity) {
+		result = false;
+	} else {
+		/* Then by rule index -- earliest wins */
+		if (cand->rule->index < ref->rule->index)
+			result = true;
+		else
+			result = false;
+	}
+
+	return result;
+}
+
+static const css_selector *_selector_next(const css_selector **node,
+		const css_selector **id, const css_selector ***classes,
+		uint32_t n_classes, const css_selector **univ)
+{
+	const css_selector *ret = NULL;
+
+	if (_selector_less_specific(ret, *node))
+		ret = *node;
+
+	if (_selector_less_specific(ret, *id))
+		ret = *id;
+
+	if (_selector_less_specific(ret, *univ))
+		ret = *univ;
+
+	if (classes != NULL && n_classes > 0) {
+		uint32_t i;
+
+		for (i = 0; i < n_classes; i++) {
+			if (_selector_less_specific(ret, *(classes[i])))
+				ret = *(classes[i]);
+		}
+	}
+
+	return ret;
+}
+
 css_error match_selectors_in_sheet(css_select_ctx *ctx, 
 		const css_stylesheet *sheet, css_select_state *state)
 {
-	lwc_string *element;
-	const css_selector **node_selectors;
-	const css_selector **univ_selectors;
+	static const css_selector *empty_selector = NULL;
+	lwc_string *element = NULL;
+	lwc_string *id = NULL;
+	lwc_string **classes = NULL;
+	uint32_t n_classes = 0, i = 0;
+	const css_selector **node_selectors = &empty_selector;
+	css_selector_hash_iterator node_iterator;
+	const css_selector **id_selectors = &empty_selector;
+	css_selector_hash_iterator id_iterator;
+	const css_selector ***class_selectors = NULL;
+	css_selector_hash_iterator class_iterator;
+	const css_selector **univ_selectors = &empty_selector;
+	css_selector_hash_iterator univ_iterator;
 	css_error error;
 
 	/* Get node's name */
@@ -636,20 +719,62 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 	if (error != CSS_OK)
 		return error;
 
+	/* Get node's ID, if any */
+	error = state->handler->node_id(state->pw, state->node,
+			sheet->dictionary, &id);
+	if (error != CSS_OK)
+		goto cleanup;
+
+	/* Get node's classes, if any */
+	/** \todo Do we really want to force the client to allocate a new array 
+	 * every time we call this? It seems hugely inefficient, given they can 
+	 * cache the data. */
+	error = state->handler->node_classes(state->pw, state->node,
+			sheet->dictionary, &classes, &n_classes);
+	if (error != CSS_OK)
+		goto cleanup;
+
 	/* Find hash chain that applies to current node */
 	error = css_selector_hash_find(sheet->selectors, element, 
-			&node_selectors);
+			&node_iterator, &node_selectors);
 	if (error != CSS_OK)
                 goto cleanup;
 
+	if (classes != NULL && n_classes > 0) {
+		/* Find hash chains for node classes */
+		class_selectors = ctx->alloc(NULL, 
+				n_classes * sizeof(css_selector **), ctx->pw);
+		if (class_selectors == NULL) {
+			error = CSS_NOMEM;
+			goto cleanup;
+		}
+
+		for (i = 0; i < n_classes; i++) {
+			error = css_selector_hash_find_by_class(
+					sheet->selectors, classes[i],
+					&class_iterator, &class_selectors[i]);
+			if (error != CSS_OK)
+				goto cleanup;
+		}
+	}
+
+	if (id != NULL) {
+		/* Find hash chain for node ID */
+		error = css_selector_hash_find_by_id(sheet->selectors, id,
+				&id_iterator, &id_selectors);
+		if (error != CSS_OK)
+			goto cleanup;
+	}
+
 	/* Find hash chain for universal selector */
-	error = css_selector_hash_find(sheet->selectors, state->universal, 
-			&univ_selectors);
+	error = css_selector_hash_find_universal(sheet->selectors,  
+			&univ_iterator, &univ_selectors);
 	if (error != CSS_OK)
 		goto cleanup;
 
 	/* Process matching selectors, if any */
-	while (*node_selectors != NULL || *univ_selectors != NULL) {
+	while (_selectors_pending(node_selectors, id_selectors, 
+			class_selectors, n_classes, univ_selectors)) {
 		const css_selector *selector;
 		css_rule *rule, *parent;
 		bool process = true;
@@ -659,31 +784,8 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		 *
 		 * Pick the least specific/earliest occurring selector.
 		 */
-		if (*node_selectors != NULL && *univ_selectors != NULL) {
-			/* Both chains have entries, so choose least specific */
-			const css_selector *node = *node_selectors;
-			const css_selector *univ = *univ_selectors;
-
-			/* Sort by specificity */
-			if (node->specificity < univ->specificity) {
-				selector = node;
-			} else if (univ->specificity < node->specificity) {
-				selector = univ;
-			} else {
-				/* Then by rule index -- earliest wins */
-				if (node->rule->index < univ->rule->index)
-					selector = node;
-				else
-					selector = univ;
-			}
-		} else if (*node_selectors != NULL) {
-			/* Universal chain is empty, so exhaust node chain */
-			selector = *node_selectors;
-		} else {
-			/* Node chain is empty, so exhaust universal chain */
-			assert(*univ_selectors != NULL);
-			selector = *univ_selectors;
-		}
+		selector = _selector_next(node_selectors, id_selectors,
+				class_selectors, n_classes, univ_selectors);
 
 		/* Ignore any selectors contained in rules which are a child 
 		 * of an @media block that doesn't match the current media 
@@ -711,11 +813,23 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		/* Advance to next selector in whichever chain we extracted 
 		 * the processed selector from. */
 		if (selector == *node_selectors) {
-			error = css_selector_hash_iterate(sheet->selectors, 
+			error = node_iterator(sheet->selectors, 
 					node_selectors,	&node_selectors);
-		} else {
-			error = css_selector_hash_iterate(sheet->selectors,
+		} else if (selector == *id_selectors) {
+			error = id_iterator(sheet->selectors,
+					id_selectors, &id_selectors);
+		} else if (selector == *univ_selectors) {
+			error = univ_iterator(sheet->selectors,
 					univ_selectors, &univ_selectors);
+		} else {
+			for (i = 0; i < n_classes; i++) {
+				if (selector == *(class_selectors[i])) {
+					error = class_iterator(sheet->selectors,
+							class_selectors[i], 
+							&class_selectors[i]);
+					break;
+				}
+			}
 		}
 
 		if (error != CSS_OK)
@@ -724,6 +838,19 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 
         error = CSS_OK;
 cleanup:
+	if (class_selectors != NULL)
+		ctx->alloc(class_selectors, 0, ctx->pw);
+
+	if (classes != NULL) {
+		for (i = 0; i < n_classes; i++)
+			lwc_context_string_unref(sheet->dictionary, classes[i]);
+
+		ctx->alloc(classes, 0, ctx->pw);
+	}
+
+	if (id != NULL)
+		lwc_context_string_unref(sheet->dictionary, id);
+
         lwc_context_string_unref(sheet->dictionary, element);
         return error;
 }
