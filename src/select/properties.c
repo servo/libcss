@@ -4049,14 +4049,17 @@ css_error cascade_quotes(uint32_t opv, css_style *style,
 		value = CSS_QUOTES_STRING;
 
 		while (v != QUOTES_NONE) {
-			lwc_string *quote;
+			lwc_string *open, *close;
 			lwc_string **temp;
 
-			quote = *((lwc_string **) style->bytecode);
-			advance_bytecode(style, sizeof(quote));
+			open = *((lwc_string **) style->bytecode);
+			advance_bytecode(style, sizeof(lwc_string *));
+
+			close = *((lwc_string **) style->bytecode);
+			advance_bytecode(style, sizeof(lwc_string *));
 
 			temp = state->result->alloc(quotes, 
-					(n_quotes + 1) * sizeof(lwc_string *), 
+					(n_quotes + 2) * sizeof(lwc_string *), 
 					state->result->pw);
 			if (temp == NULL) {
 				if (quotes != NULL) {
@@ -4068,9 +4071,8 @@ css_error cascade_quotes(uint32_t opv, css_style *style,
 
 			quotes = temp;
 
-			quotes[n_quotes] = quote;
-
-			n_quotes++;
+			quotes[n_quotes++] = open;
+			quotes[n_quotes++] = close;
 
 			v = *((uint32_t *) style->bytecode);
 			advance_bytecode(style, sizeof(v));
