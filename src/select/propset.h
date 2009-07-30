@@ -183,6 +183,11 @@ static inline css_error set_counter_increment(
 	*bits = (*bits & ~COUNTER_INCREMENT_MASK) |
 			((type & 0x1) << COUNTER_INCREMENT_SHIFT);
 
+	/* Free existing array */
+	if (style->uncommon->counter_increment != NULL &&
+			style->uncommon->counter_increment != counters)
+		style->alloc(style->uncommon->counter_increment, 0, style->pw);
+
 	style->uncommon->counter_increment = counters;
 
 	return CSS_OK;
@@ -208,6 +213,11 @@ static inline css_error set_counter_reset(
 	*bits = (*bits & ~COUNTER_RESET_MASK) |
 			((type & 0x1) << COUNTER_RESET_SHIFT);
 
+	/* Free existing array */
+	if (style->uncommon->counter_reset != NULL &&
+			style->uncommon->counter_reset != counters)
+		style->alloc(style->uncommon->counter_reset, 0, style->pw);
+
 	style->uncommon->counter_reset = counters;
 
 	return CSS_OK;
@@ -232,6 +242,10 @@ static inline css_error set_cursor(
 	/* 5bits: type */
 	*bits = (*bits & ~CURSOR_MASK) |
 			((type & 0x1f) << CURSOR_SHIFT);
+
+	/* Free existing array */
+	if (style->uncommon->cursor != NULL && style->uncommon->cursor != urls)
+		style->alloc(style->uncommon->cursor, 0, style->pw);
 
 	style->uncommon->cursor = urls;
 
@@ -316,6 +330,11 @@ static inline css_error set_content(
 
 	*bits = (*bits & ~CONTENT_MASK) |
 			((type & 0x3) << CONTENT_SHIFT);
+
+	/* Free existing array */
+	if (style->uncommon->content != NULL && 
+			style->uncommon->content != content)
+		style->alloc(style->uncommon->content, 0, style->pw);
 
 	style->uncommon->content = content;
 
@@ -535,6 +554,10 @@ static inline css_error set_quotes(
 	/* 1bit: type */
 	*bits = (*bits & ~QUOTES_MASK) |
 			((type & 0x1) << QUOTES_SHIFT);
+
+	/* Free current quotes */
+	if (style->quotes != NULL && style->quotes != quotes)
+		style->alloc(style->quotes, 0, style->pw);
 
 	style->quotes = quotes;
 
@@ -1445,6 +1468,10 @@ static inline css_error set_font_family(
 	/* 3bits: type */
 	*bits = (*bits & ~FONT_FAMILY_MASK) |
 			((type & 0x7) << FONT_FAMILY_SHIFT);
+
+	/* Free existing families */
+	if (style->font_family != NULL && style->font_family != names)
+		style->alloc(style->font_family, 0, style->pw);
 
 	style->font_family = names;
 

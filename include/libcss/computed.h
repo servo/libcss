@@ -97,6 +97,8 @@ typedef struct css_computed_uncommon {
  * 				---		---
  * 				  5 bits	  sizeof(ptr) bytes
  *
+ * Encode content as an array of content items, terminated with a blank entry.
+ *
  * content			  2		  sizeof(ptr)
  * 				---		---
  * 				  2 bits	  sizeof(ptr)
