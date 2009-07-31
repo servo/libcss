@@ -177,6 +177,125 @@ f{clear:both}
 #reset
 
 #data
+@media screen
+#errors
+#expected
+| @media 
+#reset
+
+#data
+@media screen 
+#errors
+#expected
+| @media 
+#reset
+
+#data
+@media screen{
+#errors
+#expected
+| @media 
+#reset
+
+#data
+@media screen{ 
+#errors
+#expected
+| @media 
+#reset
+
+#data
+@media screen{{
+#errors
+#expected
+| @media 
+#reset
+
+#data
+@media screen{;
+#errors
+#expected
+| @media 
+#reset
+
+#data
+@media screen{f
+#errors
+#expected
+| @media 
+|  f
+#reset
+
+#data
+@media screen{f{
+#errors
+#expected
+| @media 
+|  f
+#reset
+
+#data
+@media screen{f{color
+#errors
+#expected
+| @media 
+|  f
+#reset
+
+#data
+@media screen{f{color:
+#errors
+#expected
+| @media 
+|  f
+#reset
+
+#data
+@media screen{f{color:blue
+#errors
+#expected
+| @media 
+|  f
+|   color: #0000ff00
+#reset
+
+#data
+@media screen{f{color:blue;
+#errors
+#expected
+| @media 
+|  f
+|   color: #0000ff00
+#reset
+
+#data
+@media screen{f{color:blue}
+#errors
+#expected
+| @media 
+|  f
+|   color: #0000ff00
+#reset
+
+#data
+@media screen{f{color:blue;}
+#errors
+#expected
+| @media 
+|  f
+|   color: #0000ff00
+#reset
+
+#data
+@media screen{f{color:blue;}}
+#errors
+#expected
+| @media 
+|  f
+|   color: #0000ff00
+#reset
+
+#data
 l(
 #errors
 #expected

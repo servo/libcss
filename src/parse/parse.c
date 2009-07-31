@@ -934,6 +934,14 @@ css_error parseRuleset(css_parser *parser)
 		if (error != CSS_OK)
 			return error;
 
+		if (token->type == CSS_TOKEN_EOF) {
+			error = pushBack(parser, token);
+			if (error != CSS_OK)
+				return error;
+
+			return done(parser);
+		}
+
 		if (token->type != CSS_TOKEN_CHAR || 
 				lwc_string_length(token->idata) != 1 ||
 				lwc_string_data(token->idata)[0] != '{') {
@@ -977,6 +985,9 @@ css_error parseRulesetEnd(css_parser *parser)
 		if (error != CSS_OK)
 			return error;
 
+		if (token->type == CSS_TOKEN_EOF)
+			return done(parser);
+
 		/* If this can't possibly be the start of a decl-list, then
 		 * attempt to parse a declaration. This will catch any invalid
 		 * input at this point and read to the start of the next
@@ -1005,8 +1016,13 @@ css_error parseRulesetEnd(css_parser *parser)
 		if (error != CSS_OK)
 			return error;
 
-		if (token->type == CSS_TOKEN_EOF)
-			break;
+		if (token->type == CSS_TOKEN_EOF) {
+			error = pushBack(parser, token);
+			if (error != CSS_OK)
+				return error;
+
+			return done(parser);
+		}
 
 		if (token->type != CSS_TOKEN_CHAR || 
 				lwc_string_length(token->idata) != 1 ||
@@ -1139,6 +1155,14 @@ css_error parseAtRuleEnd(css_parser *parser)
 		if (error != CSS_OK)
 			return error;
 
+		if (token->type == CSS_TOKEN_EOF) {
+			error = pushBack(parser, token);
+			if (error != CSS_OK)
+				return error;
+
+			return done(parser);
+		}
+
 		if (token->type != CSS_TOKEN_CHAR || 
 				lwc_string_length(token->idata) != 1) {
 			/* Should never happen FOLLOW(at-rule) == '{', ';'*/
@@ -1235,8 +1259,13 @@ css_error parseBlock(css_parser *parser)
 		if (error != CSS_OK)
 			return error;
 
-		if (token->type == CSS_TOKEN_EOF)
-			break;
+		if (token->type == CSS_TOKEN_EOF) {
+			error = pushBack(parser, token);
+			if (error != CSS_OK)
+				return error;
+
+			return done(parser);
+		}
 
 		if (token->type != CSS_TOKEN_CHAR || 
 				lwc_string_length(token->idata) != 1 ||
@@ -1316,6 +1345,11 @@ css_error parseBlockContent(css_parser *parser)
 							parser->event_pw);
 					}
 
+					unref_interned_strings_in_tokens(
+							parser);
+					parserutils_vector_clear(
+							parser->tokens);
+
 					return transition(parser, to, 
 							subsequent);
 				} else if (lwc_string_length(
@@ -1368,6 +1402,11 @@ css_error parseBlockContent(css_parser *parser)
 							parser->event_pw);
 					}
 
+					unref_interned_strings_in_tokens(
+							parser);
+					parserutils_vector_clear(
+							parser->tokens);
+
 					return done(parser);
 				}
 			} else if (token->type == CSS_TOKEN_EOF) {
@@ -1384,6 +1423,9 @@ css_error parseBlockContent(css_parser *parser)
 							parser->tokens,
 							parser->event_pw);
 				}
+
+				unref_interned_strings_in_tokens(parser);
+				parserutils_vector_clear(parser->tokens);
 
 				return done(parser);
 			}
@@ -1469,6 +1511,14 @@ css_error parseDeclaration(css_parser *parser)
 		if (error != CSS_OK)
 			return error;
 
+		if (token->type == CSS_TOKEN_EOF) {
+			error = pushBack(parser, token);
+			if (error != CSS_OK)
+				return error;
+
+			return done(parser);
+		}
+
 		if (token->type != CSS_TOKEN_CHAR || 
 				lwc_string_length(token->idata) != 1 ||
 				lwc_string_data(token->idata)[0] != ':') {
@@ -1535,8 +1585,13 @@ css_error parseDeclList(css_parser *parser)
 		if (error != CSS_OK)
 			return error;
 
-		if (token->type == CSS_TOKEN_EOF)
+		if (token->type == CSS_TOKEN_EOF) {
+			error = pushBack(parser, token);
+			if (error != CSS_OK)
+				return error;
+
 			return done(parser);
+		}
 
 		if (token->type != CSS_TOKEN_CHAR || 
 				lwc_string_length(token->idata) != 1 ||
@@ -1629,6 +1684,14 @@ css_error parseProperty(css_parser *parser)
 		error = getToken(parser, &token);
 		if (error != CSS_OK)
 			return error;
+
+		if (token->type == CSS_TOKEN_EOF) {
+			error = pushBack(parser, token);
+			if (error != CSS_OK)
+				return error;
+
+			return done(parser);
+		}
 
 		if (token->type != CSS_TOKEN_IDENT) {
 			/* parse error */
@@ -2498,8 +2561,13 @@ css_error parseISBody(css_parser *parser)
 		if (error != CSS_OK)
 			return error;
 
-		if (token->type == CSS_TOKEN_EOF)
-			break;
+		if (token->type == CSS_TOKEN_EOF) {
+			error = pushBack(parser, token);
+			if (error != CSS_OK)
+				return error;
+
+			return done(parser);
+		}
 
 		if (token->type != CSS_TOKEN_CHAR || 
 				lwc_string_length(token->idata) != 1 ||
