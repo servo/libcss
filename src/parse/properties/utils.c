@@ -431,13 +431,16 @@ css_error parse_unit_specifier(css_language *c,
 	if (token->type == CSS_TOKEN_DIMENSION) {
 		size_t len = lwc_string_length(token->idata);
 		const char *data = lwc_string_data(token->idata);
+		css_unit temp_unit = CSS_UNIT_PX;
 
 		error = parse_unit_keyword(data + consumed, len - consumed,
-				unit);
+				&temp_unit);
 		if (error != CSS_OK) {
 			*ctx = orig_ctx;
 			return error;
 		}
+
+		*unit = (uint32_t) temp_unit;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		/* Non-zero values are permitted in quirks mode */
 		if (num != 0) {
@@ -457,7 +460,7 @@ css_error parse_unit_specifier(css_language *c,
 			 * (e.g. "0 px")
 			 */
 			int temp_ctx = *ctx;
-			uint32_t temp_unit;
+			css_unit temp_unit;
 
 			consumeWhitespace(vector, &temp_ctx);
 
@@ -471,7 +474,7 @@ css_error parse_unit_specifier(css_language *c,
 				if (error == CSS_OK) {
 					c->sheet->quirks_used = true;
 					*ctx = temp_ctx;
-					*unit = temp_unit;
+					*unit = (uint32_t) temp_unit;
 				}
 			}
 		}
