@@ -8,7 +8,7 @@
 #ifndef libcss_properties_h_
 #define libcss_properties_h_
 
-enum css_properties {
+enum css_properties_e {
 	CSS_PROP_AZIMUTH			= 0x000,
 	CSS_PROP_BACKGROUND_ATTACHMENT		= 0x001, 
 	CSS_PROP_BACKGROUND_COLOR		= 0x002, 
@@ -113,31 +113,31 @@ enum css_properties {
 };
 
 
-enum css_background_attachment {
+enum css_background_attachment_e {
 	CSS_BACKGROUND_ATTACHMENT_INHERIT	= 0x0,
 	CSS_BACKGROUND_ATTACHMENT_FIXED		= 0x1,
 	CSS_BACKGROUND_ATTACHMENT_SCROLL	= 0x2
 };
 
-enum css_background_color {
+enum css_background_color_e {
 	CSS_BACKGROUND_COLOR_INHERIT		= 0x0,
 	CSS_BACKGROUND_COLOR_TRANSPARENT	= 0x1,
 	CSS_BACKGROUND_COLOR_COLOR		= 0x2
 };
 
-enum css_background_image {
+enum css_background_image_e {
 	CSS_BACKGROUND_IMAGE_INHERIT		= 0x0,
 	/* Consult pointer in struct to determine which */
 	CSS_BACKGROUND_IMAGE_NONE		= 0x1,
 	CSS_BACKGROUND_IMAGE_IMAGE		= 0x1
 };
 
-enum css_background_position {
+enum css_background_position_e {
 	CSS_BACKGROUND_POSITION_INHERIT		= 0x0,
 	CSS_BACKGROUND_POSITION_SET		= 0x1
 };
 
-enum css_background_repeat {
+enum css_background_repeat_e {
 	CSS_BACKGROUND_REPEAT_INHERIT		= 0x0,
 	CSS_BACKGROUND_REPEAT_REPEAT_X		= 0x1,
 	CSS_BACKGROUND_REPEAT_REPEAT_Y		= 0x2,
@@ -145,25 +145,25 @@ enum css_background_repeat {
 	CSS_BACKGROUND_REPEAT_NO_REPEAT		= 0x4
 };
 
-enum css_border_collapse {
+enum css_border_collapse_e {
 	CSS_BORDER_COLLAPSE_INHERIT		= 0x0,
 	CSS_BORDER_COLLAPSE_SEPARATE		= 0x1,
 	CSS_BORDER_COLLAPSE_COLLAPSE		= 0x2
 };
 
-enum css_border_spacing {
+enum css_border_spacing_e {
 	CSS_BORDER_SPACING_INHERIT		= 0x0,
 	CSS_BORDER_SPACING_SET			= 0x1
 };
 
-enum css_border_color {
+enum css_border_color_e {
 	CSS_BORDER_COLOR_INHERIT		= CSS_BACKGROUND_COLOR_INHERIT,
 	CSS_BORDER_COLOR_TRANSPARENT		= CSS_BACKGROUND_COLOR_TRANSPARENT,
 	CSS_BORDER_COLOR_COLOR			= CSS_BACKGROUND_COLOR_COLOR,
 	CSS_BORDER_COLOR_INITIAL		= 0x3
 };
 
-enum css_border_style {
+enum css_border_style_e {
 	CSS_BORDER_STYLE_INHERIT		= 0x0,
 	CSS_BORDER_STYLE_NONE			= 0x1,
 	CSS_BORDER_STYLE_HIDDEN			= 0x2,
@@ -177,7 +177,7 @@ enum css_border_style {
 	CSS_BORDER_STYLE_OUTSET			= 0xa
 };
 
-enum css_border_width {
+enum css_border_width_e {
 	CSS_BORDER_WIDTH_INHERIT		= 0x0,
 	CSS_BORDER_WIDTH_THIN			= 0x1,
 	CSS_BORDER_WIDTH_MEDIUM			= 0x2,
@@ -185,19 +185,19 @@ enum css_border_width {
 	CSS_BORDER_WIDTH_WIDTH			= 0x4
 };
 
-enum css_bottom {
+enum css_bottom_e {
 	CSS_BOTTOM_INHERIT			= 0x0,
 	CSS_BOTTOM_SET				= 0x1,
 	CSS_BOTTOM_AUTO				= 0x2
 };
 
-enum css_caption_side {
+enum css_caption_side_e {
 	CSS_CAPTION_SIDE_INHERIT		= 0x0,
 	CSS_CAPTION_SIDE_TOP			= 0x1,
 	CSS_CAPTION_SIDE_BOTTOM			= 0x2
 };
 
-enum css_clear {
+enum css_clear_e {
 	CSS_CLEAR_INHERIT			= 0x0,
 	CSS_CLEAR_NONE				= 0x1,
 	CSS_CLEAR_LEFT				= 0x2,
@@ -205,39 +205,39 @@ enum css_clear {
 	CSS_CLEAR_BOTH				= 0x4
 };
 
-enum css_clip {
+enum css_clip_e {
 	CSS_CLIP_INHERIT			= 0x0,
 	CSS_CLIP_AUTO				= 0x1,
 	CSS_CLIP_RECT				= 0x2
 };
 
-enum css_color {
+enum css_color_e {
 	CSS_COLOR_INHERIT			= 0x0,
 	CSS_COLOR_COLOR				= 0x1
 };
 
-enum css_content {
+enum css_content_e {
 	CSS_CONTENT_INHERIT			= 0x0,
 	CSS_CONTENT_NONE			= 0x1,
 	CSS_CONTENT_NORMAL			= 0x2,
 	CSS_CONTENT_SET				= 0x3
 };
 
-enum css_counter_increment {
+enum css_counter_increment_e {
 	CSS_COUNTER_INCREMENT_INHERIT		= 0x0,
 	/* Consult pointer in struct to determine which */
 	CSS_COUNTER_INCREMENT_NAMED		= 0x1,
 	CSS_COUNTER_INCREMENT_NONE		= 0x1
 };
 
-enum css_counter_reset {
+enum css_counter_reset_e {
 	CSS_COUNTER_RESET_INHERIT		= 0x0,
 	/* Consult pointer in struct to determine which */
 	CSS_COUNTER_RESET_NAMED			= 0x1,
 	CSS_COUNTER_RESET_NONE			= 0x1
 };
 
-enum css_cursor {
+enum css_cursor_e {
 	CSS_CURSOR_INHERIT			= 0x00,
 	/* URLs exist if pointer is non-NULL */
 	CSS_CURSOR_AUTO				= 0x01,
@@ -259,13 +259,13 @@ enum css_cursor {
 	CSS_CURSOR_PROGRESS			= 0x11
 };
 
-enum css_direction {
+enum css_direction_e {
 	CSS_DIRECTION_INHERIT			= 0x0,
 	CSS_DIRECTION_LTR			= 0x1,
 	CSS_DIRECTION_RTL			= 0x2
 };
 
-enum css_display {
+enum css_display_e {
 	CSS_DISPLAY_INHERIT			= 0x00,
 	CSS_DISPLAY_INLINE			= 0x01,
 	CSS_DISPLAY_BLOCK			= 0x02,
@@ -285,20 +285,20 @@ enum css_display {
 	CSS_DISPLAY_NONE			= 0x10
 };
 
-enum css_empty_cells {
+enum css_empty_cells_e {
 	CSS_EMPTY_CELLS_INHERIT			= 0x0,
 	CSS_EMPTY_CELLS_SHOW			= 0x1,
 	CSS_EMPTY_CELLS_HIDE			= 0x2
 };
 
-enum css_float {
+enum css_float_e {
 	CSS_FLOAT_INHERIT			= 0x0,
 	CSS_FLOAT_LEFT				= 0x1,
 	CSS_FLOAT_RIGHT				= 0x2,
 	CSS_FLOAT_NONE				= 0x3
 };
 
-enum css_font_family {
+enum css_font_family_e {
 	CSS_FONT_FAMILY_INHERIT			= 0x0,
 	/* Named fonts exist if pointer is non-NULL */
 	CSS_FONT_FAMILY_SERIF			= 0x1,
@@ -308,7 +308,7 @@ enum css_font_family {
 	CSS_FONT_FAMILY_MONOSPACE		= 0x5
 };
 
-enum css_font_size {
+enum css_font_size_e {
 	CSS_FONT_SIZE_INHERIT			= 0x0,
 	CSS_FONT_SIZE_XX_SMALL			= 0x1,
 	CSS_FONT_SIZE_X_SMALL			= 0x2,
@@ -322,20 +322,20 @@ enum css_font_size {
 	CSS_FONT_SIZE_DIMENSION			= 0xa
 };
 
-enum css_font_style {
+enum css_font_style_e {
 	CSS_FONT_STYLE_INHERIT			= 0x0,
 	CSS_FONT_STYLE_NORMAL			= 0x1,
 	CSS_FONT_STYLE_ITALIC			= 0x2,
 	CSS_FONT_STYLE_OBLIQUE			= 0x3
 };
 
-enum css_font_variant {
+enum css_font_variant_e {
 	CSS_FONT_VARIANT_INHERIT		= 0x0,
 	CSS_FONT_VARIANT_NORMAL			= 0x1,
 	CSS_FONT_VARIANT_SMALL_CAPS		= 0x2
 };
 
-enum css_font_weight {
+enum css_font_weight_e {
 	CSS_FONT_WEIGHT_INHERIT			= 0x0,
 	CSS_FONT_WEIGHT_NORMAL			= 0x1,
 	CSS_FONT_WEIGHT_BOLD			= 0x2,
@@ -352,45 +352,45 @@ enum css_font_weight {
 	CSS_FONT_WEIGHT_900			= 0xd
 };
 
-enum css_height {
+enum css_height_e {
 	CSS_HEIGHT_INHERIT			= 0x0,
 	CSS_HEIGHT_SET				= 0x1,
 	CSS_HEIGHT_AUTO				= 0x2
 };
 
-enum css_left {
+enum css_left_e {
 	CSS_LEFT_INHERIT			= 0x0,
 	CSS_LEFT_SET				= 0x1,
 	CSS_LEFT_AUTO				= 0x2
 };
 
-enum css_letter_spacing {
+enum css_letter_spacing_e {
 	CSS_LETTER_SPACING_INHERIT		= 0x0,
 	CSS_LETTER_SPACING_SET			= 0x1,
 	CSS_LETTER_SPACING_NORMAL		= 0x2
 };
 
-enum css_line_height {
+enum css_line_height_e {
 	CSS_LINE_HEIGHT_INHERIT			= 0x0,
 	CSS_LINE_HEIGHT_NUMBER			= 0x1,
 	CSS_LINE_HEIGHT_DIMENSION		= 0x2,
 	CSS_LINE_HEIGHT_NORMAL			= 0x3
 };
 
-enum css_list_style_image {
+enum css_list_style_image_e {
 	CSS_LIST_STYLE_IMAGE_INHERIT		= 0x0,
 	/* Consult pointer in struct to determine which */
 	CSS_LIST_STYLE_IMAGE_URI		= 0x1,
 	CSS_LIST_STYLE_IMAGE_NONE		= 0x1
 };
 
-enum css_list_style_position {
+enum css_list_style_position_e {
 	CSS_LIST_STYLE_POSITION_INHERIT		= 0x0,
 	CSS_LIST_STYLE_POSITION_INSIDE		= 0x1,
 	CSS_LIST_STYLE_POSITION_OUTSIDE		= 0x2
 };
 
-enum css_list_style_type {
+enum css_list_style_type_e {
 	CSS_LIST_STYLE_TYPE_INHERIT		= 0x0,
 	CSS_LIST_STYLE_TYPE_DISC		= 0x1,
 	CSS_LIST_STYLE_TYPE_CIRCLE		= 0x2,
@@ -409,41 +409,41 @@ enum css_list_style_type {
 	CSS_LIST_STYLE_TYPE_NONE		= 0xf
 };
 
-enum css_margin {
+enum css_margin_e {
 	CSS_MARGIN_INHERIT			= 0x0,
 	CSS_MARGIN_SET				= 0x1,
 	CSS_MARGIN_AUTO				= 0x2
 };
 
-enum css_max_height {
+enum css_max_height_e {
 	CSS_MAX_HEIGHT_INHERIT			= 0x0,
 	CSS_MAX_HEIGHT_SET			= 0x1,
 	CSS_MAX_HEIGHT_NONE			= 0x2
 };
 
-enum css_max_width {
+enum css_max_width_e {
 	CSS_MAX_WIDTH_INHERIT			= 0x0,
 	CSS_MAX_WIDTH_SET			= 0x1,
 	CSS_MAX_WIDTH_NONE			= 0x2
 };
 
-enum css_min_height {
+enum css_min_height_e {
 	CSS_MIN_HEIGHT_INHERIT			= 0x0,
 	CSS_MIN_HEIGHT_SET			= 0x1
 };
 
-enum css_min_width {
+enum css_min_width_e {
 	CSS_MIN_WIDTH_INHERIT			= 0x0,
 	CSS_MIN_WIDTH_SET			= 0x1
 };
 
-enum css_outline_color {
+enum css_outline_color_e {
 	CSS_OUTLINE_COLOR_INHERIT		= 0x0,
 	CSS_OUTLINE_COLOR_COLOR			= 0x1,
 	CSS_OUTLINE_COLOR_INVERT		= 0x2
 };
 
-enum css_outline_style {
+enum css_outline_style_e {
 	CSS_OUTLINE_STYLE_INHERIT		= CSS_BORDER_STYLE_INHERIT,
 	CSS_OUTLINE_STYLE_NONE			= CSS_BORDER_STYLE_NONE,
 	CSS_OUTLINE_STYLE_DOTTED		= CSS_BORDER_STYLE_DOTTED,
@@ -456,7 +456,7 @@ enum css_outline_style {
 	CSS_OUTLINE_STYLE_OUTSET		= CSS_BORDER_STYLE_OUTSET
 };
 
-enum css_outline_width {
+enum css_outline_width_e {
 	CSS_OUTLINE_WIDTH_INHERIT		= CSS_BORDER_WIDTH_INHERIT,
 	CSS_OUTLINE_WIDTH_THIN			= CSS_BORDER_WIDTH_THIN,
 	CSS_OUTLINE_WIDTH_MEDIUM		= CSS_BORDER_WIDTH_MEDIUM,
@@ -464,7 +464,7 @@ enum css_outline_width {
 	CSS_OUTLINE_WIDTH_WIDTH			= CSS_BORDER_WIDTH_WIDTH
 };
 
-enum css_overflow {
+enum css_overflow_e {
 	CSS_OVERFLOW_INHERIT			= 0x0,
 	CSS_OVERFLOW_VISIBLE			= 0x1,
 	CSS_OVERFLOW_HIDDEN			= 0x2,
@@ -472,12 +472,12 @@ enum css_overflow {
 	CSS_OVERFLOW_AUTO			= 0x4
 };
 
-enum css_padding {
+enum css_padding_e {
 	CSS_PADDING_INHERIT			= 0x0,
 	CSS_PADDING_SET				= 0x1
 };
 
-enum css_position {
+enum css_position_e {
 	CSS_POSITION_INHERIT			= 0x0,
 	CSS_POSITION_STATIC			= 0x1,
 	CSS_POSITION_RELATIVE			= 0x2,
@@ -485,26 +485,26 @@ enum css_position {
 	CSS_POSITION_FIXED			= 0x4
 };
 
-enum css_quotes {
+enum css_quotes_e {
 	CSS_QUOTES_INHERIT			= 0x0,
 	/* Consult pointer in struct to determine which */
 	CSS_QUOTES_STRING			= 0x1,
 	CSS_QUOTES_NONE				= 0x1
 };
 
-enum css_right {
+enum css_right_e {
 	CSS_RIGHT_INHERIT			= 0x0,
 	CSS_RIGHT_SET				= 0x1,
 	CSS_RIGHT_AUTO				= 0x2
 };
 
-enum css_table_layout {
+enum css_table_layout_e {
 	CSS_TABLE_LAYOUT_INHERIT		= 0x0,
 	CSS_TABLE_LAYOUT_AUTO			= 0x1,
 	CSS_TABLE_LAYOUT_FIXED			= 0x2
 };
 
-enum css_text_align {
+enum css_text_align_e {
 	CSS_TEXT_ALIGN_INHERIT			= 0x0,
 	CSS_TEXT_ALIGN_LEFT			= 0x1,
 	CSS_TEXT_ALIGN_RIGHT			= 0x2,
@@ -513,7 +513,7 @@ enum css_text_align {
 	CSS_TEXT_ALIGN_DEFAULT			= 0x5
 };
 
-enum css_text_decoration {
+enum css_text_decoration_e {
 	CSS_TEXT_DECORATION_INHERIT		= 0x00,
 	CSS_TEXT_DECORATION_NONE		= 0x10,
 	CSS_TEXT_DECORATION_BLINK		= (1<<3),
@@ -522,12 +522,12 @@ enum css_text_decoration {
 	CSS_TEXT_DECORATION_UNDERLINE		= (1<<0)
 };
 
-enum css_text_indent {
+enum css_text_indent_e {
 	CSS_TEXT_INDENT_INHERIT			= 0x0,
 	CSS_TEXT_INDENT_SET			= 0x1
 };
 
-enum css_text_transform {
+enum css_text_transform_e {
 	CSS_TEXT_TRANSFORM_INHERIT		= 0x0,
 	CSS_TEXT_TRANSFORM_CAPITALIZE		= 0x1,
 	CSS_TEXT_TRANSFORM_UPPERCASE		= 0x2,
@@ -535,20 +535,20 @@ enum css_text_transform {
 	CSS_TEXT_TRANSFORM_NONE			= 0x4
 };
 
-enum css_top {
+enum css_top_e {
 	CSS_TOP_INHERIT				= 0x0,
 	CSS_TOP_SET				= 0x1,
 	CSS_TOP_AUTO				= 0x2
 };
 
-enum css_unicode_bidi {
+enum css_unicode_bidi_e {
 	CSS_UNICODE_BIDI_INHERIT		= 0x0,
 	CSS_UNICODE_BIDI_NORMAL			= 0x1,
 	CSS_UNICODE_BIDI_EMBED			= 0x2,
 	CSS_UNICODE_BIDI_BIDI_OVERRIDE		= 0x3
 };
 
-enum css_vertical_align {
+enum css_vertical_align_e {
 	CSS_VERTICAL_ALIGN_INHERIT		= 0x0,
 	CSS_VERTICAL_ALIGN_BASELINE		= 0x1,
 	CSS_VERTICAL_ALIGN_SUB			= 0x2,
@@ -561,14 +561,14 @@ enum css_vertical_align {
 	CSS_VERTICAL_ALIGN_SET			= 0x9
 };
 
-enum css_visibility {
+enum css_visibility_e {
 	CSS_VISIBILITY_INHERIT			= 0x0,
 	CSS_VISIBILITY_VISIBLE			= 0x1,
 	CSS_VISIBILITY_HIDDEN			= 0x2,
 	CSS_VISIBILITY_COLLAPSE			= 0x3
 };
 
-enum css_white_space {
+enum css_white_space_e {
 	CSS_WHITE_SPACE_INHERIT			= 0x0,
 	CSS_WHITE_SPACE_NORMAL			= 0x1,
 	CSS_WHITE_SPACE_PRE			= 0x2,
@@ -577,19 +577,19 @@ enum css_white_space {
 	CSS_WHITE_SPACE_PRE_LINE		= 0x5
 };
 
-enum css_width {
+enum css_width_e {
 	CSS_WIDTH_INHERIT			= 0x0,
 	CSS_WIDTH_SET				= 0x1,
 	CSS_WIDTH_AUTO				= 0x2
 };
 
-enum css_word_spacing {
+enum css_word_spacing_e {
 	CSS_WORD_SPACING_INHERIT		= 0x0,
 	CSS_WORD_SPACING_SET			= 0x1,
 	CSS_WORD_SPACING_NORMAL			= 0x2
 };
 
-enum css_z_index {
+enum css_z_index_e {
 	CSS_Z_INDEX_INHERIT			= 0x0,
 	CSS_Z_INDEX_SET				= 0x1,
 	CSS_Z_INDEX_AUTO			= 0x2

@@ -14,7 +14,7 @@
 #include <libcss/types.h>
 #include <libcss/properties.h>
 
-typedef enum css_properties opcode;
+typedef enum css_properties_e opcode;
 
 enum flag {
 	FLAG_IMPORTANT			= (1<<0),
