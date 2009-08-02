@@ -374,7 +374,7 @@ static inline uint8_t css_computed_letter_spacing(
 
 		if ((bits & 3) == CSS_LETTER_SPACING_SET) {
 			*length = style->uncommon->letter_spacing;
-			*unit = bits >> 2;
+			*unit = (css_unit) (bits >> 2);
 		}
 
 		return (bits & 3);
@@ -428,7 +428,7 @@ static inline uint8_t css_computed_outline_width(
 
 		if ((bits & 7) == CSS_OUTLINE_WIDTH_WIDTH) {
 			*length = style->uncommon->outline_width;
-			*unit = bits >> 3;
+			*unit = (css_unit) (bits >> 3);
 		}
 
 		return (bits & 7);
@@ -469,10 +469,10 @@ static inline uint8_t css_computed_border_spacing(
 			/* 8bits: hhhhvvvv : hunit | vunit */
 
 			*hlength = style->uncommon->border_spacing[0];
-			*hunit = bits1 >> 4;
+			*hunit = (css_unit) (bits1 >> 4);
 
 			*vlength = style->uncommon->border_spacing[1];
-			*vunit = bits1 & 0xf;
+			*vunit = (css_unit) (bits1 & 0xf);
 		}
 
 		return bits;
@@ -506,7 +506,7 @@ static inline uint8_t css_computed_word_spacing(
 
 		if ((bits & 3) == CSS_WORD_SPACING_SET) {
 			*length = style->uncommon->word_spacing;
-			*unit = bits >> 2;
+			*unit = (css_unit) (bits >> 2);
 		}
 
 		return (bits & 3);
@@ -628,10 +628,10 @@ static inline uint8_t css_computed_clip(
 			}
 
 			rect->top = style->uncommon->clip[0];
-			rect->tunit = bits1 >> 4;
+			rect->tunit = (css_unit) (bits1 >> 4);
 
 			rect->right = style->uncommon->clip[1];
-			rect->runit = bits1 & 0xf;
+			rect->runit = (css_unit) (bits1 & 0xf);
 
 			if (rect->bottom_auto == false ||
 					rect->left_auto == false) {
@@ -644,10 +644,10 @@ static inline uint8_t css_computed_clip(
 			}
 
 			rect->bottom = style->uncommon->clip[2];
-			rect->bunit = bits1 >> 4;
+			rect->bunit = (css_unit) (bits1 >> 4);
 
 			rect->left = style->uncommon->clip[3];
-			rect->lunit = bits1 & 0xf;
+			rect->lunit = (css_unit) (bits1 & 0xf);
 		}
 
 		return (bits & 0x3);
@@ -703,7 +703,7 @@ static inline uint8_t css_computed_vertical_align(
 	/* 8bits: uuuutttt : units | type */
 	if ((bits & 0xf) == CSS_VERTICAL_ALIGN_SET) {
 		*length = style->vertical_align;
-		*unit = bits >> 4;
+		*unit = (css_unit) (bits >> 4);
 	}
 
 	return (bits & 0xf);
@@ -726,7 +726,7 @@ static inline uint8_t css_computed_font_size(
 	/* 8bits: uuuutttt : units | type */
 	if ((bits & 0xf) == CSS_FONT_SIZE_DIMENSION) {
 		*length = style->font_size;
-		*unit = bits >> 4;
+		*unit = (css_unit) (bits >> 4);
 	}
 
 	return (bits & 0xf);
@@ -749,7 +749,7 @@ static inline uint8_t css_computed_border_top_width(
 	/* 7bits: uuuuttt : units | type */
 	if ((bits & 0x7) == CSS_BORDER_WIDTH_WIDTH) {
 		*length = style->border_width[0];
-		*unit = bits >> 3;
+		*unit = (css_unit) (bits >> 3);
 	}
 
 	return (bits & 0x7);
@@ -772,7 +772,7 @@ static inline uint8_t css_computed_border_right_width(
 	/* 7bits: uuuuttt : units | type */
 	if ((bits & 0x7) == CSS_BORDER_WIDTH_WIDTH) {
 		*length = style->border_width[1];
-		*unit = bits >> 3;
+		*unit = (css_unit) (bits >> 3);
 	}
 
 	return (bits & 0x7);
@@ -795,7 +795,7 @@ static inline uint8_t css_computed_border_bottom_width(
 	/* 7bits: uuuuttt : units | type */
 	if ((bits & 0x7) == CSS_BORDER_WIDTH_WIDTH) {
 		*length = style->border_width[2];
-		*unit = bits >> 3;
+		*unit = (css_unit) (bits >> 3);
 	}
 
 	return (bits & 0x7);
@@ -818,7 +818,7 @@ static inline uint8_t css_computed_border_left_width(
 	/* 7bits: uuuuttt : units | type */
 	if ((bits & 0x7) == CSS_BORDER_WIDTH_WIDTH) {
 		*length = style->border_width[3];
-		*unit = bits >> 3;
+		*unit = (css_unit) (bits >> 3);
 	}
 
 	return (bits & 0x7);
@@ -945,16 +945,16 @@ static inline uint8_t css_computed_top(
 		} else if ((bits & 0x3) == CSS_TOP_AUTO) {
 			/* Top is auto => -bottom */
 			*length = -style->bottom;
-			*unit = bottom >> 2;
+			*unit = (css_unit) (bottom >> 2);
 		} else {
 			*length = style->top;
-			*unit = bits >> 2;
+			*unit = (css_unit) (bits >> 2);
 		}
 
 		bits = CSS_TOP_SET;
 	} else if ((bits & 0x3) == CSS_TOP_SET) {
 		*length = style->top;
-		*unit = bits >> 2;
+		*unit = (css_unit) (bits >> 2);
 	}
 
 	/* 6bits: uuuutt : units | type */
@@ -987,18 +987,18 @@ static inline uint8_t css_computed_right(
 		} else if ((bits & 0x3) == CSS_RIGHT_AUTO) {
 			/* Right is auto => -left */
 			*length = -style->left;
-			*unit = left >> 2;
+			*unit = (css_unit) (left >> 2);
 		} else {
 			/** \todo Consider containing block's direction 
 			 * if overconstrained */
 			*length = style->right;
-			*unit = bits >> 2;
+			*unit = (css_unit) (bits >> 2);
 		}
 
 		bits = CSS_RIGHT_SET;
 	} else if ((bits & 0x3) == CSS_RIGHT_SET) {
 		*length = style->right;
-		*unit = bits >> 2;
+		*unit = (css_unit) (bits >> 2);
 	}
 
 	/* 6bits: uuuutt : units | type */
@@ -1032,16 +1032,16 @@ static inline uint8_t css_computed_bottom(
 				(top & 0x3) != CSS_TOP_AUTO) {
 			/* Bottom is auto or top is not auto => -top */
 			*length = -style->top;
-			*unit = top >> 2;
+			*unit = (css_unit) (top >> 2);
 		} else {
 			*length = style->bottom;
-			*unit = bits >> 2;
+			*unit = (css_unit) (bits >> 2);
 		}
 
 		bits = CSS_BOTTOM_SET;
 	} else if ((bits & 0x3) == CSS_BOTTOM_SET) {
 		*length = style->bottom;
-		*unit = bits >> 2;
+		*unit = (css_unit) (bits >> 2);
 	}
 
 	/* 6bits: uuuutt : units | type */
@@ -1074,18 +1074,18 @@ static inline uint8_t css_computed_left(
 		} else if ((bits & 0x3) == CSS_LEFT_AUTO) {
 			/* Left is auto => -right */
 			*length = -style->right;
-			*unit = right >> 2;
+			*unit = (css_unit) (right >> 2);
 		} else {
 			/** \todo Consider containing block's direction 
 			 * if overconstrained */
 			*length = style->left;
-			*unit = bits >> 2;
+			*unit = (css_unit) (bits >> 2);
 		}
 
 		bits = CSS_LEFT_SET;
 	} else if ((bits & 0x3) == CSS_LEFT_SET) {
 		*length = style->left;
-		*unit = bits >> 2;
+		*unit = (css_unit) (bits >> 2);
 	}
 
 	/* 6bits: uuuutt : units | type */
@@ -1198,7 +1198,7 @@ static inline uint8_t css_computed_height(
 	/* 6bits: uuuutt : units | type */
 	if ((bits & 0x3) == CSS_HEIGHT_SET) {
 		*length = style->height;
-		*unit = bits >> 2;
+		*unit = (css_unit) (bits >> 2);
 	}
 
 	return (bits & 0x3);
@@ -1225,7 +1225,7 @@ static inline uint8_t css_computed_line_height(
 	}
 
 	if ((bits & 0x3) == CSS_LINE_HEIGHT_DIMENSION) {
-		*unit = bits >> 2;
+		*unit = (css_unit) (bits >> 2);
 	}
 
 	return (bits & 0x3);
@@ -1288,7 +1288,7 @@ static inline uint8_t css_computed_margin_top(
 	/* 6bits: uuuutt : units | type */
 	if ((bits & 0x3) == CSS_MARGIN_SET) {
 		*length = style->margin[0];
-		*unit = bits >> 2;
+		*unit = (css_unit) (bits >> 2);
 	}
 
 	return (bits & 0x3);
@@ -1311,7 +1311,7 @@ static inline uint8_t css_computed_margin_right(
 	/* 6bits: uuuutt : units | type */
 	if ((bits & 0x3) == CSS_MARGIN_SET) {
 		*length = style->margin[1];
-		*unit = bits >> 2;
+		*unit = (css_unit) (bits >> 2);
 	}
 
 	return (bits & 0x3);
@@ -1334,7 +1334,7 @@ static inline uint8_t css_computed_margin_bottom(
 	/* 6bits: uuuutt : units | type */
 	if ((bits & 0x3) == CSS_MARGIN_SET) {
 		*length = style->margin[2];
-		*unit = bits >> 2;
+		*unit = (css_unit) (bits >> 2);
 	}
 
 	return (bits & 0x3);
@@ -1357,7 +1357,7 @@ static inline uint8_t css_computed_margin_left(
 	/* 6bits: uuuutt : units | type */
 	if ((bits & 0x3) == CSS_MARGIN_SET) {
 		*length = style->margin[3];
-		*unit = bits >> 2;
+		*unit = (css_unit) (bits >> 2);
 	}
 
 	return (bits & 0x3);
@@ -1448,7 +1448,7 @@ static inline uint8_t css_computed_max_height(
 	/* 6bits: uuuutt : units | type */
 	if ((bits & 0x3) == CSS_MAX_HEIGHT_SET) {
 		*length = style->max_height;
-		*unit = bits >> 2;
+		*unit = (css_unit) (bits >> 2);
 	}
 
 	return (bits & 0x3);
@@ -1471,7 +1471,7 @@ static inline uint8_t css_computed_max_width(
 	/* 6bits: uuuutt : units | type */
 	if ((bits & 0x3) == CSS_MAX_WIDTH_SET) {
 		*length = style->max_width;
-		*unit = bits >> 2;
+		*unit = (css_unit) (bits >> 2);
 	}
 
 	return (bits & 0x3);
@@ -1494,7 +1494,7 @@ static inline uint8_t css_computed_width(
 	/* 6bits: uuuutt : units | type */
 	if ((bits & 0x3) == CSS_WIDTH_SET) {
 		*length = style->width;
-		*unit = bits >> 2;
+		*unit = (css_unit) (bits >> 2);
 	}
 
 	return (bits & 0x3);
@@ -1573,7 +1573,7 @@ static inline uint8_t css_computed_min_height(
 	/* 5bits: uuuut : units | type */
 	if ((bits & 0x1) == CSS_MIN_HEIGHT_SET) {
 		*length = style->min_height;
-		*unit = bits >> 1;
+		*unit = (css_unit) (bits >> 1);
 	}
 
 	return (bits & 0x1);
@@ -1596,7 +1596,7 @@ static inline uint8_t css_computed_min_width(
 	/* 5bits: uuuut : units | type */
 	if ((bits & 0x1) == CSS_MIN_WIDTH_SET) {
 		*length = style->min_width;
-		*unit = bits >> 1;
+		*unit = (css_unit) (bits >> 1);
 	}
 
 	return (bits & 0x1);
@@ -1653,7 +1653,7 @@ static inline uint8_t css_computed_padding_top(
 	/* 5bits: uuuut : units | type */
 	if ((bits & 0x1) == CSS_PADDING_SET) {
 		*length = style->padding[0];
-		*unit = bits >> 1;
+		*unit = (css_unit) (bits >> 1);
 	}
 
 	return (bits & 0x1);
@@ -1676,7 +1676,7 @@ static inline uint8_t css_computed_padding_right(
 	/* 5bits: uuuut : units | type */
 	if ((bits & 0x1) == CSS_PADDING_SET) {
 		*length = style->padding[1];
-		*unit = bits >> 1;
+		*unit = (css_unit) (bits >> 1);
 	}
 
 	return (bits & 0x1);
@@ -1699,7 +1699,7 @@ static inline uint8_t css_computed_padding_bottom(
 	/* 5bits: uuuut : units | type */
 	if ((bits & 0x1) == CSS_PADDING_SET) {
 		*length = style->padding[2];
-		*unit = bits >> 1;
+		*unit = (css_unit) (bits >> 1);
 	}
 
 	return (bits & 0x1);
@@ -1722,7 +1722,7 @@ static inline uint8_t css_computed_padding_left(
 	/* 5bits: uuuut : units | type */
 	if ((bits & 0x1) == CSS_PADDING_SET) {
 		*length = style->padding[3];
-		*unit = bits >> 1;
+		*unit = (css_unit) (bits >> 1);
 	}
 
 	return (bits & 0x1);
@@ -1813,7 +1813,7 @@ static inline uint8_t css_computed_text_indent(
 	/* 5bits: uuuut : units | type */
 	if ((bits & 0x1) == CSS_TEXT_INDENT_SET) {
 		*length = style->text_indent;
-		*unit = bits >> 1;
+		*unit = (css_unit) (bits >> 1);
 	}
 
 	return (bits & 0x1);
@@ -1862,10 +1862,10 @@ static inline uint8_t css_computed_background_position(
 
 		/* 8bits: hhhhvvvv : hunit | vunit */
 		*hlength = style->background_position[0];
-		*hunit = bits1 >> 4;
+		*hunit = (css_unit) (bits1 >> 4);
 
 		*vlength = style->background_position[1];
-		*vunit = bits1 & 0xf;
+		*vunit = (css_unit) (bits1 & 0xf);
 	}
 
 	return bits;
