@@ -364,10 +364,17 @@ css_error css_parser_completed(css_parser *parser)
 const char *css_parser_read_charset(css_parser *parser, 
 		css_charset_source *source)
 {
+	const char *charset;
+	uint32_t src;
+
 	if (parser == NULL || source == NULL)
 		return NULL;
 
-	return parserutils_inputstream_read_charset(parser->stream, source);
+	charset = parserutils_inputstream_read_charset(parser->stream, &src);
+
+	*source = (css_charset_source) src;
+
+	return charset;
 }
 
 /**
