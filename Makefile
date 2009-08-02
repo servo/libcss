@@ -12,9 +12,9 @@ TESTRUNNER := $(PERL) build/testtools/testrunner.pl
 # Toolchain flags
 WARNFLAGS := -Wall -Wundef -Wpointer-arith -Wcast-align \
 	-Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes \
-	-Wmissing-declarations -Wnested-externs -Werror -pedantic
+	-Wmissing-declarations -Wnested-externs -pedantic
 ifneq ($(GCCVER),2)
-  WARNFLAGS := $(WARNFLAGS) -Wextra
+  WARNFLAGS := $(WARNFLAGS) -Werror -Wextra
 endif
 CFLAGS := -D_BSD_SOURCE -I$(CURDIR)/include/ \
 	-I$(CURDIR)/src $(WARNFLAGS) $(CFLAGS)
