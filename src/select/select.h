@@ -17,10 +17,10 @@
 
 typedef struct prop_state {
 	uint32_t specificity;		/* Specificity of property in result */
-	uint32_t set       : 1,		/* Whether property is set in result */
-	         origin    : 2,		/* Origin of property in result */
-	         important : 1,		/* Importance of property in result */
-	         inherit   : 1;		/* Property is set to inherit */
+	unsigned int set       : 1,	/* Whether property is set in result */
+	             origin    : 2,	/* Origin of property in result */
+	             important : 1,	/* Importance of property in result */
+	             inherit   : 1;	/* Property is set to inherit */
 } prop_state;
 
 /**

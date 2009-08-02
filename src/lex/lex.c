@@ -86,8 +86,8 @@ struct css_lexer
 						 * (used iff escapeSeen == true)
 						 */
 
-	uint32_t state    : 4,		/**< Current state */
-		 substate : 4;		/**< Current substate */
+	unsigned int state    : 4,	/**< Current state */
+		     substate : 4;	/**< Current substate */
 
 	struct {
 		uint8_t first;		/**< First character read for token */

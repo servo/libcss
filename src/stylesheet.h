@@ -53,9 +53,9 @@ typedef struct css_selector_detail {
 	lwc_string *name;	/**< Interned name */
 	lwc_string *value;	/**< Interned value, or NULL */
 
-	uint32_t type : 4,			/**< Type of selector */
-	         comb : 2,			/**< Type of combinator */
-	         next : 1;			/**< Another selector detail 
+	unsigned int type : 4,			/**< Type of selector */
+	             comb : 2,			/**< Type of combinator */
+	             next : 1;			/**< Another selector detail 
 						 * follows */
 } css_selector_detail;
 
@@ -95,10 +95,10 @@ struct css_rule {
 	css_rule *next;				/**< next in list */
 	css_rule *prev;				/**< previous in list */
 
-	uint32_t type  :  4,			/**< css_rule_type */
-	         index : 16,			/**< index in sheet */
-	         items :  8,			/**< # items in rule */
-	         ptype :  1;			/**< css_rule_parent_type */
+	unsigned int type  :  4,		/**< css_rule_type */
+	             index : 16,		/**< index in sheet */
+	             items :  8,		/**< # items in rule */
+	             ptype :  1;		/**< css_rule_parent_type */
 };
 
 typedef struct css_rule_selector {

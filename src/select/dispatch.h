@@ -37,8 +37,8 @@ extern struct prop_table {
 			const css_computed_style *child,
 			css_computed_style *result);
 
-	uint32_t inherited : 1,
-	         group : 2;
+	unsigned int inherited : 1,
+	             group : 2;
 } prop_dispatch[CSS_N_PROPERTIES];
 
 #endif
