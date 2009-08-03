@@ -77,7 +77,7 @@ void make_style_important(css_style *style)
 } while(0)
 
 	while (offset < length) {
-		opcode op;
+		opcode_t op;
 		uint8_t flags;
 		uint32_t value;
 		uint32_t opv = *((uint32_t *) bytecode);

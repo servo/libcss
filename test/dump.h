@@ -638,7 +638,7 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 } while(0)
 
 	while (offset < length) {
-		opcode op;
+		opcode_t op;
 		uint32_t value;
 		uint32_t opv = *((uint32_t *) bytecode);
 

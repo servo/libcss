@@ -1168,7 +1168,7 @@ css_error cascade_style(const css_style *style, css_select_state *state)
 	css_style s = *style;
 
 	while (s.length > 0) {
-		opcode op;
+		opcode_t op;
 		css_error error;
 		uint32_t opv = *((uint32_t *) s.bytecode);
 

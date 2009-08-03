@@ -14,7 +14,7 @@
 #include <libcss/types.h>
 #include <libcss/properties.h>
 
-typedef enum css_properties_e opcode;
+typedef enum css_properties_e opcode_t;
 
 enum flag {
 	FLAG_IMPORTANT			= (1<<0),
@@ -53,12 +53,12 @@ typedef enum shape {
 	SHAPE_RECT = 0
 } shape;
 
-static inline uint32_t buildOPV(opcode opcode, uint8_t flags, uint16_t value)
+static inline uint32_t buildOPV(opcode_t opcode, uint8_t flags, uint16_t value)
 {
 	return (opcode & 0x3ff) | (flags << 10) | ((value & 0x3fff) << 18);
 }
 
-static inline opcode getOpcode(uint32_t OPV)
+static inline opcode_t getOpcode(uint32_t OPV)
 {
 	return (OPV & 0x3ff);
 }
