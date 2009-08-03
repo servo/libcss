@@ -158,7 +158,6 @@ css_error parse_colour_specifier(css_language *c,
 			goto invalid;
 	}
 
-	/** \todo Is this endian safe? */
 	*result = (r << 24) | (g << 16) | (b << 8);
 
 	return CSS_OK;
@@ -384,7 +383,6 @@ css_error parse_hash_colour(lwc_string *data, uint32_t *result)
 	} else
 		return CSS_INVALID;
 
-	/** \todo Is this endian safe? */
 	*result = (r << 24) | (g << 16) | (b << 8);
 
 	return CSS_OK;
