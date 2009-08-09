@@ -20,6 +20,7 @@ Requirements
   LibCSS also requires the following libraries to be installed:
 
     +  LibParserUtils
+    +  LibWapcaplet
 
 Compilation
 -----------
