@@ -4524,3 +4524,73 @@ max-height: 30%; min-height: 2em; }
 | *
 #reset
 
+#data
+* { -libcss-align: none 0; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { -libcss-align: 0pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { -libcss-align: -0pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { -libcss-align: fixed inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { -libcss-align: left right; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { -libcss-align: left, right; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { -libcss-align: left | right; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { -libcss-align: justified; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { -libcss-align: center 50%; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { -libcss-align: 50%; }
+#errors
+#expected
+| *
+#reset
+

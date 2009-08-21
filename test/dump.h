@@ -1952,6 +1952,13 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 				}
 				break;
 			case CSS_PROP_TEXT_ALIGN:
+			case CSS_PROP_LIBCSS_ALIGN:
+				assert(LIBCSS_ALIGN_LEFT == TEXT_ALIGN_LEFT);
+				assert(LIBCSS_ALIGN_RIGHT == TEXT_ALIGN_RIGHT);
+				assert(LIBCSS_ALIGN_CENTER == 
+						TEXT_ALIGN_CENTER);
+				assert(LIBCSS_ALIGN_JUSTIFY == 
+						TEXT_ALIGN_JUSTIFY);
 				switch (value) {
 				case TEXT_ALIGN_LEFT:
 					*ptr += sprintf(*ptr, "left");

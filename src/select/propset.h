@@ -1679,4 +1679,22 @@ static inline css_error set_list_style_position(
 #undef LIST_STYLE_POSITION_SHIFT
 #undef LIST_STYLE_POSITION_INDEX
 
+#define LIBCSS_ALIGN_INDEX 33
+#define LIBCSS_ALIGN_SHIFT 1
+#define LIBCSS_ALIGN_MASK  0xe
+static inline uint8_t set_libcss_align(
+		css_computed_style *style, uint8_t type)
+{
+	uint8_t *bits = &style->bits[LIBCSS_ALIGN_INDEX];
+
+	/* 3bits: type */
+	*bits = (*bits & ~LIBCSS_ALIGN_MASK) |
+			((type & 0x7) << LIBCSS_ALIGN_SHIFT);
+
+	return CSS_OK;
+}
+#undef LIBCSS_ALIGN_MASK
+#undef LIBCSS_ALIGN_SHIFT
+#undef LIBCSS_ALIGN_INDEX
+
 #endif

@@ -127,5 +127,6 @@ const css_prop_handler property_handlers[LAST_PROP + 1 - FIRST_PROP] =
 	parse_width,
 	parse_word_spacing,
 	parse_z_index,
+	parse_libcss_align
 };
 

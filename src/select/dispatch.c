@@ -803,5 +803,13 @@ struct prop_table prop_dispatch[CSS_N_PROPERTIES] = {
 		compose_z_index,
 		0,
 		GROUP_NORMAL
+	},
+	{
+		cascade_libcss_align,
+		set_libcss_align_from_hint,
+		initial_libcss_align,
+		compose_libcss_align,
+		1,
+		GROUP_NORMAL
 	}
 };

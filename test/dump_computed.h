@@ -2247,5 +2247,31 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	}
 	ptr += wrote;
 	*len -= wrote;
+
+	/* -libcss-align */
+	val = css_computed_libcss_align(style);
+	switch (val) {
+	case CSS_LIBCSS_ALIGN_LEFT:
+		wrote = snprintf(ptr, *len, "-libcss-align: left\n");
+		break;
+	case CSS_LIBCSS_ALIGN_RIGHT:
+		wrote = snprintf(ptr, *len, "-libcss-align: right\n");
+		break;
+	case CSS_LIBCSS_ALIGN_CENTER:
+		wrote = snprintf(ptr, *len, "-libcss-align: center\n");
+		break;
+	case CSS_LIBCSS_ALIGN_JUSTIFY:
+		wrote = snprintf(ptr, *len, "-libcss-align: justify\n");
+		break;
+	case CSS_LIBCSS_ALIGN_DEFAULT:
+		wrote = snprintf(ptr, *len, "-libcss-align: default\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
 }
 

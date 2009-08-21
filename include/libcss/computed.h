@@ -173,8 +173,9 @@ struct css_computed_style {
  * unicode_bidi			  2
  * visibility			  2
  * white_space			  3
+ * -libcss_align		  3
  *				---
- *				 83 bits
+ *				 86 bits
  *
  * Colours are 32bits of RRGGBBAA
  * Dimensions are encoded as a fixed point value + 4 bits of unit data
@@ -232,7 +233,7 @@ struct css_computed_style {
  * 				  1 bit		  sizeof(ptr) bytes
  *
  * 				___		___
- *				268 bits	140 + 4sizeof(ptr) bytes
+ *				271 bits	140 + 4sizeof(ptr) bytes
  *
  *				 34 bytes	140 + 4sizeof(ptr) bytes
  *				===================
@@ -274,7 +275,7 @@ struct css_computed_style {
  * 31 bbbbllll	border-bottom-style | border-left-style
  * 32 ffffllll	font-weight         | list-style-type
  * 33 oooottuu	outline-style       | table-layout          | unicode-bidi
- * 34 vvll....	visibility          | list-style-position   | <unused>
+ * 34 vvllaaa.	visibility          | list-style-position   | -libcss-align | <unused>
  */
 	uint8_t bits[34];
 
@@ -2175,5 +2176,22 @@ static inline uint8_t css_computed_list_style_position(
 #undef LIST_STYLE_POSITION_MASK
 #undef LIST_STYLE_POSITION_SHIFT
 #undef LIST_STYLE_POSITION_INDEX
+
+#define LIBCSS_ALIGN_INDEX 33
+#define LIBCSS_ALIGN_SHIFT 1
+#define LIBCSS_ALIGN_MASK  0xe
+static inline uint8_t css_computed_libcss_align(
+		const css_computed_style *style)
+{
+	uint8_t bits = style->bits[LIBCSS_ALIGN_INDEX];
+	bits &= LIBCSS_ALIGN_MASK;
+	bits >>= LIBCSS_ALIGN_SHIFT;
+
+	/* 3bits: type */
+	return bits;
+}
+#undef LIBCSS_ALIGN_MASK
+#undef LIBCSS_ALIGN_SHIFT
+#undef LIBCSS_ALIGN_INDEX
 
 #endif

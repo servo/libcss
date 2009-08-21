@@ -806,6 +806,14 @@ css_error initial_z_index(css_select_state *state);
 css_error compose_z_index(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result);
+css_error cascade_libcss_align(uint32_t opv, css_style *style,
+		css_select_state *state);
+css_error set_libcss_align_from_hint(const css_hint *hint,
+		css_computed_style *style);
+css_error initial_libcss_align(css_select_state *state);
+css_error compose_libcss_align(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result);
 
 #endif
 

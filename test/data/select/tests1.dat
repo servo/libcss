@@ -303,6 +303,7 @@ white-space: normal
 width: auto
 word-spacing: normal
 z-index: auto
+-libcss-align: default
 #reset
 
 #tree all
@@ -388,6 +389,7 @@ white-space: normal
 width: auto
 word-spacing: normal
 z-index: auto
+-libcss-align: default
 #reset
 
 #tree
@@ -537,5 +539,6 @@ white-space: normal
 width: auto
 word-spacing: normal
 z-index: auto
+-libcss-align: default
 #reset
 

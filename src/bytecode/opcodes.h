@@ -628,5 +628,12 @@ enum op_z_index {
 	Z_INDEX_AUTO			= 0x0000
 };
 
+enum op_libcss_align {
+	LIBCSS_ALIGN_LEFT		= 0x0000,
+	LIBCSS_ALIGN_RIGHT		= 0x0001,
+	LIBCSS_ALIGN_CENTER		= 0x0002,
+	LIBCSS_ALIGN_JUSTIFY		= 0x0003
+};
+
 #endif
 

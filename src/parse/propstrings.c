@@ -157,6 +157,7 @@ const stringmap_entry stringmap[LAST_KNOWN] = {
 	{ "width", SLEN("width") },
 	{ "word-spacing", SLEN("word-spacing") },
 	{ "z-index", SLEN("z-index") },
+	{ "-libcss-align", SLEN("-libcss-align") },
 
 	{ "inherit", SLEN("inherit") },
 	{ "important", SLEN("important") },

@@ -3743,3 +3743,40 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 | 1 *
 |   0x02000062 0xfffffc00
 #reset
+
+##
+## 63 - -libcss-align
+##
+
+#data
+* { -libcss-align: left; }
+#errors
+#expected
+| 1 *
+|   0x00000063
+#reset
+
+#data
+* { -libcss-align: right; }
+#errors
+#expected
+| 1 *
+|   0x00040063
+#reset
+
+#data
+* { -libcss-align: center; }
+#errors
+#expected
+| 1 *
+|   0x00080063
+#reset
+
+#data
+* { -libcss-align: justify; }
+#errors
+#expected
+| 1 *
+|   0x000c0063
+#reset
+
