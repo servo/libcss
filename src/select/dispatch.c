@@ -809,7 +809,7 @@ struct prop_table prop_dispatch[CSS_N_PROPERTIES] = {
 		set_libcss_align_from_hint,
 		initial_libcss_align,
 		compose_libcss_align,
-		1,
+		0,
 		GROUP_NORMAL
 	}
 };
