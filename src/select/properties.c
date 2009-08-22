@@ -4639,6 +4639,15 @@ css_error cascade_text_align(uint32_t opv, css_style *style,
 		case TEXT_ALIGN_JUSTIFY:
 			value = CSS_TEXT_ALIGN_JUSTIFY;
 			break;
+		case TEXT_ALIGN_LIBCSS_LEFT:
+			value = CSS_TEXT_ALIGN_LIBCSS_LEFT;
+			break;
+		case TEXT_ALIGN_LIBCSS_CENTER:
+			value = CSS_TEXT_ALIGN_LIBCSS_CENTER;
+			break;
+		case TEXT_ALIGN_LIBCSS_RIGHT:
+			value = CSS_TEXT_ALIGN_LIBCSS_RIGHT;
+			break;
 		}
 	}
 
@@ -5450,62 +5459,6 @@ css_error compose_z_index(const css_computed_style *parent,
 	}
 
 	return set_z_index(result, type, index);
-}
-
-css_error cascade_libcss_align(uint32_t opv, css_style *style, 
-		css_select_state *state)
-{
-	uint16_t value = CSS_LIBCSS_ALIGN_INHERIT;
-
-	UNUSED(style);
-
-	if (isInherit(opv) == false) {
-		switch (getValue(opv)) {
-		case LIBCSS_ALIGN_LEFT:
-			value = CSS_LIBCSS_ALIGN_LEFT;
-			break;
-		case LIBCSS_ALIGN_RIGHT:
-			value = CSS_LIBCSS_ALIGN_RIGHT;
-			break;
-		case LIBCSS_ALIGN_CENTER:
-			value = CSS_LIBCSS_ALIGN_CENTER;
-			break;
-		case LIBCSS_ALIGN_JUSTIFY:
-			value = CSS_LIBCSS_ALIGN_JUSTIFY;
-			break;
-		}
-	}
-
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
-			isInherit(opv))) {
-		return set_libcss_align(state->result, value);
-	}
-
-	return CSS_OK;
-}
-
-css_error set_libcss_align_from_hint(const css_hint *hint,
-		css_computed_style *style)
-{
-	return set_libcss_align(style, hint->status);
-}
-
-css_error initial_libcss_align(css_select_state *state)
-{
-	return set_libcss_align(state->result, CSS_LIBCSS_ALIGN_DEFAULT);
-}
-
-css_error compose_libcss_align(const css_computed_style *parent,	
-		const css_computed_style *child,
-		css_computed_style *result)
-{
-	uint8_t type = get_libcss_align(child);
-
-	if (type == CSS_LIBCSS_ALIGN_INHERIT) {
-		type = get_libcss_align(parent);
-	}
-
-	return set_libcss_align(result, type);
 }
 
 /******************************************************************************

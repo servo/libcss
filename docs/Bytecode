@@ -940,6 +940,9 @@ Opcodes
 		1     => right,
 		2     => center,
 		3     => justify,
+		4     => -libcss-left,
+		5     => -libcss-center,
+		6     => -libcss-right,
 		other => Reserved for future expansion.
 
 55 - text-decoration
@@ -1097,13 +1100,5 @@ Opcodes
 				bits 0-6: 0000000 => auto,
 					  other   => rffe.
 
-63 - -libcss-align
-	<value> (14bits) :
-		0     => left,
-		1     => right,
-		2     => center,
-		3     => justify,
-		other => Reserved for future expansion.
-
-64-3ff - Reserved for future expansion.
+63-3ff - Reserved for future expansion.
 

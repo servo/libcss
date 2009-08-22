@@ -167,15 +167,14 @@ struct css_computed_style {
  * outline_style		  4
  * position			  3
  * table_layout			  2
- * text_align			  3
+ * text_align			  4
  * text_decoration		  5
  * text_transform		  3
  * unicode_bidi			  2
  * visibility			  2
  * white_space			  3
- * -libcss_align		  3
  *				---
- *				 86 bits
+ *				 84 bits
  *
  * Colours are 32bits of RRGGBBAA
  * Dimensions are encoded as a fixed point value + 4 bits of unit data
@@ -233,7 +232,7 @@ struct css_computed_style {
  * 				  1 bit		  sizeof(ptr) bytes
  *
  * 				___		___
- *				271 bits	140 + 4sizeof(ptr) bytes
+ *				269 bits	140 + 4sizeof(ptr) bytes
  *
  *				 34 bytes	140 + 4sizeof(ptr) bytes
  *				===================
@@ -265,7 +264,7 @@ struct css_computed_style {
  * 21 mmmmmccc	min-width           | clear
  * 22 tttttooo	padding-top         | overflow
  * 23 rrrrrppp	padding-right       | position
- * 24 bbbbbttt	padding-bottom      | text-align
+ * 24 bbbbb...	padding-bottom      | <unused>
  * 25 lllllttt	padding-left        | text-transform
  * 26 tttttwww	text-indent         | white-space
  * 27 bbbbbbbb	background-position
@@ -275,7 +274,7 @@ struct css_computed_style {
  * 31 bbbbllll	border-bottom-style | border-left-style
  * 32 ffffllll	font-weight         | list-style-type
  * 33 oooottuu	outline-style       | table-layout          | unicode-bidi
- * 34 vvllaaa.	visibility          | list-style-position   | -libcss-align | <unused>
+ * 34 vvlltttt	visibility          | list-style-position   | text-align
  */
 	uint8_t bits[34];
 
@@ -1766,23 +1765,6 @@ static inline uint8_t css_computed_position(
 #undef POSITION_SHIFT
 #undef POSITION_INDEX
 
-#define TEXT_ALIGN_INDEX 23
-#define TEXT_ALIGN_SHIFT 0
-#define TEXT_ALIGN_MASK  0x7
-static inline uint8_t css_computed_text_align(
-		const css_computed_style *style)
-{
-	uint8_t bits = style->bits[TEXT_ALIGN_INDEX];
-	bits &= TEXT_ALIGN_MASK;
-	bits >>= TEXT_ALIGN_SHIFT;
-
-	/* 3bits: type */
-	return bits;
-}
-#undef TEXT_ALIGN_MASK
-#undef TEXT_ALIGN_SHIFT
-#undef TEXT_ALIGN_INDEX
-
 #define TEXT_TRANSFORM_INDEX 24
 #define TEXT_TRANSFORM_SHIFT 0
 #define TEXT_TRANSFORM_MASK  0x7
@@ -2177,21 +2159,21 @@ static inline uint8_t css_computed_list_style_position(
 #undef LIST_STYLE_POSITION_SHIFT
 #undef LIST_STYLE_POSITION_INDEX
 
-#define LIBCSS_ALIGN_INDEX 33
-#define LIBCSS_ALIGN_SHIFT 1
-#define LIBCSS_ALIGN_MASK  0xe
-static inline uint8_t css_computed_libcss_align(
+#define TEXT_ALIGN_INDEX 33
+#define TEXT_ALIGN_SHIFT 0
+#define TEXT_ALIGN_MASK  0xf
+static inline uint8_t css_computed_text_align(
 		const css_computed_style *style)
 {
-	uint8_t bits = style->bits[LIBCSS_ALIGN_INDEX];
-	bits &= LIBCSS_ALIGN_MASK;
-	bits >>= LIBCSS_ALIGN_SHIFT;
+	uint8_t bits = style->bits[TEXT_ALIGN_INDEX];
+	bits &= TEXT_ALIGN_MASK;
+	bits >>= TEXT_ALIGN_SHIFT;
 
-	/* 3bits: type */
+	/* 4bits: type */
 	return bits;
 }
-#undef LIBCSS_ALIGN_MASK
-#undef LIBCSS_ALIGN_SHIFT
-#undef LIBCSS_ALIGN_INDEX
+#undef TEXT_ALIGN_MASK
+#undef TEXT_ALIGN_SHIFT
+#undef TEXT_ALIGN_INDEX
 
 #endif

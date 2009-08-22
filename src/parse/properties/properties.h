@@ -367,9 +367,6 @@ css_error parse_word_spacing(css_language *c,
 css_error parse_z_index(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style **result);
-css_error parse_libcss_align(css_language *c,
-		const parserutils_vector *vector, int *ctx,
-		css_style **result);
 
 #endif
 

@@ -3167,6 +3167,30 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 |   0x000c0054
 #reset
 
+#data
+* { text-align: -libcss-left; }
+#errors
+#expected
+| 1 *
+|   0x00100054
+#reset
+
+#data
+* { text-align: -libcss-center; }
+#errors
+#expected
+| 1 *
+|   0x00140054
+#reset
+
+#data
+* { text-align: -libcss-right; }
+#errors
+#expected
+| 1 *
+|   0x00180054
+#reset
+
 ##
 ## 55 - text-decoration
 ##
@@ -3742,41 +3766,5 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #expected
 | 1 *
 |   0x02000062 0xfffffc00
-#reset
-
-##
-## 63 - -libcss-align
-##
-
-#data
-* { -libcss-align: left; }
-#errors
-#expected
-| 1 *
-|   0x00000063
-#reset
-
-#data
-* { -libcss-align: right; }
-#errors
-#expected
-| 1 *
-|   0x00040063
-#reset
-
-#data
-* { -libcss-align: center; }
-#errors
-#expected
-| 1 *
-|   0x00080063
-#reset
-
-#data
-* { -libcss-align: justify; }
-#errors
-#expected
-| 1 *
-|   0x000c0063
 #reset
 

@@ -1310,23 +1310,6 @@ static inline uint8_t get_position(
 #undef POSITION_SHIFT
 #undef POSITION_INDEX
 
-#define TEXT_ALIGN_INDEX 23
-#define TEXT_ALIGN_SHIFT 0
-#define TEXT_ALIGN_MASK  0x7
-static inline uint8_t get_text_align(
-		const css_computed_style *style)
-{
-	uint8_t bits = style->bits[TEXT_ALIGN_INDEX];
-	bits &= TEXT_ALIGN_MASK;
-	bits >>= TEXT_ALIGN_SHIFT;
-
-	/* 3bits: type */
-	return bits;
-}
-#undef TEXT_ALIGN_MASK
-#undef TEXT_ALIGN_SHIFT
-#undef TEXT_ALIGN_INDEX
-
 #define TEXT_TRANSFORM_INDEX 24
 #define TEXT_TRANSFORM_SHIFT 0
 #define TEXT_TRANSFORM_MASK  0x7
@@ -1721,21 +1704,21 @@ static inline uint8_t get_list_style_position(
 #undef LIST_STYLE_POSITION_SHIFT
 #undef LIST_STYLE_POSITION_INDEX
 
-#define LIBCSS_ALIGN_INDEX 33
-#define LIBCSS_ALIGN_SHIFT 1
-#define LIBCSS_ALIGN_MASK  0xe
-static inline uint8_t get_libcss_align(
+#define TEXT_ALIGN_INDEX 33
+#define TEXT_ALIGN_SHIFT 0
+#define TEXT_ALIGN_MASK  0xf
+static inline uint8_t get_text_align(
 		const css_computed_style *style)
 {
-	uint8_t bits = style->bits[LIBCSS_ALIGN_INDEX];
-	bits &= LIBCSS_ALIGN_MASK;
-	bits >>= LIBCSS_ALIGN_SHIFT;
+	uint8_t bits = style->bits[TEXT_ALIGN_INDEX];
+	bits &= TEXT_ALIGN_MASK;
+	bits >>= TEXT_ALIGN_SHIFT;
 
-	/* 3bits: type */
+	/* 4bits: type */
 	return bits;
 }
-#undef LIBCSS_ALIGN_MASK
-#undef LIBCSS_ALIGN_SHIFT
-#undef LIBCSS_ALIGN_INDEX
+#undef TEXT_ALIGN_MASK
+#undef TEXT_ALIGN_SHIFT
+#undef TEXT_ALIGN_INDEX
 
 #endif
