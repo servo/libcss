@@ -4678,6 +4678,17 @@ css_error compose_text_align(const css_computed_style *parent,
 
 	if (type == CSS_TEXT_ALIGN_INHERIT) {
 		type = get_text_align(parent);
+	} else if (type == CSS_TEXT_ALIGN_INHERIT_IF_NON_MAGIC) {
+		/* This is purely for the benefit of HTML tables */
+		type = get_text_align(parent);
+
+		/* If the parent's text-align is a magical one, 
+		 * then reset to the default value. Otherwise, 
+		 * inherit as normal. */
+		if (type == CSS_TEXT_ALIGN_LIBCSS_LEFT ||
+				type == CSS_TEXT_ALIGN_LIBCSS_CENTER ||
+				type == CSS_TEXT_ALIGN_LIBCSS_RIGHT)
+			type = CSS_TEXT_ALIGN_DEFAULT;
 	}
 
 	return set_text_align(result, type);
