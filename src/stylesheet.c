@@ -162,6 +162,7 @@ css_error css_stylesheet_create(css_language_level level,
  */
 css_error css_stylesheet_destroy(css_stylesheet *sheet)
 {
+	uint32_t bucket;
 	css_rule *r, *s;
 
 	if (sheet == NULL)
@@ -184,6 +185,17 @@ css_error css_stylesheet_destroy(css_stylesheet *sheet)
 	}
 
 	css_selector_hash_destroy(sheet->selectors);
+
+	/* Release cached free styles */
+	for (bucket = 0; bucket != N_ELEMENTS(sheet->free_styles); bucket++) {
+		while (sheet->free_styles[bucket] != NULL) {
+			css_style *s = sheet->free_styles[bucket];
+
+			sheet->free_styles[bucket] = s->bytecode;
+
+			sheet->alloc(s, 0, sheet->pw);
+		}
+	}
 
 	/* These two may have been destroyed when parsing completed */
 	if (sheet->parser_frontend != NULL)
@@ -228,6 +240,7 @@ css_error css_stylesheet_append_data(css_stylesheet *sheet,
 css_error css_stylesheet_data_done(css_stylesheet *sheet)
 {
 	const css_rule *r;
+	uint32_t bucket;
 	css_error error;
 
 	if (sheet == NULL)
@@ -246,6 +259,17 @@ css_error css_stylesheet_data_done(css_stylesheet *sheet)
 
 	sheet->parser_frontend = NULL;
 	sheet->parser = NULL;
+
+	/* Release cached free styles */
+	for (bucket = 0; bucket != N_ELEMENTS(sheet->free_styles); bucket++) {
+		while (sheet->free_styles[bucket] != NULL) {
+			css_style *s = sheet->free_styles[bucket];
+
+			sheet->free_styles[bucket] = s->bytecode;
+
+			sheet->alloc(s, 0, sheet->pw);
+		}
+	}
 
 	/* Determine if there are any pending imports */
 	for (r = sheet->rule_list; r != NULL; r = r->next) {
@@ -565,13 +589,21 @@ css_error css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len,
 		css_style **style)
 {
 	css_style *s;
+	const uint32_t alloclen = ((len + 15) & ~15);
+	const uint32_t bucket = (alloclen / N_ELEMENTS(sheet->free_styles)) - 1;
 
 	if (sheet == NULL || len == 0 || style == NULL)
 		return CSS_BADPARM;
 
-	s = sheet->alloc(NULL, sizeof(css_style) + len, sheet->pw);
-	if (s == NULL)
-		return CSS_NOMEM;
+	if (bucket < N_ELEMENTS(sheet->free_styles) &&
+			sheet->free_styles[bucket] != NULL) {
+		s = sheet->free_styles[bucket];
+		sheet->free_styles[bucket] = s->bytecode;
+	} else {
+		s = sheet->alloc(NULL, sizeof(css_style) + alloclen, sheet->pw);
+		if (s == NULL)
+			return CSS_NOMEM;
+	}
 
 	/* DIY variable-sized data member */
 	s->bytecode = ((uint8_t *) s + sizeof(css_style));
@@ -593,10 +625,20 @@ css_error css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len,
  */
 css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style)
 {
+	uint32_t alloclen, bucket;
+
 	if (sheet == NULL || style == NULL)
 		return CSS_BADPARM;
 
-	sheet->alloc(style, 0, sheet->pw);
+	alloclen = ((style->length + 15) & ~15);
+	bucket = (alloclen / N_ELEMENTS(sheet->free_styles)) - 1;
+
+	if (bucket < N_ELEMENTS(sheet->free_styles)) {
+		style->bytecode = sheet->free_styles[bucket];
+		sheet->free_styles[bucket] = style;
+	} else {
+		sheet->alloc(style, 0, sheet->pw);
+	}
 
 	return CSS_OK;
 }
@@ -1067,20 +1109,31 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 
 	if (cur != NULL) {
 		/* Already have a style, so append to the end of the bytecode */
-		css_style *temp = sheet->alloc(cur, 
-				sizeof(css_style) + cur->length + style->length,
-				sheet->pw);
-		if (temp == NULL)
-			return CSS_NOMEM;
+		const uint32_t reqlen = cur->length + style->length;
+		const uint32_t curlen = ((cur->length + 15) & ~15);
 
-		/* Ensure bytecode pointer is correct */
-		temp->bytecode = ((uint8_t *) temp + sizeof(css_style));
+		if (curlen < reqlen) {
+			css_style *temp;
+			css_error error;
+
+			error = css_stylesheet_style_create(sheet, 
+					reqlen, &temp);
+			if (error != CSS_OK)
+				return error;
+
+			memcpy((uint8_t *) temp->bytecode, cur->bytecode, 
+					cur->length);
+			temp->length = cur->length;
+
+			css_stylesheet_style_destroy(sheet, cur);
+
+			cur = temp;
+		}
 
 		/** \todo Can we optimise the bytecode here? */
-		memcpy((uint8_t *) temp->bytecode + temp->length, 
+		memcpy((uint8_t *) cur->bytecode + cur->length, 
 				style->bytecode, style->length);
 
-		cur = temp;
 		cur->length += style->length;
 
 		/* Add this to the sheet's size */

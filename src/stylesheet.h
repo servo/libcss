@@ -24,7 +24,6 @@
 typedef struct css_rule css_rule;
 typedef struct css_selector css_selector;
 
-/** \todo would a parserutils_buffer be better here? */
 typedef struct css_style {
 	uint32_t length;		/**< Length, in bytes, of bytecode */
 	void *bytecode;			/**< Pointer to bytecode */
@@ -176,6 +175,8 @@ struct css_stylesheet {
 	bool inline_style;			/**< Is an inline style */
 
 	size_t size;				/**< Size, in bytes */
+
+	css_style *free_styles[4];		/**< Free styles: 16B buckets */
 
 	css_url_resolution_fn resolve;		/**< URL resolution function */
 	void *resolve_pw;			/**< Private word */
