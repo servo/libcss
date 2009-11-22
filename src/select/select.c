@@ -417,9 +417,6 @@ css_error set_hint(css_select_state *state, uint32_t i)
 	/* Retrieve this property's hint from the client */
 	error = state->handler->node_presentational_hint(state->pw, 
 			state->node, i, &hint);
-	if (error != CSS_OK && error != CSS_PROPERTY_NOT_SET)
-		return error;
-
 	if (error != CSS_OK)
 		return (error == CSS_PROPERTY_NOT_SET) ? CSS_OK : error;
 

@@ -61,7 +61,7 @@ static inline void consumeWhitespace(const parserutils_vector *vector, int *ctx)
 
 	while ((token = parserutils_vector_peek(vector, *ctx)) != NULL &&
 			token->type == CSS_TOKEN_S)
-		token = parserutils_vector_iterate(vector, ctx);
+		parserutils_vector_iterate(vector, ctx);
 }
 
 /**

@@ -1448,6 +1448,8 @@ css_error parseBlockContent(css_parser *parser)
 
 				return transition(parser, to, subsequent);
 			}
+
+			break;
 		case WS:
 			error = eatWS(parser);
 			if (error != CSS_OK)

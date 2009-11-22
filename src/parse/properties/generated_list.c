@@ -671,7 +671,7 @@ css_error parse_quotes(css_language *c,
 
 			close = token->idata;
 
-			token = parserutils_vector_iterate(vector, &temp_ctx);
+			parserutils_vector_iterate(vector, &temp_ctx);
 
 			consumeWhitespace(vector, &temp_ctx);
 
@@ -736,7 +736,7 @@ css_error parse_quotes(css_language *c,
 
 			close = token->idata;
 
-			token = parserutils_vector_iterate(vector, ctx);
+			parserutils_vector_iterate(vector, ctx);
 
 			consumeWhitespace(vector, ctx);
 

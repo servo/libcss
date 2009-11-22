@@ -117,8 +117,6 @@ css_error parse_font(css_language *c,
 
 		if (error == CSS_OK) {
 			consumeWhitespace(vector, ctx);
-
-			token = parserutils_vector_peek(vector, *ctx);
 		} else {
 			break;
 		}
