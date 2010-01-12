@@ -84,9 +84,11 @@ css_error css_select_ctx_create(css_allocator_fn alloc, void *pw,
 css_error css_select_ctx_destroy(css_select_ctx *ctx);
 
 css_error css_select_ctx_append_sheet(css_select_ctx *ctx, 
-		const css_stylesheet *sheet);
+		const css_stylesheet *sheet, 
+		css_origin origin, uint64_t media);
 css_error css_select_ctx_insert_sheet(css_select_ctx *ctx,
-		const css_stylesheet *sheet, uint32_t index);
+		const css_stylesheet *sheet, uint32_t index,
+		css_origin origin, uint64_t media);
 css_error css_select_ctx_remove_sheet(css_select_ctx *ctx,
 		const css_stylesheet *sheet);
 

@@ -58,8 +58,7 @@ int main(int argc, char **argv)
 	for (count = 0; count < ITERATIONS; count++) {
 
 		assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", argv[2], 
-				NULL, CSS_ORIGIN_AUTHOR, CSS_MEDIA_ALL, false,
-				false, ctx, myrealloc, NULL, 
+				NULL, false, false, ctx, myrealloc, NULL, 
 				resolve_url, NULL, &sheet) == CSS_OK);
 
 		fp = fopen(argv[2], "rb");
@@ -115,9 +114,8 @@ int main(int argc, char **argv)
 				buf[lwc_string_length(url)] = '\0';
 
 				assert(css_stylesheet_create(CSS_LEVEL_21,
-					"UTF-8", buf, NULL, CSS_ORIGIN_AUTHOR,
-					media, false, false, ctx, myrealloc, 
-					NULL, resolve_url, NULL,
+					"UTF-8", buf, NULL, false, false, ctx, 
+					myrealloc, NULL, resolve_url, NULL,
 					&import) == CSS_OK);
 
 				assert(css_stylesheet_data_done(import) == 

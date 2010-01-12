@@ -26,8 +26,7 @@ typedef css_error (*css_url_resolution_fn)(void *pw, lwc_context *dict,
 
 css_error css_stylesheet_create(css_language_level level,
 		const char *charset, const char *url, const char *title,
-		css_origin origin, uint64_t media, bool allow_quirks,
-		bool inline_style, lwc_context *dict, 
+		bool allow_quirks, bool inline_style, lwc_context *dict, 
 		css_allocator_fn alloc, void *alloc_pw, 
 		css_url_resolution_fn resolve, void *resolve_pw,
 		css_stylesheet **stylesheet);
@@ -46,8 +45,6 @@ css_error css_stylesheet_get_language_level(css_stylesheet *sheet,
 		css_language_level *level);
 css_error css_stylesheet_get_url(css_stylesheet *sheet, const char **url);
 css_error css_stylesheet_get_title(css_stylesheet *sheet, const char **title);
-css_error css_stylesheet_get_origin(css_stylesheet *sheet, css_origin *origin);
-css_error css_stylesheet_get_media(css_stylesheet *sheet, uint64_t *media);
 css_error css_stylesheet_quirks_allowed(css_stylesheet *sheet, bool *allowed);
 css_error css_stylesheet_used_quirks(css_stylesheet *sheet, bool *quirks);
 

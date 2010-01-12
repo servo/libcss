@@ -25,8 +25,6 @@ static size_t _rule_size(const css_rule *rule);
  * \param charset          The charset of the stylesheet data, or NULL to detect
  * \param url              URL of stylesheet
  * \param title            Title of stylesheet
- * \param origin           Origin of stylesheet
- * \param media            Media stylesheet applies to
  * \param allow_quirks     Permit quirky parsing of stylesheets
  * \param inline_style     This stylesheet is an inline style
  * \param dict             Dictionary in which to intern strings
@@ -41,8 +39,7 @@ static size_t _rule_size(const css_rule *rule);
  */
 css_error css_stylesheet_create(css_language_level level,
 		const char *charset, const char *url, const char *title,
-		css_origin origin, uint64_t media, bool allow_quirks,
-		bool inline_style, lwc_context *dict, 
+		bool allow_quirks, bool inline_style, lwc_context *dict, 
 		css_allocator_fn alloc, void *alloc_pw, 
 		css_url_resolution_fn resolve, void *resolve_pw,
 		css_stylesheet **stylesheet)
@@ -135,9 +132,6 @@ css_error css_stylesheet_create(css_language_level level,
 		}
 		memcpy(sheet->title, title, len);
 	}
-
-	sheet->origin = origin;
-	sheet->media = media;
 
 	sheet->resolve = resolve;
 	sheet->resolve_pw = resolve_pw;
@@ -426,40 +420,6 @@ css_error css_stylesheet_get_title(css_stylesheet *sheet, const char **title)
 		return CSS_BADPARM;
 
 	*title = sheet->title;
-
-	return CSS_OK;
-}
-
-/**
- * Retrieve the origin of a stylesheet
- *
- * \param sheet   The stylesheet to retrieve the origin of
- * \param origin  Pointer to location to receive origin
- * \return CSS_OK on success, appropriate error otherwise
- */
-css_error css_stylesheet_get_origin(css_stylesheet *sheet, css_origin *origin)
-{
-	if (sheet == NULL || origin == NULL)
-		return CSS_BADPARM;
-
-	*origin = sheet->origin;
-
-	return CSS_OK;
-}
-
-/**
- * Retrieve the media types associated with a stylesheet
- *
- * \param sheet  The stylesheet to retrieve the media types for
- * \param media  Pointer to location to receive media types
- * \return CSS_OK on success, appropriate error otherwise
- */
-css_error css_stylesheet_get_media(css_stylesheet *sheet, uint64_t *media)
-{
-	if (sheet == NULL || media == NULL)
-		return CSS_BADPARM;
-
-	*media = sheet->media;
 
 	return CSS_OK;
 }

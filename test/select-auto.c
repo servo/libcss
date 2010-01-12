@@ -33,6 +33,12 @@ typedef struct node {
 	struct node *last_child;
 } node;
 
+typedef struct sheet_ctx {
+	css_stylesheet *sheet;
+	css_origin origin;
+	uint64_t media;
+} sheet_ctx;
+
 typedef struct line_ctx {
 	size_t explen;
 	size_t expused;
@@ -48,7 +54,7 @@ typedef struct line_ctx {
 	uint32_t depth;
 
 	uint32_t n_sheets;
-	css_stylesheet **sheets;
+	sheet_ctx *sheets;
 
 	uint64_t media;
 	uint32_t pseudo_element;
@@ -235,8 +241,8 @@ bool handle_line(const char *data, size_t datalen, void *pw)
 		} else if (ctx->insheet) {
 			if (strncasecmp(data+1, "errors", 6) == 0) {
 				assert(css_stylesheet_data_done(
-						ctx->sheets[ctx->n_sheets - 1]) 
-						== CSS_OK);
+					ctx->sheets[ctx->n_sheets - 1].sheet) 
+					== CSS_OK);
 
 				ctx->intree = false;
 				ctx->insheet = false;
@@ -246,15 +252,15 @@ bool handle_line(const char *data, size_t datalen, void *pw)
 					strncasecmp(data+1, "user", 4) == 0 ||
 					strncasecmp(data+1, "author", 6) == 0) {
 				assert(css_stylesheet_data_done(
-						ctx->sheets[ctx->n_sheets - 1])
-						== CSS_OK);
+					ctx->sheets[ctx->n_sheets - 1].sheet)
+					== CSS_OK);
 
 				parse_sheet(ctx, data + 1, datalen - 1);
 			} else {
 				error = css_stylesheet_append_data(
-						ctx->sheets[ctx->n_sheets - 1], 
-						(const uint8_t *) data, 
-						datalen);
+					ctx->sheets[ctx->n_sheets - 1].sheet, 
+					(const uint8_t *) data, 
+					datalen);
 				assert(error == CSS_OK || 
 						error == CSS_NEEDDATA);
 			}
@@ -290,7 +296,7 @@ bool handle_line(const char *data, size_t datalen, void *pw)
 			parse_tree_data(ctx, data + 1, datalen - 1);
 		} else if (ctx->insheet) {
 			error = css_stylesheet_append_data(
-					ctx->sheets[ctx->n_sheets - 1], 
+					ctx->sheets[ctx->n_sheets - 1].sheet, 
 					(const uint8_t *) data, datalen);
 			assert(error == CSS_OK || error == CSS_NEEDDATA);
 		} else if (ctx->inexp) {
@@ -447,7 +453,7 @@ void parse_sheet(line_ctx *ctx, const char *data, size_t len)
 	css_origin origin = CSS_ORIGIN_AUTHOR;
 	uint64_t media = CSS_MEDIA_ALL;
 	css_stylesheet *sheet;
-	css_stylesheet **temp;
+	sheet_ctx *temp;
 
 	/* <origin> <media_list>? */
 
@@ -478,17 +484,19 @@ void parse_sheet(line_ctx *ctx, const char *data, size_t len)
 
 	/** \todo How are we going to handle @import? */
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", "foo", 
-			origin, media, false, false, ctx->dict, 
-			myrealloc, NULL, resolve_url, NULL, &sheet) == CSS_OK);
+			false, false, ctx->dict, myrealloc, NULL, 
+			resolve_url, NULL, &sheet) == CSS_OK);
 
 	/* Extend array of sheets and append new sheet to it */
 	temp = realloc(ctx->sheets, 
-			(ctx->n_sheets + 1) * sizeof(css_stylesheet *));
+			(ctx->n_sheets + 1) * sizeof(sheet_ctx));
 	assert(temp != NULL);
 
 	ctx->sheets = temp;
 
-	ctx->sheets[ctx->n_sheets] = sheet;
+	ctx->sheets[ctx->n_sheets].sheet = sheet;
+	ctx->sheets[ctx->n_sheets].origin = origin;
+	ctx->sheets[ctx->n_sheets].media = media;
 
 	ctx->n_sheets++;
 }
@@ -656,8 +664,9 @@ void run_test(line_ctx *ctx, const char *exp, size_t explen)
 	assert(css_select_ctx_create(myrealloc, NULL, &select) == CSS_OK);
 
 	for (i = 0; i < ctx->n_sheets; i++) {
-		assert(css_select_ctx_append_sheet(select, ctx->sheets[i]) == 
-				CSS_OK);
+		assert(css_select_ctx_append_sheet(select, 
+				ctx->sheets[i].sheet, ctx->sheets[i].origin,
+				ctx->sheets[i].media) == CSS_OK);
 	}
 
 	assert(css_computed_style_create(myrealloc, NULL, &computed) == CSS_OK);
@@ -685,7 +694,7 @@ void run_test(line_ctx *ctx, const char *exp, size_t explen)
 	destroy_tree(ctx->tree);
 
 	for (i = 0; i < ctx->n_sheets; i++) {
-		css_stylesheet_destroy(ctx->sheets[i]);
+		css_stylesheet_destroy(ctx->sheets[i].sheet);
 	}
 
 	ctx->tree = NULL;

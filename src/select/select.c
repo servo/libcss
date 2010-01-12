@@ -25,12 +25,21 @@
 #undef DEBUG_CHAIN_MATCHING
 
 /**
+ * Container for stylesheet selection info
+ */
+typedef struct css_select_sheet {
+	const css_stylesheet *sheet;	/**< Stylesheet */
+	css_origin origin;		/**< Stylesheet origin */
+	uint64_t media;			/**< Applicable media */
+} css_select_sheet;
+
+/**
  * CSS selection context
  */
 struct css_select_ctx {
 	uint32_t n_sheets;		/**< Number of sheets */
 
-	const css_stylesheet **sheets;	/**< Array of sheets */
+	css_select_sheet *sheets;	/**< Array of sheets */
 
 	css_allocator_fn alloc;		/**< Allocation routine */
 	void *pw;			/**< Client-specific private data */
@@ -40,7 +49,8 @@ static css_error set_hint(css_select_state *state, uint32_t i);
 static css_error set_initial(css_select_state *state, uint32_t i, void *parent);
 
 static css_error select_from_sheet(css_select_ctx *ctx, 
-		const css_stylesheet *sheet, css_select_state *state);
+		const css_stylesheet *sheet, css_origin origin,
+		css_select_state *state);
 static css_error intern_strings_for_sheet(css_select_ctx *ctx,
 		const css_stylesheet *sheet, css_select_state *state);
 static css_error match_selectors_in_sheet(css_select_ctx *ctx, 
@@ -119,17 +129,21 @@ css_error css_select_ctx_destroy(css_select_ctx *ctx)
 /**
  * Append a stylesheet to a selection context
  *
- * \param ctx    The context to append to
- * \param sheet  The sheet to append
+ * \param ctx     The context to append to
+ * \param sheet   The sheet to append
+ * \param origin  Origin of the sheet
+ * \param media   Media types to which the sheet applies
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error css_select_ctx_append_sheet(css_select_ctx *ctx, 
-		const css_stylesheet *sheet)
+		const css_stylesheet *sheet, css_origin origin,
+		uint64_t media)
 {
 	if (ctx == NULL || sheet == NULL)
 		return CSS_BADPARM;
 
-	return css_select_ctx_insert_sheet(ctx, sheet, ctx->n_sheets);
+	return css_select_ctx_insert_sheet(ctx, sheet, ctx->n_sheets,
+			origin, media);
 }
 
 /**
@@ -138,12 +152,15 @@ css_error css_select_ctx_append_sheet(css_select_ctx *ctx,
  * \param ctx    The context to insert into
  * \param sheet  Sheet to insert
  * \param index  Index in context to insert sheet
+ * \param origin  Origin of the sheet
+ * \param media   Media types to which the sheet applies
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error css_select_ctx_insert_sheet(css_select_ctx *ctx,
-		const css_stylesheet *sheet, uint32_t index)
+		const css_stylesheet *sheet, uint32_t index,
+		css_origin origin, uint64_t media)
 {
-	const css_stylesheet **temp;
+	css_select_sheet *temp;
 
 	if (ctx == NULL || sheet == NULL)
 		return CSS_BADPARM;
@@ -158,7 +175,7 @@ css_error css_select_ctx_insert_sheet(css_select_ctx *ctx,
 		return CSS_INVALID;
 
 	temp = ctx->alloc(ctx->sheets, 
-			(ctx->n_sheets + 1) * sizeof(css_stylesheet *),
+			(ctx->n_sheets + 1) * sizeof(css_select_sheet),
 			ctx->pw);
 	if (temp == NULL)
 		return CSS_NOMEM;
@@ -167,10 +184,12 @@ css_error css_select_ctx_insert_sheet(css_select_ctx *ctx,
 
 	if (index < ctx->n_sheets) {
 		memmove(&ctx->sheets[index + 1], &ctx->sheets[index],
-			(ctx->n_sheets - index) * sizeof(css_stylesheet *));
+			(ctx->n_sheets - index) * sizeof(css_select_sheet));
 	}
 
-	ctx->sheets[index] = sheet;
+	ctx->sheets[index].sheet = sheet;
+	ctx->sheets[index].origin = origin;
+	ctx->sheets[index].media = media;
 
 	ctx->n_sheets++;
 
@@ -193,7 +212,7 @@ css_error css_select_ctx_remove_sheet(css_select_ctx *ctx,
 		return CSS_BADPARM;
 
 	for (index = 0; index < ctx->n_sheets; index++) {
-		if (ctx->sheets[index] == sheet)
+		if (ctx->sheets[index].sheet == sheet)
 			break;
 	}
 
@@ -201,7 +220,7 @@ css_error css_select_ctx_remove_sheet(css_select_ctx *ctx,
 		return CSS_INVALID;
 
 	memmove(&ctx->sheets[index], &ctx->sheets[index + 1],
-			(ctx->n_sheets - index) * sizeof(css_stylesheet *));
+			(ctx->n_sheets - index) * sizeof(css_select_sheet));
 
 	ctx->n_sheets--;
 
@@ -243,7 +262,7 @@ css_error css_select_ctx_get_sheet(css_select_ctx *ctx, uint32_t index,
 	if (index > ctx->n_sheets)
 		return CSS_INVALID;
 
-	*sheet = ctx->sheets[index];
+	*sheet = ctx->sheets[index].sheet;
 
 	return CSS_OK;
 }
@@ -301,9 +320,10 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	 * from those which apply to our current media requirements and
 	 * are not disabled */
 	for (i = 0; i < ctx->n_sheets; i++) {
-		if ((ctx->sheets[i]->media & media) != 0 &&
-				ctx->sheets[i]->disabled == false) {
-			error = select_from_sheet(ctx, ctx->sheets[i], &state);
+		if ((ctx->sheets[i].media & media) != 0 &&
+				ctx->sheets[i].sheet->disabled == false) {
+			error = select_from_sheet(ctx, ctx->sheets[i].sheet, 
+					ctx->sheets[i].origin, &state);
 			if (error != CSS_OK)
                                 goto cleanup;
 		}
@@ -367,40 +387,51 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 
 	error = CSS_OK;
 cleanup:
-        if (ctx->sheets[0] != NULL) {
+        if (ctx->n_sheets > 0 && ctx->sheets[0].sheet != NULL) {
                 if (state.universal != NULL)
-                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
-                                                 state.universal);
+                        lwc_context_string_unref(
+					ctx->sheets[0].sheet->dictionary,
+					state.universal);
                 if (state.first_child != NULL)
-                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
-                                                 state.first_child);
+                        lwc_context_string_unref(
+					ctx->sheets[0].sheet->dictionary,
+                                        state.first_child);
                 if (state.link != NULL)
-                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
-                                                 state.link);
+                        lwc_context_string_unref(
+					ctx->sheets[0].sheet->dictionary,
+                                        state.link);
                 if (state.visited != NULL)
-                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
-                                                 state.visited);
+                        lwc_context_string_unref(
+					ctx->sheets[0].sheet->dictionary,
+                                        state.visited);
                 if (state.hover != NULL)
-                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
-                                                 state.hover);
+                        lwc_context_string_unref(
+					ctx->sheets[0].sheet->dictionary,
+                                        state.hover);
                 if (state.active != NULL)
-                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
-                                                 state.active);
+                        lwc_context_string_unref(
+					ctx->sheets[0].sheet->dictionary,
+                                        state.active);
                 if (state.focus != NULL)
-                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
-                                                 state.focus);
+                        lwc_context_string_unref(
+					ctx->sheets[0].sheet->dictionary,
+                                        state.focus);
                 if (state.first_line != NULL)
-                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
-                                                 state.first_line);
+                        lwc_context_string_unref(
+					ctx->sheets[0].sheet->dictionary,
+                                        state.first_line);
                 if (state.first_letter != NULL)
-                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
-                                                 state.first_letter);
+                        lwc_context_string_unref(
+					ctx->sheets[0].sheet->dictionary,
+                                        state.first_letter);
                 if (state.before != NULL)
-                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
-                                                 state.before);
+                        lwc_context_string_unref(
+					ctx->sheets[0].sheet->dictionary,
+                                        state.before);
                 if (state.after != NULL)
-                        lwc_context_string_unref(ctx->sheets[0]->dictionary,
-                                                 state.after);
+                        lwc_context_string_unref(
+					ctx->sheets[0].sheet->dictionary,
+                                        state.after);
         }
         return error;
 }
@@ -480,7 +511,7 @@ css_error set_initial(css_select_state *state, uint32_t i, void *parent)
 }
 
 css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet, 
-		css_select_state *state)
+		css_origin origin, css_select_state *state)
 {
 	const css_stylesheet *s = sheet;
 	const css_rule *rule = s->rule_list;
@@ -500,8 +531,7 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 					(const css_rule_import *) rule;
 
 			if (import->sheet != NULL &&
-					(import->sheet->media & 
-					state->media) != 0) {
+					(import->media & state->media) != 0) {
 				/* It's applicable, so process it */
 				s = import->sheet;
 				rule = s->rule_list;
@@ -515,7 +545,7 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 
 			/* Process this sheet */
 			state->sheet = s;
-			state->current_origin = s->origin;
+			state->current_origin = origin;
 
 			error = intern_strings_for_sheet(ctx, s, state);
 			if (error != CSS_OK)
