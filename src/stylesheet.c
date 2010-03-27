@@ -27,7 +27,6 @@ static size_t _rule_size(const css_rule *rule);
  * \param title            Title of stylesheet
  * \param allow_quirks     Permit quirky parsing of stylesheets
  * \param inline_style     This stylesheet is an inline style
- * \param dict             Dictionary in which to intern strings
  * \param alloc            Memory (de)allocation function
  * \param alloc_pw         Client private data for alloc
  * \param resolve          URL resolution function
@@ -39,7 +38,7 @@ static size_t _rule_size(const css_rule *rule);
  */
 css_error css_stylesheet_create(css_language_level level,
 		const char *charset, const char *url, const char *title,
-		bool allow_quirks, bool inline_style, lwc_context *dict, 
+		bool allow_quirks, bool inline_style,
 		css_allocator_fn alloc, void *alloc_pw, 
 		css_url_resolution_fn resolve, void *resolve_pw,
 		css_stylesheet **stylesheet)
@@ -59,17 +58,16 @@ css_error css_stylesheet_create(css_language_level level,
 
 	memset(sheet, 0, sizeof(css_stylesheet));
         
-        sheet->dictionary = dict;
 	sheet->inline_style = inline_style;
 
 	if (inline_style) {
 		error = css_parser_create_for_inline_style(charset, 
 			charset ? CSS_CHARSET_DICTATED : CSS_CHARSET_DEFAULT,
-			sheet->dictionary, alloc, alloc_pw, &sheet->parser);
+			alloc, alloc_pw, &sheet->parser);
 	} else {
 		error = css_parser_create(charset,
 			charset ? CSS_CHARSET_DICTATED : CSS_CHARSET_DEFAULT,
-			sheet->dictionary, alloc, alloc_pw, &sheet->parser);
+			alloc, alloc_pw, &sheet->parser);
 	}
 
 	if (error != CSS_OK) {
@@ -99,7 +97,7 @@ css_error css_stylesheet_create(css_language_level level,
 		return error;
 	}
 
-	error = css_selector_hash_create(dict, alloc, alloc_pw, 
+	error = css_selector_hash_create(alloc, alloc_pw, 
 			&sheet->selectors);
 	if (error != CSS_OK) {
 		css_language_destroy(sheet->parser_frontend);
@@ -322,8 +320,7 @@ css_error css_stylesheet_next_pending_import(css_stylesheet *parent,
 			break;
 
 		if (r->type == CSS_RULE_IMPORT && i->sheet == NULL) {
-                        *url = lwc_context_string_ref(parent->dictionary, 
-					i->url);
+                        *url = lwc_string_ref(i->url);
 			*media = i->media;
 
 			return CSS_OK;
@@ -628,7 +625,7 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 	memset(sel, 0, sizeof(css_selector));
 
 	sel->data.type = CSS_SELECTOR_ELEMENT;
-	sel->data.name = lwc_context_string_ref(sheet->dictionary, name);
+	sel->data.name = lwc_string_ref(name);
 	sel->data.value = NULL;
 
 	if (sheet->inline_style) {
@@ -673,12 +670,10 @@ css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 		d = c->combinator;
 
                 for (detail = &c->data; detail;) {
-                        lwc_context_string_unref(sheet->dictionary, 
-					detail->name);
+                        lwc_string_unref(detail->name);
 
                         if (detail->value != NULL) {
-                                lwc_context_string_unref(sheet->dictionary, 
-						detail->value);
+                                lwc_string_unref(detail->value);
 			}
 
                         if (detail->next)
@@ -691,11 +686,10 @@ css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 	}
         
         for (detail = &selector->data; detail;) {
-                lwc_context_string_unref(sheet->dictionary, detail->name);
+                lwc_string_unref(detail->name);
 
                 if (detail->value != NULL) {
-                        lwc_context_string_unref(sheet->dictionary, 
-					detail->value);
+                        lwc_string_unref(detail->value);
 		}
 
                 if (detail->next)
@@ -779,9 +773,9 @@ css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
 	(&temp->data)[num_details].next = 1;
         
         /* Ref the strings */
-        lwc_context_string_ref(sheet->dictionary, detail->name);
+        lwc_string_ref(detail->name);
         if (detail->value != NULL)
-                lwc_context_string_ref(sheet->dictionary, detail->value);
+                lwc_string_ref(detail->value);
         
 	(*parent) = temp;
 
@@ -948,14 +942,14 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 	case CSS_RULE_CHARSET:
         {
                 css_rule_charset *charset = (css_rule_charset *) rule;
-                lwc_context_string_unref(sheet->dictionary, charset->encoding);
+                lwc_string_unref(charset->encoding);
         }
 		break;
 	case CSS_RULE_IMPORT:
 	{
 		css_rule_import *import = (css_rule_import *) rule;
                 
-                lwc_context_string_unref(sheet->dictionary, import->url);
+                lwc_string_unref(import->url);
                 
 		if (import->sheet != NULL)
 			css_stylesheet_destroy(import->sheet);
@@ -1137,7 +1131,7 @@ css_error css_stylesheet_rule_set_charset(css_stylesheet *sheet,
 	assert(rule->type == CSS_RULE_CHARSET);
 
 	/* Set rule's encoding field */
-	r->encoding = lwc_context_string_ref(sheet->dictionary, charset);
+	r->encoding = lwc_string_ref(charset);
 	
 	return CSS_OK;
 }
@@ -1165,7 +1159,7 @@ css_error css_stylesheet_rule_set_nascent_import(css_stylesheet *sheet,
 	assert(rule->type == CSS_RULE_IMPORT);
 
 	/* Set the rule's sheet field */
-	r->url = lwc_context_string_ref(sheet->dictionary, url);
+	r->url = lwc_string_ref(url);
 	r->media = media;
 
 	return CSS_OK;

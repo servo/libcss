@@ -49,8 +49,7 @@ css_error parse_font(css_language *c,
 	/* Firstly, handle inherit */
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		uint32_t *bytecode;
@@ -96,8 +95,7 @@ css_error parse_font(css_language *c,
 		/* Ensure that we're not about to parse another inherit */
 		token = parserutils_vector_peek(vector, *ctx);
 		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-				(lwc_context_string_caseless_isequal(
-				c->sheet->dictionary,
+				(lwc_string_caseless_isequal(
 				token->idata, c->strings[INHERIT],
 				&match) == lwc_error_ok && match)) {
 			error = CSS_INVALID;
@@ -130,8 +128,7 @@ css_error parse_font(css_language *c,
 	/* Ensure that we're not about to parse another inherit */
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		error = CSS_INVALID;
@@ -155,8 +152,7 @@ css_error parse_font(css_language *c,
 		/* Ensure that we're not about to parse another inherit */
 		token = parserutils_vector_peek(vector, *ctx);
 		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-				(lwc_context_string_caseless_isequal(
-				c->sheet->dictionary,
+				(lwc_string_caseless_isequal(
 				token->idata, c->strings[INHERIT],
 				&match) == lwc_error_ok && match)) {
 			error = CSS_INVALID;
@@ -173,8 +169,7 @@ css_error parse_font(css_language *c,
 	/* Ensure that we're not about to parse another inherit */
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		error = CSS_INVALID;
@@ -322,24 +317,19 @@ static bool font_family_reserved(css_language *c, const css_token *ident)
 {
 	bool match;
 
-	return (lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	return (lwc_string_caseless_isequal(
 			ident->idata, c->strings[SERIF],
 			&match) == lwc_error_ok && match) ||
-		(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+		(lwc_string_caseless_isequal(
 			ident->idata, c->strings[SANS_SERIF],
 			&match) == lwc_error_ok && match) ||
-		(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+		(lwc_string_caseless_isequal(
 			ident->idata, c->strings[CURSIVE],
 			&match) == lwc_error_ok && match) ||
-		(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+		(lwc_string_caseless_isequal(
 			ident->idata, c->strings[FANTASY],
 			&match) == lwc_error_ok && match) ||
-		(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+		(lwc_string_caseless_isequal(
 			ident->idata, c->strings[MONOSPACE],
 			&match) == lwc_error_ok && match);
 }
@@ -357,28 +347,23 @@ static uint16_t font_family_value(css_language *c, const css_token *token)
 	bool match;
 
 	if (token->type == CSS_TOKEN_IDENT) {
-		if ((lwc_context_string_caseless_isequal(
-				c->sheet->dictionary,
+		if ((lwc_string_caseless_isequal(
 				token->idata, c->strings[SERIF],
 				&match) == lwc_error_ok && match))
 			value = FONT_FAMILY_SERIF;
-		else if ((lwc_context_string_caseless_isequal(
-				c->sheet->dictionary,
+		else if ((lwc_string_caseless_isequal(
 				token->idata, c->strings[SANS_SERIF],
 				&match) == lwc_error_ok && match))
 			value = FONT_FAMILY_SANS_SERIF;
-		else if ((lwc_context_string_caseless_isequal(
-				c->sheet->dictionary,
+		else if ((lwc_string_caseless_isequal(
 				token->idata, c->strings[CURSIVE],
 				&match) == lwc_error_ok && match))
 			value = FONT_FAMILY_CURSIVE;
-		else if ((lwc_context_string_caseless_isequal(
-				c->sheet->dictionary,
+		else if ((lwc_string_caseless_isequal(
 				token->idata, c->strings[FANTASY],
 				&match) == lwc_error_ok && match))
 			value = FONT_FAMILY_FANTASY;
-		else if ((lwc_context_string_caseless_isequal(
-				c->sheet->dictionary,
+		else if ((lwc_string_caseless_isequal(
 				token->idata, c->strings[MONOSPACE],
 				&match) == lwc_error_ok && match))
 			value = FONT_FAMILY_MONOSPACE;
@@ -438,8 +423,7 @@ css_error parse_font_family(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags = FLAG_INHERIT;
@@ -483,8 +467,7 @@ css_error parse_font_family(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		/* Nothing to do */
@@ -546,71 +529,61 @@ css_error parse_font_size(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[XX_SMALL],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_XX_SMALL;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[X_SMALL],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_X_SMALL;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[SMALL],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_SMALL;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[MEDIUM],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_MEDIUM;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[LARGE],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_LARGE;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[X_LARGE],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_X_LARGE;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[XX_LARGE],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_XX_LARGE;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[LARGER],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		value = FONT_SIZE_LARGER;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[SMALLER],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
@@ -695,23 +668,19 @@ css_error parse_font_style(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[NORMAL],
 			&match) == lwc_error_ok && match)) {
 		value = FONT_STYLE_NORMAL;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[ITALIC],
 			&match) == lwc_error_ok && match)) {
 		value = FONT_STYLE_ITALIC;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[OBLIQUE],
 			&match) == lwc_error_ok && match)) {
 		value = FONT_STYLE_OBLIQUE;
@@ -768,18 +737,15 @@ css_error parse_font_variant(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[NORMAL],
 			&match) == lwc_error_ok && match)) {
 		value = FONT_VARIANT_NORMAL;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[SMALL_CAPS],
 			&match) == lwc_error_ok && match)) {
 		value = FONT_VARIANT_SMALL_CAPS;
@@ -838,8 +804,7 @@ css_error parse_font_weight(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
@@ -865,23 +830,19 @@ css_error parse_font_weight(css_language *c,
 		case 900: value = FONT_WEIGHT_900; break;
 		default: *ctx = orig_ctx; return CSS_INVALID;
 		}
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			token->idata, c->strings[NORMAL],
 			&match) == lwc_error_ok && match)) {
 		value = FONT_WEIGHT_NORMAL;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			token->idata, c->strings[BOLD],
 			&match) == lwc_error_ok && match)) {
 		value = FONT_WEIGHT_BOLD;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			token->idata, c->strings[BOLDER],
 			&match) == lwc_error_ok && match)) {
 		value = FONT_WEIGHT_BOLDER;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			token->idata, c->strings[LIGHTER],
 			&match) == lwc_error_ok && match)) {
 		value = FONT_WEIGHT_LIGHTER;

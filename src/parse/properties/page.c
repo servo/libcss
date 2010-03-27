@@ -48,8 +48,7 @@ css_error parse_orphans(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
@@ -130,33 +129,27 @@ css_error parse_page_break_after(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[AUTO],
 			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_AFTER_AUTO;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[ALWAYS],
 			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_AFTER_ALWAYS;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[AVOID],
 			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_AFTER_AVOID;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[LEFT],
 			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_AFTER_LEFT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[RIGHT],
 			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_AFTER_RIGHT;
@@ -213,33 +206,27 @@ css_error parse_page_break_before(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[AUTO],
 			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_BEFORE_AUTO;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[ALWAYS],
 			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_BEFORE_ALWAYS;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[AVOID],
 			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_BEFORE_AVOID;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[LEFT],
 			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_BEFORE_LEFT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[RIGHT],
 			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_BEFORE_RIGHT;
@@ -296,18 +283,15 @@ css_error parse_page_break_inside(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[AUTO],
 			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_INSIDE_AUTO;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[AVOID],
 			&match) == lwc_error_ok && match)) {
 		value = PAGE_BREAK_INSIDE_AVOID;
@@ -367,8 +351,7 @@ css_error parse_widows(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;

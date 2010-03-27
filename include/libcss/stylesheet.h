@@ -21,12 +21,12 @@
  * \param abs   Pointer to location to receive result
  * \return CSS_OK on success, appropriate error otherwise.
  */
-typedef css_error (*css_url_resolution_fn)(void *pw, lwc_context *dict,
+typedef css_error (*css_url_resolution_fn)(void *pw,
 		const char *base, lwc_string *rel, lwc_string **abs);
 
 css_error css_stylesheet_create(css_language_level level,
 		const char *charset, const char *url, const char *title,
-		bool allow_quirks, bool inline_style, lwc_context *dict, 
+		bool allow_quirks, bool inline_style,
 		css_allocator_fn alloc, void *alloc_pw, 
 		css_url_resolution_fn resolve, void *resolve_pw,
 		css_stylesheet **stylesheet);

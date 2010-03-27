@@ -60,7 +60,6 @@ typedef struct line_ctx {
 	uint32_t pseudo_element;
 	node *target;
         
-        lwc_context *dict;
         lwc_string *attr_class;
         lwc_string *attr_id;
 } line_ctx;
@@ -76,11 +75,11 @@ static void parse_expected(line_ctx *ctx, const char *data, size_t len);
 static void run_test(line_ctx *ctx, const char *exp, size_t explen);
 static void destroy_tree(node *root);
 
-static css_error node_name(void *pw, void *node, lwc_context *ctx, 
+static css_error node_name(void *pw, void *node,
 		lwc_string **name);
-static css_error node_classes(void *pw, void *node, lwc_context *ctx, 
+static css_error node_classes(void *pw, void *node,
 		lwc_string ***classes, uint32_t *n_classes);
-static css_error node_id(void *pw, void *node, lwc_context *ctx, 
+static css_error node_id(void *pw, void *node,
 		lwc_string **id);
 static css_error named_ancestor_node(void *pw, void *node,
 		lwc_string *name,
@@ -167,14 +166,14 @@ static void *myrealloc(void *data, size_t len, void *pw)
 	return realloc(data, len);
 }
 
-static css_error resolve_url(void *pw, lwc_context *dict,
+static css_error resolve_url(void *pw,
 		const char *base, lwc_string *rel, lwc_string **abs)
 {
 	UNUSED(pw);
 	UNUSED(base);
 
 	/* About as useless as possible */
-	*abs = lwc_context_string_ref(dict, rel);
+	*abs = lwc_string_ref(rel);
 
 	return CSS_OK;
 }
@@ -195,11 +194,11 @@ int main(int argc, char **argv)
 
 	memset(&ctx, 0, sizeof(ctx));
 
-        assert(lwc_create_context(myrealloc, NULL, &ctx.dict) == lwc_error_ok);
-        lwc_context_ref(ctx.dict);
+        assert(lwc_initialise(myrealloc, NULL, 0) == lwc_error_ok);
 
-	lwc_context_intern(ctx.dict, "class", SLEN("class"), &ctx.attr_class);
-	lwc_context_intern(ctx.dict, "id", SLEN("id"), &ctx.attr_id);
+
+	lwc_intern_string("class", SLEN("class"), &ctx.attr_class);
+	lwc_intern_string("id", SLEN("id"), &ctx.attr_id);
         
 	assert(parse_testfile(argv[2], handle_line, &ctx) == true);
         
@@ -211,8 +210,6 @@ int main(int argc, char **argv)
 
 	assert(css_finalise(myrealloc, NULL) == CSS_OK);
 
-        lwc_context_unref(ctx.dict);
-	
         printf("PASS\n");
 	return 0;
 }
@@ -393,7 +390,7 @@ void parse_tree_data(line_ctx *ctx, const char *data, size_t len)
 
 		memset(n, 0, sizeof(node));
                 
-                lwc_context_intern(ctx->dict, name, namelen, &n->name);
+                lwc_intern_string(name, namelen, &n->name);
 
 		/* Insert it into tree */
 		if (ctx->tree == NULL) {
@@ -439,8 +436,8 @@ void parse_tree_data(line_ctx *ctx, const char *data, size_t len)
 
 		attr = &ctx->current->attrs[ctx->current->n_attrs];
                 
-                lwc_context_intern(ctx->dict, name, namelen, &attr->name);
-                lwc_context_intern(ctx->dict, value, valuelen, &attr->value);
+                lwc_intern_string(name, namelen, &attr->name);
+                lwc_intern_string(value, valuelen, &attr->value);
 
 		ctx->current->n_attrs++;
 	}
@@ -484,7 +481,7 @@ void parse_sheet(line_ctx *ctx, const char *data, size_t len)
 
 	/** \todo How are we going to handle @import? */
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", "foo", 
-			false, false, ctx->dict, myrealloc, NULL, 
+			false, false, myrealloc, NULL, 
 			resolve_url, NULL, &sheet) == CSS_OK);
 
 	/* Extend array of sheets and append new sheet to it */
@@ -725,18 +722,18 @@ void destroy_tree(node *root)
 }
 
 
-css_error node_name(void *pw, void *n, lwc_context *ctx, lwc_string **name)
+css_error node_name(void *pw, void *n, lwc_string **name)
 {
 	node *node = n;
 
 	UNUSED(pw);
         
-        *name = lwc_context_string_ref(ctx, node->name);
+        *name = lwc_string_ref(node->name);
         
 	return CSS_OK;
 }
 
-css_error node_classes(void *pw, void *n, lwc_context *ctx, 
+css_error node_classes(void *pw, void *n,
 		lwc_string ***classes, uint32_t *n_classes)
 {
 	node *node = n;
@@ -745,7 +742,7 @@ css_error node_classes(void *pw, void *n, lwc_context *ctx,
 
 	for (i = 0; i < node->n_attrs; i++) {
                 bool amatch;
-		assert(lwc_context_string_caseless_isequal(ctx, 
+		assert(lwc_string_caseless_isequal(
 				node->attrs[i].name, lc->attr_class, &amatch) ==
 				lwc_error_ok);
                 if (amatch == true)
@@ -758,7 +755,7 @@ css_error node_classes(void *pw, void *n, lwc_context *ctx,
 			return CSS_NOMEM;
 
 		*(classes[0]) = 
-			lwc_context_string_ref(ctx, node->attrs[i].value);
+			lwc_string_ref(node->attrs[i].value);
 		*n_classes = 1;
 	} else {
 		*classes = NULL;
@@ -769,7 +766,7 @@ css_error node_classes(void *pw, void *n, lwc_context *ctx,
 
 }
 
-css_error node_id(void *pw, void *n, lwc_context *ctx, 
+css_error node_id(void *pw, void *n,
 		lwc_string **id)
 {
 	node *node = n;
@@ -778,7 +775,7 @@ css_error node_id(void *pw, void *n, lwc_context *ctx,
 
 	for (i = 0; i < node->n_attrs; i++) {
                 bool amatch;
-		assert(lwc_context_string_caseless_isequal(ctx, 
+		assert(lwc_string_caseless_isequal(
 				node->attrs[i].name, lc->attr_id, &amatch) == 
 				lwc_error_ok);
                 if (amatch == true)
@@ -786,7 +783,7 @@ css_error node_id(void *pw, void *n, lwc_context *ctx,
 	}
 
 	if (i != node->n_attrs)
-		*id = lwc_context_string_ref(ctx, node->attrs[i].value);
+		*id = lwc_string_ref(node->attrs[i].value);
 	else
 		*id = NULL;
 
@@ -798,11 +795,11 @@ css_error named_ancestor_node(void *pw, void *n,
 		void **ancestor)
 {
 	node *node = n;
-        line_ctx *ctx = pw;
+        UNUSED(pw);
 
 	for (node = node->parent; node != NULL; node = node->parent) {
                 bool match;
-		assert(lwc_context_string_caseless_isequal(ctx->dict,
+		assert(lwc_string_caseless_isequal(
 				name, node->name, &match) == lwc_error_ok);
                 if (match == true)
 			break;
@@ -818,12 +815,12 @@ css_error named_parent_node(void *pw, void *n,
 		void **parent)
 {
 	node *node = n;
-        line_ctx *ctx = pw;
+        UNUSED(pw);
 
         *parent = NULL;
 	if (node->parent != NULL) {
                 bool match;
-                assert(lwc_context_string_caseless_isequal(ctx->dict,
+                assert(lwc_string_caseless_isequal(
 				name, node->parent->name, &match) == 
 				lwc_error_ok);
                 if (match == true)
@@ -838,12 +835,12 @@ css_error named_sibling_node(void *pw, void *n,
 		void **sibling)
 {
 	node *node = n;
-        line_ctx *ctx = pw;
+        UNUSED(pw);
 
         *sibling = NULL;
 	if (node->prev != NULL) {
                 bool match;
-                assert(lwc_context_string_caseless_isequal(ctx->dict,
+                assert(lwc_string_caseless_isequal(
 				name, node->prev->name, &match) == 
 				lwc_error_ok);
                 if (match == true)
@@ -880,9 +877,9 @@ css_error node_has_name(void *pw, void *n,
 		bool *match)
 {
 	node *node = n;
-	line_ctx *ctx = pw;
+        UNUSED(pw);
 
-	assert(lwc_context_string_caseless_isequal(ctx->dict, node->name, 
+	assert(lwc_string_caseless_isequal(node->name, 
 			name, match) == lwc_error_ok);
 
 	return CSS_OK;
@@ -898,7 +895,7 @@ css_error node_has_class(void *pw, void *n,
 
 	for (i = 0; i < node->n_attrs; i++) {
                 bool amatch;
-                assert(lwc_context_string_caseless_isequal(ctx->dict, 
+                assert(lwc_string_caseless_isequal(
 				node->attrs[i].name, ctx->attr_class, 
 				&amatch) == lwc_error_ok);
                 if (amatch == true)
@@ -924,7 +921,7 @@ css_error node_has_id(void *pw, void *n,
 
 	for (i = 0; i < node->n_attrs; i++) {
                 bool amatch;
-		assert(lwc_context_string_caseless_isequal(ctx->dict, 
+		assert(lwc_string_caseless_isequal(
 				node->attrs[i].name, ctx->attr_id, &amatch) == 
 				lwc_error_ok);
                 if (amatch == true)
@@ -946,11 +943,11 @@ css_error node_has_attribute(void *pw, void *n,
 {
 	node *node = n;
 	uint32_t i;
-        line_ctx *ctx = pw;
+        UNUSED(pw);
         
         *match = false;
 	for (i = 0; i < node->n_attrs; i++) {
-                assert(lwc_context_string_caseless_isequal(ctx->dict, 
+                assert(lwc_string_caseless_isequal(
 				node->attrs[i].name, name, match) == 
 				lwc_error_ok);
                 if (*match == true)
@@ -967,12 +964,12 @@ css_error node_has_attribute_equal(void *pw, void *n,
 {
 	node *node = n;
 	uint32_t i;
-        line_ctx *ctx = pw;
+        UNUSED(pw);
 
         *match = false;
         
 	for (i = 0; i < node->n_attrs; i++) {
-                assert(lwc_context_string_caseless_isequal(ctx->dict, 
+                assert(lwc_string_caseless_isequal(
 				node->attrs[i].name, name, match) == 
 				lwc_error_ok);
                 if (*match == true)
@@ -980,7 +977,7 @@ css_error node_has_attribute_equal(void *pw, void *n,
 	}
         
         if (*match == true) {
-                assert(lwc_context_string_caseless_isequal(ctx->dict, 
+                assert(lwc_string_caseless_isequal(
 				node->attrs[i].name, value, match) == 
 				lwc_error_ok);
         }
@@ -995,13 +992,13 @@ css_error node_has_attribute_includes(void *pw, void *n,
 {
 	node *node = n;
 	uint32_t i;
-        line_ctx *ctx = pw;
         size_t vlen = lwc_string_length(value);
+        UNUSED(pw);
 
         *match = false;
         
 	for (i = 0; i < node->n_attrs; i++) {
-                assert(lwc_context_string_caseless_isequal(ctx->dict, 
+                assert(lwc_string_caseless_isequal(
 				node->attrs[i].name, name, match) == 
 				lwc_error_ok);
                 if (*match == true)
@@ -1041,13 +1038,13 @@ css_error node_has_attribute_dashmatch(void *pw, void *n,
 {
 	node *node = n;
 	uint32_t i;
-        line_ctx *ctx = pw;
         size_t vlen = lwc_string_length(value);
+        UNUSED(pw);
 
         *match = false;
         
 	for (i = 0; i < node->n_attrs; i++) {
-                assert(lwc_context_string_caseless_isequal(ctx->dict, 
+                assert(lwc_string_caseless_isequal(
 				node->attrs[i].name, name, match) == 
 				lwc_error_ok);
                 if (*match == true)

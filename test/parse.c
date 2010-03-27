@@ -82,7 +82,6 @@ int main(int argc, char **argv)
 #define CHUNK_SIZE (4096)
 	uint8_t buf[CHUNK_SIZE];
 	css_error error;
-        lwc_context *ctx;
 	int i;
 
 	if (argc != 3) {
@@ -92,11 +91,10 @@ int main(int argc, char **argv)
 
 	/* Initialise library */
 	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
-        assert(lwc_create_context(myrealloc, NULL, &ctx) == lwc_error_ok);
-        lwc_context_ref(ctx);
+        assert(lwc_initialise(myrealloc, NULL, 0) == lwc_error_ok);
 
 	for (i = 0; i < ITERATIONS; i++) {
-		assert(css_parser_create("UTF-8", CSS_CHARSET_DICTATED, ctx,
+		assert(css_parser_create("UTF-8", CSS_CHARSET_DICTATED,
 				myrealloc, NULL, &parser) == CSS_OK);
 
 		params.event_handler.handler = event_handler;
@@ -145,8 +143,6 @@ int main(int argc, char **argv)
 	assert(css_finalise(myrealloc, NULL) == CSS_OK);
 
 	printf("PASS\n");
-        
-        lwc_context_unref(ctx);
         
 	return 0;
 }

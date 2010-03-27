@@ -58,10 +58,10 @@ typedef union css_parser_optparams {
 } css_parser_optparams;
 
 css_error css_parser_create(const char *charset, css_charset_source cs_source,
-		lwc_context *dict, css_allocator_fn alloc, void *pw, 
+		css_allocator_fn alloc, void *pw, 
 		css_parser **parser);
 css_error css_parser_create_for_inline_style(const char *charset, 
-		css_charset_source cs_source, lwc_context *dict, 
+		css_charset_source cs_source,
 		css_allocator_fn alloc, void *pw, css_parser **parser);
 css_error css_parser_destroy(css_parser *parser);
 

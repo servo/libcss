@@ -68,14 +68,14 @@ static void *myrealloc(void *data, size_t len, void *pw)
 	return realloc(data, len);
 }
 
-static css_error resolve_url(void *pw, lwc_context *dict,
+static css_error resolve_url(void *pw,
 		const char *base, lwc_string *rel, lwc_string **abs)
 {
 	UNUSED(pw);
 	UNUSED(base);
 
 	/* About as useless as possible */
-	*abs = lwc_context_string_ref(dict, rel);
+	*abs = lwc_string_ref(rel);
 
 	return CSS_OK;
 }
@@ -111,6 +111,8 @@ int main(int argc, char **argv)
 	ctx.inerrors = false;
 	ctx.inexp = false;
 
+        assert(lwc_initialise(myrealloc, NULL, 0) == lwc_error_ok);
+        
 	assert(parse_testfile(argv[2], handle_line, &ctx) == true);
 
 	/* and run final test */
@@ -318,13 +320,9 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 	css_error error;
 	size_t e;
 	static int testnum;
-        lwc_context *ctx;
-        
-        assert(lwc_create_context(myrealloc, NULL, &ctx) == lwc_error_ok);
-        lwc_context_ref(ctx);
         
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", NULL,
-			false, false, ctx, myrealloc, NULL, resolve_url, NULL, 
+			false, false, myrealloc, NULL, resolve_url, NULL, 
 			&sheet) == CSS_OK);
 
 	error = css_stylesheet_append_data(sheet, data, len);
@@ -353,7 +351,7 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 			buf[lwc_string_length(url)] = '\0';
 
 			assert(css_stylesheet_create(CSS_LEVEL_21,
-				"UTF-8", buf, NULL, false, false, ctx, 
+				"UTF-8", buf, NULL, false, false,
 				myrealloc, NULL, resolve_url, NULL, 
 				&import) == CSS_OK);
 
@@ -405,7 +403,6 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 	css_stylesheet_destroy(sheet);
 
 	printf("Test %d: PASS\n", testnum);
-        lwc_context_unref(ctx);
 }
 
 void validate_rule_selector(css_rule_selector *s, exp_entry *e, int testnum)

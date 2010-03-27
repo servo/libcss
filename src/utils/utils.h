@@ -70,6 +70,8 @@ css_error_from_lwc_error(lwc_error err)
                 return CSS_NOMEM;
         case lwc_error_range:
                 return CSS_BADPARM;
+        default:
+                break;
         }
         return CSS_INVALID;
 }

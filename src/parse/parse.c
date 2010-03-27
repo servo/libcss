@@ -95,8 +95,6 @@ struct css_parser
 #define STACK_CHUNK 32
 	parserutils_stack *states;	/**< Stack of states */
 
-	lwc_context *dictionary;	/**< Dictionary for interned strings */
-
 	parserutils_vector *tokens;	/**< Vector of pending tokens */
 
 	const css_token *pushback;	/**< Push back buffer */
@@ -116,7 +114,7 @@ struct css_parser
 };
 
 static css_error css_parser_create_internal(const char *charset, 
-		css_charset_source cs_source, lwc_context *dictionary, 
+		css_charset_source cs_source,
 		css_allocator_fn alloc, void *pw, parser_state initial, 
 		css_parser **parser);
 
@@ -195,7 +193,6 @@ static css_error (*parseFuncs[])(css_parser *parser) = {
  *
  * \param charset     Charset of data, if known, or NULL
  * \param cs_source   Source of charset information, or CSS_CHARSET_DEFAULT
- * \param dictionary  Dictionary in which to intern strings (not copied)
  * \param alloc       Memory (de)allocation function
  * \param pw          Pointer to client-specific private data
  * \param parser      Pointer to location to receive parser instance
@@ -204,12 +201,12 @@ static css_error (*parseFuncs[])(css_parser *parser) = {
  *         CSS_NOMEM on memory exhaustion
  */
 css_error css_parser_create(const char *charset, css_charset_source cs_source,
-		lwc_context *dictionary, css_allocator_fn alloc, void *pw, 
+		css_allocator_fn alloc, void *pw, 
 		css_parser **parser)
 {
 	parser_state initial = { sStart, 0 };
 
-	return css_parser_create_internal(charset, cs_source, dictionary,
+	return css_parser_create_internal(charset, cs_source,
 			alloc, pw, initial, parser);
 }
 
@@ -218,7 +215,6 @@ css_error css_parser_create(const char *charset, css_charset_source cs_source,
  *
  * \param charset     Charset of data, if known, or NULL
  * \param cs_source   Source of charset information, or CSS_CHARSET_DEFAULT
- * \param dictionary  Dictionary in which to intern strings (not copied)
  * \param alloc       Memory (de)allocation function
  * \param pw          Pointer to client-specific private data
  * \param parser      Pointer to location to receive parser instance
@@ -227,12 +223,12 @@ css_error css_parser_create(const char *charset, css_charset_source cs_source,
  *         CSS_NOMEM on memory exhaustion
  */
 css_error css_parser_create_for_inline_style(const char *charset,
-		css_charset_source cs_source, lwc_context *dictionary,
+		css_charset_source cs_source,
 		css_allocator_fn alloc, void *pw, css_parser **parser)
 {
 	parser_state initial = { sInlineStyle, 0 };
 
-	return css_parser_create_internal(charset, cs_source, dictionary,
+	return css_parser_create_internal(charset, cs_source,
 			alloc, pw, initial, parser);
 }
 
@@ -397,7 +393,6 @@ bool css_parser_quirks_permitted(css_parser *parser)
  *
  * \param charset     Charset of data, if known, or NULL
  * \param cs_source   Source of charset information, or CSS_CHARSET_DEFAULT
- * \param dictionary  Dictionary in which to intern strings (not copied)
  * \param alloc       Memory (de)allocation function
  * \param pw          Pointer to client-specific private data
  * \param initial     The required initial state of the parser
@@ -407,7 +402,7 @@ bool css_parser_quirks_permitted(css_parser *parser)
  *         CSS_NOMEM on memory exhaustion
  */
 css_error css_parser_create_internal(const char *charset, 
-		css_charset_source cs_source, lwc_context *dictionary, 
+		css_charset_source cs_source,
 		css_allocator_fn alloc, void *pw, parser_state initial, 
 		css_parser **parser)
 {
@@ -446,8 +441,6 @@ css_error css_parser_create_internal(const char *charset,
 		alloc(p, 0, pw);
 		return css_error_from_parserutils_error(perror);
 	}
-
-	p->dictionary = dictionary;
 
 	perror = parserutils_vector_create(sizeof(css_token), 
 			STACK_CHUNK, (parserutils_alloc) alloc, pw,
@@ -655,8 +648,7 @@ css_error getToken(css_parser *parser, const css_token **token)
 
 		if (t->type < CSS_TOKEN_LAST_INTERN && t->data.data != NULL) {
 			/* Insert token text into the dictionary */
-                        lerror = lwc_context_intern(parser->dictionary, 
-                                                    (char *)t->data.data,
+                        lerror = lwc_intern_string((char *)t->data.data,
                                                     t->data.len, &t->idata);
                         if (lerror != lwc_error_ok)
                                 return css_error_from_lwc_error(lerror);
@@ -2612,8 +2604,7 @@ void unref_interned_strings_in_tokens(css_parser *parser)
         while ((tok = parserutils_vector_iterate(
 			parser->tokens, &ctx)) != NULL) {
                 if (tok->idata != NULL) {
-                        lwc_context_string_unref(parser->dictionary, 
-					tok->idata);
+                        lwc_string_unref(tok->idata);
 		}
         }
 }

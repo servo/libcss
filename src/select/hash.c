@@ -33,8 +33,6 @@ struct css_selector_hash {
 
 	hash_entry universal;
 
-	lwc_context *ctx;
-
 	size_t hash_size;
 
 	css_allocator_fn alloc;
@@ -67,19 +65,17 @@ static css_error _iterate_universal(css_selector_hash *hash,
 /**
  * Create a hash
  *
- * \param dict   Dictionary containing interned strings
  * \param alloc  Memory (de)allocation function
  * \param pw     Pointer to client-specific private data
  * \param hash   Pointer to location to receive result
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_selector_hash_create(lwc_context *dict,
-		css_allocator_fn alloc, void *pw, 
+css_error css_selector_hash_create(css_allocator_fn alloc, void *pw, 
 		css_selector_hash **hash)
 {
 	css_selector_hash *h;
 
-	if (dict == NULL || alloc == NULL || hash == NULL)
+	if (alloc == NULL || hash == NULL)
 		return CSS_BADPARM;
 
 	h = alloc(0, sizeof(css_selector_hash), pw);
@@ -124,7 +120,6 @@ css_error css_selector_hash_create(lwc_context *dict,
 			DEFAULT_SLOTS * sizeof(hash_entry) +
 			DEFAULT_SLOTS * sizeof(hash_entry);
 
-	h->ctx = lwc_context_ref(dict);
 	h->alloc = alloc;
 	h->pw = pw;
 
@@ -183,8 +178,6 @@ css_error css_selector_hash_destroy(css_selector_hash *hash)
 
 		hash->alloc(d, 0, hash->pw);
 	}
-
-	lwc_context_unref(hash->ctx);
 
 	hash->alloc(hash, 0, hash->pw);
 
@@ -321,7 +314,7 @@ css_error css_selector_hash_find(css_selector_hash *hash,
 			lwc_error lerror;
 			bool match = false;
 
-			lerror = lwc_context_string_caseless_isequal(hash->ctx, 
+			lerror = lwc_string_caseless_isequal(
 					name, head->sel->data.name, &match);
 			if (lerror != lwc_error_ok)
 				return css_error_from_lwc_error(lerror);
@@ -379,8 +372,8 @@ css_error css_selector_hash_find_by_class(css_selector_hash *hash,
 
 			n = _class_name(head->sel);
 			if (n != NULL) {
-				lerror = lwc_context_string_caseless_isequal(
-						hash->ctx, name, n, &match);
+				lerror = lwc_string_caseless_isequal(
+						name, n, &match);
 				if (lerror != lwc_error_ok)
 					return css_error_from_lwc_error(lerror);
 
@@ -438,8 +431,8 @@ css_error css_selector_hash_find_by_id(css_selector_hash *hash,
 
 			n = _id_name(head->sel);
 			if (n != NULL) {
-				lerror = lwc_context_string_caseless_isequal(
-						hash->ctx, name, n, &match);
+				lerror = lwc_string_caseless_isequal(
+						name, n, &match);
 				if (lerror != lwc_error_ok)
 					return css_error_from_lwc_error(lerror);
 
@@ -713,7 +706,7 @@ css_error _iterate_elements(css_selector_hash *hash,
 		lwc_error lerror = lwc_error_ok;
 		bool match = false;
 
-		lerror = lwc_context_string_caseless_isequal(hash->ctx, 
+		lerror = lwc_string_caseless_isequal(
 				name, head->sel->data.name, &match);
 		if (lerror != lwc_error_ok)
 			return css_error_from_lwc_error(lerror);
@@ -762,7 +755,7 @@ css_error _iterate_classes(css_selector_hash *hash,
 		if (name == NULL)
 			continue;
 
-		lerror = lwc_context_string_caseless_isequal(hash->ctx, 
+		lerror = lwc_string_caseless_isequal(
 				ref, name, &match);
 		if (lerror != lwc_error_ok)
 			return css_error_from_lwc_error(lerror);
@@ -811,7 +804,7 @@ css_error _iterate_ids(css_selector_hash *hash,
 		if (name == NULL)
 			continue;
 
-		lerror = lwc_context_string_caseless_isequal(hash->ctx, 
+		lerror = lwc_string_caseless_isequal(
 				ref, name, &match);
 		if (lerror != lwc_error_ok)
 			return css_error_from_lwc_error(lerror);

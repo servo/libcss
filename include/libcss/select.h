@@ -25,12 +25,12 @@ enum css_pseudo_element {
 
 typedef struct css_select_handler {
 	css_error (*node_name)(void *pw, void *node,
-			lwc_context *dict, lwc_string **name);
+			lwc_string **name);
 	css_error (*node_classes)(void *pw, void *node,
-			lwc_context *dict, lwc_string ***classes,
+			lwc_string ***classes,
 			uint32_t *n_classes);
 	css_error (*node_id)(void *pw, void *node,
-			lwc_context *dict, lwc_string **id);
+			lwc_string **id);
 
 	css_error (*named_ancestor_node)(void *pw, void *node,
 			lwc_string *name, void **ancestor);

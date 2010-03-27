@@ -20,14 +20,14 @@ static void *myrealloc(void *ptr, size_t len, void *pw)
 	return realloc(ptr, len);
 }
 
-static css_error resolve_url(void *pw, lwc_context *dict,
+static css_error resolve_url(void *pw,
 		const char *base, lwc_string *rel, lwc_string **abs)
 {
 	UNUSED(pw);
 	UNUSED(base);
 
 	/* About as useless as possible */
-	*abs = lwc_context_string_ref(dict, rel);
+	*abs = lwc_string_ref(rel);
 
 	return CSS_OK;
 }
@@ -40,7 +40,6 @@ int main(int argc, char **argv)
 #define CHUNK_SIZE (4096)
 	uint8_t buf[CHUNK_SIZE];
 	css_error error;
-        lwc_context *ctx;
 	int count;
 
 	if (argc != 3) {
@@ -51,14 +50,12 @@ int main(int argc, char **argv)
 	/* Initialise library */
 	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
         
-        assert(lwc_create_context(myrealloc, NULL, &ctx) == lwc_error_ok);
-        
-        lwc_context_ref(ctx); /* Transform weak ref to a strong ref */
+        assert(lwc_initialise(myrealloc, NULL, 0) == lwc_error_ok);
         
 	for (count = 0; count < ITERATIONS; count++) {
 
 		assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", argv[2], 
-				NULL, false, false, ctx, myrealloc, NULL, 
+				NULL, false, false, myrealloc, NULL, 
 				resolve_url, NULL, &sheet) == CSS_OK);
 
 		fp = fopen(argv[2], "rb");
@@ -114,7 +111,7 @@ int main(int argc, char **argv)
 				buf[lwc_string_length(url)] = '\0';
 
 				assert(css_stylesheet_create(CSS_LEVEL_21,
-					"UTF-8", buf, NULL, false, false, ctx, 
+					"UTF-8", buf, NULL, false, false, 
 					myrealloc, NULL, resolve_url, NULL,
 					&import) == CSS_OK);
 
@@ -152,8 +149,6 @@ int main(int argc, char **argv)
 	assert(css_finalise(myrealloc, NULL) == CSS_OK);
 
 	printf("PASS\n");
-        
-        lwc_context_unref(ctx);
         
 	return 0;
 }

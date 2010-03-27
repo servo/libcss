@@ -389,49 +389,27 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 cleanup:
         if (ctx->n_sheets > 0 && ctx->sheets[0].sheet != NULL) {
                 if (state.universal != NULL)
-                        lwc_context_string_unref(
-					ctx->sheets[0].sheet->dictionary,
-					state.universal);
+                        lwc_string_unref(state.universal);
                 if (state.first_child != NULL)
-                        lwc_context_string_unref(
-					ctx->sheets[0].sheet->dictionary,
-                                        state.first_child);
+                        lwc_string_unref(state.first_child);
                 if (state.link != NULL)
-                        lwc_context_string_unref(
-					ctx->sheets[0].sheet->dictionary,
-                                        state.link);
+                        lwc_string_unref(state.link);
                 if (state.visited != NULL)
-                        lwc_context_string_unref(
-					ctx->sheets[0].sheet->dictionary,
-                                        state.visited);
+                        lwc_string_unref(state.visited);
                 if (state.hover != NULL)
-                        lwc_context_string_unref(
-					ctx->sheets[0].sheet->dictionary,
-                                        state.hover);
+                        lwc_string_unref(state.hover);
                 if (state.active != NULL)
-                        lwc_context_string_unref(
-					ctx->sheets[0].sheet->dictionary,
-                                        state.active);
+                        lwc_string_unref(state.active);
                 if (state.focus != NULL)
-                        lwc_context_string_unref(
-					ctx->sheets[0].sheet->dictionary,
-                                        state.focus);
+                        lwc_string_unref(state.focus);
                 if (state.first_line != NULL)
-                        lwc_context_string_unref(
-					ctx->sheets[0].sheet->dictionary,
-                                        state.first_line);
+                        lwc_string_unref(state.first_line);
                 if (state.first_letter != NULL)
-                        lwc_context_string_unref(
-					ctx->sheets[0].sheet->dictionary,
-                                        state.first_letter);
+                        lwc_string_unref(state.first_letter);
                 if (state.before != NULL)
-                        lwc_context_string_unref(
-					ctx->sheets[0].sheet->dictionary,
-                                        state.before);
+                        lwc_string_unref(state.before);
                 if (state.after != NULL)
-                        lwc_context_string_unref(
-					ctx->sheets[0].sheet->dictionary,
-                                        state.after);
+                        lwc_string_unref(state.after);
         }
         return error;
 }
@@ -574,73 +552,73 @@ css_error intern_strings_for_sheet(css_select_ctx *ctx,
 	lwc_error error;
 
 	UNUSED(ctx);
+        UNUSED(sheet);
 
 	/* Universal selector */
         if (state->universal != NULL)
                 return CSS_OK;
 
-	error = lwc_context_intern(sheet->dictionary, 
-			"*", SLEN("*"), &state->universal);
+	error = lwc_intern_string("*", SLEN("*"), &state->universal);
 	if (error != lwc_error_ok)
 		return css_error_from_lwc_error(error);
 
 	/* Pseudo classes */
-	error = lwc_context_intern(sheet->dictionary, 
+	error = lwc_intern_string(
 			"first-child", SLEN("first-child"), 
 			&state->first_child);
 	if (error != lwc_error_ok)
 		return css_error_from_lwc_error(error);
 
-	error = lwc_context_intern(sheet->dictionary, 
+	error = lwc_intern_string(
 			"link", SLEN("link"), 
 			&state->link);
 	if (error != lwc_error_ok)
 		return css_error_from_lwc_error(error);
 
-	error = lwc_context_intern(sheet->dictionary, 
+	error = lwc_intern_string(
 			"visited", SLEN("visited"), 
 			&state->visited);
 	if (error != lwc_error_ok)
 		return css_error_from_lwc_error(error);
 
-	error = lwc_context_intern(sheet->dictionary, 
+	error = lwc_intern_string(
 			"hover", SLEN("hover"), 
 			&state->hover);
 	if (error != lwc_error_ok)
 		return css_error_from_lwc_error(error);
 
-	error = lwc_context_intern(sheet->dictionary, 
+	error = lwc_intern_string(
 			"active", SLEN("active"), 
 			&state->active);
 	if (error != lwc_error_ok)
 		return css_error_from_lwc_error(error);
 
-	error = lwc_context_intern(sheet->dictionary, 
+	error = lwc_intern_string(
 			"focus", SLEN("focus"), 
 			&state->focus);
 	if (error != lwc_error_ok)
 		return css_error_from_lwc_error(error);
 
 	/* Pseudo elements */
-	error = lwc_context_intern(sheet->dictionary, 
+	error = lwc_intern_string(
 			"first-line", SLEN("first-line"), 
 			&state->first_line);
 	if (error != lwc_error_ok)
 		return css_error_from_lwc_error(error);
 
-	error = lwc_context_intern(sheet->dictionary, 
+	error = lwc_intern_string(
 			"first_letter", SLEN("first-letter"),
 			&state->first_letter);
 	if (error != lwc_error_ok)
 		return css_error_from_lwc_error(error);
 
-	error = lwc_context_intern(sheet->dictionary, 
+	error = lwc_intern_string(
 			"before", SLEN("before"), 
 			&state->before);
 	if (error != lwc_error_ok)
 		return css_error_from_lwc_error(error);
 
-	error = lwc_context_intern(sheet->dictionary, 
+	error = lwc_intern_string(
 			"after", SLEN("after"), 
 			&state->after);
 	if (error != lwc_error_ok)
@@ -742,13 +720,13 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 
 	/* Get node's name */
 	error = state->handler->node_name(state->pw, state->node, 
-			sheet->dictionary, &element);
+			&element);
 	if (error != CSS_OK)
 		return error;
 
 	/* Get node's ID, if any */
 	error = state->handler->node_id(state->pw, state->node,
-			sheet->dictionary, &id);
+			&id);
 	if (error != CSS_OK)
 		goto cleanup;
 
@@ -757,7 +735,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 	 * every time we call this? It seems hugely inefficient, given they can 
 	 * cache the data. */
 	error = state->handler->node_classes(state->pw, state->node,
-			sheet->dictionary, &classes, &n_classes);
+			&classes, &n_classes);
 	if (error != CSS_OK)
 		goto cleanup;
 
@@ -870,15 +848,15 @@ cleanup:
 
 	if (classes != NULL) {
 		for (i = 0; i < n_classes; i++)
-			lwc_context_string_unref(sheet->dictionary, classes[i]);
+			lwc_string_unref(classes[i]);
 
 		ctx->alloc(classes, 0, ctx->pw);
 	}
 
 	if (id != NULL)
-		lwc_context_string_unref(sheet->dictionary, id);
+		lwc_string_unref(id);
 
-        lwc_context_string_unref(sheet->dictionary, element);
+        lwc_string_unref(element);
         return error;
 }
 

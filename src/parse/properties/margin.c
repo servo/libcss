@@ -51,8 +51,7 @@ css_error parse_margin(css_language *c,
 	/* Firstly, handle inherit */
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		uint32_t *bytecode;
@@ -94,8 +93,7 @@ css_error parse_margin(css_language *c,
 		/* Ensure that we're not about to parse another inherit */
 		token = parserutils_vector_peek(vector, *ctx);
 		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-				(lwc_context_string_caseless_isequal(
-				c->sheet->dictionary,
+				(lwc_string_caseless_isequal(
 				token->idata, c->strings[INHERIT],
 				&match) == lwc_error_ok && match)) {
 			error = CSS_INVALID;
@@ -389,15 +387,13 @@ css_error parse_margin_side(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[AUTO],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);

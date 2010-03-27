@@ -91,8 +91,7 @@ css_error parse_colour_specifier(css_language *c,
 
 		return error;
 	} else if (token->type == CSS_TOKEN_FUNCTION) {
-		if ((lwc_context_string_caseless_isequal(
-				c->sheet->dictionary,
+		if ((lwc_string_caseless_isequal(
 				token->idata, c->strings[RGB],
 				&match) == lwc_error_ok && match)) {
 			int i;
@@ -335,8 +334,8 @@ css_error parse_named_colour(css_language *c, lwc_string *data,
 	bool match;
 
 	for (i = FIRST_COLOUR; i <= LAST_COLOUR; i++) {
-		if (lwc_context_string_caseless_isequal(c->sheet->dictionary,
-				data, c->strings[i], &match) == lwc_error_ok &&
+          if (lwc_string_caseless_isequal(data, c->strings[i],
+                                          &match) == lwc_error_ok &&
 				match)
 			break;
 	}
@@ -783,8 +782,7 @@ css_error comma_list_to_bytecode(css_language *c,
 
 				/* Insert into hash, if it's different
 				 * from the name we already have */
-				lerror = lwc_context_intern(
-						c->sheet->dictionary,
+				lerror = lwc_intern_string(
 						(char *) buf, p - buf,
 						&newname);
 				if (lerror != lwc_error_ok) {
@@ -794,9 +792,7 @@ css_error comma_list_to_bytecode(css_language *c,
 				}
 
 				if (newname == name) {
-					lwc_context_string_unref(
-							c->sheet->dictionary,
-							newname);
+					lwc_string_unref(newname);
 				}
 
 				name = newname;
@@ -806,8 +802,7 @@ css_error comma_list_to_bytecode(css_language *c,
 				 * new name generated above.
 				 */
 				if (name == tok_idata) {
-					lwc_context_string_ref(
-						c->sheet->dictionary, name);
+					lwc_string_ref(name);
 				}
 
 				memcpy(ptr, &name, sizeof(name));
@@ -821,8 +816,7 @@ css_error comma_list_to_bytecode(css_language *c,
 				ptr += sizeof(opv);
 			}
 
-			lwc_context_string_ref(c->sheet->dictionary,
-					token->idata);
+			lwc_string_ref(token->idata);
 
 			memcpy(ptr, &token->idata, sizeof(token->idata));
 			ptr += sizeof(token->idata);

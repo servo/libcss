@@ -48,8 +48,7 @@ css_error parse_color(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT && 
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
@@ -120,18 +119,15 @@ css_error parse_direction(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[LTR],
 			&match) == lwc_error_ok && match)) {
 		value = DIRECTION_LTR;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[RTL],
 			&match) == lwc_error_ok && match)) {
 		value = DIRECTION_RTL;
@@ -192,15 +188,13 @@ css_error parse_letter_spacing(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[NORMAL],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
@@ -281,43 +275,35 @@ css_error parse_text_align(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[LEFT],
 			&match) == lwc_error_ok && match)) {
 		value = TEXT_ALIGN_LEFT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[RIGHT],
 			&match) == lwc_error_ok && match)) {
 		value = TEXT_ALIGN_RIGHT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[CENTER],
 			&match) == lwc_error_ok && match)) {
 		value = TEXT_ALIGN_CENTER;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[JUSTIFY],
 			&match) == lwc_error_ok && match)) {
 		value = TEXT_ALIGN_JUSTIFY;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[LIBCSS_LEFT],
 			&match) == lwc_error_ok && match)) {
 		value = TEXT_ALIGN_LIBCSS_LEFT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[LIBCSS_CENTER],
 			&match) == lwc_error_ok && match)) {
 		value = TEXT_ALIGN_LIBCSS_CENTER;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[LIBCSS_RIGHT],
 			&match) == lwc_error_ok && match)) {
 		value = TEXT_ALIGN_LIBCSS_RIGHT;
@@ -375,20 +361,17 @@ css_error parse_text_decoration(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[NONE],
 			&match) == lwc_error_ok && match)) {
 		value = TEXT_DECORATION_NONE;
 	} else {
 		while (ident != NULL) {
-			if ((lwc_context_string_caseless_isequal(
-					c->sheet->dictionary,
+			if ((lwc_string_caseless_isequal(
 					ident->idata, c->strings[UNDERLINE],
 					&match) == lwc_error_ok && match)) {
 				if ((value & TEXT_DECORATION_UNDERLINE) == 0)
@@ -397,8 +380,7 @@ css_error parse_text_decoration(css_language *c,
 					*ctx = orig_ctx;
 					return CSS_INVALID;
 				}
-			} else if ((lwc_context_string_caseless_isequal(
-					c->sheet->dictionary,
+			} else if ((lwc_string_caseless_isequal(
 					ident->idata, c->strings[OVERLINE],
 					&match) == lwc_error_ok && match)) {
 				if ((value & TEXT_DECORATION_OVERLINE) == 0)
@@ -407,8 +389,7 @@ css_error parse_text_decoration(css_language *c,
 					*ctx = orig_ctx;
 					return CSS_INVALID;
 				}
-			} else if ((lwc_context_string_caseless_isequal(
-					c->sheet->dictionary,
+			} else if ((lwc_string_caseless_isequal(
 					ident->idata, c->strings[LINE_THROUGH],
 					&match) == lwc_error_ok && match)) {
 				if ((value & TEXT_DECORATION_LINE_THROUGH) == 0)
@@ -417,8 +398,7 @@ css_error parse_text_decoration(css_language *c,
 					*ctx = orig_ctx;
 					return CSS_INVALID;
 				}
-			} else if ((lwc_context_string_caseless_isequal(
-					c->sheet->dictionary,
+			} else if ((lwc_string_caseless_isequal(
 					ident->idata, c->strings[BLINK],
 					&match) == lwc_error_ok && match)) {
 				if ((value & TEXT_DECORATION_BLINK) == 0)
@@ -493,8 +473,7 @@ css_error parse_text_indent(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
@@ -573,28 +552,23 @@ css_error parse_text_transform(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[CAPITALIZE],
 			&match) == lwc_error_ok && match)) {
 		value = TEXT_TRANSFORM_CAPITALIZE;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[UPPERCASE],
 			&match) == lwc_error_ok && match)) {
 		value = TEXT_TRANSFORM_UPPERCASE;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[LOWERCASE],
 			&match) == lwc_error_ok && match)) {
 		value = TEXT_TRANSFORM_LOWERCASE;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[NONE],
 			&match) == lwc_error_ok && match)) {
 		value = TEXT_TRANSFORM_NONE;
@@ -651,23 +625,19 @@ css_error parse_unicode_bidi(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[NORMAL],
 			&match) == lwc_error_ok && match)) {
 		value = UNICODE_BIDI_NORMAL;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[EMBED],
 			&match) == lwc_error_ok && match)) {
 		value = UNICODE_BIDI_EMBED;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[BIDI_OVERRIDE],
 			&match) == lwc_error_ok && match)) {
 		value = UNICODE_BIDI_BIDI_OVERRIDE;
@@ -724,33 +694,27 @@ css_error parse_white_space(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[NORMAL],
 			&match) == lwc_error_ok && match)) {
 		value = WHITE_SPACE_NORMAL;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[PRE],
 			&match) == lwc_error_ok && match)) {
 		value = WHITE_SPACE_PRE;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[NOWRAP],
 			&match) == lwc_error_ok && match)) {
 		value = WHITE_SPACE_NOWRAP;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[PRE_WRAP],
 			&match) == lwc_error_ok && match)) {
 		value = WHITE_SPACE_PRE_WRAP;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[PRE_LINE],
 			&match) == lwc_error_ok && match)) {
 		value = WHITE_SPACE_PRE_LINE;
@@ -811,15 +775,13 @@ css_error parse_word_spacing(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[NORMAL],
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);

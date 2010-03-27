@@ -44,8 +44,7 @@ css_error parse_important(css_language *c,
 			return CSS_INVALID;
 		}
 
-		if (lwc_context_string_caseless_isequal(c->sheet->dictionary,
-				token->idata, c->strings[IMPORTANT],
+		if (lwc_string_caseless_isequal(token->idata, c->strings[IMPORTANT],
 				&match) == lwc_error_ok && match) {
 			*result |= FLAG_IMPORTANT;
 		} else {

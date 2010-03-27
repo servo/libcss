@@ -52,20 +52,17 @@ css_error parse_clip(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags = FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[AUTO],
 			&match) == lwc_error_ok && match)) {
 		value = CLIP_AUTO;
 	} else if (token->type == CSS_TOKEN_FUNCTION &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[RECT],
 			&match) == lwc_error_ok && match)) {
 		int i;
@@ -83,8 +80,7 @@ css_error parse_clip(css_language *c,
 			if (token->type == CSS_TOKEN_IDENT) {
 				/* Slightly magical way of generating the auto 
 				 * values. These are bits 3-6 of the value. */
-				if ((lwc_context_string_caseless_isequal(
-						c->sheet->dictionary,
+				if ((lwc_string_caseless_isequal(
 						token->idata, c->strings[AUTO],
 						&match) == lwc_error_ok && 
 						match))
@@ -211,28 +207,23 @@ css_error parse_overflow(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[VISIBLE],
 			&match) == lwc_error_ok && match)) {
 		value = OVERFLOW_VISIBLE;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[HIDDEN],
 			&match) == lwc_error_ok && match)) {
 		value = OVERFLOW_HIDDEN;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[SCROLL],
 			&match) == lwc_error_ok && match)) {
 		value = OVERFLOW_SCROLL;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[AUTO],
 			&match) == lwc_error_ok && match)) {
 		value = OVERFLOW_AUTO;
@@ -289,23 +280,19 @@ css_error parse_visibility(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[VISIBLE],
 			&match) == lwc_error_ok && match)) {
 		value = VISIBILITY_VISIBLE;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[HIDDEN],
 			&match) == lwc_error_ok && match)) {
 		value = VISIBILITY_HIDDEN;
-	} else if ((lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+	} else if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[COLLAPSE],
 			&match) == lwc_error_ok && match)) {
 		value = VISIBILITY_COLLAPSE;
@@ -366,14 +353,12 @@ css_error parse_z_index(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_context_string_caseless_isequal(
-			c->sheet->dictionary,
+			(lwc_string_caseless_isequal(
 			token->idata, c->strings[AUTO],
 			&match) == lwc_error_ok && match)) {
 		value = Z_INDEX_AUTO;
