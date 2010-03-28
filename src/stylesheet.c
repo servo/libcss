@@ -1093,7 +1093,7 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 					cur->length);
 			temp->length = cur->length;
 
-			css_stylesheet_style_destroy(sheet, cur, false);
+			css_stylesheet_style_destroy(sheet, cur, true);
 
 			cur = temp;
 		}
@@ -1108,7 +1108,7 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 		sheet->size += style->length;
 
 		/* Done with style */
-		css_stylesheet_style_destroy(sheet, style, false);
+		css_stylesheet_style_destroy(sheet, style, true);
 	} else {
 		/* No current style, so use this one */
 		cur = style;
