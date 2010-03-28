@@ -15,9 +15,9 @@
 #reset
 
 #data
-@import url("foo.css");
+@import url("bar.css");
 #errors
 #expected
-| 3 foo.css
+| 3 bar.css
 #reset
 

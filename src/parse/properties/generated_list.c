@@ -1,7 +1,7 @@
 /*
  * This file is part of LibCSS.
  * Licensed under the MIT License,
- *                http://www.opensource.org/licenses/mit-license.php
+ *		  http://www.opensource.org/licenses/mit-license.php
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
@@ -25,16 +25,16 @@ static css_error parse_counter_common(css_language *c,
 /**
  * Parse content
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_content(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -145,16 +145,16 @@ css_error parse_content(css_language *c,
 /**
  * Parse counter-increment
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_counter_increment(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -167,16 +167,16 @@ css_error parse_counter_increment(css_language *c,
 /**
  * Parse counter-reset
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_counter_reset(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -189,16 +189,16 @@ css_error parse_counter_reset(css_language *c,
 /**
  * Parse list-style
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_list_style(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -357,13 +357,13 @@ css_error parse_list_style(css_language *c,
 	/* Clean up after ourselves */
 cleanup:
 	if (image)
-		css_stylesheet_style_destroy(c->sheet, image);
+		css_stylesheet_style_destroy(c->sheet, image, error == CSS_OK);
 	if (position)
-		css_stylesheet_style_destroy(c->sheet, position);
+		css_stylesheet_style_destroy(c->sheet, position, error == CSS_OK);
 	if (type)
-		css_stylesheet_style_destroy(c->sheet, type);
+		css_stylesheet_style_destroy(c->sheet, type, error == CSS_OK);
 	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret);
+		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;
@@ -374,16 +374,16 @@ cleanup:
 /**
  * Parse list-style-image
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_list_style_image(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -459,16 +459,16 @@ css_error parse_list_style_image(css_language *c,
 /**
  * Parse list-style-position
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_list_style_position(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -524,16 +524,16 @@ css_error parse_list_style_position(css_language *c,
 /**
  * Parse list-style-type
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_list_style_type(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -548,9 +548,9 @@ css_error parse_list_style_type(css_language *c,
 	bool match;
 
 	/* IDENT (disc, circle, square, decimal, decimal-leading-zero,
-	 *        lower-roman, upper-roman, lower-greek, lower-latin,
-	 *        upper-latin, armenian, georgian, lower-alpha, upper-alpha,
-	 *        none, inherit)
+	 *	  lower-roman, upper-roman, lower-greek, lower-latin,
+	 *	  upper-latin, armenian, georgian, lower-alpha, upper-alpha,
+	 *	  none, inherit)
 	 */
 	ident = parserutils_vector_iterate(vector, ctx);
 	if (ident == NULL || ident->type != CSS_TOKEN_IDENT) {
@@ -588,16 +588,16 @@ css_error parse_list_style_type(css_language *c,
 /**
  * Parse quotes
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_quotes(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -729,13 +729,13 @@ css_error parse_quotes(css_language *c,
 				memcpy(ptr, &opv, sizeof(opv));
 				ptr += sizeof(opv);
 			}
-                        
-                        lwc_string_ref(open);
+			
+			lwc_string_ref(open);
 			memcpy(ptr, &open, sizeof(open));
 			ptr += sizeof(open);
 			
-                        lwc_string_ref(close);
-                        memcpy(ptr, &close, sizeof(close));
+			lwc_string_ref(close);
+			memcpy(ptr, &close, sizeof(close));
 			ptr += sizeof(close);
 
 			first = false;
@@ -758,11 +758,11 @@ css_error parse_quotes(css_language *c,
 /**
  * Parse list-style-type value
  *
- * \param c      Parsing context
- * \param ident  Identifier to consider
- * \param value  Pointer to location to receive value
+ * \param c	 Parsing context
+ * \param ident	 Identifier to consider
+ * \param value	 Pointer to location to receive value
  * \return CSS_OK on success,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_INVALID if the input is not valid
  */
 css_error parse_list_style_type_value(css_language *c, const css_token *ident,
 		uint16_t *value)
@@ -770,9 +770,9 @@ css_error parse_list_style_type_value(css_language *c, const css_token *ident,
 	bool match;
 
 	/* IDENT (disc, circle, square, decimal, decimal-leading-zero,
-	 *        lower-roman, upper-roman, lower-greek, lower-latin,
-	 *        upper-latin, armenian, georgian, lower-alpha, upper-alpha,
-	 *        none)
+	 *	  lower-roman, upper-roman, lower-greek, lower-latin,
+	 *	  upper-latin, armenian, georgian, lower-alpha, upper-alpha,
+	 *	  none)
 	 */
 	if ((lwc_string_caseless_isequal(
 			ident->idata, c->strings[DISC],
@@ -843,18 +843,18 @@ css_error parse_list_style_type_value(css_language *c, const css_token *ident,
 /**
  * Parse content list
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
- * \param value   Pointer to location to receive value
+ * \param ctx	  Pointer to vector iteration context
+ * \param value	  Pointer to location to receive value
  * \param buffer  Pointer to output buffer, or NULL to read required length
  * \param buflen  Pointer to location to receive buffer length
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_content_list(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -953,7 +953,7 @@ css_error parse_content_list(css_language *c,
 			}
 
 			if (buffer != NULL) {
-                                lwc_string_ref(token->idata);
+				lwc_string_ref(token->idata);
 				memcpy(buffer + offset, &token->idata,
 						sizeof(token->idata));
 			}
@@ -1013,7 +1013,7 @@ css_error parse_content_list(css_language *c,
 			}
 
 			if (buffer != NULL) {
-                                lwc_string_ref(token->idata);
+				lwc_string_ref(token->idata);
 				memcpy(buffer + offset, &token->idata, 
 						sizeof(token->idata));
 			}
@@ -1107,7 +1107,7 @@ css_error parse_content_list(css_language *c,
 			}
 
 			if (buffer != NULL) {
-                                lwc_string_ref(name);
+				lwc_string_ref(name);
 				memcpy(buffer + offset, &name, sizeof(name));
 			}
 
@@ -1212,14 +1212,14 @@ css_error parse_content_list(css_language *c,
 			}
 
 			if (buffer != NULL) {
-                                lwc_string_ref(name);
+				lwc_string_ref(name);
 				memcpy(buffer + offset, &name, sizeof(name));
 			}
 
 			offset += sizeof(name);
 
 			if (buffer != NULL) {
-                                lwc_string_ref(sep);
+				lwc_string_ref(sep);
 				memcpy(buffer + offset, &sep, sizeof(sep));
 			}
 
@@ -1264,17 +1264,17 @@ css_error parse_content_list(css_language *c,
 /**
  * Common parser for counter-increment and counter-reset
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
- * \param op      Opcode to parse for
+ * \param ctx	  Pointer to vector iteration context
+ * \param op	  Opcode to parse for
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_counter_common(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1435,11 +1435,11 @@ css_error parse_counter_common(css_language *c,
 				memcpy(ptr, &opv, sizeof(opv));
 				ptr += sizeof(opv);
 			}
-                        
-                        lwc_string_ref(name);
+			
+			lwc_string_ref(name);
 			memcpy(ptr, &name, sizeof(name));
 			ptr += sizeof(name);
-                        
+			
 			memcpy(ptr, &increment, sizeof(increment));
 			ptr += sizeof(increment);
 

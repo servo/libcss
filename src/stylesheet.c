@@ -1,7 +1,7 @@
 /*
  * This file is part of LibCSS.
  * Licensed under the MIT License,
- *                http://www.opensource.org/licenses/mit-license.php
+ *		  http://www.opensource.org/licenses/mit-license.php
  * Copyright 2008 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
@@ -13,6 +13,7 @@
 #include "parse/language.h"
 #include "utils/parserutilserror.h"
 #include "utils/utils.h"
+#include "select/dispatch.h"
 
 static css_error _add_selectors(css_stylesheet *sheet, css_rule *rule);
 static css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule);
@@ -21,20 +22,20 @@ static size_t _rule_size(const css_rule *rule);
 /**
  * Create a stylesheet
  *
- * \param level            The language level of the stylesheet
- * \param charset          The charset of the stylesheet data, or NULL to detect
- * \param url              URL of stylesheet
- * \param title            Title of stylesheet
- * \param allow_quirks     Permit quirky parsing of stylesheets
- * \param inline_style     This stylesheet is an inline style
- * \param alloc            Memory (de)allocation function
- * \param alloc_pw         Client private data for alloc
- * \param resolve          URL resolution function
- * \param resolve_pw       Client private data for resolve
- * \param stylesheet       Pointer to location to receive stylesheet
+ * \param level		   The language level of the stylesheet
+ * \param charset	   The charset of the stylesheet data, or NULL to detect
+ * \param url		   URL of stylesheet
+ * \param title		   Title of stylesheet
+ * \param allow_quirks	   Permit quirky parsing of stylesheets
+ * \param inline_style	   This stylesheet is an inline style
+ * \param alloc		   Memory (de)allocation function
+ * \param alloc_pw	   Client private data for alloc
+ * \param resolve	   URL resolution function
+ * \param resolve_pw	   Client private data for resolve
+ * \param stylesheet	   Pointer to location to receive stylesheet
  * \return CSS_OK on success,
- *         CSS_BADPARM on bad parameters,
- *         CSS_NOMEM on memory exhaustion
+ *	   CSS_BADPARM on bad parameters,
+ *	   CSS_NOMEM on memory exhaustion
  */
 css_error css_stylesheet_create(css_language_level level,
 		const char *charset, const char *url, const char *title,
@@ -57,7 +58,7 @@ css_error css_stylesheet_create(css_language_level level,
 		return CSS_NOMEM;
 
 	memset(sheet, 0, sizeof(css_stylesheet));
-        
+	
 	sheet->inline_style = inline_style;
 
 	if (inline_style) {
@@ -149,7 +150,7 @@ css_error css_stylesheet_create(css_language_level level,
 /**
  * Destroy a stylesheet
  *
- * \param sheet  The stylesheet to destroy
+ * \param sheet	 The stylesheet to destroy
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error css_stylesheet_destroy(css_stylesheet *sheet)
@@ -204,9 +205,9 @@ css_error css_stylesheet_destroy(css_stylesheet *sheet)
 /**
  * Append source data to a stylesheet
  *
- * \param sheet  The stylesheet to append data to
- * \param data   Pointer to data to append
- * \param len    Length, in bytes, of data to append
+ * \param sheet	 The stylesheet to append data to
+ * \param data	 Pointer to data to append
+ * \param len	 Length, in bytes, of data to append
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error css_stylesheet_append_data(css_stylesheet *sheet,
@@ -224,10 +225,10 @@ css_error css_stylesheet_append_data(css_stylesheet *sheet,
 /**
  * Flag that the last of a stylesheet's data has been seen
  *
- * \param sheet  The stylesheet in question
+ * \param sheet	 The stylesheet in question
  * \return CSS_OK on success,
- *         CSS_IMPORTS_PENDING if there are imports pending,
- *         appropriate error otherwise
+ *	   CSS_IMPORTS_PENDING if there are imports pending,
+ *	   appropriate error otherwise
  */
 css_error css_stylesheet_data_done(css_stylesheet *sheet)
 {
@@ -283,12 +284,12 @@ css_error css_stylesheet_data_done(css_stylesheet *sheet)
  * Retrieve the next pending import for the parent stylesheet
  *
  * \param parent  Parent stylesheet
- * \param url     Pointer to object to be populated with details of URL of 
- *                imported stylesheet (potentially relative)
- * \param media   Pointer to location to receive applicable media types for
- *                imported sheet,
+ * \param url	  Pointer to object to be populated with details of URL of 
+ *		  imported stylesheet (potentially relative)
+ * \param media	  Pointer to location to receive applicable media types for
+ *		  imported sheet,
  * \return CSS_OK on success,
- *         CSS_INVALID if there are no pending imports remaining
+ *	   CSS_INVALID if there are no pending imports remaining
  *
  * The client must resolve the absolute URL of the imported stylesheet,
  * using the parent's URL as the base. It must then fetch the imported
@@ -320,7 +321,7 @@ css_error css_stylesheet_next_pending_import(css_stylesheet *parent,
 			break;
 
 		if (r->type == CSS_RULE_IMPORT && i->sheet == NULL) {
-                        *url = lwc_string_ref(i->url);
+			*url = lwc_string_ref(i->url);
 			*media = i->media;
 
 			return CSS_OK;
@@ -336,8 +337,8 @@ css_error css_stylesheet_next_pending_import(css_stylesheet *parent,
  * \param parent  Parent stylesheet
  * \param import  Imported sheet
  * \return CSS_OK on success, 
- *         CSS_INVALID if there are no outstanding imports,
- *         appropriate error otherwise.
+ *	   CSS_INVALID if there are no outstanding imports,
+ *	   appropriate error otherwise.
  *
  * Ownership of the imported stylesheet is transferred to the parent.
  */
@@ -372,8 +373,8 @@ css_error css_stylesheet_register_import(css_stylesheet *parent,
 /**
  * Retrieve the language level of a stylesheet
  *
- * \param sheet  The stylesheet to retrieve the language level of
- * \param level  Pointer to location to receive language level
+ * \param sheet	 The stylesheet to retrieve the language level of
+ * \param level	 Pointer to location to receive language level
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error css_stylesheet_get_language_level(css_stylesheet *sheet,
@@ -390,8 +391,8 @@ css_error css_stylesheet_get_language_level(css_stylesheet *sheet,
 /**
  * Retrieve the URL associated with a stylesheet
  *
- * \param sheet  The stylesheet to retrieve the URL from
- * \param url    Pointer to location to receive pointer to URL
+ * \param sheet	 The stylesheet to retrieve the URL from
+ * \param url	 Pointer to location to receive pointer to URL
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error css_stylesheet_get_url(css_stylesheet *sheet, const char **url)
@@ -407,8 +408,8 @@ css_error css_stylesheet_get_url(css_stylesheet *sheet, const char **url)
 /**
  * Retrieve the title associated with a stylesheet
  *
- * \param sheet  The stylesheet to retrieve the title from
- * \param title  Pointer to location to receive pointer to title
+ * \param sheet	 The stylesheet to retrieve the title from
+ * \param title	 Pointer to location to receive pointer to title
  * \return CSS_Ok on success, appropriate error otherwise
  */
 css_error css_stylesheet_get_title(css_stylesheet *sheet, const char **title)
@@ -424,7 +425,7 @@ css_error css_stylesheet_get_title(css_stylesheet *sheet, const char **title)
 /**
  * Determine whether quirky parsing was permitted on a stylesheet
  *
- * \param sheet   The stylesheet to consider
+ * \param sheet	  The stylesheet to consider
  * \param quirks  Pointer to location to receive quirkyness
  * \return CSS_OK on success, appropriate error otherwise
  */
@@ -442,7 +443,7 @@ css_error css_stylesheet_quirks_allowed(css_stylesheet *sheet, bool *allowed)
 /**
  * Determine whether quirky parsing was used on a stylesheet
  *
- * \param sheet   The stylesheet to consider
+ * \param sheet	  The stylesheet to consider
  * \param quirks  Pointer to location to receive quirkyness
  * \return CSS_OK on success, appropriate error otherwise
  */
@@ -459,7 +460,7 @@ css_error css_stylesheet_used_quirks(css_stylesheet *sheet, bool *quirks)
 /**
  * Get disabled status of a stylesheet
  *
- * \param sheet     The stylesheet to consider
+ * \param sheet	    The stylesheet to consider
  * \param disabled  Pointer to location to receive disabled state
  * \return CSS_OK on success, appropriate error otherwise
  */
@@ -476,7 +477,7 @@ css_error css_stylesheet_get_disabled(css_stylesheet *sheet, bool *disabled)
 /**
  * Set a stylesheet's disabled state
  *
- * \param sheet     The stylesheet to modify
+ * \param sheet	    The stylesheet to modify
  * \param disabled  The new disabled state
  * \return CSS_OK on success, appropriate error otherwise
  */
@@ -495,12 +496,12 @@ css_error css_stylesheet_set_disabled(css_stylesheet *sheet, bool disabled)
 /**
  * Determine the memory-resident size of a stylesheet
  *
- * \param sheet  Sheet to consider
- * \param size   Pointer to location to receive byte count
+ * \param sheet	 Sheet to consider
+ * \param size	 Pointer to location to receive byte count
  * \return CSS_OK on success.
  *
  * \note The returned size will not include the size of interned strings
- *       or imported stylesheets.
+ *	 or imported stylesheets.
  */
 css_error css_stylesheet_size(css_stylesheet *sheet, size_t *size)
 {
@@ -529,18 +530,18 @@ css_error css_stylesheet_size(css_stylesheet *sheet, size_t *size)
 }
 
 /******************************************************************************
- * Library-private API below here                                             *
+ * Library-private API below here					      *
  ******************************************************************************/
 
 /**
  * Create a style
  *
- * \param sheet  The stylesheet context
- * \param len    The required length of the style
- * \param style  Pointer to location to receive style
+ * \param sheet	 The stylesheet context
+ * \param len	 The required length of the style
+ * \param style	 Pointer to location to receive style
  * \return CSS_OK on success,
- *         CSS_BADPARM on bad parameters,
- *         CSS_NOMEM on memory exhaustion
+ *	   CSS_BADPARM on bad parameters,
+ *	   CSS_NOMEM on memory exhaustion
  */
 css_error css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len,
 		css_style **style)
@@ -574,19 +575,32 @@ css_error css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len,
 /**
  * Destroy a style
  *
- * \param sheet  The stylesheet context
- * \param style  The style to destroy
+ * \param sheet	 The stylesheet context
+ * \param style	 The style to destroy
+ * \param suppress_bytecode_cleanup Whether or not to prevent the
+ *				    bytecode from unreffing strings
+ *				    etc.
  * \return CSS_OK on success, appropriate error otherwise
- *
- * \todo This really ought to unref all the strings in the bytecode.
  */
-css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style)
+css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style,
+				       bool suppress_bytecode_cleanup)
 {
 	uint32_t alloclen, bucket;
+	uint8_t *bptr, *eptr;
 
 	if (sheet == NULL || style == NULL)
 		return CSS_BADPARM;
-
+	
+	if (suppress_bytecode_cleanup == false) {
+		bptr = style->bytecode;
+		eptr = bptr + style->length;
+		while (bptr != eptr) {
+			uint32_t opcode = getOpcode(*((uint32_t*)bptr));
+			uint32_t skip = prop_dispatch[opcode].destroy(bptr);
+			bptr += skip;
+		}
+	}
+	
 	alloclen = ((style->length + 15) & ~15);
 	bucket = (alloclen / N_ELEMENTS(sheet->free_styles)) - 1;
 
@@ -603,12 +617,12 @@ css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style)
 /**
  * Create an element selector
  *
- * \param sheet     The stylesheet context
- * \param name      Name of selector
+ * \param sheet	    The stylesheet context
+ * \param name	    Name of selector
  * \param selector  Pointer to location to receive selector object
  * \return CSS_OK on success,
- *         CSS_BADPARM on bad parameters,
- *         CSS_NOMEM on memory exhaustion
+ *	   CSS_BADPARM on bad parameters,
+ *	   CSS_NOMEM on memory exhaustion
  */
 css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 		lwc_string *name, css_selector **selector)
@@ -649,7 +663,7 @@ css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 /**
  * Destroy a selector object
  *
- * \param sheet     The stylesheet context
+ * \param sheet	    The stylesheet context
  * \param selector  The selector to destroy
  * \return CSS_OK on success, appropriate error otherwise
  */
@@ -657,7 +671,7 @@ css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 		css_selector *selector)
 {
 	css_selector *c, *d;
-        css_selector_detail *detail;
+	css_selector_detail *detail;
 
 	if (sheet == NULL || selector == NULL)
 		return CSS_BADPARM;
@@ -669,36 +683,36 @@ css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 	for (c = selector->combinator; c != NULL; c = d) {
 		d = c->combinator;
 
-                for (detail = &c->data; detail;) {
-                        lwc_string_unref(detail->name);
+		for (detail = &c->data; detail;) {
+			lwc_string_unref(detail->name);
 
-                        if (detail->value != NULL) {
-                                lwc_string_unref(detail->value);
+			if (detail->value != NULL) {
+				lwc_string_unref(detail->value);
 			}
 
-                        if (detail->next)
-                                detail++;
-                        else
-                                detail = NULL;
-                }
-                
+			if (detail->next)
+				detail++;
+			else
+				detail = NULL;
+		}
+		
 		sheet->alloc(c, 0, sheet->pw);
 	}
-        
-        for (detail = &selector->data; detail;) {
-                lwc_string_unref(detail->name);
+	
+	for (detail = &selector->data; detail;) {
+		lwc_string_unref(detail->name);
 
-                if (detail->value != NULL) {
-                        lwc_string_unref(detail->value);
+		if (detail->value != NULL) {
+			lwc_string_unref(detail->value);
 		}
 
-                if (detail->next)
-                        detail++;
-                else
-                        detail = NULL;
-        }
-                     
-        
+		if (detail->next)
+			detail++;
+		else
+			detail = NULL;
+	}
+		     
+	
 	/* Destroy this selector */
 	sheet->alloc(selector, 0, sheet->pw);
 
@@ -708,13 +722,13 @@ css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
 /**
  * Initialise a selector detail
  *
- * \param sheet   The stylesheet context
- * \param type    The type of selector to create
- * \param name    Name of selector
- * \param value   Value of selector, or NULL
+ * \param sheet	  The stylesheet context
+ * \param type	  The type of selector to create
+ * \param name	  Name of selector
+ * \param value	  Value of selector, or NULL
  * \param detail  Pointer to detail object to initialise
  * \return CSS_OK on success,
- *         CSS_BADPARM on bad parameters
+ *	   CSS_BADPARM on bad parameters
  */
 css_error css_stylesheet_selector_detail_init(css_stylesheet *sheet,
 		css_selector_type type, lwc_string *name, 
@@ -736,7 +750,7 @@ css_error css_stylesheet_selector_detail_init(css_stylesheet *sheet,
 /**
  * Append a selector to the specifics chain of another selector
  *
- * \param sheet     The stylesheet context
+ * \param sheet	    The stylesheet context
  * \param parent    Pointer to pointer to the parent selector (updated on exit)
  * \param specific  The selector to append (copied)
  * \return CSS_OK on success, appropriate error otherwise.
@@ -771,12 +785,12 @@ css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
 	(&temp->data)[num_details + 1] = *detail;
 	/* Flag that there's another block */
 	(&temp->data)[num_details].next = 1;
-        
-        /* Ref the strings */
-        lwc_string_ref(detail->name);
-        if (detail->value != NULL)
-                lwc_string_ref(detail->value);
-        
+	
+	/* Ref the strings */
+	lwc_string_ref(detail->name);
+	if (detail->value != NULL)
+		lwc_string_ref(detail->value);
+	
 	(*parent) = temp;
 
 	/* Update parent's specificity */
@@ -804,10 +818,10 @@ css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
 /**
  * Combine a pair of selectors
  *
- * \param sheet  The stylesheet context
- * \param type   The combinator type
- * \param a      The first operand
- * \param b      The second operand
+ * \param sheet	 The stylesheet context
+ * \param type	 The combinator type
+ * \param a	 The first operand
+ * \param b	 The second operand
  * \return CSS_OK on success, appropriate error otherwise.
  *
  * For example, given A + B, the combinator field of B would point at A, 
@@ -845,12 +859,12 @@ css_error css_stylesheet_selector_combine(css_stylesheet *sheet,
 /**
  * Create a CSS rule
  *
- * \param sheet  The stylesheet context
- * \param type   The rule type
- * \param rule   Pointer to location to receive rule object
+ * \param sheet	 The stylesheet context
+ * \param type	 The rule type
+ * \param rule	 Pointer to location to receive rule object
  * \return CSS_OK on success,
- *         CSS_BADPARM on bad parameters,
- *         CSS_NOMEM on memory exhaustion
+ *	   CSS_BADPARM on bad parameters,
+ *	   CSS_NOMEM on memory exhaustion
  */
 css_error css_stylesheet_rule_create(css_stylesheet *sheet, css_rule_type type,
 		css_rule **rule)
@@ -901,8 +915,8 @@ css_error css_stylesheet_rule_create(css_stylesheet *sheet, css_rule_type type,
 /**
  * Destroy a CSS rule
  *
- * \param sheet  The stylesheet context
- * \param rule   The rule to destroy
+ * \param sheet	 The stylesheet context
+ * \param rule	 The rule to destroy
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
@@ -936,21 +950,21 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 			sheet->alloc(s->selectors, 0, sheet->pw);
 
 		if (s->style != NULL)
-			css_stylesheet_style_destroy(sheet, s->style);
+			css_stylesheet_style_destroy(sheet, s->style, false);
 	}
 		break;
 	case CSS_RULE_CHARSET:
-        {
-                css_rule_charset *charset = (css_rule_charset *) rule;
-                lwc_string_unref(charset->encoding);
-        }
+	{
+		css_rule_charset *charset = (css_rule_charset *) rule;
+		lwc_string_unref(charset->encoding);
+	}
 		break;
 	case CSS_RULE_IMPORT:
 	{
 		css_rule_import *import = (css_rule_import *) rule;
-                
-                lwc_string_unref(import->url);
-                
+		
+		lwc_string_unref(import->url);
+		
 		if (import->sheet != NULL)
 			css_stylesheet_destroy(import->sheet);
 	}
@@ -977,7 +991,7 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 		css_rule_font_face *font_face = (css_rule_font_face *) rule;
 
 		if (font_face->style != NULL)
-			css_stylesheet_style_destroy(sheet, font_face->style);
+			css_stylesheet_style_destroy(sheet, font_face->style, false);
 	}
 		break;
 	case CSS_RULE_PAGE:
@@ -990,7 +1004,7 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 		}
 
 		if (page->style != NULL)
-			css_stylesheet_style_destroy(sheet, page->style);
+			css_stylesheet_style_destroy(sheet, page->style, false);
 	}
 		break;
 	}
@@ -1004,8 +1018,8 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 /**
  * Add a selector to a CSS rule
  *
- * \param sheet     The stylesheet context
- * \param rule      The rule to add to (must be of type CSS_RULE_SELECTOR)
+ * \param sheet	    The stylesheet context
+ * \param rule	    The rule to add to (must be of type CSS_RULE_SELECTOR)
  * \param selector  The selector to add
  * \return CSS_OK on success, appropriate error otherwise
  */
@@ -1041,9 +1055,9 @@ css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet,
 /**
  * Append a style to a CSS rule
  *
- * \param sheet  The stylesheet context
- * \param rule   The rule to add to (must be CSS_RULE_SELECTOR or CSS_RULE_PAGE)
- * \param style  The style to add
+ * \param sheet	 The stylesheet context
+ * \param rule	 The rule to add to (must be CSS_RULE_SELECTOR or CSS_RULE_PAGE)
+ * \param style	 The style to add
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
@@ -1079,7 +1093,7 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 					cur->length);
 			temp->length = cur->length;
 
-			css_stylesheet_style_destroy(sheet, cur);
+			css_stylesheet_style_destroy(sheet, cur, false);
 
 			cur = temp;
 		}
@@ -1094,7 +1108,7 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 		sheet->size += style->length;
 
 		/* Done with style */
-		css_stylesheet_style_destroy(sheet, style);
+		css_stylesheet_style_destroy(sheet, style, false);
 	} else {
 		/* No current style, so use this one */
 		cur = style;
@@ -1114,8 +1128,8 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 /**
  * Set the charset of a CSS rule
  *
- * \param sheet    The stylesheet context
- * \param rule     The rule to add to (must be of type CSS_RULE_CHARSET)
+ * \param sheet	   The stylesheet context
+ * \param rule	   The rule to add to (must be of type CSS_RULE_CHARSET)
  * \param charset  The charset
  * \return CSS_OK on success, appropriate error otherwise
  */
@@ -1140,10 +1154,10 @@ css_error css_stylesheet_rule_set_charset(css_stylesheet *sheet,
 /**
  * Set the necessary data to import a stylesheet associated with a rule
  *
- * \param sheet   The stylesheet context
- * \param rule    The rule to add to (must be of type CSS_RULE_IMPORT)
- * \param url     The URL of the imported stylesheet
- * \param media   The applicable media types for the imported stylesheet
+ * \param sheet	  The stylesheet context
+ * \param rule	  The rule to add to (must be of type CSS_RULE_IMPORT)
+ * \param url	  The URL of the imported stylesheet
+ * \param media	  The applicable media types for the imported stylesheet
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error css_stylesheet_rule_set_nascent_import(css_stylesheet *sheet,
@@ -1168,9 +1182,9 @@ css_error css_stylesheet_rule_set_nascent_import(css_stylesheet *sheet,
 /**
  * Set the media of an @media rule
  *
- * \param sheet  The stylesheet context
- * \param rule   The rule to add to (must be of type CSS_RULE_MEDIA)
- * \param media  The applicable media types for the rule
+ * \param sheet	 The stylesheet context
+ * \param rule	 The rule to add to (must be of type CSS_RULE_MEDIA)
+ * \param media	 The applicable media types for the rule
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error css_stylesheet_rule_set_media(css_stylesheet *sheet,
@@ -1193,8 +1207,8 @@ css_error css_stylesheet_rule_set_media(css_stylesheet *sheet,
 /**
  * Set an @page rule selector
  *
- * \param sheet     The stylesheet context
- * \param rule      The rule to add to (must be of type CSS_RULE_PAGE)
+ * \param sheet	    The stylesheet context
+ * \param rule	    The rule to add to (must be of type CSS_RULE_PAGE)
  * \param selector  The page selector
  * \return CSS_OK on success, appropriate error otherwise
  */
@@ -1223,8 +1237,8 @@ css_error css_stylesheet_rule_set_page_selector(css_stylesheet *sheet,
 /**
  * Add a rule to a stylesheet
  *
- * \param sheet   The stylesheet to add to
- * \param rule    The rule to add
+ * \param sheet	  The stylesheet to add to
+ * \param rule	  The rule to add
  * \param parent  The parent rule, or NULL for a top-level rule
  * \return CSS_OK on success, appropriate error otherwise
  */
@@ -1294,8 +1308,8 @@ css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule,
 /**
  * Remove a rule from a stylesheet
  *
- * \param sheet  The sheet to remove from
- * \param rule   The rule to remove
+ * \param sheet	 The sheet to remove from
+ * \param rule	 The rule to remove
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error css_stylesheet_remove_rule(css_stylesheet *sheet, css_rule *rule)
@@ -1338,14 +1352,14 @@ css_error css_stylesheet_remove_rule(css_stylesheet *sheet, css_rule *rule)
 }
 
 /******************************************************************************
- * Private API below here                                                     *
+ * Private API below here						      *
  ******************************************************************************/
 
 /**
  * Add selectors in a rule to the hash
  *
- * \param sheet  Stylesheet containing hash
- * \param rule   Rule to consider
+ * \param sheet	 Stylesheet containing hash
+ * \param rule	 Rule to consider
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error _add_selectors(css_stylesheet *sheet, css_rule *rule)
@@ -1409,8 +1423,8 @@ css_error _add_selectors(css_stylesheet *sheet, css_rule *rule)
 /**
  * Remove selectors in a rule from the hash
  *
- * \param sheet  Stylesheet containing hash
- * \param rule   Rule to consider
+ * \param sheet	 Stylesheet containing hash
+ * \param rule	 Rule to consider
  * \return CSS_OK on success, appropriate error otherwise
  */
 css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule)

@@ -1,7 +1,7 @@
 /*
  * This file is part of LibCSS
  * Licensed under the MIT License,
- *                http://www.opensource.org/licenses/mit-license.php
+ *		  http://www.opensource.org/licenses/mit-license.php
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
@@ -55,6 +55,42 @@ static css_error cascade_counter_increment_reset(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t,
 				css_computed_counter *));
+
+/* Generic destructors */
+
+static uint32_t generic_destroy_color(void *bytecode)
+{
+	return sizeof(uint32_t) + 
+		((getValue(*((uint32_t*)bytecode)) == BACKGROUND_COLOR_SET) ? sizeof(css_color) : 0);
+}
+
+static uint32_t generic_destroy_uri(void *bytecode)
+{
+	bool has_uri = (getValue(*((uint32_t*)bytecode)) & BACKGROUND_IMAGE_URI) == BACKGROUND_IMAGE_URI;
+	
+	if (has_uri) {
+		lwc_string *str = *(lwc_string **)(((uint8_t*)bytecode) + sizeof(uint32_t));
+		lwc_string_unref(str);
+	}
+	return sizeof(uint32_t) + (has_uri ? sizeof(lwc_string*) : 0);
+}
+
+static uint32_t generic_destroy_length(void *bytecode)
+{
+	bool has_length = (getValue(*((uint32_t*)bytecode)) & BORDER_WIDTH_SET) == BORDER_WIDTH_SET;
+	
+	return sizeof(uint32_t) + (has_length ? sizeof(css_fixed) + sizeof(uint32_t) : 0);
+}
+
+static uint32_t generic_destroy_number(void *bytecode)
+{
+	uint32_t value = getValue(*((uint32_t*)bytecode));
+	bool has_number = (value == ORPHANS_SET);
+	
+	return sizeof(uint32_t) + (has_number ? sizeof(css_fixed) : 0);
+}
+
+/* Useful helpers */
 
 css_unit to_css_unit(uint32_t u)
 {
@@ -152,6 +188,14 @@ css_error compose_azimuth(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_azimuth(void *bytecode)
+{
+	bool has_angle = (((getValue(*(uint32_t*)bytecode) & (1<<7)) != 0));
+	uint32_t extra_size =  has_angle ? (sizeof(css_fixed) + sizeof(uint32_t)) : 0;
+	
+	return sizeof(uint32_t) + extra_size;
+}
+
 css_error cascade_background_attachment(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -203,6 +247,13 @@ css_error compose_background_attachment(const css_computed_style *parent,
 	return set_background_attachment(result, type);
 }
 
+uint32_t destroy_background_attachment(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_background_color(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -235,6 +286,11 @@ css_error compose_background_color(const css_computed_style *parent,
 	return set_background_color(result, type, color);
 }
 
+uint32_t destroy_background_color(void *bytecode)
+{
+	return generic_destroy_color(bytecode);
+}
+
 css_error cascade_background_image(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -265,6 +321,11 @@ css_error compose_background_image(const css_computed_style *parent,
 	}
 
 	return set_background_image(result, type, url);
+}
+
+uint32_t destroy_background_image(void *bytecode)
+{
+	return generic_destroy_uri(bytecode);
 }
 
 css_error cascade_background_position(uint32_t opv, css_style *style, 
@@ -368,6 +429,19 @@ css_error compose_background_position(const css_computed_style *parent,
 }
 
 
+uint32_t destroy_background_position(void *bytecode)
+{
+	uint32_t value = getValue(*((uint32_t*)bytecode));
+	uint32_t extra_size = 0;
+	
+	if ((value & 0x0f) == BACKGROUND_POSITION_VERT_SET)
+		extra_size += sizeof(css_fixed) + sizeof(uint32_t);
+	if ((value & 0xf0) == BACKGROUND_POSITION_HORZ_SET)
+		extra_size += sizeof(css_fixed) + sizeof(uint32_t);
+	
+	return sizeof(uint32_t) + extra_size;
+}
+
 css_error cascade_background_repeat(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -425,6 +499,13 @@ css_error compose_background_repeat(const css_computed_style *parent,
 	return set_background_repeat(result, type);
 }
 
+uint32_t destroy_background_repeat(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_border_collapse(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -473,6 +554,13 @@ css_error compose_border_collapse(const css_computed_style *parent,
 	}
 	
 	return set_border_collapse(result, type);
+}
+
+uint32_t destroy_border_collapse(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_border_spacing(uint32_t opv, css_style *style, 
@@ -548,6 +636,13 @@ css_error compose_border_spacing(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_border_spacing(void *bytecode)
+{
+	bool has_values = (getValue(*((uint32_t*)bytecode)) == BORDER_SPACING_SET);
+	
+	return sizeof(uint32_t) + (has_values ? (sizeof(css_fixed) + sizeof(uint32_t)) * 2 : 0);
+}
+
 css_error cascade_border_top_color(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -577,6 +672,11 @@ css_error compose_border_top_color(const css_computed_style *parent,
 	}
 
 	return set_border_top_color(result, type, color);
+}
+
+uint32_t destroy_border_top_color(void *bytecode)
+{
+	return generic_destroy_color(bytecode);
 }
 
 css_error cascade_border_right_color(uint32_t opv, css_style *style, 
@@ -612,6 +712,11 @@ css_error compose_border_right_color(const css_computed_style *parent,
 	return set_border_right_color(result, type, color);
 }
 
+uint32_t destroy_border_right_color(void *bytecode)
+{
+	return generic_destroy_color(bytecode);
+}
+
 css_error cascade_border_bottom_color(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -643,6 +748,11 @@ css_error compose_border_bottom_color(const css_computed_style *parent,
 	}
 
 	return set_border_bottom_color(result, type, color);
+}
+
+uint32_t destroy_border_bottom_color(void *bytecode)
+{
+	return generic_destroy_color(bytecode);
 }
 
 css_error cascade_border_left_color(uint32_t opv, css_style *style, 
@@ -678,6 +788,11 @@ css_error compose_border_left_color(const css_computed_style *parent,
 	return set_border_left_color(result, type, color);
 }
 
+uint32_t destroy_border_left_color(void *bytecode)
+{
+	return generic_destroy_color(bytecode);
+}
+
 css_error cascade_border_top_style(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -706,6 +821,13 @@ css_error compose_border_top_style(const css_computed_style *parent,
 	}
 
 	return set_border_top_style(result, type);
+}
+
+uint32_t destroy_border_top_style(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_border_right_style(uint32_t opv, css_style *style, 
@@ -738,6 +860,13 @@ css_error compose_border_right_style(const css_computed_style *parent,
 	return set_border_right_style(result, type);
 }
 
+uint32_t destroy_border_right_style(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_border_bottom_style(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -768,6 +897,13 @@ css_error compose_border_bottom_style(const css_computed_style *parent,
 	return set_border_bottom_style(result, type);
 }
 
+uint32_t destroy_border_bottom_style(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_border_left_style(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -796,6 +932,13 @@ css_error compose_border_left_style(const css_computed_style *parent,
 	}
 
 	return set_border_left_style(result, type);
+}
+
+uint32_t destroy_border_left_style(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_border_top_width(uint32_t opv, css_style *style, 
@@ -832,6 +975,11 @@ css_error compose_border_top_width(const css_computed_style *parent,
 	return set_border_top_width(result, type, length, unit);
 }
 
+uint32_t destroy_border_top_width(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
+}
+
 css_error cascade_border_right_width(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -864,6 +1012,11 @@ css_error compose_border_right_width(const css_computed_style *parent,
 	}
 
 	return set_border_right_width(result, type, length, unit);
+}
+
+uint32_t destroy_border_right_width(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_border_bottom_width(uint32_t opv, css_style *style, 
@@ -900,6 +1053,11 @@ css_error compose_border_bottom_width(const css_computed_style *parent,
 	return set_border_bottom_width(result, type, length, unit);
 }
 
+uint32_t destroy_border_bottom_width(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
+}
+
 css_error cascade_border_left_width(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -934,6 +1092,11 @@ css_error compose_border_left_width(const css_computed_style *parent,
 	return set_border_left_width(result, type, length, unit);
 }
 
+uint32_t destroy_border_left_width(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
+}
+
 css_error cascade_bottom(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -965,6 +1128,11 @@ css_error compose_bottom(const css_computed_style *parent,
 	}
 
 	return set_bottom(result, type, length, unit);
+}
+
+uint32_t destroy_bottom(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_caption_side(uint32_t opv, css_style *style, 
@@ -1015,6 +1183,13 @@ css_error compose_caption_side(const css_computed_style *parent,
 	}
 	
 	return set_caption_side(result, type);
+}
+
+uint32_t destroy_caption_side(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_clear(uint32_t opv, css_style *style, 
@@ -1071,6 +1246,13 @@ css_error compose_clear(const css_computed_style *parent,
 	}
 
 	return set_clear(result, type);
+}
+
+uint32_t destroy_clear(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_clip(uint32_t opv, css_style *style, 
@@ -1174,6 +1356,26 @@ css_error compose_clip(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_clip(void *bytecode)
+{
+	uint32_t value = getValue(*((uint32_t*)bytecode));
+	bool has_rect = value & CLIP_SHAPE_RECT;
+	bool nonautos = 0;
+	
+	if (has_rect) {
+		if ((value & CLIP_RECT_TOP_AUTO) == 0)
+			nonautos += 1;
+		if ((value & CLIP_RECT_RIGHT_AUTO) == 0)
+			nonautos += 1;
+		if ((value & CLIP_RECT_BOTTOM_AUTO) == 0)
+			nonautos += 1;
+		if ((value & CLIP_RECT_LEFT_AUTO) == 0)
+			nonautos += 1;
+	}
+	
+	return sizeof(uint32_t) + ((sizeof(css_fixed) + sizeof(uint32_t)) * nonautos);
+}
+
 css_error cascade_color(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -1227,6 +1429,11 @@ css_error compose_color(const css_computed_style *parent,
 	return set_color(result, type, color);
 }
 
+uint32_t destroy_color(void *bytecode)
+{
+	return generic_destroy_color(bytecode);
+}
+
 css_error cascade_content(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -1243,12 +1450,12 @@ css_error cascade_content(uint32_t opv, css_style *style,
 			value = CSS_CONTENT_NONE;
 		} else {
 			value = CSS_CONTENT_SET;
-                        
-                        while (v != CONTENT_NORMAL) {
-                                lwc_string *he = *((lwc_string **) style->bytecode);
-                                css_computed_content_item *temp;
-                                
-                                temp = state->result->alloc(content,
+			
+			while (v != CONTENT_NORMAL) {
+				lwc_string *he = *((lwc_string **) style->bytecode);
+				css_computed_content_item *temp;
+				
+				temp = state->result->alloc(content,
 						(n_contents + 1) *
 						sizeof(css_computed_content_item),
 						state->result->pw);
@@ -1451,6 +1658,41 @@ css_error compose_content(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_content(void *bytecode)
+{
+	uint32_t consumed = sizeof(uint32_t);
+	uint32_t value = getValue(*((uint32_t*)bytecode));
+	bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+	
+	if (value == CONTENT_NONE || value == CONTENT_NORMAL)
+		return sizeof(uint32_t);
+	
+	while (value != 0) {
+		switch (value & 0xff) {
+		case CONTENT_COUNTERS: {
+			lwc_string *str = *(lwc_string **)bytecode;
+			lwc_string_unref(str);
+			consumed += sizeof(lwc_string*);
+			bytecode = (uint8_t*)bytecode + sizeof(lwc_string *);
+		}
+		case CONTENT_STRING:
+		case CONTENT_URI:
+		case CONTENT_COUNTER:
+		case CONTENT_ATTR: {
+			lwc_string *str = *(lwc_string **)bytecode;
+			lwc_string_unref(str);
+			consumed += sizeof(lwc_string*);
+			bytecode = (uint8_t*)bytecode + sizeof(lwc_string *);
+		}
+		}
+		consumed += sizeof(uint32_t);
+		value = *((uint32_t*)bytecode);
+		bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+	}
+	
+	return consumed;
+}
+
 css_error cascade_counter_increment(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {	
@@ -1538,6 +1780,28 @@ css_error compose_counter_increment(const css_computed_style *parent,
 	}
 
 	return CSS_OK;
+}
+
+uint32_t destroy_counter_increment(void *bytecode)
+{
+	uint32_t consumed = sizeof(uint32_t);
+	uint32_t value = getValue(*((uint32_t*)bytecode));
+	bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+	
+	if (value == COUNTER_INCREMENT_NAMED) {
+		while (value != COUNTER_INCREMENT_NONE) {
+			lwc_string *str = *((lwc_string **)bytecode);
+			consumed += sizeof(lwc_string*) + sizeof(css_fixed);
+			bytecode = ((uint8_t*)bytecode) + sizeof(lwc_string*) + sizeof(css_fixed);
+			lwc_string_unref(str);
+			
+			consumed += sizeof(uint32_t);
+			value = *((uint32_t*)bytecode);
+			bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+		}
+	}
+	
+	return consumed;
 }
 
 css_error cascade_counter_reset(uint32_t opv, css_style *style, 
@@ -1628,6 +1892,28 @@ css_error compose_counter_reset(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_counter_reset(void *bytecode)
+{
+	uint32_t consumed = sizeof(uint32_t);
+	uint32_t value = getValue(*((uint32_t*)bytecode));
+	bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+	
+	if (value == COUNTER_INCREMENT_NAMED) {
+		while (value != COUNTER_INCREMENT_NONE) {
+			lwc_string *str = *((lwc_string **)bytecode);
+			consumed += sizeof(lwc_string*) + sizeof(css_fixed);
+			bytecode = ((uint8_t*)bytecode) + sizeof(lwc_string*) + sizeof(css_fixed);
+			lwc_string_unref(str);
+			
+			consumed += sizeof(uint32_t);
+			value = *((uint32_t*)bytecode);
+			bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+		}
+	}
+	
+	return consumed;
+}
+
 css_error cascade_cue_after(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -1662,6 +1948,11 @@ css_error compose_cue_after(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_cue_after(void *bytecode)
+{
+	return generic_destroy_uri(bytecode);
+}
+
 css_error cascade_cue_before(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -1694,6 +1985,11 @@ css_error compose_cue_before(const css_computed_style *parent,
 	UNUSED(result);
 
 	return CSS_OK;
+}
+
+uint32_t destroy_cue_before(void *bytecode)
+{
+	return generic_destroy_uri(bytecode);
 }
 
 css_error cascade_cursor(uint32_t opv, css_style *style, 
@@ -1902,6 +2198,26 @@ css_error compose_cursor(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_cursor(void *bytecode)
+{
+	uint32_t consumed = sizeof(uint32_t);
+	uint32_t value = getValue(*((uint32_t*)bytecode));
+	bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+	
+	while (value == CURSOR_URI) {
+		lwc_string *str = *((lwc_string **)bytecode);
+		consumed += sizeof(lwc_string*);
+		bytecode = ((uint8_t*)bytecode) + sizeof(lwc_string*);
+		lwc_string_unref(str);
+		
+		consumed += sizeof(uint32_t);
+		value = *((uint32_t*)bytecode);
+		bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+	}
+	
+	return consumed;
+}
+
 css_error cascade_direction(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -1950,6 +2266,13 @@ css_error compose_direction(const css_computed_style *parent,
 	}
 
 	return set_direction(result, type);
+}
+
+uint32_t destroy_direction(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_display(uint32_t opv, css_style *style, 
@@ -2044,6 +2367,13 @@ css_error compose_display(const css_computed_style *parent,
 	return set_display(result, type);
 }
 
+uint32_t destroy_display(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_elevation(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2109,6 +2439,11 @@ css_error compose_elevation(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_elevation(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
+}
+
 css_error cascade_empty_cells(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2157,6 +2492,13 @@ css_error compose_empty_cells(const css_computed_style *parent,
 	}
 
 	return set_empty_cells(result, type);
+}
+
+uint32_t destroy_empty_cells(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_float(uint32_t opv, css_style *style, 
@@ -2210,6 +2552,13 @@ css_error compose_float(const css_computed_style *parent,
 	}
 
 	return set_float(result, type);
+}
+
+uint32_t destroy_float(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_font_family(uint32_t opv, css_style *style, 
@@ -2400,6 +2749,28 @@ css_error compose_font_family(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_font_family(void *bytecode)
+{
+	uint32_t consumed = sizeof(uint32_t);
+	uint32_t value = getValue(*((uint32_t*)bytecode));
+	bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+	
+	while (value != FONT_FAMILY_END) {
+		if (value == FONT_FAMILY_STRING || value == FONT_FAMILY_IDENT_LIST) {
+			lwc_string *str = *((lwc_string **)bytecode);
+			consumed += sizeof(lwc_string*);
+			bytecode = ((uint8_t*)bytecode) + sizeof(lwc_string*);
+			lwc_string_unref(str);
+		}
+		
+		consumed += sizeof(uint32_t);
+		value = *((uint32_t*)bytecode);
+		bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+	}
+	
+	return consumed;
+}
+
 css_error cascade_font_size(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2486,6 +2857,11 @@ css_error compose_font_size(const css_computed_style *parent,
 	return set_font_size(result, type, size, unit);
 }
 
+uint32_t destroy_font_size(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
+}
+
 css_error cascade_font_style(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2539,6 +2915,13 @@ css_error compose_font_style(const css_computed_style *parent,
 	return set_font_style(result, type);
 }
 
+uint32_t destroy_font_style(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_font_variant(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2587,6 +2970,13 @@ css_error compose_font_variant(const css_computed_style *parent,
 	}
 
 	return set_font_variant(result, type);
+}
+
+uint32_t destroy_font_variant(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_font_weight(uint32_t opv, css_style *style, 
@@ -2672,6 +3062,13 @@ css_error compose_font_weight(const css_computed_style *parent,
 	return set_font_weight(result, type);
 }
 
+uint32_t destroy_font_weight(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_height(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2705,6 +3102,11 @@ css_error compose_height(const css_computed_style *parent,
 	return set_height(result, type, length, unit);
 }
 
+uint32_t destroy_height(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
+}
+
 css_error cascade_left(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2736,6 +3138,11 @@ css_error compose_left(const css_computed_style *parent,
 	}
 
 	return set_left(result, type, length, unit);
+}
+
+uint32_t destroy_left(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_letter_spacing(uint32_t opv, css_style *style, 
@@ -2777,6 +3184,11 @@ css_error compose_letter_spacing(const css_computed_style *parent,
 	}
 
 	return CSS_OK;
+}
+
+uint32_t destroy_letter_spacing(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_line_height(uint32_t opv, css_style *style, 
@@ -2844,6 +3256,15 @@ css_error compose_line_height(const css_computed_style *parent,
 	return set_line_height(result, type, length, unit);
 }
 
+uint32_t destroy_line_height(void *bytecode)
+{
+	uint32_t value = getValue(*((uint32_t*)bytecode));
+	if (value == LINE_HEIGHT_NUMBER)
+		return generic_destroy_number(bytecode);
+	else
+		return generic_destroy_length(bytecode);
+}
+
 css_error cascade_list_style_image(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -2874,6 +3295,11 @@ css_error compose_list_style_image(const css_computed_style *parent,
 	}
 
 	return set_list_style_image(result, type, url);
+}
+
+uint32_t destroy_list_style_image(void *bytecode)
+{
+	return generic_destroy_uri(bytecode);
 }
 
 css_error cascade_list_style_position(uint32_t opv, css_style *style, 
@@ -2925,6 +3351,13 @@ css_error compose_list_style_position(const css_computed_style *parent,
 	}
 
 	return set_list_style_position(result, type);
+}
+
+uint32_t destroy_list_style_position(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_list_style_type(uint32_t opv, css_style *style, 
@@ -3016,6 +3449,13 @@ css_error compose_list_style_type(const css_computed_style *parent,
 	return set_list_style_type(result, type);
 }
 
+uint32_t destroy_list_style_type(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_margin_top(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3047,6 +3487,11 @@ css_error compose_margin_top(const css_computed_style *parent,
 	}
 
 	return set_margin_top(result, type, length, unit);
+}
+
+uint32_t destroy_margin_top(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_margin_right(uint32_t opv, css_style *style, 
@@ -3082,6 +3527,11 @@ css_error compose_margin_right(const css_computed_style *parent,
 	return set_margin_right(result, type, length, unit);
 }
 
+uint32_t destroy_margin_right(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
+}
+
 css_error cascade_margin_bottom(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3115,6 +3565,11 @@ css_error compose_margin_bottom(const css_computed_style *parent,
 	return set_margin_bottom(result, type, length, unit);
 }
 
+uint32_t destroy_margin_bottom(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
+}
+
 css_error cascade_margin_left(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3146,6 +3601,11 @@ css_error compose_margin_left(const css_computed_style *parent,
 	}
 
 	return set_margin_left(result, type, length, unit);
+}
+
+uint32_t destroy_margin_left(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_max_height(uint32_t opv, css_style *style, 
@@ -3182,6 +3642,11 @@ css_error compose_max_height(const css_computed_style *parent,
 	return set_max_height(result, type, length, unit);
 }
 
+uint32_t destroy_max_height(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
+}
+
 css_error cascade_max_width(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3213,6 +3678,11 @@ css_error compose_max_width(const css_computed_style *parent,
 	}
 
 	return set_max_width(result, type, length, unit);
+}
+
+uint32_t destroy_max_width(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_min_height(uint32_t opv, css_style *style, 
@@ -3249,6 +3719,11 @@ css_error compose_min_height(const css_computed_style *parent,
 	return set_min_height(result, type, length, unit);
 }
 
+uint32_t destroy_min_height(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
+}
+
 css_error cascade_min_width(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3280,6 +3755,11 @@ css_error compose_min_width(const css_computed_style *parent,
 	}
 
 	return set_min_width(result, type, length, unit);
+}
+
+uint32_t destroy_min_width(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_orphans(uint32_t opv, css_style *style, 
@@ -3314,6 +3794,11 @@ css_error compose_orphans(const css_computed_style *parent,
 	UNUSED(result);
 
 	return CSS_OK;
+}
+
+uint32_t destroy_orphans(void *bytecode)
+{
+	return generic_destroy_number(bytecode);
 }
 
 css_error cascade_outline_color(uint32_t opv, css_style *style, 
@@ -3375,6 +3860,11 @@ css_error compose_outline_color(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_outline_color(void *bytecode)
+{
+	return generic_destroy_color(bytecode);
+}
+
 css_error cascade_outline_style(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3403,6 +3893,13 @@ css_error compose_outline_style(const css_computed_style *parent,
 	}
 
 	return set_outline_style(result, type);
+}
+
+uint32_t destroy_outline_style(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_outline_width(uint32_t opv, css_style *style, 
@@ -3444,6 +3941,11 @@ css_error compose_outline_width(const css_computed_style *parent,
 	}
 
 	return CSS_OK;
+}
+
+uint32_t destroy_outline_width(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_overflow(uint32_t opv, css_style *style, 
@@ -3502,6 +4004,13 @@ css_error compose_overflow(const css_computed_style *parent,
 	return set_overflow(result, type);
 }
 
+uint32_t destroy_overflow(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_padding_top(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3533,6 +4042,11 @@ css_error compose_padding_top(const css_computed_style *parent,
 	}
 
 	return set_padding_top(result, type, length, unit);
+}
+
+uint32_t destroy_padding_top(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_padding_right(uint32_t opv, css_style *style, 
@@ -3569,6 +4083,11 @@ css_error compose_padding_right(const css_computed_style *parent,
 	return set_padding_right(result, type, length, unit);
 }
 
+uint32_t destroy_padding_right(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
+}
+
 css_error cascade_padding_bottom(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3603,6 +4122,11 @@ css_error compose_padding_bottom(const css_computed_style *parent,
 	return set_padding_bottom(result, type, length, unit);
 }
 
+uint32_t destroy_padding_bottom(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
+}
+
 css_error cascade_padding_left(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3634,6 +4158,11 @@ css_error compose_padding_left(const css_computed_style *parent,
 	}
 
 	return set_padding_left(result, type, length, unit);
+}
+
+uint32_t destroy_padding_left(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_page_break_after(uint32_t opv, css_style *style, 
@@ -3670,6 +4199,13 @@ css_error compose_page_break_after(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_page_break_after(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_page_break_before(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3702,6 +4238,13 @@ css_error compose_page_break_before(const css_computed_style *parent,
 	UNUSED(result);
 
 	return CSS_OK;
+}
+
+uint32_t destroy_page_break_before(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_page_break_inside(uint32_t opv, css_style *style, 
@@ -3756,6 +4299,13 @@ css_error compose_page_break_inside(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_page_break_inside(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_pause_after(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3788,6 +4338,11 @@ css_error compose_pause_after(const css_computed_style *parent,
 	UNUSED(result);
 
 	return CSS_OK;
+}
+
+uint32_t destroy_pause_after(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_pause_before(uint32_t opv, css_style *style, 
@@ -3824,6 +4379,11 @@ css_error compose_pause_before(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_pause_before(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
+}
+
 css_error cascade_pitch_range(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3856,6 +4416,11 @@ css_error compose_pitch_range(const css_computed_style *parent,
 	UNUSED(result);
 
 	return CSS_OK;
+}
+
+uint32_t destroy_pitch_range(void *bytecode)
+{
+	return generic_destroy_number(bytecode);
 }
 
 css_error cascade_pitch(uint32_t opv, css_style *style, 
@@ -3922,6 +4487,11 @@ css_error compose_pitch(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_pitch(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
+}
+
 css_error cascade_play_during(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -3980,6 +4550,11 @@ css_error compose_play_during(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_play_during(void *bytecode)
+{
+	return generic_destroy_uri(bytecode);
+}
+
 css_error cascade_position(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -4034,6 +4609,13 @@ css_error compose_position(const css_computed_style *parent,
 	}
 
 	return set_position(result, type);
+}
+
+uint32_t destroy_position(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_quotes(uint32_t opv, css_style *style, 
@@ -4197,6 +4779,27 @@ css_error compose_quotes(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_quotes(void *bytecode)
+{
+	uint32_t consumed = sizeof(uint32_t);
+	uint32_t value = getValue(*((uint32_t*)bytecode));
+	bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+	
+	while (value == QUOTES_STRING) {
+		lwc_string **str = ((lwc_string **)bytecode);
+		consumed += sizeof(lwc_string*) * 2;
+		bytecode = ((uint8_t*)bytecode) + (sizeof(lwc_string*) * 2);
+		lwc_string_unref(str[0]);
+		lwc_string_unref(str[1]);
+			
+		consumed += sizeof(uint32_t);
+		value = *((uint32_t*)bytecode);
+		bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+	}
+	
+	return consumed;
+}
+
 css_error cascade_richness(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -4231,6 +4834,11 @@ css_error compose_richness(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_richness(void *bytecode)
+{
+	return generic_destroy_number(bytecode);
+}
+
 css_error cascade_right(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -4262,6 +4870,11 @@ css_error compose_right(const css_computed_style *parent,
 	}
 
 	return set_right(result, type, length, unit);
+}
+
+uint32_t destroy_right(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_speak_header(uint32_t opv, css_style *style, 
@@ -4316,6 +4929,13 @@ css_error compose_speak_header(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_speak_header(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_speak_numeral(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -4366,6 +4986,13 @@ css_error compose_speak_numeral(const css_computed_style *parent,
 	UNUSED(result);
 
 	return CSS_OK;
+}
+
+uint32_t destroy_speak_numeral(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_speak_punctuation( 
@@ -4420,6 +5047,13 @@ css_error compose_speak_punctuation(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_speak_punctuation(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_speak(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -4471,6 +5105,13 @@ css_error compose_speak(const css_computed_style *parent,
 	UNUSED(result);
 
 	return CSS_OK;
+}
+
+uint32_t destroy_speak(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_speech_rate(uint32_t opv, css_style *style, 
@@ -4534,6 +5175,11 @@ css_error compose_speech_rate(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_speech_rate(void *bytecode)
+{
+	return generic_destroy_number(bytecode);
+}
+
 css_error cascade_stress(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -4566,6 +5212,11 @@ css_error compose_stress(const css_computed_style *parent,
 	UNUSED(result);
 
 	return CSS_OK;
+}
+
+uint32_t destroy_stress(void *bytecode)
+{
+	return generic_destroy_number(bytecode);
 }
 
 css_error cascade_table_layout(uint32_t opv, css_style *style, 
@@ -4616,6 +5267,13 @@ css_error compose_table_layout(const css_computed_style *parent,
 	}
 
 	return set_table_layout(result, type);
+}
+
+uint32_t destroy_table_layout(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_text_align(uint32_t opv, css_style *style, 
@@ -4694,6 +5352,13 @@ css_error compose_text_align(const css_computed_style *parent,
 	return set_text_align(result, type);
 }
 
+uint32_t destroy_text_align(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_text_decoration(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -4750,6 +5415,13 @@ css_error compose_text_decoration(const css_computed_style *parent,
 	return set_text_decoration(result, type);
 }
 
+uint32_t destroy_text_decoration(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_text_indent(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -4782,6 +5454,11 @@ css_error compose_text_indent(const css_computed_style *parent,
 	}
 
 	return set_text_indent(result, type, length, unit);
+}
+
+uint32_t destroy_text_indent(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_text_transform(uint32_t opv, css_style *style, 
@@ -4840,6 +5517,13 @@ css_error compose_text_transform(const css_computed_style *parent,
 	return set_text_transform(result, type);
 }
 
+uint32_t destroy_text_transform(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_top(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -4871,6 +5555,11 @@ css_error compose_top(const css_computed_style *parent,
 	}
 
 	return set_top(result, type, length, unit);
+}
+
+uint32_t destroy_top(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_unicode_bidi(uint32_t opv, css_style *style, 
@@ -4924,6 +5613,13 @@ css_error compose_unicode_bidi(const css_computed_style *parent,
 	}
 
 	return set_unicode_bidi(result, type);
+}
+
+uint32_t destroy_unicode_bidi(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_vertical_align(uint32_t opv, css_style *style, 
@@ -5008,6 +5704,11 @@ css_error compose_vertical_align(const css_computed_style *parent,
 	return set_vertical_align(result, type, length, unit);
 }
 
+uint32_t destroy_vertical_align(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
+}
+
 css_error cascade_visibility(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -5059,6 +5760,13 @@ css_error compose_visibility(const css_computed_style *parent,
 	}
 
 	return set_visibility(result, type);
+}
+
+uint32_t destroy_visibility(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
 }
 
 css_error cascade_voice_family(uint32_t opv, css_style *style, 
@@ -5181,6 +5889,28 @@ css_error compose_voice_family(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_voice_family(void *bytecode)
+{
+	uint32_t consumed = sizeof(uint32_t);
+	uint32_t value = getValue(*((uint32_t*)bytecode));
+	bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+	
+	while (value != VOICE_FAMILY_END) {
+		if (value == VOICE_FAMILY_STRING || value == VOICE_FAMILY_IDENT_LIST) {
+			lwc_string *str = *((lwc_string **)bytecode);
+			consumed += sizeof(lwc_string*);
+			bytecode = ((uint8_t*)bytecode) + sizeof(lwc_string*);
+			lwc_string_unref(str);
+		}
+		
+		consumed += sizeof(uint32_t);
+		value = *((uint32_t*)bytecode);
+		bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+	}
+	
+	return consumed;
+}
+
 css_error cascade_volume(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -5252,6 +5982,18 @@ css_error compose_volume(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_volume(void *bytecode)
+{
+	uint32_t value = getValue(*((uint32_t*)bytecode));
+	uint32_t additional = 0;
+	if (value == VOLUME_NUMBER)
+		additional = sizeof(css_fixed);
+	else if (value == VOLUME_DIMENSION)
+		additional = sizeof(css_fixed) + sizeof(uint32_t);
+	
+	return sizeof(uint32_t) + additional;
+}
+
 css_error cascade_white_space(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -5311,6 +6053,13 @@ css_error compose_white_space(const css_computed_style *parent,
 	return set_white_space(result, type);
 }
 
+uint32_t destroy_white_space(void *bytecode)
+{
+	UNUSED(bytecode);
+	
+	return sizeof(uint32_t);
+}
+
 css_error cascade_widows(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -5345,6 +6094,11 @@ css_error compose_widows(const css_computed_style *parent,
 	return CSS_OK;
 }
 
+uint32_t destroy_widows(void *bytecode)
+{
+	return generic_destroy_number(bytecode);
+}
+
 css_error cascade_width(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
@@ -5376,6 +6130,11 @@ css_error compose_width(const css_computed_style *parent,
 	}
 
 	return set_width(result, type, length, unit);
+}
+
+uint32_t destroy_width(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_word_spacing(uint32_t opv, css_style *style, 
@@ -5417,6 +6176,11 @@ css_error compose_word_spacing(const css_computed_style *parent,
 	}
 
 	return CSS_OK;
+}
+
+uint32_t destroy_word_spacing(void *bytecode)
+{
+	return generic_destroy_length(bytecode);
 }
 
 css_error cascade_z_index(uint32_t opv, css_style *style, 
@@ -5472,8 +6236,13 @@ css_error compose_z_index(const css_computed_style *parent,
 	return set_z_index(result, type, index);
 }
 
+uint32_t destroy_z_index(void *bytecode)
+{
+	return generic_destroy_number(bytecode);
+}
+
 /******************************************************************************
- * Utilities below here                                                       *
+ * Utilities below here							      *
  ******************************************************************************/
 css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 		css_select_state *state, 

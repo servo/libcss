@@ -1,7 +1,7 @@
 /*
  * This file is part of LibCSS.
  * Licensed under the MIT License,
- *                http://www.opensource.org/licenses/mit-license.php
+ *		  http://www.opensource.org/licenses/mit-license.php
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
@@ -16,16 +16,16 @@
 /**
  * Parse background
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_background(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -227,17 +227,17 @@ css_error parse_background(css_language *c,
 	/* Clean up after ourselves */
 cleanup:
 	if (attachment)
-		css_stylesheet_style_destroy(c->sheet, attachment);
+		css_stylesheet_style_destroy(c->sheet, attachment, error == CSS_OK);
 	if (color)
-		css_stylesheet_style_destroy(c->sheet, color);
+		css_stylesheet_style_destroy(c->sheet, color, error == CSS_OK);
 	if (image)
-		css_stylesheet_style_destroy(c->sheet, image);
+		css_stylesheet_style_destroy(c->sheet, image, error == CSS_OK);
 	if (position)
-		css_stylesheet_style_destroy(c->sheet, position);
+		css_stylesheet_style_destroy(c->sheet, position, error == CSS_OK);
 	if (repeat)
-		css_stylesheet_style_destroy(c->sheet, repeat);
+		css_stylesheet_style_destroy(c->sheet, repeat, error == CSS_OK);
 	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret);
+		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;
@@ -248,16 +248,16 @@ cleanup:
 /**
  * Parse background-attachment
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_background_attachment(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -313,16 +313,16 @@ css_error parse_background_attachment(css_language *c,
 /**
  * Parse background-color
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_background_color(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -393,16 +393,16 @@ css_error parse_background_color(css_language *c,
 /**
  * Parse background-image
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_background_image(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -478,16 +478,16 @@ css_error parse_background_image(css_language *c,
 /**
  * Parse background-position
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_background_position(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -688,16 +688,16 @@ css_error parse_background_position(css_language *c,
 /**
  * Parse background-repeat
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_background_repeat(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 

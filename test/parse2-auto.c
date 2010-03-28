@@ -41,6 +41,18 @@ static void *myrealloc(void *data, size_t len, void *pw)
 	return realloc(data, len);
 }
 
+static void *counting_realloc(void *data, size_t len, void *pw)
+{
+	size_t *counter = (size_t *)pw;
+	
+	if (data == NULL)
+		*counter += 1;
+	else if (len == 0)
+		*counter -= 1;
+	
+	return realloc(data, len);
+}
+
 static css_error resolve_url(void *pw,
 		const char *base, lwc_string *rel, lwc_string **abs)
 {
@@ -53,10 +65,19 @@ static css_error resolve_url(void *pw,
 	return CSS_OK;
 }
 
+static void
+printing_lwc_iterator(lwc_string *str, void *pw)
+{
+	UNUSED(pw);
+	
+	printf(" DICT: %*s\n", (int)(lwc_string_length(str)), lwc_string_data(str));
+}
+
 int main(int argc, char **argv)
 {
 	line_ctx ctx;
-
+	size_t counter = 0;
+	
 	if (argc != 3) {
 		printf("Usage: %s <aliases_file> <filename>\n", argv[0]);
 		return 1;
@@ -84,8 +105,8 @@ int main(int argc, char **argv)
 	ctx.inerrors = false;
 	ctx.inexp = false;
 
-        assert(lwc_initialise(myrealloc, NULL, 0) == lwc_error_ok);
-        
+	assert(lwc_initialise(counting_realloc, &counter, 0) == lwc_error_ok);
+	
 	assert(parse_testfile(argv[2], handle_line, &ctx) == true);
 
 	/* and run final test */
@@ -95,6 +116,11 @@ int main(int argc, char **argv)
 	free(ctx.buf);
 
 	assert(css_finalise(myrealloc, NULL) == CSS_OK);
+	
+	printf("INFO: Counter is %zu\n", counter);
+	lwc_iterate_strings(printing_lwc_iterator, NULL);
+	
+	assert(counter == 2);
 
 	printf("PASS\n");
 
@@ -184,7 +210,7 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 		assert(0 && "No memory for result data");
 	}
 	buflen = 2 * explen;
-        
+	
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", NULL,
 			false, false, myrealloc, NULL, resolve_url, NULL, 
 			&sheet) == CSS_OK);

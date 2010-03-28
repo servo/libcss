@@ -1,7 +1,7 @@
 /*
  * This file is part of LibCSS
  * Licensed under the MIT License,
- *                http://www.opensource.org/licenses/mit-license.php
+ *		  http://www.opensource.org/licenses/mit-license.php
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
@@ -36,9 +36,9 @@ extern struct prop_table {
 	css_error (*compose)(const css_computed_style *parent,
 			const css_computed_style *child,
 			css_computed_style *result);
-
-	unsigned int inherited : 1,
-	             group : 2;
+	uint32_t  (*destroy)(void *bytecode);
+	unsigned int inherited;
+	unsigned int group;
 } prop_dispatch[CSS_N_PROPERTIES];
 
 #endif

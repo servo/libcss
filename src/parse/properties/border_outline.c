@@ -1,7 +1,7 @@
 /*
  * This file is part of LibCSS.
  * Licensed under the MIT License,
- *                http://www.opensource.org/licenses/mit-license.php
+ *		  http://www.opensource.org/licenses/mit-license.php
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
@@ -31,16 +31,16 @@ static css_error parse_border_side_width(css_language *c,
 /**
  * Parse border shorthand
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -107,15 +107,15 @@ css_error parse_border(css_language *c,
 	/* Clean up after ourselves */
 cleanup:
 	if (top)
-		css_stylesheet_style_destroy(c->sheet, top);
+		css_stylesheet_style_destroy(c->sheet, top, error == CSS_OK);
 	if (right)
-		css_stylesheet_style_destroy(c->sheet, right);
+		css_stylesheet_style_destroy(c->sheet, right, error == CSS_OK);
 	if (bottom)
-		css_stylesheet_style_destroy(c->sheet, bottom);
+		css_stylesheet_style_destroy(c->sheet, bottom, error == CSS_OK);
 	if (left)
-		css_stylesheet_style_destroy(c->sheet, left);
+		css_stylesheet_style_destroy(c->sheet, left, error == CSS_OK);
 	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret);
+		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;
@@ -126,16 +126,16 @@ cleanup:
 /**
  * Parse border-bottom shorthand
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_bottom(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -147,16 +147,16 @@ css_error parse_border_bottom(css_language *c,
 /**
  * Parse border-bottom-color
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_bottom_color(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -169,16 +169,16 @@ css_error parse_border_bottom_color(css_language *c,
 /**
  * Parse border-bottom-style
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_bottom_style(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -191,16 +191,16 @@ css_error parse_border_bottom_style(css_language *c,
 /**
  * Parse border-bottom-width
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_bottom_width(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -213,16 +213,16 @@ css_error parse_border_bottom_width(css_language *c,
 /**
  * Parse border-collapse
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_collapse(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -278,16 +278,16 @@ css_error parse_border_collapse(css_language *c,
 /**
  * Parse border-color shorthand
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_color(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -511,15 +511,15 @@ css_error parse_border_color(css_language *c,
 	/* Clean up after ourselves */
 cleanup:
 	if (top)
-		css_stylesheet_style_destroy(c->sheet, top);
+		css_stylesheet_style_destroy(c->sheet, top, error == CSS_OK);
 	if (right)
-		css_stylesheet_style_destroy(c->sheet, right);
+		css_stylesheet_style_destroy(c->sheet, right, error == CSS_OK);
 	if (bottom)
-		css_stylesheet_style_destroy(c->sheet, bottom);
+		css_stylesheet_style_destroy(c->sheet, bottom, error == CSS_OK);
 	if (left)
-		css_stylesheet_style_destroy(c->sheet, left);
+		css_stylesheet_style_destroy(c->sheet, left, error == CSS_OK);
 	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret);
+		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;
@@ -530,16 +530,16 @@ cleanup:
 /**
  * Parse border-left shorthand
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_left(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -551,16 +551,16 @@ css_error parse_border_left(css_language *c,
 /**
  * Parse border-left-color
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_left_color(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -573,16 +573,16 @@ css_error parse_border_left_color(css_language *c,
 /**
  * Parse border-left-style
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_left_style(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -595,16 +595,16 @@ css_error parse_border_left_style(css_language *c,
 /**
  * Parse border-left-width
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_left_width(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -617,16 +617,16 @@ css_error parse_border_left_width(css_language *c,
 /**
  * Parse border-right shorthand
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_right(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -638,16 +638,16 @@ css_error parse_border_right(css_language *c,
 /**
  * Parse border-right-color
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_right_color(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -660,16 +660,16 @@ css_error parse_border_right_color(css_language *c,
 /**
  * Parse border-right-style
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_right_style(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -682,16 +682,16 @@ css_error parse_border_right_style(css_language *c,
 /**
  * Parse border-right-width
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_right_width(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -704,16 +704,16 @@ css_error parse_border_right_width(css_language *c,
 /**
  * Parse border-spacing
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_spacing(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -833,16 +833,16 @@ css_error parse_border_spacing(css_language *c,
 /**
  * Parse border-style shorthand
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_style(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -1066,15 +1066,15 @@ css_error parse_border_style(css_language *c,
 	/* Clean up after ourselves */
 cleanup:
 	if (top)
-		css_stylesheet_style_destroy(c->sheet, top);
+		css_stylesheet_style_destroy(c->sheet, top, error == CSS_OK);
 	if (right)
-		css_stylesheet_style_destroy(c->sheet, right);
+		css_stylesheet_style_destroy(c->sheet, right, error == CSS_OK);
 	if (bottom)
-		css_stylesheet_style_destroy(c->sheet, bottom);
+		css_stylesheet_style_destroy(c->sheet, bottom, error == CSS_OK);
 	if (left)
-		css_stylesheet_style_destroy(c->sheet, left);
+		css_stylesheet_style_destroy(c->sheet, left, error == CSS_OK);
 	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret);
+		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;
@@ -1085,16 +1085,16 @@ cleanup:
 /**
  * Parse border-top shorthand
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_top(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -1106,16 +1106,16 @@ css_error parse_border_top(css_language *c,
 /**
  * Parse border-top-color
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_top_color(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1128,16 +1128,16 @@ css_error parse_border_top_color(css_language *c,
 /**
  * Parse border-top-style
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_top_style(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1150,16 +1150,16 @@ css_error parse_border_top_style(css_language *c,
 /**
  * Parse border-top-width
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_top_width(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1172,16 +1172,16 @@ css_error parse_border_top_width(css_language *c,
 /**
  * Parse border-width shorthand
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_width(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -1405,15 +1405,15 @@ css_error parse_border_width(css_language *c,
 	/* Clean up after ourselves */
 cleanup:
 	if (top)
-		css_stylesheet_style_destroy(c->sheet, top);
+		css_stylesheet_style_destroy(c->sheet, top, error == CSS_OK);
 	if (right)
-		css_stylesheet_style_destroy(c->sheet, right);
+		css_stylesheet_style_destroy(c->sheet, right, error == CSS_OK);
 	if (bottom)
-		css_stylesheet_style_destroy(c->sheet, bottom);
+		css_stylesheet_style_destroy(c->sheet, bottom, error == CSS_OK);
 	if (left)
-		css_stylesheet_style_destroy(c->sheet, left);
+		css_stylesheet_style_destroy(c->sheet, left, error == CSS_OK);
 	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret);
+		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;
@@ -1424,16 +1424,16 @@ cleanup:
 /**
  * Parse outline shorthand
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_outline(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -1590,13 +1590,13 @@ css_error parse_outline(css_language *c,
 	/* Clean up after ourselves */
 cleanup:
 	if (color)
-		css_stylesheet_style_destroy(c->sheet, color);
+		css_stylesheet_style_destroy(c->sheet, color, error == CSS_OK);
 	if (style)
-		css_stylesheet_style_destroy(c->sheet, style);
+		css_stylesheet_style_destroy(c->sheet, style, error == CSS_OK);
 	if (width)
-		css_stylesheet_style_destroy(c->sheet, width);
+		css_stylesheet_style_destroy(c->sheet, width, error == CSS_OK);
 	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret);
+		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;
@@ -1607,16 +1607,16 @@ cleanup:
 /**
  * Parse outline-color
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_outline_color(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1687,16 +1687,16 @@ css_error parse_outline_color(css_language *c,
 /**
  * Parse outline-style
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_outline_style(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1731,16 +1731,16 @@ css_error parse_outline_style(css_language *c,
 /**
  * Parse outline-width
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_outline_width(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -1754,17 +1754,17 @@ css_error parse_outline_width(css_language *c,
 /**
  * Parse border-{top,right,bottom,left} shorthand
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
- * \param side    The side we're parsing for
+ * \param ctx	  Pointer to vector iteration context
+ * \param side	  The side we're parsing for
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_side(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -1916,13 +1916,13 @@ css_error parse_border_side(css_language *c,
 	/* Clean up after ourselves */
 cleanup:
 	if (color)
-		css_stylesheet_style_destroy(c->sheet, color);
+		css_stylesheet_style_destroy(c->sheet, color, error == CSS_OK);
 	if (style)
-		css_stylesheet_style_destroy(c->sheet, style);
+		css_stylesheet_style_destroy(c->sheet, style, error == CSS_OK);
 	if (width)
-		css_stylesheet_style_destroy(c->sheet, width);
+		css_stylesheet_style_destroy(c->sheet, width, error == CSS_OK);
 	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret);
+		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;
@@ -1933,17 +1933,17 @@ cleanup:
 /**
  * Parse border-{top,right,bottom,left}-color
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
- * \param op      Opcode to parse for (encodes side)
+ * \param ctx	  Pointer to vector iteration context
+ * \param op	  Opcode to parse for (encodes side)
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_side_color(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -2014,17 +2014,17 @@ css_error parse_border_side_color(css_language *c,
 /**
  * Parse border-{top,right,bottom,left}-style
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
- * \param op      Opcode to parse for (encodes side)
+ * \param ctx	  Pointer to vector iteration context
+ * \param op	  Opcode to parse for (encodes side)
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_side_style(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -2113,17 +2113,17 @@ css_error parse_border_side_style(css_language *c,
 /**
  * Parse border-{top,right,bottom,left}-width
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
- * \param op      Opcode to parse for (encodes side)
+ * \param ctx	  Pointer to vector iteration context
+ * \param op	  Opcode to parse for (encodes side)
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_border_side_width(css_language *c,
 		const parserutils_vector *vector, int *ctx,

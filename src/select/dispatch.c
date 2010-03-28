@@ -1,7 +1,7 @@
 /*
  * This file is part of LibCSS
  * Licensed under the MIT License,
- *                http://www.opensource.org/licenses/mit-license.php
+ *		  http://www.opensource.org/licenses/mit-license.php
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
@@ -11,796 +11,506 @@
 /**
  * Dispatch table for properties, indexed by opcode
  */
+#define PROPERTY_FUNCS(pname)				\
+	cascade_##pname ,				\
+	set_##pname##_from_hint,		\
+	initial_##pname ,			\
+	compose_##pname ,		\
+	destroy_##pname
+
 struct prop_table prop_dispatch[CSS_N_PROPERTIES] = {
 	{
-		cascade_azimuth,
-		set_azimuth_from_hint,
-		initial_azimuth,
-		compose_azimuth,
+		PROPERTY_FUNCS(azimuth),
 		1,
 		GROUP_AURAL
 	},
 	{
-		cascade_background_attachment,
-		set_background_attachment_from_hint,
-		initial_background_attachment,
-		compose_background_attachment,
+		PROPERTY_FUNCS(background_attachment),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_background_color,
-		set_background_color_from_hint,
-		initial_background_color,
-		compose_background_color,
+		PROPERTY_FUNCS(background_color),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_background_image,
-		set_background_image_from_hint,
-		initial_background_image,
-		compose_background_image,
+		PROPERTY_FUNCS(background_image),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_background_position,
-		set_background_position_from_hint,
-		initial_background_position,
-		compose_background_position,
+		PROPERTY_FUNCS(background_position),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_background_repeat,
-		set_background_repeat_from_hint,
-		initial_background_repeat,
-		compose_background_repeat,
+		PROPERTY_FUNCS(background_repeat),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_border_collapse,
-		set_border_collapse_from_hint,
-		initial_border_collapse,
-		compose_border_collapse,
+		PROPERTY_FUNCS(border_collapse),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_border_spacing,
-		set_border_spacing_from_hint,
-		initial_border_spacing,
-		compose_border_spacing,
+		PROPERTY_FUNCS(border_spacing),
 		1,
 		GROUP_UNCOMMON
 	},
 	{
-		cascade_border_top_color,
-		set_border_top_color_from_hint,
-		initial_border_top_color,
-		compose_border_top_color,
+		PROPERTY_FUNCS(border_top_color),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_border_right_color,
-		set_border_right_color_from_hint,
-		initial_border_right_color,
-		compose_border_right_color,
+		PROPERTY_FUNCS(border_right_color),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_border_bottom_color,
-		set_border_bottom_color_from_hint,
-		initial_border_bottom_color,
-		compose_border_bottom_color,
+		PROPERTY_FUNCS(border_bottom_color),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_border_left_color,
-		set_border_left_color_from_hint,
-		initial_border_left_color,
-		compose_border_left_color,
+		PROPERTY_FUNCS(border_left_color),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_border_top_style,
-		set_border_top_style_from_hint,
-		initial_border_top_style,
-		compose_border_top_style,
+		PROPERTY_FUNCS(border_top_style),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_border_right_style,
-		set_border_right_style_from_hint,
-		initial_border_right_style,
-		compose_border_right_style,
+		PROPERTY_FUNCS(border_right_style),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_border_bottom_style,
-		set_border_bottom_style_from_hint,
-		initial_border_bottom_style,
-		compose_border_bottom_style,
+		PROPERTY_FUNCS(border_bottom_style),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_border_left_style,
-		set_border_left_style_from_hint,
-		initial_border_left_style,
-		compose_border_left_style,
+		PROPERTY_FUNCS(border_left_style),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_border_top_width,
-		set_border_top_width_from_hint,
-		initial_border_top_width,
-		compose_border_top_width,
+		PROPERTY_FUNCS(border_top_width),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_border_right_width,
-		set_border_right_width_from_hint,
-		initial_border_right_width,
-		compose_border_right_width,
+		PROPERTY_FUNCS(border_right_width),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_border_bottom_width,
-		set_border_bottom_width_from_hint,
-		initial_border_bottom_width,
-		compose_border_bottom_width,
+		PROPERTY_FUNCS(border_bottom_width),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_border_left_width,
-		set_border_left_width_from_hint,
-		initial_border_left_width,
-		compose_border_left_width,
+		PROPERTY_FUNCS(border_left_width),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_bottom,
-		set_bottom_from_hint,
-		initial_bottom,
-		compose_bottom,
+		PROPERTY_FUNCS(bottom),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_caption_side,
-		set_caption_side_from_hint,
-		initial_caption_side,
-		compose_caption_side,
+		PROPERTY_FUNCS(caption_side),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_clear,
-		set_clear_from_hint,
-		initial_clear,
-		compose_clear,
+		PROPERTY_FUNCS(clear),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_clip,
-		set_clip_from_hint,
-		initial_clip,
-		compose_clip,
+		PROPERTY_FUNCS(clip),
 		0,
 		GROUP_UNCOMMON
 	},
 	{
-		cascade_color,
-		set_color_from_hint,
-		initial_color,
-		compose_color,
+		PROPERTY_FUNCS(color),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_content,
-		set_content_from_hint,
-		initial_content,
-		compose_content,
+		PROPERTY_FUNCS(content),
 		0,
 		GROUP_UNCOMMON
 	},
 	{
-		cascade_counter_increment,
-		set_counter_increment_from_hint,
-		initial_counter_increment,
-		compose_counter_increment,
+		PROPERTY_FUNCS(counter_increment),
 		0,
 		GROUP_UNCOMMON
 	},
 	{
-		cascade_counter_reset,
-		set_counter_reset_from_hint,
-		initial_counter_reset,
-		compose_counter_reset,
+		PROPERTY_FUNCS(counter_reset),
 		0,
 		GROUP_UNCOMMON
 	},
 	{
-		cascade_cue_after,
-		set_cue_after_from_hint,
-		initial_cue_after,
-		compose_cue_after,
+		PROPERTY_FUNCS(cue_after),
 		0,
 		GROUP_AURAL
 	},
 	{
-		cascade_cue_before,
-		set_cue_before_from_hint,
-		initial_cue_before,
-		compose_cue_before,
+		PROPERTY_FUNCS(cue_before),
 		0,
 		GROUP_AURAL
 	},
 	{
-		cascade_cursor,
-		set_cursor_from_hint,
-		initial_cursor,
-		compose_cursor,
+		PROPERTY_FUNCS(cursor),
 		1,
 		GROUP_UNCOMMON
 	},
 	{
-		cascade_direction,
-		set_direction_from_hint,
-		initial_direction,
-		compose_direction,
+		PROPERTY_FUNCS(direction),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_display,
-		set_display_from_hint,
-		initial_display,
-		compose_display,
+		PROPERTY_FUNCS(display),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_elevation,
-		set_elevation_from_hint,
-		initial_elevation,
-		compose_elevation,
+		PROPERTY_FUNCS(elevation),
 		1,
 		GROUP_AURAL
 	},
 	{
-		cascade_empty_cells,
-		set_empty_cells_from_hint,
-		initial_empty_cells,
-		compose_empty_cells,
+		PROPERTY_FUNCS(empty_cells),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_float,
-		set_float_from_hint,
-		initial_float,
-		compose_float,
+		PROPERTY_FUNCS(float),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_font_family,
-		set_font_family_from_hint,
-		initial_font_family,
-		compose_font_family,
+		PROPERTY_FUNCS(font_family),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_font_size,
-		set_font_size_from_hint,
-		initial_font_size,
-		compose_font_size,
+		PROPERTY_FUNCS(font_size),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_font_style,
-		set_font_style_from_hint,
-		initial_font_style,
-		compose_font_style,
+		PROPERTY_FUNCS(font_style),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_font_variant,
-		set_font_variant_from_hint,
-		initial_font_variant,
-		compose_font_variant,
+		PROPERTY_FUNCS(font_variant),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_font_weight,
-		set_font_weight_from_hint,
-		initial_font_weight,
-		compose_font_weight,
+		PROPERTY_FUNCS(font_weight),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_height,
-		set_height_from_hint,
-		initial_height,
-		compose_height,
+		PROPERTY_FUNCS(height),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_left,
-		set_left_from_hint,
-		initial_left,
-		compose_left,
+		PROPERTY_FUNCS(left),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_letter_spacing,
-		set_letter_spacing_from_hint,
-		initial_letter_spacing,
-		compose_letter_spacing,
+		PROPERTY_FUNCS(letter_spacing),
 		1,
 		GROUP_UNCOMMON
 	},
 	{
-		cascade_line_height,
-		set_line_height_from_hint,
-		initial_line_height,
-		compose_line_height,
+		PROPERTY_FUNCS(line_height),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_list_style_image,
-		set_list_style_image_from_hint,
-		initial_list_style_image,
-		compose_list_style_image,
+		PROPERTY_FUNCS(list_style_image),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_list_style_position,
-		set_list_style_position_from_hint,
-		initial_list_style_position,
-		compose_list_style_position,
+		PROPERTY_FUNCS(list_style_position),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_list_style_type,
-		set_list_style_type_from_hint,
-		initial_list_style_type,
-		compose_list_style_type,
+		PROPERTY_FUNCS(list_style_type),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_margin_top,
-		set_margin_top_from_hint,
-		initial_margin_top,
-		compose_margin_top,
+		PROPERTY_FUNCS(margin_top),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_margin_right,
-		set_margin_right_from_hint,
-		initial_margin_right,
-		compose_margin_right,
+		PROPERTY_FUNCS(margin_right),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_margin_bottom,
-		set_margin_bottom_from_hint,
-		initial_margin_bottom,
-		compose_margin_bottom,
+		PROPERTY_FUNCS(margin_bottom),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_margin_left,
-		set_margin_left_from_hint,
-		initial_margin_left,
-		compose_margin_left,
+		PROPERTY_FUNCS(margin_left),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_max_height,
-		set_max_height_from_hint,
-		initial_max_height,
-		compose_max_height,
+		PROPERTY_FUNCS(max_height),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_max_width,
-		set_max_width_from_hint,
-		initial_max_width,
-		compose_max_width,
+		PROPERTY_FUNCS(max_width),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_min_height,
-		set_min_height_from_hint,
-		initial_min_height,
-		compose_min_height,
+		PROPERTY_FUNCS(min_height),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_min_width,
-		set_min_width_from_hint,
-		initial_min_width,
-		compose_min_width,
+		PROPERTY_FUNCS(min_width),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_orphans,
-		set_orphans_from_hint,
-		initial_orphans,
-		compose_orphans,
+		PROPERTY_FUNCS(orphans),
 		1,
 		GROUP_PAGE
 	},
 	{
-		cascade_outline_color,
-		set_outline_color_from_hint,
-		initial_outline_color,
-		compose_outline_color,
+		PROPERTY_FUNCS(outline_color),
 		0,
 		GROUP_UNCOMMON
 	},
 	{
-		cascade_outline_style,
-		set_outline_style_from_hint,
-		initial_outline_style,
-		compose_outline_style,
+		PROPERTY_FUNCS(outline_style),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_outline_width,
-		set_outline_width_from_hint,
-		initial_outline_width,
-		compose_outline_width,
+		PROPERTY_FUNCS(outline_width),
 		0,
 		GROUP_UNCOMMON
 	},
 	{
-		cascade_overflow,
-		set_overflow_from_hint,
-		initial_overflow,
-		compose_overflow,
+		PROPERTY_FUNCS(overflow),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_padding_top,
-		set_padding_top_from_hint,
-		initial_padding_top,
-		compose_padding_top,
+		PROPERTY_FUNCS(padding_top),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_padding_right,
-		set_padding_right_from_hint,
-		initial_padding_right,
-		compose_padding_right,
+		PROPERTY_FUNCS(padding_right),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_padding_bottom,
-		set_padding_bottom_from_hint,
-		initial_padding_bottom,
-		compose_padding_bottom,
+		PROPERTY_FUNCS(padding_bottom),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_padding_left,
-		set_padding_left_from_hint,
-		initial_padding_left,
-		compose_padding_left,
+		PROPERTY_FUNCS(padding_left),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_page_break_after,
-		set_page_break_after_from_hint,
-		initial_page_break_after,
-		compose_page_break_after,
+		PROPERTY_FUNCS(page_break_after),
 		0,
 		GROUP_PAGE
 	},
 	{
-		cascade_page_break_before,
-		set_page_break_before_from_hint,
-		initial_page_break_before,
-		compose_page_break_before,
+		PROPERTY_FUNCS(page_break_before),
 		0,
 		GROUP_PAGE
 	},
 	{
-		cascade_page_break_inside,
-		set_page_break_inside_from_hint,
-		initial_page_break_inside,
-		compose_page_break_inside,
+		PROPERTY_FUNCS(page_break_inside),
 		1,
 		GROUP_PAGE
 	},
 	{
-		cascade_pause_after,
-		set_pause_after_from_hint,
-		initial_pause_after,
-		compose_pause_after,
+		PROPERTY_FUNCS(pause_after),
 		0,
 		GROUP_AURAL
 	},
 	{
-		cascade_pause_before,
-		set_pause_before_from_hint,
-		initial_pause_before,
-		compose_pause_before,
+		PROPERTY_FUNCS(pause_before),
 		0,
 		GROUP_AURAL
 	},
 	{
-		cascade_pitch_range,
-		set_pitch_range_from_hint,
-		initial_pitch_range,
-		compose_pitch_range,
+		PROPERTY_FUNCS(pitch_range),
 		1,
 		GROUP_AURAL
 	},
 	{
-		cascade_pitch,
-		set_pitch_from_hint,
-		initial_pitch,
-		compose_pitch,
+		PROPERTY_FUNCS(pitch),
 		1,
 		GROUP_AURAL
 	},
 	{
-		cascade_play_during,
-		set_play_during_from_hint,
-		initial_play_during,
-		compose_play_during,
+		PROPERTY_FUNCS(play_during),
 		0,
 		GROUP_AURAL
 	},
 	{
-		cascade_position,
-		set_position_from_hint,
-		initial_position,
-		compose_position,
+		PROPERTY_FUNCS(position),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_quotes,
-		set_quotes_from_hint,
-		initial_quotes,
-		compose_quotes,
+		PROPERTY_FUNCS(quotes),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_richness,
-		set_richness_from_hint,
-		initial_richness,
-		compose_richness,
+		PROPERTY_FUNCS(richness),
 		1,
 		GROUP_AURAL
 	},
 	{
-		cascade_right,
-		set_right_from_hint,
-		initial_right,
-		compose_right,
+		PROPERTY_FUNCS(right),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_speak_header,
-		set_speak_header_from_hint,
-		initial_speak_header,
-		compose_speak_header,
+		PROPERTY_FUNCS(speak_header),
 		1,
 		GROUP_AURAL
 	},
 	{
-		cascade_speak_numeral,
-		set_speak_numeral_from_hint,
-		initial_speak_numeral,
-		compose_speak_numeral,
+		PROPERTY_FUNCS(speak_numeral),
 		1,
 		GROUP_AURAL
 	},
 	{
-		cascade_speak_punctuation,
-		set_speak_punctuation_from_hint,
-		initial_speak_punctuation,
-		compose_speak_punctuation,
+		PROPERTY_FUNCS(speak_punctuation),
 		1,
 		GROUP_AURAL
 	},
 	{
-		cascade_speak,
-		set_speak_from_hint,
-		initial_speak,
-		compose_speak,
+		PROPERTY_FUNCS(speak),
 		1,
 		GROUP_AURAL
 	},
 	{
-		cascade_speech_rate,
-		set_speech_rate_from_hint,
-		initial_speech_rate,
-		compose_speech_rate,
+		PROPERTY_FUNCS(speech_rate),
 		1,
 		GROUP_AURAL
 	},
 	{
-		cascade_stress,
-		set_stress_from_hint,
-		initial_stress,
-		compose_stress,
+		PROPERTY_FUNCS(stress),
 		1,
 		GROUP_AURAL
 	},
 	{
-		cascade_table_layout,
-		set_table_layout_from_hint,
-		initial_table_layout,
-		compose_table_layout,
+		PROPERTY_FUNCS(table_layout),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_text_align,
-		set_text_align_from_hint,
-		initial_text_align,
-		compose_text_align,
+		PROPERTY_FUNCS(text_align),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_text_decoration,
-		set_text_decoration_from_hint,
-		initial_text_decoration,
-		compose_text_decoration,
+		PROPERTY_FUNCS(text_decoration),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_text_indent,
-		set_text_indent_from_hint,
-		initial_text_indent,
-		compose_text_indent,
+		PROPERTY_FUNCS(text_indent),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_text_transform,
-		set_text_transform_from_hint,
-		initial_text_transform,
-		compose_text_transform,
+		PROPERTY_FUNCS(text_transform),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_top,
-		set_top_from_hint,
-		initial_top,
-		compose_top,
+		PROPERTY_FUNCS(top),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_unicode_bidi,
-		set_unicode_bidi_from_hint,
-		initial_unicode_bidi,
-		compose_unicode_bidi,
+		PROPERTY_FUNCS(unicode_bidi),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_vertical_align,
-		set_vertical_align_from_hint,
-		initial_vertical_align,
-		compose_vertical_align,
+		PROPERTY_FUNCS(vertical_align),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_visibility,
-		set_visibility_from_hint,
-		initial_visibility,
-		compose_visibility,
+		PROPERTY_FUNCS(visibility),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_voice_family,
-		set_voice_family_from_hint,
-		initial_voice_family,
-		compose_voice_family,
+		PROPERTY_FUNCS(voice_family),
 		1,
 		GROUP_AURAL
 	},
 	{
-		cascade_volume,
-		set_volume_from_hint,
-		initial_volume,
-		compose_volume,
+		PROPERTY_FUNCS(volume),
 		1,
 		GROUP_AURAL
 	},
 	{
-		cascade_white_space,
-		set_white_space_from_hint,
-		initial_white_space,
-		compose_white_space,
+		PROPERTY_FUNCS(white_space),
 		1,
 		GROUP_NORMAL
 	},
 	{
-		cascade_widows,
-		set_widows_from_hint,
-		initial_widows,
-		compose_widows,
+		PROPERTY_FUNCS(widows),
 		1,
 		GROUP_PAGE
 	},
 	{
-		cascade_width,
-		set_width_from_hint,
-		initial_width,
-		compose_width,
+		PROPERTY_FUNCS(width),
 		0,
 		GROUP_NORMAL
 	},
 	{
-		cascade_word_spacing,
-		set_word_spacing_from_hint,
-		initial_word_spacing,
-		compose_word_spacing,
+		PROPERTY_FUNCS(word_spacing),
 		1,
 		GROUP_UNCOMMON
 	},
 	{
-		cascade_z_index,
-		set_z_index_from_hint,
-		initial_z_index,
-		compose_z_index,
+		PROPERTY_FUNCS(z_index),
 		0,
 		GROUP_NORMAL
 	}

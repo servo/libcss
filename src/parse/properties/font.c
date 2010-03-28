@@ -1,7 +1,7 @@
 /*
  * This file is part of LibCSS.
  * Licensed under the MIT License,
- *                http://www.opensource.org/licenses/mit-license.php
+ *		  http://www.opensource.org/licenses/mit-license.php
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
@@ -16,16 +16,16 @@
 /**
  * Parse font
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_font(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -286,19 +286,19 @@ css_error parse_font(css_language *c,
 	/* Clean up after ourselves */
 cleanup:
 	if (style)
-		css_stylesheet_style_destroy(c->sheet, style);
+		css_stylesheet_style_destroy(c->sheet, style, error == CSS_OK);
 	if (variant)
-		css_stylesheet_style_destroy(c->sheet, variant);
+		css_stylesheet_style_destroy(c->sheet, variant, error == CSS_OK);
 	if (weight)
-		css_stylesheet_style_destroy(c->sheet, weight);
+		css_stylesheet_style_destroy(c->sheet, weight, error == CSS_OK);
 	if (size)
-		css_stylesheet_style_destroy(c->sheet, size);
+		css_stylesheet_style_destroy(c->sheet, size, error == CSS_OK);
 	if (line_height)
-		css_stylesheet_style_destroy(c->sheet, line_height);
+		css_stylesheet_style_destroy(c->sheet, line_height, error == CSS_OK);
 	if (family)
-		css_stylesheet_style_destroy(c->sheet, family);
+		css_stylesheet_style_destroy(c->sheet, family, error == CSS_OK);
 	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret);
+		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;
@@ -309,8 +309,8 @@ cleanup:
 /**
  * Determine if a given font-family ident is reserved
  *
- * \param c      Parsing context
- * \param ident  IDENT to consider
+ * \param c	 Parsing context
+ * \param ident	 IDENT to consider
  * \return True if IDENT is reserved, false otherwise
  */
 static bool font_family_reserved(css_language *c, const css_token *ident)
@@ -337,8 +337,8 @@ static bool font_family_reserved(css_language *c, const css_token *ident)
 /**
  * Convert a font-family token into a bytecode value
  *
- * \param c      Parsing context
- * \param token  Token to consider
+ * \param c	 Parsing context
+ * \param token	 Token to consider
  * \return Bytecode value
  */
 static uint16_t font_family_value(css_language *c, const css_token *token)
@@ -379,16 +379,16 @@ static uint16_t font_family_value(css_language *c, const css_token *token)
 /**
  * Parse font-family
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_font_family(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -460,7 +460,7 @@ css_error parse_font_family(css_language *c,
 	token = parserutils_vector_iterate(vector, ctx);
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
 			token->type != CSS_TOKEN_STRING)) {
-		css_stylesheet_style_destroy(c->sheet, *result);
+		css_stylesheet_style_destroy(c->sheet, *result, false);
 		*result = NULL;
 		*ctx = orig_ctx;
 		return CSS_INVALID;
@@ -476,7 +476,7 @@ css_error parse_font_family(css_language *c,
 				font_family_reserved, font_family_value,
 				&ptr);
 		if (error != CSS_OK) {
-			css_stylesheet_style_destroy(c->sheet, *result);
+			css_stylesheet_style_destroy(c->sheet, *result, false);
 			*result = NULL;
 			*ctx = orig_ctx;
 			return error;
@@ -494,16 +494,16 @@ css_error parse_font_family(css_language *c,
 /**
  * Parse font-size
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_font_size(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -638,16 +638,16 @@ css_error parse_font_size(css_language *c,
 /**
  * Parse font-style
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_font_style(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -707,16 +707,16 @@ css_error parse_font_style(css_language *c,
 /**
  * Parse font-variant
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_font_variant(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -772,16 +772,16 @@ css_error parse_font_variant(css_language *c,
 /**
  * Parse font-weight
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_font_weight(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 

@@ -1,7 +1,7 @@
 /*
  * This file is part of LibCSS.
  * Licensed under the MIT License,
- *                http://www.opensource.org/licenses/mit-license.php
+ *		  http://www.opensource.org/licenses/mit-license.php
  * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
@@ -20,16 +20,16 @@ static css_error parse_padding_side(css_language *c,
 /**
  * Parse padding shorthand
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_padding(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -249,15 +249,15 @@ css_error parse_padding(css_language *c,
 	/* Clean up after ourselves */
 cleanup:
 	if (top)
-		css_stylesheet_style_destroy(c->sheet, top);
+		css_stylesheet_style_destroy(c->sheet, top, error == CSS_OK);
 	if (right)
-		css_stylesheet_style_destroy(c->sheet, right);
+		css_stylesheet_style_destroy(c->sheet, right, error == CSS_OK);
 	if (bottom)
-		css_stylesheet_style_destroy(c->sheet, bottom);
+		css_stylesheet_style_destroy(c->sheet, bottom, error == CSS_OK);
 	if (left)
-		css_stylesheet_style_destroy(c->sheet, left);
+		css_stylesheet_style_destroy(c->sheet, left, error == CSS_OK);
 	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret);
+		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;
@@ -268,16 +268,16 @@ cleanup:
 /**
  * Parse padding-bottom
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_padding_bottom(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -290,16 +290,16 @@ css_error parse_padding_bottom(css_language *c,
 /**
  * Parse padding-left
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_padding_left(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -312,16 +312,16 @@ css_error parse_padding_left(css_language *c,
 /**
  * Parse padding-right
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_padding_right(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -334,16 +334,16 @@ css_error parse_padding_right(css_language *c,
 /**
  * Parse padding-top
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_padding_top(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
@@ -356,16 +356,16 @@ css_error parse_padding_top(css_language *c,
 /**
  * Parse padding-{top,right,bottom,left}
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
- *         CSS_NOMEM on memory exhaustion,
- *         CSS_INVALID if the input is not valid
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
  *
  * Post condition: \a *ctx is updated with the next token to process
- *                 If the input is invalid, then \a *ctx remains unchanged.
+ *		   If the input is invalid, then \a *ctx remains unchanged.
  */
 css_error parse_padding_side(css_language *c,
 		const parserutils_vector *vector, int *ctx,

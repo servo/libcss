@@ -1,7 +1,7 @@
 /*
  * This file is part of LibCSS.
  * Licensed under the MIT License,
- *                http://www.opensource.org/licenses/mit-license.php
+ *		  http://www.opensource.org/licenses/mit-license.php
  * Copyright 2008 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
@@ -53,8 +53,8 @@ typedef struct css_selector_detail {
 	lwc_string *value;	/**< Interned value, or NULL */
 
 	unsigned int type : 4,			/**< Type of selector */
-	             comb : 2,			/**< Type of combinator */
-	             next : 1;			/**< Another selector detail 
+		     comb : 2,			/**< Type of combinator */
+		     next : 1;			/**< Another selector detail 
 						 * follows */
 } css_selector_detail;
 
@@ -95,9 +95,9 @@ struct css_rule {
 	css_rule *prev;				/**< previous in list */
 
 	unsigned int type  :  4,		/**< css_rule_type */
-	             index : 16,		/**< index in sheet */
-	             items :  8,		/**< # items in rule */
-	             ptype :  1;		/**< css_rule_parent_type */
+		     index : 16,		/**< index in sheet */
+		     items :  8,		/**< # items in rule */
+		     ptype :  1;		/**< css_rule_parent_type */
 };
 
 typedef struct css_rule_selector {
@@ -182,7 +182,8 @@ struct css_stylesheet {
 
 css_error css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len,
 		css_style **style);
-css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style);
+css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style,
+				       bool suppress_bytecode_cleanup);
 
 css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 		lwc_string *name, css_selector **selector);

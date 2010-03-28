@@ -23,9 +23,9 @@ static css_error parse_pause_common(css_language *c,
 /**
  * Parse azimuth
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -53,7 +53,7 @@ css_error parse_azimuth(css_language *c,
 	 *		   center-right, right, far-right, right-side) || 
 	 *	   IDENT(behind) 
 	 *	 ] 
-	 *       | IDENT(leftwards, rightwards, inherit)
+	 *	 | IDENT(leftwards, rightwards, inherit)
 	 */
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token == NULL) {
@@ -254,9 +254,9 @@ css_error parse_azimuth(css_language *c,
 /**
  * Parse cue shorthand
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -394,11 +394,11 @@ css_error parse_cue(css_language *c,
 	/* Clean up after ourselves */
 cleanup:
 	if (before)
-		css_stylesheet_style_destroy(c->sheet, before);
+		css_stylesheet_style_destroy(c->sheet, before, error == CSS_OK);
 	if (after)
-		css_stylesheet_style_destroy(c->sheet, after);
+		css_stylesheet_style_destroy(c->sheet, after, error == CSS_OK);
 	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret);
+		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;
@@ -409,9 +409,9 @@ cleanup:
 /**
  * Parse cue-after
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -430,9 +430,9 @@ css_error parse_cue_after(css_language *c,
 /**
  * Parse cue-before
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -451,9 +451,9 @@ css_error parse_cue_before(css_language *c,
 /**
  * Parse elevation
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -582,9 +582,9 @@ css_error parse_elevation(css_language *c,
 /**
  * Parse pause shorthand
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -724,11 +724,11 @@ css_error parse_pause(css_language *c,
 	/* Clean up after ourselves */
 cleanup:
 	if (before)
-		css_stylesheet_style_destroy(c->sheet, before);
+		css_stylesheet_style_destroy(c->sheet, before, error == CSS_OK);
 	if (after)
-		css_stylesheet_style_destroy(c->sheet, after);
+		css_stylesheet_style_destroy(c->sheet, after, error == CSS_OK);
 	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret);
+		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;
@@ -739,9 +739,9 @@ cleanup:
 /**
  * Parse pause-after
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -760,9 +760,9 @@ css_error parse_pause_after(css_language *c,
 /**
  * Parse pause-before
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -782,9 +782,9 @@ css_error parse_pause_before(css_language *c,
 /**
  * Parse pitch-range
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -866,9 +866,9 @@ css_error parse_pitch_range(css_language *c,
 /**
  * Parse pitch
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -985,9 +985,9 @@ css_error parse_pitch(css_language *c,
 /**
  * Parse play-during
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -1101,7 +1101,7 @@ css_error parse_play_during(css_language *c,
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && 
-			(value & PLAY_DURING_TYPE_MASK)  == PLAY_DURING_URI) {
+			(value & PLAY_DURING_TYPE_MASK)	 == PLAY_DURING_URI) {
 		/* Don't ref URI -- we want to pass ownership to the bytecode */
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&uri, sizeof(lwc_string *));
@@ -1113,9 +1113,9 @@ css_error parse_play_during(css_language *c,
 /**
  * Parse richness
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -1197,9 +1197,9 @@ css_error parse_richness(css_language *c,
 /**
  * Parse speak-header
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -1262,9 +1262,9 @@ css_error parse_speak_header(css_language *c,
 /**
  * Parse speak-numeral
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -1327,9 +1327,9 @@ css_error parse_speak_numeral(css_language *c,
 /**
  * Parse speak-punctuation
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -1392,9 +1392,9 @@ css_error parse_speak_punctuation(css_language *c,
 /**
  * Parse speak
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -1461,9 +1461,9 @@ css_error parse_speak(css_language *c,
 /**
  * Parse speech-rate
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -1583,9 +1583,9 @@ css_error parse_speech_rate(css_language *c,
 /**
  * Parse stress
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -1666,8 +1666,8 @@ css_error parse_stress(css_language *c,
 /**
  * Determine if a given voice-family ident is reserved
  *
- * \param c      Parsing context
- * \param ident  IDENT to consider
+ * \param c	 Parsing context
+ * \param ident	 IDENT to consider
  * \return True if IDENT is reserved, false otherwise
  */
 static bool voice_family_reserved(css_language *c, const css_token *ident)
@@ -1688,8 +1688,8 @@ static bool voice_family_reserved(css_language *c, const css_token *ident)
 /**
  * Convert a voice-family token into a bytecode value
  *
- * \param c      Parsing context
- * \param token  Token to consider
+ * \param c	 Parsing context
+ * \param token	 Token to consider
  * \return Bytecode value
  */
 static uint16_t voice_family_value(css_language *c, const css_token *token)
@@ -1722,9 +1722,9 @@ static uint16_t voice_family_value(css_language *c, const css_token *token)
 /**
  * Parse voice-family
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	 CSS_NOMEM on memory exhaustion,
@@ -1800,7 +1800,7 @@ css_error parse_voice_family(css_language *c,
 	token = parserutils_vector_iterate(vector, ctx);
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
 			token->type != CSS_TOKEN_STRING)) {
-		css_stylesheet_style_destroy(c->sheet, *result);
+		css_stylesheet_style_destroy(c->sheet, *result, true);
 		*result = NULL;
 		*ctx = orig_ctx;
 		return CSS_INVALID;
@@ -1816,7 +1816,7 @@ css_error parse_voice_family(css_language *c,
 				voice_family_reserved, voice_family_value,
 				&ptr);
 		if (error != CSS_OK) {
-			css_stylesheet_style_destroy(c->sheet, *result);
+			css_stylesheet_style_destroy(c->sheet, *result, true);
 			*result = NULL;
 			*ctx = orig_ctx;
 			return error;
@@ -1834,9 +1834,9 @@ css_error parse_voice_family(css_language *c,
 /**
  * Parse volume
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
+ * \param ctx	  Pointer to vector iteration context
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	 CSS_NOMEM on memory exhaustion,
@@ -1981,10 +1981,10 @@ css_error parse_volume(css_language *c,
 /**
  * Common parser for cue-after and cue-before
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
- * \param op      Opcode to parse for
+ * \param ctx	  Pointer to vector iteration context
+ * \param op	  Opcode to parse for
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
@@ -2060,17 +2060,17 @@ css_error parse_cue_common(css_language *c,
 		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
 				&uri, sizeof(lwc_string *));
 	}
-
+	
 	return CSS_OK;
 }
 
 /**
  * Common parser for pause-after and pause-before
  *
- * \param c       Parsing context
+ * \param c	  Parsing context
  * \param vector  Vector of tokens to process
- * \param ctx     Pointer to vector iteration context
- * \param op      Opcode to parse for
+ * \param ctx	  Pointer to vector iteration context
+ * \param op	  Opcode to parse for
  * \param result  Pointer to location to receive resulting style
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,

@@ -1,7 +1,7 @@
 /*
  * This file is part of LibCSS.
  * Licensed under the MIT License,
- *                http://www.opensource.org/licenses/mit-license.php
+ *		  http://www.opensource.org/licenses/mit-license.php
  * Copyright 2008 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
@@ -92,14 +92,14 @@ static css_error parseProperty(css_language *c,
 /**
  * Create a CSS language parser
  *
- * \param sheet     The stylesheet object to parse for
+ * \param sheet	    The stylesheet object to parse for
  * \param parser    The core parser object to use
- * \param alloc     Memory (de)allocation function
- * \param pw        Pointer to client-specific private data
+ * \param alloc	    Memory (de)allocation function
+ * \param pw	    Pointer to client-specific private data
  * \param language  Pointer to location to receive parser object
  * \return CSS_OK on success,
- *         CSS_BADPARM on bad parameters,
- *         CSS_NOMEM on memory exhaustion
+ *	   CSS_BADPARM on bad parameters,
+ *	   CSS_NOMEM on memory exhaustion
  */
 css_error css_language_create(css_stylesheet *sheet, css_parser *parser,
 		css_allocator_fn alloc, void *pw, void **language)
@@ -107,7 +107,7 @@ css_error css_language_create(css_stylesheet *sheet, css_parser *parser,
 	css_language *c;
 	css_parser_optparams params;
 	parserutils_error perror;
-        lwc_error lerror;
+	lwc_error lerror;
 	css_error error;
 	int i;
 
@@ -129,10 +129,10 @@ css_error css_language_create(css_stylesheet *sheet, css_parser *parser,
 
 	/* Intern all known strings */
 	for (i = 0; i < LAST_KNOWN; i++) {
-                lerror = lwc_intern_string(stringmap[i].data,
-                                            stringmap[i].len,
-                                            &(c->strings[i]));
-                if (lerror != lwc_error_ok) {
+		lerror = lwc_intern_string(stringmap[i].data,
+					    stringmap[i].len,
+					    &(c->strings[i]));
+		if (lerror != lwc_error_ok) {
 			parserutils_stack_destroy(c->context);
 			alloc(c, 0, pw);
 			return CSS_NOMEM;
@@ -166,17 +166,17 @@ css_error css_language_create(css_stylesheet *sheet, css_parser *parser,
  */
 css_error css_language_destroy(css_language *language)
 {
-        int i;
-        
+	int i;
+	
 	if (language == NULL)
 		return CSS_BADPARM;
 
 	parserutils_stack_destroy(language->context);
-        
-        for (i = 0; i < LAST_KNOWN; ++i) {
-                lwc_string_unref(language->strings[i]);
-        }
-        
+	
+	for (i = 0; i < LAST_KNOWN; ++i) {
+		lwc_string_unref(language->strings[i]);
+	}
+	
 	language->alloc(language, 0, language->pw);
 
 	return CSS_OK;
@@ -185,11 +185,11 @@ css_error css_language_destroy(css_language *language)
 /**
  * Handler for core parser events
  *
- * \param type    The event type
+ * \param type	  The event type
  * \param tokens  Vector of tokens read since last event, or NULL
- * \param pw      Pointer to handler context
+ * \param pw	  Pointer to handler context
  * \return CSS_OK on success, CSS_INVALID to indicate parse error, 
- *         appropriate error otherwise.
+ *	   appropriate error otherwise.
  */
 css_error language_handle_event(css_parser_event type, 
 		const parserutils_vector *tokens, void *pw)
@@ -223,7 +223,7 @@ css_error language_handle_event(css_parser_event type,
 }
 
 /******************************************************************************
- * Parser stages                                                              *
+ * Parser stages							      *
  ******************************************************************************/
 
 css_error handleStartStylesheet(css_language *c, 
@@ -412,7 +412,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 			uint64_t media = 0;
 
 			/* any0 = (STRING | URI) ws 
-			 *        (IDENT ws (',' ws IDENT ws)* )? */
+			 *	  (IDENT ws (',' ws IDENT ws)* )? */
 			const css_token *uri = 
 				parserutils_vector_iterate(vector, &ctx);
 			if (uri == NULL || (uri->type != CSS_TOKEN_STRING && 
@@ -707,7 +707,7 @@ css_error handleDeclaration(css_language *c, const parserutils_vector *vector)
 }
 
 /******************************************************************************
- * At-rule parsing functions                                                  *
+ * At-rule parsing functions						      *
  ******************************************************************************/
 css_error parseMediaList(css_language *c,
 		const parserutils_vector *vector, int *ctx,
@@ -789,7 +789,7 @@ css_error parseMediaList(css_language *c,
 }
 
 /******************************************************************************
- * Selector list parsing functions                                            *
+ * Selector list parsing functions					      *
  ******************************************************************************/
 
 css_error parseClass(css_language *c, const parserutils_vector *vector, 
@@ -817,8 +817,8 @@ css_error parseAttrib(css_language *c, const parserutils_vector *vector,
 	css_selector_type type = CSS_SELECTOR_ATTRIBUTE;
 
 	/* attrib    -> '[' ws IDENT ws [
-	 *                     [ '=' | INCLUDES | DASHMATCH ] ws
-	 *                     [ IDENT | STRING ] ws ]? ']'
+	 *		       [ '=' | INCLUDES | DASHMATCH ] ws
+	 *		       [ IDENT | STRING ] ws ]? ']'
 	 */
 	token = parserutils_vector_iterate(vector, ctx);
 	if (token == NULL || tokenIsChar(token, '[') == false)
@@ -907,7 +907,7 @@ css_error parsePseudo(css_language *c, const parserutils_vector *vector,
 	}
 
 	if ((lwc_string_caseless_isequal(
-                        	name->idata, c->strings[FIRST_CHILD], 
+				name->idata, c->strings[FIRST_CHILD], 
 				&match) == lwc_error_ok && match) ||
 			(lwc_string_caseless_isequal(
 				name->idata, c->strings[LINK], 
@@ -938,7 +938,7 @@ css_error parsePseudo(css_language *c, const parserutils_vector *vector,
 				&match) == lwc_error_ok && match))
 		type = CSS_SELECTOR_PSEUDO_CLASS;
 	else if ((lwc_string_caseless_isequal(
-                                name->idata, c->strings[FIRST_LINE], 
+				name->idata, c->strings[FIRST_LINE], 
 				&match) == lwc_error_ok && match) ||
 			(lwc_string_caseless_isequal(
 				name->idata, c->strings[FIRST_LETTER], 
@@ -1029,8 +1029,8 @@ css_error parseSimpleSelector(css_language *c,
 	css_selector *selector;
 
 	/* simple_selector -> element_name specifics
-	 *                 -> specific specifics
-	 * element_name    -> IDENT | '*'
+	 *		   -> specific specifics
+	 * element_name	   -> IDENT | '*'
 	 */
 
 	token = parserutils_vector_peek(vector, *ctx);
@@ -1077,7 +1077,7 @@ css_error parseCombinator(css_language *c, const parserutils_vector *vector,
 	const css_token *token;
 	css_combinator comb = CSS_COMBINATOR_NONE;
 
-	/* combinator      -> ws '+' ws | ws '>' ws | ws1 */
+	/* combinator	   -> ws '+' ws | ws '>' ws | ws1 */
 
 	UNUSED(c);
 
@@ -1160,8 +1160,10 @@ css_error parseSelector(css_language *c, const parserutils_vector *vector,
 
 		error = css_stylesheet_selector_combine(c->sheet,
 				comb, selector, other);
-		if (error != CSS_OK)
+		if (error != CSS_OK) {
+			css_stylesheet_selector_destroy(c->sheet, selector);
 			return error;
+		}
 
 		selector = other;
 	}
@@ -1229,7 +1231,7 @@ css_error parseSelectorList(css_language *c, const parserutils_vector *vector,
 }
 
 /******************************************************************************
- * Property parsing functions                                                 *
+ * Property parsing functions						      *
  ******************************************************************************/
 
 css_error parseProperty(css_language *c, const css_token *property, 
@@ -1268,7 +1270,7 @@ css_error parseProperty(css_language *c, const css_token *property,
 	/* Determine if this declaration is important or not */
 	error = parse_important(c, vector, ctx, &flags);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(c->sheet, style);
+	  css_stylesheet_style_destroy(c->sheet, style, false);
 		return error;
 	}
 
@@ -1277,7 +1279,7 @@ css_error parseProperty(css_language *c, const css_token *property,
 	token = parserutils_vector_iterate(vector, ctx);
 	if (token != NULL) {
 		/* Trailing junk, so discard declaration */
-		css_stylesheet_style_destroy(c->sheet, style);
+                css_stylesheet_style_destroy(c->sheet, style, false);
 		return CSS_INVALID;
 	}
 
@@ -1288,7 +1290,7 @@ css_error parseProperty(css_language *c, const css_token *property,
 	/* Append style to rule */
 	error = css_stylesheet_rule_append_style(c->sheet, rule, style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(c->sheet, style);
+                css_stylesheet_style_destroy(c->sheet, style, false);
 		return error;
 	}
 
