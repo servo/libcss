@@ -114,17 +114,69 @@ css_error css_computed_style_destroy(css_computed_style *style)
 
 	if (style->uncommon != NULL) {
 		if (style->uncommon->counter_increment != NULL) {
+			css_computed_counter *c;
+
+			for (c = style->uncommon->counter_increment; 
+					c->name != NULL; c++) {
+				lwc_string_unref(c->name);
+			}
+
 			style->alloc(style->uncommon->counter_increment, 0,
 					style->pw);
 		}
 
 		if (style->uncommon->counter_reset != NULL) {
+			css_computed_counter *c;
+
+			for (c = style->uncommon->counter_reset; 
+					c->name != NULL; c++) {
+				lwc_string_unref(c->name);
+			}
+
 			style->alloc(style->uncommon->counter_reset, 0,
 					style->pw);
 		}
 	
-		if (style->uncommon->cursor != NULL)
+		if (style->uncommon->cursor != NULL) {
+			lwc_string **s;
+
+			for (s = style->uncommon->cursor; *s != NULL; s++) {
+				lwc_string_unref(*s);
+			}
+
 			style->alloc(style->uncommon->cursor, 0, style->pw);
+		}
+
+		if (style->uncommon->content != NULL) {
+			css_computed_content_item *c;
+
+			for (c = style->uncommon->content; 
+					c->type != CSS_COMPUTED_CONTENT_NONE;
+					c++) {
+				switch (c->type) {
+				case CSS_COMPUTED_CONTENT_STRING:
+					lwc_string_unref(c->data.string);
+					break;
+				case CSS_COMPUTED_CONTENT_URI:
+					lwc_string_unref(c->data.uri);
+					break;
+				case CSS_COMPUTED_CONTENT_ATTR:
+					lwc_string_unref(c->data.attr);
+					break;
+				case CSS_COMPUTED_CONTENT_COUNTER:
+					lwc_string_unref(c->data.counter.name);
+					break;
+				case CSS_COMPUTED_CONTENT_COUNTERS:
+					lwc_string_unref(c->data.counters.name);
+					lwc_string_unref(c->data.counters.sep);
+					break;
+				default:
+					break;
+				}
+			}
+
+			style->alloc(style->uncommon->content, 0, style->pw);
+		}
 
 		style->alloc(style->uncommon, 0, style->pw);
 	}
@@ -137,11 +189,31 @@ css_error css_computed_style_destroy(css_computed_style *style)
 		style->alloc(style->aural, 0, style->pw);
 	}
 
-	if (style->font_family != NULL)
-		style->alloc(style->font_family, 0, style->pw);
+	if (style->font_family != NULL) {
+		lwc_string **s;
 
-	if (style->quotes != NULL)
+		for (s = style->font_family; *s != NULL; s++) {
+			lwc_string_unref(*s);
+		}
+
+		style->alloc(style->font_family, 0, style->pw);
+	}
+
+	if (style->quotes != NULL) {
+		lwc_string **s;
+
+		for (s = style->quotes; *s != NULL; s++) {
+			lwc_string_unref(*s);
+		}
+
 		style->alloc(style->quotes, 0, style->pw);
+	}
+
+	if (style->list_style_image != NULL)
+		lwc_string_unref(style->list_style_image);
+
+	if (style->background_image != NULL)
+		lwc_string_unref(style->background_image);
 
 	style->alloc(style, 0, style->pw);
 
