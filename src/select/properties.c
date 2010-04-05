@@ -69,7 +69,8 @@ static uint32_t generic_destroy_uri(void *bytecode)
 	bool has_uri = (getValue(*((uint32_t*)bytecode)) & BACKGROUND_IMAGE_URI) == BACKGROUND_IMAGE_URI;
 	
 	if (has_uri) {
-		lwc_string *str = *(lwc_string **)(((uint8_t*)bytecode) + sizeof(uint32_t));
+		void *vstr = (((uint8_t*)bytecode) + sizeof(uint32_t));
+		lwc_string *str = *(lwc_string **) vstr;
 		lwc_string_unref(str);
 	}
 	return sizeof(uint32_t) + (has_uri ? sizeof(lwc_string*) : 0);

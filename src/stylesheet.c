@@ -586,18 +586,18 @@ css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style,
 				       bool suppress_bytecode_cleanup)
 {
 	uint32_t alloclen, bucket;
-	uint8_t *bptr, *eptr;
+	void *bptr, *eptr;
 
 	if (sheet == NULL || style == NULL)
 		return CSS_BADPARM;
 	
 	if (suppress_bytecode_cleanup == false) {
 		bptr = style->bytecode;
-		eptr = bptr + style->length;
+		eptr = (uint8_t *) bptr + style->length;
 		while (bptr != eptr) {
 			uint32_t opcode = getOpcode(*((uint32_t*)bptr));
 			uint32_t skip = prop_dispatch[opcode].destroy(bptr);
-			bptr += skip;
+			bptr = (uint8_t *) bptr + skip;
 		}
 	}
 	
