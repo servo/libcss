@@ -542,6 +542,8 @@ void validate_rule_import(css_rule_import *s, exp_entry *e, int testnum)
 		e->name);
 		assert(0 && "Mismatched URLs");
 	}
+
+	css_stylesheet_destroy(s->sheet);
 }
 
 void dump_selector_list(css_selector *list, char **ptr)

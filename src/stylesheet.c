@@ -340,7 +340,7 @@ css_error css_stylesheet_next_pending_import(css_stylesheet *parent,
  *	   CSS_INVALID if there are no outstanding imports,
  *	   appropriate error otherwise.
  *
- * Ownership of the imported stylesheet is transferred to the parent.
+ * Ownership of the imported stylesheet is retained by the client.
  */
 css_error css_stylesheet_register_import(css_stylesheet *parent,
 		css_stylesheet *import)
@@ -965,8 +965,7 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 		
 		lwc_string_unref(import->url);
 		
-		if (import->sheet != NULL)
-			css_stylesheet_destroy(import->sheet);
+		/* Do not destroy imported sheet: it is owned by the client */
 	}
 		break;
 	case CSS_RULE_MEDIA:

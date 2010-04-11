@@ -121,6 +121,8 @@ int main(int argc, char **argv)
 				assert(css_stylesheet_register_import(sheet,
 					import) == CSS_OK);
 
+				css_stylesheet_destroy(import);
+
 				error = CSS_IMPORTS_PENDING;
 			}
 		}
