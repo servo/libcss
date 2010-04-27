@@ -2446,8 +2446,10 @@ css_error parseInlineStyle(css_parser *parser)
 		return transition(parser, to, subsequent);
 	}
 	case AfterISBody0:
-		/* Emit remaining fake events to end the parse */
+		/* Clean up any remaining tokens */
+		unref_interned_strings_in_tokens(parser);
 
+		/* Emit remaining fake events to end the parse */
 		if (parser->event != NULL) {
 			/* 1) end ruleset */
 			parser->event(CSS_PARSER_END_RULESET, NULL, 
