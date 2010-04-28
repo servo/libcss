@@ -27,18 +27,7 @@ typedef struct css_hint_length {
  * Presentational hints
  */
 typedef struct css_hint {
-	/* Objects pointed to by fields in this struct are copied for
-	 * use in the computed style. Note that the copy occurs using
-	 * memcpy, so if the object contains pointers itself, then the
-	 * data pointed to by those pointers is *not* copied.
-	 */
-
-	/* Computed styles are transient objects which provide a window onto 
-	 * the internal styling and do not reference the strings they point to.
-	 * Thus, any strings passed in by the client through this struct will 
-	 * not be referenced either. Therefore, such strings must be guaranteed
-	 * to persist for the life of the document.
-	 */
+	/* Ownership of all data is passed to libcss */
 	union {
 		css_computed_clip_rect *clip;
 		css_color color;
