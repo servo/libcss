@@ -423,6 +423,9 @@ css_error set_hint(css_select_state *state, uint32_t i)
 	css_hint hint;
 	css_error error;
 
+	/* Initialise hint */
+	memset(&hint, 0, sizeof(css_hint));
+
 	/* Retrieve this property's hint from the client */
 	error = state->handler->node_presentational_hint(state->pw, 
 			state->node, i, &hint);

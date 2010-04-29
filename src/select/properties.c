@@ -1586,33 +1586,10 @@ css_error cascade_content(uint32_t opv, css_style *style,
 css_error set_content_from_hint(const css_hint *hint, 
 		css_computed_style *style)
 {
-	uint32_t n_items = 0;
 	css_computed_content_item *item;
-	css_computed_content_item *copy = NULL;
-	css_error error = CSS_OK;
+	css_error error;
 
-	if (hint->status == CSS_CONTENT_SET) {
-		for (item = hint->data.content; item != NULL && 
-				item->type != CSS_COMPUTED_CONTENT_NONE; 
-				item++)
-			n_items++;
-
-		copy = style->alloc(NULL, (n_items + 1) *
-				sizeof(css_computed_content_item),
-				style->pw);
-		if (copy == NULL) {
-			error = CSS_NOMEM;
-		} else {
-			memcpy(copy, hint->data.content, (n_items + 1) *
-					sizeof(css_computed_content_item));
-		}
-	}
-
-	if (error == CSS_OK) {
-		error = set_content(style, hint->status, copy);
-		if (error != CSS_OK && copy != NULL)
-			style->alloc(copy, 0, style->pw);
-	}
+	error = set_content(style, hint->status, hint->data.content);
 
 	for (item = hint->data.content; item != NULL &&
 			item->type != CSS_COMPUTED_CONTENT_NONE;
@@ -1638,6 +1615,9 @@ css_error set_content_from_hint(const css_hint *hint,
 			break;
 		}
 	}
+
+	if (error != CSS_OK && hint->data.content != NULL)
+		style->alloc(hint->data.content, 0, style->pw);
 
 	return error;
 }
@@ -1738,32 +1718,10 @@ css_error cascade_counter_increment(uint32_t opv, css_style *style,
 css_error set_counter_increment_from_hint(const css_hint *hint, 
 		css_computed_style *style)
 {
-	uint32_t n_items = 0;
 	css_computed_counter *item;
-	css_computed_counter *copy = NULL;
-	css_error error = CSS_OK;
+	css_error error;
 
-	if (hint->status == CSS_COUNTER_INCREMENT_NAMED && 
-			hint->data.counter != NULL) {
-		for (item = hint->data.counter; item->name != NULL; item++)
-			n_items++;
-
-		copy = style->alloc(NULL, (n_items + 1) *
-				sizeof(css_computed_counter),
-				style->pw);
-		if (copy == NULL) {
-			error = CSS_NOMEM;
-		} else {
-			memcpy(copy, hint->data.counter, (n_items + 1) *
-					sizeof(css_computed_counter));
-		}
-	}
-
-	if (error == CSS_OK) {
-		error = set_counter_increment(style, hint->status, copy);
-		if (error != CSS_OK && copy != NULL)
-			style->alloc(copy, 0, style->pw);
-	}
+	error = set_counter_increment(style, hint->status, hint->data.counter);
 
 	if (hint->status == CSS_COUNTER_INCREMENT_NAMED &&
 			hint->data.counter != NULL) {
@@ -1771,6 +1729,9 @@ css_error set_counter_increment_from_hint(const css_hint *hint,
 			lwc_string_unref(item->name);
 		}
 	}
+
+	if (error != CSS_OK && hint->data.counter != NULL)
+		style->alloc(hint->data.counter, 0, style->pw);
 
 	return error;
 }
@@ -1858,32 +1819,10 @@ css_error cascade_counter_reset(uint32_t opv, css_style *style,
 css_error set_counter_reset_from_hint(const css_hint *hint, 
 		css_computed_style *style)
 {
-	uint32_t n_items = 0;
 	css_computed_counter *item;
-	css_computed_counter *copy = NULL;
-	css_error error = CSS_OK;
+	css_error error;
 
-	if (hint->status == CSS_COUNTER_RESET_NAMED && 
-			hint->data.counter != NULL) {
-		for (item = hint->data.counter; item->name != NULL; item++)
-			n_items++;
-
-		copy = style->alloc(NULL, (n_items + 1) *
-				sizeof(css_computed_counter),
-				style->pw);
-		if (copy == NULL) {
-			error = CSS_NOMEM;
-		} else {
-			memcpy(copy, hint->data.counter, (n_items + 1) *
-					sizeof(css_computed_counter));
-		}
-	}
-
-	if (error == CSS_OK) {
-		error = set_counter_increment(style, hint->status, copy);
-		if (error != CSS_OK && copy != NULL)
-			style->alloc(copy, 0, style->pw);
-	}
+	error = set_counter_reset(style, hint->status, hint->data.counter);
 
 	if (hint->status == CSS_COUNTER_RESET_NAMED &&
 			hint->data.counter != NULL) {
@@ -1891,6 +1830,9 @@ css_error set_counter_reset_from_hint(const css_hint *hint,
 			lwc_string_unref(item->name);
 		}
 	}
+
+	if (error != CSS_OK && hint->data.counter != NULL)
+		style->alloc(hint->data.counter, 0, style->pw);
 
 	return error;
 }
@@ -2175,35 +2117,18 @@ css_error cascade_cursor(uint32_t opv, css_style *style,
 css_error set_cursor_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
-	uint32_t n_items = 0;
 	lwc_string **item;
-	lwc_string **copy = NULL;
-	css_error error = CSS_OK;
+	css_error error;
 
-	if (hint->data.strings != NULL) {
-		for (item = hint->data.strings; (*item) != NULL; item++)
-			n_items++;
-
-		copy = style->alloc(NULL, (n_items + 1) * sizeof(lwc_string *),
-				style->pw);
-		if (copy == NULL) {
-			error = CSS_NOMEM;
-		} else {
-			memcpy(copy, hint->data.strings, (n_items + 1) * 
-					sizeof(lwc_string *));
-		}
-	}
-
-	if (error == CSS_OK) {
-		error = set_cursor(style, hint->status, copy);
-		if (error != CSS_OK && copy != NULL)
-			style->alloc(copy, 0, style->pw);
-	}
+	error = set_cursor(style, hint->status, hint->data.strings);
 
 	for (item = hint->data.strings; 
 			item != NULL && (*item) != NULL; item++) {
 		lwc_string_unref(*item);
 	}
+
+	if (error != CSS_OK && hint->data.strings != NULL)
+		style->alloc(hint->data.strings, 0, style->pw);
 
 	return error;
 }
@@ -2729,35 +2654,18 @@ css_error cascade_font_family(uint32_t opv, css_style *style,
 css_error set_font_family_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
-	uint32_t n_items = 0;
 	lwc_string **item;
-	lwc_string **copy = NULL;
-	css_error error = CSS_OK;
+	css_error error;
 
-	if (hint->data.strings != NULL) {
-		for (item = hint->data.strings; (*item) != NULL; item++)
-			n_items++;
-
-		copy = style->alloc(NULL, (n_items + 1) * sizeof(lwc_string *),
-				style->pw);
-		if (copy == NULL) {
-			error = CSS_NOMEM;
-		} else {
-			memcpy(copy, hint->data.strings, (n_items + 1) *
-					sizeof(lwc_string *));
-		}
-	}
-
-	if (error == CSS_OK) {
-		error = set_font_family(style, hint->status, copy);
-		if (error != CSS_OK && copy != NULL)
-			style->alloc(copy, 0, style->pw);
-	}
+	error = set_font_family(style, hint->status, hint->data.strings);
 
 	for (item = hint->data.strings; 
 			item != NULL && (*item) != NULL; item++) {
 		lwc_string_unref(*item);
 	}
+
+	if (error != CSS_OK && hint->data.strings != NULL)
+		style->alloc(hint->data.strings, 0, style->pw);
 
 	return error;
 }
@@ -4772,35 +4680,18 @@ css_error cascade_quotes(uint32_t opv, css_style *style,
 css_error set_quotes_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
-	uint32_t n_items = 0;
 	lwc_string **item;
-	lwc_string **copy = NULL;
-	css_error error = CSS_OK;
-
-	if (hint->data.strings != NULL) {
-		for (item = hint->data.strings; (*item) != NULL; item++)
-			n_items++;
-
-		copy = style->alloc(NULL, (n_items + 1) * sizeof(lwc_string *),
-				style->pw);
-		if (copy == NULL) {
-			error = CSS_NOMEM;
-		} else {
-			memcpy(copy, hint->data.strings, (n_items + 1) *
-					sizeof(lwc_string *));
-		}
-	}
-
-	if (error == CSS_OK) {
-		error = set_quotes(style, hint->status, copy);
-		if (error != CSS_OK && copy != NULL)
-			style->alloc(copy, 0, style->pw);
-	}
+	css_error error;
+		
+	error = set_quotes(style, hint->status, hint->data.strings);
 
 	for (item = hint->data.strings;
 			item != NULL && (*item) != NULL; item++) {
 		lwc_string_unref(*item);
 	}
+
+	if (error != CSS_OK && hint->data.strings != NULL)
+		style->alloc(hint->data.strings, 0, style->pw);
 
 	return error;
 }
