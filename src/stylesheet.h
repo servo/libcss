@@ -157,9 +157,6 @@ struct css_stylesheet {
 	char *url;				/**< URL of this sheet */
 	char *title;				/**< Title of this sheet */
 
-	void *ownerNode;			/**< Owning node in document */
-	css_rule *ownerRule;			/**< Owning rule in parent */
-
 	css_language_level level;		/**< Language level of sheet */
 	css_parser *parser;			/**< Core parser for sheet */
 	void *parser_frontend;			/**< Frontend parser */

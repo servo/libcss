@@ -496,6 +496,9 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 {
 	const css_stylesheet *s = sheet;
 	const css_rule *rule = s->rule_list;
+	uint32_t sp = 0;
+#define IMPORT_STACK_SIZE 256
+	const css_rule *import_stack[IMPORT_STACK_SIZE];
 
 	do {
 		/* Find first non-charset rule, if we're at the list head */
@@ -514,6 +517,10 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 			if (import->sheet != NULL &&
 					(import->media & state->media) != 0) {
 				/* It's applicable, so process it */
+				assert(sp < IMPORT_STACK_SIZE - 1);
+
+				import_stack[sp++] = rule;
+
 				s = import->sheet;
 				rule = s->rule_list;
 			} else {
@@ -537,9 +544,10 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 				return error;
 
 			/* Find next sheet to process */
-			if (s->ownerRule != NULL) {
-				rule = s->ownerRule->next;
-				s = s->ownerRule->parent;
+			if (sp > 0) {
+				sp--;
+				rule = import_stack[sp]->next;
+				s = import_stack[sp]->parent;
 			} else {
 				s = NULL;
 			}
