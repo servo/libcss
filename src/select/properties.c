@@ -1368,7 +1368,7 @@ uint32_t destroy_clip(void *bytecode)
 {
 	uint32_t value = getValue(*((uint32_t*)bytecode));
 	bool has_rect = value & CLIP_SHAPE_RECT;
-	bool nonautos = 0;
+	int nonautos = 0;
 	
 	if (has_rect) {
 		if ((value & CLIP_RECT_TOP_AUTO) == 0)
