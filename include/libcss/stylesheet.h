@@ -8,6 +8,11 @@
 #ifndef libcss_stylesheet_h_
 #define libcss_stylesheet_h_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <libcss/errors.h>
 #include <libcss/types.h>
 
@@ -52,6 +57,10 @@ css_error css_stylesheet_get_disabled(css_stylesheet *sheet, bool *disabled);
 css_error css_stylesheet_set_disabled(css_stylesheet *sheet, bool disabled);
 
 css_error css_stylesheet_size(css_stylesheet *sheet, size_t *size);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

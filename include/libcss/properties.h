@@ -8,6 +8,11 @@
 #ifndef libcss_properties_h_
 #define libcss_properties_h_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 enum css_properties_e {
 	CSS_PROP_AZIMUTH			= 0x000,
 	CSS_PROP_BACKGROUND_ATTACHMENT		= 0x001, 
@@ -598,5 +603,9 @@ enum css_z_index_e {
 	CSS_Z_INDEX_SET				= 0x1,
 	CSS_Z_INDEX_AUTO			= 0x2
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

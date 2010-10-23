@@ -8,6 +8,11 @@
 #ifndef libcss_select_h_
 #define libcss_select_h_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <libwapcaplet/libwapcaplet.h>
 
 #include <libcss/errors.h>
@@ -101,5 +106,9 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 		const css_stylesheet *inline_style,
 		css_computed_style *result,
 		css_select_handler *handler, void *pw);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

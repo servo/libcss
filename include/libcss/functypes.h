@@ -8,6 +8,11 @@
 #ifndef libcss_functypes_h_
 #define libcss_functypes_h_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -16,6 +21,10 @@
 
 /* Type of allocation function for libcss */
 typedef void *(*css_allocator_fn)(void *ptr, size_t size, void *pw);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

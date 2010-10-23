@@ -8,6 +8,11 @@
 #ifndef libcss_computed_h_
 #define libcss_computed_h_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <libwapcaplet/libwapcaplet.h>
 
 #include <libcss/errors.h>
@@ -2176,5 +2181,9 @@ static inline uint8_t css_computed_text_align(
 #undef CSS_TEXT_ALIGN_MASK
 #undef CSS_TEXT_ALIGN_SHIFT
 #undef CSS_TEXT_ALIGN_INDEX
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

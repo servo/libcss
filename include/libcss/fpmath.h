@@ -8,6 +8,11 @@
 #ifndef libcss_fpmath_h_
 #define libcss_fpmath_h_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stdint.h>
 
 /* 22:10 fixed point math */
@@ -56,6 +61,10 @@ typedef int32_t css_fixed;
 #define F_200	0x00032000	/* 200 */
 #define F_300	0x0004b000	/* 300 */
 #define F_400	0x00064000	/* 400 */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

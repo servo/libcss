@@ -8,6 +8,11 @@
 #ifndef libcss_errors_h_
 #define libcss_errors_h_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stddef.h>
 
 typedef enum css_error {
@@ -26,6 +31,10 @@ typedef enum css_error {
 
 /* Convert a libcss error value to a string */
 const char *css_error_to_string(css_error error);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

@@ -8,6 +8,11 @@
 #ifndef libcss_types_h_
 #define libcss_types_h_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -100,5 +105,9 @@ typedef struct css_stylesheet css_stylesheet;
 typedef struct css_select_ctx css_select_ctx;
 
 typedef struct css_computed_style css_computed_style;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

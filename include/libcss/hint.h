@@ -8,6 +8,11 @@
 #ifndef libcss_hint_h_
 #define libcss_hint_h_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <libwapcaplet/libwapcaplet.h>
 
 #include <libcss/computed.h>
@@ -45,5 +50,9 @@ typedef struct css_hint {
 
 	uint8_t status;
 } css_hint;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

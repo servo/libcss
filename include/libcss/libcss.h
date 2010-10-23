@@ -8,6 +8,11 @@
 #ifndef libcss_h_
 #define libcss_h_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <libwapcaplet/libwapcaplet.h>
 
 #include <libcss/errors.h>
@@ -24,6 +29,10 @@ css_error css_initialise(const char *aliases_file,
 
 /* Clean up after LibCSS */
 css_error css_finalise(css_allocator_fn alloc, void *pw);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 
