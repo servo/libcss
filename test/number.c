@@ -8,13 +8,6 @@
 
 #include "testutils.h"
 
-static void *myrealloc(void *ptr, size_t len, void *pw)
-{
-	UNUSED(pw);
-
-	return realloc(ptr, len);
-}
-
 typedef struct line_ctx {
 	size_t buflen;
 	size_t bufused;
@@ -58,8 +51,6 @@ int main(int argc, char **argv)
 	ctx.indata = false;
 	ctx.inexp = false;
 
-        assert(lwc_initialise(myrealloc, NULL, 0) == lwc_error_ok);
-        
 	assert(parse_testfile(argv[2], handle_line, &ctx) == true);
 
 	/* and run final test */

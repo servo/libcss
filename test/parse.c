@@ -1,7 +1,6 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-#include <parserutils/parserutils.h>
 #include <libcss/libcss.h>
 
 #include "charset/detect.h"
@@ -89,9 +88,6 @@ int main(int argc, char **argv)
 		printf("Usage: %s <aliases_file> <filename>\n", argv[0]);
 		return 1;
 	}
-
-	/* Initialise library */
-        assert(lwc_initialise(myrealloc, NULL, 0) == lwc_error_ok);
 
 	for (i = 0; i < ITERATIONS; i++) {
 		assert(css_parser_create("UTF-8", CSS_CHARSET_DICTATED,

@@ -1,7 +1,6 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-#include <parserutils/parserutils.h>
 #include <libcss/libcss.h>
 #include "stylesheet.h"
 
@@ -48,9 +47,6 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	/* Initialise library */
-        assert(lwc_initialise(myrealloc, NULL, 0) == lwc_error_ok);
-        
 	for (count = 0; count < ITERATIONS; count++) {
 
 		assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", argv[2], 

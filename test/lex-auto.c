@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <parserutils/parserutils.h>
 #include <parserutils/input/inputstream.h>
 
 #include <libcss/libcss.h>

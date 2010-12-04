@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <parserutils/parserutils.h>
 #include <libcss/libcss.h>
 
 #include "stylesheet.h"
@@ -69,18 +68,6 @@ static void *myrealloc(void *data, size_t len, void *pw)
 	return realloc(data, len);
 }
 
-static void *counting_realloc(void *data, size_t len, void *pw)
-{
-	size_t *counter = (size_t *)pw;
-	
-	if (data == NULL)
-		*counter += 1;
-	else if (len == 0)
-		*counter -= 1;
-	
-	return realloc(data, len);
-}
-
 static css_error resolve_url(void *pw,
 		const char *base, lwc_string *rel, lwc_string **abs)
 {
@@ -104,7 +91,6 @@ printing_lwc_iterator(lwc_string *str, void *pw)
 int main(int argc, char **argv)
 {
 	line_ctx ctx;
-	size_t counter = 0;
 
 	if (argc != 3) {
 		printf("Usage: %s <aliases_file> <filename>\n", argv[0]);
@@ -131,8 +117,6 @@ int main(int argc, char **argv)
 	ctx.inerrors = false;
 	ctx.inexp = false;
 
-	assert(lwc_initialise(counting_realloc, &counter, 0) == lwc_error_ok);
-	
 	assert(parse_testfile(argv[2], handle_line, &ctx) == true);
 
 	/* and run final test */
@@ -141,10 +125,7 @@ int main(int argc, char **argv)
 
 	free(ctx.buf);
 
-	printf("INFO: Counter is %zu\n", counter);
 	lwc_iterate_strings(printing_lwc_iterator, NULL);
-	
-	assert(counter == 2);
 	
 	printf("PASS\n");
 

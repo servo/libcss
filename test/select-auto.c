@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <parserutils/parserutils.h>
 #include <libcss/libcss.h>
 #include <libcss/computed.h>
 #include <libcss/select.h>
@@ -167,18 +166,6 @@ static void *myrealloc(void *data, size_t len, void *pw)
 	return realloc(data, len);
 }
 
-static void *counting_realloc(void *data, size_t len, void *pw)
-{
-	size_t *counter = (size_t *)pw;
-	
-	if (data == NULL)
-		*counter += 1;
-	else if (len == 0)
-		*counter -= 1;
-	
-	return realloc(data, len);
-}
-
 static css_error resolve_url(void *pw,
 		const char *base, lwc_string *rel, lwc_string **abs)
 {
@@ -202,7 +189,6 @@ printing_lwc_iterator(lwc_string *str, void *pw)
 int main(int argc, char **argv)
 {
 	line_ctx ctx;
-	size_t counter = 0;
 	
 	if (argc != 3) {
 		printf("Usage: %s <aliases_file> <filename>\n", argv[0]);
@@ -213,8 +199,6 @@ int main(int argc, char **argv)
 	printf("computed: %u\n", (int) sizeof(css_computed_style));
 
 	memset(&ctx, 0, sizeof(ctx));
-
-	assert(lwc_initialise(counting_realloc, &counter, 0) == lwc_error_ok);
 
 
 	lwc_intern_string("class", SLEN("class"), &ctx.attr_class);
@@ -231,10 +215,7 @@ int main(int argc, char **argv)
 	lwc_string_unref(ctx.attr_class);
 	lwc_string_unref(ctx.attr_id);
 	
-	printf("INFO: Counter is %zu\n", counter);
 	lwc_iterate_strings(printing_lwc_iterator, NULL);
-	
-	assert(counter == 2);
 	
 	printf("PASS\n");
 	return 0;

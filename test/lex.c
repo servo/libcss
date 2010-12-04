@@ -1,7 +1,6 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-#include <parserutils/parserutils.h>
 #include <parserutils/charset/utf8.h>
 #include <parserutils/input/inputstream.h>
 
