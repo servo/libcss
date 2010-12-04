@@ -73,10 +73,10 @@ Length is a 32bit numeric value (as described above) and unit is as follows:
 
 CSS colours are stored as one 32bit value:
 
-	bits 24-31: Red component
-	bits 16-23: Green component
-	bits 8-15 : Blue component
-	bits 0-7  : Alpha component
+	bits 24-31: Alpha component
+	bits 16-23: Red component
+	bits 8-15 : Green component
+	bits 0-7  : Blue component
 
 Shorthand properties
 --------------------
