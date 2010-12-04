@@ -49,8 +49,6 @@ int main(int argc, char **argv)
 	}
 
 	/* Initialise library */
-	assert(parserutils_initialise(argv[1], myrealloc, NULL) == PARSERUTILS_OK);
-        
         assert(lwc_initialise(myrealloc, NULL, 0) == lwc_error_ok);
         
 	for (count = 0; count < ITERATIONS; count++) {
@@ -148,8 +146,6 @@ int main(int argc, char **argv)
 
 		css_stylesheet_destroy(sheet);
 	}
-
-	assert(parserutils_finalise(myrealloc, NULL) == PARSERUTILS_OK);
 
 	printf("PASS\n");
         

@@ -84,8 +84,6 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	assert(parserutils_initialise(argv[1], myrealloc, NULL) == PARSERUTILS_OK);
-
 	ctx.buflen = parse_filesize(argv[2]);
 	if (ctx.buflen == 0)
 		return 1;
@@ -116,8 +114,6 @@ int main(int argc, char **argv)
 
 	free(ctx.buf);
 
-	assert(parserutils_finalise(myrealloc, NULL) == PARSERUTILS_OK);
-	
 	printf("INFO: Counter is %zu\n", counter);
 	lwc_iterate_strings(printing_lwc_iterator, NULL);
 	

@@ -136,9 +136,6 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	/* Initialise library */
-	assert(parserutils_initialise(argv[1], myrealloc, NULL) == PARSERUTILS_OK);
-
 	for (i = 0; i < ITERATIONS; i++) {
 		assert(parserutils_inputstream_create("UTF-8", 
 			CSS_CHARSET_DICTATED,css_charset_extract, 
@@ -202,8 +199,6 @@ int main(int argc, char **argv)
 
 		parserutils_inputstream_destroy(stream);
 	}
-
-	assert(parserutils_finalise(myrealloc, NULL) == PARSERUTILS_OK);
 
 	printf("PASS\n");
 

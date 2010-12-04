@@ -59,8 +59,6 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	assert(parserutils_initialise(argv[1], myrealloc, NULL) == PARSERUTILS_OK);
-
 	ctx.buflen = parse_filesize(argv[2]);
 	if (ctx.buflen == 0)
 		return 1;
@@ -87,8 +85,6 @@ int main(int argc, char **argv)
 		run_test(ctx.buf, ctx.bufused, ctx.exp, ctx.expused);
 
 	free(ctx.buf);
-
-	assert(parserutils_finalise(myrealloc, NULL) == PARSERUTILS_OK);
 
 	printf("PASS\n");
 

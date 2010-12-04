@@ -212,8 +212,6 @@ int main(int argc, char **argv)
 	printf("css_hint: %u\n", (int) sizeof(css_hint));
 	printf("computed: %u\n", (int) sizeof(css_computed_style));
 
-	assert(parserutils_initialise(argv[1], myrealloc, NULL) == PARSERUTILS_OK);
-
 	memset(&ctx, 0, sizeof(ctx));
 
 	assert(lwc_initialise(counting_realloc, &counter, 0) == lwc_error_ok);
@@ -238,8 +236,6 @@ int main(int argc, char **argv)
 	
 	assert(counter == 2);
 	
-	assert(parserutils_finalise(myrealloc, NULL) == PARSERUTILS_OK);
-
 	printf("PASS\n");
 	return 0;
 }
