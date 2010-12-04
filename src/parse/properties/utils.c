@@ -18,7 +18,7 @@
  * \param c       Parsing context
  * \param vector  Vector of tokens to process
  * \param ctx     Pointer to vector iteration context
- * \param result  Pointer to location to receive result (RRGGBBAA)
+ * \param result  Pointer to location to receive result (AARRGGBB)
  * \return CSS_OK      on success,
  *         CSS_INVALID if the input is invalid
  *
@@ -31,7 +31,7 @@ css_error parse_colour_specifier(css_language *c,
 {
 	int orig_ctx = *ctx;
 	const css_token *token;
-	uint8_t r = 0, g = 0, b = 0;
+	uint8_t r = 0, g = 0, b = 0, a = 0xff;
 	bool match;
 	css_error error;
 
@@ -157,7 +157,7 @@ css_error parse_colour_specifier(css_language *c,
 			goto invalid;
 	}
 
-	*result = (r << 24) | (g << 16) | (b << 8);
+	*result = (a << 24) | (r << 16) | (g << 8) | b;
 
 	return CSS_OK;
 
@@ -179,156 +179,156 @@ css_error parse_named_colour(css_language *c, lwc_string *data,
 		uint32_t *result)
 {
 	static const uint32_t colourmap[LAST_COLOUR + 1 - FIRST_COLOUR] = {
-		0xf0f8ff00, /* ALICEBLUE */
-		0xfaebd700, /* ANTIQUEWHITE */
-		0x00ffff00, /* AQUA */
-		0x7fffd400, /* AQUAMARINE */
-		0xf0ffff00, /* AZURE */
-		0xf5f5dc00, /* BEIGE */
-		0xffe4c400, /* BISQUE */
-		0x00000000, /* BLACK */
-		0xffebcd00, /* BLANCHEDALMOND */
-		0x0000ff00, /* BLUE */
-		0x8a2be200, /* BLUEVIOLET */
-		0xa52a2a00, /* BROWN */
-		0xdeb88700, /* BURLYWOOD */
-		0x5f9ea000, /* CADETBLUE */
-		0x7fff0000, /* CHARTREUSE */
-		0xd2691e00, /* CHOCOLATE */
-		0xff7f5000, /* CORAL */
-		0x6495ed00, /* CORNFLOWERBLUE */
-		0xfff8dc00, /* CORNSILK */
-		0xdc143c00, /* CRIMSON */
-		0x00ffff00, /* CYAN */
-		0x00008b00, /* DARKBLUE */
-		0x008b8b00, /* DARKCYAN */
-		0xb8860b00, /* DARKGOLDENROD */
-		0xa9a9a900, /* DARKGRAY */
-		0x00640000, /* DARKGREEN */
-		0xa9a9a900, /* DARKGREY */
-		0xbdb76b00, /* DARKKHAKI */
-		0x8b008b00, /* DARKMAGENTA */
-		0x556b2f00, /* DARKOLIVEGREEN */
-		0xff8c0000, /* DARKORANGE */
-		0x9932cc00, /* DARKORCHID */
-		0x8b000000, /* DARKRED */
-		0xe9967a00, /* DARKSALMON */
-		0x8fbc8f00, /* DARKSEAGREEN */
-		0x483d8b00, /* DARKSLATEBLUE */
-		0x2f4f4f00, /* DARKSLATEGRAY */
-		0x2f4f4f00, /* DARKSLATEGREY */
-		0x00ced100, /* DARKTURQUOISE */
-		0x9400d300, /* DARKVIOLET */
-		0xff149300, /* DEEPPINK */
-		0x00bfff00, /* DEEPSKYBLUE */
-		0x69696900, /* DIMGRAY */
-		0x69696900, /* DIMGREY */
-		0x1e90ff00, /* DODGERBLUE */
-		0xd1927500, /* FELDSPAR */
-		0xb2222200, /* FIREBRICK */
-		0xfffaf000, /* FLORALWHITE */
-		0x228b2200, /* FORESTGREEN */
-		0xff00ff00, /* FUCHSIA */
-		0xdcdcdc00, /* GAINSBORO */
-		0xf8f8ff00, /* GHOSTWHITE */
-		0xffd70000, /* GOLD */
-		0xdaa52000, /* GOLDENROD */
-		0x80808000, /* GRAY */
-		0x00800000, /* GREEN */
-		0xadff2f00, /* GREENYELLOW */
-		0x80808000, /* GREY */
-		0xf0fff000, /* HONEYDEW */
-		0xff69b400, /* HOTPINK */
-		0xcd5c5c00, /* INDIANRED */
-		0x4b008200, /* INDIGO */
-		0xfffff000, /* IVORY */
-		0xf0e68c00, /* KHAKI */
-		0xe6e6fa00, /* LAVENDER */
-		0xfff0f500, /* LAVENDERBLUSH */
-		0x7cfc0000, /* LAWNGREEN */
-		0xfffacd00, /* LEMONCHIFFON */
-		0xadd8e600, /* LIGHTBLUE */
-		0xf0808000, /* LIGHTCORAL */
-		0xe0ffff00, /* LIGHTCYAN */
-		0xfafad200, /* LIGHTGOLDENRODYELLOW */
-		0xd3d3d300, /* LIGHTGRAY */
-		0x90ee9000, /* LIGHTGREEN */
-		0xd3d3d300, /* LIGHTGREY */
-		0xffb6c100, /* LIGHTPINK */
-		0xffa07a00, /* LIGHTSALMON */
-		0x20b2aa00, /* LIGHTSEAGREEN */
-		0x87cefa00, /* LIGHTSKYBLUE */
-		0x8470ff00, /* LIGHTSLATEBLUE */
-		0x77889900, /* LIGHTSLATEGRAY */
-		0x77889900, /* LIGHTSLATEGREY */
-		0xb0c4de00, /* LIGHTSTEELBLUE */
-		0xffffe000, /* LIGHTYELLOW */
-		0x00ff0000, /* LIME */
-		0x32cd3200, /* LIMEGREEN */
-		0xfaf0e600, /* LINEN */
-		0xff00ff00, /* MAGENTA */
-		0x80000000, /* MAROON */
-		0x66cdaa00, /* MEDIUMAQUAMARINE */
-		0x0000cd00, /* MEDIUMBLUE */
-		0xba55d300, /* MEDIUMORCHID */
-		0x9370db00, /* MEDIUMPURPLE */
-		0x3cb37100, /* MEDIUMSEAGREEN */
-		0x7b68ee00, /* MEDIUMSLATEBLUE */
-		0x00fa9a00, /* MEDIUMSPRINGGREEN */
-		0x48d1cc00, /* MEDIUMTURQUOISE */
-		0xc7158500, /* MEDIUMVIOLETRED */
-		0x19197000, /* MIDNIGHTBLUE */
-		0xf5fffa00, /* MINTCREAM */
-		0xffe4e100, /* MISTYROSE */
-		0xffe4b500, /* MOCCASIN */
-		0xffdead00, /* NAVAJOWHITE */
-		0x00008000, /* NAVY */
-		0xfdf5e600, /* OLDLACE */
-		0x80800000, /* OLIVE */
-		0x6b8e2300, /* OLIVEDRAB */
-		0xffa50000, /* ORANGE */
-		0xff450000, /* ORANGERED */
-		0xda70d600, /* ORCHID */
-		0xeee8aa00, /* PALEGOLDENROD */
-		0x98fb9800, /* PALEGREEN */
-		0xafeeee00, /* PALETURQUOISE */
-		0xdb709300, /* PALEVIOLETRED */
-		0xffefd500, /* PAPAYAWHIP */
-		0xffdab900, /* PEACHPUFF */
-		0xcd853f00, /* PERU */
-		0xffc0cb00, /* PINK */
-		0xdda0dd00, /* PLUM */
-		0xb0e0e600, /* POWDERBLUE */
-		0x80008000, /* PURPLE */
-		0xff000000, /* RED */
-		0xbc8f8f00, /* ROSYBROWN */
-		0x4169e100, /* ROYALBLUE */
-		0x8b451300, /* SADDLEBROWN */
-		0xfa807200, /* SALMON */
-		0xf4a46000, /* SANDYBROWN */
-		0x2e8b5700, /* SEAGREEN */
-		0xfff5ee00, /* SEASHELL */
-		0xa0522d00, /* SIENNA */
-		0xc0c0c000, /* SILVER */
-		0x87ceeb00, /* SKYBLUE */
-		0x6a5acd00, /* SLATEBLUE */
-		0x70809000, /* SLATEGRAY */
-		0x70809000, /* SLATEGREY */
-		0xfffafa00, /* SNOW */
-		0x00ff7f00, /* SPRINGGREEN */
-		0x4682b400, /* STEELBLUE */
-		0xd2b48c00, /* TAN */
-		0x00808000, /* TEAL */
-		0xd8bfd800, /* THISTLE */
-		0xff634700, /* TOMATO */
-		0x40e0d000, /* TURQUOISE */
-		0xee82ee00, /* VIOLET */
-		0xd0209000, /* VIOLETRED */
-		0xf5deb300, /* WHEAT */
-		0xffffff00, /* WHITE */
-		0xf5f5f500, /* WHITESMOKE */
-		0xffff0000, /* YELLOW */
-		0x9acd3200  /* YELLOWGREEN */
+		0xfff0f8ff, /* ALICEBLUE */
+		0xfffaebd7, /* ANTIQUEWHITE */
+		0xff00ffff, /* AQUA */
+		0xff7fffd4, /* AQUAMARINE */
+		0xfff0ffff, /* AZURE */
+		0xfff5f5dc, /* BEIGE */
+		0xffffe4c4, /* BISQUE */
+		0xff000000, /* BLACK */
+		0xffffebcd, /* BLANCHEDALMOND */
+		0xff0000ff, /* BLUE */
+		0xff8a2be2, /* BLUEVIOLET */
+		0xffa52a2a, /* BROWN */
+		0xffdeb887, /* BURLYWOOD */
+		0xff5f9ea0, /* CADETBLUE */
+		0xff7fff00, /* CHARTREUSE */
+		0xffd2691e, /* CHOCOLATE */
+		0xffff7f50, /* CORAL */
+		0xff6495ed, /* CORNFLOWERBLUE */
+		0xfffff8dc, /* CORNSILK */
+		0xffdc143c, /* CRIMSON */
+		0xff00ffff, /* CYAN */
+		0xff00008b, /* DARKBLUE */
+		0xff008b8b, /* DARKCYAN */
+		0xffb8860b, /* DARKGOLDENROD */
+		0xffa9a9a9, /* DARKGRAY */
+		0xff006400, /* DARKGREEN */
+		0xffa9a9a9, /* DARKGREY */
+		0xffbdb76b, /* DARKKHAKI */
+		0xff8b008b, /* DARKMAGENTA */
+		0xff556b2f, /* DARKOLIVEGREEN */
+		0xffff8c00, /* DARKORANGE */
+		0xff9932cc, /* DARKORCHID */
+		0xff8b0000, /* DARKRED */
+		0xffe9967a, /* DARKSALMON */
+		0xff8fbc8f, /* DARKSEAGREEN */
+		0xff483d8b, /* DARKSLATEBLUE */
+		0xff2f4f4f, /* DARKSLATEGRAY */
+		0xff2f4f4f, /* DARKSLATEGREY */
+		0xff00ced1, /* DARKTURQUOISE */
+		0xff9400d3, /* DARKVIOLET */
+		0xffff1493, /* DEEPPINK */
+		0xff00bfff, /* DEEPSKYBLUE */
+		0xff696969, /* DIMGRAY */
+		0xff696969, /* DIMGREY */
+		0xff1e90ff, /* DODGERBLUE */
+		0xffd19275, /* FELDSPAR */
+		0xffb22222, /* FIREBRICK */
+		0xfffffaf0, /* FLORALWHITE */
+		0xff228b22, /* FORESTGREEN */
+		0xffff00ff, /* FUCHSIA */
+		0xffdcdcdc, /* GAINSBORO */
+		0xfff8f8ff, /* GHOSTWHITE */
+		0xffffd700, /* GOLD */
+		0xffdaa520, /* GOLDENROD */
+		0xff808080, /* GRAY */
+		0xff008000, /* GREEN */
+		0xffadff2f, /* GREENYELLOW */
+		0xff808080, /* GREY */
+		0xfff0fff0, /* HONEYDEW */
+		0xffff69b4, /* HOTPINK */
+		0xffcd5c5c, /* INDIANRED */
+		0xff4b0082, /* INDIGO */
+		0xfffffff0, /* IVORY */
+		0xfff0e68c, /* KHAKI */
+		0xffe6e6fa, /* LAVENDER */
+		0xfffff0f5, /* LAVENDERBLUSH */
+		0xff7cfc00, /* LAWNGREEN */
+		0xfffffacd, /* LEMONCHIFFON */
+		0xffadd8e6, /* LIGHTBLUE */
+		0xfff08080, /* LIGHTCORAL */
+		0xffe0ffff, /* LIGHTCYAN */
+		0xfffafad2, /* LIGHTGOLDENRODYELLOW */
+		0xffd3d3d3, /* LIGHTGRAY */
+		0xff90ee90, /* LIGHTGREEN */
+		0xffd3d3d3, /* LIGHTGREY */
+		0xffffb6c1, /* LIGHTPINK */
+		0xffffa07a, /* LIGHTSALMON */
+		0xff20b2aa, /* LIGHTSEAGREEN */
+		0xff87cefa, /* LIGHTSKYBLUE */
+		0xff8470ff, /* LIGHTSLATEBLUE */
+		0xff778899, /* LIGHTSLATEGRAY */
+		0xff778899, /* LIGHTSLATEGREY */
+		0xffb0c4de, /* LIGHTSTEELBLUE */
+		0xffffffe0, /* LIGHTYELLOW */
+		0xff00ff00, /* LIME */
+		0xff32cd32, /* LIMEGREEN */
+		0xfffaf0e6, /* LINEN */
+		0xffff00ff, /* MAGENTA */
+		0xff800000, /* MAROON */
+		0xff66cdaa, /* MEDIUMAQUAMARINE */
+		0xff0000cd, /* MEDIUMBLUE */
+		0xffba55d3, /* MEDIUMORCHID */
+		0xff9370db, /* MEDIUMPURPLE */
+		0xff3cb371, /* MEDIUMSEAGREEN */
+		0xff7b68ee, /* MEDIUMSLATEBLUE */
+		0xff00fa9a, /* MEDIUMSPRINGGREEN */
+		0xff48d1cc, /* MEDIUMTURQUOISE */
+		0xffc71585, /* MEDIUMVIOLETRED */
+		0xff191970, /* MIDNIGHTBLUE */
+		0xfff5fffa, /* MINTCREAM */
+		0xffffe4e1, /* MISTYROSE */
+		0xffffe4b5, /* MOCCASIN */
+		0xffffdead, /* NAVAJOWHITE */
+		0xff000080, /* NAVY */
+		0xfffdf5e6, /* OLDLACE */
+		0xff808000, /* OLIVE */
+		0xff6b8e23, /* OLIVEDRAB */
+		0xffffa500, /* ORANGE */
+		0xffff4500, /* ORANGERED */
+		0xffda70d6, /* ORCHID */
+		0xffeee8aa, /* PALEGOLDENROD */
+		0xff98fb98, /* PALEGREEN */
+		0xffafeeee, /* PALETURQUOISE */
+		0xffdb7093, /* PALEVIOLETRED */
+		0xffffefd5, /* PAPAYAWHIP */
+		0xffffdab9, /* PEACHPUFF */
+		0xffcd853f, /* PERU */
+		0xffffc0cb, /* PINK */
+		0xffdda0dd, /* PLUM */
+		0xffb0e0e6, /* POWDERBLUE */
+		0xff800080, /* PURPLE */
+		0xffff0000, /* RED */
+		0xffbc8f8f, /* ROSYBROWN */
+		0xff4169e1, /* ROYALBLUE */
+		0xff8b4513, /* SADDLEBROWN */
+		0xfffa8072, /* SALMON */
+		0xfff4a460, /* SANDYBROWN */
+		0xff2e8b57, /* SEAGREEN */
+		0xfffff5ee, /* SEASHELL */
+		0xffa0522d, /* SIENNA */
+		0xffc0c0c0, /* SILVER */
+		0xff87ceeb, /* SKYBLUE */
+		0xff6a5acd, /* SLATEBLUE */
+		0xff708090, /* SLATEGRAY */
+		0xff708090, /* SLATEGREY */
+		0xfffffafa, /* SNOW */
+		0xff00ff7f, /* SPRINGGREEN */
+		0xff4682b4, /* STEELBLUE */
+		0xffd2b48c, /* TAN */
+		0xff008080, /* TEAL */
+		0xffd8bfd8, /* THISTLE */
+		0xffff6347, /* TOMATO */
+		0xff40e0d0, /* TURQUOISE */
+		0xffee82ee, /* VIOLET */
+		0xffd02090, /* VIOLETRED */
+		0xfff5deb3, /* WHEAT */
+		0xffffffff, /* WHITE */
+		0xfff5f5f5, /* WHITESMOKE */
+		0xffffff00, /* YELLOW */
+		0xff9acd32  /* YELLOWGREEN */
 	};
 	int i;
 	bool match;
@@ -351,13 +351,13 @@ css_error parse_named_colour(css_language *c, lwc_string *data,
  * Parse a hash colour (#rgb or #rrggbb)
  *
  * \param data    Pointer to colour string
- * \param result  Pointer to location to receive result
+ * \param result  Pointer to location to receive result (AARRGGBB)
  * \return CSS_OK      on success,
  *         CSS_INVALID if the input is invalid
  */
 css_error parse_hash_colour(lwc_string *data, uint32_t *result)
 {
-	uint8_t r = 0, g = 0, b = 0;
+	uint8_t r = 0, g = 0, b = 0, a = 0xff;
 	size_t len = lwc_string_length(data);
 	const char *input = lwc_string_data(data);
 
@@ -382,7 +382,7 @@ css_error parse_hash_colour(lwc_string *data, uint32_t *result)
 	} else
 		return CSS_INVALID;
 
-	*result = (r << 24) | (g << 16) | (b << 8);
+	*result = (a << 24) | (r << 16) | (g << 8) | b;
 
 	return CSS_OK;
 }
