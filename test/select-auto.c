@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <parserutils/parserutils.h>
 #include <libcss/libcss.h>
 #include <libcss/computed.h>
 #include <libcss/select.h>
@@ -211,7 +212,7 @@ int main(int argc, char **argv)
 	printf("css_hint: %u\n", (int) sizeof(css_hint));
 	printf("computed: %u\n", (int) sizeof(css_computed_style));
 
-	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
+	assert(parserutils_initialise(argv[1], myrealloc, NULL) == PARSERUTILS_OK);
 
 	memset(&ctx, 0, sizeof(ctx));
 
@@ -237,7 +238,7 @@ int main(int argc, char **argv)
 	
 	assert(counter == 2);
 	
-	assert(css_finalise(myrealloc, NULL) == CSS_OK);
+	assert(parserutils_finalise(myrealloc, NULL) == PARSERUTILS_OK);
 
 	printf("PASS\n");
 	return 0;

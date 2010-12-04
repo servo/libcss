@@ -1,6 +1,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 
+#include <parserutils/parserutils.h>
 #include <libcss/libcss.h>
 
 #include "charset/detect.h"
@@ -90,7 +91,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Initialise library */
-	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
+	assert(parserutils_initialise(argv[1], myrealloc, NULL) == PARSERUTILS_OK);
         assert(lwc_initialise(myrealloc, NULL, 0) == lwc_error_ok);
 
 	for (i = 0; i < ITERATIONS; i++) {
@@ -140,7 +141,7 @@ int main(int argc, char **argv)
 
 	}
 
-	assert(css_finalise(myrealloc, NULL) == CSS_OK);
+	assert(parserutils_finalise(myrealloc, NULL) == PARSERUTILS_OK);
 
 	printf("PASS\n");
         

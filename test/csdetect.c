@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <parserutils/parserutils.h>
 #include <parserutils/charset/mibenum.h>
 
 #include <libcss/libcss.h>
@@ -41,7 +42,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
+	assert(parserutils_initialise(argv[1], myrealloc, NULL) == PARSERUTILS_OK);
 
 	ctx.buflen = parse_filesize(argv[2]);
 	if (ctx.buflen == 0)
@@ -70,7 +71,7 @@ int main(int argc, char **argv)
 
 	free(ctx.buf);
 
-	assert(css_finalise(myrealloc, NULL) == CSS_OK);
+	assert(parserutils_finalise(myrealloc, NULL) == PARSERUTILS_OK);
 
 	printf("PASS\n");
 

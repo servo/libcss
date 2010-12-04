@@ -1,6 +1,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 
+#include <parserutils/parserutils.h>
 #include <parserutils/charset/utf8.h>
 #include <parserutils/input/inputstream.h>
 
@@ -136,7 +137,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Initialise library */
-	assert(css_initialise(argv[1], myrealloc, NULL) == CSS_OK);
+	assert(parserutils_initialise(argv[1], myrealloc, NULL) == PARSERUTILS_OK);
 
 	for (i = 0; i < ITERATIONS; i++) {
 		assert(parserutils_inputstream_create("UTF-8", 
@@ -202,7 +203,7 @@ int main(int argc, char **argv)
 		parserutils_inputstream_destroy(stream);
 	}
 
-	assert(css_finalise(myrealloc, NULL) == CSS_OK);
+	assert(parserutils_finalise(myrealloc, NULL) == PARSERUTILS_OK);
 
 	printf("PASS\n");
 
