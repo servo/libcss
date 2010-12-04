@@ -190,8 +190,8 @@ int main(int argc, char **argv)
 {
 	line_ctx ctx;
 	
-	if (argc != 3) {
-		printf("Usage: %s <aliases_file> <filename>\n", argv[0]);
+	if (argc != 2) {
+		printf("Usage: %s <filename>\n", argv[0]);
 		return 1;
 	}
 
@@ -204,7 +204,7 @@ int main(int argc, char **argv)
 	lwc_intern_string("class", SLEN("class"), &ctx.attr_class);
 	lwc_intern_string("id", SLEN("id"), &ctx.attr_id);
 	
-	assert(parse_testfile(argv[2], handle_line, &ctx) == true);
+	assert(parse_testfile(argv[1], handle_line, &ctx) == true);
 	
 	/* and run final test */
 	if (ctx.tree != NULL)

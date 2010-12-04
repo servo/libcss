@@ -42,20 +42,20 @@ int main(int argc, char **argv)
 	css_error error;
 	int count;
 
-	if (argc != 3) {
-		printf("Usage: %s <aliases_file> <filename>\n", argv[0]);
+	if (argc != 2) {
+		printf("Usage: %s <filename>\n", argv[0]);
 		return 1;
 	}
 
 	for (count = 0; count < ITERATIONS; count++) {
 
-		assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", argv[2], 
+		assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", argv[1], 
 				NULL, false, false, myrealloc, NULL, 
 				resolve_url, NULL, &sheet) == CSS_OK);
 
-		fp = fopen(argv[2], "rb");
+		fp = fopen(argv[1], "rb");
 		if (fp == NULL) {
-			printf("Failed opening %s\n", argv[2]);
+			printf("Failed opening %s\n", argv[1]);
 			return 1;
 		}
 

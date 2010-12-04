@@ -130,8 +130,8 @@ int main(int argc, char **argv)
 	css_error error;
 	int i;
 
-	if (argc != 3) {
-		printf("Usage: %s <aliases_file> <filename>\n", argv[0]);
+	if (argc != 2) {
+		printf("Usage: %s <filename>\n", argv[0]);
 		return 1;
 	}
 
@@ -144,9 +144,9 @@ int main(int argc, char **argv)
 		assert(css_lexer_create(stream, myrealloc, NULL, &lexer) == 
 			CSS_OK);
 
-		fp = fopen(argv[2], "rb");
+		fp = fopen(argv[1], "rb");
 		if (fp == NULL) {
-			printf("Failed opening %s\n", argv[2]);
+			printf("Failed opening %s\n", argv[1]);
 			return 1;
 		}
 
