@@ -4,7 +4,7 @@
 #expected
 | *
 |  background-attachment: scroll
-|  background-color: #ff000000
+|  background-color: #ffff0000
 |  background-image: none
 |  background-position: left top
 |  background-repeat: repeat
@@ -16,7 +16,7 @@
 #expected
 | *
 |  background-attachment: fixed
-|  background-color: #80808000
+|  background-color: #ff808080
 |  background-image: url('chess.png')
 |  background-position: 40% center
 |  background-repeat: repeat
@@ -40,7 +40,7 @@
 #expected
 | *
 |  background-attachment: fixed
-|  background-color: #ffffff00
+|  background-color: #ffffffff
 |  background-image: url('bg.gif')
 |  background-position: left top
 |  background-repeat: no-repeat
@@ -67,7 +67,7 @@
 #expected
 | *
 |  background-attachment: scroll !important
-|  background-color: #ff000000 !important
+|  background-color: #ffff0000 !important
 |  background-image: none !important
 |  background-position: left top !important
 |  background-repeat: repeat !important
@@ -79,7 +79,7 @@
 #expected
 | *
 |  background-attachment: fixed !important
-|  background-color: #80808000 !important
+|  background-color: #ff808080 !important
 |  background-image: url('chess.png') !important
 |  background-position: 50% center !important
 |  background-repeat: repeat !important
@@ -103,7 +103,7 @@
 #expected
 | *
 |  background-attachment: fixed !important
-|  background-color: #ffffff00 !important
+|  background-color: #ffffffff !important
 |  background-image: url('bg.gif') !important
 |  background-position: left top !important
 |  background-repeat: no-repeat !important

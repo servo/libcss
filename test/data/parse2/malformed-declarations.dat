@@ -63,7 +63,7 @@
 #expected
 | *
 |  top: 1em
-|  color: #bbbbcc00
+|  color: #ffbbbbcc
 #reset
 
 #data
@@ -72,7 +72,7 @@
 #expected
 | *
 |  top: 1em
-|  color: #bbbbcc00
+|  color: #ffbbbbcc
 #reset
 
 #data
@@ -80,8 +80,8 @@
 #errors
 #expected
 | *
-|  background-color: #00000000
-|  color: #ffffff00
+|  background-color: #ff000000
+|  color: #ffffffff
 #reset
 
 #data
@@ -89,7 +89,7 @@
 #errors
 #expected
 | *
-|  background-color: #00000000
+|  background-color: #ff000000
 #reset
 
 #data
@@ -97,7 +97,7 @@
 #errors
 #expected
 | *
-|  background-color: #00000000
+|  background-color: #ff000000
 #reset
 
 #data

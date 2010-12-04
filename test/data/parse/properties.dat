@@ -222,7 +222,7 @@
 #errors
 #expected
 | 1 *
-|   0x02000002 0xff008800
+|   0x02000002 0xffff0088
 #reset
 
 #data
@@ -466,7 +466,7 @@
 #errors
 #expected
 | 1 *
-|   0x02000008 0xff448800
+|   0x02000008 0xffff4488
 #reset
 
 #data
@@ -474,7 +474,7 @@
 #errors
 #expected
 | 1 *
-|   0x02000009 0x8822bb00
+|   0x02000009 0xff8822bb
 #reset
 
 #data
@@ -482,7 +482,7 @@
 #errors
 #expected
 | 1 *
-|   0x0200000a 0xbbbbcc00
+|   0x0200000a 0xffbbbbcc
 #reset
 
 #data
@@ -774,7 +774,7 @@
 #errors
 #expected
 | 1 *
-|   0x02000018 0xbbbbcc00
+|   0x02000018 0xffbbbbcc
 #reset
 
 ##
@@ -2281,7 +2281,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #errors
 #expected
 | 1 *
-|   0x02000039 0xbbbbcc00
+|   0x02000039 0xffbbbbcc
 #reset
 
 ##

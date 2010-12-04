@@ -256,7 +256,7 @@ f{clear:both}
 #expected
 | @media 
 |  f
-|   color: #0000ff00
+|   color: #ff0000ff
 #reset
 
 #data
@@ -265,7 +265,7 @@ f{clear:both}
 #expected
 | @media 
 |  f
-|   color: #0000ff00
+|   color: #ff0000ff
 #reset
 
 #data
@@ -274,7 +274,7 @@ f{clear:both}
 #expected
 | @media 
 |  f
-|   color: #0000ff00
+|   color: #ff0000ff
 #reset
 
 #data
@@ -283,7 +283,7 @@ f{clear:both}
 #expected
 | @media 
 |  f
-|   color: #0000ff00
+|   color: #ff0000ff
 #reset
 
 #data
@@ -292,7 +292,7 @@ f{clear:both}
 #expected
 | @media 
 |  f
-|   color: #0000ff00
+|   color: #ff0000ff
 #reset
 
 #data

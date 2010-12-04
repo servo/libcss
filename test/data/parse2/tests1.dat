@@ -10,7 +10,7 @@
 #errors
 #expected
 | *
-|  color: #ff000000
+|  color: #ffff0000
 #reset
 
 #data

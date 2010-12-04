@@ -33,7 +33,7 @@ border-left-width: medium
 bottom: auto
 clear: none
 clip: auto
-color: #ff000000
+color: #ffff0000
 content: normal
 counter-increment: none
 counter-reset: none
@@ -234,10 +234,10 @@ background-position: 0% 0%
 background-repeat: repeat
 border-collapse: separate
 border-spacing: 0px 0px
-border-top-color: #00000000
-border-right-color: #00000000
-border-bottom-color: #00000000
-border-left-color: #00000000
+border-top-color: #ff000000
+border-right-color: #ff000000
+border-bottom-color: #ff000000
+border-left-color: #ff000000
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -250,7 +250,7 @@ bottom: auto
 caption_side: top
 clear: none
 clip: auto
-color: #00000000
+color: #ff000000
 content: normal
 counter-increment: none
 counter-reset: none
@@ -313,16 +313,16 @@ div:active { background-color: #bbc; }
 #errors
 #expected
 background-attachment: scroll
-background-color: #00000000
+background-color: #ff000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-collapse: separate
 border-spacing: 0px 0px
-border-top-color: #00000000
-border-right-color: #00000000
-border-bottom-color: #00000000
-border-left-color: #00000000
+border-top-color: #ff000000
+border-right-color: #ff000000
+border-bottom-color: #ff000000
+border-left-color: #ff000000
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -335,7 +335,7 @@ bottom: auto
 caption_side: top
 clear: none
 clip: auto
-color: #00000000
+color: #ff000000
 content: normal
 counter-increment: none
 counter-reset: none
@@ -398,7 +398,7 @@ p:first-child { background-color: #bbc; }
 #errors
 #expected
 background-attachment: scroll
-background-color: #bbbbcc00
+background-color: #ffbbbbcc
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
@@ -468,10 +468,10 @@ background-position: 0% 0%
 background-repeat: repeat
 border-collapse: separate
 border-spacing: 0px 0px
-border-top-color: #00000000
-border-right-color: #00000000
-border-bottom-color: #00000000
-border-left-color: #00000000
+border-top-color: #ff000000
+border-right-color: #ff000000
+border-bottom-color: #ff000000
+border-left-color: #ff000000
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -484,7 +484,7 @@ bottom: auto
 caption_side: top
 clear: none
 clip: auto
-color: #00000000
+color: #ff000000
 content: normal
 counter-increment: none
 counter-reset: none
