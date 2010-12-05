@@ -6,7 +6,7 @@
  */
 
 #include "select/dispatch.h"
-#include "select/properties.h"
+#include "select/properties/properties.h"
 
 /**
  * Dispatch table for properties, indexed by opcode

@@ -178,6 +178,10 @@ struct css_stylesheet {
 
 	css_allocator_fn alloc;			/**< Allocation function */
 	void *pw;				/**< Private word */
+
+	lwc_string **string_vector;             /**< Bytecode string vector */
+	uint32_t string_vector_l;               /**< The string vector allocated length in entries */
+	uint32_t string_vector_c;               /**< The number of string vector entries used */ 
 };
 
 css_error css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len,
@@ -226,6 +230,10 @@ css_error css_stylesheet_rule_set_page_selector(css_stylesheet *sheet,
 css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule,
 		css_rule *parent);
 css_error css_stylesheet_remove_rule(css_stylesheet *sheet, css_rule *rule);
+
+css_error css_stylesheet_string_get(css_stylesheet *sheet, uint32_t string_number, lwc_string **string);
+
+css_error css_stylesheet_string_add(css_stylesheet *sheet, lwc_string *string, uint32_t *string_number);
 
 #endif
 

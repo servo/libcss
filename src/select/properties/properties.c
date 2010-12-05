@@ -9,7 +9,7 @@
 
 #include "bytecode/bytecode.h"
 #include "bytecode/opcodes.h"
-#include "select/properties.h"
+#include "select/properties/properties.h"
 #include "select/propget.h"
 #include "select/propset.h"
 #include "utils/utils.h"

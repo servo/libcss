@@ -20,6 +20,82 @@ static css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule);
 static size_t _rule_size(const css_rule *rule);
 
 /**
+ * Add a string to a stylesheets string vector.
+ *
+ * \param sheet The stylesheet to add string to.
+ * \param string The string to add.
+ * \param string_number Pointer to location to recive string number.
+ * \return CSS_OK on success,
+ *	   CSS_BADPARM on bad parameters,
+ *	   CSS_NOMEM on memory exhaustion
+ *
+ */
+css_error css_stylesheet_string_add(css_stylesheet *sheet, lwc_string *string, uint32_t *string_number)
+{
+	uint32_t new_string_number; /* The string number count */
+
+	/* search for the string in the existing vector */
+	for (new_string_number = 0; 
+	     new_string_number < sheet->string_vector_c;
+	     new_string_number++) {
+		lwc_error res;
+		bool isequal;
+		res = lwc_string_isequal(string, 
+					 sheet->string_vector[new_string_number], 
+					 &isequal);
+		if (isequal) {
+			lwc_string_unref(string);			
+			*string_number = new_string_number;
+			return CSS_OK;
+		}
+		 
+	}
+
+	/* string does not exist in current vector, add a new one */
+
+	if (sheet->string_vector_c >= sheet->string_vector_l) {
+		/* additional storage must be allocated to deal with
+		 * this request. 
+		 */
+		lwc_string **new_vector;
+		uint32_t new_vector_len;
+
+		new_vector_len = sheet->string_vector_l + 256;
+		new_vector = sheet->alloc(sheet->string_vector, new_vector_len * sizeof(lwc_string *), sheet->pw);
+
+		if (new_vector == NULL) {
+			return CSS_NOMEM;
+		}
+		sheet->string_vector = new_vector;
+		sheet->string_vector_l = new_vector_len;
+	}
+
+	sheet->string_vector_c++;
+	sheet->string_vector[new_string_number] = string;
+	*string_number = new_string_number;
+	return CSS_OK;
+}
+
+/**
+ * Get a string from a stylesheets string vector.
+ *
+ * \param sheet The stylesheet to retrive string from.
+ * \param string_number The string number to retrive.
+ * \param string Pointer to location to recive string.
+ * \return CSS_OK on success,
+ *	   CSS_BADPARM on bad parameters,
+ */
+css_error css_stylesheet_string_get(css_stylesheet *sheet, uint32_t string_number, lwc_string **string)
+{
+	if (string_number > sheet->string_vector_c) {
+		return CSS_BADPARM;
+	}
+
+	*string = sheet->string_vector[string_number];
+	return CSS_OK;
+}
+
+/**
  * Create a stylesheet
  *
  * \param level		   The language level of the stylesheet
@@ -161,6 +237,7 @@ css_error css_stylesheet_create(css_language_level level,
  */
 css_error css_stylesheet_destroy(css_stylesheet *sheet)
 {
+	uint32_t string_index;
 	uint32_t bucket;
 	css_rule *r, *s;
 
@@ -202,6 +279,14 @@ css_error css_stylesheet_destroy(css_stylesheet *sheet)
 
 	if (sheet->parser != NULL)
 		css_parser_destroy(sheet->parser);
+
+	/* destroy string vector */
+	for (string_index = 0;
+	     string_index < sheet->string_vector_c;
+	     string_index++) {
+		lwc_string_unref(sheet->string_vector[string_index]);		
+	}
+	sheet->alloc(sheet->string_vector, 0, sheet->pw);
 
 	sheet->alloc(sheet, 0, sheet->pw);
 
