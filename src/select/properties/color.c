@@ -1,0 +1,73 @@
+/*
+ * This file is part of LibCSS
+ * Licensed under the MIT License,
+ *		  http://www.opensource.org/licenses/mit-license.php
+ * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
+ */
+
+#include "bytecode/bytecode.h"
+#include "bytecode/opcodes.h"
+#include "select/propset.h"
+#include "select/propget.h"
+#include "utils/utils.h"
+
+#include "select/properties/properties.h"
+#include "select/properties/helpers.h"
+
+css_error cascade_color(uint32_t opv, css_style *style, 
+		css_select_state *state)
+{
+	uint16_t value = CSS_COLOR_INHERIT;
+	css_color color = 0;
+
+	if (isInherit(opv) == false) {
+		value = CSS_COLOR_COLOR;
+		color = *((css_color *) style->bytecode);
+		advance_bytecode(style, sizeof(color));
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+			isInherit(opv))) {
+		return set_color(state->result, value, color);
+	}
+
+	return CSS_OK;
+}
+
+css_error set_color_from_hint(const css_hint *hint, 
+		css_computed_style *style)
+{
+	return set_color(style, hint->status, hint->data.color);
+}
+
+css_error initial_color(css_select_state *state)
+{
+	css_hint hint;
+	css_error error;
+
+	error = state->handler->ua_default_for_property(state->pw, 
+			CSS_PROP_COLOR, &hint);
+	if (error != CSS_OK)
+		return error;
+
+	return set_color_from_hint(&hint, state->result);
+}
+
+css_error compose_color(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_color color;
+	uint8_t type = get_color(child, &color);
+
+	if (type == CSS_COLOR_INHERIT) {
+		type = get_color(parent, &color);
+	}
+
+	return set_color(result, type, color);
+}
+
+uint32_t destroy_color(void *bytecode)
+{
+	return generic_destroy_color(bytecode);
+}

@@ -1,0 +1,215 @@
+/*
+ * This file is part of LibCSS
+ * Licensed under the MIT License,
+ *		  http://www.opensource.org/licenses/mit-license.php
+ * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
+ */
+
+#include "bytecode/bytecode.h"
+#include "bytecode/opcodes.h"
+#include "select/propset.h"
+#include "select/propget.h"
+#include "utils/utils.h"
+
+#include "select/properties/properties.h"
+#include "select/properties/helpers.h"
+
+css_error cascade_font_family(uint32_t opv, css_style *style, 
+		css_select_state *state)
+{
+	uint16_t value = CSS_FONT_FAMILY_INHERIT;
+	lwc_string **fonts = NULL;
+	uint32_t n_fonts = 0;
+
+	if (isInherit(opv) == false) {
+		uint32_t v = getValue(opv);
+
+		while (v != FONT_FAMILY_END) {
+			lwc_string *font = NULL;
+			lwc_string **temp;
+
+			switch (v) {
+			case FONT_FAMILY_STRING:
+			case FONT_FAMILY_IDENT_LIST:
+				font = *((lwc_string **) 
+						style->bytecode);
+				advance_bytecode(style, sizeof(font));
+				break;
+			case FONT_FAMILY_SERIF:
+				if (value == CSS_FONT_FAMILY_INHERIT)
+					value = CSS_FONT_FAMILY_SERIF;
+				break;
+			case FONT_FAMILY_SANS_SERIF:
+				if (value == CSS_FONT_FAMILY_INHERIT)
+					value = CSS_FONT_FAMILY_SANS_SERIF;
+				break;
+			case FONT_FAMILY_CURSIVE:
+				if (value == CSS_FONT_FAMILY_INHERIT)
+					value = CSS_FONT_FAMILY_CURSIVE;
+				break;
+			case FONT_FAMILY_FANTASY:
+				if (value == CSS_FONT_FAMILY_INHERIT)
+					value = CSS_FONT_FAMILY_FANTASY;
+				break;
+			case FONT_FAMILY_MONOSPACE:
+				if (value == CSS_FONT_FAMILY_INHERIT)
+					value = CSS_FONT_FAMILY_MONOSPACE;
+				break;
+			}
+
+			/* Only use family-names which occur before the first
+			 * generic-family. Any values which occur after the
+			 * first generic-family are ignored. */
+			/** \todo Do this at bytecode generation time? */
+			if (value == CSS_FONT_FAMILY_INHERIT && font != NULL) {
+				temp = state->result->alloc(fonts, 
+					(n_fonts + 1) * sizeof(lwc_string *), 
+					state->result->pw);
+				if (temp == NULL) {
+					if (fonts != NULL) {
+						state->result->alloc(fonts, 0,
+							state->result->pw);
+					}
+					return CSS_NOMEM;
+				}
+
+				fonts = temp;
+
+				fonts[n_fonts] = font;
+
+				n_fonts++;
+			}
+
+			v = *((uint32_t *) style->bytecode);
+			advance_bytecode(style, sizeof(v));
+		}
+	}
+
+	/* Terminate array with blank entry, if needed */
+	if (n_fonts > 0) {
+		lwc_string **temp;
+
+		temp = state->result->alloc(fonts, 
+				(n_fonts + 1) * sizeof(lwc_string *), 
+				state->result->pw);
+		if (temp == NULL) {
+			state->result->alloc(fonts, 0, state->result->pw);
+			return CSS_NOMEM;
+		}
+
+		fonts = temp;
+
+		fonts[n_fonts] = NULL;
+	}
+
+	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+			isInherit(opv))) {
+		css_error error;
+
+		error = set_font_family(state->result, value, fonts);
+		if (error != CSS_OK && n_fonts > 0)
+			state->result->alloc(fonts, 0, state->result->pw);
+
+		return error;
+	} else {
+		if (n_fonts > 0)
+			state->result->alloc(fonts, 0, state->result->pw);
+	}
+
+	return CSS_OK;
+}
+
+css_error set_font_family_from_hint(const css_hint *hint,
+		css_computed_style *style)
+{
+	lwc_string **item;
+	css_error error;
+
+	error = set_font_family(style, hint->status, hint->data.strings);
+
+	for (item = hint->data.strings; 
+			item != NULL && (*item) != NULL; item++) {
+		lwc_string_unref(*item);
+	}
+
+	if (error != CSS_OK && hint->data.strings != NULL)
+		style->alloc(hint->data.strings, 0, style->pw);
+
+	return error;
+}
+
+css_error initial_font_family(css_select_state *state)
+{
+	css_hint hint;
+	css_error error;
+
+	error = state->handler->ua_default_for_property(state->pw,
+			CSS_PROP_FONT_FAMILY, &hint);
+	if (error != CSS_OK)
+		return error;
+
+	return set_font_family_from_hint(&hint, state->result);
+}
+
+css_error compose_font_family(const css_computed_style *parent,
+		const css_computed_style *child,
+		css_computed_style *result)
+{
+	css_error error;
+	lwc_string **urls = NULL;
+	uint8_t type = get_font_family(child, &urls);
+
+	if (type == CSS_FONT_FAMILY_INHERIT || result != child) {
+		size_t n_urls = 0;
+		lwc_string **copy = NULL;
+
+		if (type == CSS_FONT_FAMILY_INHERIT)
+			type = get_font_family(parent, &urls);
+
+		if (urls != NULL) {
+			lwc_string **i;
+
+			for (i = urls; (*i) != NULL; i++)
+				n_urls++;
+
+			copy = result->alloc(NULL, (n_urls + 1) * 
+					sizeof(lwc_string *),
+					result->pw);
+			if (copy == NULL)
+				return CSS_NOMEM;
+
+			memcpy(copy, urls, (n_urls + 1) * 
+					sizeof(lwc_string *));
+		}
+
+		error = set_font_family(result, type, copy);
+		if (error != CSS_OK && copy != NULL)
+			result->alloc(copy, 0, result->pw);
+
+		return error;
+	}
+
+	return CSS_OK;
+}
+
+uint32_t destroy_font_family(void *bytecode)
+{
+	uint32_t consumed = sizeof(uint32_t);
+	uint32_t value = getValue(*((uint32_t*)bytecode));
+	bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+	
+	while (value != FONT_FAMILY_END) {
+		if (value == FONT_FAMILY_STRING || value == FONT_FAMILY_IDENT_LIST) {
+			lwc_string *str = *((lwc_string **)bytecode);
+			consumed += sizeof(lwc_string*);
+			bytecode = ((uint8_t*)bytecode) + sizeof(lwc_string*);
+			lwc_string_unref(str);
+		}
+		
+		consumed += sizeof(uint32_t);
+		value = *((uint32_t*)bytecode);
+		bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
+	}
+	
+	return consumed;
+}
