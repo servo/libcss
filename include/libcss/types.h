@@ -73,7 +73,7 @@ typedef enum css_origin {
 	CSS_ORIGIN_AUTHOR           = 2		/**< Author stylesheet */
 } css_origin;
 
-/** CSS colour -- RRGGBBAA */
+/** CSS colour -- AARRGGBB */
 typedef uint32_t css_color;
 
 /* CSS unit */
