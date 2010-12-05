@@ -19,7 +19,7 @@ extern "C"
 /**
  * Callback to resolve an URL
  *
- * \param pw  Client data
+ * \param pw    Client data
  * \param dict  String internment context
  * \param base  Base URI (absolute)
  * \param rel   URL to resolve, either absolute or relative to base
@@ -29,11 +29,30 @@ extern "C"
 typedef css_error (*css_url_resolution_fn)(void *pw,
 		const char *base, lwc_string *rel, lwc_string **abs);
 
+/**
+ * Callback to be notified of the need for an imported stylesheet
+ *
+ * \param pw      Client data
+ * \param parent  Stylesheet requesting the import
+ * \param url     URL of the imported sheet
+ * \param media   Applicable media for the imported sheet
+ * \return CSS_OK on success, appropriate error otherwise
+ *
+ * \note This function will be invoked for notification purposes
+ *       only. The client may use this to trigger a parallel fetch
+ *       of the imported stylesheet. The imported sheet must be
+ *       registered with its parent using the post-parse import
+ *       registration API.
+ */
+typedef css_error (*css_import_notification_fn)(void *pw,
+		css_stylesheet *parent, lwc_string *url, uint64_t media);
+
 css_error css_stylesheet_create(css_language_level level,
 		const char *charset, const char *url, const char *title,
 		bool allow_quirks, bool inline_style,
-		css_allocator_fn alloc, void *alloc_pw, 
+		css_allocator_fn alloc, void *alloc_pw,
 		css_url_resolution_fn resolve, void *resolve_pw,
+		css_import_notification_fn, void *import_pw,
 		css_stylesheet **stylesheet);
 css_error css_stylesheet_destroy(css_stylesheet *sheet);
 

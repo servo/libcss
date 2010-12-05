@@ -32,6 +32,8 @@ static size_t _rule_size(const css_rule *rule);
  * \param alloc_pw	   Client private data for alloc
  * \param resolve	   URL resolution function
  * \param resolve_pw	   Client private data for resolve
+ * \param import           Import notification function
+ * \param import_pw        Client private data for import
  * \param stylesheet	   Pointer to location to receive stylesheet
  * \return CSS_OK on success,
  *	   CSS_BADPARM on bad parameters,
@@ -42,6 +44,7 @@ css_error css_stylesheet_create(css_language_level level,
 		bool allow_quirks, bool inline_style,
 		css_allocator_fn alloc, void *alloc_pw, 
 		css_url_resolution_fn resolve, void *resolve_pw,
+		css_import_notification_fn import, void *import_pw,
 		css_stylesheet **stylesheet)
 {
 	css_parser_optparams params;
@@ -134,6 +137,9 @@ css_error css_stylesheet_create(css_language_level level,
 
 	sheet->resolve = resolve;
 	sheet->resolve_pw = resolve_pw;
+
+	sheet->import = import;
+	sheet->import_pw = import_pw;
 
 	sheet->alloc = alloc;
 	sheet->pw = alloc_pw;

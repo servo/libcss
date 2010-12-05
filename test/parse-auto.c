@@ -327,7 +327,7 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 	
 	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", NULL,
 			false, false, myrealloc, NULL, resolve_url, NULL, 
-			&sheet) == CSS_OK);
+			NULL, NULL, &sheet) == CSS_OK);
 
 	error = css_stylesheet_append_data(sheet, data, len);
 	if (error != CSS_OK && error != CSS_NEEDDATA) {
@@ -357,7 +357,7 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 			assert(css_stylesheet_create(CSS_LEVEL_21,
 				"UTF-8", buf, NULL, false, false,
 				myrealloc, NULL, resolve_url, NULL, 
-				&import) == CSS_OK);
+				NULL, NULL, &import) == CSS_OK);
 
 			assert(css_stylesheet_register_import(sheet,
 				import) == CSS_OK);

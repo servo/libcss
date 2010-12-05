@@ -51,7 +51,8 @@ int main(int argc, char **argv)
 
 		assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", argv[1], 
 				NULL, false, false, myrealloc, NULL, 
-				resolve_url, NULL, &sheet) == CSS_OK);
+				resolve_url, NULL, NULL, NULL, 
+				&sheet) == CSS_OK);
 
 		fp = fopen(argv[1], "rb");
 		if (fp == NULL) {
@@ -108,7 +109,7 @@ int main(int argc, char **argv)
 				assert(css_stylesheet_create(CSS_LEVEL_21,
 					"UTF-8", buf, NULL, false, false, 
 					myrealloc, NULL, resolve_url, NULL,
-					&import) == CSS_OK);
+					NULL, NULL, &import) == CSS_OK);
 
 				assert(css_stylesheet_data_done(import) == 
 					CSS_OK);

@@ -450,6 +450,18 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 				return error;
 			}
 
+			/* Inform client of need for import */
+			if (c->sheet->import != NULL) {
+				error = c->sheet->import(c->sheet->import_pw,
+						c->sheet, url, media);
+				if (error != CSS_OK) {
+					lwc_string_unref(url);
+					css_stylesheet_rule_destroy(c->sheet, 
+							rule);
+					return error;
+				}
+			}
+
 			/* No longer care about url */
 			lwc_string_unref(url);
 

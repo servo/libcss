@@ -170,6 +170,9 @@ struct css_stylesheet {
 
 	css_style *free_styles[4];		/**< Free styles: 16B buckets */
 
+	css_import_notification_fn import;	/**< Import notification function */
+	void *import_pw;			/**< Private word */
+
 	css_url_resolution_fn resolve;		/**< URL resolution function */
 	void *resolve_pw;			/**< Private word */
 
