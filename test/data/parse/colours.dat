@@ -74,3 +74,19 @@
 |   0x02000018 0xff000000
 #reset
 
+#data
+* { color: rgba(255, 0, 0, 0) }
+#errors
+#expected
+| 1 *
+|   0x02000018 0x00ff0000
+#reset
+
+#data
+* { color: rgba(255, 0, 0, 0.5) }
+#errors
+#expected
+| 1 *
+|   0x02000018 0x7fff0000
+#reset
+

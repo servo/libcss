@@ -39,6 +39,7 @@ css_error parse_colour_specifier(css_language *c,
 
 	/* IDENT(<colour name>) | HASH(rgb | rrggbb) |
 	 * FUNCTION(rgb) [ [ NUMBER | PERCENTAGE ] ',' ] {3} ')'
+	 * FUNCTION(rgba) [ [ NUMBER | PERCENTAGE ] ',' ] {4} ')'
 	 *
 	 * For quirks, NUMBER | DIMENSION | IDENT, too
 	 * I.E. "123456" -> NUMBER, "1234f0" -> DIMENSION, "f00000" -> IDENT
@@ -91,18 +92,31 @@ css_error parse_colour_specifier(css_language *c,
 
 		return error;
 	} else if (token->type == CSS_TOKEN_FUNCTION) {
+		int colour_channels = 0;
+
 		if ((lwc_string_caseless_isequal(
 				token->idata, c->strings[RGB],
 				&match) == lwc_error_ok && match)) {
+			colour_channels = 3;
+		} else if ((lwc_string_caseless_isequal(
+				token->idata, c->strings[RGBA],
+				&match) == lwc_error_ok && match)) {
+			colour_channels = 4;
+		}
+
+		if (colour_channels == 3 || colour_channels == 4) {
 			int i;
 			css_token_type valid = CSS_TOKEN_NUMBER;
+			uint8_t *components[4] = { &r, &g, &b, &a };
 
-			for (i = 0; i < 3; i++) {
+			for (i = 0; i < colour_channels; i++) {
+				uint8_t *component;
 				css_fixed num;
 				size_t consumed = 0;
-				uint8_t *component = i == 0 ? &r
-							    : i == 1 ? &g : &b;
 				int32_t intval;
+				bool int_only;
+
+				component = components[i];
 
 				consumeWhitespace(vector, ctx);
 
@@ -115,17 +129,29 @@ css_error parse_colour_specifier(css_language *c,
 
 				if (i == 0)
 					valid = token->type;
-				else if (token->type != valid)
+				else if (i < 3 && token->type != valid)
 					goto invalid;
 
+				/* The alpha channel may be a float */
+				if (i < 3)
+					int_only = (valid == CSS_TOKEN_NUMBER);
+				else
+					int_only = false;
+
 				num = number_from_lwc_string(token->idata,
-						valid == CSS_TOKEN_NUMBER,
-						&consumed);
+						int_only, &consumed);
 				if (consumed != lwc_string_length(token->idata))
 					goto invalid;
 
 				if (valid == CSS_TOKEN_NUMBER) {
-					intval = FIXTOINT(num);
+					if (i == 3) {
+						/* alpha channel */
+						intval = FIXTOINT(
+							FMULI(num, 255));
+					} else {
+						/* colour channels */
+						intval = FIXTOINT(num);
+					}
 				} else {
 					intval = FIXTOINT(
 						FDIVI(FMULI(num, 255), 100));
@@ -146,12 +172,15 @@ css_error parse_colour_specifier(css_language *c,
 				if (token == NULL)
 					goto invalid;
 
-				if (i != 2 && tokenIsChar(token, ','))
+				if (i != (colour_channels - 1) &&
+						tokenIsChar(token, ',')) {
 					parserutils_vector_iterate(vector, ctx);
-				else if (i == 2 && tokenIsChar(token, ')'))
+				} else if (i == (colour_channels - 1) &&
+						tokenIsChar(token, ')')) {
 					parserutils_vector_iterate(vector, ctx);
-				else
+				} else {
 					goto invalid;
+				}
 			}
 		} else
 			goto invalid;
