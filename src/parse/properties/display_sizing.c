@@ -526,7 +526,7 @@ css_error parse_max_width(css_language *c,
 
 	/* Copy the bytecode to it */
 	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if ((flags && FLAG_INHERIT) == false && value == MAX_WIDTH_SET) {
+	if ((flags & FLAG_INHERIT) == false && value == MAX_WIDTH_SET) {
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
 				&length, sizeof(length));
 		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
