@@ -111,13 +111,12 @@ static css_select_handler select_handler = {
 
 int main(int argc, char **argv)
 {
-	lwc_error lwc_code;
 	css_error code;
 	css_stylesheet *sheet;
 	size_t size;
 	const char data[] = "h1 { color: red } "
 		"h4 { color: #321; } "
-		"h4, h5 { color: #123456; ";
+		"h4, h5 { color: #123456; }";
 	css_select_ctx *select_ctx;
 	uint32_t count;
 	unsigned int hh;
@@ -125,22 +124,10 @@ int main(int argc, char **argv)
 	UNUSED(argc);
 	UNUSED(argv);
 
-	/* initialise libwapcaplet (required by libcss) */
-	lwc_code = lwc_initialise(myrealloc, NULL, 0);
-	if (lwc_code != lwc_error_ok) {
-		fprintf(stderr, "lwc_initialise: %i\n", lwc_code);
-		return 1;
-	}
-
-	/* initialise libcss */
-	code = css_initialise("../test/data/Aliases", myrealloc, 0);
-	if (code != CSS_OK)
-		die("css_initialise", code);
-
-
 	/* create a stylesheet */
 	code = css_stylesheet_create(CSS_LEVEL_DEFAULT, "UTF-8", "", NULL,
-			false, false, myrealloc, 0, resolve_url, 0, &sheet);
+			false, false, myrealloc, 0, resolve_url, 0, NULL, NULL,
+			&sheet);
 	if (code != CSS_OK)
 		die("css_stylesheet_create", code);
 	code = css_stylesheet_size(sheet, &size);
@@ -219,10 +206,6 @@ int main(int argc, char **argv)
 	code = css_stylesheet_destroy(sheet);
 	if (code != CSS_OK)
 		die("css_stylesheet_destroy", code);
-	code = css_finalise(myrealloc, 0);
-	if (code != CSS_OK)
-		die("css_finalise", code);
-
 
 	return 0;
 }
