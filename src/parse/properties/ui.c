@@ -177,7 +177,7 @@ css_error parse_cursor(css_language *c,
 					value = CURSOR_W_RESIZE;
 				}
 			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[TEXT],
+					token->idata, c->strings[LIBCSS_TEXT],
 					&match) == lwc_error_ok && match)) {
 				if (first) {
 					value = CURSOR_TEXT;
@@ -341,7 +341,7 @@ css_error parse_cursor(css_language *c,
 					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_W_RESIZE;
 			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[TEXT],
+					token->idata, c->strings[LIBCSS_TEXT],
 					&match) == lwc_error_ok && match)) {
 				opv = CURSOR_TEXT;
 			} else if ((lwc_string_caseless_isequal(

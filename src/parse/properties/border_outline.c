@@ -2071,7 +2071,7 @@ css_error parse_border_side_style(css_language *c,
 			&match) == lwc_error_ok && match)) {
 		value = BORDER_STYLE_SOLID;
 	} else if ((lwc_string_caseless_isequal(
-			ident->idata, c->strings[DOUBLE],
+			ident->idata, c->strings[LIBCSS_DOUBLE],
 			&match) == lwc_error_ok && match)) {
 		value = BORDER_STYLE_DOUBLE;
 	} else if ((lwc_string_caseless_isequal(

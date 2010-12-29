@@ -138,7 +138,7 @@ css_error parse_position(css_language *c,
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
 	} else if ((lwc_string_caseless_isequal(
-			ident->idata, c->strings[STATIC],
+			ident->idata, c->strings[LIBCSS_STATIC],
 			&match) == lwc_error_ok && match)) {
 		value = POSITION_STATIC;
 	} else if ((lwc_string_caseless_isequal(

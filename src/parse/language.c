@@ -405,8 +405,9 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 		} else {
 			return CSS_INVALID;
 		}
-	} else if (lwc_string_caseless_isequal(atkeyword->idata, c->strings[IMPORT], 
-			&match) == lwc_error_ok && match) {
+	} else if (lwc_string_caseless_isequal(atkeyword->idata, 
+			c->strings[LIBCSS_IMPORT], &match) == lwc_error_ok && 
+			match) {
 		if (c->state != HAD_RULE) {
 			lwc_string *url;
 			uint64_t media = 0;
