@@ -10,6 +10,7 @@ div, p { display: block; }
 #author
 div#foo { background-color: #bbc; }
 .green { color: #0f0; }
+div#foo { float: right; }
 #errors
 #expected
 background-attachment: scroll
@@ -60,6 +61,81 @@ padding-right: 0px
 padding-bottom: 0px
 padding-left: 0px
 position: static
+right: auto
+table-layout: auto
+text-decoration: none
+top: auto
+unicode-bidi: normal
+vertical-align: baseline
+width: auto
+word-spacing: normal
+z-index: auto
+#reset
+
+#tree
+| div
+|  id=foo
+|  p*
+|   class=green
+#ua
+div, p { display: none; float: right; position: absolute; }
+#user
+p { display: inherit; float: none; }
+.green { color: #f00 !important; }
+#author
+div#foo { background-color: #bbc; }
+.green { color: #0f0; display: table-row-group; display: table-cell !important; }
+div p.green { float: left !important; }
+#errors
+#expected
+background-attachment: scroll
+background-color: transparent
+background-image: none
+background-position: 0% 0%
+background-repeat: repeat
+border-spacing: 0px 0px
+border-top-color: initial
+border-right-color: initial
+border-bottom-color: initial
+border-left-color: initial
+border-top-style: none
+border-right-style: none
+border-bottom-style: none
+border-left-style: none
+border-top-width: medium
+border-right-width: medium
+border-bottom-width: medium
+border-left-width: medium
+bottom: auto
+clear: none
+clip: auto
+color: #ffff0000
+content: normal
+counter-increment: none
+counter-reset: none
+cursor: auto
+display: table-cell
+float: none
+height: auto
+left: auto
+letter-spacing: normal
+margin-top: 0px
+margin-right: 0px
+margin-bottom: 0px
+margin-left: 0px
+max-height: none
+max-width: none
+min-height: 0px
+min-width: 0px
+outline-color: invert
+outline-style: none
+outline-width: 2px
+overflow: visible
+padding-top: 0px
+padding-right: 0px
+padding-bottom: 0px
+padding-left: 0px
+position: absolute
 right: auto
 table-layout: auto
 text-decoration: none
