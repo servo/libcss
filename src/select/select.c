@@ -68,7 +68,7 @@ static css_error match_details(css_select_ctx *ctx, void *node,
 		bool *match);
 static css_error match_detail(css_select_ctx *ctx, void *node, 
 		const css_selector_detail *detail, css_select_state *state, 
-		bool *match);
+		bool *match, bool *match_pseudo_element);
 static css_error cascade_style(const css_style *style, css_select_state *state);
 
 #ifdef DEBUG_CHAIN_MATCHING
@@ -1061,6 +1061,7 @@ css_error match_details(css_select_ctx *ctx, void *node,
 		bool *match)
 {
 	css_error error;
+	bool match_pseudo_element = false;
 
 	/* We match by default (if there are no details than the element
 	 * selector, then we must match) */
@@ -1073,7 +1074,8 @@ css_error match_details(css_select_ctx *ctx, void *node,
 	 * can be avoided unless absolutely necessary)? */
 
 	do {
-		error = match_detail(ctx, node, detail, state, match);
+		error = match_detail(ctx, node, detail, state, match,
+				&match_pseudo_element);
 		if (error != CSS_OK)
 			return error;
 
@@ -1087,12 +1089,19 @@ css_error match_details(css_select_ctx *ctx, void *node,
 			detail = NULL;
 	} while (detail != NULL);
 
+	/* If we're selecting for a pseudo element and the selector chain did
+	 * not match the pseudo element, it's not a match; reject the selector
+	 * chain */
+	if (state->pseudo_element != CSS_PSEUDO_ELEMENT_NONE &&
+			match_pseudo_element == false)
+		*match = false;
+
 	return CSS_OK;
 }
 
 css_error match_detail(css_select_ctx *ctx, void *node, 
 		const css_selector_detail *detail, css_select_state *state, 
-		bool *match)
+		bool *match, bool *match_pseudo_element)
 {
 	css_error error = CSS_OK;
 
@@ -1141,21 +1150,25 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 	case CSS_SELECTOR_PSEUDO_ELEMENT:
 		if (detail->name == state->first_line && 
 				state->pseudo_element ==
-				CSS_PSEUDO_ELEMENT_FIRST_LINE)
+				CSS_PSEUDO_ELEMENT_FIRST_LINE) {
 			*match = true;
-		else if (detail->name == state->first_letter &&
+			*match_pseudo_element = true;
+		}  else if (detail->name == state->first_letter &&
 				state->pseudo_element ==
-				CSS_PSEUDO_ELEMENT_FIRST_LETTER)
+				CSS_PSEUDO_ELEMENT_FIRST_LETTER) {
 			*match = true;
-		else if (detail->name == state->before &&
+			*match_pseudo_element = true;
+		} else if (detail->name == state->before &&
 				state->pseudo_element ==
-				CSS_PSEUDO_ELEMENT_BEFORE)
+				CSS_PSEUDO_ELEMENT_BEFORE) {
 			*match = true;
-		else if (detail->name == state->after &&
+			*match_pseudo_element = true;
+		} else if (detail->name == state->after &&
 				state->pseudo_element ==
-				CSS_PSEUDO_ELEMENT_AFTER)
+				CSS_PSEUDO_ELEMENT_AFTER) {
 			*match = true;
-		else
+			*match_pseudo_element = true;
+		} else
 			*match = false;
 		break;
 	case CSS_SELECTOR_ATTRIBUTE:
