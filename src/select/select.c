@@ -303,6 +303,10 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	if (ctx == NULL || node == NULL || result == NULL || handler == NULL)
 		return CSS_BADPARM;
 
+	/* Inline style has no meaning if selecting for a pseudo element */
+	if (pseudo_element != CSS_PSEUDO_ELEMENT_NONE && inline_style != NULL)
+		return CSS_BADPARM;
+
 	/* Set up the selection state */
 	memset(&state, 0, sizeof(css_select_state));
 	state.node = node;
@@ -353,12 +357,14 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	/* Take account of presentational hints and fix up any remaining
 	 * unset properties. */
 	for (i = 0; i < CSS_N_PROPERTIES; i++) {
-		/* If the existing property value came from an author 
-		 * stylesheet or a user sheet using !important, then leave 
-		 * it alone. */
-		if (state.props[i].set == false ||
+		/* Apply presentational hints if we're not selecting for 
+		 * a pseudo element, and the property is unset or the 
+		 * existing property value did not come from an author 
+		 * stylesheet or a user sheet using !important. */
+		if (pseudo_element == CSS_PSEUDO_ELEMENT_NONE &&
+				(state.props[i].set == false ||
 				(state.props[i].origin != CSS_ORIGIN_AUTHOR &&
-				state.props[i].important == false)) {
+				state.props[i].important == false))) {
 			error = set_hint(&state, i);
 			if (error != CSS_OK)
 				goto cleanup;
@@ -891,7 +897,13 @@ css_error match_selector_chain(css_select_ctx *ctx,
 
 		/* If this is the first selector in the chain, we must match 
 		 * its details. The details of subsequent selectors will be 
-		 * matched when processing the combinator. */
+		 * matched when processing the combinator. 
+		 *
+		 * Note that pseudo elements will only appear as details of
+		 * the first selector in the chain, as the parser will reject
+		 * any selector chains containing pseudo elements anywhere 
+		 * else.
+		 */
 		if (s == selector) {
 			/* Match details on this selector */
 			error = match_details(ctx, node, detail, state, &match);
