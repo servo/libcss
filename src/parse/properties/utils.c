@@ -1,16 +1,1551 @@
 /*
  * This file is part of LibCSS.
  * Licensed under the MIT License,
- *                http://www.opensource.org/licenses/mit-license.php
- * Copyright 2008 John-Mark Bell <jmb@netsurf-browser.org>
+ *		  http://www.opensource.org/licenses/mit-license.php
+ * Copyright 2009 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
+#include <assert.h>
 #include <string.h>
 
 #include "stylesheet.h"
 #include "bytecode/bytecode.h"
 #include "bytecode/opcodes.h"
+#include "parse/properties/properties.h"
 #include "parse/properties/utils.h"
+
+/**
+ * Common parser for pause-after and pause-before
+ *
+ * \param c	  Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx	  Pointer to vector iteration context
+ * \param op	  Opcode to parse for
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *		   If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error parse_pause_common(css_language *c, 
+		const parserutils_vector *vector, int *ctx, 
+		uint16_t op, css_style **result)
+{
+	int orig_ctx = *ctx;
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	css_fixed length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+	bool match;
+
+	/* time | percentage | IDENT(inherit) */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL) {
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			(lwc_string_caseless_isequal(
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, UNIT_S,
+				&length, &unit);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
+
+		if ((unit & UNIT_TIME) == false && (unit & UNIT_PCT) == false) {
+			*ctx = orig_ctx;
+			return CSS_INVALID;
+		}
+
+		/* Negative values are illegal */
+		if (length < 0) {
+			*ctx = orig_ctx;
+			return CSS_INVALID;
+		}
+
+		value = PAUSE_AFTER_SET;
+	}
+
+	opv = buildOPV(op, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == PAUSE_AFTER_SET)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
+		return error;
+	}
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == PAUSE_AFTER_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
+	}
+
+	return CSS_OK;
+}
+
+/**
+ * Parse list-style-type value
+ *
+ * \param c	 Parsing context
+ * \param ident	 Identifier to consider
+ * \param value	 Pointer to location to receive value
+ * \return CSS_OK on success,
+ *	   CSS_INVALID if the input is not valid
+ */
+css_error parse_list_style_type_value(css_language *c, const css_token *ident,
+		uint16_t *value)
+{
+	bool match;
+
+	/* IDENT (disc, circle, square, decimal, decimal-leading-zero,
+	 *	  lower-roman, upper-roman, lower-greek, lower-latin,
+	 *	  upper-latin, armenian, georgian, lower-alpha, upper-alpha,
+	 *	  none)
+	 */
+	if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[DISC],
+			&match) == lwc_error_ok && match)) {
+		*value = LIST_STYLE_TYPE_DISC;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[CIRCLE],
+			&match) == lwc_error_ok && match)) {
+		*value = LIST_STYLE_TYPE_CIRCLE;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[SQUARE],
+			&match) == lwc_error_ok && match)) {
+		*value = LIST_STYLE_TYPE_SQUARE;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[DECIMAL],
+			&match) == lwc_error_ok && match)) {
+		*value = LIST_STYLE_TYPE_DECIMAL;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[DECIMAL_LEADING_ZERO],
+			&match) == lwc_error_ok && match)) {
+		*value = LIST_STYLE_TYPE_DECIMAL_LEADING_ZERO;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[LOWER_ROMAN],
+			&match) == lwc_error_ok && match)) {
+		*value = LIST_STYLE_TYPE_LOWER_ROMAN;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[UPPER_ROMAN],
+			&match) == lwc_error_ok && match)) {
+		*value = LIST_STYLE_TYPE_UPPER_ROMAN;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[LOWER_GREEK],
+			&match) == lwc_error_ok && match)) {
+		*value = LIST_STYLE_TYPE_LOWER_GREEK;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[LOWER_LATIN],
+			&match) == lwc_error_ok && match)) {
+		*value = LIST_STYLE_TYPE_LOWER_LATIN;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[UPPER_LATIN],
+			&match) == lwc_error_ok && match)) {
+		*value = LIST_STYLE_TYPE_UPPER_LATIN;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[ARMENIAN],
+			&match) == lwc_error_ok && match)) {
+		*value = LIST_STYLE_TYPE_ARMENIAN;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[GEORGIAN],
+			&match) == lwc_error_ok && match)) {
+		*value = LIST_STYLE_TYPE_GEORGIAN;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[LOWER_ALPHA],
+			&match) == lwc_error_ok && match)) {
+		*value = LIST_STYLE_TYPE_LOWER_ALPHA;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[UPPER_ALPHA],
+			&match) == lwc_error_ok && match)) {
+		*value = LIST_STYLE_TYPE_UPPER_ALPHA;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[NONE],
+			&match) == lwc_error_ok && match)) {
+		*value = LIST_STYLE_TYPE_NONE;
+	} else
+		return CSS_INVALID;
+
+	return CSS_OK;
+}
+
+/**
+ * Parse content list
+ *
+ * \param c	  Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx	  Pointer to vector iteration context
+ * \param value	  Pointer to location to receive value
+ * \param buffer  Pointer to output buffer, or NULL to read required length
+ * \param buflen  Pointer to location to receive buffer length
+ * \return CSS_OK on success,
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *		   If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error parse_content_list(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t *value, uint8_t *buffer, uint32_t *buflen)
+{
+	int orig_ctx = *ctx;
+	int prev_ctx = *ctx;
+	css_error error;
+	const css_token *token;
+	bool first = true;
+	uint32_t offset = 0;
+	uint32_t opv;
+	bool match;
+
+	/* [
+	 *	IDENT(open-quote, close-quote, no-open-quote, no-close-quote) |
+	 *	STRING | URI |
+	 *	FUNCTION(attr) IDENT ')' |
+	 *	FUNCTION(counter) IDENT (',' IDENT)? ')' |
+	 *	FUNCTION(counters) IDENT ',' STRING (',' IDENT)? ')'
+	 * ]+
+	 */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL) {
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	while (token != NULL) {
+		if (token->type == CSS_TOKEN_IDENT &&
+				(lwc_string_caseless_isequal(
+				token->idata, c->strings[OPEN_QUOTE],
+				&match) == lwc_error_ok && match)) {
+			opv = CONTENT_OPEN_QUOTE;
+
+			if (first == false) {
+				if (buffer != NULL) {
+					memcpy(buffer + offset, 
+							&opv, sizeof(opv));
+				}
+
+				offset += sizeof(opv);
+			} 
+		} else if (token->type == CSS_TOKEN_IDENT &&
+				(lwc_string_caseless_isequal(
+				token->idata, c->strings[CLOSE_QUOTE],
+				&match) == lwc_error_ok && match)) {
+			opv = CONTENT_CLOSE_QUOTE;
+
+			if (first == false) {				
+				if (buffer != NULL) {
+					memcpy(buffer + offset, 
+							&opv, sizeof(opv));
+				}
+
+				offset += sizeof(opv);
+			}
+		} else if (token->type == CSS_TOKEN_IDENT &&
+				(lwc_string_caseless_isequal(
+				token->idata, c->strings[NO_OPEN_QUOTE],
+				&match) == lwc_error_ok && match)) {
+			opv = CONTENT_NO_OPEN_QUOTE;
+
+			if (first == false) {
+				if (buffer != NULL) {
+					memcpy(buffer + offset, 
+							&opv, sizeof(opv));
+				}
+
+				offset += sizeof(opv);
+			}
+		} else if (token->type == CSS_TOKEN_IDENT &&
+				(lwc_string_caseless_isequal(
+				token->idata, c->strings[NO_CLOSE_QUOTE],
+				&match) == lwc_error_ok && match)) {
+			opv = CONTENT_NO_CLOSE_QUOTE;
+
+			if (first == false) {
+				if (buffer != NULL) {
+					memcpy(buffer + offset, 
+							&opv, sizeof(opv));
+				}
+
+				offset += sizeof(opv);
+			}
+		} else if (token->type == CSS_TOKEN_STRING) {
+			opv = CONTENT_STRING;
+
+			if (first == false) {
+				if (buffer != NULL) {
+					memcpy(buffer + offset, 
+							&opv, sizeof(opv));
+				}
+
+				offset += sizeof(opv);
+			}
+
+			if (buffer != NULL) {
+				lwc_string_ref(token->idata);
+				memcpy(buffer + offset, &token->idata,
+						sizeof(token->idata));
+			}
+
+			offset += sizeof(token->idata);
+		} else if (token->type == CSS_TOKEN_URI) {
+			lwc_string *uri;
+
+			opv = CONTENT_URI;
+
+			if (first == false) {
+				if (buffer != NULL) {
+					memcpy(buffer + offset, 
+							&opv, sizeof(opv));
+				}
+
+				offset += sizeof(opv);
+			}
+
+			if (buffer != NULL) {
+				error = c->sheet->resolve(c->sheet->resolve_pw,
+					c->sheet->url,
+					token->idata, &uri);
+				if (error != CSS_OK) {
+					*ctx = orig_ctx;
+					return error;
+				}
+
+				/* Don't ref URI -- we want to pass ownership 
+				 * to the bytecode */
+				memcpy(buffer + offset, &uri, sizeof(uri));
+			}
+
+			offset += sizeof(uri);
+		} else if (token->type == CSS_TOKEN_FUNCTION &&
+				(lwc_string_caseless_isequal(
+				token->idata, c->strings[ATTR],
+				&match) == lwc_error_ok && match)) {
+			opv = CONTENT_ATTR;
+
+			if (first == false) {
+				if (buffer != NULL) {
+					memcpy(buffer + offset, 
+							&opv, sizeof(opv));
+				}
+
+				offset += sizeof(opv);
+			}
+
+			consumeWhitespace(vector, ctx);
+
+			/* Expect IDENT */
+			token = parserutils_vector_iterate(vector, ctx);
+			if (token == NULL || token->type != CSS_TOKEN_IDENT) {
+				*ctx = orig_ctx;
+				return CSS_INVALID;
+			}
+
+			if (buffer != NULL) {
+				lwc_string_ref(token->idata);
+				memcpy(buffer + offset, &token->idata, 
+						sizeof(token->idata));
+			}
+
+			offset += sizeof(token->idata);
+
+			consumeWhitespace(vector, ctx);
+
+			/* Expect ')' */
+			token = parserutils_vector_iterate(vector, ctx);
+			if (token == NULL || tokenIsChar(token, ')') == false) {
+				*ctx = orig_ctx;
+				return CSS_INVALID;
+			}
+		} else if (token->type == CSS_TOKEN_FUNCTION &&
+				(lwc_string_caseless_isequal(
+				token->idata, c->strings[COUNTER],
+				&match) == lwc_error_ok && match)) {
+			lwc_string *name;
+
+			opv = CONTENT_COUNTER;
+
+			consumeWhitespace(vector, ctx);
+
+			/* Expect IDENT */
+			token = parserutils_vector_iterate(vector, ctx);
+			if (token == NULL || token->type != CSS_TOKEN_IDENT) {
+				*ctx = orig_ctx;
+				return CSS_INVALID;
+			}
+
+			name = token->idata;
+
+			consumeWhitespace(vector, ctx);
+
+			/* Possible ',' */
+			token = parserutils_vector_peek(vector, *ctx);
+			if (token == NULL || 
+					(tokenIsChar(token, ',') == false &&
+					tokenIsChar(token, ')') == false)) {
+				*ctx = orig_ctx;
+				return CSS_INVALID;
+			}
+
+			if (tokenIsChar(token, ',')) {
+				uint16_t v;
+
+				parserutils_vector_iterate(vector, ctx);
+
+				consumeWhitespace(vector, ctx);
+
+				/* Expect IDENT */
+				token = parserutils_vector_peek(vector, *ctx);
+				if (token == NULL || token->type != 
+						CSS_TOKEN_IDENT) {
+					*ctx = orig_ctx;
+					return CSS_INVALID;
+				}
+
+				error = parse_list_style_type_value(c,
+						token, &v);
+				if (error != CSS_OK) {
+					*ctx = orig_ctx;
+					return error;
+				}
+
+				opv |= v << CONTENT_COUNTER_STYLE_SHIFT;
+
+				parserutils_vector_iterate(vector, ctx);
+
+				consumeWhitespace(vector, ctx);
+			} else {
+				opv |= LIST_STYLE_TYPE_DECIMAL << 
+						CONTENT_COUNTER_STYLE_SHIFT;
+			}
+
+			/* Expect ')' */
+			token = parserutils_vector_iterate(vector, ctx);
+			if (token == NULL || tokenIsChar(token,	')') == false) {
+				*ctx = orig_ctx;
+				return CSS_INVALID;
+			}
+
+			if (first == false) {
+				if (buffer != NULL) {
+					memcpy(buffer + offset, 
+							&opv, sizeof(opv));
+				}
+
+				offset += sizeof(opv);
+			}
+
+			if (buffer != NULL) {
+				lwc_string_ref(name);
+				memcpy(buffer + offset, &name, sizeof(name));
+			}
+
+			offset += sizeof(name);
+		} else if (token->type == CSS_TOKEN_FUNCTION &&
+				(lwc_string_caseless_isequal(
+				token->idata, c->strings[COUNTERS],
+				&match) == lwc_error_ok && match)) {
+			lwc_string *name;
+			lwc_string *sep;
+
+			opv = CONTENT_COUNTERS;
+
+			consumeWhitespace(vector, ctx);
+
+			/* Expect IDENT */
+			token = parserutils_vector_iterate(vector, ctx);
+			if (token == NULL || token->type != CSS_TOKEN_IDENT) {
+				*ctx = orig_ctx;
+				return CSS_INVALID;
+			}
+
+			name = token->idata;
+
+			consumeWhitespace(vector, ctx);
+
+			/* Expect ',' */
+			token = parserutils_vector_iterate(vector, ctx);
+			if (token == NULL || tokenIsChar(token, ',') == false) {
+				*ctx = orig_ctx;
+				return CSS_INVALID;
+			}
+
+			consumeWhitespace(vector, ctx);
+
+			/* Expect STRING */
+			token = parserutils_vector_iterate(vector, ctx);
+			if (token == NULL || token->type != CSS_TOKEN_STRING) {
+				*ctx = orig_ctx;
+				return CSS_INVALID;
+			}
+
+			sep = token->idata;
+
+			consumeWhitespace(vector, ctx);
+
+			/* Possible ',' */
+			token = parserutils_vector_peek(vector, *ctx);
+			if (token == NULL || 
+					(tokenIsChar(token, ',') == false && 
+					tokenIsChar(token, ')') == false)) {
+				*ctx = orig_ctx;
+				return CSS_INVALID;
+			}
+
+			if (tokenIsChar(token, ',')) {
+				uint16_t v;
+
+				parserutils_vector_iterate(vector, ctx);
+
+				consumeWhitespace(vector, ctx);
+
+				/* Expect IDENT */
+				token = parserutils_vector_peek(vector, *ctx);
+				if (token == NULL || token->type != 
+						CSS_TOKEN_IDENT) {
+					*ctx = orig_ctx;
+					return CSS_INVALID;
+				}
+
+				error = parse_list_style_type_value(c,
+						token, &v);
+				if (error != CSS_OK) {
+					*ctx = orig_ctx;
+					return error;
+				}
+
+				opv |= v << CONTENT_COUNTERS_STYLE_SHIFT;
+
+				parserutils_vector_iterate(vector, ctx);
+
+				consumeWhitespace(vector, ctx);
+			} else {
+				opv |= LIST_STYLE_TYPE_DECIMAL <<
+						CONTENT_COUNTERS_STYLE_SHIFT;
+			}
+
+			/* Expect ')' */
+			token = parserutils_vector_iterate(vector, ctx);
+			if (token == NULL || tokenIsChar(token, ')') == false) {
+				*ctx = orig_ctx;
+				return CSS_INVALID;
+			}
+
+			if (first == false) {
+				if (buffer != NULL) {
+					memcpy(buffer + offset, 
+							&opv, sizeof(opv));
+				}
+
+				offset += sizeof(opv);
+			}
+
+			if (buffer != NULL) {
+				lwc_string_ref(name);
+				memcpy(buffer + offset, &name, sizeof(name));
+			}
+
+			offset += sizeof(name);
+
+			if (buffer != NULL) {
+				lwc_string_ref(sep);
+				memcpy(buffer + offset, &sep, sizeof(sep));
+			}
+
+			offset += sizeof(sep);
+		} else if (first) {
+			/* Invalid if this is the first iteration */
+			*ctx = orig_ctx;
+			return CSS_INVALID;
+		} else {
+			/* Give up, ensuring current token is reprocessed */
+			*ctx = prev_ctx;
+			break;
+		}
+
+		if (first && value != NULL) {
+			*value = opv;
+		}
+		first = false;
+
+		consumeWhitespace(vector, ctx);
+
+		prev_ctx = *ctx;
+		token = parserutils_vector_iterate(vector, ctx);
+	}
+
+	/* Write list terminator */
+	opv = CONTENT_NORMAL;
+
+	if (buffer != NULL) {
+		memcpy(buffer + offset, &opv, sizeof(opv));
+	}
+
+	offset += sizeof(opv);
+
+	if (buflen != NULL) {
+		*buflen = offset;
+	}
+
+	return CSS_OK;
+}
+
+/**
+ * Common parser for counter-increment and counter-reset
+ *
+ * \param c	  Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx	  Pointer to vector iteration context
+ * \param op	  Opcode to parse for
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *		   If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error parse_counter_common(css_language *c, 
+		const parserutils_vector *vector, int *ctx, 
+		uint16_t op, css_style **result)
+{
+	int orig_ctx = *ctx;
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	uint32_t required_size = sizeof(opv);
+	int temp_ctx = *ctx;
+	uint8_t *ptr;
+	bool match;
+
+	/* [IDENT <integer>? ]+ | IDENT(none, inherit) */
+
+	/* Pass 1: validate input and calculate bytecode size */
+	token = parserutils_vector_iterate(vector, &temp_ctx);
+	if (token == NULL || token->type != CSS_TOKEN_IDENT) {
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	if ((lwc_string_caseless_isequal(
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
+		flags = FLAG_INHERIT;
+	} else if ((lwc_string_caseless_isequal(
+			token->idata, c->strings[NONE],
+			&match) == lwc_error_ok && match)) {
+		value = COUNTER_INCREMENT_NONE;
+	} else {
+		bool first = true;
+
+		value = COUNTER_INCREMENT_NAMED;
+
+		while (token != NULL) {
+			lwc_string *name = token->idata;
+			css_fixed increment = 
+					(op == CSS_PROP_COUNTER_INCREMENT) 
+					? INTTOFIX(1) : INTTOFIX(0);
+
+			consumeWhitespace(vector, &temp_ctx);
+
+			/* Optional integer */
+			token = parserutils_vector_peek(vector, temp_ctx);
+			if (token != NULL && token->type != CSS_TOKEN_IDENT &&
+					token->type != CSS_TOKEN_NUMBER) {
+				*ctx = orig_ctx;
+				return CSS_INVALID;
+			}
+
+			if (token != NULL && token->type == CSS_TOKEN_NUMBER) {
+				size_t consumed = 0;
+
+				increment = number_from_lwc_string(
+						token->idata, true, &consumed);
+
+				if (consumed != lwc_string_length(
+						token->idata)) {
+					*ctx = orig_ctx;
+					return CSS_INVALID;
+				}
+
+				parserutils_vector_iterate(vector, &temp_ctx);
+
+				consumeWhitespace(vector, &temp_ctx);
+			}
+
+			if (first == false) {
+				required_size += sizeof(opv);
+			}
+			required_size += sizeof(name) + sizeof(increment);
+
+			first = false;
+
+			token = parserutils_vector_peek(vector, temp_ctx);
+			if (token != NULL && token->type != CSS_TOKEN_IDENT) {
+				break;
+			}
+
+			token = parserutils_vector_iterate(vector, &temp_ctx);
+		}
+
+		/* And for the terminator */
+		required_size += sizeof(opv);
+	}
+
+	opv = buildOPV(op, flags, value);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
+		return error;
+	}
+
+	/* Copy OPV to bytecode */
+	ptr = (*result)->bytecode;
+	memcpy(ptr, &opv, sizeof(opv));
+	ptr += sizeof(opv);
+
+	/* Pass 2: construct bytecode */
+	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || token->type != CSS_TOKEN_IDENT) {
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	if ((lwc_string_caseless_isequal(
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match) ||
+			(lwc_string_caseless_isequal(
+			token->idata, c->strings[NONE],
+			&match) == lwc_error_ok && match)) {
+		/* Nothing to do */
+	} else {
+		bool first = true;
+
+		opv = COUNTER_INCREMENT_NAMED;
+
+		while (token != NULL) {
+			lwc_string *name = token->idata;
+			css_fixed increment = 
+					(op == CSS_PROP_COUNTER_INCREMENT) 
+					? INTTOFIX(1) : INTTOFIX(0);
+
+			consumeWhitespace(vector, ctx);
+
+			/* Optional integer */
+			token = parserutils_vector_peek(vector, *ctx);
+			if (token != NULL && token->type != CSS_TOKEN_IDENT &&
+					token->type != CSS_TOKEN_NUMBER) {
+				*ctx = orig_ctx;
+				return CSS_INVALID;
+			}
+
+			if (token != NULL && token->type == CSS_TOKEN_NUMBER) {
+				size_t consumed = 0;
+
+				increment = number_from_lwc_string(
+						token->idata, true, &consumed);
+
+				if (consumed != lwc_string_length(
+						token->idata)) {
+					*ctx = orig_ctx;
+					return CSS_INVALID;
+				}
+
+				parserutils_vector_iterate(vector, ctx);
+
+				consumeWhitespace(vector, ctx);
+			}
+
+			if (first == false) {
+				memcpy(ptr, &opv, sizeof(opv));
+				ptr += sizeof(opv);
+			}
+			
+			lwc_string_ref(name);
+			memcpy(ptr, &name, sizeof(name));
+			ptr += sizeof(name);
+			
+			memcpy(ptr, &increment, sizeof(increment));
+			ptr += sizeof(increment);
+
+			first = false;
+
+			token = parserutils_vector_peek(vector, *ctx);
+			if (token != NULL && token->type != CSS_TOKEN_IDENT) {
+				break;
+			}
+
+			token = parserutils_vector_iterate(vector, ctx);
+		}
+
+		/* And for the terminator */
+		opv = COUNTER_INCREMENT_NONE;
+		memcpy(ptr, &opv, sizeof(opv));
+		ptr += sizeof(opv);
+	}
+
+	return CSS_OK;
+}
+
+/**
+ * Parse border-{top,right,bottom,left} shorthand
+ *
+ * \param c	  Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx	  Pointer to vector iteration context
+ * \param side	  The side we're parsing for
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *		   If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error parse_border_side(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint32_t side, css_style **result)
+{
+	int orig_ctx = *ctx;
+	int prev_ctx;
+	const css_token *token;
+	css_style *color = NULL;
+	css_style *style = NULL;
+	css_style *width = NULL;
+	css_style *ret = NULL;
+	uint32_t required_size;
+	bool match;
+	css_error error;
+
+	/* Firstly, handle inherit */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+			(lwc_string_caseless_isequal(
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
+		uint32_t *bytecode;
+
+		error = css_stylesheet_style_create(c->sheet,
+			3 * sizeof(uint32_t), &ret);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
+
+		bytecode = (uint32_t *) ret->bytecode;
+
+		*(bytecode++) = buildOPV(CSS_PROP_BORDER_TOP_COLOR + side,
+				FLAG_INHERIT, 0);
+		*(bytecode++) = buildOPV(CSS_PROP_BORDER_TOP_STYLE + side,
+				FLAG_INHERIT, 0);
+		*(bytecode++) = buildOPV(CSS_PROP_BORDER_TOP_WIDTH + side,
+				FLAG_INHERIT, 0);
+
+		parserutils_vector_iterate(vector, ctx);
+
+		*result = ret;
+
+		return CSS_OK;
+	} else if (token == NULL) {
+		/* No tokens -- clearly garbage */
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	/* Attempt to parse individual properties */
+	do {
+		prev_ctx = *ctx;
+		error = CSS_OK;
+
+		/* Ensure that we're not about to parse another inherit */
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				(lwc_string_caseless_isequal(
+				token->idata, c->strings[INHERIT],
+				&match) == lwc_error_ok && match)) {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
+
+		if (color == NULL &&
+				(error = parse_border_side_color(c, vector, ctx,
+				CSS_PROP_BORDER_TOP_COLOR + side, &color)) == 
+				CSS_OK) {
+		} else if (style == NULL &&
+				(error = parse_border_side_style(c, vector, ctx,
+				CSS_PROP_BORDER_TOP_STYLE + side, &style)) == 
+				CSS_OK) {
+		} else if (width == NULL &&
+				(error = parse_border_side_width(c, vector, ctx,
+				CSS_PROP_BORDER_TOP_WIDTH + side, &width)) == 
+				CSS_OK) {
+		}
+
+		if (error == CSS_OK) {
+			consumeWhitespace(vector, ctx);
+
+			token = parserutils_vector_peek(vector, *ctx);
+		} else {
+			/* Forcibly cause loop to exit */
+			token = NULL;
+		}
+	} while (*ctx != prev_ctx && token != NULL);
+
+	/* Calculate size of resultant style */
+	required_size = 0;
+	if (color)
+		required_size += color->length;
+
+	if (style)
+		required_size += style->length;
+	else
+		required_size += sizeof(uint32_t);
+
+	if (width)
+		required_size += width->length;
+	else
+		required_size += sizeof(uint32_t);
+
+	error = css_stylesheet_style_create(c->sheet, required_size, &ret);
+	if (error != CSS_OK)
+		goto cleanup;
+
+	required_size = 0;
+
+	if (color) {
+		memcpy(((uint8_t *) ret->bytecode) + required_size,
+				color->bytecode, color->length);
+		required_size += color->length;
+	}
+
+	if (style) {
+		memcpy(((uint8_t *) ret->bytecode) + required_size,
+				style->bytecode, style->length);
+		required_size += style->length;
+	} else {
+		void *bc = ((uint8_t *) ret->bytecode) + required_size;
+
+		*((uint32_t *) bc) = buildOPV(CSS_PROP_BORDER_TOP_STYLE + side,
+				0, BORDER_STYLE_NONE);
+		required_size += sizeof(uint32_t);
+	}
+
+	if (width) {
+		memcpy(((uint8_t *) ret->bytecode) + required_size,
+				width->bytecode, width->length);
+		required_size += width->length;
+	} else {
+		void *bc = ((uint8_t *) ret->bytecode) + required_size;
+
+		*((uint32_t *) bc) = buildOPV(CSS_PROP_BORDER_TOP_WIDTH + side,
+				0, BORDER_WIDTH_MEDIUM);
+		required_size += sizeof(uint32_t);
+	}
+
+	assert(required_size == ret->length);
+
+	/* Write the result */
+	*result = ret;
+	/* Invalidate ret, so that cleanup doesn't destroy it */
+	ret = NULL;
+
+	/* Clean up after ourselves */
+cleanup:
+	if (color)
+		css_stylesheet_style_destroy(c->sheet, color, error == CSS_OK);
+	if (style)
+		css_stylesheet_style_destroy(c->sheet, style, error == CSS_OK);
+	if (width)
+		css_stylesheet_style_destroy(c->sheet, width, error == CSS_OK);
+	if (ret)
+		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
+
+	if (error != CSS_OK)
+		*ctx = orig_ctx;
+
+	return error;
+}
+
+/**
+ * Parse border-{top,right,bottom,left}-color
+ *
+ * \param c	  Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx	  Pointer to vector iteration context
+ * \param op	  Opcode to parse for (encodes side)
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *		   If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error parse_border_side_color(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t op, css_style **result)
+{
+	int orig_ctx = *ctx;
+	css_error error;
+	const css_token *token;
+	uint32_t opv;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t colour = 0;
+	uint32_t required_size;
+	bool match;
+
+	/* colour | IDENT (transparent, inherit) */
+	token= parserutils_vector_peek(vector, *ctx);
+	if (token == NULL) {
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	if (token->type == CSS_TOKEN_IDENT && 
+			(lwc_string_caseless_isequal(
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
+		parserutils_vector_iterate(vector, ctx);
+		flags |= FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			(lwc_string_caseless_isequal(
+			token->idata, c->strings[TRANSPARENT],
+			&match) == lwc_error_ok && match)) {
+		parserutils_vector_iterate(vector, ctx);
+		value = BORDER_COLOR_TRANSPARENT;
+	} else {
+		error = parse_colour_specifier(c, vector, ctx, &colour);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
+
+		value = BORDER_COLOR_SET;
+	}
+
+	opv = buildOPV(op, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == BORDER_COLOR_SET)
+		required_size += sizeof(colour);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
+		return error;
+	}
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == BORDER_COLOR_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&colour, sizeof(colour));
+	}
+
+	return CSS_OK;
+}
+
+/**
+ * Parse border-{top,right,bottom,left}-style
+ *
+ * \param c	  Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx	  Pointer to vector iteration context
+ * \param op	  Opcode to parse for (encodes side)
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *		   If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error parse_border_side_style(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t op, css_style **result)
+{
+	int orig_ctx = *ctx;
+	css_error error;
+	const css_token *ident;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	bool match;
+
+	/* IDENT (none, hidden, dotted, dashed, solid, double, groove, 
+	 * ridge, inset, outset, inherit) */
+	ident = parserutils_vector_iterate(vector, ctx);
+	if (ident == NULL || ident->type != CSS_TOKEN_IDENT) {
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
+		flags |= FLAG_INHERIT;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[NONE],
+			&match) == lwc_error_ok && match)) {
+		value = BORDER_STYLE_NONE;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[HIDDEN],
+			&match) == lwc_error_ok && match)) {
+		value = BORDER_STYLE_HIDDEN;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[DOTTED],
+			&match) == lwc_error_ok && match)) {
+		value = BORDER_STYLE_DOTTED;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[DASHED],
+			&match) == lwc_error_ok && match)) {
+		value = BORDER_STYLE_DASHED;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[SOLID],
+			&match) == lwc_error_ok && match)) {
+		value = BORDER_STYLE_SOLID;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[LIBCSS_DOUBLE],
+			&match) == lwc_error_ok && match)) {
+		value = BORDER_STYLE_DOUBLE;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[GROOVE],
+			&match) == lwc_error_ok && match)) {
+		value = BORDER_STYLE_GROOVE;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[RIDGE],
+			&match) == lwc_error_ok && match)) {
+		value = BORDER_STYLE_RIDGE;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[INSET],
+			&match) == lwc_error_ok && match)) {
+		value = BORDER_STYLE_INSET;
+	} else if ((lwc_string_caseless_isequal(
+			ident->idata, c->strings[OUTSET],
+			&match) == lwc_error_ok && match)) {
+		value = BORDER_STYLE_OUTSET;
+	} else {
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	opv = buildOPV(op, flags, value);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
+		return error;
+	}
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+
+	return CSS_OK;
+}
+
+/**
+ * Parse border-{top,right,bottom,left}-width
+ *
+ * \param c	  Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx	  Pointer to vector iteration context
+ * \param op	  Opcode to parse for (encodes side)
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *		   If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error parse_border_side_width(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t op, css_style **result)
+{
+	int orig_ctx = *ctx;
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	css_fixed length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+	bool match;
+
+	/* length | IDENT(thin, medium, thick, inherit) */
+	token= parserutils_vector_peek(vector, *ctx);
+	if (token == NULL) {
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	if (token->type == CSS_TOKEN_IDENT && 
+			(lwc_string_caseless_isequal(
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
+		parserutils_vector_iterate(vector, ctx);
+		flags |= FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			(lwc_string_caseless_isequal(
+			token->idata, c->strings[THIN],
+			&match) == lwc_error_ok && match)) {
+		parserutils_vector_iterate(vector, ctx);
+		value = BORDER_WIDTH_THIN;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			(lwc_string_caseless_isequal(
+			token->idata, c->strings[MEDIUM],
+			&match) == lwc_error_ok && match)) {
+		parserutils_vector_iterate(vector, ctx);
+		value = BORDER_WIDTH_MEDIUM;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			(lwc_string_caseless_isequal(
+			token->idata, c->strings[THICK],
+			&match) == lwc_error_ok && match)) {
+		parserutils_vector_iterate(vector, ctx);
+		value = BORDER_WIDTH_THICK;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
+
+		if (unit == UNIT_PCT || unit & UNIT_ANGLE ||
+				unit & UNIT_TIME || unit & UNIT_FREQ) {
+			*ctx = orig_ctx;
+			return CSS_INVALID;
+		}
+
+		/* Length must be positive */
+		if (length < 0) {
+			*ctx = orig_ctx;
+			return CSS_INVALID;
+		}
+
+		value = BORDER_WIDTH_SET;
+	}
+
+	opv = buildOPV(op, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == BORDER_WIDTH_SET)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
+		return error;
+	}
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == BORDER_WIDTH_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
+	}
+
+	return CSS_OK;
+}
+
+/**
+ * Parse margin-{top,right,bottom,left}
+ *
+ * \param c	  Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx	  Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *		   If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error parse_margin_side(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t op, css_style **result)
+{
+	int orig_ctx = *ctx;
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	css_fixed length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+	bool match;
+
+	/* length | percentage | IDENT(auto, inherit) */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL) {
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			(lwc_string_caseless_isequal(
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			(lwc_string_caseless_isequal(
+			token->idata, c->strings[AUTO],
+			&match) == lwc_error_ok && match)) {
+		parserutils_vector_iterate(vector, ctx);
+		value = MARGIN_AUTO;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
+
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ) {
+			*ctx = orig_ctx;
+			return CSS_INVALID;
+		}
+
+		value = MARGIN_SET;
+	}
+
+	opv = buildOPV(op, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == MARGIN_SET)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
+		return error;
+	}
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == MARGIN_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
+	}
+
+	return CSS_OK;
+}
+
+/**
+ * Parse padding-{top,right,bottom,left}
+ *
+ * \param c	  Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx	  Pointer to vector iteration context
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *	   CSS_NOMEM on memory exhaustion,
+ *	   CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *		   If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error parse_padding_side(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t op, css_style **result)
+{
+	int orig_ctx = *ctx;
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	css_fixed length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+	bool match;
+
+	/* length | percentage | IDENT(inherit) */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL) {
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			(lwc_string_caseless_isequal(
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
+
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ) {
+			*ctx = orig_ctx;
+			return CSS_INVALID;
+		}
+
+		/* Negative lengths are invalid */
+		if (length < 0) {
+			*ctx = orig_ctx;
+			return CSS_INVALID;
+		}
+
+		value = PADDING_SET;
+	}
+
+	opv = buildOPV(op, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == PADDING_SET)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
+		return error;
+	}
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == PADDING_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
+	}
+
+	return CSS_OK;
+}
+
+/**
+ * Parse {top,right,bottom,left}
+ *
+ * \param c       Parsing context
+ * \param vector  Vector of tokens to process
+ * \param ctx     Pointer to vector iteration context
+ * \param op      Opcode to parse for
+ * \param result  Pointer to location to receive resulting style
+ * \return CSS_OK on success,
+ *         CSS_NOMEM on memory exhaustion,
+ *         CSS_INVALID if the input is not valid
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ */
+css_error parse_side(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t op, css_style **result)
+{
+	int orig_ctx = *ctx;
+	css_error error;
+	const css_token *token;
+	uint8_t flags = 0;
+	uint16_t value = 0;
+	uint32_t opv;
+	css_fixed length = 0;
+	uint32_t unit = 0;
+	uint32_t required_size;
+	bool match;
+
+	/* length | percentage | IDENT(auto, inherit) */
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL) {
+		*ctx = orig_ctx;
+		return CSS_INVALID;
+	}
+
+	if (token->type == CSS_TOKEN_IDENT &&
+			(lwc_string_caseless_isequal(
+			token->idata, c->strings[INHERIT],
+			&match) == lwc_error_ok && match)) {
+		parserutils_vector_iterate(vector, ctx);
+		flags = FLAG_INHERIT;
+	} else if (token->type == CSS_TOKEN_IDENT &&
+			(lwc_string_caseless_isequal(
+			token->idata, c->strings[AUTO],
+			&match) == lwc_error_ok && match)) {
+		parserutils_vector_iterate(vector, ctx);
+		value = BOTTOM_AUTO;
+	} else {
+		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+				&length, &unit);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
+
+		if (unit & UNIT_ANGLE || unit & UNIT_TIME || unit & UNIT_FREQ) {
+			*ctx = orig_ctx;
+			return CSS_INVALID;
+		}
+
+		value = BOTTOM_SET;
+	}
+
+	opv = buildOPV(op, flags, value);
+
+	required_size = sizeof(opv);
+	if ((flags & FLAG_INHERIT) == false && value == BOTTOM_SET)
+		required_size += sizeof(length) + sizeof(unit);
+
+	/* Allocate result */
+	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
+		return error;
+	}
+
+	/* Copy the bytecode to it */
+	memcpy((*result)->bytecode, &opv, sizeof(opv));
+	if ((flags & FLAG_INHERIT) == false && value == BOTTOM_SET) {
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
+				&length, sizeof(length));
+		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
+				sizeof(length), &unit, sizeof(unit));
+	}
+
+	return CSS_OK;
+}
 
 /**
  * Parse a colour specifier

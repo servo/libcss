@@ -14,7 +14,7 @@
 #include "parse/properties/utils.h"
 
 /**
- * Parse background
+ * Parse list-style
  *
  * \param c	  Parsing context
  * \param vector  Vector of tokens to process
@@ -27,18 +27,16 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_background(css_language *c,
+css_error parse_list_style(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_style **result)
 {
 	int orig_ctx = *ctx;
 	int prev_ctx;
 	const css_token *token;
-	css_style *attachment = NULL;
-	css_style *color = NULL;
 	css_style *image = NULL;
 	css_style *position = NULL;
-	css_style *repeat = NULL;
+	css_style *type = NULL;
 	css_style *ret = NULL;
 	uint32_t required_size;
 	bool match;
@@ -53,7 +51,7 @@ css_error parse_background(css_language *c,
 		uint32_t *bytecode;
 
 		error = css_stylesheet_style_create(c->sheet, 
-				5 * sizeof(uint32_t), &ret);
+				3 * sizeof(uint32_t), &ret);
 		if (error != CSS_OK) {
 			*ctx = orig_ctx;
 			return error;
@@ -61,15 +59,11 @@ css_error parse_background(css_language *c,
 
 		bytecode = (uint32_t *) ret->bytecode;
 
-		*(bytecode++) = buildOPV(CSS_PROP_BACKGROUND_ATTACHMENT, 
+		*(bytecode++) = buildOPV(CSS_PROP_LIST_STYLE_IMAGE, 
 				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_BACKGROUND_COLOR,
+		*(bytecode++) = buildOPV(CSS_PROP_LIST_STYLE_POSITION,
 				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_BACKGROUND_IMAGE,
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_BACKGROUND_POSITION,
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_BACKGROUND_REPEAT,
+		*(bytecode++) = buildOPV(CSS_PROP_LIST_STYLE_TYPE,
 				FLAG_INHERIT, 0);
 
 		parserutils_vector_iterate(vector, ctx);
@@ -88,26 +82,24 @@ css_error parse_background(css_language *c,
 		prev_ctx = *ctx;
 		error = CSS_OK;
 
-		/* Try each property parser in turn, but only if we
-		 * haven't already got a value for this property.
-		 * To achieve this, we end up with a bunch of empty
-		 * if/else statements. Perhaps there's a clearer way 
-		 * of expressing this. */
-		if (attachment == NULL && 
-				(error = parse_background_attachment(c, vector,
-				ctx, &attachment)) == CSS_OK) {
-		} else if (color == NULL && 
-				(error = parse_background_color(c, vector, ctx,
-				&color)) == CSS_OK) {
-		} else if (image == NULL && 
-				(error = parse_background_image(c, vector, ctx,
-				&image)) == CSS_OK) {
-		} else if (position == NULL &&
-				(error = parse_background_position(c, vector, 
+		/* Ensure that we're not about to parse another inherit */
+		token = parserutils_vector_peek(vector, *ctx);
+		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
+				(lwc_string_caseless_isequal(
+				token->idata, c->strings[INHERIT],
+				&match) == lwc_error_ok && match)) {
+			error = CSS_INVALID;
+			goto cleanup;
+		}
+
+		if (type == NULL && (error = parse_list_style_type(c, vector,
+				ctx, &type)) == CSS_OK) {
+		} else if (position == NULL && 
+				(error = parse_list_style_position(c, vector, 
 				ctx, &position)) == CSS_OK) {
-		} else if (repeat == NULL &&
-				(error = parse_background_repeat(c, vector, 
-				ctx, &repeat)) == CSS_OK) {
+		} else if (image == NULL && 
+				(error = parse_list_style_image(c, vector, ctx,
+				&image)) == CSS_OK) {
 		}
 
 		if (error == CSS_OK) {
@@ -124,16 +116,6 @@ css_error parse_background(css_language *c,
 	 * defaulting the unspecified properties to their initial values */
 	required_size = 0;
 
-	if (attachment)
-		required_size += attachment->length;
-	else
-		required_size += sizeof(uint32_t);
-
-	if (color)
-		required_size += color->length;
-	else
-		required_size += sizeof(uint32_t);
-
 	if (image)
 		required_size += image->length;
 	else
@@ -142,10 +124,10 @@ css_error parse_background(css_language *c,
 	if (position)
 		required_size += position->length;
 	else
-		required_size += sizeof(uint32_t); /* Use top left, not 0% 0% */
+		required_size += sizeof(uint32_t);
 
-	if (repeat)
-		required_size += repeat->length;
+	if (type)
+		required_size += type->length;
 	else
 		required_size += sizeof(uint32_t);
 
@@ -156,30 +138,6 @@ css_error parse_background(css_language *c,
 
 	required_size = 0;
 
-	if (attachment) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				attachment->bytecode, attachment->length);
-		required_size += attachment->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_BACKGROUND_ATTACHMENT,
-				0, BACKGROUND_ATTACHMENT_SCROLL);
-		required_size += sizeof(uint32_t);
-	}
-
-	if (color) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				color->bytecode, color->length);
-		required_size += color->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_BACKGROUND_COLOR,
-				0, BACKGROUND_COLOR_TRANSPARENT);
-		required_size += sizeof(uint32_t);
-	}
-
 	if (image) {
 		memcpy(((uint8_t *) ret->bytecode) + required_size,
 				image->bytecode, image->length);
@@ -187,8 +145,8 @@ css_error parse_background(css_language *c,
 	} else {
 		void *bc = ((uint8_t *) ret->bytecode) + required_size;
 
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_BACKGROUND_IMAGE,
-				0, BACKGROUND_IMAGE_NONE);
+		*((uint32_t *) bc) = buildOPV(CSS_PROP_LIST_STYLE_IMAGE,
+				0, LIST_STYLE_IMAGE_NONE);
 		required_size += sizeof(uint32_t);
 	}
 
@@ -199,21 +157,20 @@ css_error parse_background(css_language *c,
 	} else {
 		void *bc = ((uint8_t *) ret->bytecode) + required_size;
 
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_BACKGROUND_POSITION,
-				0, BACKGROUND_POSITION_HORZ_LEFT |
-				BACKGROUND_POSITION_VERT_TOP);
+		*((uint32_t *) bc) = buildOPV(CSS_PROP_LIST_STYLE_POSITION,
+				0, LIST_STYLE_POSITION_OUTSIDE);
 		required_size += sizeof(uint32_t);
 	}
 
-	if (repeat) {
+	if (type) {
 		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				repeat->bytecode, repeat->length);
-		required_size += repeat->length;
+				type->bytecode, type->length);
+		required_size += type->length;
 	} else {
 		void *bc = ((uint8_t *) ret->bytecode) + required_size;
 
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_BACKGROUND_REPEAT,
-				0, BACKGROUND_REPEAT_REPEAT);
+		*((uint32_t *) bc) = buildOPV(CSS_PROP_LIST_STYLE_TYPE,
+				0, LIST_STYLE_TYPE_DISC);
 		required_size += sizeof(uint32_t);
 	}
 
@@ -226,16 +183,12 @@ css_error parse_background(css_language *c,
 
 	/* Clean up after ourselves */
 cleanup:
-	if (attachment)
-		css_stylesheet_style_destroy(c->sheet, attachment, error == CSS_OK);
-	if (color)
-		css_stylesheet_style_destroy(c->sheet, color, error == CSS_OK);
 	if (image)
 		css_stylesheet_style_destroy(c->sheet, image, error == CSS_OK);
 	if (position)
 		css_stylesheet_style_destroy(c->sheet, position, error == CSS_OK);
-	if (repeat)
-		css_stylesheet_style_destroy(c->sheet, repeat, error == CSS_OK);
+	if (type)
+		css_stylesheet_style_destroy(c->sheet, type, error == CSS_OK);
 	if (ret)
 		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
 
@@ -244,9 +197,3 @@ cleanup:
 
 	return error;
 }
-
-
-
-
-
-

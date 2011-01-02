@@ -14,7 +14,7 @@
 #include "parse/properties/utils.h"
 
 /**
- * Parse margin shorthand
+ * Parse border-width shorthand
  *
  * \param c	  Parsing context
  * \param vector  Vector of tokens to process
@@ -27,7 +27,7 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_margin(css_language *c,
+css_error parse_border_width(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_style **result)
 {
@@ -61,13 +61,13 @@ css_error parse_margin(css_language *c,
 
 		bytecode = (uint32_t *) ret->bytecode;
 
-		*(bytecode++) = buildOPV(CSS_PROP_MARGIN_TOP,
+		*(bytecode++) = buildOPV(CSS_PROP_BORDER_TOP_WIDTH,
 				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_MARGIN_RIGHT,
+		*(bytecode++) = buildOPV(CSS_PROP_BORDER_RIGHT_WIDTH,
 				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_MARGIN_BOTTOM,
+		*(bytecode++) = buildOPV(CSS_PROP_BORDER_BOTTOM_WIDTH,
 				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_MARGIN_LEFT,
+		*(bytecode++) = buildOPV(CSS_PROP_BORDER_LEFT_WIDTH,
 				FLAG_INHERIT, 0);
 
 		parserutils_vector_iterate(vector, ctx);
@@ -97,20 +97,24 @@ css_error parse_margin(css_language *c,
 		}
 
 		if (top == NULL &&
-				(error = parse_margin_side(c, vector, ctx, 
-				CSS_PROP_MARGIN_TOP, &top)) == CSS_OK) {
+				(error = parse_border_side_width(c, vector, 
+				ctx, CSS_PROP_BORDER_TOP_WIDTH, &top)) == 
+				CSS_OK) {
 			num_sides = 1;
 		} else if (right == NULL &&
-				(error = parse_margin_side(c, vector, ctx, 
-				CSS_PROP_MARGIN_RIGHT, &right)) == CSS_OK) {
+				(error = parse_border_side_width(c, vector, 
+				ctx, CSS_PROP_BORDER_RIGHT_WIDTH, &right)) == 
+				CSS_OK) {
 			num_sides = 2;
 		} else if (bottom == NULL &&
-				(error = parse_margin_side(c, vector, ctx, 
-				CSS_PROP_MARGIN_BOTTOM, &bottom)) == CSS_OK) {
+				(error = parse_border_side_width(c, vector, 
+				ctx, CSS_PROP_BORDER_BOTTOM_WIDTH, &bottom)) == 
+				CSS_OK) {
 			num_sides = 3;
 		} else if (left == NULL &&
-				(error = parse_margin_side(c, vector, ctx, 
-				CSS_PROP_MARGIN_LEFT, &left)) == CSS_OK) {
+				(error = parse_border_side_width(c, vector, 
+				ctx, CSS_PROP_BORDER_LEFT_WIDTH, &left)) == 
+				CSS_OK) {
 			num_sides = 4;
 		}
 
@@ -157,17 +161,17 @@ css_error parse_margin(css_language *c,
 				top->bytecode, top->length);
 		required_size += top->length;
 
-		*opv = buildOPV(CSS_PROP_MARGIN_RIGHT, flags, value);
+		*opv = buildOPV(CSS_PROP_BORDER_RIGHT_WIDTH, flags, value);
 		memcpy(((uint8_t *) ret->bytecode) + required_size,
 				top->bytecode, top->length);
 		required_size += top->length;
 
-		*opv = buildOPV(CSS_PROP_MARGIN_BOTTOM, flags, value);
+		*opv = buildOPV(CSS_PROP_BORDER_BOTTOM_WIDTH, flags, value);
 		memcpy(((uint8_t *) ret->bytecode) + required_size,
 				top->bytecode, top->length);
 		required_size += top->length;
 
-		*opv = buildOPV(CSS_PROP_MARGIN_LEFT, flags, value);
+		*opv = buildOPV(CSS_PROP_BORDER_LEFT_WIDTH, flags, value);
 		memcpy(((uint8_t *) ret->bytecode) + required_size,
 				top->bytecode, top->length);
 		required_size += top->length;
@@ -187,12 +191,12 @@ css_error parse_margin(css_language *c,
 				right->bytecode, right->length);
 		required_size += right->length;
 
-		*vopv = buildOPV(CSS_PROP_MARGIN_BOTTOM, vflags, vvalue);
+		*vopv = buildOPV(CSS_PROP_BORDER_BOTTOM_WIDTH, vflags, vvalue);
 		memcpy(((uint8_t *) ret->bytecode) + required_size,
 				top->bytecode, top->length);
 		required_size += top->length;
 
-		*hopv = buildOPV(CSS_PROP_MARGIN_LEFT, hflags, hvalue);
+		*hopv = buildOPV(CSS_PROP_BORDER_LEFT_WIDTH, hflags, hvalue);
 		memcpy(((uint8_t *) ret->bytecode) + required_size,
 				right->bytecode, right->length);
 		required_size += right->length;
@@ -213,7 +217,7 @@ css_error parse_margin(css_language *c,
 				bottom->bytecode, bottom->length);
 		required_size += bottom->length;
 
-		*opv = buildOPV(CSS_PROP_MARGIN_LEFT, flags, value);
+		*opv = buildOPV(CSS_PROP_BORDER_LEFT_WIDTH, flags, value);
 		memcpy(((uint8_t *) ret->bytecode) + required_size,
 				right->bytecode, right->length);
 		required_size += right->length;
@@ -260,9 +264,3 @@ cleanup:
 
 	return error;
 }
-
-
-
-
-
-

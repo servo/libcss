@@ -10,6 +10,47 @@
 
 #include "parse/language.h"
 
+css_error parse_pause_common(css_language *c, 
+		const parserutils_vector *vector, int *ctx, 
+			     uint16_t op, css_style **result);
+
+css_error parse_list_style_type_value(css_language *c,
+		const css_token *token, uint16_t *value);
+css_error parse_content_list(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t *value, uint8_t *buffer, uint32_t *buflen);
+css_error parse_counter_common(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t op, css_style **result);
+
+
+enum { BORDER_SIDE_TOP = 0, BORDER_SIDE_RIGHT = 1, BORDER_SIDE_BOTTOM = 2, BORDER_SIDE_LEFT = 3 };
+
+css_error parse_border_side(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint32_t side, css_style **result);
+css_error parse_border_side_color(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t op, css_style **result);
+css_error parse_border_side_style(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t op, css_style **result);
+css_error parse_border_side_width(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t op, css_style **result);
+
+css_error parse_margin_side(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t op, css_style **result);
+
+css_error parse_side(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t op, css_style **result);
+
+css_error parse_padding_side(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		uint16_t op, css_style **result);
+
 css_error parse_colour_specifier(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint32_t *result);
