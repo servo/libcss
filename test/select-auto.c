@@ -651,7 +651,7 @@ void parse_expected(line_ctx *ctx, const char *data, size_t len)
 void run_test(line_ctx *ctx, const char *exp, size_t explen)
 {
 	css_select_ctx *select;
-	css_computed_style *computed;
+	css_select_results *results;
 	uint32_t i;
 	char *buf;
 	size_t buflen;
@@ -673,15 +673,14 @@ void run_test(line_ctx *ctx, const char *exp, size_t explen)
 				ctx->sheets[i].media) == CSS_OK);
 	}
 
-	assert(css_computed_style_create(myrealloc, NULL, &computed) == CSS_OK);
-
 	testnum++;
 
-	assert(css_select_style(select, ctx->target, ctx->pseudo_element,
-			ctx->media, NULL, computed, &select_handler, ctx) == 
-			CSS_OK);
+	assert(css_select_style(select, ctx->target, ctx->media, NULL, 
+			&select_handler, ctx, &results) == CSS_OK);
 
-	dump_computed_style(computed, buf, &buflen);
+	assert(results->styles[ctx->pseudo_element] != NULL);
+
+	dump_computed_style(results->styles[ctx->pseudo_element], buf, &buflen);
 
 	if (8192 - buflen != explen || memcmp(buf, exp, explen) != 0) {
 		printf("Expected (%u):\n%.*s\n", 
@@ -692,7 +691,7 @@ void run_test(line_ctx *ctx, const char *exp, size_t explen)
 	}
 
 	/* Clean up */
-	css_computed_style_destroy(computed);
+	css_select_results_destroy(results);
 	css_select_ctx_destroy(select);
 
 	destroy_tree(ctx->tree);

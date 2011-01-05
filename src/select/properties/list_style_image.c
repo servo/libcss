@@ -35,7 +35,7 @@ css_error set_list_style_image_from_hint(const css_hint *hint,
 
 css_error initial_list_style_image(css_select_state *state)
 {
-	return set_list_style_image(state->result, 
+	return set_list_style_image(state->computed, 
 			CSS_LIST_STYLE_IMAGE_NONE, NULL);
 }
 

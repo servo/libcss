@@ -34,7 +34,7 @@ css_error cascade_list_style_position(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_list_style_position(state->result, value);
+		return set_list_style_position(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -48,7 +48,7 @@ css_error set_list_style_position_from_hint(const css_hint *hint,
 
 css_error initial_list_style_position(css_select_state *state)
 {
-	return set_list_style_position(state->result, 
+	return set_list_style_position(state->computed, 
 			CSS_LIST_STYLE_POSITION_OUTSIDE);
 }
 

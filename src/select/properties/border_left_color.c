@@ -29,7 +29,7 @@ css_error set_border_left_color_from_hint(const css_hint *hint,
 
 css_error initial_border_left_color(css_select_state *state)
 {
-	return set_border_left_color(state->result, 
+	return set_border_left_color(state->computed, 
 			CSS_BORDER_COLOR_INITIAL, 0);
 }
 

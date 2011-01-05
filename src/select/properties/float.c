@@ -37,7 +37,7 @@ css_error cascade_float(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_float(state->result, value);
+		return set_float(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -51,7 +51,7 @@ css_error set_float_from_hint(const css_hint *hint,
 
 css_error initial_float(css_select_state *state)
 {
-	return set_float(state->result, CSS_FLOAT_NONE);
+	return set_float(state->computed, CSS_FLOAT_NONE);
 }
 
 css_error compose_float(const css_computed_style *parent,

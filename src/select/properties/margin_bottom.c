@@ -29,7 +29,7 @@ css_error set_margin_bottom_from_hint(const css_hint *hint,
 
 css_error initial_margin_bottom(css_select_state *state)
 {
-	return set_margin_bottom(state->result, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
+	return set_margin_bottom(state->computed, CSS_MARGIN_SET, 0, CSS_UNIT_PX);
 }
 
 css_error compose_margin_bottom(const css_computed_style *parent,

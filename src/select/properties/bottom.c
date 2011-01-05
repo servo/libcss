@@ -29,7 +29,7 @@ css_error set_bottom_from_hint(const css_hint *hint,
 
 css_error initial_bottom(css_select_state *state)
 {
-	return set_bottom(state->result, CSS_BOTTOM_AUTO, 0, CSS_UNIT_PX);
+	return set_bottom(state->computed, CSS_BOTTOM_AUTO, 0, CSS_UNIT_PX);
 }
 
 css_error compose_bottom(const css_computed_style *parent,

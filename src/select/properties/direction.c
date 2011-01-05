@@ -34,7 +34,7 @@ css_error cascade_direction(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_direction(state->result, value);
+		return set_direction(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -48,7 +48,7 @@ css_error set_direction_from_hint(const css_hint *hint,
 
 css_error initial_direction(css_select_state *state)
 {
-	return set_direction(state->result, CSS_DIRECTION_LTR);
+	return set_direction(state->computed, CSS_DIRECTION_LTR);
 }
 
 css_error compose_direction(const css_computed_style *parent,

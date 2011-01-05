@@ -28,7 +28,7 @@ css_error set_border_bottom_style_from_hint(const css_hint *hint,
 
 css_error initial_border_bottom_style(css_select_state *state)
 {
-	return set_border_bottom_style(state->result, CSS_BORDER_STYLE_NONE);
+	return set_border_bottom_style(state->computed, CSS_BORDER_STYLE_NONE);
 }
 
 css_error compose_border_bottom_style(const css_computed_style *parent,

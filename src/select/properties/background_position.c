@@ -74,7 +74,7 @@ css_error cascade_background_position(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_background_position(state->result, value,
+		return set_background_position(state->computed, value,
 				hlength, hunit, vlength, vunit);
 	}
 
@@ -91,7 +91,7 @@ css_error set_background_position_from_hint(const css_hint *hint,
 
 css_error initial_background_position(css_select_state *state)
 {
-	return set_background_position(state->result, 
+	return set_background_position(state->computed, 
 			CSS_BACKGROUND_POSITION_SET, 
 			0, CSS_UNIT_PCT, 0, CSS_UNIT_PCT);
 }

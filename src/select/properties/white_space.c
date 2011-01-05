@@ -43,7 +43,7 @@ css_error cascade_white_space(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_white_space(state->result, value);
+		return set_white_space(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -57,7 +57,7 @@ css_error set_white_space_from_hint(const css_hint *hint,
 
 css_error initial_white_space(css_select_state *state)
 {
-	return set_white_space(state->result, CSS_WHITE_SPACE_NORMAL);
+	return set_white_space(state->computed, CSS_WHITE_SPACE_NORMAL);
 }
 
 css_error compose_white_space(const css_computed_style *parent,	

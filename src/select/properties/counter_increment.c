@@ -44,7 +44,7 @@ css_error set_counter_increment_from_hint(const css_hint *hint,
 
 css_error initial_counter_increment(css_select_state *state)
 {
-	return set_counter_increment(state->result, 
+	return set_counter_increment(state->computed, 
 			CSS_COUNTER_INCREMENT_NONE, NULL);
 }
 

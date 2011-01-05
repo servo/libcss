@@ -29,7 +29,7 @@ css_error set_word_spacing_from_hint(const css_hint *hint,
 
 css_error initial_word_spacing(css_select_state *state)
 {
-	return set_word_spacing(state->result, CSS_WORD_SPACING_NORMAL, 
+	return set_word_spacing(state->computed, CSS_WORD_SPACING_NORMAL, 
 			0, CSS_UNIT_PX);
 }
 

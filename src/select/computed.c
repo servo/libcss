@@ -239,9 +239,9 @@ css_error css_computed_style_initialise(css_computed_style *style,
 		return CSS_BADPARM;
 
 	state.node = NULL;
-	state.pseudo_element = CSS_PSEUDO_ELEMENT_NONE;
 	state.media = CSS_MEDIA_ALL;
-	state.result = style;
+	state.results = NULL;
+	state.computed = style;
 	state.handler = handler;
 	state.pw = pw;
 

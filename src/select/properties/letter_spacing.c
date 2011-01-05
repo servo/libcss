@@ -29,7 +29,7 @@ css_error set_letter_spacing_from_hint(const css_hint *hint,
 
 css_error initial_letter_spacing(css_select_state *state)
 {
-	return set_letter_spacing(state->result, CSS_LETTER_SPACING_NORMAL, 
+	return set_letter_spacing(state->computed, CSS_LETTER_SPACING_NORMAL, 
 			0, CSS_UNIT_PX);
 }
 

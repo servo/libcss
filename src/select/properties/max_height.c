@@ -29,7 +29,7 @@ css_error set_max_height_from_hint(const css_hint *hint,
 
 css_error initial_max_height(css_select_state *state)
 {
-	return set_max_height(state->result, CSS_MAX_HEIGHT_NONE, 
+	return set_max_height(state->computed, CSS_MAX_HEIGHT_NONE, 
 			0, CSS_UNIT_PX);
 }
 

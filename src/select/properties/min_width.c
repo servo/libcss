@@ -29,7 +29,7 @@ css_error set_min_width_from_hint(const css_hint *hint,
 
 css_error initial_min_width(css_select_state *state)
 {
-	return set_min_width(state->result, CSS_MIN_WIDTH_SET, 0, CSS_UNIT_PX);
+	return set_min_width(state->computed, CSS_MIN_WIDTH_SET, 0, CSS_UNIT_PX);
 }
 
 css_error compose_min_width(const css_computed_style *parent,

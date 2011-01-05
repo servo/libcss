@@ -34,7 +34,7 @@ css_error cascade_border_collapse(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_border_collapse(state->result, value);
+		return set_border_collapse(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -48,7 +48,7 @@ css_error set_border_collapse_from_hint(const css_hint *hint,
 
 css_error initial_border_collapse(css_select_state *state)
 {
-	return set_border_collapse(state->result, CSS_BORDER_COLLAPSE_SEPARATE);
+	return set_border_collapse(state->computed, CSS_BORDER_COLLAPSE_SEPARATE);
 }
 
 css_error compose_border_collapse(const css_computed_style *parent,

@@ -28,7 +28,7 @@ css_error cascade_color(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_color(state->result, value, color);
+		return set_color(state->computed, value, color);
 	}
 
 	return CSS_OK;
@@ -50,7 +50,7 @@ css_error initial_color(css_select_state *state)
 	if (error != CSS_OK)
 		return error;
 
-	return set_color_from_hint(&hint, state->result);
+	return set_color_from_hint(&hint, state->computed);
 }
 
 css_error compose_color(const css_computed_style *parent,

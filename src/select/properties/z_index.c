@@ -36,7 +36,7 @@ css_error cascade_z_index(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_z_index(state->result, value, index);
+		return set_z_index(state->computed, value, index);
 	}
 
 	return CSS_OK;
@@ -50,7 +50,7 @@ css_error set_z_index_from_hint(const css_hint *hint,
 
 css_error initial_z_index(css_select_state *state)
 {
-	return set_z_index(state->result, CSS_Z_INDEX_AUTO, 0);
+	return set_z_index(state->computed, CSS_Z_INDEX_AUTO, 0);
 }
 
 css_error compose_z_index(const css_computed_style *parent,

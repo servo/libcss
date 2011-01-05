@@ -35,7 +35,7 @@ css_error cascade_outline_color(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_outline_color(state->result, value, color);
+		return set_outline_color(state->computed, value, color);
 	}
 
 	return CSS_OK;
@@ -49,7 +49,7 @@ css_error set_outline_color_from_hint(const css_hint *hint,
 
 css_error initial_outline_color(css_select_state *state)
 {
-	return set_outline_color(state->result, CSS_OUTLINE_COLOR_INVERT, 0);
+	return set_outline_color(state->computed, CSS_OUTLINE_COLOR_INVERT, 0);
 }
 
 css_error compose_outline_color(const css_computed_style *parent,

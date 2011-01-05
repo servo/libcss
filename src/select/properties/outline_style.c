@@ -28,7 +28,7 @@ css_error set_outline_style_from_hint(const css_hint *hint,
 
 css_error initial_outline_style(css_select_state *state)
 {
-	return set_outline_style(state->result, CSS_OUTLINE_STYLE_NONE);
+	return set_outline_style(state->computed, CSS_OUTLINE_STYLE_NONE);
 }
 
 css_error compose_outline_style(const css_computed_style *parent,

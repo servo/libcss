@@ -40,7 +40,7 @@ css_error cascade_background_repeat(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_background_repeat(state->result, value);
+		return set_background_repeat(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -54,7 +54,7 @@ css_error set_background_repeat_from_hint(const css_hint *hint,
 
 css_error initial_background_repeat(css_select_state *state)
 {
-	return set_background_repeat(state->result, 
+	return set_background_repeat(state->computed, 
 			CSS_BACKGROUND_REPEAT_REPEAT);
 }
 

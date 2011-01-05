@@ -36,13 +36,13 @@ css_error cascade_quotes(uint32_t opv, css_style *style,
 			close = *((lwc_string **) style->bytecode);
 			advance_bytecode(style, sizeof(lwc_string *));
 
-			temp = state->result->alloc(quotes, 
+			temp = state->computed->alloc(quotes, 
 					(n_quotes + 2) * sizeof(lwc_string *), 
-					state->result->pw);
+					state->computed->pw);
 			if (temp == NULL) {
 				if (quotes != NULL) {
-					state->result->alloc(quotes, 0,
-							state->result->pw);
+					state->computed->alloc(quotes, 0,
+							state->computed->pw);
 				}
 				return CSS_NOMEM;
 			}
@@ -61,11 +61,11 @@ css_error cascade_quotes(uint32_t opv, css_style *style,
 	if (n_quotes > 0) {
 		lwc_string **temp;
 
-		temp = state->result->alloc(quotes, 
+		temp = state->computed->alloc(quotes, 
 				(n_quotes + 1) * sizeof(lwc_string *), 
-				state->result->pw);
+				state->computed->pw);
 		if (temp == NULL) {
-			state->result->alloc(quotes, 0, state->result->pw);
+			state->computed->alloc(quotes, 0, state->computed->pw);
 			return CSS_NOMEM;
 		}
 
@@ -78,14 +78,14 @@ css_error cascade_quotes(uint32_t opv, css_style *style,
 			isInherit(opv))) {
 		css_error error;
 
-		error = set_quotes(state->result, value, quotes);
+		error = set_quotes(state->computed, value, quotes);
 		if (error != CSS_OK && quotes != NULL)
-			state->result->alloc(quotes, 0, state->result->pw);
+			state->computed->alloc(quotes, 0, state->computed->pw);
 
 		return error;
 	} else {
 		if (quotes != NULL)
-			state->result->alloc(quotes, 0, state->result->pw);
+			state->computed->alloc(quotes, 0, state->computed->pw);
 	}
 
 	return CSS_OK;
@@ -120,7 +120,7 @@ css_error initial_quotes(css_select_state *state)
 	if (error != CSS_OK)
 		return error;
 
-	return set_quotes_from_hint(&hint, state->result);
+	return set_quotes_from_hint(&hint, state->computed);
 }
 
 css_error compose_quotes(const css_computed_style *parent,

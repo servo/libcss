@@ -28,7 +28,7 @@ css_error set_background_color_from_hint(const css_hint *hint,
 
 css_error initial_background_color(css_select_state *state)
 {
-	return set_background_color(state->result, 
+	return set_background_color(state->computed, 
 			CSS_BACKGROUND_COLOR_TRANSPARENT, 0);
 }
 

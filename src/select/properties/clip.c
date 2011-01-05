@@ -71,7 +71,7 @@ css_error cascade_clip(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_clip(state->result, value, &rect);
+		return set_clip(state->computed, value, &rect);
 	}
 
 	return CSS_OK;
@@ -89,7 +89,7 @@ css_error initial_clip(css_select_state *state)
 			CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX,
 			false, false, false, false };
 
-	return set_clip(state->result, CSS_CLIP_AUTO, &rect);
+	return set_clip(state->computed, CSS_CLIP_AUTO, &rect);
 }
 
 css_error compose_clip(const css_computed_style *parent,

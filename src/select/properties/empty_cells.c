@@ -34,7 +34,7 @@ css_error cascade_empty_cells(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_empty_cells(state->result, value);
+		return set_empty_cells(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -48,7 +48,7 @@ css_error set_empty_cells_from_hint(const css_hint *hint,
 
 css_error initial_empty_cells(css_select_state *state)
 {
-	return set_empty_cells(state->result, CSS_EMPTY_CELLS_SHOW);
+	return set_empty_cells(state->computed, CSS_EMPTY_CELLS_SHOW);
 }
 
 css_error compose_empty_cells(const css_computed_style *parent,

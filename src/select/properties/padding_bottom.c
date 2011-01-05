@@ -29,7 +29,7 @@ css_error set_padding_bottom_from_hint(const css_hint *hint,
 
 css_error initial_padding_bottom(css_select_state *state)
 {
-	return set_padding_bottom(state->result, CSS_PADDING_SET, 
+	return set_padding_bottom(state->computed, CSS_PADDING_SET, 
 			0, CSS_UNIT_PX);
 }
 

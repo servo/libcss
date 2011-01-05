@@ -67,7 +67,7 @@ css_error cascade_font_weight(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_font_weight(state->result, value);
+		return set_font_weight(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -81,7 +81,7 @@ css_error set_font_weight_from_hint(const css_hint *hint,
 
 css_error initial_font_weight(css_select_state *state)
 {
-	return set_font_weight(state->result, CSS_FONT_WEIGHT_NORMAL);
+	return set_font_weight(state->computed, CSS_FONT_WEIGHT_NORMAL);
 }
 
 css_error compose_font_weight(const css_computed_style *parent,

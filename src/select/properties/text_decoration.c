@@ -42,7 +42,7 @@ css_error cascade_text_decoration(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_text_decoration(state->result, value);
+		return set_text_decoration(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -56,7 +56,7 @@ css_error set_text_decoration_from_hint(const css_hint *hint,
 
 css_error initial_text_decoration(css_select_state *state)
 {
-	return set_text_decoration(state->result, CSS_TEXT_DECORATION_NONE);
+	return set_text_decoration(state->computed, CSS_TEXT_DECORATION_NONE);
 }
 
 css_error compose_text_decoration(const css_computed_style *parent,	

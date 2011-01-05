@@ -54,13 +54,13 @@ css_error cascade_voice_family(uint32_t opv, css_style *style,
 			 * first generic-family are ignored. */
 			/** \todo Do this at bytecode generation time? */
 			if (value == 0 && voice != NULL) {
-				temp = state->result->alloc(voices, 
+				temp = state->computed->alloc(voices, 
 					(n_voices + 1) * sizeof(lwc_string *), 
-					state->result->pw);
+					state->computed->pw);
 				if (temp == NULL) {
 					if (voices != NULL) {
-						state->result->alloc(voices, 0,
-							state->result->pw);
+						state->computed->alloc(voices, 0,
+							state->computed->pw);
 					}
 					return CSS_NOMEM;
 				}
@@ -81,11 +81,11 @@ css_error cascade_voice_family(uint32_t opv, css_style *style,
 	if (n_voices > 0) {
 		lwc_string **temp;
 
-		temp = state->result->alloc(voices, 
+		temp = state->computed->alloc(voices, 
 				(n_voices + 1) * sizeof(lwc_string *), 
-				state->result->pw);
+				state->computed->pw);
 		if (temp == NULL) {
-			state->result->alloc(voices, 0, state->result->pw);
+			state->computed->alloc(voices, 0, state->computed->pw);
 			return CSS_NOMEM;
 		}
 
@@ -98,10 +98,10 @@ css_error cascade_voice_family(uint32_t opv, css_style *style,
 			isInherit(opv))) {
 		/** \todo voice-family */
 		if (n_voices > 0)
-			state->result->alloc(voices, 0, state->result->pw);
+			state->computed->alloc(voices, 0, state->computed->pw);
 	} else {
 		if (n_voices > 0)
-			state->result->alloc(voices, 0, state->result->pw);
+			state->computed->alloc(voices, 0, state->computed->pw);
 	}
 
 	return CSS_OK;

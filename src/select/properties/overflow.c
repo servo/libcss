@@ -40,7 +40,7 @@ css_error cascade_overflow(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_overflow(state->result, value);
+		return set_overflow(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -54,7 +54,7 @@ css_error set_overflow_from_hint(const css_hint *hint,
 
 css_error initial_overflow(css_select_state *state)
 {
-	return set_overflow(state->result, CSS_OVERFLOW_VISIBLE);
+	return set_overflow(state->computed, CSS_OVERFLOW_VISIBLE);
 }
 
 css_error compose_overflow(const css_computed_style *parent,

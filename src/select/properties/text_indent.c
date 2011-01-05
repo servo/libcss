@@ -29,7 +29,7 @@ css_error set_text_indent_from_hint(const css_hint *hint,
 
 css_error initial_text_indent(css_select_state *state)
 {
-	return set_text_indent(state->result, CSS_TEXT_INDENT_SET, 
+	return set_text_indent(state->computed, CSS_TEXT_INDENT_SET, 
 			0, CSS_UNIT_PX);
 }
 

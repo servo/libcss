@@ -41,7 +41,7 @@ css_error cascade_border_spacing(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_border_spacing(state->result, value,
+		return set_border_spacing(state->computed, value,
 				hlength, hunit, vlength, vunit);
 	}
 
@@ -58,7 +58,7 @@ css_error set_border_spacing_from_hint(const css_hint *hint,
 
 css_error initial_border_spacing(css_select_state *state)
 {
-	return set_border_spacing(state->result, CSS_BORDER_SPACING_SET,
+	return set_border_spacing(state->computed, CSS_BORDER_SPACING_SET,
 			0, CSS_UNIT_PX, 0, CSS_UNIT_PX);
 }
 

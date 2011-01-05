@@ -28,7 +28,7 @@ css_error set_border_top_color_from_hint(const css_hint *hint,
 
 css_error initial_border_top_color(css_select_state *state)
 {
-	return set_border_top_color(state->result, CSS_BORDER_COLOR_INITIAL, 0);
+	return set_border_top_color(state->computed, CSS_BORDER_COLOR_INITIAL, 0);
 }
 
 css_error compose_border_top_color(const css_computed_style *parent,

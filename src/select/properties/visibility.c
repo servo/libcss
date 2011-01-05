@@ -37,7 +37,7 @@ css_error cascade_visibility(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_visibility(state->result, value);
+		return set_visibility(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -51,7 +51,7 @@ css_error set_visibility_from_hint(const css_hint *hint,
 
 css_error initial_visibility(css_select_state *state)
 {
-	return set_visibility(state->result, CSS_VISIBILITY_VISIBLE);
+	return set_visibility(state->computed, CSS_VISIBILITY_VISIBLE);
 }
 
 css_error compose_visibility(const css_computed_style *parent,	

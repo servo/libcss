@@ -35,14 +35,14 @@ css_error cascade_content(uint32_t opv, css_style *style,
 				lwc_string *he = *((lwc_string **) style->bytecode);
 				css_computed_content_item *temp;
 				
-				temp = state->result->alloc(content,
+				temp = state->computed->alloc(content,
 						(n_contents + 1) *
 						sizeof(css_computed_content_item),
-						state->result->pw);
+						state->computed->pw);
 				if (temp == NULL) {
 					if (content != NULL) {
-						state->result->alloc(content,
-							0, state->result->pw);
+						state->computed->alloc(content,
+							0, state->computed->pw);
 					}
 					return CSS_NOMEM;
 				}
@@ -126,11 +126,11 @@ css_error cascade_content(uint32_t opv, css_style *style,
 	if (n_contents > 0) {
 		css_computed_content_item *temp;
 
-		temp = state->result->alloc(content,
+		temp = state->computed->alloc(content,
 				(n_contents + 1) * sizeof(css_computed_content_item),
-				state->result->pw);
+				state->computed->pw);
 		if (temp == NULL) {
-			state->result->alloc(content, 0, state->result->pw);
+			state->computed->alloc(content, 0, state->computed->pw);
 			return CSS_NOMEM;
 		}
 
@@ -143,13 +143,13 @@ css_error cascade_content(uint32_t opv, css_style *style,
 			isInherit(opv))) {
 		css_error error;
 
-		error = set_content(state->result, value, content);
+		error = set_content(state->computed, value, content);
 		if (error != CSS_OK && content != NULL)
-			state->result->alloc(content, 0, state->result->pw);
+			state->computed->alloc(content, 0, state->computed->pw);
 
 		return error;
 	} else if (content != NULL) {
-		state->result->alloc(content, 0, state->result->pw);
+		state->computed->alloc(content, 0, state->computed->pw);
 	}
 
 	return CSS_OK;
@@ -196,7 +196,7 @@ css_error set_content_from_hint(const css_hint *hint,
 
 css_error initial_content(css_select_state *state)
 {
-	return set_content(state->result, CSS_CONTENT_NORMAL, NULL);
+	return set_content(state->computed, CSS_CONTENT_NORMAL, NULL);
 }
 
 css_error compose_content(const css_computed_style *parent,

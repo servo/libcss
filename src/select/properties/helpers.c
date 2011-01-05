@@ -107,7 +107,7 @@ css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return fun(state->result, value, color);
+		return fun(state->computed, value, color);
 	}
 
 	return CSS_OK;
@@ -137,7 +137,7 @@ css_error cascade_uri_none(uint32_t opv, css_style *style,
 	/** \todo lose fun != NULL once all properties have set routines */
 	if (fun != NULL && outranks_existing(getOpcode(opv), 
 			isImportant(opv), state, isInherit(opv))) {
-		return fun(state->result, value, uri);
+		return fun(state->computed, value, uri);
 	}
 
 	return CSS_OK;
@@ -188,7 +188,7 @@ css_error cascade_border_style(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return fun(state->result, value);
+		return fun(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -228,7 +228,7 @@ css_error cascade_border_width(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return fun(state->result, value, length, unit);
+		return fun(state->computed, value, length, unit);
 	}
 
 	return CSS_OK;
@@ -262,7 +262,7 @@ css_error cascade_length_auto(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return fun(state->result, value, length, unit);
+		return fun(state->computed, value, length, unit);
 	}
 
 	return CSS_OK;
@@ -296,7 +296,7 @@ css_error cascade_length_normal(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return fun(state->result, value, length, unit);
+		return fun(state->computed, value, length, unit);
 	}
 
 	return CSS_OK;
@@ -330,7 +330,7 @@ css_error cascade_length_none(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return fun(state->result, value, length, unit);
+		return fun(state->computed, value, length, unit);
 	}
 
 	return CSS_OK;
@@ -358,7 +358,7 @@ css_error cascade_length(uint32_t opv, css_style *style,
 	/** \todo lose fun != NULL once all properties have set routines */
 	if (fun != NULL && outranks_existing(getOpcode(opv), 
 			isImportant(opv), state, isInherit(opv))) {
-		return fun(state->result, value, length, unit);
+		return fun(state->computed, value, length, unit);
 	}
 
 	return CSS_OK;
@@ -382,7 +382,7 @@ css_error cascade_number(uint32_t opv, css_style *style,
 	/** \todo lose fun != NULL once all properties have set routines */
 	if (fun != NULL && outranks_existing(getOpcode(opv), 
 			isImportant(opv), state, isInherit(opv))) {
-		return fun(state->result, value, length);
+		return fun(state->computed, value, length);
 	}
 
 	return CSS_OK;
@@ -411,7 +411,7 @@ css_error cascade_page_break_after_before(uint32_t opv, css_style *style,
 	/** \todo lose fun != NULL */
 	if (fun != NULL && outranks_existing(getOpcode(opv), 
 			isImportant(opv), state, isInherit(opv))) {
-		return fun(state->result, value);
+		return fun(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -444,14 +444,14 @@ css_error cascade_counter_increment_reset(uint32_t opv, css_style *style,
 				val = *((css_fixed *) style->bytecode);
 				advance_bytecode(style, sizeof(val));
 
-				temp = state->result->alloc(counters,
+				temp = state->computed->alloc(counters,
 						(n_counters + 1) * 
 						sizeof(css_computed_counter),
-						state->result->pw);
+						state->computed->pw);
 				if (temp == NULL) {
 					if (counters != NULL) {
-						state->result->alloc(counters, 
-							0, state->result->pw);
+						state->computed->alloc(counters, 
+							0, state->computed->pw);
 					}
 					return CSS_NOMEM;
 				}
@@ -478,11 +478,11 @@ css_error cascade_counter_increment_reset(uint32_t opv, css_style *style,
 	if (n_counters > 0) {
 		css_computed_counter *temp;
 
-		temp = state->result->alloc(counters, 
+		temp = state->computed->alloc(counters, 
 				(n_counters + 1) * sizeof(css_computed_counter),
-				state->result->pw);
+				state->computed->pw);
 		if (temp == NULL) {
-			state->result->alloc(counters, 0, state->result->pw);
+			state->computed->alloc(counters, 0, state->computed->pw);
 			return CSS_NOMEM;
 		}
 
@@ -496,13 +496,13 @@ css_error cascade_counter_increment_reset(uint32_t opv, css_style *style,
 			isInherit(opv))) {
 		css_error error;
 
-		error = fun(state->result, value, counters);
+		error = fun(state->computed, value, counters);
 		if (error != CSS_OK && n_counters > 0)
-			state->result->alloc(counters, 0, state->result->pw);
+			state->computed->alloc(counters, 0, state->computed->pw);
 
 		return error;
 	} else if (n_counters > 0) {
-		state->result->alloc(counters, 0, state->result->pw);
+		state->computed->alloc(counters, 0, state->computed->pw);
 	}
 
 	return CSS_OK;

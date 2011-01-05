@@ -62,13 +62,13 @@ css_error cascade_font_family(uint32_t opv, css_style *style,
 			 * first generic-family are ignored. */
 			/** \todo Do this at bytecode generation time? */
 			if (value == CSS_FONT_FAMILY_INHERIT && font != NULL) {
-				temp = state->result->alloc(fonts, 
+				temp = state->computed->alloc(fonts, 
 					(n_fonts + 1) * sizeof(lwc_string *), 
-					state->result->pw);
+					state->computed->pw);
 				if (temp == NULL) {
 					if (fonts != NULL) {
-						state->result->alloc(fonts, 0,
-							state->result->pw);
+						state->computed->alloc(fonts, 0,
+							state->computed->pw);
 					}
 					return CSS_NOMEM;
 				}
@@ -89,11 +89,11 @@ css_error cascade_font_family(uint32_t opv, css_style *style,
 	if (n_fonts > 0) {
 		lwc_string **temp;
 
-		temp = state->result->alloc(fonts, 
+		temp = state->computed->alloc(fonts, 
 				(n_fonts + 1) * sizeof(lwc_string *), 
-				state->result->pw);
+				state->computed->pw);
 		if (temp == NULL) {
-			state->result->alloc(fonts, 0, state->result->pw);
+			state->computed->alloc(fonts, 0, state->computed->pw);
 			return CSS_NOMEM;
 		}
 
@@ -106,14 +106,14 @@ css_error cascade_font_family(uint32_t opv, css_style *style,
 			isInherit(opv))) {
 		css_error error;
 
-		error = set_font_family(state->result, value, fonts);
+		error = set_font_family(state->computed, value, fonts);
 		if (error != CSS_OK && n_fonts > 0)
-			state->result->alloc(fonts, 0, state->result->pw);
+			state->computed->alloc(fonts, 0, state->computed->pw);
 
 		return error;
 	} else {
 		if (n_fonts > 0)
-			state->result->alloc(fonts, 0, state->result->pw);
+			state->computed->alloc(fonts, 0, state->computed->pw);
 	}
 
 	return CSS_OK;
@@ -148,7 +148,7 @@ css_error initial_font_family(css_select_state *state)
 	if (error != CSS_OK)
 		return error;
 
-	return set_font_family_from_hint(&hint, state->result);
+	return set_font_family_from_hint(&hint, state->computed);
 }
 
 css_error compose_font_family(const css_computed_style *parent,

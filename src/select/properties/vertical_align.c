@@ -62,7 +62,7 @@ css_error cascade_vertical_align(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_vertical_align(state->result, value, length, unit);
+		return set_vertical_align(state->computed, value, length, unit);
 	}
 
 	return CSS_OK;
@@ -77,7 +77,7 @@ css_error set_vertical_align_from_hint(const css_hint *hint,
 
 css_error initial_vertical_align(css_select_state *state)
 {
-	return set_vertical_align(state->result, CSS_VERTICAL_ALIGN_BASELINE,
+	return set_vertical_align(state->computed, CSS_VERTICAL_ALIGN_BASELINE,
 			0, CSS_UNIT_PX);
 }
 

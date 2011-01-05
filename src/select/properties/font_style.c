@@ -37,7 +37,7 @@ css_error cascade_font_style(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_font_style(state->result, value);
+		return set_font_style(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -51,7 +51,7 @@ css_error set_font_style_from_hint(const css_hint *hint,
 
 css_error initial_font_style(css_select_state *state)
 {
-	return set_font_style(state->result, CSS_FONT_STYLE_NORMAL);
+	return set_font_style(state->computed, CSS_FONT_STYLE_NORMAL);
 }
 
 css_error compose_font_style(const css_computed_style *parent,

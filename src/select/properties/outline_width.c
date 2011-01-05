@@ -29,7 +29,7 @@ css_error set_outline_width_from_hint(const css_hint *hint,
 
 css_error initial_outline_width(css_select_state *state)
 {
-	return set_outline_width(state->result, CSS_OUTLINE_WIDTH_MEDIUM,
+	return set_outline_width(state->computed, CSS_OUTLINE_WIDTH_MEDIUM,
 			0, CSS_UNIT_PX);
 }
 

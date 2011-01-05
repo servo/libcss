@@ -34,7 +34,7 @@ css_error cascade_caption_side(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_caption_side(state->result, value);
+		return set_caption_side(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -48,7 +48,7 @@ css_error set_caption_side_from_hint(const css_hint *hint,
 
 css_error initial_caption_side(css_select_state *state)
 {
-	return set_caption_side(state->result, CSS_CAPTION_SIDE_TOP);
+	return set_caption_side(state->computed, CSS_CAPTION_SIDE_TOP);
 }
 
 css_error compose_caption_side(const css_computed_style *parent,

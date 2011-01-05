@@ -29,7 +29,7 @@ css_error set_width_from_hint(const css_hint *hint,
 
 css_error initial_width(css_select_state *state)
 {
-	return set_width(state->result, CSS_WIDTH_AUTO, 0, CSS_UNIT_PX);
+	return set_width(state->computed, CSS_WIDTH_AUTO, 0, CSS_UNIT_PX);
 }
 
 css_error compose_width(const css_computed_style *parent,

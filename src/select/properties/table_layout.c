@@ -34,7 +34,7 @@ css_error cascade_table_layout(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_table_layout(state->result, value);
+		return set_table_layout(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -48,7 +48,7 @@ css_error set_table_layout_from_hint(const css_hint *hint,
 
 css_error initial_table_layout(css_select_state *state)
 {
-	return set_table_layout(state->result, CSS_TABLE_LAYOUT_AUTO);
+	return set_table_layout(state->computed, CSS_TABLE_LAYOUT_AUTO);
 }
 
 css_error compose_table_layout(const css_computed_style *parent,

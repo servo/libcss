@@ -40,7 +40,7 @@ css_error cascade_clear(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_clear(state->result, value);
+		return set_clear(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -54,7 +54,7 @@ css_error set_clear_from_hint(const css_hint *hint,
 
 css_error initial_clear(css_select_state *state)
 {
-	return set_clear(state->result, CSS_CLEAR_NONE);
+	return set_clear(state->computed, CSS_CLEAR_NONE);
 }
 
 css_error compose_clear(const css_computed_style *parent,

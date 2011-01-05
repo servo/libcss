@@ -29,7 +29,7 @@ css_error set_height_from_hint(const css_hint *hint,
 
 css_error initial_height(css_select_state *state)
 {
-	return set_height(state->result, CSS_HEIGHT_AUTO, 0, CSS_UNIT_PX);
+	return set_height(state->computed, CSS_HEIGHT_AUTO, 0, CSS_UNIT_PX);
 }
 
 css_error compose_height(const css_computed_style *parent,

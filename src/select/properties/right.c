@@ -29,7 +29,7 @@ css_error set_right_from_hint(const css_hint *hint,
 
 css_error initial_right(css_select_state *state)
 {
-	return set_right(state->result, CSS_RIGHT_AUTO, 0, CSS_UNIT_PX);
+	return set_right(state->computed, CSS_RIGHT_AUTO, 0, CSS_UNIT_PX);
 }
 
 css_error compose_right(const css_computed_style *parent,

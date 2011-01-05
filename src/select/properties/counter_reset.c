@@ -44,7 +44,7 @@ css_error set_counter_reset_from_hint(const css_hint *hint,
 
 css_error initial_counter_reset(css_select_state *state)
 {
-	return set_counter_reset(state->result, CSS_COUNTER_RESET_NONE, NULL);
+	return set_counter_reset(state->computed, CSS_COUNTER_RESET_NONE, NULL);
 }
 
 css_error compose_counter_reset(const css_computed_style *parent,

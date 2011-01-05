@@ -76,7 +76,7 @@ css_error cascade_display(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_display(state->result, value);
+		return set_display(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -90,7 +90,7 @@ css_error set_display_from_hint(const css_hint *hint,
 
 css_error initial_display(css_select_state *state)
 {
-	return set_display(state->result, CSS_DISPLAY_INLINE);
+	return set_display(state->computed, CSS_DISPLAY_INLINE);
 }
 
 css_error compose_display(const css_computed_style *parent,

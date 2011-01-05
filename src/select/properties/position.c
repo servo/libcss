@@ -40,7 +40,7 @@ css_error cascade_position(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_position(state->result, value);
+		return set_position(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -54,7 +54,7 @@ css_error set_position_from_hint(const css_hint *hint,
 
 css_error initial_position(css_select_state *state)
 {
-	return set_position(state->result, CSS_POSITION_STATIC);
+	return set_position(state->computed, CSS_POSITION_STATIC);
 }
 
 css_error compose_position(const css_computed_style *parent,

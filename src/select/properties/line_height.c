@@ -45,7 +45,7 @@ css_error cascade_line_height(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_line_height(state->result, value, val, unit);
+		return set_line_height(state->computed, value, val, unit);
 	}
 
 	return CSS_OK;
@@ -60,7 +60,7 @@ css_error set_line_height_from_hint(const css_hint *hint,
 
 css_error initial_line_height(css_select_state *state)
 {
-	return set_line_height(state->result, CSS_LINE_HEIGHT_NORMAL, 
+	return set_line_height(state->computed, CSS_LINE_HEIGHT_NORMAL, 
 			0, CSS_UNIT_PX);
 }
 

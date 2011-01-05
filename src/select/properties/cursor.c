@@ -31,13 +31,13 @@ css_error cascade_cursor(uint32_t opv, css_style *style,
 			uri = *((lwc_string **) style->bytecode);
 			advance_bytecode(style, sizeof(uri));
 
-			temp = state->result->alloc(uris, 
+			temp = state->computed->alloc(uris, 
 					(n_uris + 1) * sizeof(lwc_string *), 
-					state->result->pw);
+					state->computed->pw);
 			if (temp == NULL) {
 				if (uris != NULL) {
-					state->result->alloc(uris, 0,
-							state->result->pw);
+					state->computed->alloc(uris, 0,
+							state->computed->pw);
 				}
 				return CSS_NOMEM;
 			}
@@ -111,11 +111,11 @@ css_error cascade_cursor(uint32_t opv, css_style *style,
 	if (n_uris > 0) {
 		lwc_string **temp;
 
-		temp = state->result->alloc(uris, 
+		temp = state->computed->alloc(uris, 
 				(n_uris + 1) * sizeof(lwc_string *), 
-				state->result->pw);
+				state->computed->pw);
 		if (temp == NULL) {
-			state->result->alloc(uris, 0, state->result->pw);
+			state->computed->alloc(uris, 0, state->computed->pw);
 			return CSS_NOMEM;
 		}
 
@@ -128,14 +128,14 @@ css_error cascade_cursor(uint32_t opv, css_style *style,
 			isInherit(opv))) {
 		css_error error;
 
-		error = set_cursor(state->result, value, uris);
+		error = set_cursor(state->computed, value, uris);
 		if (error != CSS_OK && n_uris > 0)
-			state->result->alloc(uris, 0, state->result->pw);
+			state->computed->alloc(uris, 0, state->computed->pw);
 
 		return error;
 	} else {
 		if (n_uris > 0)
-			state->result->alloc(uris, 0, state->result->pw);
+			state->computed->alloc(uris, 0, state->computed->pw);
 	}
 
 	return CSS_OK;
@@ -162,7 +162,7 @@ css_error set_cursor_from_hint(const css_hint *hint,
 
 css_error initial_cursor(css_select_state *state)
 {
-	return set_cursor(state->result, CSS_CURSOR_AUTO, NULL);
+	return set_cursor(state->computed, CSS_CURSOR_AUTO, NULL);
 }
 
 css_error compose_cursor(const css_computed_style *parent,

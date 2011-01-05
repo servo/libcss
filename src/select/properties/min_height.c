@@ -29,7 +29,7 @@ css_error set_min_height_from_hint(const css_hint *hint,
 
 css_error initial_min_height(css_select_state *state)
 {
-	return set_min_height(state->result, CSS_MIN_HEIGHT_SET, 
+	return set_min_height(state->computed, CSS_MIN_HEIGHT_SET, 
 			0, CSS_UNIT_PX);
 }
 

@@ -28,9 +28,11 @@ typedef struct prop_state {
  */
 typedef struct css_select_state {
 	void *node;			/* Node we're selecting for */
-	uint32_t pseudo_element;	/* Pseudo element to select for */
 	uint64_t media;			/* Currently active media types */
-	css_computed_style *result;	/* Style to populate */
+	css_select_results *results;	/* Result set to populate */
+
+	css_pseudo_element current_pseudo;	/* Current pseudo element */
+	css_computed_style *computed;	/* Computed style to populate */
 
 	css_select_handler *handler;	/* Handler functions */
 	void *pw;			/* Client data for handlers */
@@ -53,7 +55,7 @@ typedef struct css_select_state {
 	lwc_string *before;
 	lwc_string *after;
 
-	prop_state props[CSS_N_PROPERTIES];
+	prop_state props[CSS_N_PROPERTIES][CSS_PSEUDO_ELEMENT_COUNT];
 } css_select_state;
 
 static inline void advance_bytecode(css_style *style, uint32_t n_bytes)

@@ -29,7 +29,7 @@ css_error set_max_width_from_hint(const css_hint *hint,
 
 css_error initial_max_width(css_select_state *state)
 {
-	return set_max_width(state->result, CSS_MAX_WIDTH_NONE, 0, CSS_UNIT_PX);
+	return set_max_width(state->computed, CSS_MAX_WIDTH_NONE, 0, CSS_UNIT_PX);
 }
 
 css_error compose_max_width(const css_computed_style *parent,

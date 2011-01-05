@@ -37,7 +37,7 @@ css_error cascade_unicode_bidi(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_unicode_bidi(state->result, value);
+		return set_unicode_bidi(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -51,7 +51,7 @@ css_error set_unicode_bidi_from_hint(const css_hint *hint,
 
 css_error initial_unicode_bidi(css_select_state *state)
 {
-	return set_unicode_bidi(state->result, CSS_UNICODE_BIDI_NORMAL);
+	return set_unicode_bidi(state->computed, CSS_UNICODE_BIDI_NORMAL);
 }
 
 css_error compose_unicode_bidi(const css_computed_style *parent,	

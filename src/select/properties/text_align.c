@@ -49,7 +49,7 @@ css_error cascade_text_align(uint32_t opv, css_style *style,
 
 	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
-		return set_text_align(state->result, value);
+		return set_text_align(state->computed, value);
 	}
 
 	return CSS_OK;
@@ -63,7 +63,7 @@ css_error set_text_align_from_hint(const css_hint *hint,
 
 css_error initial_text_align(css_select_state *state)
 {
-	return set_text_align(state->result, CSS_TEXT_ALIGN_DEFAULT);
+	return set_text_align(state->computed, CSS_TEXT_ALIGN_DEFAULT);
 }
 
 css_error compose_text_align(const css_computed_style *parent,	

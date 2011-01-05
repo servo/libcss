@@ -29,7 +29,7 @@ css_error set_top_from_hint(const css_hint *hint,
 
 css_error initial_top(css_select_state *state)
 {
-	return set_top(state->result, CSS_TOP_AUTO, 0, CSS_UNIT_PX);
+	return set_top(state->computed, CSS_TOP_AUTO, 0, CSS_UNIT_PX);
 }
 
 css_error compose_top(const css_computed_style *parent,
