@@ -166,7 +166,7 @@ int main(int argc, char **argv)
 
 	/* select style for each of h1 to h6 */
 	for (hh = 1; hh != 7; hh++) {
-		css_computed_style *style;
+		css_select_results *style;
 		char element[20];
 		lwc_string *element_name;
 		uint8_t color_type;
@@ -178,22 +178,24 @@ int main(int argc, char **argv)
 		snprintf(element, sizeof element, "h%i", hh);
 		lwc_intern_string(element, strlen(element), &element_name);
 
-		code = css_computed_style_create(myrealloc, 0, &style);
-		if (code != CSS_OK)
-			die("css_computed_style_create", code);
-		code = css_select_style(select_ctx, element_name, 0,
-				CSS_MEDIA_SCREEN, NULL, style,
-				&select_handler, 0);
+		code = css_select_style(select_ctx, element_name,
+				CSS_MEDIA_SCREEN, NULL,
+				&select_handler, 0,
+				&style);
 		if (code != CSS_OK)
 			die("css_select_style", code);
 
-		color_type = css_computed_color(style, &color_shade);
+		lwc_string_unref(element_name);
+
+		color_type = css_computed_color(
+				style->styles[CSS_PSEUDO_ELEMENT_NONE],
+				&color_shade);
 		if (color_type == CSS_COLOR_INHERIT)
 			printf("color of h%i is 'inherit'\n", hh);
 		else
 			printf("color of h%i is %x\n", hh, color_shade);
 
-		code = css_computed_style_destroy(style);
+		code = css_select_results_destroy(style);
 		if (code != CSS_OK)
 			die("css_computed_style_destroy", code);
 	}
