@@ -286,7 +286,9 @@ css_error css_stylesheet_destroy(css_stylesheet *sheet)
 	     string_index++) {
 		lwc_string_unref(sheet->string_vector[string_index]);		
 	}
-	sheet->alloc(sheet->string_vector, 0, sheet->pw);
+
+	if (sheet->string_vector != NULL)
+		sheet->alloc(sheet->string_vector, 0, sheet->pw);
 
 	sheet->alloc(sheet, 0, sheet->pw);
 
