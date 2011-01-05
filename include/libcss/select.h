@@ -45,7 +45,7 @@ typedef struct css_select_results {
 	 * then no computed style will be created and
 	 * the corresponding pointer will be set to NULL
 	 */
-	css_computed_style *styles[];
+	css_computed_style *styles[CSS_PSEUDO_ELEMENT_COUNT];
 } css_select_results;
 
 typedef struct css_select_handler {

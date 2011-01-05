@@ -311,9 +311,7 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	state.pw = pw;
 
 	/* Allocate the result set */
-	state.results = ctx->alloc(NULL, sizeof(css_select_results) + 
-					CSS_PSEUDO_ELEMENT_COUNT * 
-					sizeof(css_computed_style *), ctx->pw);
+	state.results = ctx->alloc(NULL, sizeof(css_select_results), ctx->pw);
 	if (state.results == NULL)
 		return CSS_NOMEM;
 
