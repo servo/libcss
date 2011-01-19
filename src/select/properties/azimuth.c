@@ -84,10 +84,3 @@ css_error compose_azimuth(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_azimuth(void *bytecode)
-{
-	bool has_angle = (((getValue(*(uint32_t*)bytecode) & (1<<7)) != 0));
-	uint32_t extra_size =  has_angle ? (sizeof(css_fixed) + sizeof(uint32_t)) : 0;
-	
-	return sizeof(uint32_t) + extra_size;
-}

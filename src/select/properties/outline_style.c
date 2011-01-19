@@ -44,9 +44,3 @@ css_error compose_outline_style(const css_computed_style *parent,
 	return set_outline_style(result, type);
 }
 
-uint32_t destroy_outline_style(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

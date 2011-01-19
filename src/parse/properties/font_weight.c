@@ -29,14 +29,13 @@
  */
 css_error parse_font_weight(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
-		css_style **result)
+		css_style *result)
 {
 	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
 	uint16_t value = 0;
-	uint32_t opv;
 	bool match;
 
 	/* NUMBER (100, 200, 300, 400, 500, 600, 700, 800, 900) | 
@@ -95,17 +94,13 @@ css_error parse_font_weight(css_language *c,
 		return CSS_INVALID;
 	}
 
-	opv = buildOPV(CSS_PROP_FONT_WEIGHT, flags, value);
-
-	/* Allocate result */
-	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
-	if (error != CSS_OK) {
+	error = css_stylesheet_style_appendOPV(result,
+					       CSS_PROP_FONT_WEIGHT,
+					       flags,
+					       value);
+	if (error != CSS_OK) 
 		*ctx = orig_ctx;
-		return error;
-	}
+	
 
-	/* Copy the bytecode to it */
-	memcpy((*result)->bytecode, &opv, sizeof(opv));
-
-	return CSS_OK;
+	return error;
 }

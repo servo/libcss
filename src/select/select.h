@@ -60,8 +60,8 @@ typedef struct css_select_state {
 
 static inline void advance_bytecode(css_style *style, uint32_t n_bytes)
 {
-	style->length -= n_bytes;
-	style->bytecode = ((uint8_t *) style->bytecode) + n_bytes;
+	style->used -= (n_bytes / sizeof(css_code_t));
+	style->bytecode = style->bytecode + (n_bytes / sizeof(css_code_t));
 }
 
 bool outranks_existing(uint16_t op, bool important, css_select_state *state,

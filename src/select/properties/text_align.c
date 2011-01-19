@@ -90,9 +90,3 @@ css_error compose_text_align(const css_computed_style *parent,
 	return set_text_align(result, type);
 }
 
-uint32_t destroy_text_align(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

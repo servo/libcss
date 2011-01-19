@@ -48,7 +48,3 @@ css_error compose_orphans(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_orphans(void *bytecode)
-{
-	return generic_destroy_number(bytecode);
-}

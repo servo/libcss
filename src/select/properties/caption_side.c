@@ -64,9 +64,3 @@ css_error compose_caption_side(const css_computed_style *parent,
 	return set_caption_side(result, type);
 }
 
-uint32_t destroy_caption_side(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

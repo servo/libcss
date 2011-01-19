@@ -29,18 +29,14 @@
  */
 css_error parse_clip(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
-		css_style **result)
+		css_style *result)
 {
 	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
-	uint8_t flags = 0;
-	uint16_t value = 0;
-	uint32_t opv;
 	int num_lengths = 0;
 	css_fixed length[4] = { 0 };
 	uint32_t unit[4] = { 0 };
-	uint32_t required_size;
 	bool match;
 
 	/* FUNCTION(rect) [ [ IDENT(auto) | length ] CHAR(,)? ]{3} 
@@ -52,22 +48,28 @@ css_error parse_clip(css_language *c,
 		return CSS_INVALID;
 	}
 
-	if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_string_caseless_isequal(
-			token->idata, c->strings[INHERIT],
-			&match) == lwc_error_ok && match)) {
-		flags = FLAG_INHERIT;
-	} else if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_string_caseless_isequal(
-			token->idata, c->strings[AUTO],
-			&match) == lwc_error_ok && match)) {
-		value = CLIP_AUTO;
-	} else if (token->type == CSS_TOKEN_FUNCTION &&
-			(lwc_string_caseless_isequal(
-			token->idata, c->strings[RECT],
-			&match) == lwc_error_ok && match)) {
+	if ((token->type == CSS_TOKEN_IDENT) &&
+	    (lwc_string_caseless_isequal(
+		    token->idata, c->strings[INHERIT],
+		    &match) == lwc_error_ok && match)) {
+		error = css_stylesheet_style_appendOPV(result,
+						       CSS_PROP_CLIP,
+						       FLAG_INHERIT,
+						       0);
+	} else if ((token->type == CSS_TOKEN_IDENT) &&
+		   (lwc_string_caseless_isequal(
+			   token->idata, c->strings[AUTO],
+			   &match) == lwc_error_ok && match)) {
+		error = css_stylesheet_style_appendOPV(result,
+						       CSS_PROP_CLIP,
+						       0,
+						       CLIP_AUTO);
+	} else if ((token->type == CSS_TOKEN_FUNCTION) &&
+		   (lwc_string_caseless_isequal(
+			   token->idata, c->strings[RECT],
+			   &match) == lwc_error_ok && match)) {
 		int i;
-		value = CLIP_SHAPE_RECT;
+		uint16_t value = CLIP_SHAPE_RECT;
 
 		for (i = 0; i < 4; i++) {
 			consumeWhitespace(vector, ctx);
@@ -136,41 +138,34 @@ css_error parse_clip(css_language *c,
 			*ctx = orig_ctx;
 			return CSS_INVALID;
 		}
-	} else {
-		*ctx = orig_ctx;
-		return CSS_INVALID;
-	}
 
-	opv = buildOPV(CSS_PROP_CLIP, flags, value);
-
-	required_size = sizeof(opv);
-	if ((flags & FLAG_INHERIT) == false && 
-			(value & CLIP_SHAPE_MASK) == CLIP_SHAPE_RECT) {
-		required_size += 
-			num_lengths * (sizeof(length[0]) + sizeof(unit[0]));
-	}
-
-	/* Allocate result */
-	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK) {
-		*ctx = orig_ctx;
-		return error;
-	}
-
-	/* Copy the bytecode to it */
-	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if ((flags & FLAG_INHERIT) == false && 
-			(value & CLIP_SHAPE_MASK) == CLIP_SHAPE_RECT) {
-		int i;
-		uint8_t *ptr = ((uint8_t *) (*result)->bytecode) + sizeof(opv);
+                /* output bytecode */
+		error = css_stylesheet_style_appendOPV(result,
+						       CSS_PROP_CLIP,
+						       0,
+						       value);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
 
 		for (i = 0; i < num_lengths; i++) {
-			memcpy(ptr, &length[i], sizeof(length[i]));
-			ptr += sizeof(length[i]);
-			memcpy(ptr, &unit[i], sizeof(unit[i]));
-			ptr += sizeof(unit[i]);
+			error = css_stylesheet_style_vappend(result, 
+							     2, 
+							     length[i], 
+							     unit[i]);
+			if (error != CSS_OK) 
+				break;
 		}
+
+
+	} else {
+		error = CSS_INVALID;
 	}
 
-	return CSS_OK;
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
+	}
+
+	return error;
 }

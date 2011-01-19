@@ -48,7 +48,3 @@ css_error compose_widows(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_widows(void *bytecode)
-{
-	return generic_destroy_number(bytecode);
-}

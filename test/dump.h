@@ -629,7 +629,7 @@ static void dump_counters(lwc_string *name, lwc_string *separator,
 void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 {
 	void *bytecode = style->bytecode;
-	size_t length = style->length;
+	size_t length = (style->used * sizeof(css_code_t));
 	uint32_t offset = 0;
 
 #define ADVANCE(n) do {					\
@@ -759,10 +759,11 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 					break;
 				case BACKGROUND_IMAGE_URI:
 				{
-					lwc_string *he = 
-						*((lwc_string **) 
-						bytecode);
-					ADVANCE(sizeof(he));
+					uint32_t snum = *((uint32_t *) bytecode);					lwc_string *he;
+					css_stylesheet_string_get(style->sheet, 
+								  snum, 
+								  &he);
+					ADVANCE(sizeof(snum));
 					*ptr += sprintf(*ptr, "url('%.*s')", 
 							(int) lwc_string_length(he), 
 							lwc_string_data(he));
@@ -1095,21 +1096,22 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 				}
 
 				while (value != CONTENT_NORMAL) {
-					lwc_string *he = 
-						*((lwc_string **) 
-						bytecode);
+					uint32_t snum = *((uint32_t *) bytecode);					
+					lwc_string *he;
 					const char *end = "";
 
 					switch (value & 0xff) {
 					case CONTENT_COUNTER:
-						ADVANCE(sizeof(he));
+						css_stylesheet_string_get(style->sheet, snum, &he);
+						ADVANCE(sizeof(snum));
 						dump_counter(he, value, ptr);
 						break;
+
 					case CONTENT_COUNTERS:
 					{
 						lwc_string *sep;
-
-						ADVANCE(sizeof(he));
+						css_stylesheet_string_get(style->sheet, snum, &he);
+						ADVANCE(sizeof(snum));
 
 						sep = *((lwc_string **) bytecode);
 						ADVANCE(sizeof(sep));
@@ -1118,9 +1120,11 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 							ptr);
 					}
 						break;
+
 					case CONTENT_URI:
 					case CONTENT_ATTR:	
 					case CONTENT_STRING:
+						css_stylesheet_string_get(style->sheet, snum, &he);
 						if (value == CONTENT_URI) 
 							*ptr += sprintf(*ptr, "url(");
 						if (value == CONTENT_ATTR)
@@ -1128,22 +1132,26 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 						if (value != CONTENT_STRING)
 							end = ")";
 
-						ADVANCE(sizeof(he));
+						ADVANCE(sizeof(snum));
 
 						*ptr += sprintf(*ptr, "'%.*s'%s",
                                                                 (int) lwc_string_length(he),
                                                                 lwc_string_data(he),
 							end);
 						break;
+
 					case CONTENT_OPEN_QUOTE:
 						*ptr += sprintf(*ptr, "open-quote");
 						break;
+
 					case CONTENT_CLOSE_QUOTE:
 						*ptr += sprintf(*ptr, "close-quote");
 						break;
+
 					case CONTENT_NO_OPEN_QUOTE:
 						*ptr += sprintf(*ptr, "no-open-quote");
 						break;
+
 					case CONTENT_NO_CLOSE_QUOTE:
 						*ptr += sprintf(*ptr, "no-close-quote");
 						break;
@@ -1167,10 +1175,11 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 				case COUNTER_INCREMENT_NAMED:
 					while (value != COUNTER_INCREMENT_NONE) {
 						css_fixed val;
-						lwc_string *he = 
-							*((lwc_string **) 
-							bytecode);
-						ADVANCE(sizeof(he));
+					uint32_t snum = *((uint32_t *) bytecode);					lwc_string *he;
+					css_stylesheet_string_get(style->sheet, 
+								  snum, 
+								  &he);
+						ADVANCE(sizeof(snum));
 						*ptr += sprintf(*ptr, "%.*s ", 
                                                                 (int)lwc_string_length(he),
                                                                 lwc_string_data(he));
@@ -1194,10 +1203,11 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 				break;
 			case CSS_PROP_CURSOR:
 				while (value == CURSOR_URI) {
-					lwc_string *he = 
-						*((lwc_string **) 
-						bytecode);
-					ADVANCE(sizeof(ptr));
+					uint32_t snum = *((uint32_t *) bytecode);					lwc_string *he;
+					css_stylesheet_string_get(style->sheet, 
+								  snum, 
+								  &he);
+					ADVANCE(sizeof(snum));
 					*ptr += sprintf(*ptr, "url('%.*s'), ", 
 							(int) lwc_string_length(he),
 							lwc_string_data(he));
@@ -1380,10 +1390,10 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 					case FONT_FAMILY_STRING:
 					case FONT_FAMILY_IDENT_LIST:
 					{
-						lwc_string *he = 
-						*((lwc_string **) 
-						bytecode);
-						ADVANCE(sizeof(he));
+						uint32_t snum = *((uint32_t *) bytecode);					
+						lwc_string *he;
+						css_stylesheet_string_get(style->sheet, snum, &he);
+						ADVANCE(sizeof(snum));
 						*ptr += sprintf(*ptr, "'%.*s'", 
                                                                 (int) lwc_string_length(he), 
                                                                 lwc_string_data(he));
@@ -1799,10 +1809,10 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 				switch (value) {
 				case PLAY_DURING_URI:
 				{
-					lwc_string *he = 
-						*((lwc_string **) 
-						bytecode);
-					ADVANCE(sizeof(he));
+					uint32_t snum = *((uint32_t *) bytecode);					
+					lwc_string *he;
+					css_stylesheet_string_get(style->sheet, snum, &he);
+					ADVANCE(sizeof(snum));
 					*ptr += sprintf(*ptr, "'%.*s'", 
                                                         (int) lwc_string_length(he), 
                                                         lwc_string_data(he));
@@ -1841,10 +1851,10 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 				switch (value) {
 				case QUOTES_STRING:
 					while (value != QUOTES_NONE) {
-						lwc_string *he = 
-						*((lwc_string **) 
-						bytecode);
-						ADVANCE(sizeof(he));
+						uint32_t snum = *((uint32_t *) bytecode);					
+						lwc_string *he;
+						css_stylesheet_string_get(style->sheet, snum, &he);
+						ADVANCE(sizeof(snum));
 						*ptr += sprintf(*ptr, " '%.*s' ", 
                                                                 (int) lwc_string_length(he), 
                                                                 lwc_string_data(he));
@@ -2075,10 +2085,10 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 					case VOICE_FAMILY_STRING:
 					case VOICE_FAMILY_IDENT_LIST:
 					{
-						lwc_string *he = 
-						*((lwc_string **) 
-						bytecode);
-						ADVANCE(sizeof(he));
+						uint32_t snum = *((uint32_t *) bytecode);					
+						lwc_string *he;
+						css_stylesheet_string_get(style->sheet, snum, &he);
+						ADVANCE(sizeof(snum));
 						*ptr += sprintf(*ptr, "'%.*s'", 
                                                                 (int) lwc_string_length(he),
                                                                 lwc_string_data(he));

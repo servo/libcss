@@ -53,7 +53,3 @@ css_error compose_background_image(const css_computed_style *parent,
 	return set_background_image(result, type, url);
 }
 
-uint32_t destroy_background_image(void *bytecode)
-{
-	return generic_destroy_uri(bytecode);
-}

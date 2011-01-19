@@ -79,7 +79,3 @@ css_error compose_elevation(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_elevation(void *bytecode)
-{
-	return generic_destroy_length(bytecode);
-}

@@ -79,11 +79,3 @@ css_error compose_line_height(const css_computed_style *parent,
 	return set_line_height(result, type, length, unit);
 }
 
-uint32_t destroy_line_height(void *bytecode)
-{
-	uint32_t value = getValue(*((uint32_t*)bytecode));
-	if (value == LINE_HEIGHT_NUMBER)
-		return generic_destroy_number(bytecode);
-	else
-		return generic_destroy_length(bytecode);
-}

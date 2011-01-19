@@ -341,6 +341,55 @@
 | *
 #reset
 
+#data
+* { outline: thin solid red inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline: inherit thin solid #fff; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline: inherit thin; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline: thin inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline: inherit inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline: inherit #BBC !important; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { outline: #BBC !important inherit; }
+#errors
+#expected
+| *
+#reset
+
 
 #data
 * { outline-color: red; }

@@ -127,6 +127,8 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 	printf("got: %s expected: %.*s\n", buf, (int) explen, exp);
 
 	assert(strncmp(buf, exp, explen) == 0);
+
+	lwc_string_unref(in);
 }
 
 void print_css_fixed(char *buf, size_t len, css_fixed f)

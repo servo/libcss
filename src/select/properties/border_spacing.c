@@ -87,9 +87,3 @@ css_error compose_border_spacing(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_border_spacing(void *bytecode)
-{
-	bool has_values = (getValue(*((uint32_t*)bytecode)) == BORDER_SPACING_SET);
-	
-	return sizeof(uint32_t) + (has_values ? (sizeof(css_fixed) + sizeof(uint32_t)) * 2 : 0);
-}

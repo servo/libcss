@@ -42,7 +42,7 @@ static bool voice_family_reserved(css_language *c, const css_token *ident)
  * \param token	 Token to consider
  * \return Bytecode value
  */
-static uint16_t voice_family_value(css_language *c, const css_token *token)
+static css_code_t voice_family_value(css_language *c, const css_token *token, bool first)
 {
 	uint16_t value;
 	bool match;
@@ -66,7 +66,7 @@ static uint16_t voice_family_value(css_language *c, const css_token *token)
 		value = VOICE_FAMILY_STRING;
 	}
 
-	return value;
+	return first ? buildOPV(CSS_PROP_VOICE_FAMILY, 0, value) : value;
 }
 
 /**
@@ -85,17 +85,11 @@ static uint16_t voice_family_value(css_language *c, const css_token *token)
  */
 css_error parse_voice_family(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
-		css_style **result)
+		css_style *result)
 {
 	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
-	uint8_t flags = 0;
-	uint16_t value = 0;
-	uint32_t opv;
-	uint32_t required_size = sizeof(opv);
-	int temp_ctx = *ctx;
-	uint8_t *ptr;
 	bool match;
 
 	/* [ IDENT+ | STRING ] [ ',' [ IDENT+ | STRING ] ]* | IDENT(inherit)
@@ -104,54 +98,9 @@ css_error parse_voice_family(css_language *c,
 	 * a single space
 	 */
 
-	/* Pass 1: validate input and calculate space */
-	token = parserutils_vector_iterate(vector, &temp_ctx);
-	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-			token->type != CSS_TOKEN_STRING)) {
-		*ctx = orig_ctx;
-		return CSS_INVALID;
-	}
-
-	if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_string_caseless_isequal(
-			token->idata, c->strings[INHERIT],
-			&match) == lwc_error_ok && match)) {
-		flags = FLAG_INHERIT;
-	} else {
-		uint32_t list_size;
-
-		value = voice_family_value(c, token);
-
-		error = comma_list_length(c, vector, &temp_ctx, 
-				token, voice_family_reserved, &list_size);
-		if (error != CSS_OK) {
-			*ctx = orig_ctx;
-			return error;
-		}
-
-		required_size += list_size;
-	}
-
-	opv = buildOPV(CSS_PROP_VOICE_FAMILY, flags, value);
-
-	/* Allocate result */
-	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK) {
-		*ctx = orig_ctx;
-		return error;
-	}
-
-	/* Copy OPV to bytecode */
-	ptr = (*result)->bytecode;
-	memcpy(ptr, &opv, sizeof(opv));
-	ptr += sizeof(opv);
-
-	/* Pass 2: populate bytecode */
 	token = parserutils_vector_iterate(vector, ctx);
 	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
 			token->type != CSS_TOKEN_STRING)) {
-		css_stylesheet_style_destroy(c->sheet, *result, true);
-		*result = NULL;
 		*ctx = orig_ctx;
 		return CSS_INVALID;
 	}
@@ -160,22 +109,24 @@ css_error parse_voice_family(css_language *c,
 			(lwc_string_caseless_isequal(
 			token->idata, c->strings[INHERIT],
 			&match) == lwc_error_ok && match)) {
-		/* Nothing to do */
+		error = css_stylesheet_style_inherit(result, CSS_PROP_VOICE_FAMILY);
 	} else {
-		error = comma_list_to_bytecode(c, vector, ctx, token, 
+		*ctx = orig_ctx;
+
+		error = comma_list_to_style(c, vector, ctx,
 				voice_family_reserved, voice_family_value,
-				&ptr);
+				result);
 		if (error != CSS_OK) {
-			css_stylesheet_style_destroy(c->sheet, *result, true);
-			*result = NULL;
 			*ctx = orig_ctx;
 			return error;
 		}
 
-		/* Write terminator */
-		opv = VOICE_FAMILY_END;
-		memcpy(ptr, &opv, sizeof(opv));
-		ptr += sizeof(opv);
+		error = css_stylesheet_style_append(result, VOICE_FAMILY_END);
+	}
+
+	if (error != CSS_OK) {
+		*ctx = orig_ctx;
+		return error;
 	}
 
 	return CSS_OK;

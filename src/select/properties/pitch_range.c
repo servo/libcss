@@ -48,7 +48,3 @@ css_error compose_pitch_range(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_pitch_range(void *bytecode)
-{
-	return generic_destroy_number(bytecode);
-}

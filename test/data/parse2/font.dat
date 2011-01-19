@@ -295,6 +295,48 @@
 #reset
 
 #data
+* { font: 10pt inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font: inherit 10pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font: 'Sonic the Hedgehog' 12pt inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font: 'Sonic the Hedgehog' inherit 12pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font: inherit 12pt 'Sonic the Hedgehog'; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { font: inherit inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
 * { font-family: inherit; }
 #errors
 #expected

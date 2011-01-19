@@ -84,6 +84,7 @@ int main(int argc, char **argv)
 		run_test(ctx.buf, ctx.bufused, ctx.exp, ctx.expused);
 
 	free(ctx.buf);
+	free(ctx.exp);
 
 	printf("PASS\n");
 

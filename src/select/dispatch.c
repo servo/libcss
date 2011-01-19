@@ -15,8 +15,7 @@
 	cascade_##pname,				\
 	set_##pname##_from_hint,			\
 	initial_##pname,				\
-	compose_##pname,				\
-	destroy_##pname
+	compose_##pname
 
 struct prop_table prop_dispatch[CSS_N_PROPERTIES] = {
 	{

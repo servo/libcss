@@ -55,7 +55,3 @@ css_error compose_letter_spacing(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_letter_spacing(void *bytecode)
-{
-	return generic_destroy_length(bytecode);
-}

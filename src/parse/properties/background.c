@@ -29,58 +29,86 @@
  */
 css_error parse_background(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		css_style **result)
+		css_style *result)
 {
 	int orig_ctx = *ctx;
 	int prev_ctx;
 	const css_token *token;
-	css_style *attachment = NULL;
-	css_style *color = NULL;
-	css_style *image = NULL;
-	css_style *position = NULL;
-	css_style *repeat = NULL;
-	css_style *ret = NULL;
-	uint32_t required_size;
-	bool match;
-	css_error error;
+	css_error error = CSS_OK;
+	bool attachment = true;
+	bool color = true;
+	bool image = true;
+	bool position = true;
+	bool repeat = true;
+	css_style * attachment_style;
+	css_style * color_style;
+	css_style * image_style;
+	css_style * position_style;
+	css_style * repeat_style;
+
 
 	/* Firstly, handle inherit */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			(lwc_string_caseless_isequal(
-			token->idata, c->strings[INHERIT],
-			&match) == lwc_error_ok && match)) {
-		uint32_t *bytecode;
-
-		error = css_stylesheet_style_create(c->sheet, 
-				5 * sizeof(uint32_t), &ret);
-		if (error != CSS_OK) {
-			*ctx = orig_ctx;
-			return error;
-		}
-
-		bytecode = (uint32_t *) ret->bytecode;
-
-		*(bytecode++) = buildOPV(CSS_PROP_BACKGROUND_ATTACHMENT, 
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_BACKGROUND_COLOR,
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_BACKGROUND_IMAGE,
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_BACKGROUND_POSITION,
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_BACKGROUND_REPEAT,
-				FLAG_INHERIT, 0);
-
-		parserutils_vector_iterate(vector, ctx);
-
-		*result = ret;
-
-		return CSS_OK;
-	} else if (token == NULL) {
-		/* No tokens -- clearly garbage */
-		*ctx = orig_ctx;
+	if (token == NULL) 
 		return CSS_INVALID;
+		
+	if (is_css_inherit(c, token)) {
+		error = css_stylesheet_style_inherit(result, CSS_PROP_BACKGROUND_ATTACHMENT);
+		if (error != CSS_OK) 
+			return error;
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_BACKGROUND_COLOR);
+		if (error != CSS_OK) 
+			return error;		
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_BACKGROUND_IMAGE);
+		if (error != CSS_OK) 
+			return error;
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_BACKGROUND_POSITION);
+		if (error != CSS_OK) 
+			return error;
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_BACKGROUND_REPEAT);
+		if (error == CSS_OK) 
+			parserutils_vector_iterate(vector, ctx);
+
+		return error;
+	} 
+
+	/* allocate styles */
+	error = css_stylesheet_style_create(c->sheet, &attachment_style);
+	if (error != CSS_OK) 
+		return error;
+
+	error = css_stylesheet_style_create(c->sheet, &color_style);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(attachment_style);
+		return error;
+	}
+
+	error = css_stylesheet_style_create(c->sheet, &image_style);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(attachment_style);
+		css_stylesheet_style_destroy(color_style);
+		return error;
+	}
+
+	error = css_stylesheet_style_create(c->sheet, &position_style);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(attachment_style);
+		css_stylesheet_style_destroy(color_style);
+		css_stylesheet_style_destroy(image_style);
+		return error;
+	}
+
+	error = css_stylesheet_style_create(c->sheet, &repeat_style);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(attachment_style);
+		css_stylesheet_style_destroy(color_style);
+		css_stylesheet_style_destroy(image_style);
+		css_stylesheet_style_destroy(position_style);
+		return error;
 	}
 
 	/* Attempt to parse the various longhand properties */
@@ -88,26 +116,34 @@ css_error parse_background(css_language *c,
 		prev_ctx = *ctx;
 		error = CSS_OK;
 
+		if (is_css_inherit(c, token)) {
+			error = CSS_INVALID;
+			goto parse_background_cleanup;
+		}
+
 		/* Try each property parser in turn, but only if we
 		 * haven't already got a value for this property.
-		 * To achieve this, we end up with a bunch of empty
-		 * if/else statements. Perhaps there's a clearer way 
-		 * of expressing this. */
-		if (attachment == NULL && 
-				(error = parse_background_attachment(c, vector,
-				ctx, &attachment)) == CSS_OK) {
-		} else if (color == NULL && 
-				(error = parse_background_color(c, vector, ctx,
-				&color)) == CSS_OK) {
-		} else if (image == NULL && 
-				(error = parse_background_image(c, vector, ctx,
-				&image)) == CSS_OK) {
-		} else if (position == NULL &&
-				(error = parse_background_position(c, vector, 
-				ctx, &position)) == CSS_OK) {
-		} else if (repeat == NULL &&
-				(error = parse_background_repeat(c, vector, 
-				ctx, &repeat)) == CSS_OK) {
+		 */
+		if ((attachment) && 
+		    (error = parse_background_attachment(c, vector, ctx, 
+					    attachment_style)) == CSS_OK) {
+			attachment = false;
+		} else if ((color) && 
+			   (error = parse_background_color(c, vector, ctx,
+					    color_style)) == CSS_OK) {
+			color = false;
+		} else if ((image) && 
+			   (error = parse_background_image(c, vector, ctx,
+					    image_style)) == CSS_OK) {
+			image = false;
+		} else if ((position) &&
+			   (error = parse_background_position(c, vector, ctx, 
+					position_style)) == CSS_OK) {
+			position = false;
+		} else if ((repeat) &&
+			   (error = parse_background_repeat(c, vector, ctx, 
+					repeat_style)) == CSS_OK) {
+			repeat = false;
 		}
 
 		if (error == CSS_OK) {
@@ -120,129 +156,78 @@ css_error parse_background(css_language *c,
 		}
 	} while (*ctx != prev_ctx && token != NULL);
 
-	/* Calculate the required size of the resultant style,
-	 * defaulting the unspecified properties to their initial values */
-	required_size = 0;
-
-	if (attachment)
-		required_size += attachment->length;
-	else
-		required_size += sizeof(uint32_t);
-
-	if (color)
-		required_size += color->length;
-	else
-		required_size += sizeof(uint32_t);
-
-	if (image)
-		required_size += image->length;
-	else
-		required_size += sizeof(uint32_t);
-
-	if (position)
-		required_size += position->length;
-	else
-		required_size += sizeof(uint32_t); /* Use top left, not 0% 0% */
-
-	if (repeat)
-		required_size += repeat->length;
-	else
-		required_size += sizeof(uint32_t);
-
-	/* Create and populate it */
-	error = css_stylesheet_style_create(c->sheet, required_size, &ret);
-	if (error != CSS_OK)
-		goto cleanup;
-
-	required_size = 0;
-
 	if (attachment) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				attachment->bytecode, attachment->length);
-		required_size += attachment->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_BACKGROUND_ATTACHMENT,
-				0, BACKGROUND_ATTACHMENT_SCROLL);
-		required_size += sizeof(uint32_t);
+		error = css_stylesheet_style_appendOPV(attachment_style, 
+				CSS_PROP_BACKGROUND_ATTACHMENT, 0, 
+				BACKGROUND_ATTACHMENT_SCROLL);
+		if (error != CSS_OK)
+			goto parse_background_cleanup;
 	}
 
 	if (color) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				color->bytecode, color->length);
-		required_size += color->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_BACKGROUND_COLOR,
-				0, BACKGROUND_COLOR_TRANSPARENT);
-		required_size += sizeof(uint32_t);
+		error = css_stylesheet_style_appendOPV(color_style, 
+				CSS_PROP_BACKGROUND_COLOR, 0, 
+				BACKGROUND_COLOR_TRANSPARENT);
+		if (error != CSS_OK)
+			goto parse_background_cleanup;
 	}
 
 	if (image) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				image->bytecode, image->length);
-		required_size += image->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_BACKGROUND_IMAGE,
+		error = css_stylesheet_style_appendOPV(image_style, 
+				CSS_PROP_BACKGROUND_IMAGE,
 				0, BACKGROUND_IMAGE_NONE);
-		required_size += sizeof(uint32_t);
+		if (error != CSS_OK)
+			goto parse_background_cleanup;
 	}
 
 	if (position) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				position->bytecode, position->length);
-		required_size += position->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_BACKGROUND_POSITION,
+		error = css_stylesheet_style_appendOPV(position_style,
+				CSS_PROP_BACKGROUND_POSITION,
 				0, BACKGROUND_POSITION_HORZ_LEFT |
 				BACKGROUND_POSITION_VERT_TOP);
-		required_size += sizeof(uint32_t);
+		if (error != CSS_OK)
+			goto parse_background_cleanup;
 	}
 
 	if (repeat) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				repeat->bytecode, repeat->length);
-		required_size += repeat->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_BACKGROUND_REPEAT,
+		error = css_stylesheet_style_appendOPV(repeat_style, 
+				CSS_PROP_BACKGROUND_REPEAT,
 				0, BACKGROUND_REPEAT_REPEAT);
-		required_size += sizeof(uint32_t);
+		if (error != CSS_OK)
+			goto parse_background_cleanup;
 	}
 
-	assert(required_size == ret->length);
+	error = css_stylesheet_merge_style(result, attachment_style);
+	if (error != CSS_OK)
+		goto parse_background_cleanup;
 
-	/* Write the result */
-	*result = ret;
-	/* Invalidate ret, so that cleanup doesn't destroy it */
-	ret = NULL;
+	error = css_stylesheet_merge_style(result, color_style);
+	if (error != CSS_OK)
+		goto parse_background_cleanup;
 
-	/* Clean up after ourselves */
-cleanup:
-	if (attachment)
-		css_stylesheet_style_destroy(c->sheet, attachment, error == CSS_OK);
-	if (color)
-		css_stylesheet_style_destroy(c->sheet, color, error == CSS_OK);
-	if (image)
-		css_stylesheet_style_destroy(c->sheet, image, error == CSS_OK);
-	if (position)
-		css_stylesheet_style_destroy(c->sheet, position, error == CSS_OK);
-	if (repeat)
-		css_stylesheet_style_destroy(c->sheet, repeat, error == CSS_OK);
-	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
+	error = css_stylesheet_merge_style(result, image_style);
+	if (error != CSS_OK)
+		goto parse_background_cleanup;
+
+	error = css_stylesheet_merge_style(result, position_style);
+	if (error != CSS_OK)
+		goto parse_background_cleanup;
+
+	error = css_stylesheet_merge_style(result, repeat_style);
+
+parse_background_cleanup:
+	css_stylesheet_style_destroy(attachment_style);
+	css_stylesheet_style_destroy(color_style);
+	css_stylesheet_style_destroy(image_style);
+	css_stylesheet_style_destroy(position_style);
+	css_stylesheet_style_destroy(repeat_style);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;
 
 	return error;
+
+
 }
 
 

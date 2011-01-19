@@ -48,7 +48,3 @@ css_error compose_text_indent(const css_computed_style *parent,
 	return set_text_indent(result, type, length, unit);
 }
 
-uint32_t destroy_text_indent(void *bytecode)
-{
-	return generic_destroy_length(bytecode);
-}

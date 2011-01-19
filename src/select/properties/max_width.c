@@ -47,7 +47,3 @@ css_error compose_max_width(const css_computed_style *parent,
 	return set_max_width(result, type, length, unit);
 }
 
-uint32_t destroy_max_width(void *bytecode)
-{
-	return generic_destroy_length(bytecode);
-}

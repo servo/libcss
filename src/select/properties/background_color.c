@@ -46,7 +46,3 @@ css_error compose_background_color(const css_computed_style *parent,
 	return set_background_color(result, type, color);
 }
 
-uint32_t destroy_background_color(void *bytecode)
-{
-	return generic_destroy_color(bytecode);
-}

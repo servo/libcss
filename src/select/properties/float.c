@@ -67,9 +67,3 @@ css_error compose_float(const css_computed_style *parent,
 	return set_float(result, type);
 }
 
-uint32_t destroy_float(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

@@ -31,9 +31,8 @@ css_error cascade_voice_family(uint32_t opv, css_style *style,
 			switch (v) {
 			case VOICE_FAMILY_STRING:
 			case VOICE_FAMILY_IDENT_LIST:
-				voice = *((lwc_string **) 
-						style->bytecode);
-				advance_bytecode(style, sizeof(voice));
+				css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &voice);
+				advance_bytecode(style, sizeof(css_code_t));
 				break;
 			case VOICE_FAMILY_MALE:
 				if (value == 0)
@@ -134,24 +133,3 @@ css_error compose_voice_family(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_voice_family(void *bytecode)
-{
-	uint32_t consumed = sizeof(uint32_t);
-	uint32_t value = getValue(*((uint32_t*)bytecode));
-	bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
-	
-	while (value != VOICE_FAMILY_END) {
-		if (value == VOICE_FAMILY_STRING || value == VOICE_FAMILY_IDENT_LIST) {
-			lwc_string *str = *((lwc_string **)bytecode);
-			consumed += sizeof(lwc_string*);
-			bytecode = ((uint8_t*)bytecode) + sizeof(lwc_string*);
-			lwc_string_unref(str);
-		}
-		
-		consumed += sizeof(uint32_t);
-		value = *((uint32_t*)bytecode);
-		bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
-	}
-	
-	return consumed;
-}

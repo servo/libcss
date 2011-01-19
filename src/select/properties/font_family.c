@@ -31,9 +31,8 @@ css_error cascade_font_family(uint32_t opv, css_style *style,
 			switch (v) {
 			case FONT_FAMILY_STRING:
 			case FONT_FAMILY_IDENT_LIST:
-				font = *((lwc_string **) 
-						style->bytecode);
-				advance_bytecode(style, sizeof(font));
+				css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &font);
+				advance_bytecode(style, sizeof(css_code_t));
 				break;
 			case FONT_FAMILY_SERIF:
 				if (value == CSS_FONT_FAMILY_INHERIT)
@@ -192,24 +191,3 @@ css_error compose_font_family(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_font_family(void *bytecode)
-{
-	uint32_t consumed = sizeof(uint32_t);
-	uint32_t value = getValue(*((uint32_t*)bytecode));
-	bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
-	
-	while (value != FONT_FAMILY_END) {
-		if (value == FONT_FAMILY_STRING || value == FONT_FAMILY_IDENT_LIST) {
-			lwc_string *str = *((lwc_string **)bytecode);
-			consumed += sizeof(lwc_string*);
-			bytecode = ((uint8_t*)bytecode) + sizeof(lwc_string*);
-			lwc_string_unref(str);
-		}
-		
-		consumed += sizeof(uint32_t);
-		value = *((uint32_t*)bytecode);
-		bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
-	}
-	
-	return consumed;
-}

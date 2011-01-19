@@ -66,20 +66,15 @@ css_error parse_important(css_language *c,
  */
 void make_style_important(css_style *style)
 {
-	void *bytecode = style->bytecode;
-	size_t length = style->length;
+	css_code_t *bytecode = style->bytecode;
+	uint32_t length = style->used;
 	uint32_t offset = 0;
-
-#define ADVANCE(n) do {					\
-	offset += (n);					\
-	bytecode = ((uint8_t *) bytecode) + (n);	\
-} while(0)
 
 	while (offset < length) {
 		opcode_t op;
 		uint8_t flags;
 		uint32_t value;
-		uint32_t opv = *((uint32_t *) bytecode);
+		css_code_t opv = bytecode[offset];
 
 		/* Extract opv components, setting important flag */
 		op = getOpcode(opv);
@@ -87,20 +82,18 @@ void make_style_important(css_style *style)
 		value = getValue(opv);
 
 		/* Write OPV back to bytecode */
-		*((uint32_t *) bytecode) = buildOPV(op, flags, value);
+		bytecode[offset] = buildOPV(op, flags, value);
 
-		ADVANCE(sizeof(opv));
+		offset++;
 
 		/* Advance past any property-specific data */
 		if (isInherit(opv) == false) {
 			switch (op) {
 			case CSS_PROP_AZIMUTH:
-				if ((value & ~AZIMUTH_BEHIND) == 
-						AZIMUTH_ANGLE) {
-					ADVANCE(sizeof(css_fixed) + 
-							sizeof(uint32_t));
-				}
+				if ((value & ~AZIMUTH_BEHIND) == AZIMUTH_ANGLE)
+					offset += 2; /* length + units */
 				break;
+
 			case CSS_PROP_BORDER_TOP_COLOR:
 			case CSS_PROP_BORDER_RIGHT_COLOR:
 			case CSS_PROP_BORDER_BOTTOM_COLOR:
@@ -109,10 +102,10 @@ void make_style_important(css_style *style)
 				assert(BACKGROUND_COLOR_SET == 
 						BORDER_COLOR_SET);
 
-				if (value == BACKGROUND_COLOR_SET) {
-					ADVANCE(sizeof(uint32_t));
-				}
+				if (value == BACKGROUND_COLOR_SET)
+					offset++; /* colour */
 				break;
+
 			case CSS_PROP_BACKGROUND_IMAGE:
 			case CSS_PROP_CUE_AFTER:
 			case CSS_PROP_CUE_BEFORE:
@@ -122,28 +115,23 @@ void make_style_important(css_style *style)
 				assert(BACKGROUND_IMAGE_URI ==
 						LIST_STYLE_IMAGE_URI);
 
-				if (value == BACKGROUND_IMAGE_URI) {
-					ADVANCE(sizeof(lwc_string *));
-				}
+				if (value == BACKGROUND_IMAGE_URI) 
+					offset++; /* string table entry */
 				break;
+
 			case CSS_PROP_BACKGROUND_POSITION:
-				if ((value & 0xf0) ==
-						BACKGROUND_POSITION_HORZ_SET) {
-					ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
-				}
-				if ((value & 0x0f) ==
-						BACKGROUND_POSITION_VERT_SET) {
-					ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
-				}
+				if ((value & 0xf0) == BACKGROUND_POSITION_HORZ_SET)
+					offset += 2; /* length + units */
+
+				if ((value & 0x0f) == BACKGROUND_POSITION_VERT_SET)
+					offset += 2; /* length + units */
 				break;
+
 			case CSS_PROP_BORDER_SPACING:
-				if (value == BORDER_SPACING_SET) {
-					ADVANCE(2 * sizeof(css_fixed) +
-							2 * sizeof(uint32_t));
-				}
+				if (value == BORDER_SPACING_SET)
+					offset += 4; /* two length + units */
 				break;
+
 			case CSS_PROP_BORDER_TOP_WIDTH:
 			case CSS_PROP_BORDER_RIGHT_WIDTH:
 			case CSS_PROP_BORDER_BOTTOM_WIDTH:
@@ -151,11 +139,10 @@ void make_style_important(css_style *style)
 			case CSS_PROP_OUTLINE_WIDTH:
 				assert(BORDER_WIDTH_SET == OUTLINE_WIDTH_SET);
 
-				if (value == BORDER_WIDTH_SET) {
-					ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
-				}
+				if (value == BORDER_WIDTH_SET)
+					offset += 2; /* length + units */
 				break;
+
 			case CSS_PROP_MARGIN_TOP:
 			case CSS_PROP_MARGIN_RIGHT:
 			case CSS_PROP_MARGIN_BOTTOM:
@@ -173,40 +160,32 @@ void make_style_important(css_style *style)
 				assert(BOTTOM_SET == MARGIN_SET);
 				assert(BOTTOM_SET == WIDTH_SET);
 
-				if (value == BOTTOM_SET) {
-					ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
-				}
+				if (value == BOTTOM_SET) 
+					offset += 2; /* length + units */
 				break;
+
 			case CSS_PROP_CLIP:
-				if ((value & CLIP_SHAPE_MASK) == 
-						CLIP_SHAPE_RECT) {
-					if ((value & CLIP_RECT_TOP_AUTO) == 0) {
-						ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
-					}
-					if ((value & CLIP_RECT_RIGHT_AUTO) == 
-							0) {
-						ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
-					}
-					if ((value & CLIP_RECT_BOTTOM_AUTO) == 
-							0) {
-						ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
-					}
-					if ((value & CLIP_RECT_LEFT_AUTO) == 
-							0) {
-						ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
-					}
+				if ((value & CLIP_SHAPE_MASK) == CLIP_SHAPE_RECT) {
+					if ((value & CLIP_RECT_TOP_AUTO) == 0)
+						offset += 2; /* length + units */
+
+					if ((value & CLIP_RECT_RIGHT_AUTO) == 0)
+						offset += 2; /* length + units */
+
+					if ((value & CLIP_RECT_BOTTOM_AUTO) == 0)
+						offset += 2; /* length + units */
+
+					if ((value & CLIP_RECT_LEFT_AUTO) == 0)
+						offset += 2; /* length + units */
+
 				}
 				break;
+
 			case CSS_PROP_COLOR:
-				if (value == COLOR_SET) {
-					ADVANCE(sizeof(uint32_t));
-				}	
+				if (value == COLOR_SET)
+					offset++; /* colour */
 				break;
+
 			case CSS_PROP_CONTENT:
 				while (value != CONTENT_NORMAL &&
 						value != CONTENT_NONE) {
@@ -215,12 +194,13 @@ void make_style_important(css_style *style)
 					case CONTENT_URI:
 					case CONTENT_ATTR:
 					case CONTENT_STRING:
-						ADVANCE(sizeof(lwc_string *));
+						offset++; /* string table entry */
 						break;
+
 					case CONTENT_COUNTERS:
-						ADVANCE(2 * 
-							sizeof(lwc_string *));
+						offset+=2; /* two string entries */
 						break;
+
 					case CONTENT_OPEN_QUOTE:
 					case CONTENT_CLOSE_QUOTE:
 					case CONTENT_NO_OPEN_QUOTE:
@@ -228,85 +208,85 @@ void make_style_important(css_style *style)
 						break;
 					}
 
-					value = *((uint32_t *) bytecode);
-					ADVANCE(sizeof(value));
+					value = bytecode[offset];
+				        offset++;
 				}
 				break;
+
 			case CSS_PROP_COUNTER_INCREMENT:
 			case CSS_PROP_COUNTER_RESET:
 				assert(COUNTER_INCREMENT_NONE == 
 						COUNTER_RESET_NONE);
 
 				while (value != COUNTER_INCREMENT_NONE) {
-					ADVANCE(sizeof(lwc_string *) +
-							sizeof(css_fixed));
+					offset+=2; /* string + integer */
 
-					value = *((uint32_t *) bytecode);
-					ADVANCE(sizeof(value));
+					value = bytecode[offset];
+				        offset++;
 				}
 				break;
+
 			case CSS_PROP_CURSOR:
 				while (value == CURSOR_URI) {
-					ADVANCE(sizeof(lwc_string *));
+					offset++; /* string table entry */
 
-					value = *((uint32_t *) bytecode);
-					ADVANCE(sizeof(value));
+					value = bytecode[offset];
+				        offset++;
 				}
 				break;
+
 			case CSS_PROP_ELEVATION:
-				if (value == ELEVATION_ANGLE) {
-					ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
-				}
+				if (value == ELEVATION_ANGLE)
+					offset += 2; /* length + units */
 				break;
+
 			case CSS_PROP_FONT_FAMILY:
 				while (value != FONT_FAMILY_END) {
 					switch (value) {
 					case FONT_FAMILY_STRING:
 					case FONT_FAMILY_IDENT_LIST:
-						ADVANCE(sizeof(lwc_string *));
+						offset++; /* string table entry */
 						break;
 					}
 
-					value = *((uint32_t *) bytecode);
-					ADVANCE(sizeof(value));
+					value = bytecode[offset];
+				        offset++;
 				}
 				break;
+
 			case CSS_PROP_FONT_SIZE:
-				if (value == FONT_SIZE_DIMENSION) {
-					ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
-				}
+				if (value == FONT_SIZE_DIMENSION) 
+					offset += 2; /* length + units */
 				break;
+
 			case CSS_PROP_LETTER_SPACING:
 			case CSS_PROP_WORD_SPACING:
 				assert(LETTER_SPACING_SET == WORD_SPACING_SET);
 
-				if (value == LETTER_SPACING_SET) {
-					ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
-				}
+				if (value == LETTER_SPACING_SET)
+					offset += 2; /* length + units */
 				break;
+
 			case CSS_PROP_LINE_HEIGHT:
 				switch (value) {
 				case LINE_HEIGHT_NUMBER:
-					ADVANCE(sizeof(css_fixed));
+					offset++; /* value */
 					break;
+
 				case LINE_HEIGHT_DIMENSION:
-					ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
+					offset += 2; /* length + units */
 					break;
 				}
 				break;
+
 			case CSS_PROP_MAX_HEIGHT:
 			case CSS_PROP_MAX_WIDTH:
 				assert(MAX_HEIGHT_SET == MAX_WIDTH_SET);
 
-				if (value == MAX_HEIGHT_SET) {
-					ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
-				}
+				if (value == MAX_HEIGHT_SET)
+					offset += 2; /* length + units */
 				break;
+
 			case CSS_PROP_PADDING_TOP:
 			case CSS_PROP_PADDING_RIGHT:
 			case CSS_PROP_PADDING_BOTTOM:
@@ -322,11 +302,10 @@ void make_style_important(css_style *style)
 				assert(MIN_HEIGHT_SET == PAUSE_BEFORE_SET);
 				assert(MIN_HEIGHT_SET == TEXT_INDENT_SET);
 
-				if (value == MIN_HEIGHT_SET) {
-					ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
-				}
+				if (value == MIN_HEIGHT_SET)
+					offset += 2; /* length + units */
 				break;
+
 			case CSS_PROP_ORPHANS:
 			case CSS_PROP_PITCH_RANGE:
 			case CSS_PROP_RICHNESS:
@@ -337,81 +316,80 @@ void make_style_important(css_style *style)
 				assert(ORPHANS_SET == STRESS_SET);
 				assert(ORPHANS_SET == WIDOWS_SET);
 
-				if (value == ORPHANS_SET) {
-					ADVANCE(sizeof(css_fixed));
-				}
+				if (value == ORPHANS_SET)
+					offset++; /* value */
 				break;
+
 			case CSS_PROP_OUTLINE_COLOR:
-				if (value == OUTLINE_COLOR_SET) {
-					ADVANCE(sizeof(uint32_t));
-				}
+				if (value == OUTLINE_COLOR_SET)
+					offset++; /* color */
 				break;
+
 			case CSS_PROP_PITCH:
-				if (value == PITCH_FREQUENCY) {
-					ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
-				}
+				if (value == PITCH_FREQUENCY)
+					offset += 2; /* length + units */
 				break;
+
 			case CSS_PROP_PLAY_DURING:
-				if (value == PLAY_DURING_URI) {
-					ADVANCE(sizeof(lwc_string *));
-				}
+				if (value == PLAY_DURING_URI)
+					offset++; /* string table entry */
 				break;
+
 			case CSS_PROP_QUOTES:
 				while (value != QUOTES_NONE) {
-					ADVANCE(2 * sizeof(lwc_string *));
+					offset += 2; /* two string table entries */
 
-					value = *((uint32_t *) bytecode);
-					ADVANCE(sizeof(value));
+					value = bytecode[offset];
+				        offset++;
 				}
 				break;
+
 			case CSS_PROP_SPEECH_RATE:
-				if (value == SPEECH_RATE_SET) {
-					ADVANCE(sizeof(css_fixed));
-				}
+				if (value == SPEECH_RATE_SET) 
+					offset++; /* rate */
 				break;
+
 			case CSS_PROP_VERTICAL_ALIGN:
-				if (value == VERTICAL_ALIGN_SET) {
-					ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
-				}
+				if (value == VERTICAL_ALIGN_SET)
+					offset += 2; /* length + units */
 				break;
+
 			case CSS_PROP_VOICE_FAMILY:
 				while (value != VOICE_FAMILY_END) {
 					switch (value) {
 					case VOICE_FAMILY_STRING:
 					case VOICE_FAMILY_IDENT_LIST:
-						ADVANCE(sizeof(lwc_string *));
+						offset++; /* string table entry */
 						break;
 					}
 
-					value = *((uint32_t *) bytecode);
-					ADVANCE(sizeof(value));
+					value = bytecode[offset];
+				        offset++;
 				}
 				break;
+
 			case CSS_PROP_VOLUME:
 				switch (value) {
 				case VOLUME_NUMBER:
-					ADVANCE(sizeof(css_fixed));
+					offset++; /* value */
 					break;
+
 				case VOLUME_DIMENSION:
-					ADVANCE(sizeof(css_fixed) +
-							sizeof(uint32_t));
+					offset += 2; /* value + units */
 					break;
 				}
 				break;
+
 			case CSS_PROP_Z_INDEX:
-				if (value == Z_INDEX_SET) {
-					ADVANCE(sizeof(css_fixed));
-				}
+				if (value == Z_INDEX_SET)
+					offset++; /* z index */
 				break;
+
 			default:
 				break;
 			}
 		}
 	}
-
-#undef ADVANCE
 
 }
 

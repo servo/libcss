@@ -64,9 +64,3 @@ css_error compose_direction(const css_computed_style *parent,
 	return set_direction(result, type);
 }
 
-uint32_t destroy_direction(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

@@ -29,22 +29,22 @@
  */
 css_error parse_play_during(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
-		css_style **result)
+		css_style *result)
 {
 	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
 	uint16_t value = 0;
-	uint32_t opv;
-	uint32_t required_size;
 	lwc_string *uri;
 	bool match;
+	uint32_t uri_snumber;
 
 	/* URI [ IDENT(mix) || IDENT(repeat) ]? | IDENT(auto,none,inherit) */
 	token = parserutils_vector_iterate(vector, ctx);
-	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-			token->type != CSS_TOKEN_URI)) {
+	if ((token == NULL) || 
+	    ((token->type != CSS_TOKEN_IDENT) &&
+	     (token->type != CSS_TOKEN_URI))) {
 		*ctx = orig_ctx;
 		return CSS_INVALID;
 	}
@@ -78,6 +78,15 @@ css_error parse_play_during(css_language *c,
 			*ctx = orig_ctx;
 			return error;
 		}
+
+		error = css_stylesheet_string_add(c->sheet, 
+						  uri, 
+						  &uri_snumber);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
+
 
 		for (modifiers = 0; modifiers < 2; modifiers++) {
 			consumeWhitespace(vector, ctx);
@@ -115,28 +124,19 @@ css_error parse_play_during(css_language *c,
 		}
 	}
 
-	opv = buildOPV(CSS_PROP_PLAY_DURING, flags, value);
-
-	required_size = sizeof(opv);
-	if ((flags & FLAG_INHERIT) == false && 
-			(value & PLAY_DURING_TYPE_MASK) == PLAY_DURING_URI)
-		required_size += sizeof(lwc_string *);
-
-	/* Allocate result */
-	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	error = css_stylesheet_style_appendOPV(result, CSS_PROP_PLAY_DURING, flags, value);
 	if (error != CSS_OK) {
 		*ctx = orig_ctx;
 		return error;
 	}
 
-	/* Copy the bytecode to it */
-	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false && 
-			(value & PLAY_DURING_TYPE_MASK)	 == PLAY_DURING_URI) {
-		/* Don't ref URI -- we want to pass ownership to the bytecode */
-		memcpy((uint8_t *) (*result)->bytecode + sizeof(opv),
-				&uri, sizeof(lwc_string *));
+	    (value & PLAY_DURING_TYPE_MASK) == PLAY_DURING_URI) {
+		error = css_stylesheet_style_append(result, uri_snumber);
 	}
 
-	return CSS_OK;
+	if (error != CSS_OK) 
+		*ctx = orig_ctx;
+
+	return error;
 }

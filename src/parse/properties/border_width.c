@@ -29,96 +29,87 @@
  */
 css_error parse_border_width(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		css_style **result)
+		css_style *result)
 {
 	int orig_ctx = *ctx;
 	int prev_ctx;
 	const css_token *token;
-	css_style *top = NULL;
-	css_style *right = NULL;
-	css_style *bottom = NULL;
-	css_style *left = NULL;
-	css_style *ret = NULL;
-	uint32_t num_sides = 0;
-	uint32_t required_size;
+	uint16_t side_val[4];
+	css_fixed side_length[4];
+	uint32_t side_unit[4];
+	uint32_t side_count = 0;
 	bool match;
 	css_error error;
 
 	/* Firstly, handle inherit */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			(lwc_string_caseless_isequal(
-			token->idata, c->strings[INHERIT],
-			&match) == lwc_error_ok && match)) {
-		uint32_t *bytecode;
-
-		error = css_stylesheet_style_create(c->sheet,
-			4 * sizeof(uint32_t), &ret);
-		if (error != CSS_OK) {
-			*ctx = orig_ctx;
-			return error;
-		}
-
-		bytecode = (uint32_t *) ret->bytecode;
-
-		*(bytecode++) = buildOPV(CSS_PROP_BORDER_TOP_WIDTH,
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_BORDER_RIGHT_WIDTH,
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_BORDER_BOTTOM_WIDTH,
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_BORDER_LEFT_WIDTH,
-				FLAG_INHERIT, 0);
-
-		parserutils_vector_iterate(vector, ctx);
-
-		*result = ret;
-
-		return CSS_OK;
-	} else if (token == NULL) {
-		/* No tokens -- clearly garbage */
-		*ctx = orig_ctx;
+	if (token == NULL) 
 		return CSS_INVALID;
-	}
+		
+	if (is_css_inherit(c, token)) {
+		error = css_stylesheet_style_inherit(result, CSS_PROP_BORDER_TOP_WIDTH);
+		if (error != CSS_OK) 
+			return error;
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_BORDER_RIGHT_WIDTH);
+		if (error != CSS_OK) 
+			return error;		
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_BORDER_BOTTOM_WIDTH);
+		if (error != CSS_OK) 
+			return error;
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_BORDER_LEFT_WIDTH);
+		if (error == CSS_OK) 
+			parserutils_vector_iterate(vector, ctx);
+
+		return error;
+	} 
 
 	/* Attempt to parse up to 4 widths */
 	do {
 		prev_ctx = *ctx;
-		error = CSS_OK;
 
-		/* Ensure that we're not about to parse another inherit */
-		token = parserutils_vector_peek(vector, *ctx);
-		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-				(lwc_string_caseless_isequal(
-				token->idata, c->strings[INHERIT],
-				&match) == lwc_error_ok && match)) {
-			error = CSS_INVALID;
-			goto cleanup;
+		if ((token != NULL) && is_css_inherit(c, token)) {
+			*ctx = orig_ctx;
+			return CSS_INVALID;
 		}
 
-		if (top == NULL &&
-				(error = parse_border_side_width(c, vector, 
-				ctx, CSS_PROP_BORDER_TOP_WIDTH, &top)) == 
-				CSS_OK) {
-			num_sides = 1;
-		} else if (right == NULL &&
-				(error = parse_border_side_width(c, vector, 
-				ctx, CSS_PROP_BORDER_RIGHT_WIDTH, &right)) == 
-				CSS_OK) {
-			num_sides = 2;
-		} else if (bottom == NULL &&
-				(error = parse_border_side_width(c, vector, 
-				ctx, CSS_PROP_BORDER_BOTTOM_WIDTH, &bottom)) == 
-				CSS_OK) {
-			num_sides = 3;
-		} else if (left == NULL &&
-				(error = parse_border_side_width(c, vector, 
-				ctx, CSS_PROP_BORDER_LEFT_WIDTH, &left)) == 
-				CSS_OK) {
-			num_sides = 4;
+		if ((token->type == CSS_TOKEN_IDENT) && (lwc_string_caseless_isequal(token->idata, c->strings[THIN], &match) == lwc_error_ok && match)) {
+			side_val[side_count] =  BORDER_WIDTH_THIN;
+			parserutils_vector_iterate(vector, ctx);
+			error = CSS_OK;
+		} else if ((token->type == CSS_TOKEN_IDENT) && (lwc_string_caseless_isequal(token->idata, c->strings[MEDIUM], &match) == lwc_error_ok && match)) {
+			side_val[side_count] =  BORDER_WIDTH_MEDIUM;
+			parserutils_vector_iterate(vector, ctx);
+			error = CSS_OK;
+		} else if ((token->type == CSS_TOKEN_IDENT) && (lwc_string_caseless_isequal(token->idata, c->strings[THICK], &match) == lwc_error_ok && match)) {
+			parserutils_vector_iterate(vector, ctx);
+			error = CSS_OK;
+			side_val[side_count] =  BORDER_WIDTH_THICK;
+		} else {
+			side_val[side_count] = BORDER_WIDTH_SET;
+
+			error = parse_unit_specifier(c, vector, ctx, UNIT_PX, &side_length[side_count], &side_unit[side_count]);
+			if (error == CSS_OK) {
+				if (side_unit[side_count] == UNIT_PCT ||
+				    side_unit[side_count] & UNIT_ANGLE ||
+				    side_unit[side_count] & UNIT_TIME ||
+				    side_unit[side_count] & UNIT_FREQ) {
+					*ctx = orig_ctx;
+					return CSS_INVALID;
+				}
+
+				if (side_length[side_count] < 0) {
+					*ctx = orig_ctx;
+					return CSS_INVALID;
+				}
+			}
 		}
 
 		if (error == CSS_OK) {
+			side_count++;
+
 			consumeWhitespace(vector, ctx);
 
 			token = parserutils_vector_peek(vector, *ctx);
@@ -126,138 +117,51 @@ css_error parse_border_width(css_language *c,
 			/* Forcibly cause loop to exit */
 			token = NULL;
 		}
-	} while (*ctx != prev_ctx && token != NULL);
+	} while ((*ctx != prev_ctx) && (token != NULL) && (side_count < 4));
 
-	if (num_sides == 0) {
+
+#define SIDE_APPEND(OP,NUM)								\
+	error = css_stylesheet_style_appendOPV(result, (OP), 0, side_val[(NUM)]);	\
+	if (error != CSS_OK)								\
+		break;									\
+	if (side_val[(NUM)] == BORDER_WIDTH_SET) {					\
+		error = css_stylesheet_style_append(result, side_length[(NUM)]);	\
+		if (error != CSS_OK)							\
+			break;								\
+		error = css_stylesheet_style_append(result, side_unit[(NUM)]);		\
+		if (error != CSS_OK)							\
+			break;								\
+	}
+
+	switch (side_count) {
+	case 1:
+		SIDE_APPEND(CSS_PROP_BORDER_TOP_WIDTH, 0);
+		SIDE_APPEND(CSS_PROP_BORDER_RIGHT_WIDTH, 0);
+		SIDE_APPEND(CSS_PROP_BORDER_BOTTOM_WIDTH, 0);
+		SIDE_APPEND(CSS_PROP_BORDER_LEFT_WIDTH, 0);
+		break;
+	case 2:
+		SIDE_APPEND(CSS_PROP_BORDER_TOP_WIDTH, 0);
+		SIDE_APPEND(CSS_PROP_BORDER_RIGHT_WIDTH, 1);
+		SIDE_APPEND(CSS_PROP_BORDER_BOTTOM_WIDTH, 0);
+		SIDE_APPEND(CSS_PROP_BORDER_LEFT_WIDTH, 1);
+		break;
+	case 3:
+		SIDE_APPEND(CSS_PROP_BORDER_TOP_WIDTH, 0);
+		SIDE_APPEND(CSS_PROP_BORDER_RIGHT_WIDTH, 1);
+		SIDE_APPEND(CSS_PROP_BORDER_BOTTOM_WIDTH, 2);
+		SIDE_APPEND(CSS_PROP_BORDER_LEFT_WIDTH, 1);
+		break;
+	case 4:
+		SIDE_APPEND(CSS_PROP_BORDER_TOP_WIDTH, 0);
+		SIDE_APPEND(CSS_PROP_BORDER_RIGHT_WIDTH, 1);
+		SIDE_APPEND(CSS_PROP_BORDER_BOTTOM_WIDTH, 2);
+		SIDE_APPEND(CSS_PROP_BORDER_LEFT_WIDTH, 3);
+		break;
+	default:
 		error = CSS_INVALID;
-		goto cleanup;
+		break;
 	}
-
-	/* Calculate size of resultant style */
-	if (num_sides == 1) {
-		required_size = 4 * top->length;
-	} else if (num_sides == 2) {
-		required_size = 2 * top->length + 2 * right->length;
-	} else if (num_sides == 3) {
-		required_size = top->length + 2 * right->length + 
-				bottom->length;
-	} else {
-		required_size = top->length + right->length +
-				bottom->length + left->length;
-	}
-
-	error = css_stylesheet_style_create(c->sheet, required_size, &ret);
-	if (error != CSS_OK)
-		goto cleanup;
-
-	required_size = 0;
-
-	if (num_sides == 1) {
-		uint32_t *opv = ((uint32_t *) top->bytecode);
-		uint8_t flags = getFlags(*opv);
-		uint16_t value = getValue(*opv);
-
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				top->bytecode, top->length);
-		required_size += top->length;
-
-		*opv = buildOPV(CSS_PROP_BORDER_RIGHT_WIDTH, flags, value);
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				top->bytecode, top->length);
-		required_size += top->length;
-
-		*opv = buildOPV(CSS_PROP_BORDER_BOTTOM_WIDTH, flags, value);
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				top->bytecode, top->length);
-		required_size += top->length;
-
-		*opv = buildOPV(CSS_PROP_BORDER_LEFT_WIDTH, flags, value);
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				top->bytecode, top->length);
-		required_size += top->length;
-	} else if (num_sides == 2) {
-		uint32_t *vopv = ((uint32_t *) top->bytecode);
-		uint32_t *hopv = ((uint32_t *) right->bytecode);
-		uint8_t vflags = getFlags(*vopv);
-		uint8_t hflags = getFlags(*hopv);
-		uint16_t vvalue = getValue(*vopv);
-		uint16_t hvalue = getValue(*hopv);
-
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				top->bytecode, top->length);
-		required_size += top->length;
-
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				right->bytecode, right->length);
-		required_size += right->length;
-
-		*vopv = buildOPV(CSS_PROP_BORDER_BOTTOM_WIDTH, vflags, vvalue);
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				top->bytecode, top->length);
-		required_size += top->length;
-
-		*hopv = buildOPV(CSS_PROP_BORDER_LEFT_WIDTH, hflags, hvalue);
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				right->bytecode, right->length);
-		required_size += right->length;
-	} else if (num_sides == 3) {
-		uint32_t *opv = ((uint32_t *) right->bytecode);
-		uint8_t flags = getFlags(*opv);
-		uint16_t value = getValue(*opv);
-
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				top->bytecode, top->length);
-		required_size += top->length;
-
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				right->bytecode, right->length);
-		required_size += right->length;
-
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				bottom->bytecode, bottom->length);
-		required_size += bottom->length;
-
-		*opv = buildOPV(CSS_PROP_BORDER_LEFT_WIDTH, flags, value);
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				right->bytecode, right->length);
-		required_size += right->length;
-	} else {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				top->bytecode, top->length);
-		required_size += top->length;
-
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				right->bytecode, right->length);
-		required_size += right->length;
-
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				bottom->bytecode, bottom->length);
-		required_size += bottom->length;
-
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				left->bytecode, left->length);
-		required_size += left->length;
-	}
-
-	assert(required_size == ret->length);
-
-	/* Write the result */
-	*result = ret;
-	/* Invalidate ret, so that cleanup doesn't destroy it */
-	ret = NULL;
-
-	/* Clean up after ourselves */
-cleanup:
-	if (top)
-		css_stylesheet_style_destroy(c->sheet, top, error == CSS_OK);
-	if (right)
-		css_stylesheet_style_destroy(c->sheet, right, error == CSS_OK);
-	if (bottom)
-		css_stylesheet_style_destroy(c->sheet, bottom, error == CSS_OK);
-	if (left)
-		css_stylesheet_style_destroy(c->sheet, left, error == CSS_OK);
-	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;

@@ -71,9 +71,3 @@ css_error compose_background_repeat(const css_computed_style *parent,
 	return set_background_repeat(result, type);
 }
 
-uint32_t destroy_background_repeat(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

@@ -32,8 +32,10 @@ css_error cascade_content(uint32_t opv, css_style *style,
 			value = CSS_CONTENT_SET;
 			
 			while (v != CONTENT_NORMAL) {
-				lwc_string *he = *((lwc_string **) style->bytecode);
+				lwc_string *he;
 				css_computed_content_item *temp;
+
+				css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &he);
 				
 				temp = state->computed->alloc(content,
 						(n_contents + 1) *
@@ -51,7 +53,7 @@ css_error cascade_content(uint32_t opv, css_style *style,
 
 				switch (v & 0xff) {
 				case CONTENT_COUNTER:
-					advance_bytecode(style, sizeof(he));
+					advance_bytecode(style, sizeof(css_code_t));
 
 					content[n_contents].type =
 						CSS_COMPUTED_CONTENT_COUNTER;
@@ -62,11 +64,10 @@ css_error cascade_content(uint32_t opv, css_style *style,
 				{
 					lwc_string *sep;
 	
-					advance_bytecode(style, sizeof(he));
+					advance_bytecode(style, sizeof(css_code_t));
 
-					sep = *((lwc_string **) 
-							style->bytecode);
-					advance_bytecode(style, sizeof(sep));
+					css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &sep);
+					advance_bytecode(style, sizeof(css_code_t));
 
 					content[n_contents].type =
 						CSS_COMPUTED_CONTENT_COUNTERS;
@@ -76,21 +77,21 @@ css_error cascade_content(uint32_t opv, css_style *style,
 				}
 					break;
 				case CONTENT_URI:
-					advance_bytecode(style, sizeof(he));
+					advance_bytecode(style, sizeof(css_code_t));
 
 					content[n_contents].type =
 						CSS_COMPUTED_CONTENT_URI;
 					content[n_contents].data.uri = he;
 					break;
 				case CONTENT_ATTR:
-					advance_bytecode(style, sizeof(he));
+					advance_bytecode(style, sizeof(css_code_t));
 
 					content[n_contents].type =
 						CSS_COMPUTED_CONTENT_ATTR;
 					content[n_contents].data.attr = he;
 					break;
 				case CONTENT_STRING:
-					advance_bytecode(style, sizeof(he));
+					advance_bytecode(style, sizeof(css_code_t));
 
 					content[n_contents].type =
 						CSS_COMPUTED_CONTENT_STRING;
@@ -245,37 +246,3 @@ css_error compose_content(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_content(void *bytecode)
-{
-	uint32_t consumed = sizeof(uint32_t);
-	uint32_t value = getValue(*((uint32_t*)bytecode));
-	bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
-	
-	if (value == CONTENT_NONE || value == CONTENT_NORMAL)
-		return sizeof(uint32_t);
-	
-	while (value != 0) {
-		switch (value & 0xff) {
-		case CONTENT_COUNTERS: {
-			lwc_string *str = *(lwc_string **)bytecode;
-			lwc_string_unref(str);
-			consumed += sizeof(lwc_string*);
-			bytecode = (uint8_t*)bytecode + sizeof(lwc_string *);
-		}
-		case CONTENT_STRING:
-		case CONTENT_URI:
-		case CONTENT_COUNTER:
-		case CONTENT_ATTR: {
-			lwc_string *str = *(lwc_string **)bytecode;
-			lwc_string_unref(str);
-			consumed += sizeof(lwc_string*);
-			bytecode = (uint8_t*)bytecode + sizeof(lwc_string *);
-		}
-		}
-		consumed += sizeof(uint32_t);
-		value = *((uint32_t*)bytecode);
-		bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
-	}
-	
-	return consumed;
-}

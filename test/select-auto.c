@@ -178,12 +178,15 @@ static css_error resolve_url(void *pw,
 	return CSS_OK;
 }
 
+static bool fail_because_lwc_leaked = false;
+
 static void
 printing_lwc_iterator(lwc_string *str, void *pw)
 {
 	UNUSED(pw);
 	
 	printf(" DICT: %*s\n", (int)(lwc_string_length(str)), lwc_string_data(str));
+	fail_because_lwc_leaked = true;
 }
 
 int main(int argc, char **argv)
@@ -216,6 +219,8 @@ int main(int argc, char **argv)
 	lwc_string_unref(ctx.attr_id);
 	
 	lwc_iterate_strings(printing_lwc_iterator, NULL);
+	
+	assert(fail_because_lwc_leaked == false);
 	
 	printf("PASS\n");
 	return 0;

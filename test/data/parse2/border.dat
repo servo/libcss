@@ -597,6 +597,41 @@
 | *
 #reset
 
+#data
+* { border: thin inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border: inherit thin; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border: thin solid black inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border: thin inherit solid; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { border: inherit !important #ff9; }
+#errors
+#expected
+| *
+#reset
+
 
 #data
 * { border-color: red; }

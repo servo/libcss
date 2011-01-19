@@ -159,6 +159,55 @@
 | *
 #reset
 
+#data
+* { padding: 2px inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { padding: inherit 2px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { padding: 2px 3em inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { padding: 2px inherit 3em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { padding: 2px 0 0 0 inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { padding: inherit inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { padding: inherit 0 !important; }
+#errors
+#expected
+| *
+#reset
+
 
 
 #data

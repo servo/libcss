@@ -210,22 +210,3 @@ css_error compose_cursor(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_cursor(void *bytecode)
-{
-	uint32_t consumed = sizeof(uint32_t);
-	uint32_t value = getValue(*((uint32_t*)bytecode));
-	bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
-	
-	while (value == CURSOR_URI) {
-		lwc_string *str = *((lwc_string **)bytecode);
-		consumed += sizeof(lwc_string*);
-		bytecode = ((uint8_t*)bytecode) + sizeof(lwc_string*);
-		lwc_string_unref(str);
-		
-		consumed += sizeof(uint32_t);
-		value = *((uint32_t*)bytecode);
-		bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
-	}
-	
-	return consumed;
-}

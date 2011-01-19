@@ -18,6 +18,7 @@
 #include <libcss/stylesheet.h>
 #include <libcss/types.h>
 
+#include "bytecode/bytecode.h"
 #include "parse/parse.h"
 #include "select/hash.h"
 
@@ -25,8 +26,10 @@ typedef struct css_rule css_rule;
 typedef struct css_selector css_selector;
 
 typedef struct css_style {
-	uint32_t length;		/**< Length, in bytes, of bytecode */
-	void *bytecode;			/**< Pointer to bytecode */
+	css_code_t *bytecode;	      /**< Pointer to bytecode */
+	uint32_t used;		      /**< number of code entries used */
+	uint32_t allocated;	      /**< number of allocated code entries */
+	struct css_stylesheet *sheet; /**< containing sheet */
 } css_style;
 
 typedef enum css_selector_type {
@@ -168,8 +171,6 @@ struct css_stylesheet {
 
 	size_t size;				/**< Size, in bytes */
 
-	css_style *free_styles[4];		/**< Free styles: 16B buckets */
-
 	css_import_notification_fn import;	/**< Import notification function */
 	void *import_pw;			/**< Private word */
 
@@ -178,16 +179,34 @@ struct css_stylesheet {
 
 	css_allocator_fn alloc;			/**< Allocation function */
 	void *pw;				/**< Private word */
-
+  
+	css_style *cached_style;		/**< Cache for style parsing */
+  
 	lwc_string **string_vector;             /**< Bytecode string vector */
 	uint32_t string_vector_l;               /**< The string vector allocated length in entries */
 	uint32_t string_vector_c;               /**< The number of string vector entries used */ 
 };
 
-css_error css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len,
-		css_style **style);
-css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style,
-				       bool suppress_bytecode_cleanup);
+css_error css_stylesheet_style_create(css_stylesheet *sheet, css_style **style);
+css_error css_stylesheet_style_append(css_style *style, css_code_t code);
+css_error css_stylesheet_style_vappend(css_style *style, uint32_t style_count, ...);
+css_error css_stylesheet_style_destroy(css_style *style);
+css_error css_stylesheet_merge_style(css_style *target, css_style *style);
+
+/** Helper function to avoid distinct buildOPV call */ 
+static inline css_error css_stylesheet_style_appendOPV(css_style *style, opcode_t opcode, uint8_t flags, uint16_t value)
+{
+	return css_stylesheet_style_append(style, buildOPV(opcode, flags, value));
+}
+
+/** Helper function to set inherit flag */ 
+static inline css_error css_stylesheet_style_inherit(css_style *style, opcode_t opcode)
+{
+	return css_stylesheet_style_append(style, buildOPV(opcode, FLAG_INHERIT, 0));
+}
+
+
+
 
 css_error css_stylesheet_selector_create(css_stylesheet *sheet,
 		lwc_string *name, css_selector **selector);

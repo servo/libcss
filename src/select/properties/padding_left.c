@@ -47,7 +47,3 @@ css_error compose_padding_left(const css_computed_style *parent,
 	return set_padding_left(result, type, length, unit);
 }
 
-uint32_t destroy_padding_left(void *bytecode)
-{
-	return generic_destroy_length(bytecode);
-}

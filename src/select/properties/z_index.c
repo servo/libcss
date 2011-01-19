@@ -67,7 +67,3 @@ css_error compose_z_index(const css_computed_style *parent,
 	return set_z_index(result, type, index);
 }
 
-uint32_t destroy_z_index(void *bytecode)
-{
-	return generic_destroy_number(bytecode);
-}

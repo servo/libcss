@@ -105,6 +105,48 @@
 #reset
 
 #data
+* { cue: inherit inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue: none inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue: inherit none; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue: none url(foo) !important inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue: inherit none url(foo) !important; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { cue: inherit url(foo) !important; }
+#errors
+#expected
+| *
+#reset
+
+#data
 * { cue:}
 #errors
 #expected

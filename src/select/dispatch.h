@@ -36,7 +36,6 @@ extern struct prop_table {
 	css_error (*compose)(const css_computed_style *parent,
 			const css_computed_style *child,
 			css_computed_style *result);
-	uint32_t  (*destroy)(void *bytecode);
 	unsigned int inherited;
 	unsigned int group;
 } prop_dispatch[CSS_N_PROPERTIES];

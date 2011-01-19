@@ -48,7 +48,3 @@ css_error compose_border_left_width(const css_computed_style *parent,
 	return set_border_left_width(result, type, length, unit);
 }
 
-uint32_t destroy_border_left_width(void *bytecode)
-{
-	return generic_destroy_length(bytecode);
-}

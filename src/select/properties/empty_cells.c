@@ -64,9 +64,3 @@ css_error compose_empty_cells(const css_computed_style *parent,
 	return set_empty_cells(result, type);
 }
 
-uint32_t destroy_empty_cells(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

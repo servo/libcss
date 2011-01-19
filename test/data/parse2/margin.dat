@@ -221,6 +221,55 @@
 | *
 #reset
 
+#data
+* { margin: 2px inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { margin: inherit 2px; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { margin: 2px 3em inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { margin: 2px inherit 3em; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { margin: 2px 0 0 0 inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { margin: inherit inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { margin: inherit 0 !important; }
+#errors
+#expected
+| *
+#reset
+
 
 
 #data

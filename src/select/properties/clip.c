@@ -115,22 +115,3 @@ css_error compose_clip(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_clip(void *bytecode)
-{
-	uint32_t value = getValue(*((uint32_t*)bytecode));
-	bool has_rect = value & CLIP_SHAPE_RECT;
-	int nonautos = 0;
-	
-	if (has_rect) {
-		if ((value & CLIP_RECT_TOP_AUTO) == 0)
-			nonautos += 1;
-		if ((value & CLIP_RECT_RIGHT_AUTO) == 0)
-			nonautos += 1;
-		if ((value & CLIP_RECT_BOTTOM_AUTO) == 0)
-			nonautos += 1;
-		if ((value & CLIP_RECT_LEFT_AUTO) == 0)
-			nonautos += 1;
-	}
-	
-	return sizeof(uint32_t) + ((sizeof(css_fixed) + sizeof(uint32_t)) * nonautos);
-}

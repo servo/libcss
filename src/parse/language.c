@@ -1273,17 +1273,24 @@ css_error parseProperty(css_language *c, const css_token *property,
 	handler = property_handlers[i - FIRST_PROP];
 	assert(handler != NULL);
 
-	/* Call it */
-	error = handler(c, vector, ctx, &style);
-	if (error != CSS_OK)
+	/* allocate style */
+	error = css_stylesheet_style_create(c->sheet, &style);
+	if (error != CSS_OK) 
 		return error;
 
 	assert (style != NULL);
 
+	/* Call the handler */
+	error = handler(c, vector, ctx, style);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(style);
+		return error;
+	}
+
 	/* Determine if this declaration is important or not */
 	error = parse_important(c, vector, ctx, &flags);
 	if (error != CSS_OK) {
-	  css_stylesheet_style_destroy(c->sheet, style, false);
+		css_stylesheet_style_destroy(style);
 		return error;
 	}
 
@@ -1292,7 +1299,7 @@ css_error parseProperty(css_language *c, const css_token *property,
 	token = parserutils_vector_iterate(vector, ctx);
 	if (token != NULL) {
 		/* Trailing junk, so discard declaration */
-                css_stylesheet_style_destroy(c->sheet, style, false);
+                css_stylesheet_style_destroy(style);
 		return CSS_INVALID;
 	}
 
@@ -1303,7 +1310,7 @@ css_error parseProperty(css_language *c, const css_token *property,
 	/* Append style to rule */
 	error = css_stylesheet_rule_append_style(c->sheet, rule, style);
 	if (error != CSS_OK) {
-                css_stylesheet_style_destroy(c->sheet, style, false);
+                css_stylesheet_style_destroy(style);
 		return error;
 	}
 

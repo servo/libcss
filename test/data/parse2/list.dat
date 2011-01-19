@@ -180,6 +180,69 @@
 | *
 #reset
 
+#data
+* { list-style: inherit circle; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style: disc inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style: circle inside inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style: inherit disc inside; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style: disc circle; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style: inside inherit url('PicoDrive'); }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style: !important disc circle; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style: !important disc inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { list-style: disc inherit !important; }
+#errors
+#expected
+| *
+#reset
+
 
 
 

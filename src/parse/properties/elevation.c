@@ -29,17 +29,15 @@
  */
 css_error parse_elevation(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
-		css_style **result)
+		css_style *result)
 {
 	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
 	uint16_t value = 0;
-	uint32_t opv;
 	css_fixed length = 0;
 	uint32_t unit = 0;
-	uint32_t required_size;
 	bool match;
 
 	/* angle | IDENT(below, level, above, higher, lower, inherit) */
@@ -119,26 +117,18 @@ css_error parse_elevation(css_language *c,
 		value = ELEVATION_ANGLE;
 	}
 
-	opv = buildOPV(CSS_PROP_ELEVATION, flags, value);
-
-	required_size = sizeof(opv);
-	if ((flags & FLAG_INHERIT) == false && value == ELEVATION_ANGLE)
-		required_size += sizeof(length) + sizeof(unit);
-
-	/* Allocate result */
-	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	error = css_stylesheet_style_appendOPV(result, CSS_PROP_ELEVATION, flags, value);
 	if (error != CSS_OK) {
 		*ctx = orig_ctx;
 		return error;
 	}
 
-	/* Copy the bytecode to it */
-	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if ((flags & FLAG_INHERIT) == false && value == ELEVATION_ANGLE) {
-		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
-				&length, sizeof(length));
-		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
-				sizeof(length), &unit, sizeof(unit));
+	if (((flags & FLAG_INHERIT) == false) && (value == ELEVATION_ANGLE)) {
+		error = css_stylesheet_style_vappend(result, 2, length, unit);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
 	}
 
 	return CSS_OK;

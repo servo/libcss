@@ -47,7 +47,3 @@ css_error compose_right(const css_computed_style *parent,
 	return set_right(result, type, length, unit);
 }
 
-uint32_t destroy_right(void *bytecode)
-{
-	return generic_destroy_length(bytecode);
-}

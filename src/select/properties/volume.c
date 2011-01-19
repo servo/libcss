@@ -85,14 +85,3 @@ css_error compose_volume(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_volume(void *bytecode)
-{
-	uint32_t value = getValue(*((uint32_t*)bytecode));
-	uint32_t additional = 0;
-	if (value == VOLUME_NUMBER)
-		additional = sizeof(css_fixed);
-	else if (value == VOLUME_DIMENSION)
-		additional = sizeof(css_fixed) + sizeof(uint32_t);
-	
-	return sizeof(uint32_t) + additional;
-}

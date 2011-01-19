@@ -48,9 +48,3 @@ css_error compose_page_break_after(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_page_break_after(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

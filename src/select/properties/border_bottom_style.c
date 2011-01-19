@@ -44,9 +44,3 @@ css_error compose_border_bottom_style(const css_computed_style *parent,
 	return set_border_bottom_style(result, type);
 }
 
-uint32_t destroy_border_bottom_style(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

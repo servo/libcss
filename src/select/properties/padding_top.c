@@ -47,7 +47,3 @@ css_error compose_padding_top(const css_computed_style *parent,
 	return set_padding_top(result, type, length, unit);
 }
 
-uint32_t destroy_padding_top(void *bytecode)
-{
-	return generic_destroy_length(bytecode);
-}

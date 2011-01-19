@@ -103,9 +103,3 @@ css_error compose_list_style_type(const css_computed_style *parent,
 	return set_list_style_type(result, type);
 }
 
-uint32_t destroy_list_style_type(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

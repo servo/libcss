@@ -70,9 +70,3 @@ css_error compose_text_transform(const css_computed_style *parent,
 	return set_text_transform(result, type);
 }
 
-uint32_t destroy_text_transform(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

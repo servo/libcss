@@ -72,9 +72,3 @@ css_error compose_text_decoration(const css_computed_style *parent,
 	return set_text_decoration(result, type);
 }
 
-uint32_t destroy_text_decoration(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

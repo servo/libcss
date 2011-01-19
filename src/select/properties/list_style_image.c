@@ -53,7 +53,3 @@ css_error compose_list_style_image(const css_computed_style *parent,
 	return set_list_style_image(result, type, url);
 }
 
-uint32_t destroy_list_style_image(void *bytecode)
-{
-	return generic_destroy_uri(bytecode);
-}

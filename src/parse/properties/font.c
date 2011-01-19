@@ -29,63 +29,105 @@
  */
 css_error parse_font(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		css_style **result)
+		css_style *result)
 {
+	const css_token *token;
+	css_error error;
 	int orig_ctx = *ctx;
 	int prev_ctx;
-	const css_token *token;
-	css_style *style = NULL;
-	css_style *variant = NULL;
-	css_style *weight = NULL;
-	css_style *size = NULL;
-	css_style *line_height = NULL;
-	css_style *family = NULL;
-	css_style *ret = NULL;
-	uint32_t required_size;
-	bool match;
+	bool style = true;
+	bool variant = true;
+	bool weight = true;
+	bool size = true;
+	bool line_height = true;
+	bool family = true;
+	css_style *style_style;
+	css_style *variant_style;
+	css_style *weight_style;
+	css_style *size_style;
+	css_style *line_height_style;
+	css_style *family_style;
 	int svw;
-	css_error error;
 
 	/* Firstly, handle inherit */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			(lwc_string_caseless_isequal(
-			token->idata, c->strings[INHERIT],
-			&match) == lwc_error_ok && match)) {
-		uint32_t *bytecode;
-
-		error = css_stylesheet_style_create(c->sheet, 
-				6 * sizeof(uint32_t), &ret);
-		if (error != CSS_OK) {
-			*ctx = orig_ctx;
-			return error;
-		}
-
-		bytecode = (uint32_t *) ret->bytecode;
-
-		*(bytecode++) = buildOPV(CSS_PROP_FONT_STYLE, 
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_FONT_VARIANT,
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_FONT_WEIGHT,
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_FONT_SIZE,
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_LINE_HEIGHT,
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_FONT_FAMILY,
-				FLAG_INHERIT, 0);
-
-		parserutils_vector_iterate(vector, ctx);
-
-		*result = ret;
-
-		return CSS_OK;
-	} else if (token == NULL) {
-		/* No tokens -- clearly garbage */
-		*ctx = orig_ctx;
+	if (token == NULL) 
 		return CSS_INVALID;
+		
+	if (is_css_inherit(c, token)) {
+		error = css_stylesheet_style_inherit(result, CSS_PROP_FONT_STYLE);
+		if (error != CSS_OK) 
+			return error;
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_FONT_VARIANT);
+		if (error != CSS_OK) 
+			return error;		
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_FONT_WEIGHT);
+		if (error != CSS_OK) 
+			return error;
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_FONT_SIZE);
+		if (error != CSS_OK) 
+			return error;
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_LINE_HEIGHT);
+		if (error != CSS_OK) 
+			return error;
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_FONT_FAMILY);
+		if (error == CSS_OK) 
+			parserutils_vector_iterate(vector, ctx);
+
+		return error;
+	} 
+
+
+	/* allocate styles */
+	error = css_stylesheet_style_create(c->sheet, &style_style);
+	if (error != CSS_OK) 
+		return error;
+
+	error = css_stylesheet_style_create(c->sheet, &variant_style);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(style_style);
+		return error;
 	}
+
+	error = css_stylesheet_style_create(c->sheet, &weight_style);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(style_style);
+		css_stylesheet_style_destroy(variant_style);
+		return error;
+	}
+
+	error = css_stylesheet_style_create(c->sheet, &size_style);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(style_style);
+		css_stylesheet_style_destroy(variant_style);
+		css_stylesheet_style_destroy(weight_style);
+		return error;
+	}
+
+	error = css_stylesheet_style_create(c->sheet, &line_height_style);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(style_style);
+		css_stylesheet_style_destroy(variant_style);
+		css_stylesheet_style_destroy(weight_style);
+		css_stylesheet_style_destroy(size_style);
+		return error;
+	}
+
+	error = css_stylesheet_style_create(c->sheet, &family_style);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(style_style);
+		css_stylesheet_style_destroy(variant_style);
+		css_stylesheet_style_destroy(weight_style);
+		css_stylesheet_style_destroy(size_style);
+		css_stylesheet_style_destroy(line_height_style);
+		return error;
+	}
+
 
 	/* Attempt to parse the optional style, variant, and weight */
 	for (svw = 0; svw < 3; svw++) {
@@ -94,23 +136,23 @@ css_error parse_font(css_language *c,
 
 		/* Ensure that we're not about to parse another inherit */
 		token = parserutils_vector_peek(vector, *ctx);
-		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-				(lwc_string_caseless_isequal(
-				token->idata, c->strings[INHERIT],
-				&match) == lwc_error_ok && match)) {
+		if ((token != NULL) && is_css_inherit(c, token)) {
 			error = CSS_INVALID;
-			goto cleanup;
+			goto parse_font_cleanup;
 		}
 
-		if (style == NULL && 
-				(error = parse_font_style(c, vector,
-				ctx, &style)) == CSS_OK) {
-		} else if (variant == NULL && 
-				(error = parse_font_variant(c, vector, ctx,
-				&variant)) == CSS_OK) {
-		} else if (weight == NULL && 
-				(error = parse_font_weight(c, vector, ctx,
-				&weight)) == CSS_OK) {
+		if ((style) && 
+		    (error = parse_font_style(c, vector,
+					ctx, style_style)) == CSS_OK) {
+			style = false;
+		} else if ((variant) && 
+			   (error = parse_font_variant(c, vector, ctx,
+					variant_style)) == CSS_OK) {
+			variant = false;
+		} else if ((weight) && 
+			   (error = parse_font_weight(c, vector, ctx,
+				weight_style)) == CSS_OK) {
+			weight = false;
 		}
 
 		if (error == CSS_OK) {
@@ -127,178 +169,125 @@ css_error parse_font(css_language *c,
 
 	/* Ensure that we're not about to parse another inherit */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			(lwc_string_caseless_isequal(
-			token->idata, c->strings[INHERIT],
-			&match) == lwc_error_ok && match)) {
+	if ((token != NULL) && is_css_inherit(c, token)) {
 		error = CSS_INVALID;
-		goto cleanup;
+		goto parse_font_cleanup;
 	}
 
 	/* Now expect a font-size */
-	error = parse_font_size(c, vector, ctx, &size);
+	error = parse_font_size(c, vector, ctx, size_style);
 	if (error != CSS_OK)
-		goto cleanup;
+		goto parse_font_cleanup;
+	size = false;
 
 	consumeWhitespace(vector, ctx);
 
 	/* Potential line-height */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token != NULL && tokenIsChar(token, '/')) {
+	if ((token != NULL) && tokenIsChar(token, '/')) {
 		parserutils_vector_iterate(vector, ctx);
 
 		consumeWhitespace(vector, ctx);
 
 		/* Ensure that we're not about to parse another inherit */
 		token = parserutils_vector_peek(vector, *ctx);
-		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-				(lwc_string_caseless_isequal(
-				token->idata, c->strings[INHERIT],
-				&match) == lwc_error_ok && match)) {
+		if ((token != NULL) && is_css_inherit(c, token)) {
 			error = CSS_INVALID;
-			goto cleanup;
+			goto parse_font_cleanup;
 		}
 
-		error = parse_line_height(c, vector, ctx, &line_height);
+		error = parse_line_height(c, vector, ctx, line_height_style);
 		if (error != CSS_OK)
-			goto cleanup;
+			goto parse_font_cleanup;
+
+		line_height = false;
 	}
 
 	consumeWhitespace(vector, ctx);
 
 	/* Ensure that we're not about to parse another inherit */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			(lwc_string_caseless_isequal(
-			token->idata, c->strings[INHERIT],
-			&match) == lwc_error_ok && match)) {
+	if ((token != NULL) && is_css_inherit(c, token)) {
 		error = CSS_INVALID;
-		goto cleanup;
+		goto parse_font_cleanup;
 	}
 
 	/* Now expect a font-family */
-	error = parse_font_family(c, vector, ctx, &family);
+	error = parse_font_family(c, vector, ctx, family_style);
 	if (error != CSS_OK)
-		goto cleanup;
+		goto parse_font_cleanup;
+	family = false;
 
 	/* Must have size and family */
-	assert(size != NULL);
-	assert(family != NULL);
+	assert(size != true);
+	assert(family != true);
 
-	/* Calculate the required size of the resultant style,
-	 * defaulting the unspecified properties to their initial values */
-	required_size = 0;
 
-	if (style)
-		required_size += style->length;
-	else
-		required_size += sizeof(uint32_t);
-
-	if (variant)
-		required_size += variant->length;
-	else
-		required_size += sizeof(uint32_t);
-
-	if (weight)
-		required_size += weight->length;
-	else
-		required_size += sizeof(uint32_t);
-
-	required_size += size->length;
-
-	if (line_height)
-		required_size += line_height->length;
-	else
-		required_size += sizeof(uint32_t);
-
-	required_size += family->length;
-
-	/* Create and populate it */
-	error = css_stylesheet_style_create(c->sheet, required_size, &ret);
-	if (error != CSS_OK)
-		goto cleanup;
-
-	required_size = 0;
-
+	/* defaults */
 	if (style) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				style->bytecode, style->length);
-		required_size += style->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_FONT_STYLE,
-				0, FONT_STYLE_NORMAL);
-		required_size += sizeof(uint32_t);
+		error = css_stylesheet_style_appendOPV(style_style, 
+				CSS_PROP_FONT_STYLE, 0, 
+				FONT_STYLE_NORMAL);
+		if (error != CSS_OK)
+			goto parse_font_cleanup;
 	}
 
 	if (variant) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				variant->bytecode, variant->length);
-		required_size += variant->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_FONT_VARIANT,
-				0, FONT_VARIANT_NORMAL);
-		required_size += sizeof(uint32_t);
+		error = css_stylesheet_style_appendOPV(variant_style, 
+				CSS_PROP_FONT_VARIANT, 0, 
+				FONT_VARIANT_NORMAL);
+		if (error != CSS_OK)
+			goto parse_font_cleanup;
 	}
 
 	if (weight) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				weight->bytecode, weight->length);
-		required_size += weight->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_FONT_WEIGHT,
+		error = css_stylesheet_style_appendOPV(weight_style, 
+				CSS_PROP_FONT_WEIGHT,
 				0, FONT_WEIGHT_NORMAL);
-		required_size += sizeof(uint32_t);
+		if (error != CSS_OK)
+			goto parse_font_cleanup;
 	}
-
-	memcpy(((uint8_t *) ret->bytecode) + required_size,
-			size->bytecode, size->length);
-	required_size += size->length;
 
 	if (line_height) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				line_height->bytecode, line_height->length);
-		required_size += line_height->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_LINE_HEIGHT,
+		error = css_stylesheet_style_appendOPV(line_height_style, 
+				CSS_PROP_LINE_HEIGHT,
 				0, LINE_HEIGHT_NORMAL);
-		required_size += sizeof(uint32_t);
+		if (error != CSS_OK)
+			goto parse_font_cleanup;
 	}
 
-	memcpy(((uint8_t *) ret->bytecode) + required_size,
-			family->bytecode, family->length);
-	required_size += family->length;
+	/* merge final output */
+	error = css_stylesheet_merge_style(result, style_style);
+		if (error != CSS_OK)
+			goto parse_font_cleanup;
 
-	assert(required_size == ret->length);
+	error = css_stylesheet_merge_style(result, variant_style);
+		if (error != CSS_OK)
+			goto parse_font_cleanup;
 
-	/* Write the result */
-	*result = ret;
-	/* Invalidate ret, so that cleanup doesn't destroy it */
-	ret = NULL;
+	error = css_stylesheet_merge_style(result, weight_style);
+		if (error != CSS_OK)
+			goto parse_font_cleanup;
 
-	/* Clean up after ourselves */
-cleanup:
-	if (style)
-		css_stylesheet_style_destroy(c->sheet, style, error == CSS_OK);
-	if (variant)
-		css_stylesheet_style_destroy(c->sheet, variant, error == CSS_OK);
-	if (weight)
-		css_stylesheet_style_destroy(c->sheet, weight, error == CSS_OK);
-	if (size)
-		css_stylesheet_style_destroy(c->sheet, size, error == CSS_OK);
-	if (line_height)
-		css_stylesheet_style_destroy(c->sheet, line_height, error == CSS_OK);
-	if (family)
-		css_stylesheet_style_destroy(c->sheet, family, error == CSS_OK);
-	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
+	error = css_stylesheet_merge_style(result, size_style);
+		if (error != CSS_OK)
+			goto parse_font_cleanup;
+
+	error = css_stylesheet_merge_style(result, line_height_style);
+		if (error != CSS_OK)
+			goto parse_font_cleanup;
+
+	error = css_stylesheet_merge_style(result, family_style);
+
+
+
+parse_font_cleanup:
+	css_stylesheet_style_destroy(style_style);
+	css_stylesheet_style_destroy(variant_style);
+	css_stylesheet_style_destroy(weight_style);
+	css_stylesheet_style_destroy(size_style);
+	css_stylesheet_style_destroy(line_height_style);
+	css_stylesheet_style_destroy(family_style);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;

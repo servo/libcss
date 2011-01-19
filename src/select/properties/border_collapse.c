@@ -64,9 +64,3 @@ css_error compose_border_collapse(const css_computed_style *parent,
 	return set_border_collapse(result, type);
 }
 
-uint32_t destroy_border_collapse(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

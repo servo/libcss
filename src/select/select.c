@@ -1283,10 +1283,10 @@ css_error cascade_style(const css_style *style, css_select_state *state)
 {
 	css_style s = *style;
 
-	while (s.length > 0) {
+	while (s.used > 0) {
 		opcode_t op;
 		css_error error;
-		uint32_t opv = *((uint32_t *) s.bytecode);
+		css_code_t opv = *s.bytecode;
 
 		advance_bytecode(&s, sizeof(opv));
 

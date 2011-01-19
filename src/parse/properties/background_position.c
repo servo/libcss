@@ -29,17 +29,15 @@
  */
 css_error parse_background_position(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
-		css_style **result)
+		css_style *result)
 {
 	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
-	uint32_t opv;
 	uint16_t value[2] = { 0 };
 	css_fixed length[2] = { 0 };
 	uint32_t unit[2] = { 0 };
-	uint32_t required_size;
 	bool match;
 
 	/* [length | percentage | IDENT(left, right, top, bottom, center)]{1,2}
@@ -185,38 +183,23 @@ css_error parse_background_position(css_language *c,
 		}
 	}
 
-	opv = buildOPV(CSS_PROP_BACKGROUND_POSITION, flags, 
-			value[0] | value[1]);
-
-	required_size = sizeof(opv);
-	if ((flags & FLAG_INHERIT) == false) { 
-		if (value[0] == BACKGROUND_POSITION_HORZ_SET)
-			required_size += sizeof(length[0]) + sizeof(unit[0]);
-		if (value[1] == BACKGROUND_POSITION_VERT_SET)
-			required_size += sizeof(length[1]) + sizeof(unit[1]);
-	}
-
-	/* Allocate result */
-	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	error = css_stylesheet_style_appendOPV(result, 
+					       CSS_PROP_BACKGROUND_POSITION, 
+					       flags, 
+					       value[0] | value[1]);
 	if (error != CSS_OK) {
 		*ctx = orig_ctx;
 		return error;
 	}
 
-	/* Copy the bytecode to it */
-	memcpy((*result)->bytecode, &opv, sizeof(opv));
 	if ((flags & FLAG_INHERIT) == false) {
-		uint8_t *ptr = ((uint8_t *) (*result)->bytecode) + sizeof(opv);
 		if (value[0] == BACKGROUND_POSITION_HORZ_SET) {
-			memcpy(ptr, &length[0], sizeof(length[0]));
-			ptr += sizeof(length[0]);
-			memcpy(ptr, &unit[0], sizeof(unit[0]));
-			ptr += sizeof(unit[0]);
+			css_stylesheet_style_append(result, length[0]);
+			css_stylesheet_style_append(result, unit[0]);
 		}
 		if (value[1] == BACKGROUND_POSITION_VERT_SET) {
-			memcpy(ptr, &length[1], sizeof(length[1]));
-			ptr += sizeof(length[1]);
-			memcpy(ptr, &unit[1], sizeof(unit[1]));
+			css_stylesheet_style_append(result, length[1]);
+			css_stylesheet_style_append(result, unit[1]);
 		}
 	}
 

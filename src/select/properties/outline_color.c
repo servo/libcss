@@ -73,7 +73,3 @@ css_error compose_outline_color(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_outline_color(void *bytecode)
-{
-	return generic_destroy_color(bytecode);
-}

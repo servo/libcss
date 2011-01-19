@@ -73,9 +73,3 @@ css_error compose_white_space(const css_computed_style *parent,
 	return set_white_space(result, type);
 }
 
-uint32_t destroy_white_space(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

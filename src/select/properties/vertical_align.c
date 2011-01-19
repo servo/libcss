@@ -96,7 +96,3 @@ css_error compose_vertical_align(const css_computed_style *parent,
 	return set_vertical_align(result, type, length, unit);
 }
 
-uint32_t destroy_vertical_align(void *bytecode)
-{
-	return generic_destroy_length(bytecode);
-}

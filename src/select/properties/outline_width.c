@@ -55,7 +55,3 @@ css_error compose_outline_width(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_outline_width(void *bytecode)
-{
-	return generic_destroy_length(bytecode);
-}

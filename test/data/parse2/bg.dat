@@ -60,6 +60,40 @@
 | *
 #reset
 
+#data
+* { background: #fff inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background: inherit #fff; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background: #fff inherit top left; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background: inherit fixed !important; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background: #fff url(foo) repeat fixed right bottom inherit; }
+#errors
+#expected
+| *
+#reset
 
 #data
 * { background: red !important; }

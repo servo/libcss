@@ -53,12 +53,15 @@ static css_error resolve_url(void *pw,
 	return CSS_OK;
 }
 
+static bool fail_because_lwc_leaked = false;
+
 static void
 printing_lwc_iterator(lwc_string *str, void *pw)
 {
 	UNUSED(pw);
 	
 	printf(" DICT: %*s\n", (int)(lwc_string_length(str)), lwc_string_data(str));
+	fail_because_lwc_leaked = true;
 }
 
 int main(int argc, char **argv)
@@ -97,9 +100,12 @@ int main(int argc, char **argv)
 		run_test(ctx.buf, ctx.bufused, ctx.exp, ctx.expused);
 
 	free(ctx.buf);
+	free(ctx.exp);
 
 	lwc_iterate_strings(printing_lwc_iterator, NULL);
-
+	
+	assert(fail_because_lwc_leaked == false);
+	
 	printf("PASS\n");
 
 	return 0;
@@ -214,6 +220,8 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 	}
 
 	css_stylesheet_destroy(sheet);
+
+	free(buf);
 
 	printf("Test %d: PASS\n", testnum);
 }

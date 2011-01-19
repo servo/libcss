@@ -19,7 +19,7 @@
  * \param c	  Parsing context
  * \param vector  Vector of tokens to process
  * \param ctx	  Pointer to vector iteration context
- * \param result  Pointer to location to receive resulting style
+ * \param result  style to place resulting bytcode in
  * \return CSS_OK on success,
  *	   CSS_NOMEM on memory exhaustion,
  *	   CSS_INVALID if the input is not valid
@@ -29,17 +29,15 @@
  */
 css_error parse_azimuth(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
-		css_style **result)
+		css_style *result)
 {
 	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
 	uint8_t flags = 0;
 	uint16_t value = 0;
-	uint32_t opv;
 	css_fixed length = 0;
 	uint32_t unit = 0;
-	uint32_t required_size;
 	bool match;
 
 	/* angle | [ IDENT(left-side, far-left, left, center-left, center, 
@@ -219,26 +217,18 @@ css_error parse_azimuth(css_language *c,
 		value = AZIMUTH_ANGLE;
 	}
 
-	opv = buildOPV(CSS_PROP_AZIMUTH, flags, value);
-
-	required_size = sizeof(opv);
-	if ((flags & FLAG_INHERIT) == false && value == AZIMUTH_ANGLE)
-		required_size += sizeof(length) + sizeof(unit);
-
-	/* Allocate result */
-	error = css_stylesheet_style_create(c->sheet, required_size, result);
+	error = css_stylesheet_style_appendOPV(result, CSS_PROP_AZIMUTH, flags, value);
 	if (error != CSS_OK) {
 		*ctx = orig_ctx;
 		return error;
 	}
 
-	/* Copy the bytecode to it */
-	memcpy((*result)->bytecode, &opv, sizeof(opv));
-	if ((flags & FLAG_INHERIT) == false && value == AZIMUTH_ANGLE) {
-		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv),
-				&length, sizeof(length));
-		memcpy(((uint8_t *) (*result)->bytecode) + sizeof(opv) +
-				sizeof(length), &unit, sizeof(unit));
+	if (((flags & FLAG_INHERIT) == false) && (value == AZIMUTH_ANGLE)) {
+		error = css_stylesheet_style_vappend(result, 2, length, unit);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
 	}
 
 	return CSS_OK;

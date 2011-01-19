@@ -106,9 +106,3 @@ css_error compose_display(const css_computed_style *parent,
 	return set_display(result, type);
 }
 
-uint32_t destroy_display(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

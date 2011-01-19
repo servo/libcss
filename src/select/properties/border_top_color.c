@@ -45,7 +45,3 @@ css_error compose_border_top_color(const css_computed_style *parent,
 	return set_border_top_color(result, type, color);
 }
 
-uint32_t destroy_border_top_color(void *bytecode)
-{
-	return generic_destroy_color(bytecode);
-}

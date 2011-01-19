@@ -29,52 +29,57 @@
  */
 css_error parse_list_style(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		css_style **result)
+		css_style *result)
 {
 	int orig_ctx = *ctx;
 	int prev_ctx;
 	const css_token *token;
-	css_style *image = NULL;
-	css_style *position = NULL;
-	css_style *type = NULL;
-	css_style *ret = NULL;
-	uint32_t required_size;
-	bool match;
 	css_error error;
+	bool image = true;
+	bool position = true;
+	bool type = true;
+	css_style *image_style;
+	css_style *position_style;
+	css_style *type_style;
 
 	/* Firstly, handle inherit */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			(lwc_string_caseless_isequal(
-			token->idata, c->strings[INHERIT],
-			&match) == lwc_error_ok && match)) {
-		uint32_t *bytecode;
-
-		error = css_stylesheet_style_create(c->sheet, 
-				3 * sizeof(uint32_t), &ret);
-		if (error != CSS_OK) {
-			*ctx = orig_ctx;
-			return error;
-		}
-
-		bytecode = (uint32_t *) ret->bytecode;
-
-		*(bytecode++) = buildOPV(CSS_PROP_LIST_STYLE_IMAGE, 
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_LIST_STYLE_POSITION,
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_LIST_STYLE_TYPE,
-				FLAG_INHERIT, 0);
-
-		parserutils_vector_iterate(vector, ctx);
-
-		*result = ret;
-
-		return CSS_OK;
-	} else if (token == NULL) {
-		/* No tokens -- clearly garbage */
-		*ctx = orig_ctx;
+	if (token == NULL) 
 		return CSS_INVALID;
+		
+	if (is_css_inherit(c, token)) {
+		error = css_stylesheet_style_inherit(result, CSS_PROP_LIST_STYLE_IMAGE);
+		if (error != CSS_OK) 
+			return error;
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_LIST_STYLE_POSITION);
+		if (error != CSS_OK) 
+			return error;		
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_LIST_STYLE_TYPE);
+
+		if (error == CSS_OK) 
+			parserutils_vector_iterate(vector, ctx);
+
+		return error;
+	} 
+
+	/* allocate styles */
+	error = css_stylesheet_style_create(c->sheet, &image_style);
+	if (error != CSS_OK) 
+		return error;
+
+	error = css_stylesheet_style_create(c->sheet, &position_style);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(image_style);
+		return error;
+	}
+
+	error = css_stylesheet_style_create(c->sheet, &type_style);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(image_style);
+		css_stylesheet_style_destroy(position_style);
+		return error;
 	}
 
 	/* Attempt to parse the various longhand properties */
@@ -84,22 +89,23 @@ css_error parse_list_style(css_language *c,
 
 		/* Ensure that we're not about to parse another inherit */
 		token = parserutils_vector_peek(vector, *ctx);
-		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-				(lwc_string_caseless_isequal(
-				token->idata, c->strings[INHERIT],
-				&match) == lwc_error_ok && match)) {
+		if (token != NULL && is_css_inherit(c, token)) {
 			error = CSS_INVALID;
-			goto cleanup;
+			goto parse_list_style_cleanup;
 		}
 
-		if (type == NULL && (error = parse_list_style_type(c, vector,
-				ctx, &type)) == CSS_OK) {
-		} else if (position == NULL && 
-				(error = parse_list_style_position(c, vector, 
-				ctx, &position)) == CSS_OK) {
-		} else if (image == NULL && 
-				(error = parse_list_style_image(c, vector, ctx,
-				&image)) == CSS_OK) {
+		if ((type) && 
+		    (error = parse_list_style_type(c, vector,
+				ctx, type_style)) == CSS_OK) {
+			type = false;
+		} else if ((position) && 
+			   (error = parse_list_style_position(c, vector, 
+				ctx, position_style)) == CSS_OK) {
+			position = false;
+		} else if ((image) && 
+			   (error = parse_list_style_image(c, vector, ctx,
+				image_style)) == CSS_OK) {
+			image = false;
 		}
 
 		if (error == CSS_OK) {
@@ -112,88 +118,47 @@ css_error parse_list_style(css_language *c,
 		}
 	} while (*ctx != prev_ctx && token != NULL);
 
-	/* Calculate the required size of the resultant style,
-	 * defaulting the unspecified properties to their initial values */
-	required_size = 0;
 
-	if (image)
-		required_size += image->length;
-	else
-		required_size += sizeof(uint32_t);
-
-	if (position)
-		required_size += position->length;
-	else
-		required_size += sizeof(uint32_t);
-
-	if (type)
-		required_size += type->length;
-	else
-		required_size += sizeof(uint32_t);
-
-	/* Create and populate it */
-	error = css_stylesheet_style_create(c->sheet, required_size, &ret);
-	if (error != CSS_OK)
-		goto cleanup;
-
-	required_size = 0;
-
+	/* defaults */
 	if (image) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				image->bytecode, image->length);
-		required_size += image->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_LIST_STYLE_IMAGE,
+		error = css_stylesheet_style_appendOPV(image_style, 
+			       CSS_PROP_LIST_STYLE_IMAGE,
 				0, LIST_STYLE_IMAGE_NONE);
-		required_size += sizeof(uint32_t);
 	}
 
 	if (position) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				position->bytecode, position->length);
-		required_size += position->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_LIST_STYLE_POSITION,
+		error = css_stylesheet_style_appendOPV(position_style, 
+			       CSS_PROP_LIST_STYLE_POSITION,
 				0, LIST_STYLE_POSITION_OUTSIDE);
-		required_size += sizeof(uint32_t);
 	}
 
 	if (type) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				type->bytecode, type->length);
-		required_size += type->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_LIST_STYLE_TYPE,
+		error = css_stylesheet_style_appendOPV(type_style, 
+			       CSS_PROP_LIST_STYLE_TYPE,
 				0, LIST_STYLE_TYPE_DISC);
-		required_size += sizeof(uint32_t);
 	}
 
-	assert(required_size == ret->length);
 
-	/* Write the result */
-	*result = ret;
-	/* Invalidate ret, so that cleanup doesn't destroy it */
-	ret = NULL;
+	error = css_stylesheet_merge_style(result, image_style);
+	if (error != CSS_OK)
+		goto parse_list_style_cleanup;
 
-	/* Clean up after ourselves */
-cleanup:
-	if (image)
-		css_stylesheet_style_destroy(c->sheet, image, error == CSS_OK);
-	if (position)
-		css_stylesheet_style_destroy(c->sheet, position, error == CSS_OK);
-	if (type)
-		css_stylesheet_style_destroy(c->sheet, type, error == CSS_OK);
-	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
+	error = css_stylesheet_merge_style(result, position_style);
+	if (error != CSS_OK)
+		goto parse_list_style_cleanup;
+
+	error = css_stylesheet_merge_style(result, type_style);
+
+
+parse_list_style_cleanup:
+
+	css_stylesheet_style_destroy(type_style);
+	css_stylesheet_style_destroy(position_style);
+	css_stylesheet_style_destroy(image_style);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;
 
 	return error;
+
 }

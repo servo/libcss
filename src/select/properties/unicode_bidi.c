@@ -67,9 +67,3 @@ css_error compose_unicode_bidi(const css_computed_style *parent,
 	return set_unicode_bidi(result, type);
 }
 
-uint32_t destroy_unicode_bidi(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

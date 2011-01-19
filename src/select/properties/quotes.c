@@ -30,11 +30,11 @@ css_error cascade_quotes(uint32_t opv, css_style *style,
 			lwc_string *open, *close;
 			lwc_string **temp;
 
-			open = *((lwc_string **) style->bytecode);
-			advance_bytecode(style, sizeof(lwc_string *));
+			css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &open);
+			advance_bytecode(style, sizeof(css_code_t));
 
-			close = *((lwc_string **) style->bytecode);
-			advance_bytecode(style, sizeof(lwc_string *));
+			css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &close);
+			advance_bytecode(style, sizeof(css_code_t));
 
 			temp = state->computed->alloc(quotes, 
 					(n_quotes + 2) * sizeof(lwc_string *), 
@@ -165,23 +165,3 @@ css_error compose_quotes(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_quotes(void *bytecode)
-{
-	uint32_t consumed = sizeof(uint32_t);
-	uint32_t value = getValue(*((uint32_t*)bytecode));
-	bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
-	
-	while (value == QUOTES_STRING) {
-		lwc_string **str = ((lwc_string **)bytecode);
-		consumed += sizeof(lwc_string*) * 2;
-		bytecode = ((uint8_t*)bytecode) + (sizeof(lwc_string*) * 2);
-		lwc_string_unref(str[0]);
-		lwc_string_unref(str[1]);
-			
-		consumed += sizeof(uint32_t);
-		value = *((uint32_t*)bytecode);
-		bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
-	}
-	
-	return consumed;
-}

@@ -65,9 +65,3 @@ css_error compose_list_style_position(const css_computed_style *parent,
 	return set_list_style_position(result, type);
 }
 
-uint32_t destroy_list_style_position(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

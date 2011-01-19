@@ -16,41 +16,6 @@
 
 #include "select/properties/helpers.h"
 
-/* Generic destructors */
-
-uint32_t generic_destroy_color(void *bytecode)
-{
-	return sizeof(uint32_t) + 
-		((getValue(*((uint32_t*)bytecode)) == BACKGROUND_COLOR_SET) ? sizeof(css_color) : 0);
-}
-
-uint32_t generic_destroy_uri(void *bytecode)
-{
-	bool has_uri = (getValue(*((uint32_t*)bytecode)) & BACKGROUND_IMAGE_URI) == BACKGROUND_IMAGE_URI;
-	
-	if (has_uri) {
-		void *vstr = (((uint8_t*)bytecode) + sizeof(uint32_t));
-		lwc_string *str = *(lwc_string **) vstr;
-		lwc_string_unref(str);
-	}
-	return sizeof(uint32_t) + (has_uri ? sizeof(lwc_string*) : 0);
-}
-
-uint32_t generic_destroy_length(void *bytecode)
-{
-	bool has_length = (getValue(*((uint32_t*)bytecode)) & BORDER_WIDTH_SET) == BORDER_WIDTH_SET;
-	
-	return sizeof(uint32_t) + (has_length ? sizeof(css_fixed) + sizeof(uint32_t) : 0);
-}
-
-uint32_t generic_destroy_number(void *bytecode)
-{
-	uint32_t value = getValue(*((uint32_t*)bytecode));
-	bool has_number = (value == ORPHANS_SET);
-	
-	return sizeof(uint32_t) + (has_number ? sizeof(css_fixed) : 0);
-}
-
 /* Useful helpers */
 
 css_unit to_css_unit(uint32_t u)
@@ -128,8 +93,8 @@ css_error cascade_uri_none(uint32_t opv, css_style *style,
 			break;
 		case BACKGROUND_IMAGE_URI:
 			value = CSS_BACKGROUND_IMAGE_IMAGE;
-			uri = *((lwc_string **) style->bytecode);
-			advance_bytecode(style, sizeof(uri));
+			css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &uri);
+			advance_bytecode(style, sizeof(css_code_t));
 			break;
 		}
 	}
@@ -437,8 +402,7 @@ css_error cascade_counter_increment_reset(uint32_t opv, css_style *style,
 				lwc_string *name;
 				css_fixed val = 0;
 
-				name = *((lwc_string **)
-						style->bytecode);
+				css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &name);
 				advance_bytecode(style, sizeof(name));
 
 				val = *((css_fixed *) style->bytecode);

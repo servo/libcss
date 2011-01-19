@@ -97,9 +97,3 @@ css_error compose_font_weight(const css_computed_style *parent,
 	return set_font_weight(result, type);
 }
 
-uint32_t destroy_font_weight(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

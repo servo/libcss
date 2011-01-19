@@ -29,14 +29,13 @@
  */
 css_error parse_list_style_type(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
-		css_style **result)
+		css_style *result)
 {
 	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *ident;
 	uint8_t flags = 0;
 	uint16_t value = 0;
-	uint32_t opv;
 	bool match;
 
 	/* IDENT (disc, circle, square, decimal, decimal-leading-zero,
@@ -62,17 +61,10 @@ css_error parse_list_style_type(css_language *c,
 		}
 	}
 
-	opv = buildOPV(CSS_PROP_LIST_STYLE_TYPE, flags, value);
+	error = css_stylesheet_style_appendOPV(result, CSS_PROP_LIST_STYLE_TYPE, flags, value);
 
-	/* Allocate result */
-	error = css_stylesheet_style_create(c->sheet, sizeof(opv), result);
-	if (error != CSS_OK) {	
+	if (error != CSS_OK) 
 		*ctx = orig_ctx;
-		return error;
-	}
-
-	/* Copy the bytecode to it */
-	memcpy((*result)->bytecode, &opv, sizeof(opv));
-
-	return CSS_OK;
+	
+	return error;
 }

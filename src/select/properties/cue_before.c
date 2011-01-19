@@ -48,7 +48,3 @@ css_error compose_cue_before(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_cue_before(void *bytecode)
-{
-	return generic_destroy_uri(bytecode);
-}

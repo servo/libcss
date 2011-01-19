@@ -66,9 +66,3 @@ css_error compose_page_break_inside(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_page_break_inside(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

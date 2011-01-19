@@ -67,9 +67,3 @@ css_error compose_font_style(const css_computed_style *parent,
 	return set_font_style(result, type);
 }
 
-uint32_t destroy_font_style(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

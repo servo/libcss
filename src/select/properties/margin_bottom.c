@@ -47,7 +47,3 @@ css_error compose_margin_bottom(const css_computed_style *parent,
 	return set_margin_bottom(result, type, length, unit);
 }
 
-uint32_t destroy_margin_bottom(void *bytecode)
-{
-	return generic_destroy_length(bytecode);
-}

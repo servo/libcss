@@ -70,9 +70,3 @@ css_error compose_clear(const css_computed_style *parent,
 	return set_clear(result, type);
 }
 
-uint32_t destroy_clear(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

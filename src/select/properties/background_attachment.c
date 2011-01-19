@@ -65,9 +65,3 @@ css_error compose_background_attachment(const css_computed_style *parent,
 	return set_background_attachment(result, type);
 }
 
-uint32_t destroy_background_attachment(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

@@ -114,16 +114,3 @@ css_error compose_background_position(const css_computed_style *parent,
 				vlength, vunit);
 }
 
-
-uint32_t destroy_background_position(void *bytecode)
-{
-	uint32_t value = getValue(*((uint32_t*)bytecode));
-	uint32_t extra_size = 0;
-	
-	if ((value & 0x0f) == BACKGROUND_POSITION_VERT_SET)
-		extra_size += sizeof(css_fixed) + sizeof(uint32_t);
-	if ((value & 0xf0) == BACKGROUND_POSITION_HORZ_SET)
-		extra_size += sizeof(css_fixed) + sizeof(uint32_t);
-	
-	return sizeof(uint32_t) + extra_size;
-}

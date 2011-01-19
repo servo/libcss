@@ -78,7 +78,3 @@ css_error compose_pitch(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_pitch(void *bytecode)
-{
-	return generic_destroy_length(bytecode);
-}

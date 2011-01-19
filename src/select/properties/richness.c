@@ -48,7 +48,3 @@ css_error compose_richness(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_richness(void *bytecode)
-{
-	return generic_destroy_number(bytecode);
-}

@@ -93,24 +93,3 @@ css_error compose_counter_increment(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_counter_increment(void *bytecode)
-{
-	uint32_t consumed = sizeof(uint32_t);
-	uint32_t value = getValue(*((uint32_t*)bytecode));
-	bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
-	
-	if (value == COUNTER_INCREMENT_NAMED) {
-		while (value != COUNTER_INCREMENT_NONE) {
-			lwc_string *str = *((lwc_string **)bytecode);
-			consumed += sizeof(lwc_string*) + sizeof(css_fixed);
-			bytecode = ((uint8_t*)bytecode) + sizeof(lwc_string*) + sizeof(css_fixed);
-			lwc_string_unref(str);
-			
-			consumed += sizeof(uint32_t);
-			value = *((uint32_t*)bytecode);
-			bytecode = ((uint8_t*)bytecode) + sizeof(uint32_t);
-		}
-	}
-	
-	return consumed;
-}

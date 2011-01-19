@@ -75,7 +75,3 @@ css_error compose_speech_rate(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_speech_rate(void *bytecode)
-{
-	return generic_destroy_number(bytecode);
-}

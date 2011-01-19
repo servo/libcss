@@ -64,9 +64,3 @@ css_error compose_table_layout(const css_computed_style *parent,
 	return set_table_layout(result, type);
 }
 
-uint32_t destroy_table_layout(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

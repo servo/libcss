@@ -29,79 +29,84 @@
  */
 css_error parse_outline(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		css_style **result)
+		css_style *result)
 {
 	int orig_ctx = *ctx;
 	int prev_ctx;
 	const css_token *token;
-	css_style *color = NULL;
-	css_style *style = NULL;
-	css_style *width = NULL;
-	css_style *ret = NULL;
-	uint32_t required_size;
-	bool match;
 	css_error error;
+	bool color = true;
+	bool style = true;
+	bool width = true;
+	css_style *color_style;
+	css_style *style_style;
+	css_style *width_style;
 
 	/* Firstly, handle inherit */
 	token = parserutils_vector_peek(vector, *ctx);
-	if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-			(lwc_string_caseless_isequal(
-			token->idata, c->strings[INHERIT],
-			&match) == lwc_error_ok && match)) {
-		uint32_t *bytecode;
-
-		error = css_stylesheet_style_create(c->sheet,
-			3 * sizeof(uint32_t), &ret);
-		if (error != CSS_OK) {
-			*ctx = orig_ctx;
-			return error;
-		}
-
-		bytecode = (uint32_t *) ret->bytecode;
-
-		*(bytecode++) = buildOPV(CSS_PROP_OUTLINE_COLOR,
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_OUTLINE_STYLE,
-				FLAG_INHERIT, 0);
-		*(bytecode++) = buildOPV(CSS_PROP_OUTLINE_WIDTH,
-				FLAG_INHERIT, 0);
-
-		parserutils_vector_iterate(vector, ctx);
-
-		*result = ret;
-
-		return CSS_OK;
-	} else if (token == NULL) {
-		/* No tokens -- clearly garbage */
-		*ctx = orig_ctx;
+	if (token == NULL) 
 		return CSS_INVALID;
+		
+	if (is_css_inherit(c, token)) {
+		error = css_stylesheet_style_inherit(result, CSS_PROP_OUTLINE_COLOR);
+		if (error != CSS_OK) 
+			return error;
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_OUTLINE_STYLE);
+		if (error != CSS_OK) 
+			return error;		
+
+		error = css_stylesheet_style_inherit(result, CSS_PROP_OUTLINE_WIDTH);
+
+		if (error == CSS_OK) 
+			parserutils_vector_iterate(vector, ctx);
+
+		return error;
+	} 
+
+	/* allocate styles */
+	error = css_stylesheet_style_create(c->sheet, &color_style);
+	if (error != CSS_OK) 
+		return error;
+
+	error = css_stylesheet_style_create(c->sheet, &style_style);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(color_style);
+		return error;
 	}
 
-	/* Attempt to parse individual properties */
+	error = css_stylesheet_style_create(c->sheet, &width_style);
+	if (error != CSS_OK) {
+		css_stylesheet_style_destroy(color_style);
+		css_stylesheet_style_destroy(style_style);
+		return error;
+	}
+
+	/* Attempt to parse the various longhand properties */
 	do {
 		prev_ctx = *ctx;
 		error = CSS_OK;
 
 		/* Ensure that we're not about to parse another inherit */
 		token = parserutils_vector_peek(vector, *ctx);
-		if (token != NULL && token->type == CSS_TOKEN_IDENT &&
-				(lwc_string_caseless_isequal(
-				token->idata, c->strings[INHERIT],
-				&match) == lwc_error_ok && match)) {
+		if (token != NULL && is_css_inherit(c, token)) {
 			error = CSS_INVALID;
-			goto cleanup;
+			goto parse_outline_cleanup;
 		}
 
-		if (color == NULL &&
-				(error = parse_outline_color(c, vector, 
-				ctx, &color)) == CSS_OK) {
-		} else if (style == NULL &&
-				(error = parse_outline_style(c, vector, 
-				ctx, &style)) == CSS_OK) {
-		} else if (width == NULL &&
-				(error = parse_outline_width(c, vector, 
-				ctx, &width)) == CSS_OK) {
-		}
+		if ((color) && 
+			   (error = parse_outline_color(c, vector, ctx,
+				color_style)) == CSS_OK) {
+			color = false;
+		} else if ((style) && 
+			   (error = parse_outline_style(c, vector, 
+				ctx, style_style)) == CSS_OK) {
+			style = false;
+		} else if ((width) && 
+		    (error = parse_outline_width(c, vector,
+				ctx, width_style)) == CSS_OK) {
+			width = false;
+		} 
 
 		if (error == CSS_OK) {
 			consumeWhitespace(vector, ctx);
@@ -113,82 +118,43 @@ css_error parse_outline(css_language *c,
 		}
 	} while (*ctx != prev_ctx && token != NULL);
 
-	/* Calculate size of resultant style */
-	required_size = 0;
-	if (color)
-		required_size += color->length;
-	else
-		required_size += sizeof(uint32_t);
 
-	if (style)
-		required_size += style->length;
-	else
-		required_size += sizeof(uint32_t);
-
-	if (width)
-		required_size += width->length;
-	else
-		required_size += sizeof(uint32_t);
-
-	error = css_stylesheet_style_create(c->sheet, required_size, &ret);
-	if (error != CSS_OK)
-		goto cleanup;
-
-	required_size = 0;
-
+	/* defaults */
 	if (color) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				color->bytecode, color->length);
-		required_size += color->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_OUTLINE_COLOR,
+		error = css_stylesheet_style_appendOPV(color_style, 
+			       CSS_PROP_OUTLINE_COLOR,
 				0, OUTLINE_COLOR_INVERT);
-		required_size += sizeof(uint32_t);
 	}
 
 	if (style) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				style->bytecode, style->length);
-		required_size += style->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_OUTLINE_STYLE,
+		error = css_stylesheet_style_appendOPV(style_style, 
+			       CSS_PROP_OUTLINE_STYLE,
 				0, OUTLINE_STYLE_NONE);
-		required_size += sizeof(uint32_t);
 	}
 
 	if (width) {
-		memcpy(((uint8_t *) ret->bytecode) + required_size,
-				width->bytecode, width->length);
-		required_size += width->length;
-	} else {
-		void *bc = ((uint8_t *) ret->bytecode) + required_size;
-
-		*((uint32_t *) bc) = buildOPV(CSS_PROP_OUTLINE_WIDTH,
+		error = css_stylesheet_style_appendOPV(width_style, 
+			       CSS_PROP_OUTLINE_WIDTH,
 				0, OUTLINE_WIDTH_MEDIUM);
-		required_size += sizeof(uint32_t);
 	}
 
-	assert(required_size == ret->length);
 
-	/* Write the result */
-	*result = ret;
-	/* Invalidate ret, so that cleanup doesn't destroy it */
-	ret = NULL;
+	error = css_stylesheet_merge_style(result, color_style);
+	if (error != CSS_OK)
+		goto parse_outline_cleanup;
 
-	/* Clean up after ourselves */
-cleanup:
-	if (color)
-		css_stylesheet_style_destroy(c->sheet, color, error == CSS_OK);
-	if (style)
-		css_stylesheet_style_destroy(c->sheet, style, error == CSS_OK);
-	if (width)
-		css_stylesheet_style_destroy(c->sheet, width, error == CSS_OK);
-	if (ret)
-		css_stylesheet_style_destroy(c->sheet, ret, error == CSS_OK);
+	error = css_stylesheet_merge_style(result, style_style);
+	if (error != CSS_OK)
+		goto parse_outline_cleanup;
+
+	error = css_stylesheet_merge_style(result, width_style);
+
+
+parse_outline_cleanup:
+
+	css_stylesheet_style_destroy(width_style);
+	css_stylesheet_style_destroy(style_style);
+	css_stylesheet_style_destroy(color_style);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;

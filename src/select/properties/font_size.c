@@ -100,7 +100,3 @@ css_error compose_font_size(const css_computed_style *parent,
 	return set_font_size(result, type, size, unit);
 }
 
-uint32_t destroy_font_size(void *bytecode)
-{
-	return generic_destroy_length(bytecode);
-}

@@ -19,3 +19,41 @@
 | *
 #reset
 
+#data
+* { background-position: left top inherit; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background-position: inherit left top; }
+#errors
+#expected
+| *
+#reset
+
+#data
+* { background-position: left top; }
+#errors
+#expected
+| *
+|  background-position: left top
+#reset
+
+#data
+* { background-position: left center; }
+#errors
+#expected
+| *
+|  background-position: left center
+#reset
+
+#data
+* { background-position: 62% center; }
+#errors
+#expected
+| *
+|  background-position: 62% center
+#reset
+

@@ -70,9 +70,3 @@ css_error compose_overflow(const css_computed_style *parent,
 	return set_overflow(result, type);
 }
 
-uint32_t destroy_overflow(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

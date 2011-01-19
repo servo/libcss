@@ -66,9 +66,3 @@ css_error compose_speak_punctuation(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_speak_punctuation(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

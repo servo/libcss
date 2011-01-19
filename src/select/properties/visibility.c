@@ -67,9 +67,3 @@ css_error compose_visibility(const css_computed_style *parent,
 	return set_visibility(result, type);
 }
 
-uint32_t destroy_visibility(void *bytecode)
-{
-	UNUSED(bytecode);
-	
-	return sizeof(uint32_t);
-}

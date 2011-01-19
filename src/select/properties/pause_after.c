@@ -48,7 +48,3 @@ css_error compose_pause_after(const css_computed_style *parent,
 	return CSS_OK;
 }
 
-uint32_t destroy_pause_after(void *bytecode)
-{
-	return generic_destroy_length(bytecode);
-}

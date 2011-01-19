@@ -47,7 +47,3 @@ css_error compose_width(const css_computed_style *parent,
 	return set_width(result, type, length, unit);
 }
 
-uint32_t destroy_width(void *bytecode)
-{
-	return generic_destroy_length(bytecode);
-}

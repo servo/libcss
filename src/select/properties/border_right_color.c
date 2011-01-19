@@ -47,7 +47,3 @@ css_error compose_border_right_color(const css_computed_style *parent,
 	return set_border_right_color(result, type, color);
 }
 
-uint32_t destroy_border_right_color(void *bytecode)
-{
-	return generic_destroy_color(bytecode);
-}

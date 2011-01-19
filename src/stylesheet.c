@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "stylesheet.h"
 #include "bytecode/bytecode.h"
@@ -20,15 +21,17 @@ static css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule);
 static size_t _rule_size(const css_rule *rule);
 
 /**
- * Add a string to a stylesheets string vector.
+ * Add a string to a stylesheet's string vector.
  *
  * \param sheet The stylesheet to add string to.
  * \param string The string to add.
- * \param string_number Pointer to location to recive string number.
+ * \param string_number Pointer to location to receive string number.
  * \return CSS_OK on success,
  *	   CSS_BADPARM on bad parameters,
  *	   CSS_NOMEM on memory exhaustion
  *
+ * \post Ownership of \a string reference is passed to the stylesheet (even on failure)
+ * \note The returned string number is guaranteed to be non-zero
  */
 css_error css_stylesheet_string_add(css_stylesheet *sheet, lwc_string *string, uint32_t *string_number)
 {
@@ -43,9 +46,15 @@ css_error css_stylesheet_string_add(css_stylesheet *sheet, lwc_string *string, u
 		res = lwc_string_isequal(string, 
 					 sheet->string_vector[new_string_number], 
 					 &isequal);
+
+		if (res != lwc_error_ok) {
+			lwc_string_unref(string);			
+			return css_error_from_lwc_error(res);
+		}
+
 		if (isequal) {
 			lwc_string_unref(string);			
-			*string_number = new_string_number;
+			*string_number = (new_string_number + 1);
 			return CSS_OK;
 		}
 		 
@@ -64,6 +73,7 @@ css_error css_stylesheet_string_add(css_stylesheet *sheet, lwc_string *string, u
 		new_vector = sheet->alloc(sheet->string_vector, new_vector_len * sizeof(lwc_string *), sheet->pw);
 
 		if (new_vector == NULL) {
+			lwc_string_unref(string);			
 			return CSS_NOMEM;
 		}
 		sheet->string_vector = new_vector;
@@ -72,21 +82,25 @@ css_error css_stylesheet_string_add(css_stylesheet *sheet, lwc_string *string, u
 
 	sheet->string_vector_c++;
 	sheet->string_vector[new_string_number] = string;
-	*string_number = new_string_number;
+	*string_number = (new_string_number + 1);
+
 	return CSS_OK;
 }
 
 /**
- * Get a string from a stylesheets string vector.
+ * Get a string from a stylesheet's string vector.
  *
  * \param sheet The stylesheet to retrive string from.
  * \param string_number The string number to retrive.
- * \param string Pointer to location to recive string.
+ * \param string Pointer to location to receive string.
  * \return CSS_OK on success,
  *	   CSS_BADPARM on bad parameters,
  */
 css_error css_stylesheet_string_get(css_stylesheet *sheet, uint32_t string_number, lwc_string **string)
 {
+	/* External string numbers = index into vector + 1 */
+	string_number--;
+
 	if (string_number > sheet->string_vector_c) {
 		return CSS_BADPARM;
 	}
@@ -238,17 +252,16 @@ css_error css_stylesheet_create(css_language_level level,
 css_error css_stylesheet_destroy(css_stylesheet *sheet)
 {
 	uint32_t string_index;
-	uint32_t bucket;
 	css_rule *r, *s;
 
 	if (sheet == NULL)
 		return CSS_BADPARM;
-
+	
 	if (sheet->title != NULL)
 		sheet->alloc(sheet->title, 0, sheet->pw);
 
 	sheet->alloc(sheet->url, 0, sheet->pw);
-
+        
 	for (r = sheet->rule_list; r != NULL; r = s) {
 		s = r->next;
 
@@ -262,23 +275,15 @@ css_error css_stylesheet_destroy(css_stylesheet *sheet)
 
 	css_selector_hash_destroy(sheet->selectors);
 
-	/* Release cached free styles */
-	for (bucket = 0; bucket != N_ELEMENTS(sheet->free_styles); bucket++) {
-		while (sheet->free_styles[bucket] != NULL) {
-			css_style *s = sheet->free_styles[bucket];
-
-			sheet->free_styles[bucket] = s->bytecode;
-
-			sheet->alloc(s, 0, sheet->pw);
-		}
-	}
-
-	/* These two may have been destroyed when parsing completed */
+	/* These three may have been destroyed when parsing completed */
 	if (sheet->parser_frontend != NULL)
 		css_language_destroy(sheet->parser_frontend);
 
 	if (sheet->parser != NULL)
 		css_parser_destroy(sheet->parser);
+
+	if (sheet->cached_style != NULL)
+		css_stylesheet_style_destroy(sheet->cached_style);
 
 	/* destroy string vector */
 	for (string_index = 0;
@@ -326,7 +331,6 @@ css_error css_stylesheet_append_data(css_stylesheet *sheet,
 css_error css_stylesheet_data_done(css_stylesheet *sheet)
 {
 	const css_rule *r;
-	uint32_t bucket;
 	css_error error;
 
 	if (sheet == NULL)
@@ -345,16 +349,11 @@ css_error css_stylesheet_data_done(css_stylesheet *sheet)
 
 	sheet->parser_frontend = NULL;
 	sheet->parser = NULL;
-
-	/* Release cached free styles */
-	for (bucket = 0; bucket != N_ELEMENTS(sheet->free_styles); bucket++) {
-		while (sheet->free_styles[bucket] != NULL) {
-			css_style *s = sheet->free_styles[bucket];
-
-			sheet->free_styles[bucket] = s->bytecode;
-
-			sheet->alloc(s, 0, sheet->pw);
-		}
+	
+	/* If we have a cached style, drop it as we're done parsing. */
+	if (sheet->cached_style != NULL) {
+		css_stylesheet_style_destroy(sheet->cached_style);
+		sheet->cached_style = NULL;
 	}
 
 	/* Determine if there are any pending imports */
@@ -623,6 +622,11 @@ css_error css_stylesheet_size(css_stylesheet *sheet, size_t *size)
 /******************************************************************************
  * Library-private API below here					      *
  ******************************************************************************/
+/* Note, CSS_STYLE_DEFAULT_SIZE must be a power of 2 */
+/* With a test set of NetSurf's homepage, BBC news, wikipedia, CNN, Ars, Google and El-Reg,
+ * 16 seems to be a good medium between wastage and reallocs.
+ */
+#define CSS_STYLE_DEFAULT_SIZE 16
 
 /**
  * Create a style
@@ -634,31 +638,113 @@ css_error css_stylesheet_size(css_stylesheet *sheet, size_t *size)
  *	   CSS_BADPARM on bad parameters,
  *	   CSS_NOMEM on memory exhaustion
  */
-css_error css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len,
-		css_style **style)
+css_error css_stylesheet_style_create(css_stylesheet *sheet, css_style **style)
 {
 	css_style *s;
-	const uint32_t alloclen = ((len + 15) & ~15);
-	const uint32_t bucket = (alloclen / N_ELEMENTS(sheet->free_styles)) - 1;
 
-	if (sheet == NULL || len == 0 || style == NULL)
+	if (sheet == NULL)
 		return CSS_BADPARM;
-
-	if (bucket < N_ELEMENTS(sheet->free_styles) &&
-			sheet->free_styles[bucket] != NULL) {
-		s = sheet->free_styles[bucket];
-		sheet->free_styles[bucket] = s->bytecode;
-	} else {
-		s = sheet->alloc(NULL, sizeof(css_style) + alloclen, sheet->pw);
-		if (s == NULL)
-			return CSS_NOMEM;
+	
+	if (sheet->cached_style != NULL) {
+		*style = sheet->cached_style;
+		sheet->cached_style = NULL;
+		return CSS_OK;
 	}
+	
+	s = sheet->alloc(NULL, sizeof(css_style), sheet->pw);
+	if (s == NULL)
+		return CSS_NOMEM;
 
-	/* DIY variable-sized data member */
-	s->bytecode = ((uint8_t *) s + sizeof(css_style));
-	s->length = len;
+	s->bytecode = sheet->alloc(NULL, sizeof(css_code_t) * CSS_STYLE_DEFAULT_SIZE, sheet->pw);
+
+	if (s->bytecode == NULL) {
+		sheet->alloc(s, 0, sheet->pw); /* do not leak */
+	
+		return CSS_NOMEM;
+	}
+	s->allocated = CSS_STYLE_DEFAULT_SIZE;
+	s->used = 0;
+	s->sheet = sheet;
 
 	*style = s;
+
+	return CSS_OK;
+}
+
+css_error css_stylesheet_merge_style(css_style *target, css_style *style)
+{
+	css_code_t *newcode;
+	uint32_t newcode_len;
+	css_stylesheet *sheet;
+
+	if (target == NULL || style == NULL)
+		return CSS_BADPARM;
+
+	sheet = target->sheet;
+	newcode_len = target->used + style->used ;
+	
+	if (newcode_len > target->allocated) {
+		newcode_len += CSS_STYLE_DEFAULT_SIZE - 1;
+		newcode_len &= ~(CSS_STYLE_DEFAULT_SIZE - 1);
+		newcode = sheet->alloc(target->bytecode, newcode_len * sizeof(css_code_t), sheet->pw);
+
+		if (newcode == NULL)
+			return CSS_NOMEM;
+
+		target->bytecode = newcode;
+		target->allocated = newcode_len;
+	}
+
+	memcpy(target->bytecode + target->used, style->bytecode, style->used * sizeof(css_code_t));
+
+	target->used += style->used;
+
+	return CSS_OK;
+
+}
+
+/** append one or more css code entries to a style */ 
+css_error css_stylesheet_style_vappend(css_style *style, uint32_t style_count, ...)
+{
+	va_list ap;
+	css_error error = CSS_OK;
+	css_code_t css_code;
+
+	va_start(ap, style_count);
+	while (style_count > 0) {
+		css_code = va_arg(ap, css_code_t);
+		error = css_stylesheet_style_append(style, css_code);
+		if (error != CSS_OK)
+			break;
+		style_count--;
+	}
+	va_end(ap);
+	return error;
+}
+
+/** append a css code entry to a style */ 
+css_error css_stylesheet_style_append(css_style *style, css_code_t css_code)
+{
+	css_stylesheet *sheet;
+
+	if (style == NULL)
+		return CSS_BADPARM;
+
+	sheet = style->sheet;
+
+	if (style->allocated == style->used) {
+		/* space not available to append, extend allocation */
+		css_code_t *newcode;
+		uint32_t newcode_len = style->allocated * 2;
+		newcode = sheet->alloc(style->bytecode, sizeof(css_code_t) * newcode_len, sheet->pw);
+		if (newcode == NULL)
+			return CSS_NOMEM;
+		style->bytecode = newcode;
+		style->allocated = newcode_len;
+	}
+
+	style->bytecode[style->used] = css_code;
+	style->used++;
 
 	return CSS_OK;
 }
@@ -668,40 +754,30 @@ css_error css_stylesheet_style_create(css_stylesheet *sheet, uint32_t len,
  *
  * \param sheet	 The stylesheet context
  * \param style	 The style to destroy
- * \param suppress_bytecode_cleanup Whether or not to prevent the
- *				    bytecode from unreffing strings
- *				    etc.
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_stylesheet_style_destroy(css_stylesheet *sheet, css_style *style,
-				       bool suppress_bytecode_cleanup)
+css_error css_stylesheet_style_destroy(css_style *style)
 {
-	uint32_t alloclen, bucket;
-	void *bptr, *eptr;
-
-	if (sheet == NULL || style == NULL)
+	css_stylesheet *sheet;
+	
+	if (style == NULL)
 		return CSS_BADPARM;
-	
-	if (suppress_bytecode_cleanup == false) {
-		bptr = style->bytecode;
-		eptr = (uint8_t *) bptr + style->length;
-		while (bptr != eptr) {
-			uint32_t opcode = getOpcode(*((uint32_t*)bptr));
-			uint32_t skip = prop_dispatch[opcode].destroy(bptr);
-			bptr = (uint8_t *) bptr + skip;
-		}
-	}
-	
-	alloclen = ((style->length + 15) & ~15);
-	bucket = (alloclen / N_ELEMENTS(sheet->free_styles)) - 1;
 
-	if (bucket < N_ELEMENTS(sheet->free_styles)) {
-		style->bytecode = sheet->free_styles[bucket];
-		sheet->free_styles[bucket] = style;
+	sheet = style->sheet;
+
+	if (sheet->cached_style == NULL) {
+		sheet->cached_style = style;
+		style->used = 0;
+	} else if (sheet->cached_style->allocated < style->allocated) {
+		sheet->alloc(sheet->cached_style->bytecode, 0, sheet->pw);
+		sheet->alloc(sheet->cached_style, 0, sheet->pw);
+		sheet->cached_style = style;
+		style->used = 0;
 	} else {
+		sheet->alloc(style->bytecode, 0, sheet->pw);
 		sheet->alloc(style, 0, sheet->pw);
 	}
-
+	
 	return CSS_OK;
 }
 
@@ -1041,7 +1117,7 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 			sheet->alloc(s->selectors, 0, sheet->pw);
 
 		if (s->style != NULL)
-			css_stylesheet_style_destroy(sheet, s->style, false);
+			css_stylesheet_style_destroy(s->style);
 	}
 		break;
 	case CSS_RULE_CHARSET:
@@ -1081,7 +1157,7 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 		css_rule_font_face *font_face = (css_rule_font_face *) rule;
 
 		if (font_face->style != NULL)
-			css_stylesheet_style_destroy(sheet, font_face->style, false);
+			css_stylesheet_style_destroy(font_face->style);
 	}
 		break;
 	case CSS_RULE_PAGE:
@@ -1094,7 +1170,7 @@ css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 		}
 
 		if (page->style != NULL)
-			css_stylesheet_style_destroy(sheet, page->style, false);
+			css_stylesheet_style_destroy(page->style);
 	}
 		break;
 	}
@@ -1142,6 +1218,7 @@ css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet,
 	return CSS_OK;
 }
 
+
 /**
  * Append a style to a CSS rule
  *
@@ -1153,7 +1230,8 @@ css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet,
 css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 		css_rule *rule, css_style *style)
 {
-	css_style *cur;
+	css_style *current_style;
+	css_error error;
 
 	if (sheet == NULL || rule == NULL || style == NULL)
 		return CSS_BADPARM;
@@ -1161,56 +1239,30 @@ css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
 	assert(rule->type == CSS_RULE_SELECTOR || rule->type == CSS_RULE_PAGE);
 
 	if (rule->type == CSS_RULE_SELECTOR)
-		cur = ((css_rule_selector *) rule)->style;
+		current_style = ((css_rule_selector *) rule)->style;
 	else
-		cur = ((css_rule_page *) rule)->style;
+		current_style = ((css_rule_page *) rule)->style;
 
-	if (cur != NULL) {
-		/* Already have a style, so append to the end of the bytecode */
-		const uint32_t reqlen = cur->length + style->length;
-		const uint32_t curlen = ((cur->length + 15) & ~15);
+	if (current_style != NULL) {
+		error = css_stylesheet_merge_style(current_style, style);
 
-		if (curlen < reqlen) {
-			css_style *temp;
-			css_error error;
-
-			error = css_stylesheet_style_create(sheet, 
-					reqlen, &temp);
-			if (error != CSS_OK)
-				return error;
-
-			memcpy((uint8_t *) temp->bytecode, cur->bytecode, 
-					cur->length);
-			temp->length = cur->length;
-
-			css_stylesheet_style_destroy(sheet, cur, true);
-
-			cur = temp;
-		}
-
-		/** \todo Can we optimise the bytecode here? */
-		memcpy((uint8_t *) cur->bytecode + cur->length, 
-				style->bytecode, style->length);
-
-		cur->length += style->length;
-
-		/* Add this to the sheet's size */
-		sheet->size += style->length;
+		if (error != CSS_OK)
+			return error;
 
 		/* Done with style */
-		css_stylesheet_style_destroy(sheet, style, true);
+		css_stylesheet_style_destroy(style);
 	} else {
 		/* No current style, so use this one */
-		cur = style;
+		current_style = style;
 
 		/* Add to the sheet's size */
-		sheet->size += style->length;
+		sheet->size += (style->used * sizeof(css_code_t));
 	}
 
 	if (rule->type == CSS_RULE_SELECTOR)
-		((css_rule_selector *) rule)->style = cur;
+		((css_rule_selector *) rule)->style = current_style;
 	else
-		((css_rule_page *) rule)->style = cur;
+		((css_rule_page *) rule)->style = current_style;
 
 	return CSS_OK;
 }
@@ -1594,7 +1646,7 @@ size_t _rule_size(const css_rule *r)
 		}
 
 		if (rs->style != NULL)
-			bytes += rs->style->length;
+			bytes += (rs->style->used * sizeof(css_code_t));
 	} else if (r->type == CSS_RULE_CHARSET) {
 		bytes += sizeof(css_rule_charset);
 	} else if (r->type == CSS_RULE_IMPORT) {
@@ -1614,7 +1666,7 @@ size_t _rule_size(const css_rule *r)
 		bytes += sizeof(css_rule_font_face);
 
 		if (rf->style != NULL)
-			bytes += rf->style->length;
+			bytes += (rf->style->used * sizeof(css_code_t));
 	} else if (r->type == CSS_RULE_PAGE) {
 		const css_rule_page *rp = (const css_rule_page *) r;
 		const css_selector *s = rp->selector;
@@ -1634,7 +1686,7 @@ size_t _rule_size(const css_rule *r)
 		}
 
 		if (rp->style != NULL)
-			bytes += rp->style->length;
+			bytes += (rp->style->used * sizeof(css_code_t));
 	}
 
 	return bytes;

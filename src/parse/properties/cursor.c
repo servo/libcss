@@ -28,17 +28,11 @@
  */
 css_error parse_cursor(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
-		css_style **result)
+		css_style *result)
 {
 	int orig_ctx = *ctx;
 	css_error error;
 	const css_token *token;
-	uint8_t flags = 0;
-	uint16_t value = 0;
-	uint32_t opv;
-	uint32_t required_size = sizeof(opv);
-	int temp_ctx = *ctx;
-	uint8_t *ptr;
 	bool match;
 
 	/* [ (URI ',')* IDENT(auto, crosshair, default, pointer, move, e-resize,
@@ -46,204 +40,32 @@ css_error parse_cursor(css_language *c,
 	 *              s-resize, w-resize, text, wait, help, progress) ] 
 	 * | IDENT(inherit) 
 	 */
-
-	/* Pass 1: validate input and calculate bytecode size */
-	token = parserutils_vector_iterate(vector, &temp_ctx);
-	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-			token->type != CSS_TOKEN_URI)) {
-		*ctx = orig_ctx;
-		return CSS_INVALID;
-	}
-
-	if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_string_caseless_isequal(
-			token->idata, c->strings[INHERIT],
-			&match) == lwc_error_ok && match)) {
-		flags = FLAG_INHERIT;
-	} else {
-		bool first = true;
-
-		/* URI* */
-		while (token != NULL && token->type == CSS_TOKEN_URI) {
-			lwc_string *uri = token->idata;
-
-			if (first == false) {
-				required_size += sizeof(opv);
-			} else {
-				value = CURSOR_URI;
-			}
-			required_size += sizeof(uri);
-
-			consumeWhitespace(vector, &temp_ctx);
-
-			/* Expect ',' */
-			token = parserutils_vector_iterate(vector, &temp_ctx);
-			if (token == NULL || tokenIsChar(token, ',') == false) {
-				*ctx = orig_ctx;
-				return CSS_INVALID;
-			}
-
-			consumeWhitespace(vector, &temp_ctx);
-
-			/* Expect either URI or IDENT */
-			token = parserutils_vector_iterate(vector, &temp_ctx);
-			if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-					token->type != CSS_TOKEN_URI)) {
-				*ctx = orig_ctx;
-				return CSS_INVALID;
-			}
-
-			first = false;
-		}
-
-		/* IDENT */
-		if (token != NULL && token->type == CSS_TOKEN_IDENT) {
-			if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[AUTO],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_AUTO;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[CROSSHAIR],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_CROSSHAIR;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[DEFAULT],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_DEFAULT;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[POINTER],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_POINTER;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[MOVE],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_MOVE;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[E_RESIZE],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_E_RESIZE;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[NE_RESIZE],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_NE_RESIZE;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[NW_RESIZE],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_NW_RESIZE;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[N_RESIZE],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_N_RESIZE;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[SE_RESIZE],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_SE_RESIZE;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[SW_RESIZE],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_SW_RESIZE;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[S_RESIZE],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_S_RESIZE;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[W_RESIZE],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_W_RESIZE;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[LIBCSS_TEXT],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_TEXT;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[WAIT],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_WAIT;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[HELP],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_HELP;
-				}
-			} else if ((lwc_string_caseless_isequal(
-					token->idata, c->strings[PROGRESS],
-					&match) == lwc_error_ok && match)) {
-				if (first) {
-					value = CURSOR_PROGRESS;
-				}
-			} else {
-				*ctx = orig_ctx;
-				return CSS_INVALID;
-			}
-
-			if (first == false) {
-				required_size += sizeof(opv);
-			}
-		}
-	}
-
-	opv = buildOPV(CSS_PROP_CURSOR, flags, value);
-
-	/* Allocate result */
-	error = css_stylesheet_style_create(c->sheet, required_size, result);
-	if (error != CSS_OK) {
-		*ctx = orig_ctx;
-		return error;
-	}
-
-	/* Copy OPV to bytecode */
-	ptr = (*result)->bytecode;
-	memcpy(ptr, &opv, sizeof(opv));
-	ptr += sizeof(opv);
-
-	/* Pass 2: construct bytecode */
 	token = parserutils_vector_iterate(vector, ctx);
-	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
-			token->type != CSS_TOKEN_URI)) {
+	if ((token == NULL) || 
+	    (token->type != CSS_TOKEN_IDENT &&
+	     token->type != CSS_TOKEN_URI)) {
 		*ctx = orig_ctx;
 		return CSS_INVALID;
 	}
 
-	if (token->type == CSS_TOKEN_IDENT &&
-			(lwc_string_caseless_isequal(
-			token->idata, c->strings[INHERIT],
-			&match) == lwc_error_ok && match)) {
-		/* Nothing to do */
+	if ((token->type == CSS_TOKEN_IDENT) &&
+	    (lwc_string_caseless_isequal(token->idata,
+					 c->strings[INHERIT],
+					 &match) == lwc_error_ok && match)) {
+		error = css_stylesheet_style_inherit(result, CSS_PROP_CURSOR);
 	} else {
 		bool first = true;
+
+/* Macro to output the value marker, awkward because we need to check
+ * first to determine how the value is constructed.
+ */
+#define CSS_APPEND(CSSVAL) css_stylesheet_style_append(result, first?buildOPV(CSS_PROP_CURSOR, 0, CSSVAL):CSSVAL)
+
 
 		/* URI* */
 		while (token != NULL && token->type == CSS_TOKEN_URI) {
 			lwc_string *uri;
+			uint32_t uri_snumber;
 
 			error = c->sheet->resolve(c->sheet->resolve_pw,
 					c->sheet->url,
@@ -253,16 +75,25 @@ css_error parse_cursor(css_language *c,
 				return error;
 			}
 
-			if (first == false) {
-				opv = CURSOR_URI;
-				memcpy(ptr, &opv, sizeof(opv));
-				ptr += sizeof(opv);
+			error = css_stylesheet_string_add(c->sheet, 
+							  uri, 
+							  &uri_snumber);
+			if (error != CSS_OK) {
+				*ctx = orig_ctx;
+				return error;
 			}
-                        
- 			/* Don't ref URI -- we want to pass ownership to the 
-			 * bytecode */
-			memcpy(ptr, &uri, sizeof(uri));
-			ptr += sizeof(uri);
+
+			error = CSS_APPEND(CURSOR_URI);
+			if (error != CSS_OK) {
+				*ctx = orig_ctx;
+				return error;
+			}
+
+			error = css_stylesheet_style_append(result, uri_snumber);
+			if (error != CSS_OK) {
+				*ctx = orig_ctx;
+				return error;
+			}
 
 			consumeWhitespace(vector, ctx);
 
@@ -291,83 +122,81 @@ css_error parse_cursor(css_language *c,
 			if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[AUTO],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_AUTO;
+				error=CSS_APPEND(CURSOR_AUTO);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[CROSSHAIR],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_CROSSHAIR;
+				error=CSS_APPEND(CURSOR_CROSSHAIR);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[DEFAULT],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_DEFAULT;
+				error=CSS_APPEND(CURSOR_DEFAULT);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[POINTER],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_POINTER;
+				error=CSS_APPEND(CURSOR_POINTER);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[MOVE],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_MOVE;
+				error=CSS_APPEND(CURSOR_MOVE);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[E_RESIZE],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_E_RESIZE;
+				error=CSS_APPEND(CURSOR_E_RESIZE);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[NE_RESIZE],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_NE_RESIZE;
+				error=CSS_APPEND(CURSOR_NE_RESIZE);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[NW_RESIZE],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_NW_RESIZE;
+				error=CSS_APPEND(CURSOR_NW_RESIZE);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[N_RESIZE],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_N_RESIZE;
+				error=CSS_APPEND(CURSOR_N_RESIZE);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[SE_RESIZE],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_SE_RESIZE;
+				error=CSS_APPEND(CURSOR_SE_RESIZE);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[SW_RESIZE],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_SW_RESIZE;
+				error=CSS_APPEND(CURSOR_SW_RESIZE);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[S_RESIZE],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_S_RESIZE;
+				error=CSS_APPEND(CURSOR_S_RESIZE);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[W_RESIZE],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_W_RESIZE;
+				error=CSS_APPEND(CURSOR_W_RESIZE);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[LIBCSS_TEXT],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_TEXT;
+				error=CSS_APPEND(CURSOR_TEXT);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[WAIT],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_WAIT;
+				error=CSS_APPEND(CURSOR_WAIT);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[HELP],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_HELP;
+				error=CSS_APPEND(CURSOR_HELP);
 			} else if ((lwc_string_caseless_isequal(
 					token->idata, c->strings[PROGRESS],
 					&match) == lwc_error_ok && match)) {
-				opv = CURSOR_PROGRESS;
+				error=CSS_APPEND(CURSOR_PROGRESS);
 			} else {
-				*ctx = orig_ctx;
-				return CSS_INVALID;
-			}
-
-			if (first == false) {
-				memcpy(ptr, &opv, sizeof(opv));
-				ptr += sizeof(opv);
+				error =  CSS_INVALID;
 			}
 		}
+
 	}
 
-	return CSS_OK;
+	if (error != CSS_OK)
+		*ctx = orig_ctx;
+
+	return error;
 }
 
