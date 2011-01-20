@@ -28,8 +28,8 @@ css_error cascade_cursor(uint32_t opv, css_style *style,
 			lwc_string *uri;
 			lwc_string **temp;
 
-			uri = *((lwc_string **) style->bytecode);
-			advance_bytecode(style, sizeof(uri));
+			css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &uri);
+			advance_bytecode(style, sizeof(css_code_t));
 
 			temp = state->computed->alloc(uris, 
 					(n_uris + 1) * sizeof(lwc_string *), 
