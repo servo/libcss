@@ -25,8 +25,8 @@ css_error cascade_play_during(uint32_t opv, css_style *style,
 		case PLAY_DURING_URI:
 			value = 0;
 
-			uri = *((lwc_string **) style->bytecode);
-			advance_bytecode(style, sizeof(uri));
+			css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &uri);
+			advance_bytecode(style, sizeof(css_code_t));
 			break;
 		case PLAY_DURING_AUTO:
 		case PLAY_DURING_NONE:
