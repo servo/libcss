@@ -27,7 +27,7 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_background(css_language *c,
+css_error css__parse_background(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_style *result)
 {
@@ -118,30 +118,30 @@ css_error parse_background(css_language *c,
 
 		if (is_css_inherit(c, token)) {
 			error = CSS_INVALID;
-			goto parse_background_cleanup;
+			goto css__parse_background_cleanup;
 		}
 
 		/* Try each property parser in turn, but only if we
 		 * haven't already got a value for this property.
 		 */
 		if ((attachment) && 
-		    (error = parse_background_attachment(c, vector, ctx, 
+		    (error = css__parse_background_attachment(c, vector, ctx, 
 					    attachment_style)) == CSS_OK) {
 			attachment = false;
 		} else if ((color) && 
-			   (error = parse_background_color(c, vector, ctx,
+			   (error = css__parse_background_color(c, vector, ctx,
 					    color_style)) == CSS_OK) {
 			color = false;
 		} else if ((image) && 
-			   (error = parse_background_image(c, vector, ctx,
+			   (error = css__parse_background_image(c, vector, ctx,
 					    image_style)) == CSS_OK) {
 			image = false;
 		} else if ((position) &&
-			   (error = parse_background_position(c, vector, ctx, 
+			   (error = css__parse_background_position(c, vector, ctx, 
 					position_style)) == CSS_OK) {
 			position = false;
 		} else if ((repeat) &&
-			   (error = parse_background_repeat(c, vector, ctx, 
+			   (error = css__parse_background_repeat(c, vector, ctx, 
 					repeat_style)) == CSS_OK) {
 			repeat = false;
 		}
@@ -161,7 +161,7 @@ css_error parse_background(css_language *c,
 				CSS_PROP_BACKGROUND_ATTACHMENT, 0, 
 				BACKGROUND_ATTACHMENT_SCROLL);
 		if (error != CSS_OK)
-			goto parse_background_cleanup;
+			goto css__parse_background_cleanup;
 	}
 
 	if (color) {
@@ -169,7 +169,7 @@ css_error parse_background(css_language *c,
 				CSS_PROP_BACKGROUND_COLOR, 0, 
 				BACKGROUND_COLOR_TRANSPARENT);
 		if (error != CSS_OK)
-			goto parse_background_cleanup;
+			goto css__parse_background_cleanup;
 	}
 
 	if (image) {
@@ -177,7 +177,7 @@ css_error parse_background(css_language *c,
 				CSS_PROP_BACKGROUND_IMAGE,
 				0, BACKGROUND_IMAGE_NONE);
 		if (error != CSS_OK)
-			goto parse_background_cleanup;
+			goto css__parse_background_cleanup;
 	}
 
 	if (position) {
@@ -186,7 +186,7 @@ css_error parse_background(css_language *c,
 				0, BACKGROUND_POSITION_HORZ_LEFT |
 				BACKGROUND_POSITION_VERT_TOP);
 		if (error != CSS_OK)
-			goto parse_background_cleanup;
+			goto css__parse_background_cleanup;
 	}
 
 	if (repeat) {
@@ -194,28 +194,28 @@ css_error parse_background(css_language *c,
 				CSS_PROP_BACKGROUND_REPEAT,
 				0, BACKGROUND_REPEAT_REPEAT);
 		if (error != CSS_OK)
-			goto parse_background_cleanup;
+			goto css__parse_background_cleanup;
 	}
 
 	error = css_stylesheet_merge_style(result, attachment_style);
 	if (error != CSS_OK)
-		goto parse_background_cleanup;
+		goto css__parse_background_cleanup;
 
 	error = css_stylesheet_merge_style(result, color_style);
 	if (error != CSS_OK)
-		goto parse_background_cleanup;
+		goto css__parse_background_cleanup;
 
 	error = css_stylesheet_merge_style(result, image_style);
 	if (error != CSS_OK)
-		goto parse_background_cleanup;
+		goto css__parse_background_cleanup;
 
 	error = css_stylesheet_merge_style(result, position_style);
 	if (error != CSS_OK)
-		goto parse_background_cleanup;
+		goto css__parse_background_cleanup;
 
 	error = css_stylesheet_merge_style(result, repeat_style);
 
-parse_background_cleanup:
+css__parse_background_cleanup:
 	css_stylesheet_style_destroy(attachment_style);
 	css_stylesheet_style_destroy(color_style);
 	css_stylesheet_style_destroy(image_style);

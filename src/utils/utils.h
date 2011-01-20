@@ -34,7 +34,7 @@
 #define N_ELEMENTS(x) (sizeof((x)) / sizeof((x)[0]))
 #endif
 
-css_fixed number_from_lwc_string(lwc_string *string, bool int_only,
+css_fixed css__number_from_lwc_string(lwc_string *string, bool int_only,
 		size_t *consumed);
 
 static inline bool isDigit(uint8_t c)

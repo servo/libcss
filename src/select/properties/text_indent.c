@@ -14,26 +14,26 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_text_indent(uint32_t opv, css_style *style, 
+css_error css__cascade_text_indent(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	return cascade_length(opv, style, state, set_text_indent);
+	return css__cascade_length(opv, style, state, set_text_indent);
 }
 
-css_error set_text_indent_from_hint(const css_hint *hint,
+css_error css__set_text_indent_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	return set_text_indent(style, hint->status,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_text_indent(css_select_state *state)
+css_error css__initial_text_indent(css_select_state *state)
 {
 	return set_text_indent(state->computed, CSS_TEXT_INDENT_SET, 
 			0, CSS_UNIT_PX);
 }
 
-css_error compose_text_indent(const css_computed_style *parent,
+css_error css__compose_text_indent(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

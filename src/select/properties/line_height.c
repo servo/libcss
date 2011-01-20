@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_line_height(uint32_t opv, css_style *style, 
+css_error css__cascade_line_height(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	uint16_t value = CSS_LINE_HEIGHT_INHERIT;
@@ -41,9 +41,9 @@ css_error cascade_line_height(uint32_t opv, css_style *style,
 		}
 	}
 
-	unit = to_css_unit(unit);
+	unit = css__to_css_unit(unit);
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return set_line_height(state->computed, value, val, unit);
 	}
@@ -51,20 +51,20 @@ css_error cascade_line_height(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_line_height_from_hint(const css_hint *hint,
+css_error css__set_line_height_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	return set_line_height(style, hint->status,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_line_height(css_select_state *state)
+css_error css__initial_line_height(css_select_state *state)
 {
 	return set_line_height(state->computed, CSS_LINE_HEIGHT_NORMAL, 
 			0, CSS_UNIT_PX);
 }
 
-css_error compose_line_height(const css_computed_style *parent,
+css_error css__compose_line_height(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

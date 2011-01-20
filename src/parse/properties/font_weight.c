@@ -27,7 +27,7 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_font_weight(css_language *c, 
+css_error css__parse_font_weight(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result)
 {
@@ -53,7 +53,7 @@ css_error parse_font_weight(css_language *c,
 		flags |= FLAG_INHERIT;
 	} else if (token->type == CSS_TOKEN_NUMBER) {
 		size_t consumed = 0;
-		css_fixed num = number_from_lwc_string(token->idata, 
+		css_fixed num = css__number_from_lwc_string(token->idata, 
 				true, &consumed);
 		/* Invalid if there are trailing characters */
 		if (consumed != lwc_string_length(token->idata)) {

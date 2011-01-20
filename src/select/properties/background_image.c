@@ -14,13 +14,13 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_background_image(uint32_t opv, css_style *style, 
+css_error css__cascade_background_image(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	return cascade_uri_none(opv, style, state, set_background_image);
+	return css__cascade_uri_none(opv, style, state, set_background_image);
 }
 
-css_error set_background_image_from_hint(const css_hint *hint, 
+css_error css__set_background_image_from_hint(const css_hint *hint, 
 		css_computed_style *style)
 {
 	css_error error;
@@ -33,13 +33,13 @@ css_error set_background_image_from_hint(const css_hint *hint,
 	return error;
 }
 
-css_error initial_background_image(css_select_state *state)
+css_error css__initial_background_image(css_select_state *state)
 {
 	return set_background_image(state->computed, 
 			CSS_BACKGROUND_IMAGE_NONE, NULL);
 }
 
-css_error compose_background_image(const css_computed_style *parent,
+css_error css__compose_background_image(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

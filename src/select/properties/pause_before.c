@@ -14,14 +14,14 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_pause_before(uint32_t opv, css_style *style, 
+css_error css__cascade_pause_before(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	/** \todo pause-before */
-	return cascade_length(opv, style, state, NULL);
+	return css__cascade_length(opv, style, state, NULL);
 }
 
-css_error set_pause_before_from_hint(const css_hint *hint,
+css_error css__set_pause_before_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	UNUSED(hint);
@@ -30,14 +30,14 @@ css_error set_pause_before_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_pause_before(css_select_state *state)
+css_error css__initial_pause_before(css_select_state *state)
 {
 	UNUSED(state);
 
 	return CSS_OK;
 }
 
-css_error compose_pause_before(const css_computed_style *parent,
+css_error css__compose_pause_before(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

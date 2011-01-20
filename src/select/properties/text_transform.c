@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_text_transform(uint32_t opv, css_style *style, 
+css_error css__cascade_text_transform(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	uint16_t value = CSS_TEXT_TRANSFORM_INHERIT;
@@ -38,7 +38,7 @@ css_error cascade_text_transform(uint32_t opv, css_style *style,
 		}
 	}
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return set_text_transform(state->computed, value);
 	}
@@ -46,18 +46,18 @@ css_error cascade_text_transform(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_text_transform_from_hint(const css_hint *hint,
+css_error css__set_text_transform_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	return set_text_transform(style, hint->status);
 }
 
-css_error initial_text_transform(css_select_state *state)
+css_error css__initial_text_transform(css_select_state *state)
 {
 	return set_text_transform(state->computed, CSS_TEXT_TRANSFORM_NONE);
 }
 
-css_error compose_text_transform(const css_computed_style *parent,	
+css_error css__compose_text_transform(const css_computed_style *parent,	
 		const css_computed_style *child,
 		css_computed_style *result)
 {

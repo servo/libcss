@@ -27,7 +27,7 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_border_style(css_language *c,
+css_error css__parse_border_style(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_style *result)
 {

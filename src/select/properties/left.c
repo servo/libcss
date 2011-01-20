@@ -14,25 +14,25 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_left(uint32_t opv, css_style *style, 
+css_error css__cascade_left(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	return cascade_length_auto(opv, style, state, set_left);
+	return css__cascade_length_auto(opv, style, state, set_left);
 }
 
-css_error set_left_from_hint(const css_hint *hint,
+css_error css__set_left_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	return set_left(style, hint->status,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_left(css_select_state *state)
+css_error css__initial_left(css_select_state *state)
 {
 	return set_left(state->computed, CSS_LEFT_AUTO, 0, CSS_UNIT_PX);
 }
 
-css_error compose_left(const css_computed_style *parent,
+css_error css__compose_left(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

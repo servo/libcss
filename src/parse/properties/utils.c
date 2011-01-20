@@ -25,7 +25,7 @@
  * \return CSS_OK on success,
  *	   CSS_INVALID if the input is not valid
  */
-css_error parse_list_style_type_value(css_language *c, const css_token *ident,
+css_error css__parse_list_style_type_value(css_language *c, const css_token *ident,
 		uint16_t *value)
 {
 	bool match;
@@ -118,7 +118,7 @@ css_error parse_list_style_type_value(css_language *c, const css_token *ident,
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_border_side(css_language *c,
+css_error css__parse_border_side(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_style *result, enum border_side_e side)
 {
@@ -181,22 +181,22 @@ css_error parse_border_side(css_language *c,
 		token = parserutils_vector_peek(vector, *ctx);
 		if (token != NULL && is_css_inherit(c, token)) {
 			error = CSS_INVALID;
-			goto parse_border_side_cleanup;
+			goto css__parse_border_side_cleanup;
 		}
 
 		/* Try each property parser in turn, but only if we
 		 * haven't already got a value for this property.
 		 */
 		if ((color) && 
-		    (error = parse_border_side_color(c, vector, ctx, 
+		    (error = css__parse_border_side_color(c, vector, ctx, 
 			     color_style, CSS_PROP_BORDER_TOP_COLOR + side)) == CSS_OK) {
 			color = false;
 		} else if ((style) && 
-			   (error = parse_border_side_style(c, vector, ctx,
+			   (error = css__parse_border_side_style(c, vector, ctx,
 				    style_style, CSS_PROP_BORDER_TOP_STYLE + side)) == CSS_OK) {
 			style = false;
 		} else if ((width) && 
-			   (error = parse_border_side_width(c, vector, ctx,
+			   (error = css__parse_border_side_width(c, vector, ctx,
 				    width_style, CSS_PROP_BORDER_TOP_WIDTH + side)) == CSS_OK) {
 			width = false;
 		} 
@@ -216,7 +216,7 @@ css_error parse_border_side(css_language *c,
 				CSS_PROP_BORDER_TOP_STYLE + side, 0, 
 				BORDER_STYLE_NONE);
 		if (error != CSS_OK)
-			goto parse_border_side_cleanup;
+			goto css__parse_border_side_cleanup;
 	}
 
 	if (width) {
@@ -224,20 +224,20 @@ css_error parse_border_side(css_language *c,
 				CSS_PROP_BORDER_TOP_WIDTH + side,
 				0, BORDER_WIDTH_MEDIUM);
 		if (error != CSS_OK)
-			goto parse_border_side_cleanup;
+			goto css__parse_border_side_cleanup;
 	}
 
 	error = css_stylesheet_merge_style(result, color_style);
 	if (error != CSS_OK)
-		goto parse_border_side_cleanup;
+		goto css__parse_border_side_cleanup;
 
 	error = css_stylesheet_merge_style(result, style_style);
 	if (error != CSS_OK)
-		goto parse_border_side_cleanup;
+		goto css__parse_border_side_cleanup;
 
 	error = css_stylesheet_merge_style(result, width_style);
 
-parse_border_side_cleanup:
+css__parse_border_side_cleanup:
 	css_stylesheet_style_destroy(color_style);
 	css_stylesheet_style_destroy(style_style);
 	css_stylesheet_style_destroy(width_style);
@@ -261,7 +261,7 @@ parse_border_side_cleanup:
  * Post condition: \a *ctx is updated with the next token to process
  *                 If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_colour_specifier(css_language *c,
+css_error css__parse_colour_specifier(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint32_t *result)
 {
@@ -292,9 +292,9 @@ css_error parse_colour_specifier(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT) {
-		error = parse_named_colour(c, token->idata, result);
+		error = css__parse_named_colour(c, token->idata, result);
 		if (error != CSS_OK && c->sheet->quirks_allowed) {
-			error = parse_hash_colour(token->idata, result);
+			error = css__parse_hash_colour(token->idata, result);
 			if (error == CSS_OK)
 				c->sheet->quirks_used = true;
 		}
@@ -304,14 +304,14 @@ css_error parse_colour_specifier(css_language *c,
 
 		return error;
 	} else if (token->type == CSS_TOKEN_HASH) {
-		error = parse_hash_colour(token->idata, result);
+		error = css__parse_hash_colour(token->idata, result);
 		if (error != CSS_OK)
 			*ctx = orig_ctx;
 
 		return error;
 	} else if (c->sheet->quirks_allowed &&
 			token->type == CSS_TOKEN_NUMBER) {
-		error = parse_hash_colour(token->idata, result);
+		error = css__parse_hash_colour(token->idata, result);
 		if (error == CSS_OK)
 			c->sheet->quirks_used = true;
 		else
@@ -320,7 +320,7 @@ css_error parse_colour_specifier(css_language *c,
 		return error;
 	} else if (c->sheet->quirks_allowed &&
 			token->type == CSS_TOKEN_DIMENSION) {
-		error = parse_hash_colour(token->idata, result);
+		error = css__parse_hash_colour(token->idata, result);
 		if (error == CSS_OK)
 			c->sheet->quirks_used = true;
 		else
@@ -374,7 +374,7 @@ css_error parse_colour_specifier(css_language *c,
 				else
 					int_only = false;
 
-				num = number_from_lwc_string(token->idata,
+				num = css__number_from_lwc_string(token->idata,
 						int_only, &consumed);
 				if (consumed != lwc_string_length(token->idata))
 					goto invalid;
@@ -440,7 +440,7 @@ invalid:
  * \return CSS_OK      on success,
  *         CSS_INVALID if the colour name is unknown
  */
-css_error parse_named_colour(css_language *c, lwc_string *data,
+css_error css__parse_named_colour(css_language *c, lwc_string *data,
 		uint32_t *result)
 {
 	static const uint32_t colourmap[LAST_COLOUR + 1 - FIRST_COLOUR] = {
@@ -620,7 +620,7 @@ css_error parse_named_colour(css_language *c, lwc_string *data,
  * \return CSS_OK      on success,
  *         CSS_INVALID if the input is invalid
  */
-css_error parse_hash_colour(lwc_string *data, uint32_t *result)
+css_error css__parse_hash_colour(lwc_string *data, uint32_t *result)
 {
 	uint8_t r = 0, g = 0, b = 0, a = 0xff;
 	size_t len = lwc_string_length(data);
@@ -667,7 +667,7 @@ css_error parse_hash_colour(lwc_string *data, uint32_t *result)
  * Post condition: \a *ctx is updated with the next token to process
  *                 If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_unit_specifier(css_language *c,
+css_error css__parse_unit_specifier(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint32_t default_unit,
 		css_fixed *length, uint32_t *unit)
@@ -688,14 +688,14 @@ css_error parse_unit_specifier(css_language *c,
 		return CSS_INVALID;
 	}
 
-	num = number_from_lwc_string(token->idata, false, &consumed);
+	num = css__number_from_lwc_string(token->idata, false, &consumed);
 
 	if (token->type == CSS_TOKEN_DIMENSION) {
 		size_t len = lwc_string_length(token->idata);
 		const char *data = lwc_string_data(token->idata);
 		css_unit temp_unit = CSS_UNIT_PX;
 
-		error = parse_unit_keyword(data + consumed, len - consumed,
+		error = css__parse_unit_keyword(data + consumed, len - consumed,
 				&temp_unit);
 		if (error != CSS_OK) {
 			*ctx = orig_ctx;
@@ -729,7 +729,7 @@ css_error parse_unit_specifier(css_language *c,
 			/* Try to parse the unit keyword, ignoring errors */
 			token = parserutils_vector_iterate(vector, &temp_ctx);
 			if (token != NULL && token->type == CSS_TOKEN_IDENT) {
-				error = parse_unit_keyword(
+				error = css__parse_unit_keyword(
 						lwc_string_data(token->idata),
 						lwc_string_length(token->idata),
 						&temp_unit);
@@ -763,7 +763,7 @@ css_error parse_unit_specifier(css_language *c,
  * \return CSS_OK      on success,
  *         CSS_INVALID on encountering an unknown keyword
  */
-css_error parse_unit_keyword(const char *ptr, size_t len, css_unit *unit)
+css_error css__parse_unit_keyword(const char *ptr, size_t len, css_unit *unit)
 {
 	if (len == 4) {
 		if (strncasecmp(ptr, "grad", 4) == 0)
@@ -917,7 +917,7 @@ cleanup:
  * Post condition: \a *ctx is updated with the next token to process
  *                 If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error comma_list_to_style(css_language *c,
+css_error css__comma_list_to_style(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		bool (*reserved)(css_language *c, const css_token *ident),
 		css_code_t (*get_value)(css_language *c, const css_token *token, bool first),

@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_vertical_align(uint32_t opv, css_style *style, 
+css_error css__cascade_vertical_align(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	uint16_t value = CSS_VERTICAL_ALIGN_INHERIT;
@@ -58,9 +58,9 @@ css_error cascade_vertical_align(uint32_t opv, css_style *style,
 		}
 	}
 
-	unit = to_css_unit(unit);
+	unit = css__to_css_unit(unit);
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return set_vertical_align(state->computed, value, length, unit);
 	}
@@ -68,20 +68,20 @@ css_error cascade_vertical_align(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_vertical_align_from_hint(const css_hint *hint,
+css_error css__set_vertical_align_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	return set_vertical_align(style, hint->status,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_vertical_align(css_select_state *state)
+css_error css__initial_vertical_align(css_select_state *state)
 {
 	return set_vertical_align(state->computed, CSS_VERTICAL_ALIGN_BASELINE,
 			0, CSS_UNIT_PX);
 }
 
-css_error compose_vertical_align(const css_computed_style *parent,
+css_error css__compose_vertical_align(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

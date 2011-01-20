@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_clip(uint32_t opv, css_style *style, 
+css_error css__cascade_clip(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	uint16_t value = CSS_CLIP_INHERIT;
@@ -64,12 +64,12 @@ css_error cascade_clip(uint32_t opv, css_style *style,
 		}
 	}
 
-	rect.tunit = to_css_unit(rect.tunit);
-	rect.runit = to_css_unit(rect.runit);
-	rect.bunit = to_css_unit(rect.bunit);
-	rect.lunit = to_css_unit(rect.lunit);
+	rect.tunit = css__to_css_unit(rect.tunit);
+	rect.runit = css__to_css_unit(rect.runit);
+	rect.bunit = css__to_css_unit(rect.bunit);
+	rect.lunit = css__to_css_unit(rect.lunit);
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return set_clip(state->computed, value, &rect);
 	}
@@ -77,13 +77,13 @@ css_error cascade_clip(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_clip_from_hint(const css_hint *hint, 
+css_error css__set_clip_from_hint(const css_hint *hint, 
 		css_computed_style *style)
 {
 	return set_clip(style, hint->status, hint->data.clip);
 }
 
-css_error initial_clip(css_select_state *state)
+css_error css__initial_clip(css_select_state *state)
 {
 	css_computed_clip_rect rect = { 0, 0, 0, 0, 
 			CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX,
@@ -92,7 +92,7 @@ css_error initial_clip(css_select_state *state)
 	return set_clip(state->computed, CSS_CLIP_AUTO, &rect);
 }
 
-css_error compose_clip(const css_computed_style *parent,
+css_error css__compose_clip(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

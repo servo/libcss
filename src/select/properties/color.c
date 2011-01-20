@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_color(uint32_t opv, css_style *style, 
+css_error css__cascade_color(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	uint16_t value = CSS_COLOR_INHERIT;
@@ -26,7 +26,7 @@ css_error cascade_color(uint32_t opv, css_style *style,
 		advance_bytecode(style, sizeof(color));
 	}
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return set_color(state->computed, value, color);
 	}
@@ -34,13 +34,13 @@ css_error cascade_color(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_color_from_hint(const css_hint *hint, 
+css_error css__set_color_from_hint(const css_hint *hint, 
 		css_computed_style *style)
 {
 	return set_color(style, hint->status, hint->data.color);
 }
 
-css_error initial_color(css_select_state *state)
+css_error css__initial_color(css_select_state *state)
 {
 	css_hint hint;
 	css_error error;
@@ -50,10 +50,10 @@ css_error initial_color(css_select_state *state)
 	if (error != CSS_OK)
 		return error;
 
-	return set_color_from_hint(&hint, state->computed);
+	return css__set_color_from_hint(&hint, state->computed);
 }
 
-css_error compose_color(const css_computed_style *parent,
+css_error css__compose_color(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

@@ -27,7 +27,7 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_list_style(css_language *c,
+css_error css__parse_list_style(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_style *result)
 {
@@ -91,19 +91,19 @@ css_error parse_list_style(css_language *c,
 		token = parserutils_vector_peek(vector, *ctx);
 		if (token != NULL && is_css_inherit(c, token)) {
 			error = CSS_INVALID;
-			goto parse_list_style_cleanup;
+			goto css__parse_list_style_cleanup;
 		}
 
 		if ((type) && 
-		    (error = parse_list_style_type(c, vector,
+		    (error = css__parse_list_style_type(c, vector,
 				ctx, type_style)) == CSS_OK) {
 			type = false;
 		} else if ((position) && 
-			   (error = parse_list_style_position(c, vector, 
+			   (error = css__parse_list_style_position(c, vector, 
 				ctx, position_style)) == CSS_OK) {
 			position = false;
 		} else if ((image) && 
-			   (error = parse_list_style_image(c, vector, ctx,
+			   (error = css__parse_list_style_image(c, vector, ctx,
 				image_style)) == CSS_OK) {
 			image = false;
 		}
@@ -141,16 +141,16 @@ css_error parse_list_style(css_language *c,
 
 	error = css_stylesheet_merge_style(result, image_style);
 	if (error != CSS_OK)
-		goto parse_list_style_cleanup;
+		goto css__parse_list_style_cleanup;
 
 	error = css_stylesheet_merge_style(result, position_style);
 	if (error != CSS_OK)
-		goto parse_list_style_cleanup;
+		goto css__parse_list_style_cleanup;
 
 	error = css_stylesheet_merge_style(result, type_style);
 
 
-parse_list_style_cleanup:
+css__parse_list_style_cleanup:
 
 	css_stylesheet_style_destroy(type_style);
 	css_stylesheet_style_destroy(position_style);

@@ -27,7 +27,7 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_background_position(css_language *c, 
+css_error css__parse_background_position(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result)
 {
@@ -108,7 +108,7 @@ css_error parse_background_position(css_language *c,
 			} else if (token->type == CSS_TOKEN_DIMENSION ||
 					token->type == CSS_TOKEN_NUMBER ||
 					token->type == CSS_TOKEN_PERCENTAGE) {
-				error = parse_unit_specifier(c, vector, ctx, 
+				error = css__parse_unit_specifier(c, vector, ctx, 
 						UNIT_PX, &length[i], &unit[i]);
 				if (error != CSS_OK) {
 					*ctx = orig_ctx;

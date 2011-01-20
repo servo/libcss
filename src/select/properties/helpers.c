@@ -18,7 +18,7 @@
 
 /* Useful helpers */
 
-css_unit to_css_unit(uint32_t u)
+css_unit css__to_css_unit(uint32_t u)
 {
 	switch (u) {
 	case UNIT_PX: return CSS_UNIT_PX;
@@ -45,7 +45,7 @@ css_unit to_css_unit(uint32_t u)
 /******************************************************************************
  * Utilities below here							      *
  ******************************************************************************/
-css_error cascade_bg_border_color(uint32_t opv, css_style *style,
+css_error css__cascade_bg_border_color(uint32_t opv, css_style *style,
 		css_select_state *state, 
 		css_error (*fun)(css_computed_style *, uint8_t, css_color))
 {
@@ -70,7 +70,7 @@ css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 		}
 	}
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return fun(state->computed, value, color);
 	}
@@ -78,7 +78,7 @@ css_error cascade_bg_border_color(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error cascade_uri_none(uint32_t opv, css_style *style,
+css_error css__cascade_uri_none(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, 
 				lwc_string *))
@@ -100,7 +100,7 @@ css_error cascade_uri_none(uint32_t opv, css_style *style,
 	}
 
 	/** \todo lose fun != NULL once all properties have set routines */
-	if (fun != NULL && outranks_existing(getOpcode(opv), 
+	if (fun != NULL && css__outranks_existing(getOpcode(opv), 
 			isImportant(opv), state, isInherit(opv))) {
 		return fun(state->computed, value, uri);
 	}
@@ -108,7 +108,7 @@ css_error cascade_uri_none(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error cascade_border_style(uint32_t opv, css_style *style,
+css_error css__cascade_border_style(uint32_t opv, css_style *style,
 		css_select_state *state, 
 		css_error (*fun)(css_computed_style *, uint8_t))
 {
@@ -151,7 +151,7 @@ css_error cascade_border_style(uint32_t opv, css_style *style,
 		}
 	}
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return fun(state->computed, value);
 	}
@@ -159,7 +159,7 @@ css_error cascade_border_style(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error cascade_border_width(uint32_t opv, css_style *style,
+css_error css__cascade_border_width(uint32_t opv, css_style *style,
 		css_select_state *state, 
 		css_error (*fun)(css_computed_style *, uint8_t, css_fixed, 
 				css_unit))
@@ -189,9 +189,9 @@ css_error cascade_border_width(uint32_t opv, css_style *style,
 		}
 	}
 
-	unit = to_css_unit(unit);
+	unit = css__to_css_unit(unit);
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return fun(state->computed, value, length, unit);
 	}
@@ -199,7 +199,7 @@ css_error cascade_border_width(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error cascade_length_auto(uint32_t opv, css_style *style,
+css_error css__cascade_length_auto(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
 				css_unit))
@@ -223,9 +223,9 @@ css_error cascade_length_auto(uint32_t opv, css_style *style,
 		}
 	}
 
-	unit = to_css_unit(unit);
+	unit = css__to_css_unit(unit);
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return fun(state->computed, value, length, unit);
 	}
@@ -233,7 +233,7 @@ css_error cascade_length_auto(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error cascade_length_normal(uint32_t opv, css_style *style,
+css_error css__cascade_length_normal(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
 				css_unit))
@@ -257,9 +257,9 @@ css_error cascade_length_normal(uint32_t opv, css_style *style,
 		}
 	}
 
-	unit = to_css_unit(unit);
+	unit = css__to_css_unit(unit);
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return fun(state->computed, value, length, unit);
 	}
@@ -267,7 +267,7 @@ css_error cascade_length_normal(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error cascade_length_none(uint32_t opv, css_style *style,
+css_error css__cascade_length_none(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
 				css_unit))
@@ -291,9 +291,9 @@ css_error cascade_length_none(uint32_t opv, css_style *style,
 		}
 	}
 
-	unit = to_css_unit(unit);
+	unit = css__to_css_unit(unit);
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return fun(state->computed, value, length, unit);
 	}
@@ -301,7 +301,7 @@ css_error cascade_length_none(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error cascade_length(uint32_t opv, css_style *style,
+css_error css__cascade_length(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, css_fixed,
 				css_unit))
@@ -318,10 +318,10 @@ css_error cascade_length(uint32_t opv, css_style *style,
 		advance_bytecode(style, sizeof(unit));
 	}
 
-	unit = to_css_unit(unit);
+	unit = css__to_css_unit(unit);
 
 	/** \todo lose fun != NULL once all properties have set routines */
-	if (fun != NULL && outranks_existing(getOpcode(opv), 
+	if (fun != NULL && css__outranks_existing(getOpcode(opv), 
 			isImportant(opv), state, isInherit(opv))) {
 		return fun(state->computed, value, length, unit);
 	}
@@ -329,7 +329,7 @@ css_error cascade_length(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error cascade_number(uint32_t opv, css_style *style,
+css_error css__cascade_number(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t, css_fixed))
 {
@@ -345,7 +345,7 @@ css_error cascade_number(uint32_t opv, css_style *style,
 	}
 
 	/** \todo lose fun != NULL once all properties have set routines */
-	if (fun != NULL && outranks_existing(getOpcode(opv), 
+	if (fun != NULL && css__outranks_existing(getOpcode(opv), 
 			isImportant(opv), state, isInherit(opv))) {
 		return fun(state->computed, value, length);
 	}
@@ -353,7 +353,7 @@ css_error cascade_number(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error cascade_page_break_after_before(uint32_t opv, css_style *style,
+css_error css__cascade_page_break_after_before(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t))
 {
@@ -374,7 +374,7 @@ css_error cascade_page_break_after_before(uint32_t opv, css_style *style,
 	}
 
 	/** \todo lose fun != NULL */
-	if (fun != NULL && outranks_existing(getOpcode(opv), 
+	if (fun != NULL && css__outranks_existing(getOpcode(opv), 
 			isImportant(opv), state, isInherit(opv))) {
 		return fun(state->computed, value);
 	}
@@ -382,7 +382,7 @@ css_error cascade_page_break_after_before(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error cascade_counter_increment_reset(uint32_t opv, css_style *style,
+css_error css__cascade_counter_increment_reset(uint32_t opv, css_style *style,
 		css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t,
 				css_computed_counter *))
@@ -456,7 +456,7 @@ css_error cascade_counter_increment_reset(uint32_t opv, css_style *style,
 		counters[n_counters].value = 0;
 	}
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		css_error error;
 

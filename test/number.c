@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	ctx.buflen = parse_filesize(argv[1]);
+	ctx.buflen = css__parse_filesize(argv[1]);
 	if (ctx.buflen == 0)
 		return 1;
 
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 	ctx.indata = false;
 	ctx.inexp = false;
 
-	assert(parse_testfile(argv[1], handle_line, &ctx) == true);
+	assert(css__parse_testfile(argv[1], handle_line, &ctx) == true);
 
 	/* and run final test */
 	if (ctx.bufused > 0)
@@ -120,7 +120,7 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
         
         assert(lwc_intern_string((const char *)data, len, &in) == lwc_error_ok);
         
-	result = number_from_lwc_string(in, false, &consumed);
+	result = css__number_from_lwc_string(in, false, &consumed);
 
 	print_css_fixed(buf, sizeof(buf), result);
 

@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_elevation(uint32_t opv, css_style *style, 
+css_error css__cascade_elevation(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	uint16_t value = 0;
@@ -42,9 +42,9 @@ css_error cascade_elevation(uint32_t opv, css_style *style,
 		}
 	}
 
-	unit = to_css_unit(unit);
+	unit = css__to_css_unit(unit);
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		/** \todo set computed elevation */
 	}
@@ -52,7 +52,7 @@ css_error cascade_elevation(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_elevation_from_hint(const css_hint *hint,
+css_error css__set_elevation_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	UNUSED(hint);
@@ -61,14 +61,14 @@ css_error set_elevation_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_elevation(css_select_state *state)
+css_error css__initial_elevation(css_select_state *state)
 {
 	UNUSED(state);
 
 	return CSS_OK;
 }
 
-css_error compose_elevation(const css_computed_style *parent,
+css_error css__compose_elevation(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

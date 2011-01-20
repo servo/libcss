@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_font_variant(uint32_t opv, css_style *style, 
+css_error css__cascade_font_variant(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	uint16_t value = CSS_FONT_VARIANT_INHERIT;
@@ -32,7 +32,7 @@ css_error cascade_font_variant(uint32_t opv, css_style *style,
 		}
 	}
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return set_font_variant(state->computed, value);
 	}
@@ -40,18 +40,18 @@ css_error cascade_font_variant(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_font_variant_from_hint(const css_hint *hint,
+css_error css__set_font_variant_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	return set_font_variant(style, hint->status);
 }
 
-css_error initial_font_variant(css_select_state *state)
+css_error css__initial_font_variant(css_select_state *state)
 {
 	return set_font_variant(state->computed, CSS_FONT_VARIANT_NORMAL);
 }
 
-css_error compose_font_variant(const css_computed_style *parent,
+css_error css__compose_font_variant(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

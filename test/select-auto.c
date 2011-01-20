@@ -65,13 +65,13 @@ typedef struct line_ctx {
 } line_ctx;
 
 static bool handle_line(const char *data, size_t datalen, void *pw);
-static void parse_tree(line_ctx *ctx, const char *data, size_t len);
-static void parse_tree_data(line_ctx *ctx, const char *data, size_t len);
-static void parse_sheet(line_ctx *ctx, const char *data, size_t len);
-static void parse_media_list(const char **data, size_t *len, uint64_t *media);
-static void parse_pseudo_list(const char **data, size_t *len, 
+static void css__parse_tree(line_ctx *ctx, const char *data, size_t len);
+static void css__parse_tree_data(line_ctx *ctx, const char *data, size_t len);
+static void css__parse_sheet(line_ctx *ctx, const char *data, size_t len);
+static void css__parse_media_list(const char **data, size_t *len, uint64_t *media);
+static void css__parse_pseudo_list(const char **data, size_t *len, 
 		uint32_t *element);
-static void parse_expected(line_ctx *ctx, const char *data, size_t len);
+static void css__parse_expected(line_ctx *ctx, const char *data, size_t len);
 static void run_test(line_ctx *ctx, const char *exp, size_t explen);
 static void destroy_tree(node *root);
 
@@ -207,7 +207,7 @@ int main(int argc, char **argv)
 	lwc_intern_string("class", SLEN("class"), &ctx.attr_class);
 	lwc_intern_string("id", SLEN("id"), &ctx.attr_id);
 	
-	assert(parse_testfile(argv[1], handle_line, &ctx) == true);
+	assert(css__parse_testfile(argv[1], handle_line, &ctx) == true);
 	
 	/* and run final test */
 	if (ctx.tree != NULL)
@@ -240,7 +240,7 @@ bool handle_line(const char *data, size_t datalen, void *pw)
 				ctx->inexp = false;
 			} else {
 				/* Assume start of stylesheet */
-				parse_sheet(ctx, data + 1, datalen - 1);
+				css__parse_sheet(ctx, data + 1, datalen - 1);
 
 				ctx->intree = false;
 				ctx->insheet = true;
@@ -264,7 +264,7 @@ bool handle_line(const char *data, size_t datalen, void *pw)
 					ctx->sheets[ctx->n_sheets - 1].sheet)
 					== CSS_OK);
 
-				parse_sheet(ctx, data + 1, datalen - 1);
+				css__parse_sheet(ctx, data + 1, datalen - 1);
 			} else {
 				error = css_stylesheet_append_data(
 					ctx->sheets[ctx->n_sheets - 1].sheet, 
@@ -291,7 +291,7 @@ bool handle_line(const char *data, size_t datalen, void *pw)
 		} else {
 			/* Start state */
 			if (strncasecmp(data+1, "tree", 4) == 0) {
-				parse_tree(ctx, data + 5, datalen - 5);
+				css__parse_tree(ctx, data + 5, datalen - 5);
 
 				ctx->intree = true;
 				ctx->insheet = false;
@@ -302,21 +302,21 @@ bool handle_line(const char *data, size_t datalen, void *pw)
 	} else {
 		if (ctx->intree) {
 			/* Not interested in the '|' */
-			parse_tree_data(ctx, data + 1, datalen - 1);
+			css__parse_tree_data(ctx, data + 1, datalen - 1);
 		} else if (ctx->insheet) {
 			error = css_stylesheet_append_data(
 					ctx->sheets[ctx->n_sheets - 1].sheet, 
 					(const uint8_t *) data, datalen);
 			assert(error == CSS_OK || error == CSS_NEEDDATA);
 		} else if (ctx->inexp) {
-			parse_expected(ctx, data, datalen);
+			css__parse_expected(ctx, data, datalen);
 		}
 	}
 
 	return true;
 }
 
-void parse_tree(line_ctx *ctx, const char *data, size_t len)
+void css__parse_tree(line_ctx *ctx, const char *data, size_t len)
 {
 	const char *p = data;
 	const char *end = data + len;
@@ -334,7 +334,7 @@ void parse_tree(line_ctx *ctx, const char *data, size_t len)
 	if (p < end) {
 		left = end - p;
 
-		parse_media_list(&p, &left, &ctx->media);
+		css__parse_media_list(&p, &left, &ctx->media);
 
 		end = p + left;
 	}
@@ -342,11 +342,11 @@ void parse_tree(line_ctx *ctx, const char *data, size_t len)
 	if (p < end) {
 		left = end - p;
 
-		parse_pseudo_list(&p, &left, &ctx->pseudo_element);
+		css__parse_pseudo_list(&p, &left, &ctx->pseudo_element);
 	}
 }
 
-void parse_tree_data(line_ctx *ctx, const char *data, size_t len)
+void css__parse_tree_data(line_ctx *ctx, const char *data, size_t len)
 {
 	const char *p = data;
 	const char *end = data + len;
@@ -455,7 +455,7 @@ void parse_tree_data(line_ctx *ctx, const char *data, size_t len)
 	}
 }
 
-void parse_sheet(line_ctx *ctx, const char *data, size_t len)
+void css__parse_sheet(line_ctx *ctx, const char *data, size_t len)
 {
 	const char *p;
 	const char *end = data + len;
@@ -488,7 +488,7 @@ void parse_sheet(line_ctx *ctx, const char *data, size_t len)
 	if (p < end) {
 		size_t ignored = end - p;
 
-		parse_media_list(&p, &ignored, &media);
+		css__parse_media_list(&p, &ignored, &media);
 	}
 
 	/** \todo How are we going to handle @import? */
@@ -510,7 +510,7 @@ void parse_sheet(line_ctx *ctx, const char *data, size_t len)
 	ctx->n_sheets++;
 }
 
-void parse_media_list(const char **data, size_t *len, uint64_t *media)
+void css__parse_media_list(const char **data, size_t *len, uint64_t *media)
 {
 	const char *p = *data;
 	const char *end = p + *len;
@@ -583,7 +583,7 @@ void parse_media_list(const char **data, size_t *len, uint64_t *media)
 	*len = end - p;
 }
 
-void parse_pseudo_list(const char **data, size_t *len, uint32_t *element)
+void css__parse_pseudo_list(const char **data, size_t *len, uint32_t *element)
 {
 	const char *p = *data;
 	const char *end = p + *len;
@@ -635,7 +635,7 @@ void parse_pseudo_list(const char **data, size_t *len, uint32_t *element)
 	*len = end - p;
 }
 
-void parse_expected(line_ctx *ctx, const char *data, size_t len)
+void css__parse_expected(line_ctx *ctx, const char *data, size_t len)
 {
 	while (ctx->expused + len >= ctx->explen) {
 		size_t required = ctx->explen == 0 ? 64 : ctx->explen * 2;

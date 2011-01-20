@@ -14,25 +14,25 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_width(uint32_t opv, css_style *style, 
+css_error css__cascade_width(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	return cascade_length_auto(opv, style, state, set_width);
+	return css__cascade_length_auto(opv, style, state, set_width);
 }
 
-css_error set_width_from_hint(const css_hint *hint,
+css_error css__set_width_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	return set_width(style, hint->status,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_width(css_select_state *state)
+css_error css__initial_width(css_select_state *state)
 {
 	return set_width(state->computed, CSS_WIDTH_AUTO, 0, CSS_UNIT_PX);
 }
 
-css_error compose_width(const css_computed_style *parent,
+css_error css__compose_width(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

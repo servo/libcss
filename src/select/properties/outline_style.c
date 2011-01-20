@@ -14,24 +14,24 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_outline_style(uint32_t opv, css_style *style, 
+css_error css__cascade_outline_style(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	return cascade_border_style(opv, style, state, set_outline_style);
+	return css__cascade_border_style(opv, style, state, set_outline_style);
 }
 
-css_error set_outline_style_from_hint(const css_hint *hint,
+css_error css__set_outline_style_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	return set_outline_style(style, hint->status);
 }
 
-css_error initial_outline_style(css_select_state *state)
+css_error css__initial_outline_style(css_select_state *state)
 {
 	return set_outline_style(state->computed, CSS_OUTLINE_STYLE_NONE);
 }
 
-css_error compose_outline_style(const css_computed_style *parent,
+css_error css__compose_outline_style(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

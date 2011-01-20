@@ -5,8 +5,8 @@
  * Copyright 2008 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
-#ifndef css_parse_language_h_
-#define css_parse_language_h_
+#ifndef css_css__parse_language_h_
+#define css_css__parse_language_h_
 
 #include <parserutils/utils/stack.h>
 #include <parserutils/utils/vector.h>

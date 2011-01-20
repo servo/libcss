@@ -14,14 +14,14 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_counter_increment(uint32_t opv, css_style *style, 
+css_error css__cascade_counter_increment(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {	
-	return cascade_counter_increment_reset(opv, style, state, 
+	return css__cascade_counter_increment_reset(opv, style, state, 
 			set_counter_increment);
 }
 
-css_error set_counter_increment_from_hint(const css_hint *hint, 
+css_error css__set_counter_increment_from_hint(const css_hint *hint, 
 		css_computed_style *style)
 {
 	css_computed_counter *item;
@@ -42,13 +42,13 @@ css_error set_counter_increment_from_hint(const css_hint *hint,
 	return error;
 }
 
-css_error initial_counter_increment(css_select_state *state)
+css_error css__initial_counter_increment(css_select_state *state)
 {
 	return set_counter_increment(state->computed, 
 			CSS_COUNTER_INCREMENT_NONE, NULL);
 }
 
-css_error compose_counter_increment(const css_computed_style *parent,
+css_error css__compose_counter_increment(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

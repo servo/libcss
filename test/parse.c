@@ -112,7 +112,7 @@ int main(int argc, char **argv)
 			size_t read = fread(buf, 1, CHUNK_SIZE, fp);
 			assert(read == CHUNK_SIZE);
 
-			error = css_parser_parse_chunk(parser, buf, CHUNK_SIZE);
+			error = css_parser_css__parse_chunk(parser, buf, CHUNK_SIZE);
 			assert(error == CSS_OK || error == CSS_NEEDDATA);
 
 			len -= CHUNK_SIZE;
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 			size_t read = fread(buf, 1, len, fp);
 			assert(read == len);
 
-			error = css_parser_parse_chunk(parser, buf, len);
+			error = css_parser_css__parse_chunk(parser, buf, len);
 			assert(error == CSS_OK || error == CSS_NEEDDATA);
 
 			len = 0;

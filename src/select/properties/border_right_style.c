@@ -14,24 +14,24 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_border_right_style(uint32_t opv, css_style *style, 
+css_error css__cascade_border_right_style(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	return cascade_border_style(opv, style, state, set_border_right_style);
+	return css__cascade_border_style(opv, style, state, set_border_right_style);
 }
 
-css_error set_border_right_style_from_hint(const css_hint *hint, 
+css_error css__set_border_right_style_from_hint(const css_hint *hint, 
 		css_computed_style *style)
 {
 	return set_border_right_style(style, hint->status);
 }
 
-css_error initial_border_right_style(css_select_state *state)
+css_error css__initial_border_right_style(css_select_state *state)
 {
 	return set_border_right_style(state->computed, CSS_BORDER_STYLE_NONE);
 }
 
-css_error compose_border_right_style(const css_computed_style *parent,
+css_error css__compose_border_right_style(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

@@ -14,25 +14,25 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_padding_left(uint32_t opv, css_style *style, 
+css_error css__cascade_padding_left(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	return cascade_length(opv, style, state, set_padding_left);
+	return css__cascade_length(opv, style, state, set_padding_left);
 }
 
-css_error set_padding_left_from_hint(const css_hint *hint,
+css_error css__set_padding_left_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	return set_padding_left(style, hint->status,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_padding_left(css_select_state *state)
+css_error css__initial_padding_left(css_select_state *state)
 {
 	return set_padding_left(state->computed, CSS_PADDING_SET, 0, CSS_UNIT_PX);
 }
 
-css_error compose_padding_left(const css_computed_style *parent,
+css_error css__compose_padding_left(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

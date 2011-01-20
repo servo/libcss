@@ -27,7 +27,7 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_border_color(css_language *c,
+css_error css__parse_border_color(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_style *result)
 {
@@ -83,7 +83,7 @@ css_error parse_border_color(css_language *c,
 			error = CSS_OK;
 		} else {
 			side_val[side_count] = BORDER_COLOR_SET;
-			error = parse_colour_specifier(c, vector, ctx, &side_color[side_count]);
+			error = css__parse_colour_specifier(c, vector, ctx, &side_color[side_count]);
 		}
 
 		if (error == CSS_OK) {

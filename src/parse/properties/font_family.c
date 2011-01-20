@@ -98,7 +98,7 @@ static css_code_t font_family_value(css_language *c, const css_token *token, boo
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_font_family(css_language *c, 
+css_error css__parse_font_family(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result)
 {
@@ -131,7 +131,7 @@ css_error parse_font_family(css_language *c,
 	} else {
 		*ctx = orig_ctx;
 
-		error = comma_list_to_style(c, vector, ctx,
+		error = css__comma_list_to_style(c, vector, ctx,
 				font_family_reserved, font_family_value,
 				result);
 		if (error != CSS_OK) {

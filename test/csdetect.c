@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	ctx.buflen = parse_filesize(argv[1]);
+	ctx.buflen = css__parse_filesize(argv[1]);
 	if (ctx.buflen == 0)
 		return 1;
 
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 	ctx.indata = false;
 	ctx.inenc = false;
 
-	assert(parse_testfile(argv[1], handle_line, &ctx) == true);
+	assert(css__parse_testfile(argv[1], handle_line, &ctx) == true);
 
 	/* and run final test */
 	if (ctx.bufused > 0 && ctx.buf[ctx.bufused - 1] == '\n')

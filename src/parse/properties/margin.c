@@ -27,7 +27,7 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_margin(css_language *c,
+css_error css__parse_margin(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_style *result)
 {
@@ -82,7 +82,7 @@ css_error parse_margin(css_language *c,
 		} else {
 			side_val[side_count] = MARGIN_SET;
 
-			error = parse_unit_specifier(c, vector, ctx, UNIT_PX, &side_length[side_count], &side_unit[side_count]);
+			error = css__parse_unit_specifier(c, vector, ctx, UNIT_PX, &side_length[side_count], &side_unit[side_count]);
 			if (error == CSS_OK) {
 				if (side_unit[side_count] & UNIT_ANGLE||
 				    side_unit[side_count] & UNIT_TIME||

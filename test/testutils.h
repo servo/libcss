@@ -34,10 +34,10 @@ void __assert2(const char *expr, const char *function,
 
 typedef bool (*line_func)(const char *data, size_t datalen, void *pw);
 
-static size_t parse_strlen(const char *str, size_t limit);
-char *parse_strnchr(const char *str, size_t len, int chr);
-bool parse_testfile(const char *filename, line_func callback, void *pw);
-size_t parse_filesize(const char *filename);
+static size_t css__parse_strlen(const char *str, size_t limit);
+char *css__parse_strnchr(const char *str, size_t len, int chr);
+bool css__parse_testfile(const char *filename, line_func callback, void *pw);
+size_t css__parse_filesize(const char *filename);
 
 /**
  * Testcase datafile parser driver
@@ -47,7 +47,7 @@ size_t parse_filesize(const char *filename);
  * \param pw        Pointer to client-specific private data
  * \return true on success, false otherwise.
  */
-bool parse_testfile(const char *filename, line_func callback, void *pw)
+bool css__parse_testfile(const char *filename, line_func callback, void *pw)
 {
 	FILE *fp;
 	char buf[300];
@@ -62,7 +62,7 @@ bool parse_testfile(const char *filename, line_func callback, void *pw)
 		if (buf[0] == '\n')
 			continue;
 
-		if (!callback(buf, parse_strlen(buf, sizeof buf - 1), pw)) {
+		if (!callback(buf, css__parse_strlen(buf, sizeof buf - 1), pw)) {
 			fclose(fp);
 			return false;
 		}
@@ -80,7 +80,7 @@ bool parse_testfile(const char *filename, line_func callback, void *pw)
  * \param limit  Upper bound on string length
  * \return String length
  */
-size_t parse_strlen(const char *str, size_t limit)
+size_t css__parse_strlen(const char *str, size_t limit)
 {
 	size_t len = 0;
 
@@ -105,7 +105,7 @@ size_t parse_strlen(const char *str, size_t limit)
  * \param chr  Character to search for
  * \return Pointer to character in string, or NULL if not found
  */
-char *parse_strnchr(const char *str, size_t len, int chr)
+char *css__parse_strnchr(const char *str, size_t len, int chr)
 {
 	size_t i;
 
@@ -129,7 +129,7 @@ char *parse_strnchr(const char *str, size_t len, int chr)
  * \param filename  Name of file to read size of
  * \return File size (in bytes), or 0 on error
  */
-size_t parse_filesize(const char *filename)
+size_t css__parse_filesize(const char *filename)
 {
 	FILE *fp;
 	size_t len = 0;

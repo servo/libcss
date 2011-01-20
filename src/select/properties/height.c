@@ -14,25 +14,25 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_height(uint32_t opv, css_style *style, 
+css_error css__cascade_height(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	return cascade_length_auto(opv, style, state, set_height);
+	return css__cascade_length_auto(opv, style, state, set_height);
 }
 
-css_error set_height_from_hint(const css_hint *hint,
+css_error css__set_height_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	return set_height(style, hint->status,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_height(css_select_state *state)
+css_error css__initial_height(css_select_state *state)
 {
 	return set_height(state->computed, CSS_HEIGHT_AUTO, 0, CSS_UNIT_PX);
 }
 
-css_error compose_height(const css_computed_style *parent,
+css_error css__compose_height(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_cursor(uint32_t opv, css_style *style, 
+css_error css__cascade_cursor(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {	
 	uint16_t value = CSS_CURSOR_INHERIT;
@@ -124,7 +124,7 @@ css_error cascade_cursor(uint32_t opv, css_style *style,
 		uris[n_uris] = NULL;
 	}
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		css_error error;
 
@@ -141,7 +141,7 @@ css_error cascade_cursor(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_cursor_from_hint(const css_hint *hint,
+css_error css__set_cursor_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	lwc_string **item;
@@ -160,12 +160,12 @@ css_error set_cursor_from_hint(const css_hint *hint,
 	return error;
 }
 
-css_error initial_cursor(css_select_state *state)
+css_error css__initial_cursor(css_select_state *state)
 {
 	return set_cursor(state->computed, CSS_CURSOR_AUTO, NULL);
 }
 
-css_error compose_cursor(const css_computed_style *parent,
+css_error css__compose_cursor(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

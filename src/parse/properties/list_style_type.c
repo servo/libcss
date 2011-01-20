@@ -27,7 +27,7 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_list_style_type(css_language *c, 
+css_error css__parse_list_style_type(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result)
 {
@@ -54,7 +54,7 @@ css_error parse_list_style_type(css_language *c,
 			&match) == lwc_error_ok && match)) {
 		flags |= FLAG_INHERIT;
 	} else {
-		error = parse_list_style_type_value(c, ident, &value);
+		error = css__parse_list_style_type_value(c, ident, &value);
 		if (error != CSS_OK) {
 			*ctx = orig_ctx;
 			return error;

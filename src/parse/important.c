@@ -24,7 +24,7 @@
  * Post condition: \a *ctx is updated with the next token to process
  *                 If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_important(css_language *c,
+css_error css__parse_important(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint8_t *result)
 {
@@ -64,7 +64,7 @@ css_error parse_important(css_language *c,
  *
  * \param style  The style to modify
  */
-void make_style_important(css_style *style)
+void css__make_style_important(css_style *style)
 {
 	css_code_t *bytecode = style->bytecode;
 	uint32_t length = style->used;

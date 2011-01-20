@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_outline_color(uint32_t opv, css_style *style, 
+css_error css__cascade_outline_color(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	uint16_t value = CSS_OUTLINE_COLOR_INHERIT;
@@ -33,7 +33,7 @@ css_error cascade_outline_color(uint32_t opv, css_style *style,
 		}
 	}
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return set_outline_color(state->computed, value, color);
 	}
@@ -41,18 +41,18 @@ css_error cascade_outline_color(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_outline_color_from_hint(const css_hint *hint,
+css_error css__set_outline_color_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	return set_outline_color(style, hint->status, hint->data.color);
 }
 
-css_error initial_outline_color(css_select_state *state)
+css_error css__initial_outline_color(css_select_state *state)
 {
 	return set_outline_color(state->computed, CSS_OUTLINE_COLOR_INVERT, 0);
 }
 
-css_error compose_outline_color(const css_computed_style *parent,
+css_error css__compose_outline_color(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

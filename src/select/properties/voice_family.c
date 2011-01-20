@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_voice_family(uint32_t opv, css_style *style, 
+css_error css__cascade_voice_family(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	uint16_t value = 0;
@@ -93,7 +93,7 @@ css_error cascade_voice_family(uint32_t opv, css_style *style,
 		voices[n_voices] = NULL;
 	}
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		/** \todo voice-family */
 		if (n_voices > 0)
@@ -106,7 +106,7 @@ css_error cascade_voice_family(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_voice_family_from_hint(const css_hint *hint,
+css_error css__set_voice_family_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	UNUSED(hint);
@@ -115,14 +115,14 @@ css_error set_voice_family_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_voice_family(css_select_state *state)
+css_error css__initial_voice_family(css_select_state *state)
 {
 	UNUSED(state);
 
 	return CSS_OK;
 }
 
-css_error compose_voice_family(const css_computed_style *parent,
+css_error css__compose_voice_family(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

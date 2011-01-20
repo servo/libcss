@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_speak_numeral(uint32_t opv, css_style *style, 
+css_error css__cascade_speak_numeral(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	uint16_t value = 0;
@@ -31,7 +31,7 @@ css_error cascade_speak_numeral(uint32_t opv, css_style *style,
 		}
 	}
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		/** \todo speak-numeral */
 	}
@@ -39,7 +39,7 @@ css_error cascade_speak_numeral(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_speak_numeral_from_hint(const css_hint *hint,
+css_error css__set_speak_numeral_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	UNUSED(hint);
@@ -48,14 +48,14 @@ css_error set_speak_numeral_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_speak_numeral(css_select_state *state)
+css_error css__initial_speak_numeral(css_select_state *state)
 {
 	UNUSED(state);
 
 	return CSS_OK;
 }
 
-css_error compose_speak_numeral(const css_computed_style *parent,
+css_error css__compose_speak_numeral(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

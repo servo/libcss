@@ -27,7 +27,7 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_cue(css_language *c, 
+css_error css__parse_cue(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result)
 {
@@ -44,7 +44,7 @@ css_error parse_cue(css_language *c,
 
 	first_token = parserutils_vector_peek(vector, *ctx);
 
-	error = parse_cue_before(c, vector, ctx, result);
+	error = css__parse_cue_before(c, vector, ctx, result);
 	if (error == CSS_OK) {
 		/* first token parsed */
 		
@@ -54,14 +54,14 @@ css_error parse_cue(css_language *c,
 		if (token == NULL)  {
 			/* no second token, re-parse the first */
 			*ctx = orig_ctx;
-			error = parse_cue_after(c, vector, ctx, result);
+			error = css__parse_cue_after(c, vector, ctx, result);
 		} else {
 			/* second token - might be useful */
 			if (is_css_inherit(c, token)) {
 				/* another inherit which is bogus */
 				error = CSS_INVALID;
 			} else {
-				error = parse_cue_after(c, vector, ctx, result);
+				error = css__parse_cue_after(c, vector, ctx, result);
 				if (error == CSS_OK) { 
 					/* second token parsed */
 					if (is_css_inherit(c, first_token)) {
@@ -71,7 +71,7 @@ css_error parse_cue(css_language *c,
 				} else {
 					/* second token appears to be junk re-try with first */
 					*ctx = orig_ctx;
-					error = parse_cue_after(c, vector, ctx, result);
+					error = css__parse_cue_after(c, vector, ctx, result);
 				}
 			}
 		}

@@ -14,14 +14,14 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_widows(uint32_t opv, css_style *style, 
+css_error css__cascade_widows(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	/** \todo widows */
-	return cascade_number(opv, style, state, NULL);
+	return css__cascade_number(opv, style, state, NULL);
 }
 
-css_error set_widows_from_hint(const css_hint *hint,
+css_error css__set_widows_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	UNUSED(hint);
@@ -30,14 +30,14 @@ css_error set_widows_from_hint(const css_hint *hint,
 	return CSS_OK;
 }
 
-css_error initial_widows(css_select_state *state)
+css_error css__initial_widows(css_select_state *state)
 {
 	UNUSED(state);
 
 	return CSS_OK;
 }
 
-css_error compose_widows(const css_computed_style *parent,
+css_error css__compose_widows(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

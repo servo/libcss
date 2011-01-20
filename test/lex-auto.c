@@ -36,7 +36,7 @@ typedef struct line_ctx {
 } line_ctx;
 
 static bool handle_line(const char *data, size_t datalen, void *pw);
-static void parse_expected(line_ctx *ctx, const char *data, size_t len);
+static void css__parse_expected(line_ctx *ctx, const char *data, size_t len);
 static const char *string_from_type(css_token_type type);
 static css_token_type string_to_type(const char *data, size_t len);
 static void run_test(const uint8_t *data, size_t len, 
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	ctx.buflen = parse_filesize(argv[1]);
+	ctx.buflen = css__parse_filesize(argv[1]);
 	if (ctx.buflen == 0)
 		return 1;
 
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
 	ctx.indata = false;
 	ctx.inexp = false;
 
-	assert(parse_testfile(argv[1], handle_line, &ctx) == true);
+	assert(css__parse_testfile(argv[1], handle_line, &ctx) == true);
 
 	/* and run final test */
 	if (ctx.bufused > 0)
@@ -127,17 +127,17 @@ bool handle_line(const char *data, size_t datalen, void *pw)
 			if (data[datalen - 1] == '\n')
 				datalen -= 1;
 
-			parse_expected(ctx, data, datalen);
+			css__parse_expected(ctx, data, datalen);
 		}
 	}
 
 	return true;
 }
 
-void parse_expected(line_ctx *ctx, const char *data, size_t len)
+void css__parse_expected(line_ctx *ctx, const char *data, size_t len)
 {
 	css_token_type type;
-	const char *colon = parse_strnchr(data, len, ':');
+	const char *colon = css__parse_strnchr(data, len, ':');
 
 	if (colon == NULL)
 		colon = data + len;

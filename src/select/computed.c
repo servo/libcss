@@ -306,7 +306,7 @@ css_error css_computed_style_compose(const css_computed_style *parent,
 	}
 
 	/* Finally, compute absolute values for everything */
-	return compute_absolute_values(parent, result, compute_font_size, pw);
+	return css__compute_absolute_values(parent, result, compute_font_size, pw);
 }
 
 /******************************************************************************
@@ -322,7 +322,7 @@ css_error css_computed_style_compose(const css_computed_style *parent,
  * \param pw                 Private word for callback
  * \return CSS_OK on success.
  */
-css_error compute_absolute_values(const css_computed_style *parent,
+css_error css__compute_absolute_values(const css_computed_style *parent,
 		css_computed_style *style,
 		css_error (*compute_font_size)(void *pw, 
 			const css_hint *parent, css_hint *size),

@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_z_index(uint32_t opv, css_style *style, 
+css_error css__cascade_z_index(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	uint16_t value = CSS_Z_INDEX_INHERIT;
@@ -34,7 +34,7 @@ css_error cascade_z_index(uint32_t opv, css_style *style,
 		}
 	}
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return set_z_index(state->computed, value, index);
 	}
@@ -42,18 +42,18 @@ css_error cascade_z_index(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_z_index_from_hint(const css_hint *hint,
+css_error css__set_z_index_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	return set_z_index(style, hint->status, hint->data.integer);
 }
 
-css_error initial_z_index(css_select_state *state)
+css_error css__initial_z_index(css_select_state *state)
 {
 	return set_z_index(state->computed, CSS_Z_INDEX_AUTO, 0);
 }
 
-css_error compose_z_index(const css_computed_style *parent,
+css_error css__compose_z_index(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

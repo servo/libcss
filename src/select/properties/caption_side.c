@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_caption_side(uint32_t opv, css_style *style, 
+css_error css__cascade_caption_side(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	uint16_t value = CSS_CAPTION_SIDE_INHERIT;
@@ -32,7 +32,7 @@ css_error cascade_caption_side(uint32_t opv, css_style *style,
 		}
 	}
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return set_caption_side(state->computed, value);
 	}
@@ -40,18 +40,18 @@ css_error cascade_caption_side(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_caption_side_from_hint(const css_hint *hint, 
+css_error css__set_caption_side_from_hint(const css_hint *hint, 
 		css_computed_style *style)
 {
 	return set_caption_side(style, hint->status);
 }
 
-css_error initial_caption_side(css_select_state *state)
+css_error css__initial_caption_side(css_select_state *state)
 {
 	return set_caption_side(state->computed, CSS_CAPTION_SIDE_TOP);
 }
 
-css_error compose_caption_side(const css_computed_style *parent,
+css_error css__compose_caption_side(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

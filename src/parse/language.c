@@ -1288,7 +1288,7 @@ css_error parseProperty(css_language *c, const css_token *property,
 	}
 
 	/* Determine if this declaration is important or not */
-	error = parse_important(c, vector, ctx, &flags);
+	error = css__parse_important(c, vector, ctx, &flags);
 	if (error != CSS_OK) {
 		css_stylesheet_style_destroy(style);
 		return error;
@@ -1305,7 +1305,7 @@ css_error parseProperty(css_language *c, const css_token *property,
 
 	/* If it's important, then mark the style appropriately */
 	if (flags != 0)
-		make_style_important(style);
+		css__make_style_important(style);
 
 	/* Append style to rule */
 	error = css_stylesheet_rule_append_style(c->sheet, rule, style);

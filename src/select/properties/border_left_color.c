@@ -14,26 +14,26 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_border_left_color(uint32_t opv, css_style *style, 
+css_error css__cascade_border_left_color(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	return cascade_bg_border_color(opv, style, state, 
+	return css__cascade_bg_border_color(opv, style, state, 
 			set_border_left_color);
 }
 
-css_error set_border_left_color_from_hint(const css_hint *hint, 
+css_error css__set_border_left_color_from_hint(const css_hint *hint, 
 		css_computed_style *style)
 {
 	return set_border_left_color(style, hint->status, hint->data.color);
 }
 
-css_error initial_border_left_color(css_select_state *state)
+css_error css__initial_border_left_color(css_select_state *state)
 {
 	return set_border_left_color(state->computed, 
 			CSS_BORDER_COLOR_INITIAL, 0);
 }
 
-css_error compose_border_left_color(const css_computed_style *parent,
+css_error css__compose_border_left_color(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

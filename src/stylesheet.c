@@ -317,7 +317,7 @@ css_error css_stylesheet_append_data(css_stylesheet *sheet,
 	if (sheet->parser == NULL)
 		return CSS_INVALID;
 
-	return css_parser_parse_chunk(sheet->parser, data, len);
+	return css_parser_css__parse_chunk(sheet->parser, data, len);
 }
 
 /**

@@ -34,10 +34,10 @@ letter_spacing:CSS_PROP_LETTER_SPACING IDENT:( INHERIT: NORMAL:0,LETTER_SPACING_
 
 line_height:CSS_PROP_LINE_HEIGHT IDENT:( INHERIT: NORMAL:0,LINE_HEIGHT_NORMAL IDENT:) NUMBER:( false:LINE_HEIGHT_NUMBER RANGE:num<0 NUMBER:) LENGTH_UNIT:( UNIT_PX:LINE_HEIGHT_DIMENSION DISALLOW:unit&UNIT_ANGLE||unit&UNIT_TIME||unit&UNIT_FREQ RANGE:<0 LENGTH_UNIT:)
 
-border_top:BORDER_SIDE_TOP WRAP:parse_border_side
-border_bottom:BORDER_SIDE_BOTTOM WRAP:parse_border_side
-border_left:BORDER_SIDE_LEFT WRAP:parse_border_side
-border_right:BORDER_SIDE_RIGHT WRAP:parse_border_side
+border_top:BORDER_SIDE_TOP WRAP:css__parse_border_side
+border_bottom:BORDER_SIDE_BOTTOM WRAP:css__parse_border_side
+border_left:BORDER_SIDE_LEFT WRAP:css__parse_border_side
+border_right:BORDER_SIDE_RIGHT WRAP:css__parse_border_side
 
 max_height:CSS_PROP_MAX_HEIGHT IDENT:( INHERIT: NONE:0,MAX_HEIGHT_NONE IDENT:) LENGTH_UNIT:( UNIT_PX:MAX_HEIGHT_SET DISALLOW:unit&UNIT_ANGLE||unit&UNIT_TIME||unit&UNIT_FREQ RANGE:<0 LENGTH_UNIT:)
 
@@ -52,53 +52,53 @@ color:CSS_PROP_COLOR IDENT:INHERIT COLOR:COLOR_SET
 #generic for padding_{top, bottom, left, right}.c
 padding_side:op GENERIC: IDENT:INHERIT LENGTH_UNIT:( UNIT_PX:PADDING_SET DISALLOW:unit&UNIT_ANGLE||unit&UNIT_TIME||unit&UNIT_FREQ  RANGE:<0 LENGTH_UNIT:)
 
-padding_bottom:CSS_PROP_PADDING_BOTTOM WRAP:parse_padding_side
-padding_left:CSS_PROP_PADDING_LEFT WRAP:parse_padding_side
-padding_top:CSS_PROP_PADDING_TOP WRAP:parse_padding_side
-padding_right:CSS_PROP_PADDING_RIGHT WRAP:parse_padding_side
+padding_bottom:CSS_PROP_PADDING_BOTTOM WRAP:css__parse_padding_side
+padding_left:CSS_PROP_PADDING_LEFT WRAP:css__parse_padding_side
+padding_top:CSS_PROP_PADDING_TOP WRAP:css__parse_padding_side
+padding_right:CSS_PROP_PADDING_RIGHT WRAP:css__parse_padding_side
 
 
 #generic for margin_{top, bottom, left, right}.c
 margin_side:op GENERIC IDENT:( INHERIT: AUTO:0,MARGIN_AUTO IDENT:) LENGTH_UNIT:( UNIT_PX:MARGIN_SET DISALLOW:unit&UNIT_ANGLE||unit&UNIT_TIME||unit&UNIT_FREQ LENGTH_UNIT:)
 
-margin_top:CSS_PROP_MARGIN_TOP WRAP:parse_margin_side
-margin_bottom:CSS_PROP_MARGIN_BOTTOM WRAP:parse_margin_side
-margin_left:CSS_PROP_MARGIN_LEFT WRAP:parse_margin_side
-margin_right:CSS_PROP_MARGIN_RIGHT WRAP:parse_margin_side
+margin_top:CSS_PROP_MARGIN_TOP WRAP:css__parse_margin_side
+margin_bottom:CSS_PROP_MARGIN_BOTTOM WRAP:css__parse_margin_side
+margin_left:CSS_PROP_MARGIN_LEFT WRAP:css__parse_margin_side
+margin_right:CSS_PROP_MARGIN_RIGHT WRAP:css__parse_margin_side
 
 #generic for {top, bottom, left, right}.c
 side:op GENERIC: IDENT:( INHERIT: AUTO:0,BOTTOM_AUTO IDENT:) LENGTH_UNIT:( UNIT_PX:BOTTOM_SET DISALLOW:unit&UNIT_ANGLE||unit&UNIT_TIME||unit&UNIT_FREQ LENGTH_UNIT:)
 
-top:CSS_PROP_TOP WRAP:parse_side
-bottom:CSS_PROP_BOTTOM WRAP:parse_side
-left:CSS_PROP_LEFT WRAP:parse_side
-right:CSS_PROP_RIGHT WRAP:parse_side
+top:CSS_PROP_TOP WRAP:css__parse_side
+bottom:CSS_PROP_BOTTOM WRAP:css__parse_side
+left:CSS_PROP_LEFT WRAP:css__parse_side
+right:CSS_PROP_RIGHT WRAP:css__parse_side
 
 
 #generic for border_{top, bottom, left, right}_width.c
 border_side_width:op GENERIC: IDENT:( INHERIT: THIN:0,BORDER_WIDTH_THIN MEDIUM:0,BORDER_WIDTH_MEDIUM THICK:0,BORDER_WIDTH_THICK IDENT:) LENGTH_UNIT:( UNIT_PX:BORDER_WIDTH_SET DISALLOW:unit==UNIT_PCT||unit&UNIT_ANGLE||unit&UNIT_TIME||unit&UNIT_FREQ RANGE:<0 LENGTH_UNIT:)
 
-border_top_width:CSS_PROP_BORDER_TOP_WIDTH WRAP:parse_border_side_width
-border_bottom_width:CSS_PROP_BORDER_BOTTOM_WIDTH WRAP:parse_border_side_width
-border_left_width:CSS_PROP_BORDER_LEFT_WIDTH WRAP:parse_border_side_width
-border_right_width:CSS_PROP_BORDER_RIGHT_WIDTH WRAP:parse_border_side_width
+border_top_width:CSS_PROP_BORDER_TOP_WIDTH WRAP:css__parse_border_side_width
+border_bottom_width:CSS_PROP_BORDER_BOTTOM_WIDTH WRAP:css__parse_border_side_width
+border_left_width:CSS_PROP_BORDER_LEFT_WIDTH WRAP:css__parse_border_side_width
+border_right_width:CSS_PROP_BORDER_RIGHT_WIDTH WRAP:css__parse_border_side_width
 
 
 #generic for border_{top, bottom, left, right}_style.c
 border_side_style:op GENERIC: IDENT:( INHERIT: NONE:0,BORDER_STYLE_NONE HIDDEN:0,BORDER_STYLE_HIDDEN DOTTED:0,BORDER_STYLE_DOTTED DASHED:0,BORDER_STYLE_DASHED SOLID:0,BORDER_STYLE_SOLID LIBCSS_DOUBLE:0,BORDER_STYLE_DOUBLE GROOVE:0,BORDER_STYLE_GROOVE RIDGE:0,BORDER_STYLE_RIDGE INSET:0,BORDER_STYLE_INSET OUTSET:0,BORDER_STYLE_OUTSET IDENT:)
 
-border_top_style:CSS_PROP_BORDER_TOP_STYLE WRAP:parse_border_side_style
-border_bottom_style:CSS_PROP_BORDER_BOTTOM_STYLE WRAP:parse_border_side_style
-border_left_style:CSS_PROP_BORDER_LEFT_STYLE WRAP:parse_border_side_style
-border_right_style:CSS_PROP_BORDER_RIGHT_STYLE WRAP:parse_border_side_style
+border_top_style:CSS_PROP_BORDER_TOP_STYLE WRAP:css__parse_border_side_style
+border_bottom_style:CSS_PROP_BORDER_BOTTOM_STYLE WRAP:css__parse_border_side_style
+border_left_style:CSS_PROP_BORDER_LEFT_STYLE WRAP:css__parse_border_side_style
+border_right_style:CSS_PROP_BORDER_RIGHT_STYLE WRAP:css__parse_border_side_style
 
 #generic for border_{top, bottom, left, right}_color.c
 border_side_color:op GENERIC: IDENT:( INHERIT: TRANSPARENT:0,BORDER_COLOR_TRANSPARENT IDENT:) COLOR:BORDER_COLOR_SET
 
-border_top_color:CSS_PROP_BORDER_TOP_COLOR WRAP:parse_border_side_color
-border_bottom_color:CSS_PROP_BORDER_BOTTOM_COLOR WRAP:parse_border_side_color
-border_left_color:CSS_PROP_BORDER_LEFT_COLOR WRAP:parse_border_side_color
-border_right_color:CSS_PROP_BORDER_RIGHT_COLOR WRAP:parse_border_side_color
+border_top_color:CSS_PROP_BORDER_TOP_COLOR WRAP:css__parse_border_side_color
+border_bottom_color:CSS_PROP_BORDER_BOTTOM_COLOR WRAP:css__parse_border_side_color
+border_left_color:CSS_PROP_BORDER_LEFT_COLOR WRAP:css__parse_border_side_color
+border_right_color:CSS_PROP_BORDER_RIGHT_COLOR WRAP:css__parse_border_side_color
 
 
 counter_increment:CSS_PROP_COUNTER_INCREMENT IDENT:( INHERIT: NONE:0,COUNTER_INCREMENT_NONE IDENT:) IDENT_LIST:( STRING_OPTNUM:COUNTER_INCREMENT_NAMED 1:COUNTER_INCREMENT_NONE IDENT_LIST:)
@@ -127,7 +127,7 @@ outline_color:CSS_PROP_OUTLINE_COLOR IDENT:( INHERIT: INVERT:0,OUTLINE_COLOR_INV
 
 outline_style:CSS_PROP_OUTLINE_STYLE IDENT:( INHERIT: NONE:0,BORDER_STYLE_NONE DOTTED:0,BORDER_STYLE_DOTTED DASHED:0,BORDER_STYLE_DASHED SOLID:0,BORDER_STYLE_SOLID LIBCSS_DOUBLE:0,BORDER_STYLE_DOUBLE GROOVE:0,BORDER_STYLE_GROOVE RIDGE:0,BORDER_STYLE_RIDGE INSET:0,BORDER_STYLE_INSET OUTSET:0,BORDER_STYLE_OUTSET IDENT:)
 
-outline_width:CSS_PROP_OUTLINE_WIDTH WRAP:parse_border_side_width
+outline_width:CSS_PROP_OUTLINE_WIDTH WRAP:css__parse_border_side_width
 
 overflow:CSS_PROP_OVERFLOW IDENT:( INHERIT: VISIBLE:0,OVERFLOW_VISIBLE HIDDEN:0,OVERFLOW_HIDDEN SCROLL:0,OVERFLOW_SCROLL AUTO:0,OVERFLOW_AUTO  IDENT:)
 

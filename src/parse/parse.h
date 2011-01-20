@@ -5,8 +5,8 @@
  * Copyright 2008 John-Mark Bell <jmb@netsurf-browser.org>
  */
 
-#ifndef css_parse_parse_h_
-#define css_parse_parse_h_
+#ifndef css_css__parse_parse_h_
+#define css_css__parse_parse_h_
 
 #include <libwapcaplet/libwapcaplet.h>
 
@@ -68,7 +68,7 @@ css_error css_parser_destroy(css_parser *parser);
 css_error css_parser_setopt(css_parser *parser, css_parser_opttype type,
 		css_parser_optparams *params);
 
-css_error css_parser_parse_chunk(css_parser *parser, const uint8_t *data, 
+css_error css_parser_css__parse_chunk(css_parser *parser, const uint8_t *data, 
 		size_t len);
 css_error css_parser_completed(css_parser *parser);
 

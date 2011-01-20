@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_background_position(uint32_t opv, css_style *style, 
+css_error css__cascade_background_position(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	uint16_t value = CSS_BACKGROUND_POSITION_INHERIT;
@@ -69,10 +69,10 @@ css_error cascade_background_position(uint32_t opv, css_style *style,
 		}
 	}
 
-	hunit = to_css_unit(hunit);
-	vunit = to_css_unit(vunit);
+	hunit = css__to_css_unit(hunit);
+	vunit = css__to_css_unit(vunit);
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return set_background_position(state->computed, value,
 				hlength, hunit, vlength, vunit);
@@ -81,7 +81,7 @@ css_error cascade_background_position(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_background_position_from_hint(const css_hint *hint, 
+css_error css__set_background_position_from_hint(const css_hint *hint, 
 		css_computed_style *style)
 {
 	return set_background_position(style, hint->status, 
@@ -89,14 +89,14 @@ css_error set_background_position_from_hint(const css_hint *hint,
 		hint->data.position.v.value, hint->data.position.v.unit);
 }
 
-css_error initial_background_position(css_select_state *state)
+css_error css__initial_background_position(css_select_state *state)
 {
 	return set_background_position(state->computed, 
 			CSS_BACKGROUND_POSITION_SET, 
 			0, CSS_UNIT_PCT, 0, CSS_UNIT_PCT);
 }
 
-css_error compose_background_position(const css_computed_style *parent,
+css_error css__compose_background_position(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

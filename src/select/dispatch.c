@@ -12,10 +12,10 @@
  * Dispatch table for properties, indexed by opcode
  */
 #define PROPERTY_FUNCS(pname)				\
-	cascade_##pname,				\
-	set_##pname##_from_hint,			\
-	initial_##pname,				\
-	compose_##pname
+	css__cascade_##pname,				\
+	css__set_##pname##_from_hint,			\
+	css__initial_##pname,				\
+	css__compose_##pname
 
 struct prop_table prop_dispatch[CSS_N_PROPERTIES] = {
 	{

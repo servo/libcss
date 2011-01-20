@@ -14,26 +14,26 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_border_left_width(uint32_t opv, css_style *style, 
+css_error css__cascade_border_left_width(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	return cascade_border_width(opv, style, state, set_border_left_width);
+	return css__cascade_border_width(opv, style, state, set_border_left_width);
 }
 
-css_error set_border_left_width_from_hint(const css_hint *hint, 
+css_error css__set_border_left_width_from_hint(const css_hint *hint, 
 		css_computed_style *style)
 {
 	return set_border_left_width(style, hint->status,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_border_left_width(css_select_state *state)
+css_error css__initial_border_left_width(css_select_state *state)
 {
 	return set_border_left_width(state->computed, CSS_BORDER_WIDTH_MEDIUM,
 			0, CSS_UNIT_PX);
 }
 
-css_error compose_border_left_width(const css_computed_style *parent,
+css_error css__compose_border_left_width(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

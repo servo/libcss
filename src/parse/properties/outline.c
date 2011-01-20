@@ -27,7 +27,7 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_outline(css_language *c,
+css_error css__parse_outline(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_style *result)
 {
@@ -91,19 +91,19 @@ css_error parse_outline(css_language *c,
 		token = parserutils_vector_peek(vector, *ctx);
 		if (token != NULL && is_css_inherit(c, token)) {
 			error = CSS_INVALID;
-			goto parse_outline_cleanup;
+			goto css__parse_outline_cleanup;
 		}
 
 		if ((color) && 
-			   (error = parse_outline_color(c, vector, ctx,
+			   (error = css__parse_outline_color(c, vector, ctx,
 				color_style)) == CSS_OK) {
 			color = false;
 		} else if ((style) && 
-			   (error = parse_outline_style(c, vector, 
+			   (error = css__parse_outline_style(c, vector, 
 				ctx, style_style)) == CSS_OK) {
 			style = false;
 		} else if ((width) && 
-		    (error = parse_outline_width(c, vector,
+		    (error = css__parse_outline_width(c, vector,
 				ctx, width_style)) == CSS_OK) {
 			width = false;
 		} 
@@ -141,16 +141,16 @@ css_error parse_outline(css_language *c,
 
 	error = css_stylesheet_merge_style(result, color_style);
 	if (error != CSS_OK)
-		goto parse_outline_cleanup;
+		goto css__parse_outline_cleanup;
 
 	error = css_stylesheet_merge_style(result, style_style);
 	if (error != CSS_OK)
-		goto parse_outline_cleanup;
+		goto css__parse_outline_cleanup;
 
 	error = css_stylesheet_merge_style(result, width_style);
 
 
-parse_outline_cleanup:
+css__parse_outline_cleanup:
 
 	css_stylesheet_style_destroy(width_style);
 	css_stylesheet_style_destroy(style_style);

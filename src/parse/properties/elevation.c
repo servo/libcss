@@ -27,7 +27,7 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_elevation(css_language *c, 
+css_error css__parse_elevation(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result)
 {
@@ -84,7 +84,7 @@ css_error parse_elevation(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 		value = ELEVATION_LOWER;
 	} else {
-		error = parse_unit_specifier(c, vector, ctx, UNIT_DEG,
+		error = css__parse_unit_specifier(c, vector, ctx, UNIT_DEG,
 				&length, &unit);
 		if (error != CSS_OK) {
 			*ctx = orig_ctx;

@@ -14,26 +14,26 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_outline_width(uint32_t opv, css_style *style, 
+css_error css__cascade_outline_width(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	return cascade_border_width(opv, style, state, set_outline_width);
+	return css__cascade_border_width(opv, style, state, set_outline_width);
 }
 
-css_error set_outline_width_from_hint(const css_hint *hint,
+css_error css__set_outline_width_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	return set_outline_width(style, hint->status,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_outline_width(css_select_state *state)
+css_error css__initial_outline_width(css_select_state *state)
 {
 	return set_outline_width(state->computed, CSS_OUTLINE_WIDTH_MEDIUM,
 			0, CSS_UNIT_PX);
 }
 
-css_error compose_outline_width(const css_computed_style *parent,
+css_error css__compose_outline_width(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

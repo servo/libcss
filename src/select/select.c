@@ -422,7 +422,7 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	 * is set to the computed value of color. */
 	if (parent == NULL) {
 		/* Only compute absolute values for the base element */
-		error = compute_absolute_values(NULL,
+		error = css__compute_absolute_values(NULL,
 				state.results->styles[CSS_PSEUDO_ELEMENT_NONE],
 				handler->compute_font_size, pw);
 		if (error != CSS_OK)
@@ -882,7 +882,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		bool process = true;
 
 		/* Selectors must be matched in ascending order of specificity
-		 * and rule index. (c.f. outranks_existing())
+		 * and rule index. (c.f. css__outranks_existing())
 		 *
 		 * Pick the least specific/earliest occurring selector.
 		 */
@@ -1300,7 +1300,7 @@ css_error cascade_style(const css_style *style, css_select_state *state)
 	return CSS_OK;
 }
 
-bool outranks_existing(uint16_t op, bool important, css_select_state *state,
+bool css__outranks_existing(uint16_t op, bool important, css_select_state *state,
 		bool inherit)
 {
 	prop_state *existing = &state->props[op][state->current_pseudo];

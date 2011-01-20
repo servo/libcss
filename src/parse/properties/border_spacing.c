@@ -27,7 +27,7 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_border_spacing(css_language *c, 
+css_error css__parse_border_spacing(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result)
 {
@@ -58,7 +58,7 @@ css_error parse_border_spacing(css_language *c,
 	} else {
 		int num_lengths = 0;
 
-		error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+		error = css__parse_unit_specifier(c, vector, ctx, UNIT_PX,
 				&length[0], &unit[0]);
 		if (error != CSS_OK) {
 			*ctx = orig_ctx;
@@ -82,7 +82,7 @@ css_error parse_border_spacing(css_language *c,
 			 * any remaining junk is thrown out.
 			 * Ctx will be preserved on error, as usual
 			 */
-			error = parse_unit_specifier(c, vector, ctx, UNIT_PX,
+			error = css__parse_unit_specifier(c, vector, ctx, UNIT_PX,
 					&length[1], &unit[1]);
 			if (error == CSS_OK) {
 				if (unit[1] & UNIT_ANGLE || 

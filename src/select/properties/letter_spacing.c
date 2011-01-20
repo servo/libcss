@@ -14,26 +14,26 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_letter_spacing(uint32_t opv, css_style *style, 
+css_error css__cascade_letter_spacing(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	return cascade_length_normal(opv, style, state, set_letter_spacing);
+	return css__cascade_length_normal(opv, style, state, set_letter_spacing);
 }
 
-css_error set_letter_spacing_from_hint(const css_hint *hint,
+css_error css__set_letter_spacing_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	return set_letter_spacing(style, hint->status,
 			hint->data.length.value, hint->data.length.unit);
 }
 
-css_error initial_letter_spacing(css_select_state *state)
+css_error css__initial_letter_spacing(css_select_state *state)
 {
 	return set_letter_spacing(state->computed, CSS_LETTER_SPACING_NORMAL, 
 			0, CSS_UNIT_PX);
 }
 
-css_error compose_letter_spacing(const css_computed_style *parent,
+css_error css__compose_letter_spacing(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

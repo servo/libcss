@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_border_spacing(uint32_t opv, css_style *style, 
+css_error css__cascade_border_spacing(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	uint16_t value = CSS_BORDER_SPACING_INHERIT;
@@ -36,10 +36,10 @@ css_error cascade_border_spacing(uint32_t opv, css_style *style,
 		advance_bytecode(style, sizeof(vunit));
 	}
 
-	hunit = to_css_unit(hunit);
-	vunit = to_css_unit(vunit);
+	hunit = css__to_css_unit(hunit);
+	vunit = css__to_css_unit(vunit);
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		return set_border_spacing(state->computed, value,
 				hlength, hunit, vlength, vunit);
@@ -48,7 +48,7 @@ css_error cascade_border_spacing(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_border_spacing_from_hint(const css_hint *hint, 
+css_error css__set_border_spacing_from_hint(const css_hint *hint, 
 		css_computed_style *style)
 {
 	return set_border_spacing(style, hint->status,
@@ -56,13 +56,13 @@ css_error set_border_spacing_from_hint(const css_hint *hint,
 		hint->data.position.v.value, hint->data.position.v.unit);
 }
 
-css_error initial_border_spacing(css_select_state *state)
+css_error css__initial_border_spacing(css_select_state *state)
 {
 	return set_border_spacing(state->computed, CSS_BORDER_SPACING_SET,
 			0, CSS_UNIT_PX, 0, CSS_UNIT_PX);
 }
 
-css_error compose_border_spacing(const css_computed_style *parent,
+css_error css__compose_border_spacing(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

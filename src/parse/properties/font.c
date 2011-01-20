@@ -27,7 +27,7 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_font(css_language *c,
+css_error css__parse_font(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_style *result)
 {
@@ -138,19 +138,19 @@ css_error parse_font(css_language *c,
 		token = parserutils_vector_peek(vector, *ctx);
 		if ((token != NULL) && is_css_inherit(c, token)) {
 			error = CSS_INVALID;
-			goto parse_font_cleanup;
+			goto css__parse_font_cleanup;
 		}
 
 		if ((style) && 
-		    (error = parse_font_style(c, vector,
+		    (error = css__parse_font_style(c, vector,
 					ctx, style_style)) == CSS_OK) {
 			style = false;
 		} else if ((variant) && 
-			   (error = parse_font_variant(c, vector, ctx,
+			   (error = css__parse_font_variant(c, vector, ctx,
 					variant_style)) == CSS_OK) {
 			variant = false;
 		} else if ((weight) && 
-			   (error = parse_font_weight(c, vector, ctx,
+			   (error = css__parse_font_weight(c, vector, ctx,
 				weight_style)) == CSS_OK) {
 			weight = false;
 		}
@@ -171,13 +171,13 @@ css_error parse_font(css_language *c,
 	token = parserutils_vector_peek(vector, *ctx);
 	if ((token != NULL) && is_css_inherit(c, token)) {
 		error = CSS_INVALID;
-		goto parse_font_cleanup;
+		goto css__parse_font_cleanup;
 	}
 
 	/* Now expect a font-size */
-	error = parse_font_size(c, vector, ctx, size_style);
+	error = css__parse_font_size(c, vector, ctx, size_style);
 	if (error != CSS_OK)
-		goto parse_font_cleanup;
+		goto css__parse_font_cleanup;
 	size = false;
 
 	consumeWhitespace(vector, ctx);
@@ -193,12 +193,12 @@ css_error parse_font(css_language *c,
 		token = parserutils_vector_peek(vector, *ctx);
 		if ((token != NULL) && is_css_inherit(c, token)) {
 			error = CSS_INVALID;
-			goto parse_font_cleanup;
+			goto css__parse_font_cleanup;
 		}
 
-		error = parse_line_height(c, vector, ctx, line_height_style);
+		error = css__parse_line_height(c, vector, ctx, line_height_style);
 		if (error != CSS_OK)
-			goto parse_font_cleanup;
+			goto css__parse_font_cleanup;
 
 		line_height = false;
 	}
@@ -209,13 +209,13 @@ css_error parse_font(css_language *c,
 	token = parserutils_vector_peek(vector, *ctx);
 	if ((token != NULL) && is_css_inherit(c, token)) {
 		error = CSS_INVALID;
-		goto parse_font_cleanup;
+		goto css__parse_font_cleanup;
 	}
 
 	/* Now expect a font-family */
-	error = parse_font_family(c, vector, ctx, family_style);
+	error = css__parse_font_family(c, vector, ctx, family_style);
 	if (error != CSS_OK)
-		goto parse_font_cleanup;
+		goto css__parse_font_cleanup;
 	family = false;
 
 	/* Must have size and family */
@@ -229,7 +229,7 @@ css_error parse_font(css_language *c,
 				CSS_PROP_FONT_STYLE, 0, 
 				FONT_STYLE_NORMAL);
 		if (error != CSS_OK)
-			goto parse_font_cleanup;
+			goto css__parse_font_cleanup;
 	}
 
 	if (variant) {
@@ -237,7 +237,7 @@ css_error parse_font(css_language *c,
 				CSS_PROP_FONT_VARIANT, 0, 
 				FONT_VARIANT_NORMAL);
 		if (error != CSS_OK)
-			goto parse_font_cleanup;
+			goto css__parse_font_cleanup;
 	}
 
 	if (weight) {
@@ -245,7 +245,7 @@ css_error parse_font(css_language *c,
 				CSS_PROP_FONT_WEIGHT,
 				0, FONT_WEIGHT_NORMAL);
 		if (error != CSS_OK)
-			goto parse_font_cleanup;
+			goto css__parse_font_cleanup;
 	}
 
 	if (line_height) {
@@ -253,35 +253,35 @@ css_error parse_font(css_language *c,
 				CSS_PROP_LINE_HEIGHT,
 				0, LINE_HEIGHT_NORMAL);
 		if (error != CSS_OK)
-			goto parse_font_cleanup;
+			goto css__parse_font_cleanup;
 	}
 
 	/* merge final output */
 	error = css_stylesheet_merge_style(result, style_style);
 		if (error != CSS_OK)
-			goto parse_font_cleanup;
+			goto css__parse_font_cleanup;
 
 	error = css_stylesheet_merge_style(result, variant_style);
 		if (error != CSS_OK)
-			goto parse_font_cleanup;
+			goto css__parse_font_cleanup;
 
 	error = css_stylesheet_merge_style(result, weight_style);
 		if (error != CSS_OK)
-			goto parse_font_cleanup;
+			goto css__parse_font_cleanup;
 
 	error = css_stylesheet_merge_style(result, size_style);
 		if (error != CSS_OK)
-			goto parse_font_cleanup;
+			goto css__parse_font_cleanup;
 
 	error = css_stylesheet_merge_style(result, line_height_style);
 		if (error != CSS_OK)
-			goto parse_font_cleanup;
+			goto css__parse_font_cleanup;
 
 	error = css_stylesheet_merge_style(result, family_style);
 
 
 
-parse_font_cleanup:
+css__parse_font_cleanup:
 	css_stylesheet_style_destroy(style_style);
 	css_stylesheet_style_destroy(variant_style);
 	css_stylesheet_style_destroy(weight_style);

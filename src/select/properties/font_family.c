@@ -14,7 +14,7 @@
 #include "select/properties/properties.h"
 #include "select/properties/helpers.h"
 
-css_error cascade_font_family(uint32_t opv, css_style *style, 
+css_error css__cascade_font_family(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
 	uint16_t value = CSS_FONT_FAMILY_INHERIT;
@@ -101,7 +101,7 @@ css_error cascade_font_family(uint32_t opv, css_style *style,
 		fonts[n_fonts] = NULL;
 	}
 
-	if (outranks_existing(getOpcode(opv), isImportant(opv), state,
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
 			isInherit(opv))) {
 		css_error error;
 
@@ -118,7 +118,7 @@ css_error cascade_font_family(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error set_font_family_from_hint(const css_hint *hint,
+css_error css__set_font_family_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
 	lwc_string **item;
@@ -137,7 +137,7 @@ css_error set_font_family_from_hint(const css_hint *hint,
 	return error;
 }
 
-css_error initial_font_family(css_select_state *state)
+css_error css__initial_font_family(css_select_state *state)
 {
 	css_hint hint;
 	css_error error;
@@ -147,10 +147,10 @@ css_error initial_font_family(css_select_state *state)
 	if (error != CSS_OK)
 		return error;
 
-	return set_font_family_from_hint(&hint, state->computed);
+	return css__set_font_family_from_hint(&hint, state->computed);
 }
 
-css_error compose_font_family(const css_computed_style *parent,
+css_error css__compose_font_family(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {

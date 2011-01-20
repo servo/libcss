@@ -27,35 +27,35 @@
  * Post condition: \a *ctx is updated with the next token to process
  *		   If the input is invalid, then \a *ctx remains unchanged.
  */
-css_error parse_border(css_language *c,
+css_error css__parse_border(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_style *result)
 {
 	int orig_ctx = *ctx;
 	css_error error;
 
-	error = parse_border_side(c, vector, ctx, result, BORDER_SIDE_TOP);
+	error = css__parse_border_side(c, vector, ctx, result, BORDER_SIDE_TOP);
 	if (error != CSS_OK) {
 		*ctx = orig_ctx;
 		return error;
 	}
 
 	*ctx = orig_ctx;
-	error = parse_border_side(c, vector, ctx, result, BORDER_SIDE_RIGHT);
+	error = css__parse_border_side(c, vector, ctx, result, BORDER_SIDE_RIGHT);
 	if (error != CSS_OK) {
 		*ctx = orig_ctx;
 		return error;
 	}
 
 	*ctx = orig_ctx;
-	error = parse_border_side(c, vector, ctx, result, BORDER_SIDE_BOTTOM);
+	error = css__parse_border_side(c, vector, ctx, result, BORDER_SIDE_BOTTOM);
 	if (error != CSS_OK) {
 		*ctx = orig_ctx;
 		return error;
 	}
 
 	*ctx = orig_ctx;
-	error = parse_border_side(c, vector, ctx, result, BORDER_SIDE_LEFT);
+	error = css__parse_border_side(c, vector, ctx, result, BORDER_SIDE_LEFT);
 	if (error != CSS_OK) 
 		*ctx = orig_ctx;
 	
