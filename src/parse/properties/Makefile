@@ -48,9 +48,9 @@ $(eval $(foreach PROP,$(AUTOGEN_PARSERS),$(call gen_prop_parser,$(PROP))))
 
 
 
-DIR_SOURCES := azimuth.c text_decoration.c background.c utils.c		\
+DIR_SOURCES := azimuth.c text_decoration.c background.c			\
 	background_position.c border_spacing.c font.c outline.c		\
-	voice_family.c border_style.c cue.c		\
+	voice_family.c border_style.c cue.c				\
 	font_family.c list_style.c padding.c cursor.c			\
 	list_style_type.c pause.c border.c border_width.c margin.c	\
 	play_during.c clip.c properties.c border_color.c content.c	\
