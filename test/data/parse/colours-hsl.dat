@@ -54,7 +54,23 @@
 |   0x02000018 0xffff00ff
 #reset
 
-## Selection of difefrnt HSL values
+## Selection of different HSL values
+
+#data
+* { color: hsl(0, 0%, 0%) }
+#errors
+#expected
+| 1 *
+|   0x02000018 0xff000000
+#reset
+
+#data
+* { color: hsl(0, 0%, 100%) }
+#errors
+#expected
+| 1 *
+|   0x02000018 0xffffffff
+#reset
 
 #data
 * { color: hsl(0, 0%, 40%) }

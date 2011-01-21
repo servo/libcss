@@ -249,48 +249,8 @@ css__parse_border_side_cleanup:
 }
 
 
-#if defined(HSL_CONVERT_FLOAT)
-
-static inline int hue_to_RGB(float m1, float m2, int h)
-{
-	float r;
-
-	h = (h < 0) ? h + 360 : h;
-	h = (h > 360) ? h - 360 : h;
-
-	if (h < 60) 
-		r = m1 + (m2 - m1) * (h / 60.0);
-	else if (h < 180) 
-		r = m2;
-	else if (h < 240) 
-		r = m1 + (m2 - m1) * ((240 - h) / 60.0);
-	else r = m1;
-
-	return r * 255.5;
-}
-
 /**
- * Convert Hue Sauration Lightness value to RGB float version from CSS standard
- *
- * CSS standard conversion definition
- *
- *  HOW TO RETURN hsl.to.rgb(h, s, l): 
- *  SELECT: 
- *  l<=0.5: PUT l*(s+1) IN m2
- *  ELSE: PUT l+s-l*s IN m2
- *  PUT l*2-m2 IN m1
- *  PUT hue.to.rgb(m1, m2, h+1/3) IN r
- *  PUT hue.to.rgb(m1, m2, h    ) IN g
- *  PUT hue.to.rgb(m1, m2, h-1/3) IN b
- *  RETURN (r, g, b)
- *
- *  HOW TO RETURN hue.to.rgb(m1, m2, h): 
- *  IF h<0: PUT h+1 IN h
- *  IF h>1: PUT h-1 IN h
- *  IF h*6<1: RETURN m1+(m2-m1)*h*6
- *  IF h*2<1: RETURN m2
- *  IF h*3<2: RETURN m1+(m2-m1)*(2/3-h)*6
- *  RETURN m1
+ * Convert Hue Saturation Lightness value to RGB.
  *
  * \param hue Hue in degrees 0..360
  * \param sat Saturation value in percent 0..100
@@ -299,80 +259,81 @@ static inline int hue_to_RGB(float m1, float m2, int h)
  * \param g green component
  * \param b blue component
  */
-static void HSL_to_RGB(int32_t hue, int32_t sat, int32_t lit, uint8_t *r, uint8_t *g, uint8_t *b)
+static void HSL_to_RGB(css_fixed hue, css_fixed sat, css_fixed lit, uint8_t *r, uint8_t *g, uint8_t *b)
 {
-	float m1, m2;
-	float s, l;
+	css_fixed min_rgb, max_rgb, chroma;
+	css_fixed relative_hue, scaled_hue, mid1, mid2;
+	int sextant;
 
-	s = sat/100.0;
-	l = lit/100.0;
+#define ORGB(R, G, B) \
+	*r = FIXTOINT(FDIVI(FMULI((R), 255), 100)); \
+	*g = FIXTOINT(FDIVI(FMULI((G), 255), 100)); \
+	*b = FIXTOINT(FDIVI(FMULI((B), 255), 100))
 
-	m2 = (l <= 0.5) ? l * (s + 1) : l + s - l * s;
-	m1 = l * 2 - m2;
-
-	*r = hue_to_RGB(m1, m2, hue + 120);
-	*g = hue_to_RGB(m1, m2, hue      );
-	*b = hue_to_RGB(m1, m2, hue - 120);
-}
-
-#else
-
-#define ORGB(R, G, B) *r = ((R) * 255) / 1000; *g = ((G) * 255) / 1000; *b= ((B) * 255) / 1000
-
-/**
- * Convert Hue Sauration Lightness value to RGB integer version.
- *
- * \param hue Hue in degrees 0..360
- * \param sat Saturation value in percent 0..100
- * \param lit Lightness value in percent 0..100
- * \param r red component
- * \param g green component
- * \param b blue component
- */
-static void HSL_to_RGB(int32_t hue, int32_t sat, int32_t lit, uint8_t *r, uint8_t *g, uint8_t *b)
-{
-	int m1,m2;
-	int sextant; /* which of the six sextants the hue is in */
-	int fract, vsf, mid1, mid2;
-
-	sat *= 10;
-	lit *= 10;
-
-	if (lit <= 500) {
-		m2 = (lit * (sat + 1000)) / 1000 ;
-	} else {
-		m2 = (((lit + sat) * 1000) - lit * sat) / 1000;
-	}
-
-	/* check m2 is in range */
-	if (m2 == 0) {
-		ORGB(0,0,0);
+	/* If saturation is zero there is no hue and r = g = b = lit */
+	if (sat == INTTOFIX(0)) {
+		ORGB(lit, lit, lit);
 		return;
 	}
-		
-	m1 = (lit * 2) - m2;
 
-	sextant = (hue * 6) / 360;
+	/* Compute max(r,g,b) */
+	if (lit <= INTTOFIX(50)) {
+		max_rgb = FDIVI(FMUL(lit, FADDI(sat, 100)), 100);
+	} else {
+		max_rgb = FDIVI(FSUB(FMULI(FADD(lit, sat), 100), FMUL(lit, sat)), 100);
+	}
 
-	fract = (((hue * 6) - (sextant * 360)) * 1000) / 360;
-        vsf = (m2 * fract * (m2 - m1) / m2) / 1000 ;
-        mid1 = m1 + vsf;
-        mid2 = m2 - vsf;
+	/* Compute min(r,g,b) */
+	min_rgb = FSUB(FMULI(lit, 2), max_rgb);
 
+	/* We know that the value of at least one of the components is 
+	 * max(r,g,b) and that the value of at least one of the other
+	 * components is min(r,g,b).
+	 *
+	 * We can determine which components have these values by
+	 * considering which the sextant of the hexcone the hue lies
+	 * in:
+	 *
+	 * Sextant:	max(r,g,b):	min(r,g,b):
+	 *
+	 * 0		r		b
+	 * 1		g		b
+	 * 2		g		r
+	 * 3		b		r
+	 * 4		b		g
+	 * 5		r		g
+	 *
+	 * Thus, we must only compute the value of the third component
+	 */
+
+	/* Chroma is the difference between min and max */
+	chroma = FSUB(max_rgb, min_rgb);
+
+	/* Compute which sextant the hue lies in (truncates result) */
+	sextant = FIXTOINT(FDIVI(FMULI(hue, 6), 360));
+
+	/* Compute offset of hue from start of sextant */
+	relative_hue = FDIVI(FSUBI(FMULI(hue, 6), sextant * 360), 360);
+
+	/* Scale offset by chroma */
+        scaled_hue = FMUL(relative_hue, chroma);
+
+	/* Compute potential values of the third colour component */
+        mid1 = FADD(min_rgb, scaled_hue);
+        mid2 = FSUB(max_rgb, scaled_hue);
+
+	/* Populate result */
         switch (sextant) {
-	case 0: ORGB(m2,   mid1, m1); break;
-	case 1: ORGB(mid2, m2,   m1); break;
-	case 2: ORGB(m1,   m2,   mid1); break;
-	case 3: ORGB(m1,   mid2, m2); break;
-	case 4: ORGB(mid1, m1,   m2); break;
-	case 5: ORGB(m2,   m1,   mid2); break;
+	case 0: ORGB(max_rgb,   mid1,      min_rgb); break;
+	case 1: ORGB(mid2,      max_rgb,   min_rgb); break;
+	case 2: ORGB(min_rgb,   max_rgb,   mid1); break;
+	case 3: ORGB(min_rgb,   mid2,      max_rgb); break;
+	case 4: ORGB(mid1,      min_rgb,   max_rgb); break;
+	case 5: ORGB(max_rgb,   min_rgb,   mid2); break;
         }
 
-}
-
 #undef ORGB
-
-#endif
+}
 
 /**
  * Parse a colour specifier
@@ -564,8 +525,8 @@ css_error css__parse_colour_specifier(css_language *c,
 		} else if (colour_channels == 5 || colour_channels == 6) {
 			/* hue - saturation - lightness */
 			size_t consumed = 0;
-			css_fixed num;
-			int32_t alpha = 255, hue, sat, lit;
+			css_fixed hue, sat, lit;
+			int32_t alpha = 255;
 
 			/* hue is a number without a unit representing an 
 			 * angle (0-360) degrees  
@@ -576,11 +537,15 @@ css_error css__parse_colour_specifier(css_language *c,
 			if ((token == NULL) || (token->type != CSS_TOKEN_NUMBER))
 				goto invalid;
 
-			num = css__number_from_lwc_string(token->idata, true, &consumed);
+			hue = css__number_from_lwc_string(token->idata, false, &consumed);
 			if (consumed != lwc_string_length(token->idata))
 				goto invalid; /* failed to consume the whole string as a number */
 
-			hue = (((FIXTOINT(num) % 360) + 360) % 360);
+			/* Normalise hue to the range [0, 360) */
+			while (hue < INTTOFIX(0))
+				hue += INTTOFIX(360);
+			while (hue >= INTTOFIX(360))
+				hue -= INTTOFIX(360);
 
 			consumeWhitespace(vector, ctx);
 
@@ -596,10 +561,15 @@ css_error css__parse_colour_specifier(css_language *c,
 			if ((token == NULL) || (token->type != CSS_TOKEN_PERCENTAGE))
 				goto invalid;
 
-			num = css__number_from_lwc_string(token->idata, true, &consumed);
+			sat = css__number_from_lwc_string(token->idata, false, &consumed);
 			if (consumed != lwc_string_length(token->idata))
 				goto invalid; /* failed to consume the whole string as a number */
-			sat = FIXTOINT(num);
+
+			/* Normalise saturation to the range [0, 100] */
+			if (sat < INTTOFIX(0))
+				sat = INTTOFIX(0);
+			else if (sat > INTTOFIX(100))
+				sat = INTTOFIX(100);
 
 			consumeWhitespace(vector, ctx);
 
@@ -615,11 +585,15 @@ css_error css__parse_colour_specifier(css_language *c,
 			if ((token == NULL) || (token->type != CSS_TOKEN_PERCENTAGE))
 				goto invalid;
 
-			num = css__number_from_lwc_string(token->idata, true, &consumed);
+			lit = css__number_from_lwc_string(token->idata, false, &consumed);
 			if (consumed != lwc_string_length(token->idata))
 				goto invalid; /* failed to consume the whole string as a number */
 
-			lit = FIXTOINT(num);
+			/* Normalise lightness to the range [0, 100] */
+			if (lit < INTTOFIX(0))
+				lit = INTTOFIX(0);
+			else if (lit > INTTOFIX(100))
+				lit = INTTOFIX(100);
 
 			consumeWhitespace(vector, ctx);
 
@@ -637,11 +611,11 @@ css_error css__parse_colour_specifier(css_language *c,
 				if ((token == NULL) || (token->type != CSS_TOKEN_NUMBER))
 					goto invalid;
 
-				num = css__number_from_lwc_string(token->idata, true, &consumed);
+				alpha = css__number_from_lwc_string(token->idata, false, &consumed);
 				if (consumed != lwc_string_length(token->idata))
 					goto invalid; /* failed to consume the whole string as a number */
-
-				alpha = FIXTOINT(FMULI(num, 255));
+				
+				alpha = FIXTOINT(FMULI(alpha, 255));
 
 				consumeWhitespace(vector, ctx);
 
