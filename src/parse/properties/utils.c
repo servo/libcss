@@ -314,6 +314,9 @@ static void HSL_to_RGB(int32_t hue, int32_t sat, int32_t lit, uint8_t *r, uint8_
 }
 
 #else
+
+#define ORGB(R, G, B) *r = ((R) * 255) / 100; *g = ((G) * 255) / 100; *b= ((B) * 255) / 100
+
 static void HSL_to_RGB(int32_t hue, int32_t sat, int32_t lit, uint8_t *r, uint8_t *g, uint8_t *b)
 {
 	int m1,m2;
@@ -326,17 +329,20 @@ static void HSL_to_RGB(int32_t hue, int32_t sat, int32_t lit, uint8_t *r, uint8_
 		m2 = (((lit + sat) * 100) - lit * sat) / 100;
 	}
 
-
-	m1 = lit * 2 - m2;
+	/* check m2 is in range */
+	if (m2 == 0) {
+		ORGB(0,0,0);
+		return;
+	}
+		
+	m1 = (lit * 2) - m2;
 
 	sextant = (hue * 6) / 360;
 
-	fract = (hue * 6) - (sextant * 360);
-        vsf = (m2 * fract * ((m2 - m1) / m2)) / 100 ;
+	fract = (((hue * 6) - (sextant * 360)) * 100) /360;
+        vsf = (m2 * fract * (m2 - m1) / m2) / 100 ;
         mid1 = m1 + vsf;
         mid2 = m2 - vsf;
-
-#define ORGB(R, G, B) *r = ((R) * 255) / 100; *g = ((G) * 255) / 100; *b= ((B) * 255) / 100
 
         switch (sextant) {
 	case 0: ORGB(m2,   mid1, m1); break;
@@ -347,8 +353,10 @@ static void HSL_to_RGB(int32_t hue, int32_t sat, int32_t lit, uint8_t *r, uint8_
 	case 5: ORGB(m2,   m1,   mid2); break;
         }
 
-#undef ORGB
 }
+
+#undef ORGB
+
 #endif
 
 /**
