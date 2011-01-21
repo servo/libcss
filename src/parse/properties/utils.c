@@ -269,14 +269,17 @@ css__parse_border_side_cleanup:
   IF h*3<2: RETURN m1+(m2-m1)*(2/3-h)*6
   RETURN m1
 */
-static inline int hue_to_RGB(float m1, float m2, float h)
+static inline int hue_to_RGB(float m1, float m2, int h)
 {
-	h = (h < 0) ? h + 1.0 : h;
-	h = (h > 1.0) ? h - 1.0 : h;
+	h = (h < 0) ? h + 360 : h;
+	h = (h > 360) ? h - 360 : h;
 
-	if (h * 6.0 < 1.0) return (m1 + (m2 - m1) * h * 6.0) * 255.5;
-	if (h * 2.0 < 1.0) return (m2 * 255.5);
-	if (h * 3.0 < 2.0) return (m1 + (m2 - m1) * ((2.0/3.0) - h) * 6.0) * 255.5;
+	if (h < 60) 
+		return (m1 + (m2 - m1) * (h / 60.0)) * 255.5;
+	if (h < 180) 
+		return (m2 * 255.5);
+	if (h < 240) 
+		return (m1 + (m2 - m1) * ((240 - h) / 60.0)) * 255.5;
 	return m1 * 255.5;
 }
 
@@ -293,18 +296,17 @@ static inline int hue_to_RGB(float m1, float m2, float h)
 static void HSL_to_RGB(int32_t hue, int32_t sat, int32_t lit, uint8_t *r, uint8_t *g, uint8_t *b)
 {
 	float m1, m2;
-	float h, s, l;
+	float s, l;
 
-	h = hue/360.0;
 	s = sat/100.0;
 	l = lit/100.0;
 
 	m2 = (l <= 0.5) ? l * (s + 1) : l + s - l * s;
 	m1 = l * 2 - m2;
 
-	*r = hue_to_RGB(m1, m2, h + (1.0/3.0));
-	*g = hue_to_RGB(m1, m2, h      );
-	*b = hue_to_RGB(m1, m2, h - (1.0/3.0));
+	*r = hue_to_RGB(m1, m2, hue + 120);
+	*g = hue_to_RGB(m1, m2, hue      );
+	*b = hue_to_RGB(m1, m2, hue - 120);
 }
 
 /**
