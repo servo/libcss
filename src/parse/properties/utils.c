@@ -248,27 +248,9 @@ css__parse_border_side_cleanup:
 	return error;
 }
 
-#if 1
-/* CSS standard definition
 
-  HOW TO RETURN hsl.to.rgb(h, s, l): 
-  SELECT: 
-  l<=0.5: PUT l*(s+1) IN m2
-  ELSE: PUT l+s-l*s IN m2
-  PUT l*2-m2 IN m1
-  PUT hue.to.rgb(m1, m2, h+1/3) IN r
-  PUT hue.to.rgb(m1, m2, h    ) IN g
-  PUT hue.to.rgb(m1, m2, h-1/3) IN b
-  RETURN (r, g, b)
+#if defined(HSL_CONVERT_FLOAT)
 
-  HOW TO RETURN hue.to.rgb(m1, m2, h): 
-  IF h<0: PUT h+1 IN h
-  IF h>1: PUT h-1 IN h
-  IF h*6<1: RETURN m1+(m2-m1)*h*6
-  IF h*2<1: RETURN m2
-  IF h*3<2: RETURN m1+(m2-m1)*(2/3-h)*6
-  RETURN m1
-*/
 static inline int hue_to_RGB(float m1, float m2, int h)
 {
 	float r;
@@ -289,6 +271,26 @@ static inline int hue_to_RGB(float m1, float m2, int h)
 
 /**
  * Convert Hue Sauration Lightness value to RGB float version from CSS standard
+ *
+ * CSS standard conversion definition
+ *
+ *  HOW TO RETURN hsl.to.rgb(h, s, l): 
+ *  SELECT: 
+ *  l<=0.5: PUT l*(s+1) IN m2
+ *  ELSE: PUT l+s-l*s IN m2
+ *  PUT l*2-m2 IN m1
+ *  PUT hue.to.rgb(m1, m2, h+1/3) IN r
+ *  PUT hue.to.rgb(m1, m2, h    ) IN g
+ *  PUT hue.to.rgb(m1, m2, h-1/3) IN b
+ *  RETURN (r, g, b)
+ *
+ *  HOW TO RETURN hue.to.rgb(m1, m2, h): 
+ *  IF h<0: PUT h+1 IN h
+ *  IF h>1: PUT h-1 IN h
+ *  IF h*6<1: RETURN m1+(m2-m1)*h*6
+ *  IF h*2<1: RETURN m2
+ *  IF h*3<2: RETURN m1+(m2-m1)*(2/3-h)*6
+ *  RETURN m1
  *
  * \param hue Hue in degrees 0..360
  * \param sat Saturation value in percent 0..100
@@ -315,18 +317,31 @@ static void HSL_to_RGB(int32_t hue, int32_t sat, int32_t lit, uint8_t *r, uint8_
 
 #else
 
-#define ORGB(R, G, B) *r = ((R) * 255) / 100; *g = ((G) * 255) / 100; *b= ((B) * 255) / 100
+#define ORGB(R, G, B) *r = ((R) * 255) / 1000; *g = ((G) * 255) / 1000; *b= ((B) * 255) / 1000
 
+/**
+ * Convert Hue Sauration Lightness value to RGB integer version.
+ *
+ * \param hue Hue in degrees 0..360
+ * \param sat Saturation value in percent 0..100
+ * \param lit Lightness value in percent 0..100
+ * \param r red component
+ * \param g green component
+ * \param b blue component
+ */
 static void HSL_to_RGB(int32_t hue, int32_t sat, int32_t lit, uint8_t *r, uint8_t *g, uint8_t *b)
 {
 	int m1,m2;
 	int sextant; /* which of the six sextants the hue is in */
 	int fract, vsf, mid1, mid2;
 
-	if (lit <= 50) {
-		m2 = (lit * (sat + 100)) / 100 ;
+	sat *= 10;
+	lit *= 10;
+
+	if (lit <= 500) {
+		m2 = (lit * (sat + 1000)) / 1000 ;
 	} else {
-		m2 = (((lit + sat) * 100) - lit * sat) / 100;
+		m2 = (((lit + sat) * 1000) - lit * sat) / 1000;
 	}
 
 	/* check m2 is in range */
@@ -339,8 +354,8 @@ static void HSL_to_RGB(int32_t hue, int32_t sat, int32_t lit, uint8_t *r, uint8_
 
 	sextant = (hue * 6) / 360;
 
-	fract = (((hue * 6) - (sextant * 360)) * 100) /360;
-        vsf = (m2 * fract * (m2 - m1) / m2) / 100 ;
+	fract = (((hue * 6) - (sextant * 360)) * 1000) / 360;
+        vsf = (m2 * fract * (m2 - m1) / m2) / 1000 ;
         mid1 = m1 + vsf;
         mid2 = m2 - vsf;
 

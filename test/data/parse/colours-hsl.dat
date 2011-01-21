@@ -94,7 +94,7 @@
 #errors
 #expected
 | 1 *
-|   0x02000018 0xff9FD7DF
+|   0x02000018 0xff9FD6DF
 #reset
 
 #data
