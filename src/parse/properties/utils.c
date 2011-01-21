@@ -248,7 +248,7 @@ css__parse_border_side_cleanup:
 	return error;
 }
 
-
+#if 1
 /* CSS standard definition
 
   HOW TO RETURN hsl.to.rgb(h, s, l): 
@@ -271,16 +271,20 @@ css__parse_border_side_cleanup:
 */
 static inline int hue_to_RGB(float m1, float m2, int h)
 {
+	float r;
+
 	h = (h < 0) ? h + 360 : h;
 	h = (h > 360) ? h - 360 : h;
 
 	if (h < 60) 
-		return (m1 + (m2 - m1) * (h / 60.0)) * 255.5;
-	if (h < 180) 
-		return (m2 * 255.5);
-	if (h < 240) 
-		return (m1 + (m2 - m1) * ((240 - h) / 60.0)) * 255.5;
-	return m1 * 255.5;
+		r = m1 + (m2 - m1) * (h / 60.0);
+	else if (h < 180) 
+		r = m2;
+	else if (h < 240) 
+		r = m1 + (m2 - m1) * ((240 - h) / 60.0);
+	else r = m1;
+
+	return r * 255.5;
 }
 
 /**
@@ -308,6 +312,44 @@ static void HSL_to_RGB(int32_t hue, int32_t sat, int32_t lit, uint8_t *r, uint8_
 	*g = hue_to_RGB(m1, m2, hue      );
 	*b = hue_to_RGB(m1, m2, hue - 120);
 }
+
+#else
+static void HSL_to_RGB(int32_t hue, int32_t sat, int32_t lit, uint8_t *r, uint8_t *g, uint8_t *b)
+{
+	int m1,m2;
+	int sextant; /* which of the six sextants the hue is in */
+	int fract, vsf, mid1, mid2;
+
+	if (lit <= 50) {
+		m2 = (lit * (sat + 100)) / 100 ;
+	} else {
+		m2 = (((lit + sat) * 100) - lit * sat) / 100;
+	}
+
+
+	m1 = lit * 2 - m2;
+
+	sextant = (hue * 6) / 360;
+
+	fract = (hue * 6) - (sextant * 360);
+        vsf = (m2 * fract * ((m2 - m1) / m2)) / 100 ;
+        mid1 = m1 + vsf;
+        mid2 = m2 - vsf;
+
+#define ORGB(R, G, B) *r = ((R) * 255) / 100; *g = ((G) * 255) / 100; *b= ((B) * 255) / 100
+
+        switch (sextant) {
+	case 0: ORGB(m2,   mid1, m1); break;
+	case 1: ORGB(mid2, m2,   m1); break;
+	case 2: ORGB(m1,   m2,   mid1); break;
+	case 3: ORGB(m1,   mid2, m2); break;
+	case 4: ORGB(mid1, m1,   m2); break;
+	case 5: ORGB(m2,   m1,   mid2); break;
+        }
+
+#undef ORGB
+}
+#endif
 
 /**
  * Parse a colour specifier
