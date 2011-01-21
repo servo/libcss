@@ -31,7 +31,7 @@ css_error css__parse_cursor(css_language *c,
 		css_style *result)
 {
 	int orig_ctx = *ctx;
-	css_error error;
+	css_error error = CSS_OK;
 	const css_token *token;
 	bool match;
 
