@@ -248,6 +248,65 @@ css__parse_border_side_cleanup:
 	return error;
 }
 
+
+/* CSS standard definition
+
+  HOW TO RETURN hsl.to.rgb(h, s, l): 
+  SELECT: 
+  l<=0.5: PUT l*(s+1) IN m2
+  ELSE: PUT l+s-l*s IN m2
+  PUT l*2-m2 IN m1
+  PUT hue.to.rgb(m1, m2, h+1/3) IN r
+  PUT hue.to.rgb(m1, m2, h    ) IN g
+  PUT hue.to.rgb(m1, m2, h-1/3) IN b
+  RETURN (r, g, b)
+
+  HOW TO RETURN hue.to.rgb(m1, m2, h): 
+  IF h<0: PUT h+1 IN h
+  IF h>1: PUT h-1 IN h
+  IF h*6<1: RETURN m1+(m2-m1)*h*6
+  IF h*2<1: RETURN m2
+  IF h*3<2: RETURN m1+(m2-m1)*(2/3-h)*6
+  RETURN m1
+*/
+static inline int hue_to_RGB(float m1, float m2, float h)
+{
+	h = (h < 0) ? h + 1.0 : h;
+	h = (h > 1.0) ? h - 1.0 : h;
+
+	if (h * 6.0 < 1.0) return (m1 + (m2 - m1) * h * 6.0) * 255.5;
+	if (h * 2.0 < 1.0) return (m2 * 255.5);
+	if (h * 3.0 < 2.0) return (m1 + (m2 - m1) * ((2.0/3.0) - h) * 6.0) * 255.5;
+	return m1 * 255.5;
+}
+
+/**
+ * Convert Hue Sauration Lightness value to RGB float version from CSS standard
+ *
+ * \param hue Hue in degrees 0..360
+ * \param sat Saturation value in percent 0..100
+ * \param lit Lightness value in percent 0..100
+ * \param r red component
+ * \param g green component
+ * \param b blue component
+ */
+static void HSL_to_RGB(int32_t hue, int32_t sat, int32_t lit, uint8_t *r, uint8_t *g, uint8_t *b)
+{
+	float m1, m2;
+	float h, s, l;
+
+	h = hue/360.0;
+	s = sat/100.0;
+	l = lit/100.0;
+
+	m2 = (l <= 0.5) ? l * (s + 1) : l + s - l * s;
+	m1 = l * 2 - m2;
+
+	*r = hue_to_RGB(m1, m2, h + (1.0/3.0));
+	*g = hue_to_RGB(m1, m2, h      );
+	*b = hue_to_RGB(m1, m2, h - (1.0/3.0));
+}
+
 /**
  * Parse a colour specifier
  *
@@ -273,9 +332,12 @@ css_error css__parse_colour_specifier(css_language *c,
 
 	consumeWhitespace(vector, ctx);
 
-	/* IDENT(<colour name>) | HASH(rgb | rrggbb) |
+	/* IDENT(<colour name>) | 
+	 * HASH(rgb | rrggbb) |
 	 * FUNCTION(rgb) [ [ NUMBER | PERCENTAGE ] ',' ] {3} ')'
 	 * FUNCTION(rgba) [ [ NUMBER | PERCENTAGE ] ',' ] {4} ')'
+	 * FUNCTION(hsl) ANGLE ',' PERCENTAGE ',' PERCENTAGE  ')'
+	 * FUNCTION(hsla) ANGLE ',' PERCENTAGE ',' PERCENTAGE ',' NUMBER ')'
 	 *
 	 * For quirks, NUMBER | DIMENSION | IDENT, too
 	 * I.E. "123456" -> NUMBER, "1234f0" -> DIMENSION, "f00000" -> IDENT
@@ -338,6 +400,14 @@ css_error css__parse_colour_specifier(css_language *c,
 				token->idata, c->strings[RGBA],
 				&match) == lwc_error_ok && match)) {
 			colour_channels = 4;
+		} if ((lwc_string_caseless_isequal(
+				token->idata, c->strings[HSL],
+				&match) == lwc_error_ok && match)) {
+			colour_channels = 5;
+		} else if ((lwc_string_caseless_isequal(
+				token->idata, c->strings[HSLA],
+				&match) == lwc_error_ok && match)) {
+			colour_channels = 6;
 		}
 
 		if (colour_channels == 3 || colour_channels == 4) {
@@ -418,8 +488,112 @@ css_error css__parse_colour_specifier(css_language *c,
 					goto invalid;
 				}
 			}
-		} else
+		} else if (colour_channels == 5 || colour_channels == 6) {
+			/* hue - saturation - lightness */
+			size_t consumed = 0;
+			css_fixed num;
+			int32_t alpha = 255, hue, sat, lit;
+
+			/* hue is a number without a unit representing an 
+			 * angle (0-360) degrees  
+			 */
+			consumeWhitespace(vector, ctx);
+
+			token = parserutils_vector_iterate(vector, ctx);
+			if ((token == NULL) || (token->type != CSS_TOKEN_NUMBER))
+				goto invalid;
+
+			num = css__number_from_lwc_string(token->idata, true, &consumed);
+			if (consumed != lwc_string_length(token->idata))
+				goto invalid; /* failed to consume the whole string as a number */
+
+			hue = (((FIXTOINT(num) % 360) + 360) % 360);
+
+			consumeWhitespace(vector, ctx);
+
+			token = parserutils_vector_iterate(vector, ctx);
+			if (!tokenIsChar(token, ','))
+				goto invalid;
+
+
+			/* saturation */
+			consumeWhitespace(vector, ctx);
+
+			token = parserutils_vector_iterate(vector, ctx);
+			if ((token == NULL) || (token->type != CSS_TOKEN_PERCENTAGE))
+				goto invalid;
+
+			num = css__number_from_lwc_string(token->idata, true, &consumed);
+			if (consumed != lwc_string_length(token->idata))
+				goto invalid; /* failed to consume the whole string as a number */
+			sat = FIXTOINT(num);
+
+			consumeWhitespace(vector, ctx);
+
+			token = parserutils_vector_iterate(vector, ctx);
+			if (!tokenIsChar(token, ','))
+				goto invalid;
+
+
+			/* lightness */
+			consumeWhitespace(vector, ctx);
+
+			token = parserutils_vector_iterate(vector, ctx);
+			if ((token == NULL) || (token->type != CSS_TOKEN_PERCENTAGE))
+				goto invalid;
+
+			num = css__number_from_lwc_string(token->idata, true, &consumed);
+			if (consumed != lwc_string_length(token->idata))
+				goto invalid; /* failed to consume the whole string as a number */
+
+			lit = FIXTOINT(num);
+
+			consumeWhitespace(vector, ctx);
+
+			token = parserutils_vector_iterate(vector, ctx);
+
+			if (colour_channels == 6) {
+				/* alpha */
+
+				if (!tokenIsChar(token, ','))
+					goto invalid;
+			
+				consumeWhitespace(vector, ctx);
+
+				token = parserutils_vector_iterate(vector, ctx);
+				if ((token == NULL) || (token->type != CSS_TOKEN_NUMBER))
+					goto invalid;
+
+				num = css__number_from_lwc_string(token->idata, true, &consumed);
+				if (consumed != lwc_string_length(token->idata))
+					goto invalid; /* failed to consume the whole string as a number */
+
+				alpha = FIXTOINT(FMULI(num, 255));
+
+				consumeWhitespace(vector, ctx);
+
+				token = parserutils_vector_iterate(vector, ctx);
+
+			}
+
+			if (!tokenIsChar(token, ')'))
+				goto invalid;
+
+			/* have a valid HSV entry, convert to RGB */
+
+			HSL_to_RGB(hue, sat, lit, &r, &g, &b);
+
+			/* apply alpha */
+			if (alpha > 255)
+				a = 255;
+			else if (alpha < 0)
+				a = 0;
+			else
+				a = alpha;
+
+		} else {
 			goto invalid;
+		}
 	}
 
 	*result = (a << 24) | (r << 16) | (g << 8) | b;

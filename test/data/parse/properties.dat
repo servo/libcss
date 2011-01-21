@@ -777,6 +777,16 @@
 |   0x02000018 0xffbbbbcc
 #reset
 
+## more fully tested in colours-hsl.dat
+
+#data
+* { color: hsl(240,15%,77%) }
+#errors
+#expected
+| 1 *
+|   0x02000018 0xffbbbbcd
+#reset
+
 ##
 ## 19 - content
 ##

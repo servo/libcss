@@ -331,6 +331,8 @@ const stringmap_entry stringmap[LAST_KNOWN] = {
 	{ "blink", SLEN("blink") },
 	{ "rgb", SLEN("rgb") },
 	{ "rgba", SLEN("rgba") },
+	{ "hsl", SLEN("hsl") },
+	{ "hsla", SLEN("hsla") },
 	{ "-libcss-left", SLEN("-libcss-left") },
 	{ "-libcss-center", SLEN("-libcss-center") },
 	{ "-libcss-right", SLEN("-libcss-right") },
