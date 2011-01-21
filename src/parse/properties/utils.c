@@ -421,6 +421,12 @@ css_error css__parse_colour_specifier(css_language *c,
 	}
 
 	if (token->type == CSS_TOKEN_IDENT) {
+		if ((lwc_string_caseless_isequal(
+				token->idata, c->strings[TRANSPARENT],
+				&match) == lwc_error_ok && match)) {
+			*result = 0; /* black transparent */
+			return CSS_OK;
+		}
 		error = css__parse_named_colour(c, token->idata, result);
 		if (error != CSS_OK && c->sheet->quirks_allowed) {
 			error = css__parse_hash_colour(token->idata, result);
