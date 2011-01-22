@@ -303,17 +303,18 @@ static void HSL_to_RGB(css_fixed hue, css_fixed sat, css_fixed lit, uint8_t *r, 
 	 * 4		b		g
 	 * 5		r		g
 	 *
-	 * Thus, we must only compute the value of the third component
+	 * Thus, we need only compute the value of the third component
 	 */
 
 	/* Chroma is the difference between min and max */
 	chroma = FSUB(max_rgb, min_rgb);
 
 	/* Compute which sextant the hue lies in (truncates result) */
-	sextant = FIXTOINT(FDIVI(FMULI(hue, 6), 360));
+	hue = FDIVI(FMULI(hue, 6), 360);
+	sextant = FIXTOINT(hue);
 
 	/* Compute offset of hue from start of sextant */
-	relative_hue = FDIVI(FSUBI(FMULI(hue, 6), sextant * 360), 360);
+	relative_hue = FSUBI(hue, sextant);
 
 	/* Scale offset by chroma */
         scaled_hue = FMUL(relative_hue, chroma);
