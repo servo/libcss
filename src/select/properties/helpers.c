@@ -403,10 +403,10 @@ css_error css__cascade_counter_increment_reset(uint32_t opv, css_style *style,
 				css_fixed val = 0;
 
 				css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &name);
-				advance_bytecode(style, sizeof(name));
+				advance_bytecode(style, sizeof(css_code_t));
 
 				val = *((css_fixed *) style->bytecode);
-				advance_bytecode(style, sizeof(val));
+				advance_bytecode(style, sizeof(css_code_t));
 
 				temp = state->computed->alloc(counters,
 						(n_counters + 1) * 
@@ -428,7 +428,7 @@ css_error css__cascade_counter_increment_reset(uint32_t opv, css_style *style,
 				n_counters++;
 
 				v = *((uint32_t *) style->bytecode);
-				advance_bytecode(style, sizeof(v));
+				advance_bytecode(style, sizeof(css_code_t));
 			}
 		}
 			break;
