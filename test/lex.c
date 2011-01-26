@@ -137,11 +137,11 @@ int main(int argc, char **argv)
 
 	for (i = 0; i < ITERATIONS; i++) {
 		assert(parserutils_inputstream_create("UTF-8", 
-			CSS_CHARSET_DICTATED,css_charset_extract, 
+			CSS_CHARSET_DICTATED,css__charset_extract, 
 			(parserutils_alloc) myrealloc, NULL, &stream) == 
 			PARSERUTILS_OK);
 
-		assert(css_lexer_create(stream, myrealloc, NULL, &lexer) == 
+		assert(css__lexer_create(stream, myrealloc, NULL, &lexer) == 
 			CSS_OK);
 
 		fp = fopen(argv[1], "rb");
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
 
 			len -= CHUNK_SIZE;
 
-			while ((error = css_lexer_get_token(lexer, &tok)) == 
+			while ((error = css__lexer_get_token(lexer, &tok)) == 
 					CSS_OK) {
 				printToken(tok);
 
@@ -187,14 +187,14 @@ int main(int argc, char **argv)
 		assert(parserutils_inputstream_append(stream, NULL, 0) == 
 				PARSERUTILS_OK);
 
-		while ((error = css_lexer_get_token(lexer, &tok)) == CSS_OK) {
+		while ((error = css__lexer_get_token(lexer, &tok)) == CSS_OK) {
 			printToken(tok);
 
 			if (tok->type == CSS_TOKEN_EOF)
 				break;
 		}
 
-		css_lexer_destroy(lexer);
+		css__lexer_destroy(lexer);
 
 		parserutils_inputstream_destroy(stream);
 	}

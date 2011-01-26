@@ -65,20 +65,20 @@ css_error css__parse_list_style(css_language *c,
 	} 
 
 	/* allocate styles */
-	error = css_stylesheet_style_create(c->sheet, &image_style);
+	error = css__stylesheet_style_create(c->sheet, &image_style);
 	if (error != CSS_OK) 
 		return error;
 
-	error = css_stylesheet_style_create(c->sheet, &position_style);
+	error = css__stylesheet_style_create(c->sheet, &position_style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(image_style);
+		css__stylesheet_style_destroy(image_style);
 		return error;
 	}
 
-	error = css_stylesheet_style_create(c->sheet, &type_style);
+	error = css__stylesheet_style_create(c->sheet, &type_style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(image_style);
-		css_stylesheet_style_destroy(position_style);
+		css__stylesheet_style_destroy(image_style);
+		css__stylesheet_style_destroy(position_style);
 		return error;
 	}
 
@@ -121,40 +121,40 @@ css_error css__parse_list_style(css_language *c,
 
 	/* defaults */
 	if (image) {
-		error = css_stylesheet_style_appendOPV(image_style, 
+		error = css__stylesheet_style_appendOPV(image_style, 
 			       CSS_PROP_LIST_STYLE_IMAGE,
 				0, LIST_STYLE_IMAGE_NONE);
 	}
 
 	if (position) {
-		error = css_stylesheet_style_appendOPV(position_style, 
+		error = css__stylesheet_style_appendOPV(position_style, 
 			       CSS_PROP_LIST_STYLE_POSITION,
 				0, LIST_STYLE_POSITION_OUTSIDE);
 	}
 
 	if (type) {
-		error = css_stylesheet_style_appendOPV(type_style, 
+		error = css__stylesheet_style_appendOPV(type_style, 
 			       CSS_PROP_LIST_STYLE_TYPE,
 				0, LIST_STYLE_TYPE_DISC);
 	}
 
 
-	error = css_stylesheet_merge_style(result, image_style);
+	error = css__stylesheet_merge_style(result, image_style);
 	if (error != CSS_OK)
 		goto css__parse_list_style_cleanup;
 
-	error = css_stylesheet_merge_style(result, position_style);
+	error = css__stylesheet_merge_style(result, position_style);
 	if (error != CSS_OK)
 		goto css__parse_list_style_cleanup;
 
-	error = css_stylesheet_merge_style(result, type_style);
+	error = css__stylesheet_merge_style(result, type_style);
 
 
 css__parse_list_style_cleanup:
 
-	css_stylesheet_style_destroy(type_style);
-	css_stylesheet_style_destroy(position_style);
-	css_stylesheet_style_destroy(image_style);
+	css__stylesheet_style_destroy(type_style);
+	css__stylesheet_style_destroy(position_style);
+	css__stylesheet_style_destroy(image_style);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;

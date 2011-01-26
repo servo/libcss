@@ -77,37 +77,37 @@ css_error css__parse_background(css_language *c,
 	} 
 
 	/* allocate styles */
-	error = css_stylesheet_style_create(c->sheet, &attachment_style);
+	error = css__stylesheet_style_create(c->sheet, &attachment_style);
 	if (error != CSS_OK) 
 		return error;
 
-	error = css_stylesheet_style_create(c->sheet, &color_style);
+	error = css__stylesheet_style_create(c->sheet, &color_style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(attachment_style);
+		css__stylesheet_style_destroy(attachment_style);
 		return error;
 	}
 
-	error = css_stylesheet_style_create(c->sheet, &image_style);
+	error = css__stylesheet_style_create(c->sheet, &image_style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(attachment_style);
-		css_stylesheet_style_destroy(color_style);
+		css__stylesheet_style_destroy(attachment_style);
+		css__stylesheet_style_destroy(color_style);
 		return error;
 	}
 
-	error = css_stylesheet_style_create(c->sheet, &position_style);
+	error = css__stylesheet_style_create(c->sheet, &position_style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(attachment_style);
-		css_stylesheet_style_destroy(color_style);
-		css_stylesheet_style_destroy(image_style);
+		css__stylesheet_style_destroy(attachment_style);
+		css__stylesheet_style_destroy(color_style);
+		css__stylesheet_style_destroy(image_style);
 		return error;
 	}
 
-	error = css_stylesheet_style_create(c->sheet, &repeat_style);
+	error = css__stylesheet_style_create(c->sheet, &repeat_style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(attachment_style);
-		css_stylesheet_style_destroy(color_style);
-		css_stylesheet_style_destroy(image_style);
-		css_stylesheet_style_destroy(position_style);
+		css__stylesheet_style_destroy(attachment_style);
+		css__stylesheet_style_destroy(color_style);
+		css__stylesheet_style_destroy(image_style);
+		css__stylesheet_style_destroy(position_style);
 		return error;
 	}
 
@@ -157,7 +157,7 @@ css_error css__parse_background(css_language *c,
 	} while (*ctx != prev_ctx && token != NULL);
 
 	if (attachment) {
-		error = css_stylesheet_style_appendOPV(attachment_style, 
+		error = css__stylesheet_style_appendOPV(attachment_style, 
 				CSS_PROP_BACKGROUND_ATTACHMENT, 0, 
 				BACKGROUND_ATTACHMENT_SCROLL);
 		if (error != CSS_OK)
@@ -165,7 +165,7 @@ css_error css__parse_background(css_language *c,
 	}
 
 	if (color) {
-		error = css_stylesheet_style_appendOPV(color_style, 
+		error = css__stylesheet_style_appendOPV(color_style, 
 				CSS_PROP_BACKGROUND_COLOR, 0, 
 				BACKGROUND_COLOR_TRANSPARENT);
 		if (error != CSS_OK)
@@ -173,7 +173,7 @@ css_error css__parse_background(css_language *c,
 	}
 
 	if (image) {
-		error = css_stylesheet_style_appendOPV(image_style, 
+		error = css__stylesheet_style_appendOPV(image_style, 
 				CSS_PROP_BACKGROUND_IMAGE,
 				0, BACKGROUND_IMAGE_NONE);
 		if (error != CSS_OK)
@@ -181,7 +181,7 @@ css_error css__parse_background(css_language *c,
 	}
 
 	if (position) {
-		error = css_stylesheet_style_appendOPV(position_style,
+		error = css__stylesheet_style_appendOPV(position_style,
 				CSS_PROP_BACKGROUND_POSITION,
 				0, BACKGROUND_POSITION_HORZ_LEFT |
 				BACKGROUND_POSITION_VERT_TOP);
@@ -190,37 +190,37 @@ css_error css__parse_background(css_language *c,
 	}
 
 	if (repeat) {
-		error = css_stylesheet_style_appendOPV(repeat_style, 
+		error = css__stylesheet_style_appendOPV(repeat_style, 
 				CSS_PROP_BACKGROUND_REPEAT,
 				0, BACKGROUND_REPEAT_REPEAT);
 		if (error != CSS_OK)
 			goto css__parse_background_cleanup;
 	}
 
-	error = css_stylesheet_merge_style(result, attachment_style);
+	error = css__stylesheet_merge_style(result, attachment_style);
 	if (error != CSS_OK)
 		goto css__parse_background_cleanup;
 
-	error = css_stylesheet_merge_style(result, color_style);
+	error = css__stylesheet_merge_style(result, color_style);
 	if (error != CSS_OK)
 		goto css__parse_background_cleanup;
 
-	error = css_stylesheet_merge_style(result, image_style);
+	error = css__stylesheet_merge_style(result, image_style);
 	if (error != CSS_OK)
 		goto css__parse_background_cleanup;
 
-	error = css_stylesheet_merge_style(result, position_style);
+	error = css__stylesheet_merge_style(result, position_style);
 	if (error != CSS_OK)
 		goto css__parse_background_cleanup;
 
-	error = css_stylesheet_merge_style(result, repeat_style);
+	error = css__stylesheet_merge_style(result, repeat_style);
 
 css__parse_background_cleanup:
-	css_stylesheet_style_destroy(attachment_style);
-	css_stylesheet_style_destroy(color_style);
-	css_stylesheet_style_destroy(image_style);
-	css_stylesheet_style_destroy(position_style);
-	css_stylesheet_style_destroy(repeat_style);
+	css__stylesheet_style_destroy(attachment_style);
+	css__stylesheet_style_destroy(color_style);
+	css__stylesheet_style_destroy(image_style);
+	css__stylesheet_style_destroy(position_style);
+	css__stylesheet_style_destroy(repeat_style);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;

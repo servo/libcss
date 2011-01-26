@@ -52,7 +52,7 @@ css_error css__parse_clip(css_language *c,
 	    (lwc_string_caseless_isequal(
 		    token->idata, c->strings[INHERIT],
 		    &match) == lwc_error_ok && match)) {
-		error = css_stylesheet_style_appendOPV(result,
+		error = css__stylesheet_style_appendOPV(result,
 						       CSS_PROP_CLIP,
 						       FLAG_INHERIT,
 						       0);
@@ -60,7 +60,7 @@ css_error css__parse_clip(css_language *c,
 		   (lwc_string_caseless_isequal(
 			   token->idata, c->strings[AUTO],
 			   &match) == lwc_error_ok && match)) {
-		error = css_stylesheet_style_appendOPV(result,
+		error = css__stylesheet_style_appendOPV(result,
 						       CSS_PROP_CLIP,
 						       0,
 						       CLIP_AUTO);
@@ -140,7 +140,7 @@ css_error css__parse_clip(css_language *c,
 		}
 
                 /* output bytecode */
-		error = css_stylesheet_style_appendOPV(result,
+		error = css__stylesheet_style_appendOPV(result,
 						       CSS_PROP_CLIP,
 						       0,
 						       value);
@@ -150,7 +150,7 @@ css_error css__parse_clip(css_language *c,
 		}
 
 		for (i = 0; i < num_lengths; i++) {
-			error = css_stylesheet_style_vappend(result, 
+			error = css__stylesheet_style_vappend(result, 
 							     2, 
 							     length[i], 
 							     unit[i]);

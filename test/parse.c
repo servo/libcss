@@ -90,12 +90,12 @@ int main(int argc, char **argv)
 	}
 
 	for (i = 0; i < ITERATIONS; i++) {
-		assert(css_parser_create("UTF-8", CSS_CHARSET_DICTATED,
+		assert(css__parser_create("UTF-8", CSS_CHARSET_DICTATED,
 				myrealloc, NULL, &parser) == CSS_OK);
 
 		params.event_handler.handler = event_handler;
 		params.event_handler.pw = NULL;
-		assert(css_parser_setopt(parser, CSS_PARSER_EVENT_HANDLER, 
+		assert(css__parser_setopt(parser, CSS_PARSER_EVENT_HANDLER, 
 				&params) == CSS_OK);
 
 		fp = fopen(argv[1], "rb");
@@ -130,9 +130,9 @@ int main(int argc, char **argv)
 
 		fclose(fp);
 
-		assert(css_parser_completed(parser) == CSS_OK);
+		assert(css__parser_completed(parser) == CSS_OK);
 
-		css_parser_destroy(parser);
+		css__parser_destroy(parser);
 
 	}
 

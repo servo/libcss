@@ -113,7 +113,7 @@ struct css_parser
 	void *pw;			/**< Client-specific private data */
 };
 
-static css_error css_parser_create_internal(const char *charset, 
+static css_error css__parser_create_internal(const char *charset, 
 		css_charset_source cs_source,
 		css_allocator_fn alloc, void *pw, parser_state initial, 
 		css_parser **parser);
@@ -200,13 +200,13 @@ static css_error (*parseFuncs[])(css_parser *parser) = {
  *         CSS_BADPARM on bad parameters,
  *         CSS_NOMEM on memory exhaustion
  */
-css_error css_parser_create(const char *charset, css_charset_source cs_source,
+css_error css__parser_create(const char *charset, css_charset_source cs_source,
 		css_allocator_fn alloc, void *pw, 
 		css_parser **parser)
 {
 	parser_state initial = { sStart, 0 };
 
-	return css_parser_create_internal(charset, cs_source,
+	return css__parser_create_internal(charset, cs_source,
 			alloc, pw, initial, parser);
 }
 
@@ -222,13 +222,13 @@ css_error css_parser_create(const char *charset, css_charset_source cs_source,
  *         CSS_BADPARM on bad parameters,
  *         CSS_NOMEM on memory exhaustion
  */
-css_error css_parser_create_for_inline_style(const char *charset,
+css_error css__parser_create_for_inline_style(const char *charset,
 		css_charset_source cs_source,
 		css_allocator_fn alloc, void *pw, css_parser **parser)
 {
 	parser_state initial = { sInlineStyle, 0 };
 
-	return css_parser_create_internal(charset, cs_source,
+	return css__parser_create_internal(charset, cs_source,
 			alloc, pw, initial, parser);
 }
 
@@ -238,7 +238,7 @@ css_error css_parser_create_for_inline_style(const char *charset,
  * \param parser  The parser instance to destroy
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_parser_destroy(css_parser *parser)
+css_error css__parser_destroy(css_parser *parser)
 {
 	if (parser == NULL)
 		return CSS_BADPARM;
@@ -249,7 +249,7 @@ css_error css_parser_destroy(css_parser *parser)
 
 	parserutils_stack_destroy(parser->states);
 
-	css_lexer_destroy(parser->lexer);
+	css__lexer_destroy(parser->lexer);
 
 	parserutils_inputstream_destroy(parser->stream);
 
@@ -266,7 +266,7 @@ css_error css_parser_destroy(css_parser *parser)
  * \param params  Option-specific data
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_parser_setopt(css_parser *parser, css_parser_opttype type,
+css_error css__parser_setopt(css_parser *parser, css_parser_opttype type,
 		css_parser_optparams *params)
 {
 	if (parser == NULL || params == NULL)
@@ -324,7 +324,7 @@ css_error css__parser_parse_chunk(css_parser *parser, const uint8_t *data,
  * \param parser  The parser to inform
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_parser_completed(css_parser *parser)
+css_error css__parser_completed(css_parser *parser)
 {
 	parserutils_error perror;
 	parser_state *state;
@@ -357,7 +357,7 @@ css_error css_parser_completed(css_parser *parser)
  * \param source  Pointer to location to receive charset source
  * \return Pointer to charset name (constant; do not free)
  */
-const char *css_parser_read_charset(css_parser *parser, 
+const char *css__parser_read_charset(css_parser *parser, 
 		css_charset_source *source)
 {
 	const char *charset;
@@ -379,7 +379,7 @@ const char *css_parser_read_charset(css_parser *parser,
  * \param parser  Parser to query
  * \return True if quirks permitted, false otherwise
  */
-bool css_parser_quirks_permitted(css_parser *parser)
+bool css__parser_quirks_permitted(css_parser *parser)
 {
 	return parser->quirks;
 }
@@ -401,7 +401,7 @@ bool css_parser_quirks_permitted(css_parser *parser)
  *         CSS_BADPARM on bad parameters,
  *         CSS_NOMEM on memory exhaustion
  */
-css_error css_parser_create_internal(const char *charset, 
+css_error css__parser_create_internal(const char *charset, 
 		css_charset_source cs_source,
 		css_allocator_fn alloc, void *pw, parser_state initial, 
 		css_parser **parser)
@@ -418,14 +418,14 @@ css_error css_parser_create_internal(const char *charset,
 		return CSS_NOMEM;
 
 	perror = parserutils_inputstream_create(charset, cs_source,
-			css_charset_extract, (parserutils_alloc) alloc, pw,
+			css__charset_extract, (parserutils_alloc) alloc, pw,
 			&p->stream);
 	if (perror != PARSERUTILS_OK) {
 		alloc(p, 0, pw);
 		return css_error_from_parserutils_error(perror);
 	}
 
-	error = css_lexer_create(p->stream, alloc, pw, &p->lexer);
+	error = css__lexer_create(p->stream, alloc, pw, &p->lexer);
 	if (error != CSS_OK) {
 		parserutils_inputstream_destroy(p->stream);
 		alloc(p, 0, pw);
@@ -436,7 +436,7 @@ css_error css_parser_create_internal(const char *charset,
 			STACK_CHUNK, (parserutils_alloc) alloc, pw,
 			&p->states);
 	if (perror != PARSERUTILS_OK) {
-		css_lexer_destroy(p->lexer);
+		css__lexer_destroy(p->lexer);
 		parserutils_inputstream_destroy(p->stream);
 		alloc(p, 0, pw);
 		return css_error_from_parserutils_error(perror);
@@ -447,7 +447,7 @@ css_error css_parser_create_internal(const char *charset,
 			&p->tokens);
 	if (perror != PARSERUTILS_OK) {
 		parserutils_stack_destroy(p->states);
-		css_lexer_destroy(p->lexer);
+		css__lexer_destroy(p->lexer);
 		parserutils_inputstream_destroy(p->stream);
 		alloc(p, 0, pw);
 		return css_error_from_parserutils_error(perror);
@@ -459,7 +459,7 @@ css_error css_parser_create_internal(const char *charset,
 	if (perror != PARSERUTILS_OK) {
 		parserutils_vector_destroy(p->tokens);
 		parserutils_stack_destroy(p->states);
-		css_lexer_destroy(p->lexer);
+		css__lexer_destroy(p->lexer);
 		parserutils_inputstream_destroy(p->stream);
 		alloc(p, 0, pw);
 		return css_error_from_parserutils_error(perror);
@@ -470,7 +470,7 @@ css_error css_parser_create_internal(const char *charset,
 		parserutils_stack_destroy(p->open_items);
 		parserutils_vector_destroy(p->tokens);
 		parserutils_stack_destroy(p->states);
-		css_lexer_destroy(p->lexer);
+		css__lexer_destroy(p->lexer);
 		parserutils_inputstream_destroy(p->stream);
 		alloc(p, 0, pw);
 		return css_error_from_parserutils_error(perror);
@@ -623,14 +623,14 @@ css_error getToken(css_parser *parser, const css_token **token)
 		/* Otherwise, ask the lexer */
 		css_token *t;
 
-		error = css_lexer_get_token(parser->lexer, &t);
+		error = css__lexer_get_token(parser->lexer, &t);
 		if (error != CSS_OK)
 			return error;
 
 		/* If the last token read was whitespace, keep reading
 		 * tokens until we encounter one that isn't whitespace */
 		while (parser->last_was_ws && t->type == CSS_TOKEN_S) {
-			error = css_lexer_get_token(parser->lexer, &t);
+			error = css__lexer_get_token(parser->lexer, &t);
 			if (error != CSS_OK)
 				return error;
 		}

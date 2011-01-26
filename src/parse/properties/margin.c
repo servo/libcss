@@ -107,14 +107,14 @@ css_error css__parse_margin(css_language *c,
 
 
 #define SIDE_APPEND(OP,NUM)								\
-	error = css_stylesheet_style_appendOPV(result, (OP), 0, side_val[(NUM)]);	\
+	error = css__stylesheet_style_appendOPV(result, (OP), 0, side_val[(NUM)]);	\
 	if (error != CSS_OK)								\
 		break;									\
 	if (side_val[(NUM)] == MARGIN_SET) {						\
-		error = css_stylesheet_style_append(result, side_length[(NUM)]);	\
+		error = css__stylesheet_style_append(result, side_length[(NUM)]);	\
 		if (error != CSS_OK)							\
 			break;								\
-		error = css_stylesheet_style_append(result, side_unit[(NUM)]);		\
+		error = css__stylesheet_style_append(result, side_unit[(NUM)]);		\
 		if (error != CSS_OK)							\
 			break;								\
 	}

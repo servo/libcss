@@ -760,7 +760,7 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 				case BACKGROUND_IMAGE_URI:
 				{
 					uint32_t snum = *((uint32_t *) bytecode);					lwc_string *he;
-					css_stylesheet_string_get(style->sheet, 
+					css__stylesheet_string_get(style->sheet, 
 								  snum, 
 								  &he);
 					ADVANCE(sizeof(snum));
@@ -1102,7 +1102,7 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 
 					switch (value & 0xff) {
 					case CONTENT_COUNTER:
-						css_stylesheet_string_get(style->sheet, snum, &he);
+						css__stylesheet_string_get(style->sheet, snum, &he);
 						ADVANCE(sizeof(snum));
 						dump_counter(he, value, ptr);
 						break;
@@ -1110,7 +1110,7 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 					case CONTENT_COUNTERS:
 					{
 						lwc_string *sep;
-						css_stylesheet_string_get(style->sheet, snum, &he);
+						css__stylesheet_string_get(style->sheet, snum, &he);
 						ADVANCE(sizeof(snum));
 
 						sep = *((lwc_string **) bytecode);
@@ -1124,7 +1124,7 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 					case CONTENT_URI:
 					case CONTENT_ATTR:	
 					case CONTENT_STRING:
-						css_stylesheet_string_get(style->sheet, snum, &he);
+						css__stylesheet_string_get(style->sheet, snum, &he);
 						if (value == CONTENT_URI) 
 							*ptr += sprintf(*ptr, "url(");
 						if (value == CONTENT_ATTR)
@@ -1176,7 +1176,7 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 					while (value != COUNTER_INCREMENT_NONE) {
 						css_fixed val;
 					uint32_t snum = *((uint32_t *) bytecode);					lwc_string *he;
-					css_stylesheet_string_get(style->sheet, 
+					css__stylesheet_string_get(style->sheet, 
 								  snum, 
 								  &he);
 						ADVANCE(sizeof(snum));
@@ -1204,7 +1204,7 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 			case CSS_PROP_CURSOR:
 				while (value == CURSOR_URI) {
 					uint32_t snum = *((uint32_t *) bytecode);					lwc_string *he;
-					css_stylesheet_string_get(style->sheet, 
+					css__stylesheet_string_get(style->sheet, 
 								  snum, 
 								  &he);
 					ADVANCE(sizeof(snum));
@@ -1392,7 +1392,7 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 					{
 						uint32_t snum = *((uint32_t *) bytecode);					
 						lwc_string *he;
-						css_stylesheet_string_get(style->sheet, snum, &he);
+						css__stylesheet_string_get(style->sheet, snum, &he);
 						ADVANCE(sizeof(snum));
 						*ptr += sprintf(*ptr, "'%.*s'", 
                                                                 (int) lwc_string_length(he), 
@@ -1811,7 +1811,7 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 				{
 					uint32_t snum = *((uint32_t *) bytecode);					
 					lwc_string *he;
-					css_stylesheet_string_get(style->sheet, snum, &he);
+					css__stylesheet_string_get(style->sheet, snum, &he);
 					ADVANCE(sizeof(snum));
 					*ptr += sprintf(*ptr, "'%.*s'", 
                                                         (int) lwc_string_length(he), 
@@ -1853,7 +1853,7 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 					while (value != QUOTES_NONE) {
 						uint32_t snum = *((uint32_t *) bytecode);					
 						lwc_string *he;
-						css_stylesheet_string_get(style->sheet, snum, &he);
+						css__stylesheet_string_get(style->sheet, snum, &he);
 						ADVANCE(sizeof(snum));
 						*ptr += sprintf(*ptr, " '%.*s' ", 
                                                                 (int) lwc_string_length(he), 
@@ -2087,7 +2087,7 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 					{
 						uint32_t snum = *((uint32_t *) bytecode);					
 						lwc_string *he;
-						css_stylesheet_string_get(style->sheet, snum, &he);
+						css__stylesheet_string_get(style->sheet, snum, &he);
 						ADVANCE(sizeof(snum));
 						*ptr += sprintf(*ptr, "'%.*s'", 
                                                                 (int) lwc_string_length(he),

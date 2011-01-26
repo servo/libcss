@@ -51,7 +51,7 @@ css_error css__parse_border_spacing(css_language *c,
 			&match) == lwc_error_ok && match)) {
 		parserutils_vector_iterate(vector, ctx);
 		/* inherit */
-		error = css_stylesheet_style_appendOPV(result,
+		error = css__stylesheet_style_appendOPV(result,
 						       CSS_PROP_BORDER_SPACING,
 						       FLAG_INHERIT,
 						       0);
@@ -109,7 +109,7 @@ css_error css__parse_border_spacing(css_language *c,
 			return CSS_INVALID;
 		}
 
-		error = css_stylesheet_style_appendOPV(result,
+		error = css__stylesheet_style_appendOPV(result,
 						       CSS_PROP_BORDER_SPACING,
 						       0,
 						       BORDER_SPACING_SET);
@@ -119,7 +119,7 @@ css_error css__parse_border_spacing(css_language *c,
 			return error;
 		}
 
-		error = css_stylesheet_style_vappend(result, 
+		error = css__stylesheet_style_vappend(result, 
 						     4, 
 						     length[0], 
 						     unit[0], 

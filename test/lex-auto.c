@@ -274,10 +274,10 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 	static int testnum;
 
 	assert(parserutils_inputstream_create("UTF-8", CSS_CHARSET_DICTATED,
-			css_charset_extract, myrealloc, NULL, &input) ==
+			css__charset_extract, myrealloc, NULL, &input) ==
 			PARSERUTILS_OK);
 
-	assert(css_lexer_create(input, myrealloc, NULL, &lexer) == CSS_OK);
+	assert(css__lexer_create(input, myrealloc, NULL, &lexer) == CSS_OK);
 
 	assert(parserutils_inputstream_append(input, data, len) == 
 			PARSERUTILS_OK);
@@ -288,7 +288,7 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 	e = 0;
 	testnum++;
 
-	while ((error = css_lexer_get_token(lexer, &tok)) == CSS_OK) {
+	while ((error = css__lexer_get_token(lexer, &tok)) == CSS_OK) {
 		if (tok->type != exp[e].type) {
 			printf("%d: Got token %s, Expected %s [%d, %d]\n",
 				testnum, string_from_type(tok->type), 
@@ -323,7 +323,7 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 
 	assert(e == explen);
 
-	css_lexer_destroy(lexer);
+	css__lexer_destroy(lexer);
 
 	parserutils_inputstream_destroy(input);
 

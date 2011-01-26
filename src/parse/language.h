@@ -41,9 +41,9 @@ typedef struct css_language {
 	void *pw;			/**< Client's private data */
 } css_language;
 
-css_error css_language_create(css_stylesheet *sheet, css_parser *parser,
+css_error css__language_create(css_stylesheet *sheet, css_parser *parser,
 		css_allocator_fn alloc, void *pw, void **language);
-css_error css_language_destroy(css_language *language);
+css_error css__language_destroy(css_language *language);
 
 /******************************************************************************
  * Helper functions                                                           *

@@ -155,20 +155,20 @@ css_error css__parse_border_side(css_language *c,
 	} 
 
 	/* allocate styles */
-	error = css_stylesheet_style_create(c->sheet, &color_style);
+	error = css__stylesheet_style_create(c->sheet, &color_style);
 	if (error != CSS_OK) 
 		return error;
 
-	error = css_stylesheet_style_create(c->sheet, &style_style);
+	error = css__stylesheet_style_create(c->sheet, &style_style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(color_style);
+		css__stylesheet_style_destroy(color_style);
 		return error;
 	}
 
-	error = css_stylesheet_style_create(c->sheet, &width_style);
+	error = css__stylesheet_style_create(c->sheet, &width_style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(color_style);
-		css_stylesheet_style_destroy(width_style);
+		css__stylesheet_style_destroy(color_style);
+		css__stylesheet_style_destroy(width_style);
 		return error;
 	}
 
@@ -212,7 +212,7 @@ css_error css__parse_border_side(css_language *c,
 	} while (*ctx != prev_ctx && token != NULL);
 
 	if (style) {
-		error = css_stylesheet_style_appendOPV(style_style, 
+		error = css__stylesheet_style_appendOPV(style_style, 
 				CSS_PROP_BORDER_TOP_STYLE + side, 0, 
 				BORDER_STYLE_NONE);
 		if (error != CSS_OK)
@@ -220,27 +220,27 @@ css_error css__parse_border_side(css_language *c,
 	}
 
 	if (width) {
-		error = css_stylesheet_style_appendOPV(width_style, 
+		error = css__stylesheet_style_appendOPV(width_style, 
 				CSS_PROP_BORDER_TOP_WIDTH + side,
 				0, BORDER_WIDTH_MEDIUM);
 		if (error != CSS_OK)
 			goto css__parse_border_side_cleanup;
 	}
 
-	error = css_stylesheet_merge_style(result, color_style);
+	error = css__stylesheet_merge_style(result, color_style);
 	if (error != CSS_OK)
 		goto css__parse_border_side_cleanup;
 
-	error = css_stylesheet_merge_style(result, style_style);
+	error = css__stylesheet_merge_style(result, style_style);
 	if (error != CSS_OK)
 		goto css__parse_border_side_cleanup;
 
-	error = css_stylesheet_merge_style(result, width_style);
+	error = css__stylesheet_merge_style(result, width_style);
 
 css__parse_border_side_cleanup:
-	css_stylesheet_style_destroy(color_style);
-	css_stylesheet_style_destroy(style_style);
-	css_stylesheet_style_destroy(width_style);
+	css__stylesheet_style_destroy(color_style);
+	css__stylesheet_style_destroy(style_style);
+	css__stylesheet_style_destroy(width_style);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;
@@ -1172,22 +1172,22 @@ css_error css__comma_list_to_style(css_language *c,
 				if (error != CSS_OK)
 					goto cleanup;
 
-				error = css_stylesheet_string_add(c->sheet,
+				error = css__stylesheet_string_add(c->sheet,
 						str, &snumber);
 				if (error != CSS_OK)
 					goto cleanup;
 
-				error = css_stylesheet_style_append(result, 
+				error = css__stylesheet_style_append(result, 
 						value);
 				if (error != CSS_OK)
 					goto cleanup;
 
-				error = css_stylesheet_style_append(result,
+				error = css__stylesheet_style_append(result,
 						snumber);
 				if (error != CSS_OK)
 					goto cleanup;
 			} else {
-				error = css_stylesheet_style_append(result,
+				error = css__stylesheet_style_append(result,
 						value);
 				if (error != CSS_OK)
 					goto cleanup;
@@ -1196,16 +1196,16 @@ css_error css__comma_list_to_style(css_language *c,
 			css_code_t value = get_value(c, token, first);
 			uint32_t snumber;
 
-			error = css_stylesheet_string_add(c->sheet, 
+			error = css__stylesheet_string_add(c->sheet, 
 					lwc_string_ref(token->idata), &snumber);
 			if (error != CSS_OK)
 				goto cleanup;
 
-			error = css_stylesheet_style_append(result, value);
+			error = css__stylesheet_style_append(result, value);
 			if (error != CSS_OK)
 				goto cleanup;
 
-			error = css_stylesheet_style_append(result, snumber);
+			error = css__stylesheet_style_append(result, snumber);
 			if (error != CSS_OK)
 				goto cleanup;
 		} else {

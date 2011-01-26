@@ -65,20 +65,20 @@ css_error css__parse_outline(css_language *c,
 	} 
 
 	/* allocate styles */
-	error = css_stylesheet_style_create(c->sheet, &color_style);
+	error = css__stylesheet_style_create(c->sheet, &color_style);
 	if (error != CSS_OK) 
 		return error;
 
-	error = css_stylesheet_style_create(c->sheet, &style_style);
+	error = css__stylesheet_style_create(c->sheet, &style_style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(color_style);
+		css__stylesheet_style_destroy(color_style);
 		return error;
 	}
 
-	error = css_stylesheet_style_create(c->sheet, &width_style);
+	error = css__stylesheet_style_create(c->sheet, &width_style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(color_style);
-		css_stylesheet_style_destroy(style_style);
+		css__stylesheet_style_destroy(color_style);
+		css__stylesheet_style_destroy(style_style);
 		return error;
 	}
 
@@ -121,40 +121,40 @@ css_error css__parse_outline(css_language *c,
 
 	/* defaults */
 	if (color) {
-		error = css_stylesheet_style_appendOPV(color_style, 
+		error = css__stylesheet_style_appendOPV(color_style, 
 			       CSS_PROP_OUTLINE_COLOR,
 				0, OUTLINE_COLOR_INVERT);
 	}
 
 	if (style) {
-		error = css_stylesheet_style_appendOPV(style_style, 
+		error = css__stylesheet_style_appendOPV(style_style, 
 			       CSS_PROP_OUTLINE_STYLE,
 				0, OUTLINE_STYLE_NONE);
 	}
 
 	if (width) {
-		error = css_stylesheet_style_appendOPV(width_style, 
+		error = css__stylesheet_style_appendOPV(width_style, 
 			       CSS_PROP_OUTLINE_WIDTH,
 				0, OUTLINE_WIDTH_MEDIUM);
 	}
 
 
-	error = css_stylesheet_merge_style(result, color_style);
+	error = css__stylesheet_merge_style(result, color_style);
 	if (error != CSS_OK)
 		goto css__parse_outline_cleanup;
 
-	error = css_stylesheet_merge_style(result, style_style);
+	error = css__stylesheet_merge_style(result, style_style);
 	if (error != CSS_OK)
 		goto css__parse_outline_cleanup;
 
-	error = css_stylesheet_merge_style(result, width_style);
+	error = css__stylesheet_merge_style(result, width_style);
 
 
 css__parse_outline_cleanup:
 
-	css_stylesheet_style_destroy(width_style);
-	css_stylesheet_style_destroy(style_style);
-	css_stylesheet_style_destroy(color_style);
+	css__stylesheet_style_destroy(width_style);
+	css__stylesheet_style_destroy(style_style);
+	css__stylesheet_style_destroy(color_style);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;

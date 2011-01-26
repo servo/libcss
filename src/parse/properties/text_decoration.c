@@ -51,7 +51,7 @@ css_error css__parse_text_decoration(css_language *c,
 	} else if (lwc_string_caseless_isequal(token->idata,
 				c->strings[NONE],
 				&match) == lwc_error_ok && match) {
-		error = css_stylesheet_style_appendOPV(result,
+		error = css__stylesheet_style_appendOPV(result,
 				CSS_PROP_TEXT_DECORATION, 0, TEXT_DECORATION_NONE);
 	} else {
 		uint16_t value = 0;
@@ -104,7 +104,7 @@ css_error css__parse_text_decoration(css_language *c,
 				break;
 			token = parserutils_vector_iterate(vector, ctx);
 		}
-		error = css_stylesheet_style_appendOPV(result,
+		error = css__stylesheet_style_appendOPV(result,
 				CSS_PROP_TEXT_DECORATION, 0, value);
 	}
 

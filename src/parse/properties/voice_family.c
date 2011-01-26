@@ -121,7 +121,7 @@ css_error css__parse_voice_family(css_language *c,
 			return error;
 		}
 
-		error = css_stylesheet_style_append(result, VOICE_FAMILY_END);
+		error = css__stylesheet_style_append(result, VOICE_FAMILY_END);
 	}
 
 	if (error != CSS_OK) {

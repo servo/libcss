@@ -54,7 +54,7 @@ css_error css__parse_quotes(css_language *c,
 		   (lwc_string_caseless_isequal(token->idata,
 				c->strings[NONE],
 				&match) == lwc_error_ok && match)) {
-		error = css_stylesheet_style_appendOPV(result,
+		error = css__stylesheet_style_appendOPV(result,
 				CSS_PROP_QUOTES, 0, QUOTES_NONE);
 	} else if (token->type == CSS_TOKEN_STRING) {
 		bool first = true;
@@ -62,14 +62,14 @@ css_error css__parse_quotes(css_language *c,
 /* Macro to output the value marker, awkward because we need to check
  * first to determine how the value is constructed.
  */
-#define CSS_FIRST_APPEND(CSSVAL) css_stylesheet_style_append(result, first?buildOPV(CSS_PROP_QUOTES, 0, CSSVAL):CSSVAL)
+#define CSS_FIRST_APPEND(CSSVAL) css__stylesheet_style_append(result, first?buildOPV(CSS_PROP_QUOTES, 0, CSSVAL):CSSVAL)
 
 		/* [ STRING STRING ]+ */
 		while ((token != NULL) && (token->type == CSS_TOKEN_STRING)) {
 			uint32_t open_snumber;
 			uint32_t close_snumber;
 
-			error = css_stylesheet_string_add(c->sheet, 
+			error = css__stylesheet_string_add(c->sheet, 
 					lwc_string_ref(token->idata), 
 					&open_snumber);
 			if (error != CSS_OK) 
@@ -84,7 +84,7 @@ css_error css__parse_quotes(css_language *c,
 				break;
 			}
 
-			error = css_stylesheet_string_add(c->sheet, 
+			error = css__stylesheet_string_add(c->sheet, 
 					lwc_string_ref(token->idata), 
 					&close_snumber);
 			if (error != CSS_OK) 
@@ -96,11 +96,11 @@ css_error css__parse_quotes(css_language *c,
 			if (error != CSS_OK) 
 				break;
 
-			error = css_stylesheet_style_append(result, open_snumber);
+			error = css__stylesheet_style_append(result, open_snumber);
 			if (error != CSS_OK) 
 				break;
 
-			error = css_stylesheet_style_append(result, close_snumber);
+			error = css__stylesheet_style_append(result, close_snumber);
 			if (error != CSS_OK) 
 				break;
 
@@ -114,7 +114,7 @@ css_error css__parse_quotes(css_language *c,
 
 		if (error == CSS_OK) {
 			/* AddTerminator */
-			error = css_stylesheet_style_append(result, QUOTES_NONE);
+			error = css__stylesheet_style_append(result, QUOTES_NONE);
 		} 
 	} else {
 		error = CSS_INVALID;

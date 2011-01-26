@@ -35,7 +35,7 @@ css_error css__cascade_content(uint32_t opv, css_style *style,
 				lwc_string *he;
 				css_computed_content_item *temp;
 
-				css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &he);
+				css__stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &he);
 				
 				temp = state->computed->alloc(content,
 						(n_contents + 1) *
@@ -66,7 +66,7 @@ css_error css__cascade_content(uint32_t opv, css_style *style,
 	
 					advance_bytecode(style, sizeof(css_code_t));
 
-					css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &sep);
+					css__stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &sep);
 					advance_bytecode(style, sizeof(css_code_t));
 
 					content[n_contents].type =

@@ -837,7 +837,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		goto cleanup;
 
 	/* Find hash chain that applies to current node */
-	error = css_selector_hash_find(sheet->selectors, element, 
+	error = css__selector_hash_find(sheet->selectors, element, 
 			&node_iterator, &node_selectors);
 	if (error != CSS_OK)
                 goto cleanup;
@@ -852,7 +852,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		}
 
 		for (i = 0; i < n_classes; i++) {
-			error = css_selector_hash_find_by_class(
+			error = css__selector_hash_find_by_class(
 					sheet->selectors, classes[i],
 					&class_iterator, &class_selectors[i]);
 			if (error != CSS_OK)
@@ -862,14 +862,14 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 
 	if (id != NULL) {
 		/* Find hash chain for node ID */
-		error = css_selector_hash_find_by_id(sheet->selectors, id,
+		error = css__selector_hash_find_by_id(sheet->selectors, id,
 				&id_iterator, &id_selectors);
 		if (error != CSS_OK)
 			goto cleanup;
 	}
 
 	/* Find hash chain for universal selector */
-	error = css_selector_hash_find_universal(sheet->selectors,  
+	error = css__selector_hash_find_universal(sheet->selectors,  
 			&univ_iterator, &univ_selectors);
 	if (error != CSS_OK)
 		goto cleanup;

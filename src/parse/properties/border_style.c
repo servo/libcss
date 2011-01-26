@@ -111,7 +111,7 @@ css_error css__parse_border_style(css_language *c,
 
 
 #define SIDE_APPEND(OP,NUM)								\
-	error = css_stylesheet_style_appendOPV(result, (OP), 0, side_val[(NUM)]);	\
+	error = css__stylesheet_style_appendOPV(result, (OP), 0, side_val[(NUM)]);	\
 	if (error != CSS_OK)								\
 		break 
 

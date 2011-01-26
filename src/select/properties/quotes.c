@@ -30,10 +30,10 @@ css_error css__cascade_quotes(uint32_t opv, css_style *style,
 			lwc_string *open, *close;
 			lwc_string **temp;
 
-			css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &open);
+			css__stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &open);
 			advance_bytecode(style, sizeof(css_code_t));
 
-			css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &close);
+			css__stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &close);
 			advance_bytecode(style, sizeof(css_code_t));
 
 			temp = state->computed->alloc(quotes, 

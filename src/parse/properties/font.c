@@ -84,47 +84,47 @@ css_error css__parse_font(css_language *c,
 
 
 	/* allocate styles */
-	error = css_stylesheet_style_create(c->sheet, &style_style);
+	error = css__stylesheet_style_create(c->sheet, &style_style);
 	if (error != CSS_OK) 
 		return error;
 
-	error = css_stylesheet_style_create(c->sheet, &variant_style);
+	error = css__stylesheet_style_create(c->sheet, &variant_style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(style_style);
+		css__stylesheet_style_destroy(style_style);
 		return error;
 	}
 
-	error = css_stylesheet_style_create(c->sheet, &weight_style);
+	error = css__stylesheet_style_create(c->sheet, &weight_style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(style_style);
-		css_stylesheet_style_destroy(variant_style);
+		css__stylesheet_style_destroy(style_style);
+		css__stylesheet_style_destroy(variant_style);
 		return error;
 	}
 
-	error = css_stylesheet_style_create(c->sheet, &size_style);
+	error = css__stylesheet_style_create(c->sheet, &size_style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(style_style);
-		css_stylesheet_style_destroy(variant_style);
-		css_stylesheet_style_destroy(weight_style);
+		css__stylesheet_style_destroy(style_style);
+		css__stylesheet_style_destroy(variant_style);
+		css__stylesheet_style_destroy(weight_style);
 		return error;
 	}
 
-	error = css_stylesheet_style_create(c->sheet, &line_height_style);
+	error = css__stylesheet_style_create(c->sheet, &line_height_style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(style_style);
-		css_stylesheet_style_destroy(variant_style);
-		css_stylesheet_style_destroy(weight_style);
-		css_stylesheet_style_destroy(size_style);
+		css__stylesheet_style_destroy(style_style);
+		css__stylesheet_style_destroy(variant_style);
+		css__stylesheet_style_destroy(weight_style);
+		css__stylesheet_style_destroy(size_style);
 		return error;
 	}
 
-	error = css_stylesheet_style_create(c->sheet, &family_style);
+	error = css__stylesheet_style_create(c->sheet, &family_style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(style_style);
-		css_stylesheet_style_destroy(variant_style);
-		css_stylesheet_style_destroy(weight_style);
-		css_stylesheet_style_destroy(size_style);
-		css_stylesheet_style_destroy(line_height_style);
+		css__stylesheet_style_destroy(style_style);
+		css__stylesheet_style_destroy(variant_style);
+		css__stylesheet_style_destroy(weight_style);
+		css__stylesheet_style_destroy(size_style);
+		css__stylesheet_style_destroy(line_height_style);
 		return error;
 	}
 
@@ -225,7 +225,7 @@ css_error css__parse_font(css_language *c,
 
 	/* defaults */
 	if (style) {
-		error = css_stylesheet_style_appendOPV(style_style, 
+		error = css__stylesheet_style_appendOPV(style_style, 
 				CSS_PROP_FONT_STYLE, 0, 
 				FONT_STYLE_NORMAL);
 		if (error != CSS_OK)
@@ -233,7 +233,7 @@ css_error css__parse_font(css_language *c,
 	}
 
 	if (variant) {
-		error = css_stylesheet_style_appendOPV(variant_style, 
+		error = css__stylesheet_style_appendOPV(variant_style, 
 				CSS_PROP_FONT_VARIANT, 0, 
 				FONT_VARIANT_NORMAL);
 		if (error != CSS_OK)
@@ -241,7 +241,7 @@ css_error css__parse_font(css_language *c,
 	}
 
 	if (weight) {
-		error = css_stylesheet_style_appendOPV(weight_style, 
+		error = css__stylesheet_style_appendOPV(weight_style, 
 				CSS_PROP_FONT_WEIGHT,
 				0, FONT_WEIGHT_NORMAL);
 		if (error != CSS_OK)
@@ -249,7 +249,7 @@ css_error css__parse_font(css_language *c,
 	}
 
 	if (line_height) {
-		error = css_stylesheet_style_appendOPV(line_height_style, 
+		error = css__stylesheet_style_appendOPV(line_height_style, 
 				CSS_PROP_LINE_HEIGHT,
 				0, LINE_HEIGHT_NORMAL);
 		if (error != CSS_OK)
@@ -257,37 +257,37 @@ css_error css__parse_font(css_language *c,
 	}
 
 	/* merge final output */
-	error = css_stylesheet_merge_style(result, style_style);
+	error = css__stylesheet_merge_style(result, style_style);
 		if (error != CSS_OK)
 			goto css__parse_font_cleanup;
 
-	error = css_stylesheet_merge_style(result, variant_style);
+	error = css__stylesheet_merge_style(result, variant_style);
 		if (error != CSS_OK)
 			goto css__parse_font_cleanup;
 
-	error = css_stylesheet_merge_style(result, weight_style);
+	error = css__stylesheet_merge_style(result, weight_style);
 		if (error != CSS_OK)
 			goto css__parse_font_cleanup;
 
-	error = css_stylesheet_merge_style(result, size_style);
+	error = css__stylesheet_merge_style(result, size_style);
 		if (error != CSS_OK)
 			goto css__parse_font_cleanup;
 
-	error = css_stylesheet_merge_style(result, line_height_style);
+	error = css__stylesheet_merge_style(result, line_height_style);
 		if (error != CSS_OK)
 			goto css__parse_font_cleanup;
 
-	error = css_stylesheet_merge_style(result, family_style);
+	error = css__stylesheet_merge_style(result, family_style);
 
 
 
 css__parse_font_cleanup:
-	css_stylesheet_style_destroy(style_style);
-	css_stylesheet_style_destroy(variant_style);
-	css_stylesheet_style_destroy(weight_style);
-	css_stylesheet_style_destroy(size_style);
-	css_stylesheet_style_destroy(line_height_style);
-	css_stylesheet_style_destroy(family_style);
+	css__stylesheet_style_destroy(style_style);
+	css__stylesheet_style_destroy(variant_style);
+	css__stylesheet_style_destroy(weight_style);
+	css__stylesheet_style_destroy(size_style);
+	css__stylesheet_style_destroy(line_height_style);
+	css__stylesheet_style_destroy(family_style);
 
 	if (error != CSS_OK)
 		*ctx = orig_ctx;

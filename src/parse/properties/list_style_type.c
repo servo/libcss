@@ -61,7 +61,7 @@ css_error css__parse_list_style_type(css_language *c,
 		}
 	}
 
-	error = css_stylesheet_style_appendOPV(result, CSS_PROP_LIST_STYLE_TYPE, flags, value);
+	error = css__stylesheet_style_appendOPV(result, CSS_PROP_LIST_STYLE_TYPE, flags, value);
 
 	if (error != CSS_OK) 
 		*ctx = orig_ctx;

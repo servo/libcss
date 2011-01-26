@@ -187,72 +187,72 @@ struct css_stylesheet {
 	uint32_t string_vector_c;               /**< The number of string vector entries used */ 
 };
 
-css_error css_stylesheet_style_create(css_stylesheet *sheet, css_style **style);
-css_error css_stylesheet_style_append(css_style *style, css_code_t code);
-css_error css_stylesheet_style_vappend(css_style *style, uint32_t style_count, ...);
-css_error css_stylesheet_style_destroy(css_style *style);
-css_error css_stylesheet_merge_style(css_style *target, css_style *style);
+css_error css__stylesheet_style_create(css_stylesheet *sheet, css_style **style);
+css_error css__stylesheet_style_append(css_style *style, css_code_t code);
+css_error css__stylesheet_style_vappend(css_style *style, uint32_t style_count, ...);
+css_error css__stylesheet_style_destroy(css_style *style);
+css_error css__stylesheet_merge_style(css_style *target, css_style *style);
 
 /** Helper function to avoid distinct buildOPV call */ 
-static inline css_error css_stylesheet_style_appendOPV(css_style *style, opcode_t opcode, uint8_t flags, uint16_t value)
+static inline css_error css__stylesheet_style_appendOPV(css_style *style, opcode_t opcode, uint8_t flags, uint16_t value)
 {
-	return css_stylesheet_style_append(style, buildOPV(opcode, flags, value));
+	return css__stylesheet_style_append(style, buildOPV(opcode, flags, value));
 }
 
 /** Helper function to set inherit flag */ 
 static inline css_error css_stylesheet_style_inherit(css_style *style, opcode_t opcode)
 {
-	return css_stylesheet_style_append(style, buildOPV(opcode, FLAG_INHERIT, 0));
+	return css__stylesheet_style_append(style, buildOPV(opcode, FLAG_INHERIT, 0));
 }
 
 
 
 
-css_error css_stylesheet_selector_create(css_stylesheet *sheet,
+css_error css__stylesheet_selector_create(css_stylesheet *sheet,
 		lwc_string *name, css_selector **selector);
-css_error css_stylesheet_selector_destroy(css_stylesheet *sheet,
+css_error css__stylesheet_selector_destroy(css_stylesheet *sheet,
 		css_selector *selector);
 
-css_error css_stylesheet_selector_detail_init(css_stylesheet *sheet,
+css_error css__stylesheet_selector_detail_init(css_stylesheet *sheet,
 		css_selector_type type, lwc_string *name,
 		lwc_string *value, 
 		css_selector_detail *detail);
 
-css_error css_stylesheet_selector_append_specific(css_stylesheet *sheet,
+css_error css__stylesheet_selector_append_specific(css_stylesheet *sheet,
 		css_selector **parent, const css_selector_detail *specific);
 
-css_error css_stylesheet_selector_combine(css_stylesheet *sheet,
+css_error css__stylesheet_selector_combine(css_stylesheet *sheet,
 		css_combinator type, css_selector *a, css_selector *b);
 
-css_error css_stylesheet_rule_create(css_stylesheet *sheet, css_rule_type type,
+css_error css__stylesheet_rule_create(css_stylesheet *sheet, css_rule_type type,
 		css_rule **rule);
-css_error css_stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule);
+css_error css__stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule);
 
-css_error css_stylesheet_rule_add_selector(css_stylesheet *sheet, 
+css_error css__stylesheet_rule_add_selector(css_stylesheet *sheet, 
 		css_rule *rule, css_selector *selector);
 
-css_error css_stylesheet_rule_append_style(css_stylesheet *sheet,
+css_error css__stylesheet_rule_append_style(css_stylesheet *sheet,
 		css_rule *rule, css_style *style);
 
-css_error css_stylesheet_rule_set_charset(css_stylesheet *sheet,
+css_error css__stylesheet_rule_set_charset(css_stylesheet *sheet,
 		css_rule *rule, lwc_string *charset);
 
-css_error css_stylesheet_rule_set_nascent_import(css_stylesheet *sheet,
+css_error css__stylesheet_rule_set_nascent_import(css_stylesheet *sheet,
 		css_rule *rule, lwc_string *url, uint64_t media);
 
-css_error css_stylesheet_rule_set_media(css_stylesheet *sheet,
+css_error css__stylesheet_rule_set_media(css_stylesheet *sheet,
 		css_rule *rule, uint64_t media);
 
-css_error css_stylesheet_rule_set_page_selector(css_stylesheet *sheet,
+css_error css__stylesheet_rule_set_page_selector(css_stylesheet *sheet,
 		css_rule *rule, css_selector *sel);
 
-css_error css_stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule,
+css_error css__stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule,
 		css_rule *parent);
-css_error css_stylesheet_remove_rule(css_stylesheet *sheet, css_rule *rule);
+css_error css__stylesheet_remove_rule(css_stylesheet *sheet, css_rule *rule);
 
-css_error css_stylesheet_string_get(css_stylesheet *sheet, uint32_t string_number, lwc_string **string);
+css_error css__stylesheet_string_get(css_stylesheet *sheet, uint32_t string_number, lwc_string **string);
 
-css_error css_stylesheet_string_add(css_stylesheet *sheet, lwc_string *string, uint32_t *string_number);
+css_error css__stylesheet_string_add(css_stylesheet *sheet, lwc_string *string, uint32_t *string_number);
 
 #endif
 

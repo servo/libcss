@@ -79,7 +79,7 @@ css_error css__parse_play_during(css_language *c,
 			return error;
 		}
 
-		error = css_stylesheet_string_add(c->sheet, 
+		error = css__stylesheet_string_add(c->sheet, 
 						  uri, 
 						  &uri_snumber);
 		if (error != CSS_OK) {
@@ -124,7 +124,7 @@ css_error css__parse_play_during(css_language *c,
 		}
 	}
 
-	error = css_stylesheet_style_appendOPV(result, CSS_PROP_PLAY_DURING, flags, value);
+	error = css__stylesheet_style_appendOPV(result, CSS_PROP_PLAY_DURING, flags, value);
 	if (error != CSS_OK) {
 		*ctx = orig_ctx;
 		return error;
@@ -132,7 +132,7 @@ css_error css__parse_play_during(css_language *c,
 
 	if ((flags & FLAG_INHERIT) == false && 
 	    (value & PLAY_DURING_TYPE_MASK) == PLAY_DURING_URI) {
-		error = css_stylesheet_style_append(result, uri_snumber);
+		error = css__stylesheet_style_append(result, uri_snumber);
 	}
 
 	if (error != CSS_OK) 

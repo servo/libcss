@@ -521,7 +521,7 @@ bool validate_rule_selector(css_rule_selector *s, exp_entry *e)
 				/* String */
 				lwc_string *p;
 
-				css_stylesheet_string_get(s->style->sheet, (s->style->bytecode[i / sizeof(css_code_t)]), &p);
+				css__stylesheet_string_get(s->style->sheet, (s->style->bytecode[i / sizeof(css_code_t)]), &p);
 
 				if (lwc_string_length(p) != 
 					strlen(e->stringtab[j].string) ||

@@ -117,14 +117,14 @@ css_error css__parse_elevation(css_language *c,
 		value = ELEVATION_ANGLE;
 	}
 
-	error = css_stylesheet_style_appendOPV(result, CSS_PROP_ELEVATION, flags, value);
+	error = css__stylesheet_style_appendOPV(result, CSS_PROP_ELEVATION, flags, value);
 	if (error != CSS_OK) {
 		*ctx = orig_ctx;
 		return error;
 	}
 
 	if (((flags & FLAG_INHERIT) == false) && (value == ELEVATION_ANGLE)) {
-		error = css_stylesheet_style_vappend(result, 2, length, unit);
+		error = css__stylesheet_style_vappend(result, 2, length, unit);
 		if (error != CSS_OK) {
 			*ctx = orig_ctx;
 			return error;

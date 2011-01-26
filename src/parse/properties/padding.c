@@ -99,13 +99,13 @@ css_error css__parse_padding(css_language *c,
 	} while ((*ctx != prev_ctx) && (token != NULL) && (side_count < 4));
 
 #define SIDE_APPEND(OP,NUM)							\
-	error = css_stylesheet_style_appendOPV(result, (OP), 0, PADDING_SET);	\
+	error = css__stylesheet_style_appendOPV(result, (OP), 0, PADDING_SET);	\
 	if (error != CSS_OK)							\
 		break;								\
-	error = css_stylesheet_style_append(result, side_length[(NUM)]);	\
+	error = css__stylesheet_style_append(result, side_length[(NUM)]);	\
 	if (error != CSS_OK)							\
 		break;								\
-	error = css_stylesheet_style_append(result, side_unit[(NUM)]);		\
+	error = css__stylesheet_style_append(result, side_unit[(NUM)]);		\
 	if (error != CSS_OK)							\
 		break;
 

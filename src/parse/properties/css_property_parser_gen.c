@@ -179,7 +179,7 @@ void output_ident(FILE *outputf, bool only_ident, struct keyval *parseid, struct
 			parseid->val);
 		} else {
 		fprintf(outputf,
-			"\t\t\terror = css_stylesheet_style_appendOPV(result, %s, %s);\n",
+			"\t\t\terror = css__stylesheet_style_appendOPV(result, %s, %s);\n",
 			parseid->val,
 			ckv->val);
 		}
@@ -205,19 +205,19 @@ void output_uri(FILE *outputf, struct keyval *parseid, struct keyval_list *kvlis
 		"			return error;\n"
 		"		}\n"
 		"\n"
-		"		error = css_stylesheet_string_add(c->sheet, uri, &uri_snumber);\n"
+		"		error = css__stylesheet_string_add(c->sheet, uri, &uri_snumber);\n"
 		"		if (error != CSS_OK) {\n"
 		"			*ctx = orig_ctx;\n"
 		"			return error;\n"
 		"		}\n"
 		"\n"
-		"		error = css_stylesheet_style_appendOPV(result, %s, 0, %s);\n"
+		"		error = css__stylesheet_style_appendOPV(result, %s, 0, %s);\n"
 		"		if (error != CSS_OK) {\n"
 		"			*ctx = orig_ctx;\n"
 		"			return error;\n"
 		"		}\n"
 		"\n"
-		"		error = css_stylesheet_style_append(result, uri_snumber);\n"
+		"		error = css__stylesheet_style_append(result, uri_snumber);\n"
 		"	} else ",
 		parseid->val,
 		ckv->val);
@@ -255,12 +255,12 @@ void output_number(FILE *outputf, struct keyval *parseid, struct keyval_list *kv
 	}
 
 	fprintf(outputf,
-		"\t\terror = css_stylesheet_style_appendOPV(result, %s, 0, %s);\n"
+		"\t\terror = css__stylesheet_style_appendOPV(result, %s, 0, %s);\n"
 		"\t\tif (error != CSS_OK) {\n"
 		"\t\t\t*ctx = orig_ctx;\n"
 		"\t\t\treturn error;\n"
 		"\t\t}\n\n"
-		"\t\terror = css_stylesheet_style_append(result, num);\n"
+		"\t\terror = css__stylesheet_style_append(result, num);\n"
 		"\t} else ",
 		parseid->val,
 		ckv->val);	
@@ -279,13 +279,13 @@ void output_color(FILE *outputf, struct keyval *parseid, struct keyval_list *kvl
 		"\t\t\t*ctx = orig_ctx;\n"
 		"\t\t\treturn error;\n"
 		"\t\t}\n\n"
-		"\t\terror = css_stylesheet_style_appendOPV(result, %s, 0, %s);\n"
+		"\t\terror = css__stylesheet_style_appendOPV(result, %s, 0, %s);\n"
 		"\t\tif (error != CSS_OK) {\n"
 		"\t\t\t*ctx = orig_ctx;\n"
 		"\t\t\treturn error;\n"
 		"\t\t}\n"
 		"\n"
-		"\t\terror = css_stylesheet_style_append(result, color);\n"
+		"\t\terror = css__stylesheet_style_append(result, color);\n"
 		"\t}\n\n",
 		parseid->val,
 		ckv->val);
@@ -338,13 +338,13 @@ void output_length_unit(FILE *outputf, struct keyval *parseid, struct keyval_lis
 	}
 
 	fprintf(outputf,
-		"\t\terror = css_stylesheet_style_appendOPV(result, %s, 0, %s);\n"
+		"\t\terror = css__stylesheet_style_appendOPV(result, %s, 0, %s);\n"
 		"\t\tif (error != CSS_OK) {\n"
 		"\t\t\t*ctx = orig_ctx;\n"
 		"\t\t\treturn error;\n"
 		"\t\t}\n"
 		"\n"
-		"\t\terror = css_stylesheet_style_vappend(result, 2, length, unit);\n"
+		"\t\terror = css__stylesheet_style_vappend(result, 2, length, unit);\n"
 		"\t}\n\n",
 		parseid->val,
 		ckv->val);
@@ -359,7 +359,7 @@ void output_ident_list(FILE *outputf, struct keyval *parseid, struct keyval_list
 
 		fprintf(outputf,
 			"{\n"
-			"\t\terror = css_stylesheet_style_appendOPV(result, %s, 0, %s);\n"
+			"\t\terror = css__stylesheet_style_appendOPV(result, %s, 0, %s);\n"
 			"\t\tif (error != CSS_OK) {\n"
 			"\t\t\t*ctx = orig_ctx;\n"
 			"\t\t\treturn error;\n"
@@ -368,12 +368,12 @@ void output_ident_list(FILE *outputf, struct keyval *parseid, struct keyval_list
 			"\t\t\tuint32_t snumber;\n"
 			"\t\t\tcss_fixed num;\n"
 			"\t\t\tint pctx;\n\n"
-			"\t\t\terror = css_stylesheet_string_add(c->sheet, lwc_string_ref(token->idata), &snumber);\n"
+			"\t\t\terror = css__stylesheet_string_add(c->sheet, lwc_string_ref(token->idata), &snumber);\n"
 			"\t\t\tif (error != CSS_OK) {\n"
 			"\t\t\t\t*ctx = orig_ctx;\n"
 			"\t\t\t\treturn error;\n"
 			"\t\t\t}\n\n"
-			"\t\t\terror = css_stylesheet_style_append(result, snumber);\n"	
+			"\t\t\terror = css__stylesheet_style_append(result, snumber);\n"	
 			"\t\t\tif (error != CSS_OK) {\n"
 			"\t\t\t\t*ctx = orig_ctx;\n"
 			"\t\t\t\treturn error;\n"
@@ -394,7 +394,7 @@ void output_ident_list(FILE *outputf, struct keyval *parseid, struct keyval_list
 			"\t\t\t} else {\n"
 			"\t\t\t\tnum = INTTOFIX(%s);\n"
 			"\t\t\t}\n\n"
-			"\t\t\terror = css_stylesheet_style_append(result, num);\n"
+			"\t\t\terror = css__stylesheet_style_append(result, num);\n"
 			"\t\t\tif (error != CSS_OK) {\n"
 			"\t\t\t\t*ctx = orig_ctx;\n"
 			"\t\t\t\treturn error;\n"
@@ -402,7 +402,7 @@ void output_ident_list(FILE *outputf, struct keyval *parseid, struct keyval_list
 			"\t\t\tif (token == NULL)\n"
 			"\t\t\t\tbreak;\n\n"
 			"\t\t\tif (token->type == CSS_TOKEN_IDENT) {\n"
-			"\t\t\t\terror = css_stylesheet_style_append(result, %s);\n"
+			"\t\t\t\terror = css__stylesheet_style_append(result, %s);\n"
 			"\t\t\t\tif (error != CSS_OK) {\n"
 			"\t\t\t\t\t*ctx = orig_ctx;\n"
 			"\t\t\t\t\treturn error;\n"
@@ -411,7 +411,7 @@ void output_ident_list(FILE *outputf, struct keyval *parseid, struct keyval_list
 			"\t\t\t\t*ctx = pctx; /* rewind one token back */\n"
 			"\t\t\t}\n"
 			"\t\t}\n\n"
-			"\t\terror = css_stylesheet_style_append(result, %s);\n"
+			"\t\terror = css__stylesheet_style_append(result, %s);\n"
 			"\t}\n\n",
 			parseid->val,
 			ckv->val,

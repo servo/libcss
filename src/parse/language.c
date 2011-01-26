@@ -101,7 +101,7 @@ static css_error parseProperty(css_language *c,
  *	   CSS_BADPARM on bad parameters,
  *	   CSS_NOMEM on memory exhaustion
  */
-css_error css_language_create(css_stylesheet *sheet, css_parser *parser,
+css_error css__language_create(css_stylesheet *sheet, css_parser *parser,
 		css_allocator_fn alloc, void *pw, void **language)
 {
 	css_language *c;
@@ -141,7 +141,7 @@ css_error css_language_create(css_stylesheet *sheet, css_parser *parser,
 
 	params.event_handler.handler = language_handle_event;
 	params.event_handler.pw = c;
-	error = css_parser_setopt(parser, CSS_PARSER_EVENT_HANDLER, &params);
+	error = css__parser_setopt(parser, CSS_PARSER_EVENT_HANDLER, &params);
 	if (error != CSS_OK) {
 		parserutils_stack_destroy(c->context);
 		alloc(c, 0, pw);
@@ -164,7 +164,7 @@ css_error css_language_create(css_stylesheet *sheet, css_parser *parser,
  * \param language  The parser to destroy
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_language_destroy(css_language *language)
+css_error css__language_destroy(css_language *language)
 {
 	int i;
 	
@@ -281,7 +281,7 @@ css_error handleStartRuleset(css_language *c, const parserutils_vector *vector)
 	if (cur != NULL && cur->type != CSS_PARSER_START_STYLESHEET)
 		parent_rule = cur->data;
 
-	error = css_stylesheet_rule_create(c->sheet, CSS_RULE_SELECTOR, &rule);
+	error = css__stylesheet_rule_create(c->sheet, CSS_RULE_SELECTOR, &rule);
 	if (error != CSS_OK)
 		return error;
 
@@ -289,7 +289,7 @@ css_error handleStartRuleset(css_language *c, const parserutils_vector *vector)
 		/* Parse selectors, if there are any */
 		error = parseSelectorList(c, vector, rule);
 		if (error != CSS_OK) {
-			css_stylesheet_rule_destroy(c->sheet, rule);
+			css__stylesheet_rule_destroy(c->sheet, rule);
 			return error;
 		}
 	}
@@ -298,14 +298,14 @@ css_error handleStartRuleset(css_language *c, const parserutils_vector *vector)
 
 	perror = parserutils_stack_push(c->context, (void *) &entry);
 	if (perror != PARSERUTILS_OK) {
-		css_stylesheet_rule_destroy(c->sheet, rule);
+		css__stylesheet_rule_destroy(c->sheet, rule);
 		return css_error_from_parserutils_error(perror);
 	}
 
-	error = css_stylesheet_add_rule(c->sheet, rule, parent_rule);
+	error = css__stylesheet_add_rule(c->sheet, rule, parent_rule);
 	if (error != CSS_OK) {
 		parserutils_stack_pop(c->context, NULL);
-		css_stylesheet_rule_destroy(c->sheet, rule);
+		css__stylesheet_rule_destroy(c->sheet, rule);
 		return error;
 	}
 
@@ -380,21 +380,21 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 			if (token != NULL)
 				return CSS_INVALID;
 
-			error = css_stylesheet_rule_create(c->sheet, 
+			error = css__stylesheet_rule_create(c->sheet, 
 					CSS_RULE_CHARSET, &rule);
 			if (error != CSS_OK)
 				return error;
 
-			error = css_stylesheet_rule_set_charset(c->sheet, rule,
+			error = css__stylesheet_rule_set_charset(c->sheet, rule,
 					charset->idata);
 			if (error != CSS_OK) {
-				css_stylesheet_rule_destroy(c->sheet, rule);
+				css__stylesheet_rule_destroy(c->sheet, rule);
 				return error;
 			}
 
-			error = css_stylesheet_add_rule(c->sheet, rule, NULL);
+			error = css__stylesheet_add_rule(c->sheet, rule, NULL);
 			if (error != CSS_OK) {
-				css_stylesheet_rule_destroy(c->sheet, rule);
+				css__stylesheet_rule_destroy(c->sheet, rule);
 				return error;
 			}
 
@@ -428,7 +428,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 				return error;
 
 			/* Create rule */
-			error = css_stylesheet_rule_create(c->sheet, 
+			error = css__stylesheet_rule_create(c->sheet, 
 					CSS_RULE_IMPORT, &rule);
 			if (error != CSS_OK)
 				return error;
@@ -438,16 +438,16 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 					c->sheet->url,
 					uri->idata, &url);
 			if (error != CSS_OK) {
-				css_stylesheet_rule_destroy(c->sheet, rule);
+				css__stylesheet_rule_destroy(c->sheet, rule);
 				return error;
 			}
 
 			/* Inform rule of it */
-			error = css_stylesheet_rule_set_nascent_import(c->sheet,
+			error = css__stylesheet_rule_set_nascent_import(c->sheet,
 					rule, url, media);
 			if (error != CSS_OK) {
 				lwc_string_unref(url);
-				css_stylesheet_rule_destroy(c->sheet, rule);
+				css__stylesheet_rule_destroy(c->sheet, rule);
 				return error;
 			}
 
@@ -457,7 +457,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 						c->sheet, url, media);
 				if (error != CSS_OK) {
 					lwc_string_unref(url);
-					css_stylesheet_rule_destroy(c->sheet, 
+					css__stylesheet_rule_destroy(c->sheet, 
 							rule);
 					return error;
 				}
@@ -467,9 +467,9 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 			lwc_string_unref(url);
 
 			/* Add rule to sheet */
-			error = css_stylesheet_add_rule(c->sheet, rule, NULL);
+			error = css__stylesheet_add_rule(c->sheet, rule, NULL);
 			if (error != CSS_OK) {
-				css_stylesheet_rule_destroy(c->sheet, rule);
+				css__stylesheet_rule_destroy(c->sheet, rule);
 				return error;
 			}
 
@@ -490,20 +490,20 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 		if (error != CSS_OK)
 			return error;
 
-		error = css_stylesheet_rule_create(c->sheet, 
+		error = css__stylesheet_rule_create(c->sheet, 
 				CSS_RULE_MEDIA, &rule);
 		if (error != CSS_OK)
 			return error;
 
-		error = css_stylesheet_rule_set_media(c->sheet, rule, media);
+		error = css__stylesheet_rule_set_media(c->sheet, rule, media);
 		if (error != CSS_OK) {
-			css_stylesheet_rule_destroy(c->sheet, rule);
+			css__stylesheet_rule_destroy(c->sheet, rule);
 			return error;
 		}
 
-		error = css_stylesheet_add_rule(c->sheet, rule, NULL);
+		error = css__stylesheet_add_rule(c->sheet, rule, NULL);
 		if (error != CSS_OK) {
-			css_stylesheet_rule_destroy(c->sheet, rule);
+			css__stylesheet_rule_destroy(c->sheet, rule);
 			return error;
 		}
 
@@ -517,7 +517,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 
 		/* any0 = (':' IDENT)? ws */
 
-		error = css_stylesheet_rule_create(c->sheet,
+		error = css__stylesheet_rule_create(c->sheet,
 				CSS_RULE_PAGE, &rule);
 		if (error != CSS_OK)
 			return error;
@@ -530,22 +530,22 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 
 			error = parseSelector(c, vector, &ctx, &sel);
 			if (error != CSS_OK) {
-				css_stylesheet_rule_destroy(c->sheet, rule);
+				css__stylesheet_rule_destroy(c->sheet, rule);
 				return error;
 			}
 
-			error = css_stylesheet_rule_set_page_selector(c->sheet,
+			error = css__stylesheet_rule_set_page_selector(c->sheet,
 					rule, sel);
 			if (error != CSS_OK) {
-				css_stylesheet_selector_destroy(c->sheet, sel);
-				css_stylesheet_rule_destroy(c->sheet, rule);
+				css__stylesheet_selector_destroy(c->sheet, sel);
+				css__stylesheet_rule_destroy(c->sheet, rule);
 				return error;
 			}
 		}
 
-		error = css_stylesheet_add_rule(c->sheet, rule, NULL);
+		error = css__stylesheet_add_rule(c->sheet, rule, NULL);
 		if (error != CSS_OK) {
-			css_stylesheet_rule_destroy(c->sheet, rule);
+			css__stylesheet_rule_destroy(c->sheet, rule);
 			return error;
 		}
 
@@ -819,7 +819,7 @@ css_error parseClass(css_language *c, const parserutils_vector *vector,
 	if (token == NULL || token->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
 
-	return css_stylesheet_selector_detail_init(c->sheet, 
+	return css__stylesheet_selector_detail_init(c->sheet, 
 			CSS_SELECTOR_CLASS, token->idata, NULL, specific);
 }
 
@@ -877,7 +877,7 @@ css_error parseAttrib(css_language *c, const parserutils_vector *vector,
 			return CSS_INVALID;
 	}
 
-	return css_stylesheet_selector_detail_init(c->sheet, type, 
+	return css__stylesheet_selector_detail_init(c->sheet, type, 
 			name->idata, value != NULL ? value->idata : NULL,
 			specific);
 }
@@ -966,7 +966,7 @@ css_error parsePseudo(css_language *c, const parserutils_vector *vector,
 	else
 		return CSS_INVALID;
 
-	return css_stylesheet_selector_detail_init(c->sheet, 
+	return css__stylesheet_selector_detail_init(c->sheet, 
 			type, name->idata, value != NULL ? value->idata : NULL,
 			specific);
 }
@@ -986,7 +986,7 @@ css_error parseSpecific(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_HASH) {
-		error = css_stylesheet_selector_detail_init(c->sheet,
+		error = css__stylesheet_selector_detail_init(c->sheet,
 				CSS_SELECTOR_ID, token->idata, NULL, &specific);
 		if (error != CSS_OK)
 			return error;
@@ -1008,7 +1008,7 @@ css_error parseSpecific(css_language *c,
 		return CSS_INVALID;
 	}
 
-	return css_stylesheet_selector_append_specific(c->sheet, parent, 
+	return css__stylesheet_selector_append_specific(c->sheet, parent, 
 			&specific);
 }
 
@@ -1052,7 +1052,7 @@ css_error parseSimpleSelector(css_language *c,
 
 	if (token->type == CSS_TOKEN_IDENT || tokenIsChar(token, '*')) {
 		/* Have element name */
-		error = css_stylesheet_selector_create(c->sheet,
+		error = css__stylesheet_selector_create(c->sheet,
 				token->idata, &selector);
 		if (error != CSS_OK)
 			return error;
@@ -1060,7 +1060,7 @@ css_error parseSimpleSelector(css_language *c,
 		parserutils_vector_iterate(vector, ctx);
 	} else {
 		/* Universal selector */
-		error = css_stylesheet_selector_create(c->sheet,
+		error = css__stylesheet_selector_create(c->sheet,
 				c->strings[UNIVERSAL], &selector);
 		if (error != CSS_OK)
 			return error;
@@ -1068,14 +1068,14 @@ css_error parseSimpleSelector(css_language *c,
 		/* Ensure we have at least one specific selector */
 		error = parseSpecific(c, vector, ctx, &selector);
 		if (error != CSS_OK) {
-			css_stylesheet_selector_destroy(c->sheet, selector);
+			css__stylesheet_selector_destroy(c->sheet, selector);
 			return error;
 		}
 	}
 
 	error = parseSelectorSpecifics(c, vector, ctx, &selector);
 	if (error != CSS_OK) {
-		css_stylesheet_selector_destroy(c->sheet, selector);
+		css__stylesheet_selector_destroy(c->sheet, selector);
 		return error;
 	}
 
@@ -1171,10 +1171,10 @@ css_error parseSelector(css_language *c, const parserutils_vector *vector,
 
 		*result = other;
 
-		error = css_stylesheet_selector_combine(c->sheet,
+		error = css__stylesheet_selector_combine(c->sheet,
 				comb, selector, other);
 		if (error != CSS_OK) {
-			css_stylesheet_selector_destroy(c->sheet, selector);
+			css__stylesheet_selector_destroy(c->sheet, selector);
 			return error;
 		}
 
@@ -1200,15 +1200,15 @@ css_error parseSelectorList(css_language *c, const parserutils_vector *vector,
 	error = parseSelector(c, vector, &ctx, &selector);
 	if (error != CSS_OK) {
 		if (selector != NULL)
-			css_stylesheet_selector_destroy(c->sheet, selector);
+			css__stylesheet_selector_destroy(c->sheet, selector);
 		return error;
 	}
 
 	assert(selector != NULL);
 
-	error = css_stylesheet_rule_add_selector(c->sheet, rule, selector);
+	error = css__stylesheet_rule_add_selector(c->sheet, rule, selector);
 	if (error != CSS_OK) {
-		css_stylesheet_selector_destroy(c->sheet, selector);
+		css__stylesheet_selector_destroy(c->sheet, selector);
 		return error;
 	}
 
@@ -1224,7 +1224,7 @@ css_error parseSelectorList(css_language *c, const parserutils_vector *vector,
 		error = parseSelector(c, vector, &ctx, &selector);
 		if (error != CSS_OK) {
 			if (selector != NULL) {
-				css_stylesheet_selector_destroy(c->sheet, 
+				css__stylesheet_selector_destroy(c->sheet, 
 						selector);
 			}
 			return error;
@@ -1232,10 +1232,10 @@ css_error parseSelectorList(css_language *c, const parserutils_vector *vector,
 
 		assert(selector != NULL);
 
-		error = css_stylesheet_rule_add_selector(c->sheet, rule, 
+		error = css__stylesheet_rule_add_selector(c->sheet, rule, 
 				selector);
 		if (error != CSS_OK) {
-			css_stylesheet_selector_destroy(c->sheet, selector);
+			css__stylesheet_selector_destroy(c->sheet, selector);
 			return error;
 		}
 	}
@@ -1274,7 +1274,7 @@ css_error parseProperty(css_language *c, const css_token *property,
 	assert(handler != NULL);
 
 	/* allocate style */
-	error = css_stylesheet_style_create(c->sheet, &style);
+	error = css__stylesheet_style_create(c->sheet, &style);
 	if (error != CSS_OK) 
 		return error;
 
@@ -1283,14 +1283,14 @@ css_error parseProperty(css_language *c, const css_token *property,
 	/* Call the handler */
 	error = handler(c, vector, ctx, style);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(style);
+		css__stylesheet_style_destroy(style);
 		return error;
 	}
 
 	/* Determine if this declaration is important or not */
 	error = css__parse_important(c, vector, ctx, &flags);
 	if (error != CSS_OK) {
-		css_stylesheet_style_destroy(style);
+		css__stylesheet_style_destroy(style);
 		return error;
 	}
 
@@ -1299,7 +1299,7 @@ css_error parseProperty(css_language *c, const css_token *property,
 	token = parserutils_vector_iterate(vector, ctx);
 	if (token != NULL) {
 		/* Trailing junk, so discard declaration */
-                css_stylesheet_style_destroy(style);
+                css__stylesheet_style_destroy(style);
 		return CSS_INVALID;
 	}
 
@@ -1308,9 +1308,9 @@ css_error parseProperty(css_language *c, const css_token *property,
 		css__make_style_important(style);
 
 	/* Append style to rule */
-	error = css_stylesheet_rule_append_style(c->sheet, rule, style);
+	error = css__stylesheet_rule_append_style(c->sheet, rule, style);
 	if (error != CSS_OK) {
-                css_stylesheet_style_destroy(style);
+                css__stylesheet_style_destroy(style);
 		return error;
 	}
 

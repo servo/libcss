@@ -93,7 +93,7 @@ css_error css__cascade_uri_none(uint32_t opv, css_style *style,
 			break;
 		case BACKGROUND_IMAGE_URI:
 			value = CSS_BACKGROUND_IMAGE_IMAGE;
-			css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &uri);
+			css__stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &uri);
 			advance_bytecode(style, sizeof(css_code_t));
 			break;
 		}
@@ -402,7 +402,7 @@ css_error css__cascade_counter_increment_reset(uint32_t opv, css_style *style,
 				lwc_string *name;
 				css_fixed val = 0;
 
-				css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &name);
+				css__stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &name);
 				advance_bytecode(style, sizeof(css_code_t));
 
 				val = *((css_fixed *) style->bytecode);

@@ -57,24 +57,24 @@ typedef union css_parser_optparams {
 	} event_handler;
 } css_parser_optparams;
 
-css_error css_parser_create(const char *charset, css_charset_source cs_source,
+css_error css__parser_create(const char *charset, css_charset_source cs_source,
 		css_allocator_fn alloc, void *pw, 
 		css_parser **parser);
-css_error css_parser_create_for_inline_style(const char *charset, 
+css_error css__parser_create_for_inline_style(const char *charset, 
 		css_charset_source cs_source,
 		css_allocator_fn alloc, void *pw, css_parser **parser);
-css_error css_parser_destroy(css_parser *parser);
+css_error css__parser_destroy(css_parser *parser);
 
-css_error css_parser_setopt(css_parser *parser, css_parser_opttype type,
+css_error css__parser_setopt(css_parser *parser, css_parser_opttype type,
 		css_parser_optparams *params);
 
 css_error css__parser_parse_chunk(css_parser *parser, const uint8_t *data, 
 		size_t len);
-css_error css_parser_completed(css_parser *parser);
+css_error css__parser_completed(css_parser *parser);
 
-const char *css_parser_read_charset(css_parser *parser, 
+const char *css__parser_read_charset(css_parser *parser, 
 		css_charset_source *source);
-bool css_parser_quirks_permitted(css_parser *parser);
+bool css__parser_quirks_permitted(css_parser *parser);
 
 #endif
 

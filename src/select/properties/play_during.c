@@ -25,7 +25,7 @@ css_error css__cascade_play_during(uint32_t opv, css_style *style,
 		case PLAY_DURING_URI:
 			value = 0;
 
-			css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &uri);
+			css__stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &uri);
 			advance_bytecode(style, sizeof(css_code_t));
 			break;
 		case PLAY_DURING_AUTO:

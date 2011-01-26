@@ -59,7 +59,7 @@ css_error css__parse_cursor(css_language *c,
 /* Macro to output the value marker, awkward because we need to check
  * first to determine how the value is constructed.
  */
-#define CSS_APPEND(CSSVAL) css_stylesheet_style_append(result, first?buildOPV(CSS_PROP_CURSOR, 0, CSSVAL):CSSVAL)
+#define CSS_APPEND(CSSVAL) css__stylesheet_style_append(result, first?buildOPV(CSS_PROP_CURSOR, 0, CSSVAL):CSSVAL)
 
 
 		/* URI* */
@@ -75,7 +75,7 @@ css_error css__parse_cursor(css_language *c,
 				return error;
 			}
 
-			error = css_stylesheet_string_add(c->sheet, 
+			error = css__stylesheet_string_add(c->sheet, 
 							  uri, 
 							  &uri_snumber);
 			if (error != CSS_OK) {
@@ -89,7 +89,7 @@ css_error css__parse_cursor(css_language *c,
 				return error;
 			}
 
-			error = css_stylesheet_style_append(result, uri_snumber);
+			error = css__stylesheet_style_append(result, uri_snumber);
 			if (error != CSS_OK) {
 				*ctx = orig_ctx;
 				return error;

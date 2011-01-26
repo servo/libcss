@@ -31,7 +31,7 @@ css_error css__cascade_font_family(uint32_t opv, css_style *style,
 			switch (v) {
 			case FONT_FAMILY_STRING:
 			case FONT_FAMILY_IDENT_LIST:
-				css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &font);
+				css__stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &font);
 				advance_bytecode(style, sizeof(css_code_t));
 				break;
 			case FONT_FAMILY_SERIF:

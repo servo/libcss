@@ -66,14 +66,14 @@ typedef struct css_token {
 	uint32_t line;
 } css_token;
 
-css_error css_lexer_create(parserutils_inputstream *input, 
+css_error css__lexer_create(parserutils_inputstream *input, 
 		css_allocator_fn alloc, void *pw, css_lexer **lexer);
-css_error css_lexer_destroy(css_lexer *lexer);
+css_error css__lexer_destroy(css_lexer *lexer);
 
-css_error css_lexer_setopt(css_lexer *lexer, css_lexer_opttype type, 
+css_error css__lexer_setopt(css_lexer *lexer, css_lexer_opttype type, 
 		css_lexer_optparams *params);
 
-css_error css_lexer_get_token(css_lexer *lexer, css_token **token);
+css_error css__lexer_get_token(css_lexer *lexer, css_token **token);
 
 #endif
 

@@ -139,7 +139,7 @@ css_error css__parse_font_family(css_language *c,
 			return error;
 		}
 
-		error = css_stylesheet_style_append(result, FONT_FAMILY_END);
+		error = css__stylesheet_style_append(result, FONT_FAMILY_END);
 	}
 
 	if (error != CSS_OK) {

@@ -94,7 +94,7 @@ css_error css__parse_font_weight(css_language *c,
 		return CSS_INVALID;
 	}
 
-	error = css_stylesheet_style_appendOPV(result,
+	error = css__stylesheet_style_appendOPV(result,
 					       CSS_PROP_FONT_WEIGHT,
 					       flags,
 					       value);

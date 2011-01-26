@@ -70,7 +70,7 @@ static css_error _iterate_universal(css_selector_hash *hash,
  * \param hash   Pointer to location to receive result
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_selector_hash_create(css_allocator_fn alloc, void *pw, 
+css_error css__selector_hash_create(css_allocator_fn alloc, void *pw, 
 		css_selector_hash **hash)
 {
 	css_selector_hash *h;
@@ -134,7 +134,7 @@ css_error css_selector_hash_create(css_allocator_fn alloc, void *pw,
  * \param hash  The hash to destroy
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_selector_hash_destroy(css_selector_hash *hash)
+css_error css__selector_hash_destroy(css_selector_hash *hash)
 {
 	hash_entry *d, *e;
 	uint32_t i;
@@ -191,7 +191,7 @@ css_error css_selector_hash_destroy(css_selector_hash *hash)
  * \param selector  Pointer to selector
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_selector_hash_insert(css_selector_hash *hash,
+css_error css__selector_hash_insert(css_selector_hash *hash,
 		const css_selector *selector)
 {
 	uint32_t index, mask;
@@ -239,7 +239,7 @@ css_error css_selector_hash_insert(css_selector_hash *hash,
  * \param selector  Pointer to selector
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_selector_hash_remove(css_selector_hash *hash,
+css_error css__selector_hash_remove(css_selector_hash *hash,
 		const css_selector *selector)
 {
 	uint32_t index, mask;
@@ -291,7 +291,7 @@ css_error css_selector_hash_remove(css_selector_hash *hash,
  *
  * If nothing matches, CSS_OK will be returned and **matched == NULL
  */
-css_error css_selector_hash_find(css_selector_hash *hash,
+css_error css__selector_hash_find(css_selector_hash *hash,
 		lwc_string *name, 
 		css_selector_hash_iterator *iterator,
 		const css_selector ***matched)
@@ -346,7 +346,7 @@ css_error css_selector_hash_find(css_selector_hash *hash,
  *
  * If nothing matches, CSS_OK will be returned and **matched == NULL
  */
-css_error css_selector_hash_find_by_class(css_selector_hash *hash,
+css_error css__selector_hash_find_by_class(css_selector_hash *hash,
 		lwc_string *name, 
 		css_selector_hash_iterator *iterator,
 		const css_selector ***matched)
@@ -405,7 +405,7 @@ css_error css_selector_hash_find_by_class(css_selector_hash *hash,
  *
  * If nothing matches, CSS_OK will be returned and **matched == NULL
  */
-css_error css_selector_hash_find_by_id(css_selector_hash *hash,
+css_error css__selector_hash_find_by_id(css_selector_hash *hash,
 		lwc_string *name, 
 		css_selector_hash_iterator *iterator,
 		const css_selector ***matched)
@@ -463,7 +463,7 @@ css_error css_selector_hash_find_by_id(css_selector_hash *hash,
  *
  * If nothing matches, CSS_OK will be returned and **matched == NULL
  */
-css_error css_selector_hash_find_universal(css_selector_hash *hash,
+css_error css__selector_hash_find_universal(css_selector_hash *hash,
 		css_selector_hash_iterator *iterator,
 		const css_selector ***matched)
 {
@@ -486,7 +486,7 @@ css_error css_selector_hash_find_universal(css_selector_hash *hash,
  * \note The returned size will represent the size of the hash datastructures,
  *       and will not include the size of the data stored in the hash.
  */
-css_error css_selector_hash_size(css_selector_hash *hash, size_t *size)
+css_error css__selector_hash_size(css_selector_hash *hash, size_t *size)
 {
 	if (hash == NULL || size == NULL)
 		return CSS_BADPARM;

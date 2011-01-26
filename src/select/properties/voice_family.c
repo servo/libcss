@@ -31,7 +31,7 @@ css_error css__cascade_voice_family(uint32_t opv, css_style *style,
 			switch (v) {
 			case VOICE_FAMILY_STRING:
 			case VOICE_FAMILY_IDENT_LIST:
-				css_stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &voice);
+				css__stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &voice);
 				advance_bytecode(style, sizeof(css_code_t));
 				break;
 			case VOICE_FAMILY_MALE:

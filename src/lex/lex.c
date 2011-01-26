@@ -176,7 +176,7 @@ static inline bool isSpace(uint8_t c);
  *         CSS_BADPARM on bad parameters,
  *         CSS_NOMEM on memory exhaustion
  */
-css_error css_lexer_create(parserutils_inputstream *input, 
+css_error css__lexer_create(parserutils_inputstream *input, 
 		css_allocator_fn alloc, void *pw, css_lexer **lexer)
 {
 	css_lexer *lex;
@@ -214,7 +214,7 @@ css_error css_lexer_create(parserutils_inputstream *input,
  * \param lexer  The instance to destroy
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_lexer_destroy(css_lexer *lexer)
+css_error css__lexer_destroy(css_lexer *lexer)
 {
 	if (lexer == NULL)
 		return CSS_BADPARM;
@@ -235,7 +235,7 @@ css_error css_lexer_destroy(css_lexer *lexer)
  * \param params  Option-specific parameters
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_lexer_setopt(css_lexer *lexer, css_lexer_opttype type,
+css_error css__lexer_setopt(css_lexer *lexer, css_lexer_opttype type,
 		css_lexer_optparams *params)
 {
 	if (lexer == NULL || params == NULL)
@@ -267,7 +267,7 @@ css_error css_lexer_setopt(css_lexer *lexer, css_lexer_opttype type,
  * does not depend on these remaining constant. This allows the client code
  * to efficiently implement a push-back buffer with interned string data.
  */
-css_error css_lexer_get_token(css_lexer *lexer, css_token **token)
+css_error css__lexer_get_token(css_lexer *lexer, css_token **token)
 {
 	css_error error;
 

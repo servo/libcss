@@ -54,18 +54,18 @@ css_error css__parse_content(css_language *c,
 		   (lwc_string_caseless_isequal(token->idata,
 						c->strings[NORMAL],
 						&match) == lwc_error_ok && match)) {
-		error = css_stylesheet_style_appendOPV(result, CSS_PROP_CONTENT, 0, CONTENT_NORMAL);
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_CONTENT, 0, CONTENT_NORMAL);
 	} else if ((token->type == CSS_TOKEN_IDENT) &&
 		   (lwc_string_caseless_isequal(token->idata,
 						c->strings[NONE],
 						&match) == lwc_error_ok && match)) {
-		error = css_stylesheet_style_appendOPV(result, CSS_PROP_CONTENT, 0, CONTENT_NONE);
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_CONTENT, 0, CONTENT_NONE);
 	} else {
 
 /* Macro to output the value marker, awkward because we need to check
  * first to determine how the value is constructed.
  */
-#define CSS_APPEND(CSSVAL) css_stylesheet_style_append(result, first?buildOPV(CSS_PROP_CONTENT, 0, CSSVAL):CSSVAL)
+#define CSS_APPEND(CSSVAL) css__stylesheet_style_append(result, first?buildOPV(CSS_PROP_CONTENT, 0, CSSVAL):CSSVAL)
 
 		bool first = true;
 		int prev_ctx = orig_ctx;
@@ -108,7 +108,7 @@ css_error css__parse_content(css_language *c,
 			} else if (token->type == CSS_TOKEN_STRING) {
 				uint32_t snumber;
 
-				error = css_stylesheet_string_add(c->sheet, lwc_string_ref(token->idata), &snumber);
+				error = css__stylesheet_string_add(c->sheet, lwc_string_ref(token->idata), &snumber);
 				if (error != CSS_OK) {
 					*ctx = orig_ctx;
 					return error;
@@ -120,7 +120,7 @@ css_error css__parse_content(css_language *c,
 					return error;
 				}
 
-				error = css_stylesheet_style_append(result, snumber);
+				error = css__stylesheet_style_append(result, snumber);
 			} else if (token->type == CSS_TOKEN_URI) {
 				lwc_string *uri;
 				uint32_t uri_snumber;
@@ -134,7 +134,7 @@ css_error css__parse_content(css_language *c,
 					return error;
 				}
 
-				error = css_stylesheet_string_add(c->sheet, 
+				error = css__stylesheet_string_add(c->sheet, 
 								  uri, 
 								  &uri_snumber);
 				if (error != CSS_OK) {
@@ -148,7 +148,7 @@ css_error css__parse_content(css_language *c,
 					return error;
 				}
 
-				error = css_stylesheet_style_append(result, uri_snumber);
+				error = css__stylesheet_style_append(result, uri_snumber);
 			} else if (token->type == CSS_TOKEN_FUNCTION &&
 				   (lwc_string_caseless_isequal(
 					   token->idata, c->strings[ATTR],
@@ -164,7 +164,7 @@ css_error css__parse_content(css_language *c,
 					return CSS_INVALID;
 				}
 
-				error = css_stylesheet_string_add(c->sheet, lwc_string_ref(token->idata), &snumber);
+				error = css__stylesheet_string_add(c->sheet, lwc_string_ref(token->idata), &snumber);
 				if (error != CSS_OK) {
 					*ctx = orig_ctx;
 					return error;
@@ -176,7 +176,7 @@ css_error css__parse_content(css_language *c,
 					return error;
 				}
 
-				error = css_stylesheet_style_append(result, snumber);
+				error = css__stylesheet_style_append(result, snumber);
 
 				consumeWhitespace(vector, ctx);
 
@@ -257,7 +257,7 @@ css_error css__parse_content(css_language *c,
 				}
 
 
-				error = css_stylesheet_string_add(c->sheet, lwc_string_ref(name), &snumber);
+				error = css__stylesheet_string_add(c->sheet, lwc_string_ref(name), &snumber);
 				if (error != CSS_OK) {
 					*ctx = orig_ctx;
 					return error;
@@ -269,7 +269,7 @@ css_error css__parse_content(css_language *c,
 					return error;
 				}
 
-				error = css_stylesheet_style_append(result, snumber);
+				error = css__stylesheet_style_append(result, snumber);
 			} else if (token->type == CSS_TOKEN_FUNCTION &&
 				   (lwc_string_caseless_isequal(
 					   token->idata, c->strings[COUNTERS],
@@ -364,13 +364,13 @@ css_error css__parse_content(css_language *c,
 				}
 
 
-				error = css_stylesheet_string_add(c->sheet, lwc_string_ref(name), &name_snumber);
+				error = css__stylesheet_string_add(c->sheet, lwc_string_ref(name), &name_snumber);
 				if (error != CSS_OK) {
 					*ctx = orig_ctx;
 					return error;
 				}
 
-				error = css_stylesheet_string_add(c->sheet, lwc_string_ref(sep), &sep_snumber);
+				error = css__stylesheet_string_add(c->sheet, lwc_string_ref(sep), &sep_snumber);
 				if (error != CSS_OK) {
 					*ctx = orig_ctx;
 					return error;
@@ -382,13 +382,13 @@ css_error css__parse_content(css_language *c,
 					return error;
 				}
 
-				error = css_stylesheet_style_append(result, name_snumber);
+				error = css__stylesheet_style_append(result, name_snumber);
 				if (error != CSS_OK) {
 					*ctx = orig_ctx;
 					return error;
 				}
 
-				error = css_stylesheet_style_append(result, sep_snumber);
+				error = css__stylesheet_style_append(result, sep_snumber);
 			} else if (first) {
 				/* Invalid if this is the first iteration */
 				error = CSS_INVALID;
@@ -414,7 +414,7 @@ css_error css__parse_content(css_language *c,
 		} /* while */
 
 		/* Write list terminator */
-		css_stylesheet_style_append(result, CONTENT_NORMAL);
+		css__stylesheet_style_append(result, CONTENT_NORMAL);
 	}
 
 	if (error != CSS_OK)

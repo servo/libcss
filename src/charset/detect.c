@@ -35,7 +35,7 @@ static parserutils_error try_ascii_compatible_charset(const uint8_t *data,
  *
  * CSS 2.1 $4.4
  */
-parserutils_error css_charset_extract(const uint8_t *data, size_t len,
+parserutils_error css__charset_extract(const uint8_t *data, size_t len,
 		uint16_t *mibenum, uint32_t *source)
 {
 	parserutils_error error;

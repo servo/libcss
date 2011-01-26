@@ -217,14 +217,14 @@ css_error css__parse_azimuth(css_language *c,
 		value = AZIMUTH_ANGLE;
 	}
 
-	error = css_stylesheet_style_appendOPV(result, CSS_PROP_AZIMUTH, flags, value);
+	error = css__stylesheet_style_appendOPV(result, CSS_PROP_AZIMUTH, flags, value);
 	if (error != CSS_OK) {
 		*ctx = orig_ctx;
 		return error;
 	}
 
 	if (((flags & FLAG_INHERIT) == false) && (value == AZIMUTH_ANGLE)) {
-		error = css_stylesheet_style_vappend(result, 2, length, unit);
+		error = css__stylesheet_style_vappend(result, 2, length, unit);
 		if (error != CSS_OK) {
 			*ctx = orig_ctx;
 			return error;
