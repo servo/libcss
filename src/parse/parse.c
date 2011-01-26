@@ -293,7 +293,7 @@ css_error css_parser_setopt(css_parser *parser, css_parser_opttype type,
  * \param len     Length of chunk
  * \return CSS_OK on success, appropriate error otherwise
  */
-css_error css_parser_css__parse_chunk(css_parser *parser, const uint8_t *data, 
+css_error css__parser_parse_chunk(css_parser *parser, const uint8_t *data, 
 		size_t len)
 {
 	parserutils_error perror;
