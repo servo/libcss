@@ -342,6 +342,7 @@ static void HSL_to_RGB(css_fixed hue, css_fixed sat, css_fixed lit, uint8_t *r, 
  * \param c       Parsing context
  * \param vector  Vector of tokens to process
  * \param ctx     Pointer to vector iteration context
+ * \param value   Pointer to location to receive value
  * \param result  Pointer to location to receive result (AARRGGBB)
  * \return CSS_OK      on success,
  *         CSS_INVALID if the input is invalid
@@ -351,11 +352,10 @@ static void HSL_to_RGB(css_fixed hue, css_fixed sat, css_fixed lit, uint8_t *r, 
  */
 css_error css__parse_colour_specifier(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		uint32_t *result)
+		uint16_t *value, uint32_t *result)
 {
 	int orig_ctx = *ctx;
 	const css_token *token;
-	uint8_t r = 0, g = 0, b = 0, a = 0xff;
 	bool match;
 	css_error error;
 
@@ -386,9 +386,17 @@ css_error css__parse_colour_specifier(css_language *c,
 		if ((lwc_string_caseless_isequal(
 				token->idata, c->strings[TRANSPARENT],
 				&match) == lwc_error_ok && match)) {
+			*value = COLOR_TRANSPARENT;
 			*result = 0; /* black transparent */
 			return CSS_OK;
+		} else if ((lwc_string_caseless_isequal(
+				token->idata, c->strings[CURRENTCOLOR],
+				&match) == lwc_error_ok && match)) {
+			*value = COLOR_CURRENT_COLOR;
+			*result = 0;
+			return CSS_OK;
 		}
+
 		error = css__parse_named_colour(c, token->idata, result);
 		if (error != CSS_OK && c->sheet->quirks_allowed) {
 			error = css__parse_hash_colour(token->idata, result);
@@ -397,34 +405,27 @@ css_error css__parse_colour_specifier(css_language *c,
 		}
 
 		if (error != CSS_OK)
-			*ctx = orig_ctx;
-
-		return error;
+			goto invalid;
 	} else if (token->type == CSS_TOKEN_HASH) {
 		error = css__parse_hash_colour(token->idata, result);
 		if (error != CSS_OK)
-			*ctx = orig_ctx;
-
-		return error;
+			goto invalid;
 	} else if (c->sheet->quirks_allowed &&
 			token->type == CSS_TOKEN_NUMBER) {
 		error = css__parse_hash_colour(token->idata, result);
 		if (error == CSS_OK)
 			c->sheet->quirks_used = true;
 		else
-			*ctx = orig_ctx;
-
-		return error;
+			goto invalid;
 	} else if (c->sheet->quirks_allowed &&
 			token->type == CSS_TOKEN_DIMENSION) {
 		error = css__parse_hash_colour(token->idata, result);
 		if (error == CSS_OK)
 			c->sheet->quirks_used = true;
 		else
-			*ctx = orig_ctx;
-
-		return error;
+			goto invalid;
 	} else if (token->type == CSS_TOKEN_FUNCTION) {
+		uint8_t r = 0, g = 0, b = 0, a = 0xff;
 		int colour_channels = 0;
 
 		if ((lwc_string_caseless_isequal(
@@ -641,9 +642,11 @@ css_error css__parse_colour_specifier(css_language *c,
 		} else {
 			goto invalid;
 		}
+
+		*result = (a << 24) | (r << 16) | (g << 8) | b;
 	}
 
-	*result = (a << 24) | (r << 16) | (g << 8) | b;
+	*value = COLOR_SET;
 
 	return CSS_OK;
 

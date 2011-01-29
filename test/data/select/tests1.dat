@@ -14,15 +14,15 @@ div#foo { float: right; }
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -89,15 +89,15 @@ div p.green { float: left !important; }
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -164,15 +164,15 @@ div.moose > div + div { border-top-style: solid; }
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -238,15 +238,15 @@ div.moose > div + div { border-top-style: solid; }
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: solid
 border-right-style: none
 border-bottom-style: none
@@ -304,7 +304,7 @@ div { display: inline; }
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
@@ -333,6 +333,90 @@ counter-reset: none
 cursor: auto
 direction: ltr
 display: block
+empty-cells: show
+float: none
+font-family: sans-serif
+font-size: 12pt
+font-style: normal
+font-variant: normal
+font-weight: normal
+height: auto
+left: auto
+letter-spacing: normal
+line-height: normal
+list-style-image: none
+list-style-position: outside
+list-style-type: disc
+margin-top: 0px
+margin-right: 0px
+margin-bottom: 0px
+margin-left: 0px
+max-height: none
+max-width: none
+min-height: 0px
+min-width: 0px
+outline-color: invert
+outline-style: none
+outline-width: 2px
+overflow: visible
+padding-top: 0px
+padding-right: 0px
+padding-bottom: 0px
+padding-left: 0px
+position: static
+quotes: none
+right: auto
+table-layout: auto
+text-align: default
+text-decoration: none
+text-indent: 0px
+text-transform: none
+top: auto
+unicode-bidi: normal
+vertical-align: baseline
+visibility: visible
+white-space: normal
+width: auto
+word-spacing: normal
+z-index: auto
+#reset
+
+#tree all
+| div*
+#author
+div { color: currentColor; }
+#errors
+#expected
+background-attachment: scroll
+background-color: #00000000
+background-image: none
+background-position: 0% 0%
+background-repeat: repeat
+border-collapse: separate
+border-spacing: 0px 0px
+border-top-color: #ff000000
+border-right-color: #ff000000
+border-bottom-color: #ff000000
+border-left-color: #ff000000
+border-top-style: none
+border-right-style: none
+border-bottom-style: none
+border-left-style: none
+border-top-width: 2px
+border-right-width: 2px
+border-bottom-width: 2px
+border-left-width: 2px
+bottom: auto
+caption_side: top
+clear: none
+clip: auto
+color: #ff000000
+content: normal
+counter-increment: none
+counter-reset: none
+cursor: auto
+direction: ltr
+display: inline
 empty-cells: show
 float: none
 font-family: sans-serif
@@ -479,10 +563,10 @@ background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -538,7 +622,7 @@ div { quotes: "a" "b" }
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
@@ -627,15 +711,15 @@ div p + p { background-attachment: fixed; }
 #errors
 #expected
 background-attachment: fixed
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -696,15 +780,15 @@ div p + p { background-attachment: fixed; }
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -766,15 +850,15 @@ div p + p { background-attachment: fixed; }
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -839,15 +923,15 @@ div p + p { background-image: url("Sonic_the_Hedgehog.png"); background-position
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: url('Sonic_the_Hedgehog.png')
 background-position: 100% 100%
 background-repeat: repeat-y
 border-spacing: 0px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -911,15 +995,15 @@ div p + p { background-image: url("Sonic_the_Hedgehog.png"); background-repeat: 
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: url('Sonic_the_Hedgehog.png')
 background-position: 50% 20%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -989,15 +1073,15 @@ td,th {display:table-cell;}
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -1067,15 +1151,15 @@ td,th {display:table-cell;}
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -1145,15 +1229,15 @@ td,th {display:table-cell;}
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -1220,14 +1304,14 @@ tr {display:table-row;}
 td,th {display:table-cell;}
 #user
 #author
-.hedgehog tr > td {border-color:transparent;}
+.hedgehog tr > td {border-color:#00000000;}
 #sonic tr > td {border-top-color:#fff;border-right-color:#8040ff;border-bottom-color:black;border-left-color:rgb(255,0,255);}
 td,th {border-top-style: none;border-right-style: hidden;border-bottom-style: dotted;border-left-style: dashed}
 tr > td {border-top-width: thin;border-right-width: medium;border-bottom-width: thick;border-left-width: 2px;}
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
@@ -1302,21 +1386,21 @@ tr {display:table-row;}
 td,th {display:table-cell;}
 #user
 #author
-.hedgehog tr > td {border-color:transparent;}
+.hedgehog tr > td {border-color:#000000;}
 td,th {border-top-style: solid;border-right-style: double;border-bottom-style: groove;border-left-style: ridge}
 tr > td {border-top-width: 0;border-right-width: 2em;border-bottom-width: thick;border-left-width: -2px;}
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: transparent
-border-right-color: transparent
-border-bottom-color: transparent
-border-left-color: transparent
+border-top-color: #ff000000
+border-right-color: #ff000000
+border-bottom-color: #ff000000
+border-left-color: #ff000000
 border-top-style: solid
 border-right-style: double
 border-bottom-style: groove
@@ -1387,15 +1471,15 @@ td,th {display:table-cell;}
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 0px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: inset
 border-right-style: outset
 border-bottom-style: inset
@@ -1465,15 +1549,15 @@ td,th {display:table-cell;}
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 2px 2px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: none
 border-right-style: none
 border-bottom-style: none
@@ -1543,15 +1627,15 @@ td,th {display:table-cell;}
 #errors
 #expected
 background-attachment: scroll
-background-color: transparent
+background-color: #00000000
 background-image: none
 background-position: 0% 0%
 background-repeat: repeat
 border-spacing: 2px 0px
-border-top-color: initial
-border-right-color: initial
-border-bottom-color: initial
-border-left-color: initial
+border-top-color: currentColor
+border-right-color: currentColor
+border-bottom-color: currentColor
+border-left-color: currentColor
 border-top-style: none
 border-right-style: none
 border-bottom-style: none

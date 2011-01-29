@@ -268,27 +268,26 @@ void output_number(FILE *outputf, struct keyval *parseid, struct keyval_list *kv
 
 void output_color(FILE *outputf, struct keyval *parseid, struct keyval_list *kvlist)
 {
-	struct keyval *ckv = kvlist->item[0];
-
 	fprintf(outputf,
 		"{\n"
+		"\t\tuint16_t value = 0;\n"
 		"\t\tuint32_t color = 0;\n"
 		"\t\t*ctx = orig_ctx;\n\n"
-		"\t\terror = css__parse_colour_specifier(c, vector, ctx, &color);\n"
+		"\t\terror = css__parse_colour_specifier(c, vector, ctx, &value, &color);\n"
 		"\t\tif (error != CSS_OK) {\n"
 		"\t\t\t*ctx = orig_ctx;\n"
 		"\t\t\treturn error;\n"
 		"\t\t}\n\n"
-		"\t\terror = css__stylesheet_style_appendOPV(result, %s, 0, %s);\n"
+		"\t\terror = css__stylesheet_style_appendOPV(result, %s, 0, value);\n"
 		"\t\tif (error != CSS_OK) {\n"
 		"\t\t\t*ctx = orig_ctx;\n"
 		"\t\t\treturn error;\n"
 		"\t\t}\n"
 		"\n"
-		"\t\terror = css__stylesheet_style_append(result, color);\n"
+		"\t\tif (value == COLOR_SET)\n"
+		"\t\t\terror = css__stylesheet_style_append(result, color);\n"
 		"\t}\n\n",
-		parseid->val,
-		ckv->val);
+		parseid->val);
 }
 
 void output_length_unit(FILE *outputf, struct keyval *parseid, struct keyval_list *kvlist)

@@ -17,17 +17,30 @@
 css_error css__cascade_color(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
+	bool inherit = isInherit(opv);
 	uint16_t value = CSS_COLOR_INHERIT;
 	css_color color = 0;
 
-	if (isInherit(opv) == false) {
-		value = CSS_COLOR_COLOR;
-		color = *((css_color *) style->bytecode);
-		advance_bytecode(style, sizeof(color));
+	if (inherit == false) {
+		switch (getValue(opv)) {
+		case COLOR_TRANSPARENT:
+			value = CSS_COLOR_COLOR;
+			break;
+		case COLOR_CURRENT_COLOR:
+			/* color: currentColor always computes to inherit */
+			value = CSS_COLOR_INHERIT;
+			inherit = true;
+			break;
+		case COLOR_SET:
+			value = CSS_COLOR_COLOR;
+			color = *((css_color *) style->bytecode);
+			advance_bytecode(style, sizeof(color));
+			break;
+		}
 	}
 
-	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
-			isInherit(opv))) {
+	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state, 
+			inherit)) {
 		return set_color(state->computed, value, color);
 	}
 

@@ -45,7 +45,15 @@
 #errors
 #expected
 | 1 *
-|   0x02000018 0x00000000
+|   0x00000018
+#reset
+
+#data
+* { color: currentColor }
+#errors
+#expected
+| 1 *
+|   0x00040018
 #reset
 
 ## Out-of-range rgb() parameters

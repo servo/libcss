@@ -13,6 +13,11 @@
 #include "select/propset.h"
 #include "utils/utils.h"
 
+static css_error compute_absolute_color(css_computed_style *style,
+		uint8_t (*get)(const css_computed_style *style,
+				css_color *color),
+		css_error (*set)(css_computed_style *style,
+				uint8_t type, css_color color));
 static css_error compute_border_colors(css_computed_style *style);
 
 static css_error compute_absolute_border_width(css_computed_style *style,
@@ -375,6 +380,13 @@ css_error css__compute_absolute_values(const css_computed_style *parent,
 	if (error != CSS_OK)
 		return error;
 
+	/* Fix up background-color */
+	error = compute_absolute_color(style,
+			get_background_color,
+			set_background_color);
+	if (error != CSS_OK)
+		return error;
+
 	/* Fix up border-{top,right,bottom,left}-color */
 	error = compute_border_colors(style);
 	if (error != CSS_OK)
@@ -475,6 +487,13 @@ css_error css__compute_absolute_values(const css_computed_style *parent,
 		if (error != CSS_OK)
 			return error;
 
+		/* Fix up outline-color */
+		error = compute_absolute_color(style,
+				get_outline_color,
+				set_outline_color);
+		if (error != CSS_OK)
+			return error;
+
 		/* Fix up outline-width */
 		error = compute_absolute_border_side_width(style, 
 				&ex_size.data.length, 
@@ -500,7 +519,36 @@ css_error css__compute_absolute_values(const css_computed_style *parent,
  ******************************************************************************/
 
 /**
- * Compute border colours, replacing any set to initial with 
+ * Compute colour values, replacing any set to currentColor with
+ * the computed value of color.
+ *
+ * \param style  The style to process
+ * \param get    Accessor for colour value
+ * \param set    Mutator for colour value
+ * \return CSS_OK on success
+ */
+css_error compute_absolute_color(css_computed_style *style,
+		uint8_t (*get)(const css_computed_style *style,
+				css_color *color),
+		css_error (*set)(css_computed_style *style,
+				uint8_t type, css_color color))
+{
+	css_color color;
+	css_error error = CSS_OK;
+
+	if (get(style, &color) == CSS_BACKGROUND_COLOR_CURRENT_COLOR) {
+		css_color computed_color;
+
+		css_computed_color(style, &computed_color);
+
+		error = set(style, CSS_BACKGROUND_COLOR_COLOR, computed_color);
+	}
+
+	return error;
+}
+
+/**
+ * Compute border colours, replacing any set to currentColor with 
  * the computed value of color.
  *
  * \param style  The style to process
@@ -513,28 +561,28 @@ css_error compute_border_colors(css_computed_style *style)
 
 	css_computed_color(style, &color);
 
-	if (get_border_top_color(style, &bcol) == CSS_BORDER_COLOR_INITIAL) {
+	if (get_border_top_color(style, &bcol) == CSS_BORDER_COLOR_CURRENT_COLOR) {
 		error = set_border_top_color(style, 
 				CSS_BORDER_COLOR_COLOR, color);
 		if (error != CSS_OK)
 			return error;
 	}
 
-	if (get_border_right_color(style, &bcol) == CSS_BORDER_COLOR_INITIAL) {
+	if (get_border_right_color(style, &bcol) == CSS_BORDER_COLOR_CURRENT_COLOR) {
 		error = set_border_right_color(style, 
 				CSS_BORDER_COLOR_COLOR, color);
 		if (error != CSS_OK)
 			return error;
 	}
 
-	if (get_border_bottom_color(style, &bcol) == CSS_BORDER_COLOR_INITIAL) {
+	if (get_border_bottom_color(style, &bcol) == CSS_BORDER_COLOR_CURRENT_COLOR) {
 		error = set_border_bottom_color(style, 
 				CSS_BORDER_COLOR_COLOR, color);
 		if (error != CSS_OK)
 			return error;
 	}
 
-	if (get_border_left_color(style, &bcol) == CSS_BORDER_COLOR_INITIAL) {
+	if (get_border_left_color(style, &bcol) == CSS_BORDER_COLOR_CURRENT_COLOR) {
 		error = set_border_left_color(style, 
 				CSS_BORDER_COLOR_COLOR, color);
 		if (error != CSS_OK)

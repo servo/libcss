@@ -336,6 +336,7 @@ const stringmap_entry stringmap[LAST_KNOWN] = {
 	{ "-libcss-left", SLEN("-libcss-left") },
 	{ "-libcss-center", SLEN("-libcss-center") },
 	{ "-libcss-right", SLEN("-libcss-right") },
+	{ "currentColor", SLEN("currentColor") },
 
 	{ "aliceblue", SLEN("aliceblue") },
 	{ "antiquewhite", SLEN("antiquewhite") },

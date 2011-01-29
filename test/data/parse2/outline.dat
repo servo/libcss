@@ -19,6 +19,26 @@
 #reset
 
 #data
+* { outline: transparent; }
+#errors
+#expected
+| *
+|  outline-color: transparent
+|  outline-style: none
+|  outline-width: medium
+#reset
+
+#data
+* { outline: currentColor; }
+#errors
+#expected
+| *
+|  outline-color: currentColor
+|  outline-style: none
+|  outline-width: medium
+#reset
+
+#data
 * { outline: solid; }
 #errors
 #expected

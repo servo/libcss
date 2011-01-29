@@ -172,9 +172,6 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* background-color */
 	val = css_computed_background_color(style, &color);
 	switch (val) {
-	case CSS_BACKGROUND_COLOR_TRANSPARENT:
-		wrote = snprintf(ptr, *len, "background-color: transparent\n");
-		break;
 	case CSS_BACKGROUND_COLOR_COLOR:
 		wrote = snprintf(ptr, *len, "background-color: #%08x\n", color);
 		break;
@@ -289,11 +286,8 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-top-color */
 	val = css_computed_border_top_color(style, &color);
 	switch (val) {
-	case CSS_BORDER_COLOR_INITIAL:
-		wrote = snprintf(ptr, *len, "border-top-color: initial\n");
-		break;
-	case CSS_BORDER_COLOR_TRANSPARENT:
-		wrote = snprintf(ptr, *len, "border-top-color: transparent\n");
+	case CSS_BORDER_COLOR_CURRENT_COLOR:
+		wrote = snprintf(ptr, *len, "border-top-color: currentColor\n");
 		break;
 	case CSS_BORDER_COLOR_COLOR:
 		wrote = snprintf(ptr, *len, "border-top-color: #%08x\n", color);
@@ -308,12 +302,8 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-right-color */
 	val = css_computed_border_right_color(style, &color);
 	switch (val) {
-	case CSS_BORDER_COLOR_INITIAL:
-		wrote = snprintf(ptr, *len, "border-right-color: initial\n");
-		break;
-	case CSS_BORDER_COLOR_TRANSPARENT:
-		wrote = snprintf(ptr, *len,
-				"border-right-color: transparent\n");
+	case CSS_BORDER_COLOR_CURRENT_COLOR:
+		wrote = snprintf(ptr, *len, "border-right-color: currentColor\n");
 		break;
 	case CSS_BORDER_COLOR_COLOR:
 		wrote = snprintf(ptr, *len,
@@ -329,12 +319,8 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-bottom-color */
 	val = css_computed_border_bottom_color(style, &color);
 	switch (val) {
-	case CSS_BORDER_COLOR_INITIAL:
-		wrote = snprintf(ptr, *len, "border-bottom-color: initial\n");
-		break;
-	case CSS_BORDER_COLOR_TRANSPARENT:
-		wrote = snprintf(ptr, *len,
-				"border-bottom-color: transparent\n");
+	case CSS_BORDER_COLOR_CURRENT_COLOR:
+		wrote = snprintf(ptr, *len, "border-bottom-color: currentColor\n");
 		break;
 	case CSS_BORDER_COLOR_COLOR:
 		wrote = snprintf(ptr, *len,
@@ -350,11 +336,8 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-left-color */
 	val = css_computed_border_left_color(style, &color);
 	switch (val) {
-	case CSS_BORDER_COLOR_INITIAL:
-		wrote = snprintf(ptr, *len, "border-left-color: initial\n");
-		break;
-	case CSS_BORDER_COLOR_TRANSPARENT:
-		wrote = snprintf(ptr, *len, "border-left-color: transparent\n");
+	case CSS_BORDER_COLOR_CURRENT_COLOR:
+		wrote = snprintf(ptr, *len, "border-left-color: currentColor\n");
 		break;
 	case CSS_BORDER_COLOR_COLOR:
 		wrote = snprintf(ptr, *len,

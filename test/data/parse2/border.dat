@@ -37,6 +37,44 @@
 #reset
 
 #data
+* { border: transparent; }
+#errors
+#expected
+| *
+|  border-top-color: transparent
+|  border-top-style: none
+|  border-top-width: medium
+|  border-right-color: transparent
+|  border-right-style: none
+|  border-right-width: medium
+|  border-bottom-color: transparent
+|  border-bottom-style: none
+|  border-bottom-width: medium
+|  border-left-color: transparent
+|  border-left-style: none
+|  border-left-width: medium
+#reset
+
+#data
+* { border: currentColor; }
+#errors
+#expected
+| *
+|  border-top-color: currentColor
+|  border-top-style: none
+|  border-top-width: medium
+|  border-right-color: currentColor
+|  border-right-style: none
+|  border-right-width: medium
+|  border-bottom-color: currentColor
+|  border-bottom-style: none
+|  border-bottom-width: medium
+|  border-left-color: currentColor
+|  border-left-style: none
+|  border-left-width: medium
+#reset
+
+#data
 * { border: solid; }
 #errors
 #expected

@@ -723,12 +723,17 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 			case CSS_PROP_BACKGROUND_COLOR:
 				assert(BACKGROUND_COLOR_TRANSPARENT == 
 						BORDER_COLOR_TRANSPARENT);
+				assert(BACKGROUND_COLOR_CURRENT_COLOR ==
+						BORDER_COLOR_CURRENT_COLOR);
 				assert(BACKGROUND_COLOR_SET ==
 						BORDER_COLOR_SET);
 
 				switch (value) {
 				case BACKGROUND_COLOR_TRANSPARENT:
 					*ptr += sprintf(*ptr, "transparent");
+					break;
+				case BACKGROUND_COLOR_CURRENT_COLOR:
+					*ptr += sprintf(*ptr, "currentColor");
 					break;
 				case BACKGROUND_COLOR_SET:
 				{
@@ -1076,6 +1081,12 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 				break;
 			case CSS_PROP_COLOR:
 				switch (value) {
+				case COLOR_TRANSPARENT:
+					*ptr += sprintf(*ptr, "transparent");
+					break;
+				case COLOR_CURRENT_COLOR:
+					*ptr += sprintf(*ptr, "currentColor");
+					break;
 				case COLOR_SET:
 				{
 					uint32_t colour = 
@@ -1706,6 +1717,12 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 				break;
 			case CSS_PROP_OUTLINE_COLOR:
 				switch (value) {
+				case OUTLINE_COLOR_TRANSPARENT:
+					*ptr += sprintf(*ptr, "transparent");
+					break;
+				case OUTLINE_COLOR_CURRENT_COLOR:
+					*ptr += sprintf(*ptr, "currentColor");
+					break;
 				case OUTLINE_COLOR_SET:
 				{
 					uint32_t colour = 

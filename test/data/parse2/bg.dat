@@ -11,6 +11,30 @@
 #reset
 
 #data
+* { background: transparent }
+#errors
+#expected
+| *
+|  background-attachment: scroll
+|  background-color: transparent
+|  background-image: none
+|  background-position: left top
+|  background-repeat: repeat
+#reset
+
+#data
+* { background: currentColor }
+#errors
+#expected
+| *
+|  background-attachment: scroll
+|  background-color: currentColor
+|  background-image: none
+|  background-position: left top
+|  background-repeat: repeat
+#reset
+
+#data
 * { background: url("chess.png") gray 40% repeat fixed; }
 #errors
 #expected

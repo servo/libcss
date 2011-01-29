@@ -22,6 +22,12 @@ css_error css__cascade_outline_color(uint32_t opv, css_style *style,
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
+		case OUTLINE_COLOR_TRANSPARENT:
+			value = CSS_OUTLINE_COLOR_COLOR;
+			break;
+		case OUTLINE_COLOR_CURRENT_COLOR:
+			value = CSS_OUTLINE_COLOR_CURRENT_COLOR;
+			break;
 		case OUTLINE_COLOR_SET:
 			value = CSS_OUTLINE_COLOR_COLOR;
 			color = *((css_color *) style->bytecode);

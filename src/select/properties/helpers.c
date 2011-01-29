@@ -53,14 +53,17 @@ css_error css__cascade_bg_border_color(uint32_t opv, css_style *style,
 	css_color color = 0;
 
 	assert(CSS_BACKGROUND_COLOR_INHERIT == CSS_BORDER_COLOR_INHERIT);
-	assert(CSS_BACKGROUND_COLOR_TRANSPARENT == 
-			CSS_BORDER_COLOR_TRANSPARENT);
 	assert(CSS_BACKGROUND_COLOR_COLOR == CSS_BORDER_COLOR_COLOR);
+	assert(CSS_BACKGROUND_COLOR_CURRENT_COLOR == 
+			CSS_BORDER_COLOR_CURRENT_COLOR);
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
 		case BACKGROUND_COLOR_TRANSPARENT:
-			value = CSS_BACKGROUND_COLOR_TRANSPARENT;
+			value = CSS_BACKGROUND_COLOR_COLOR;
+			break;
+		case BACKGROUND_COLOR_CURRENT_COLOR:
+			value = CSS_BACKGROUND_COLOR_CURRENT_COLOR;
 			break;
 		case BACKGROUND_COLOR_SET:
 			value = CSS_BACKGROUND_COLOR_COLOR;

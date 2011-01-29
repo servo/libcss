@@ -149,8 +149,9 @@ Opcodes
 		bit 7 set => colour follows.
 			bits 0-6: MBZ
 		bit 7 clear => keyword colour:
-			bits 1-6: MBZ
-			bit 0   : clear => transparent, set => rffe.
+			bits 0-6: 0000000 => transparent,
+				  0000001 => currentColor,
+				  other   => rffe.
 
 03 - background-image
 	<value> (14bits) :
@@ -214,8 +215,9 @@ Opcodes
 		bit 7 set => colour follows.
 			bits 0-6: MBZ
 		bit 7 clear => keyword colour:
-			bits 1-6: MBZ
-			bit 0   : clear => transparent, set => rffe.
+			bits 0-6: 0000000 => transparent,
+				  0000001 => currentColor,
+				  other   => rffe.
 
 0c - border-top-style
 0d - border-right-style
@@ -310,8 +312,10 @@ Opcodes
 		bits 0-7: 
 			bit 7: set => colour follows.
 					bits 0-6: MBZ.
-			       clear => Reserved for future expansion.
-			       		bits 0-6: MBZ.
+			       clear => keywords:
+			       		bits 0-6: 0000000 => transparent,
+						  0000001 => currentColor,
+						  other   => rffe.
 
 19 - content
 	<value> (14bits) :
@@ -707,7 +711,9 @@ Opcodes
 			bit 7 set => colour follows
 				bits 0-6: MBZ
 			bit 7 clear => keywords:
-				bits 0-6: 0000000 => invert,
+				bits 0-6: 0000000 => transparent,
+					  0000001 => currentColor,
+					  0000010 => invert,
 					  other   => rffe.
 
 3a - outline-style

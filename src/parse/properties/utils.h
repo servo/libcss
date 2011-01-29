@@ -166,7 +166,7 @@ css_error css__parse_list_style_type_value(css_language *c,
 
 css_error css__parse_colour_specifier(css_language *c,
 		const parserutils_vector *vector, int *ctx,
-		uint32_t *result);
+		uint16_t *value, uint32_t *result);
 
 css_error css__parse_named_colour(css_language *c, lwc_string *data, 
 		uint32_t *result);

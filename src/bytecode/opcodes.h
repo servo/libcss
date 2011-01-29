@@ -35,6 +35,7 @@ enum op_background_attachment {
 
 enum op_background_color {
 	BACKGROUND_COLOR_TRANSPARENT	= 0x0000,
+	BACKGROUND_COLOR_CURRENT_COLOR	= 0x0001,
 	BACKGROUND_COLOR_SET		= 0x0080
 };
 
@@ -72,8 +73,9 @@ enum op_border_spacing {
 };
 
 enum op_border_color {
-	BORDER_COLOR_SET		= 0x0080,
-	BORDER_COLOR_TRANSPARENT	= 0x0000
+	BORDER_COLOR_TRANSPARENT	= 0x0000,
+	BORDER_COLOR_CURRENT_COLOR	= 0x0001,
+	BORDER_COLOR_SET		= 0x0080
 };
 
 enum op_border_style {
@@ -126,6 +128,8 @@ enum op_clip {
 };
 
 enum op_color {
+	COLOR_TRANSPARENT		= 0x0000,
+	COLOR_CURRENT_COLOR		= 0x0001,
 	COLOR_SET			= 0x0080
 };
 
@@ -366,8 +370,10 @@ enum op_orphans {
 };
 
 enum op_outline_color {
-	OUTLINE_COLOR_SET		= 0x0080,
-	OUTLINE_COLOR_INVERT		= 0x0000
+	OUTLINE_COLOR_TRANSPARENT	= 0x0000,
+	OUTLINE_COLOR_CURRENT_COLOR	= 0x0001,
+	OUTLINE_COLOR_INVERT		= 0x0002,
+	OUTLINE_COLOR_SET		= 0x0080
 };
 
 enum op_outline_style {

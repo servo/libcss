@@ -233,6 +233,14 @@
 |   0x00000002
 #reset
 
+#data
+* { background-color: currentColor }
+#errors
+#expected
+| 1 *
+|   0x00040002
+#reset
+
 ##
 ## 03 - background-image
 ##
@@ -491,6 +499,14 @@
 #expected
 | 1 *
 |   0x0000000b
+#reset
+
+#data
+* { border-left-color: currentColor }
+#errors
+#expected
+| 1 *
+|   0x0004000b
 #reset
 
 ##
@@ -2283,7 +2299,7 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #errors
 #expected
 | 1 *
-|   0x00000039
+|   0x00080039
 #reset
 
 #data
@@ -2292,6 +2308,22 @@ p:before { content: open-quote url('http://picodrive.acornarcade.com/') " : " at
 #expected
 | 1 *
 |   0x02000039 0xffbbbbcc
+#reset
+
+#data
+* { outline-color: currentColor }
+#errors
+#expected
+| 1 *
+|   0x00040039
+#reset
+
+#data
+* { outline-color: transparent }
+#errors
+#expected
+| 1 *
+|   0x00000039
 #reset
 
 ##

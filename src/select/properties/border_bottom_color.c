@@ -30,7 +30,7 @@ css_error css__set_border_bottom_color_from_hint(const css_hint *hint,
 css_error css__initial_border_bottom_color(css_select_state *state)
 {
 	return set_border_bottom_color(state->computed, 
-			CSS_BORDER_COLOR_INITIAL, 0);
+			CSS_BORDER_COLOR_CURRENT_COLOR, 0);
 }
 
 css_error css__compose_border_bottom_color(const css_computed_style *parent,

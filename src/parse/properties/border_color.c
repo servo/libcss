@@ -37,7 +37,6 @@ css_error css__parse_border_color(css_language *c,
 	uint16_t side_val[4];
 	uint32_t side_color[4];
 	uint32_t side_count = 0;
-	bool match;
 	css_error error;
 
 	/* Firstly, handle inherit */
@@ -74,18 +73,7 @@ css_error css__parse_border_color(css_language *c,
 			return CSS_INVALID;
 		}
 
-		if ((token->type == CSS_TOKEN_IDENT) && 
-		   (lwc_string_caseless_isequal(token->idata, 
-				c->strings[TRANSPARENT], 
-				&match) == lwc_error_ok && match)) {
-			side_val[side_count] = BORDER_COLOR_TRANSPARENT;
-			parserutils_vector_iterate(vector, ctx);
-			error = CSS_OK;
-		} else {
-			side_val[side_count] = BORDER_COLOR_SET;
-			error = css__parse_colour_specifier(c, vector, ctx, &side_color[side_count]);
-		}
-
+		error = css__parse_colour_specifier(c, vector, ctx, &side_val[side_count], &side_color[side_count]);
 		if (error == CSS_OK) {
 			side_count++;
 
