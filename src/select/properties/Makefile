@@ -56,6 +56,7 @@ max_height.c \
 max_width.c \
 min_height.c \
 min_width.c \
+opacity.c \
 orphans.c \
 outline_color.c \
 outline_style.c \

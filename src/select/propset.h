@@ -1391,6 +1391,27 @@ static inline css_error set_position(
 #undef POSITION_SHIFT
 #undef POSITION_INDEX
 
+#define OPACITY_INDEX 23
+#define OPACITY_SHIFT 2
+#define OPACITY_MASK  0x04
+static inline css_error set_opacity(
+		css_computed_style *style, 
+		uint8_t type, css_fixed opacity)
+{
+	uint8_t *bits = &style->bits[OPACITY_INDEX];
+
+	/* 1bit: t : type */
+	*bits = (*bits & ~OPACITY_MASK) |
+			((type & 0x1) << OPACITY_SHIFT);
+
+	style->opacity = opacity;
+
+	return CSS_OK;
+}
+#undef OPACITY_MASK
+#undef OPACITY_SHIFT
+#undef OPACITY_INDEX
+
 #define TEXT_TRANSFORM_INDEX 24
 #define TEXT_TRANSFORM_SHIFT 0
 #define TEXT_TRANSFORM_MASK  0x7

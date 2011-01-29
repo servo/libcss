@@ -385,6 +385,7 @@ static const char *opcode_names[] = {
 	"width",
 	"word-spacing",
 	"z-index",
+	"opacity",
 };
 
 static void dump_css_fixed(css_fixed f, char **ptr)
@@ -1664,6 +1665,17 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 					break;
 				case MAX_HEIGHT_NONE:
 					*ptr += sprintf(*ptr, "none");
+					break;
+				}
+				break;
+			case CSS_PROP_OPACITY:
+				switch (value) {
+				case OPACITY_SET:
+				{
+					css_fixed val = *((css_fixed *) bytecode);
+					ADVANCE(sizeof(val));
+					dump_number(val, ptr);
+				}
 					break;
 				}
 				break;

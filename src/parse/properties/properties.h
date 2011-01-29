@@ -229,6 +229,9 @@ css_error css__parse_min_height(css_language *c,
 css_error css__parse_min_width(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result);
+css_error css__parse_opacity(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		css_style *result);
 css_error css__parse_orphans(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result);

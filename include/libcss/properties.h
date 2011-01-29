@@ -113,8 +113,9 @@ enum css_properties_e {
 	CSS_PROP_WIDTH				= 0x060, 
 	CSS_PROP_WORD_SPACING			= 0x061, 
 	CSS_PROP_Z_INDEX			= 0x062,
+	CSS_PROP_OPACITY			= 0x063,
 
-	CSS_N_PROPERTIES			= CSS_PROP_Z_INDEX + 1
+	CSS_N_PROPERTIES
 };
 
 
@@ -439,6 +440,11 @@ enum css_min_height_e {
 enum css_min_width_e {
 	CSS_MIN_WIDTH_INHERIT			= 0x0,
 	CSS_MIN_WIDTH_SET			= 0x1
+};
+
+enum css_opacity_e {
+	CSS_OPACITY_INHERIT			= 0x0,
+	CSS_OPACITY_SET				= 0x1
 };
 
 enum css_outline_color_e {

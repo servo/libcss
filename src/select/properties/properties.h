@@ -77,6 +77,7 @@ PROPERTY_FUNCS(max_height);
 PROPERTY_FUNCS(max_width);
 PROPERTY_FUNCS(min_height);
 PROPERTY_FUNCS(min_width);
+PROPERTY_FUNCS(opacity);
 PROPERTY_FUNCS(orphans);
 PROPERTY_FUNCS(outline_color);
 PROPERTY_FUNCS(outline_style);

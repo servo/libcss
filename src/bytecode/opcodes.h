@@ -365,6 +365,10 @@ enum op_min_width {
 	MIN_WIDTH_SET			= 0x0080
 };
 
+enum op_opacity {
+	OPACITY_SET			= 0x0080
+};
+
 enum op_orphans {
 	ORPHANS_SET			= 0x0080
 };

@@ -181,7 +181,7 @@ struct css_computed_style {
  *				---
  *				 84 bits
  *
- * Colours are 32bits of RRGGBBAA
+ * Colours are 32bits of AARRGGBB
  * Dimensions are encoded as a fixed point value + 4 bits of unit data
  *
  * background_color		  2		  4
@@ -269,7 +269,7 @@ struct css_computed_style {
  * 21 mmmmmccc	min-width           | clear
  * 22 tttttooo	padding-top         | overflow
  * 23 rrrrrppp	padding-right       | position
- * 24 bbbbb...	padding-bottom      | <unused>
+ * 24 bbbbbo..	padding-bottom      | opacity               | <unused>
  * 25 lllllttt	padding-left        | text-transform
  * 26 tttttwww	text-indent         | white-space
  * 27 bbbbbbbb	background-position
@@ -314,6 +314,8 @@ struct css_computed_style {
 
 	css_fixed min_height;
 	css_fixed min_width;
+
+	css_fixed opacity;
 
 	css_fixed padding[4];
 
@@ -1770,6 +1772,28 @@ static inline uint8_t css_computed_position(
 #undef CSS_POSITION_MASK
 #undef CSS_POSITION_SHIFT
 #undef CSS_POSITION_INDEX
+
+#define CSS_OPACITY_INDEX 23
+#define CSS_OPACITY_SHIFT 2
+#define CSS_OPACITY_MASK  0x04
+static inline uint8_t css_computed_opacity(
+		const css_computed_style *style, 
+		css_fixed *opacity)
+{
+	uint8_t bits = style->bits[CSS_OPACITY_INDEX];
+	bits &= CSS_OPACITY_MASK;
+	bits >>= CSS_OPACITY_SHIFT;
+
+	/* 1bit: t : type */
+	if ((bits & 0x1) == CSS_OPACITY_SET) {
+		*opacity = style->opacity;
+	}
+
+	return (bits & 0x1);
+}
+#undef CSS_OPACITY_MASK
+#undef CSS_OPACITY_SHIFT
+#undef CSS_OPACITY_INDEX
 
 #define CSS_TEXT_TRANSFORM_INDEX 24
 #define CSS_TEXT_TRANSFORM_SHIFT 0

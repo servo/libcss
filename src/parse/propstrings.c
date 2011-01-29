@@ -111,6 +111,7 @@ const stringmap_entry stringmap[LAST_KNOWN] = {
 	{ "max-width", SLEN("max-width") },
 	{ "min-height", SLEN("min-height") },
 	{ "min-width", SLEN("min-width") },
+	{ "opacity", SLEN("opacity") },
 	{ "orphans", SLEN("orphans") },
 	{ "outline", SLEN("outline") },
 	{ "outline-color", SLEN("outline-color") },

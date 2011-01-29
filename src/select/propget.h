@@ -1310,6 +1310,28 @@ static inline uint8_t get_position(
 #undef POSITION_SHIFT
 #undef POSITION_INDEX
 
+#define OPACITY_INDEX 23
+#define OPACITY_SHIFT 2
+#define OPACITY_MASK  0x04
+static inline uint8_t get_opacity(
+		const css_computed_style *style, 
+		css_fixed *opacity)
+{
+	uint8_t bits = style->bits[OPACITY_INDEX];
+	bits &= OPACITY_MASK;
+	bits >>= OPACITY_SHIFT;
+
+	/* 1bit: t : type */
+	if ((bits & 0x1) == CSS_OPACITY_SET) {
+		*opacity = style->opacity;
+	}
+
+	return (bits & 0x1);
+}
+#undef OPACITY_MASK
+#undef OPACITY_SHIFT
+#undef OPACITY_INDEX
+
 #define TEXT_TRANSFORM_INDEX 24
 #define TEXT_TRANSFORM_SHIFT 0
 #define TEXT_TRANSFORM_MASK  0x7

@@ -38,6 +38,7 @@ typedef struct css_hint {
 		css_color color;
 		css_computed_content_item *content;
 		css_computed_counter *counter;
+		css_fixed fixed;
 		int32_t integer;
 		css_hint_length length;
 		struct {

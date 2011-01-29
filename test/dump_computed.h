@@ -1648,6 +1648,27 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	ptr += wrote;
 	*len -= wrote;
 
+	/* opacity */
+	val = css_computed_opacity(style, &len1);
+	switch (val) {
+	case CSS_OPACITY_SET:
+		wrote = snprintf(ptr, *len, "opacity: ");
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = dump_css_fixed(len1, ptr, *len);
+		ptr += wrote;
+		*len -= wrote;
+
+		wrote = snprintf(ptr, *len, "\n");
+		break;
+	default:
+		wrote = 0;
+		break;
+	}
+	ptr += wrote;
+	*len -= wrote;
+
 	/* outline-color */
 	val = css_computed_outline_color(style, &color);
 	switch (val) {

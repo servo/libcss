@@ -81,6 +81,7 @@ const css_prop_handler property_handlers[LAST_PROP + 1 - FIRST_PROP] =
 	css__parse_max_width,
 	css__parse_min_height,
 	css__parse_min_width,
+	css__parse_opacity,
 	css__parse_orphans,
 	css__parse_outline,
 	css__parse_outline_color,

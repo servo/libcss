@@ -56,6 +56,22 @@
 |   0x00040018
 #reset
 
+#data
+* { opacity: 0 }
+#errors
+#expected
+| 1 *
+|   0x02000063 0x00000000
+#reset
+
+#data
+* { opacity: 0.22 }
+#errors
+#expected
+| 1 *
+|   0x02000063 0x000000e1
+#reset
+
 ## Out-of-range rgb() parameters
 
 #data
@@ -128,5 +144,21 @@
 #expected
 | 1 *
 |   0x02000018 0x00000000
+#reset
+
+#data
+* { opacity: -0.22 }
+#errors
+#expected
+| 1 *
+|   0x02000063 0x00000000
+#reset
+
+#data
+* { opacity: 1.22 }
+#errors
+#expected
+| 1 *
+|   0x02000063 0x00000400
 #reset
 
