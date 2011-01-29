@@ -34,6 +34,7 @@ static css_error resolve_url(void *pw,
 
 int main(int argc, char **argv)
 {
+	css_stylesheet_params params;
 	css_stylesheet *sheet;
 	FILE *fp;
 	size_t len, origlen;
@@ -47,11 +48,22 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	params.level = CSS_LEVEL_21;
+	params.charset = "UTF-8";
+	params.url = argv[1];
+	params.title = NULL;
+	params.allow_quirks = false;
+	params.inline_style = false;
+	params.resolve = resolve_url;
+	params.resolve_pw = NULL;
+	params.import = NULL;
+	params.import_pw = NULL;
+	params.color = NULL;
+	params.color_pw = NULL;
+
 	for (count = 0; count < ITERATIONS; count++) {
 
-		assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", argv[1], 
-				NULL, false, false, myrealloc, NULL, 
-				resolve_url, NULL, NULL, NULL, 
+		assert(css_stylesheet_create(&params, myrealloc, NULL, 
 				&sheet) == CSS_OK);
 
 		fp = fopen(argv[1], "rb");
@@ -106,10 +118,10 @@ int main(int argc, char **argv)
 						lwc_string_length(url));
 				buf[lwc_string_length(url)] = '\0';
 
-				assert(css_stylesheet_create(CSS_LEVEL_21,
-					"UTF-8", buf, NULL, false, false, 
-					myrealloc, NULL, resolve_url, NULL,
-					NULL, NULL, &import) == CSS_OK);
+				params.url = buf;
+
+				assert(css_stylesheet_create(&params,
+					myrealloc, NULL, &import) == CSS_OK);
 
 				assert(css_stylesheet_data_done(import) == 
 					CSS_OK);

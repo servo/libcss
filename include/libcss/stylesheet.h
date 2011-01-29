@@ -47,12 +47,55 @@ typedef css_error (*css_url_resolution_fn)(void *pw,
 typedef css_error (*css_import_notification_fn)(void *pw,
 		css_stylesheet *parent, lwc_string *url, uint64_t media);
 
-css_error css_stylesheet_create(css_language_level level,
-		const char *charset, const char *url, const char *title,
-		bool allow_quirks, bool inline_style,
+/**
+ * Callback use to resolve system colour names to RGB values
+ *
+ * \param pw     Client data
+ * \param name   System colour name
+ * \param color  Pointer to location to receive color value
+ * \return CSS_OK       on success,
+ *         CSS_INVALID  if the name is unknown.
+ */
+typedef css_error (*css_color_resolution_fn)(void *pw,
+		lwc_string *name, css_color *color);
+
+/**
+ * Parameter block for css_stylesheet_create()
+ */
+typedef struct css_stylesheet_params {
+	/** The language level of the stylesheet */
+	css_language_level level;
+
+	/** The charset of the stylesheet data, or NULL to detect */
+	const char *charset;
+	/** URL of stylesheet */
+	const char *url;
+	/** Title of stylesheet */
+	const char *title;
+
+	/** Permit quirky parsing of stylesheet */
+	bool allow_quirks;
+	/** This stylesheet is an inline style */
+	bool inline_style;
+
+	/** URL resolution function */
+	css_url_resolution_fn resolve;
+	/** Client private data for resolve */
+	void *resolve_pw;
+
+	/** Import notification function */
+	css_import_notification_fn import;
+	/** Client private data for import */
+	void *import_pw;
+
+	/** Colour resolution function */
+	css_color_resolution_fn color;
+	/** Client private data for color */
+	void *color_pw;
+} css_stylesheet_params;
+
+css_error css_stylesheet_create(css_stylesheet_params *params,
 		css_allocator_fn alloc, void *alloc_pw,
-		css_url_resolution_fn resolve, void *resolve_pw,
-		css_import_notification_fn, void *import_pw,
 		css_stylesheet **stylesheet);
 css_error css_stylesheet_destroy(css_stylesheet *sheet);
 

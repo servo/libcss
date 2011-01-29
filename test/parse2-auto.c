@@ -183,6 +183,7 @@ void css__parse_expected(line_ctx *ctx, const char *data, size_t len)
 
 void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 {
+	css_stylesheet_params params;
 	css_stylesheet *sheet;
 	css_error error;
 	char *buf;
@@ -195,9 +196,21 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 	}
 	buflen = 2 * explen;
 	
-	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", NULL,
-			false, false, myrealloc, NULL, resolve_url, NULL, 
-			NULL, NULL, &sheet) == CSS_OK);
+	params.level = CSS_LEVEL_21;
+	params.charset = "UTF-8";
+	params.url = "foo";
+	params.title = NULL;
+	params.allow_quirks = false;
+	params.inline_style = false;
+	params.resolve = resolve_url;
+	params.resolve_pw = NULL;
+	params.import = NULL;
+	params.import_pw = NULL;
+	params.color = NULL;
+	params.color_pw = NULL;
+
+	assert(css_stylesheet_create(&params, myrealloc, NULL, 
+			&sheet) == CSS_OK);
 
 	error = css_stylesheet_append_data(sheet, data, len);
 	if (error != CSS_OK && error != CSS_NEEDDATA) {

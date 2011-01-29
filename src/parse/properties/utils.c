@@ -628,7 +628,6 @@ css_error css__parse_colour_specifier(css_language *c,
 				goto invalid;
 
 			/* have a valid HSV entry, convert to RGB */
-
 			HSL_to_RGB(hue, sat, lit, &r, &g, &b);
 
 			/* apply alpha */
@@ -821,17 +820,23 @@ css_error css__parse_named_colour(css_language *c, lwc_string *data,
 	bool match;
 
 	for (i = FIRST_COLOUR; i <= LAST_COLOUR; i++) {
-          if (lwc_string_caseless_isequal(data, c->strings[i],
-                                          &match) == lwc_error_ok &&
-				match)
+		if (lwc_string_caseless_isequal(data, c->strings[i],
+				&match) == lwc_error_ok && match)
 			break;
 	}
-	if (i == LAST_COLOUR + 1)
-		return CSS_INVALID;
 
-	*result = colourmap[i - FIRST_COLOUR];
+	if (i <= LAST_COLOUR) {
+		/* Known named colour */
+		*result = colourmap[i - FIRST_COLOUR];
+		return CSS_OK;
+	}
 
-	return CSS_OK;
+	/* We don't know this colour name; ask the client */
+	if (c->sheet->color != NULL)
+		return c->sheet->color(c->sheet->color_pw, data, result);
+
+	/* Invalid colour name */
+	return CSS_INVALID;
 }
 
 /**

@@ -457,6 +457,7 @@ void css__parse_tree_data(line_ctx *ctx, const char *data, size_t len)
 
 void css__parse_sheet(line_ctx *ctx, const char *data, size_t len)
 {
+	css_stylesheet_params params;
 	const char *p;
 	const char *end = data + len;
 	css_origin origin = CSS_ORIGIN_AUTHOR;
@@ -491,10 +492,22 @@ void css__parse_sheet(line_ctx *ctx, const char *data, size_t len)
 		css__parse_media_list(&p, &ignored, &media);
 	}
 
+	params.level = CSS_LEVEL_21;
+	params.charset = "UTF-8";
+	params.url = "foo";
+	params.title = "foo";
+	params.allow_quirks = false;
+	params.inline_style = false;
+	params.resolve = resolve_url;
+	params.resolve_pw = NULL;
+	params.import = NULL;
+	params.import_pw = NULL;
+	params.color = NULL;
+	params.color_pw = NULL;
+
 	/** \todo How are we going to handle @import? */
-	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", "foo", 
-			false, false, myrealloc, NULL, 
-			resolve_url, NULL, NULL, NULL, &sheet) == CSS_OK);
+	assert(css_stylesheet_create(&params, myrealloc, NULL, 
+			&sheet) == CSS_OK);
 
 	/* Extend array of sheets and append new sheet to it */
 	temp = realloc(ctx->sheets, 

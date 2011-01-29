@@ -112,38 +112,25 @@ css_error css__stylesheet_string_get(css_stylesheet *sheet, uint32_t string_numb
 /**
  * Create a stylesheet
  *
- * \param level		   The language level of the stylesheet
- * \param charset	   The charset of the stylesheet data, or NULL to detect
- * \param url		   URL of stylesheet
- * \param title		   Title of stylesheet
- * \param allow_quirks	   Permit quirky parsing of stylesheets
- * \param inline_style	   This stylesheet is an inline style
- * \param alloc		   Memory (de)allocation function
- * \param alloc_pw	   Client private data for alloc
- * \param resolve	   URL resolution function
- * \param resolve_pw	   Client private data for resolve
- * \param import           Import notification function
- * \param import_pw        Client private data for import
- * \param stylesheet	   Pointer to location to receive stylesheet
+ * \param params      Stylesheet parameters
+ * \param alloc	      Memory (de)allocation function
+ * \param alloc_pw    Client private data for alloc
+ * \param stylesheet  Pointer to location to receive stylesheet
  * \return CSS_OK on success,
  *	   CSS_BADPARM on bad parameters,
  *	   CSS_NOMEM on memory exhaustion
  */
-css_error css_stylesheet_create(css_language_level level,
-		const char *charset, const char *url, const char *title,
-		bool allow_quirks, bool inline_style,
+css_error css_stylesheet_create(css_stylesheet_params *params,
 		css_allocator_fn alloc, void *alloc_pw, 
-		css_url_resolution_fn resolve, void *resolve_pw,
-		css_import_notification_fn import, void *import_pw,
 		css_stylesheet **stylesheet)
 {
-	css_parser_optparams params;
+	css_parser_optparams optparams;
 	css_error error;
 	css_stylesheet *sheet;
 	size_t len;
 
-	if (url == NULL || alloc == NULL || 
-			resolve == NULL || stylesheet == NULL)
+	if (params == NULL || params->url == NULL || alloc == NULL || 
+			params->resolve == NULL || stylesheet == NULL)
 		return CSS_BADPARM;
 
 	sheet = alloc(NULL, sizeof(css_stylesheet), alloc_pw);
@@ -152,15 +139,17 @@ css_error css_stylesheet_create(css_language_level level,
 
 	memset(sheet, 0, sizeof(css_stylesheet));
 	
-	sheet->inline_style = inline_style;
+	sheet->inline_style = params->inline_style;
 
-	if (inline_style) {
-		error = css__parser_create_for_inline_style(charset, 
-			charset ? CSS_CHARSET_DICTATED : CSS_CHARSET_DEFAULT,
+	if (params->inline_style) {
+		error = css__parser_create_for_inline_style(params->charset, 
+			params->charset != NULL 
+				? CSS_CHARSET_DICTATED : CSS_CHARSET_DEFAULT,
 			alloc, alloc_pw, &sheet->parser);
 	} else {
-		error = css__parser_create(charset,
-			charset ? CSS_CHARSET_DICTATED : CSS_CHARSET_DEFAULT,
+		error = css__parser_create(params->charset,
+			params->charset != NULL
+				? CSS_CHARSET_DICTATED : CSS_CHARSET_DEFAULT,
 			alloc, alloc_pw, &sheet->parser);
 	}
 
@@ -169,12 +158,13 @@ css_error css_stylesheet_create(css_language_level level,
 		return error;
 	}
 
-	sheet->quirks_allowed = allow_quirks;
-	if (allow_quirks) {
-		params.quirks = true;
+	sheet->quirks_allowed = params->allow_quirks;
+
+	if (params->allow_quirks) {
+		optparams.quirks = true;
 
 		error = css__parser_setopt(sheet->parser, CSS_PARSER_QUIRKS,
-				&params);
+				&optparams);
 		if (error != CSS_OK) {
 			css__parser_destroy(sheet->parser);
 			alloc(sheet, 0, alloc_pw);
@@ -182,7 +172,7 @@ css_error css_stylesheet_create(css_language_level level,
 		}
 	}
 
-	sheet->level = level;
+	sheet->level = params->level;
 	error = css__language_create(sheet, sheet->parser, alloc, alloc_pw,
 			&sheet->parser_frontend);
 	if (error != CSS_OK) {
@@ -200,7 +190,7 @@ css_error css_stylesheet_create(css_language_level level,
 		return error;
 	}
 
-	len = strlen(url) + 1;
+	len = strlen(params->url) + 1;
 	sheet->url = alloc(NULL, len, alloc_pw);
 	if (sheet->url == NULL) {
 		css__selector_hash_destroy(sheet->selectors);
@@ -209,10 +199,10 @@ css_error css_stylesheet_create(css_language_level level,
 		alloc(sheet, 0, alloc_pw);
 		return CSS_NOMEM;
 	}
-	memcpy(sheet->url, url, len);
+	memcpy(sheet->url, params->url, len);
 
-	if (title != NULL) {
-		len = strlen(title) + 1;
+	if (params->title != NULL) {
+		len = strlen(params->title) + 1;
 		sheet->title = alloc(NULL, len, alloc_pw);
 		if (sheet->title == NULL) {
 			alloc(sheet->url, 0, alloc_pw);
@@ -222,14 +212,17 @@ css_error css_stylesheet_create(css_language_level level,
 			alloc(sheet, 0, alloc_pw);
 			return CSS_NOMEM;
 		}
-		memcpy(sheet->title, title, len);
+		memcpy(sheet->title, params->title, len);
 	}
 
-	sheet->resolve = resolve;
-	sheet->resolve_pw = resolve_pw;
+	sheet->resolve = params->resolve;
+	sheet->resolve_pw = params->resolve_pw;
 
-	sheet->import = import;
-	sheet->import_pw = import_pw;
+	sheet->import = params->import;
+	sheet->import_pw = params->import_pw;
+
+	sheet->color = params->color;
+	sheet->color_pw = params->color_pw;
 
 	sheet->alloc = alloc;
 	sheet->pw = alloc_pw;

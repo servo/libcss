@@ -363,16 +363,29 @@ static void report_fail(const uint8_t *data, size_t datalen, exp_entry *e)
 
 void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 {
+	css_stylesheet_params params;
 	css_stylesheet *sheet;
 	css_rule *rule;
 	css_error error;
 	size_t e;
 	static int testnum;
 	bool failed;
-	
-	assert(css_stylesheet_create(CSS_LEVEL_21, "UTF-8", "foo", NULL,
-			false, false, myrealloc, NULL, resolve_url, NULL, 
-			NULL, NULL, &sheet) == CSS_OK);
+
+	params.level = CSS_LEVEL_21;
+	params.charset = "UTF-8";
+	params.url = "foo";
+	params.title = NULL;
+	params.allow_quirks = false;
+	params.inline_style = false;
+	params.resolve = resolve_url;
+	params.resolve_pw = NULL;
+	params.import = NULL;
+	params.import_pw = NULL;
+	params.color = NULL;
+	params.color_pw = NULL;
+
+	assert(css_stylesheet_create(&params, myrealloc, NULL, 
+			&sheet) == CSS_OK);
 
 	error = css_stylesheet_append_data(sheet, data, len);
 	if (error != CSS_OK && error != CSS_NEEDDATA) {
@@ -399,10 +412,10 @@ void run_test(const uint8_t *data, size_t len, exp_entry *exp, size_t explen)
 					lwc_string_length(url));
 			buf[lwc_string_length(url)] = '\0';
 
-			assert(css_stylesheet_create(CSS_LEVEL_21,
-				"UTF-8", buf, NULL, false, false,
-				myrealloc, NULL, resolve_url, NULL, 
-				NULL, NULL, &import) == CSS_OK);
+			params.url = buf;
+
+			assert(css_stylesheet_create(&params,
+				myrealloc, NULL, &import) == CSS_OK);
 
 			assert(css_stylesheet_register_import(sheet,
 				import) == CSS_OK);
