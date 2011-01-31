@@ -1351,6 +1351,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 		const css_selector_detail *detail, css_select_state *state, 
 		bool *match, css_pseudo_element *pseudo_element)
 {
+	bool is_root = false;
 	css_error error = CSS_OK;
 
 	UNUSED(ctx);
@@ -1374,14 +1375,19 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 				detail->name, match);
 		break;
 	case CSS_SELECTOR_PSEUDO_CLASS:
-		if (detail->name == state->first_child) {
+		error = state->handler->node_is_root(state->pw, node, &is_root);
+		if (error != CSS_OK)
+			return error;
+
+		if (is_root == false && detail->name == state->first_child) {
 			int32_t num_before = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
 					node, false, false, &num_before);
 			if (error == CSS_OK)
 				*match = (num_before == 0);
-		} else if (detail->name == state->nth_child) {
+		} else if (is_root == false && 
+				detail->name == state->nth_child) {
 			int32_t num_before = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1392,7 +1398,8 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 
 				*match = match_nth(a, b, num_before + 1);
 			}
-		} else if (detail->name == state->nth_last_child) {
+		} else if (is_root == false && 
+				detail->name == state->nth_last_child) {
 			int32_t num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1403,7 +1410,8 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 
 				*match = match_nth(a, b, num_after + 1);
 			}
-		} else if (detail->name == state->nth_of_type) {
+		} else if (is_root == false && 
+				detail->name == state->nth_of_type) {
 			int32_t num_before = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1414,7 +1422,8 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 
 				*match = match_nth(a, b, num_before + 1);
 			}
-		} else if (detail->name == state->nth_last_of_type) {
+		} else if (is_root == false && 
+				detail->name == state->nth_last_of_type) {
 			int32_t num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1425,28 +1434,32 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 
 				*match = match_nth(a, b, num_after + 1);
 			}
-		} else if (detail->name == state->last_child) {
+		} else if (is_root == false &&
+				detail->name == state->last_child) {
 			int32_t num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw,
 					node, false, true, &num_after);
 			if (error == CSS_OK)
 				*match = (num_after == 0);
-		} else if (detail->name == state->first_of_type) {
+		} else if (is_root == false &&
+				detail->name == state->first_of_type) {
 			int32_t num_before = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
 					node, true, false, &num_before);
 			if (error == CSS_OK)
 				*match = (num_before == 0);
-		} else if (detail->name == state->last_of_type) {
+		} else if (is_root == false &&
+				detail->name == state->last_of_type) {
 			int32_t num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
 					node, true, true, &num_after);
 			if (error == CSS_OK)
 				*match = (num_after == 0);
-		} else if (detail->name == state->only_child) {
+		} else if (is_root == false && 
+				detail->name == state->only_child) {
 			int32_t num_before = 0, num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1459,7 +1472,8 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 					*match = (num_before == 0) && 
 							(num_after == 0);
 			}
-		} else if (detail->name == state->only_of_type) {
+		} else if (is_root == false && 
+				detail->name == state->only_of_type) {
 			int32_t num_before = 0, num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1473,8 +1487,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 							(num_after == 0);
 			}
 		} else if (detail->name == state->root) {
-			error = state->handler->node_is_root(state->pw,
-					node, match);
+			*match = is_root;
 		} else if (detail->name == state->empty) {
 			error = state->handler->node_is_empty(state->pw,
 					node, match);
