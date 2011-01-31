@@ -536,7 +536,8 @@ lwc_string *_class_name(const css_selector *selector)
 	lwc_string *name = NULL;
 
 	do {
-		if (detail->type == CSS_SELECTOR_CLASS) {
+		/* Ignore :not(.class) */
+		if (detail->type == CSS_SELECTOR_CLASS && detail->negate == 0) {
 			name = detail->name;
 			break;
 		}
@@ -562,7 +563,8 @@ lwc_string *_id_name(const css_selector *selector)
 	lwc_string *name = NULL;
 
 	do {
-		if (detail->type == CSS_SELECTOR_ID) {
+		/* Ignore :not(#id) */
+		if (detail->type == CSS_SELECTOR_ID && detail->negate == 0) {
 			name = detail->name;
 			break;
 		}
