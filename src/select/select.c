@@ -1769,6 +1769,27 @@ void dump_chain(const css_selector *selector)
 					(int) lwc_string_length(detail->value),
 					lwc_string_data(detail->value));
 			break;
+		case CSS_SELECTOR_ATTRIBUTE_PREFIX:
+			fprintf(stderr, "[%.*s^=\"%.*s\"]",
+					(int) lwc_string_length(detail->name),
+					lwc_string_data(detail->name),
+					(int) lwc_string_length(detail->value),
+					lwc_string_data(detail->value));
+			break;
+		case CSS_SELECTOR_ATTRIBUTE_SUFFIX:
+			fprintf(stderr, "[%.*s$=\"%.*s\"]",
+					(int) lwc_string_length(detail->name),
+					lwc_string_data(detail->name),
+					(int) lwc_string_length(detail->value),
+					lwc_string_data(detail->value));
+			break;
+		case CSS_SELECTOR_ATTRIBUTE_SUBSTRING:
+			fprintf(stderr, "[%.*s*=\"%.*s\"]",
+					(int) lwc_string_length(detail->name),
+					lwc_string_data(detail->name),
+					(int) lwc_string_length(detail->value),
+					lwc_string_data(detail->value));
+			break;
 		}
 
 		if (detail->next)

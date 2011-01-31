@@ -971,6 +971,9 @@ css_error css__stylesheet_selector_append_specific(css_stylesheet *sheet,
 	case CSS_SELECTOR_ATTRIBUTE_EQUAL:
 	case CSS_SELECTOR_ATTRIBUTE_DASHMATCH:
 	case CSS_SELECTOR_ATTRIBUTE_INCLUDES:
+	case CSS_SELECTOR_ATTRIBUTE_PREFIX:
+	case CSS_SELECTOR_ATTRIBUTE_SUFFIX:
+	case CSS_SELECTOR_ATTRIBUTE_SUBSTRING:
 		(*parent)->specificity += CSS_SPECIFICITY_C;
 		break;
 	case CSS_SELECTOR_ID:
