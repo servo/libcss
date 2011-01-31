@@ -1034,6 +1034,7 @@ css_error parseNth(css_language *c,
 
 				if (len - (++consumed) > 0) {
 					size_t bstart;
+
 					/* Reject additional sign */
 					if (data[consumed] == '-' ||
 							data[consumed] == '+')
