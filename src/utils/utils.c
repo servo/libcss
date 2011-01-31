@@ -10,19 +10,28 @@
 css_fixed css__number_from_lwc_string(lwc_string *string,
 		bool int_only, size_t *consumed)
 {
-	size_t len;
-	const uint8_t *ptr;
+	if (string == NULL || lwc_string_length(string) == 0 || 
+			consumed == NULL)
+		return 0;
+
+	return css__number_from_string(
+			(uint8_t *)lwc_string_data(string),
+			lwc_string_length(string),
+			int_only,
+			consumed);
+}
+
+css_fixed css__number_from_string(const uint8_t *data, size_t len,
+		bool int_only, size_t *consumed)
+{
+	const uint8_t *ptr = data;
 	int sign = 1;
 	int32_t intpart = 0;
 	int32_t fracpart = 0;
 	int32_t pwr = 1;
 
-	if (string == NULL || lwc_string_length(string) == 0 || 
-			consumed == NULL)
+	if (data == NULL || len == 0 || consumed == NULL)
 		return 0;
-
-	len = lwc_string_length(string);
-	ptr = (uint8_t *)lwc_string_data(string);
 
 	/* number = [+-]? ([0-9]+ | [0-9]* '.' [0-9]+) */
 
@@ -92,7 +101,7 @@ css_fixed css__number_from_lwc_string(lwc_string *string,
 		}
 	}
 
-	*consumed = (char *)ptr - lwc_string_data(string);
+	*consumed = ptr - data;
 
 	if (sign > 0) {
 		/* If the result is larger than we can represent,

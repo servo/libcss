@@ -41,24 +41,43 @@ typedef enum css_selector_type {
 	CSS_SELECTOR_ATTRIBUTE,
 	CSS_SELECTOR_ATTRIBUTE_EQUAL,
 	CSS_SELECTOR_ATTRIBUTE_DASHMATCH,
-	CSS_SELECTOR_ATTRIBUTE_INCLUDES
+	CSS_SELECTOR_ATTRIBUTE_INCLUDES,
+	CSS_SELECTOR_ATTRIBUTE_PREFIX,
+	CSS_SELECTOR_ATTRIBUTE_SUFFIX,
+	CSS_SELECTOR_ATTRIBUTE_SUBSTRING
 } css_selector_type;
 
 typedef enum css_combinator {
 	CSS_COMBINATOR_NONE,
 	CSS_COMBINATOR_ANCESTOR,
 	CSS_COMBINATOR_PARENT,
-	CSS_COMBINATOR_SIBLING
+	CSS_COMBINATOR_SIBLING,
+	CSS_COMBINATOR_GENERIC_SIBLING
 } css_combinator;
 
-typedef struct css_selector_detail {
-	lwc_string *name;	/**< Interned name */
-	lwc_string *value;	/**< Interned value, or NULL */
+typedef enum css_selector_detail_value_type {
+	CSS_SELECTOR_DETAIL_VALUE_STRING,
+	CSS_SELECTOR_DETAIL_VALUE_NTH
+} css_selector_detail_value_type;
 
-	unsigned int type : 4,			/**< Type of selector */
-		     comb : 2,			/**< Type of combinator */
-		     next : 1;			/**< Another selector detail 
+typedef union css_selector_detail_value {
+	lwc_string *string;		/**< Interned string, or NULL */
+	struct {
+		int32_t a;
+		int32_t b;
+	} nth;				/**< Data for x = an + b */
+} css_selector_detail_value;
+
+typedef struct css_selector_detail {
+	lwc_string *name;			/**< Interned name */
+	css_selector_detail_value value;	/**< Detail value */
+
+	unsigned int type       : 4,		/**< Type of selector */
+		     comb       : 3,		/**< Type of combinator */
+		     next       : 1,		/**< Another selector detail 
 						 * follows */
+		     value_type : 1,		/**< Type of value field */
+		     negate     : 1;		/**< Detail match is inverted */
 } css_selector_detail;
 
 struct css_selector {
@@ -186,30 +205,35 @@ struct css_stylesheet {
 	css_style *cached_style;		/**< Cache for style parsing */
   
 	lwc_string **string_vector;             /**< Bytecode string vector */
-	uint32_t string_vector_l;               /**< The string vector allocated length in entries */
-	uint32_t string_vector_c;               /**< The number of string vector entries used */ 
+	uint32_t string_vector_l;               /**< The string vector allocated
+						 * length in entries */
+	uint32_t string_vector_c;               /**< The number of string 
+						 * vector entries used */ 
 };
 
-css_error css__stylesheet_style_create(css_stylesheet *sheet, css_style **style);
+css_error css__stylesheet_style_create(css_stylesheet *sheet, 
+		css_style **style);
 css_error css__stylesheet_style_append(css_style *style, css_code_t code);
-css_error css__stylesheet_style_vappend(css_style *style, uint32_t style_count, ...);
+css_error css__stylesheet_style_vappend(css_style *style, uint32_t style_count,
+		...);
 css_error css__stylesheet_style_destroy(css_style *style);
 css_error css__stylesheet_merge_style(css_style *target, css_style *style);
 
 /** Helper function to avoid distinct buildOPV call */ 
-static inline css_error css__stylesheet_style_appendOPV(css_style *style, opcode_t opcode, uint8_t flags, uint16_t value)
+static inline css_error css__stylesheet_style_appendOPV(css_style *style, 
+		opcode_t opcode, uint8_t flags, uint16_t value)
 {
-	return css__stylesheet_style_append(style, buildOPV(opcode, flags, value));
+	return css__stylesheet_style_append(style, 
+			buildOPV(opcode, flags, value));
 }
 
 /** Helper function to set inherit flag */ 
-static inline css_error css_stylesheet_style_inherit(css_style *style, opcode_t opcode)
+static inline css_error css_stylesheet_style_inherit(css_style *style, 
+		opcode_t opcode)
 {
-	return css__stylesheet_style_append(style, buildOPV(opcode, FLAG_INHERIT, 0));
+	return css__stylesheet_style_append(style, 
+			buildOPV(opcode, FLAG_INHERIT, 0));
 }
-
-
-
 
 css_error css__stylesheet_selector_create(css_stylesheet *sheet,
 		lwc_string *name, css_selector **selector);
@@ -218,8 +242,9 @@ css_error css__stylesheet_selector_destroy(css_stylesheet *sheet,
 
 css_error css__stylesheet_selector_detail_init(css_stylesheet *sheet,
 		css_selector_type type, lwc_string *name,
-		lwc_string *value, 
-		css_selector_detail *detail);
+		css_selector_detail_value value, 
+		css_selector_detail_value_type value_type,
+		bool negate, css_selector_detail *detail);
 
 css_error css__stylesheet_selector_append_specific(css_stylesheet *sheet,
 		css_selector **parent, const css_selector_detail *specific);
@@ -253,9 +278,11 @@ css_error css__stylesheet_add_rule(css_stylesheet *sheet, css_rule *rule,
 		css_rule *parent);
 css_error css__stylesheet_remove_rule(css_stylesheet *sheet, css_rule *rule);
 
-css_error css__stylesheet_string_get(css_stylesheet *sheet, uint32_t string_number, lwc_string **string);
+css_error css__stylesheet_string_get(css_stylesheet *sheet, 
+		uint32_t string_number, lwc_string **string);
 
-css_error css__stylesheet_string_add(css_stylesheet *sheet, lwc_string *string, uint32_t *string_number);
+css_error css__stylesheet_string_add(css_stylesheet *sheet, 
+		lwc_string *string, uint32_t *string_number);
 
 #endif
 

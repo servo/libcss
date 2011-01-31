@@ -63,6 +63,8 @@ typedef struct css_select_handler {
 			lwc_string *name, void **parent);
 	css_error (*named_sibling_node)(void *pw, void *node,
 			lwc_string *name, void **sibling);
+	css_error (*named_generic_sibling_node)(void *pw, void *node,
+			lwc_string *name, void **sibling);
 
 	css_error (*parent_node)(void *pw, void *node, void **parent);
 	css_error (*sibling_node)(void *pw, void *node, void **sibling);
@@ -84,13 +86,32 @@ typedef struct css_select_handler {
 	css_error (*node_has_attribute_includes)(void *pw, void *node,
 			lwc_string *name, lwc_string *value,
 			bool *match);
+	css_error (*node_has_attribute_prefix)(void *pw, void *node,
+			lwc_string *name, lwc_string *value,
+			bool *match);
+	css_error (*node_has_attribute_suffix)(void *pw, void *node,
+			lwc_string *name, lwc_string *value,
+			bool *match);
+	css_error (*node_has_attribute_substring)(void *pw, void *node,
+			lwc_string *name, lwc_string *value,
+			bool *match);
 
-	css_error (*node_is_first_child)(void *pw, void *node, bool *match);
+	css_error (*node_is_root)(void *pw, void *node, bool *match);
+	css_error (*node_count_siblings)(void *pw, void *node,
+			bool same_name, bool after, int32_t *count);
+	css_error (*node_is_empty)(void *pw, void *node, bool *match);
+
 	css_error (*node_is_link)(void *pw, void *node, bool *match);
 	css_error (*node_is_visited)(void *pw, void *node, bool *match);
 	css_error (*node_is_hover)(void *pw, void *node, bool *match);
 	css_error (*node_is_active)(void *pw, void *node, bool *match);
 	css_error (*node_is_focus)(void *pw, void *node, bool *match);
+
+	css_error (*node_is_enabled)(void *pw, void *node, bool *match);
+	css_error (*node_is_disabled)(void *pw, void *node, bool *match);
+	css_error (*node_is_checked)(void *pw, void *node, bool *match);
+
+	css_error (*node_is_target)(void *pw, void *node, bool *match);
 	css_error (*node_is_lang)(void *pw, void *node,
 			lwc_string *lang, bool *match);
 

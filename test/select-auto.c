@@ -90,6 +90,9 @@ static css_error named_parent_node(void *pw, void *node,
 static css_error named_sibling_node(void *pw, void *node,
 		lwc_string *name,
 		void **sibling);
+static css_error named_generic_sibling_node(void *pw, void *node,
+		lwc_string *name,
+		void **sibling);
 static css_error parent_node(void *pw, void *node, void **parent);
 static css_error sibling_node(void *pw, void *node, void **sibling);
 static css_error node_has_name(void *pw, void *node, 
@@ -116,12 +119,31 @@ static css_error node_has_attribute_includes(void *pw, void *node,
 		lwc_string *name,
 		lwc_string *value,
 		bool *match);
-static css_error node_is_first_child(void *pw, void *node, bool *match);
+static css_error node_has_attribute_prefix(void *pw, void *node,
+		lwc_string *name,
+		lwc_string *value,
+		bool *match);
+static css_error node_has_attribute_suffix(void *pw, void *node,
+		lwc_string *name,
+		lwc_string *value,
+		bool *match);
+static css_error node_has_attribute_substring(void *pw, void *node,
+		lwc_string *name,
+		lwc_string *value,
+		bool *match);
+static css_error node_is_root(void *pw, void *node, bool *match);
+static css_error node_count_siblings(void *pw, void *node,
+		bool same_name, bool after, int32_t *count);
+static css_error node_is_empty(void *pw, void *node, bool *match);
 static css_error node_is_link(void *pw, void *node, bool *match);
 static css_error node_is_visited(void *pw, void *node, bool *match);
 static css_error node_is_hover(void *pw, void *node, bool *match);
 static css_error node_is_active(void *pw, void *node, bool *match);
 static css_error node_is_focus(void *pw, void *node, bool *match);
+static css_error node_is_enabled(void *pw, void *node, bool *match);
+static css_error node_is_disabled(void *pw, void *node, bool *match);
+static css_error node_is_checked(void *pw, void *node, bool *match);
+static css_error node_is_target(void *pw, void *node, bool *match);
 static css_error node_is_lang(void *pw, void *node,
 		lwc_string *lang, bool *match);
 static css_error node_presentational_hint(void *pw, void *node,
@@ -138,6 +160,7 @@ static css_select_handler select_handler = {
 	named_ancestor_node,
 	named_parent_node,
 	named_sibling_node,
+	named_generic_sibling_node,
 	parent_node,
 	sibling_node,
 	node_has_name,
@@ -147,12 +170,21 @@ static css_select_handler select_handler = {
 	node_has_attribute_equal,
 	node_has_attribute_dashmatch,
 	node_has_attribute_includes,
-	node_is_first_child,
+	node_has_attribute_prefix,
+	node_has_attribute_suffix,
+	node_has_attribute_substring,
+	node_is_root,
+	node_count_siblings,
+	node_is_empty,
 	node_is_link,
 	node_is_visited,
 	node_is_hover,
 	node_is_active,
 	node_is_focus,
+	node_is_enabled,
+	node_is_disabled,
+	node_is_checked,
+	node_is_target,
 	node_is_lang,
 	node_presentational_hint,
 	ua_default_for_property,
@@ -882,6 +914,26 @@ css_error named_sibling_node(void *pw, void *n,
 	return CSS_OK;
 }
 
+css_error named_generic_sibling_node(void *pw, void *n,
+		lwc_string *name,
+		void **sibling)
+{
+	node *node = n;
+	UNUSED(pw);
+
+	for (node = node->prev; node != NULL; node = node->prev) {
+		bool match;
+		assert(lwc_string_caseless_isequal(
+				name, node->name, &match) == lwc_error_ok);
+		if (match == true)
+			break;
+	}
+
+	*sibling = (void *) node;
+
+	return CSS_OK;
+}
+
 css_error parent_node(void *pw, void *n, void **parent)
 {
 	node *node = n;
@@ -1109,13 +1161,189 @@ css_error node_has_attribute_dashmatch(void *pw, void *n,
 	return CSS_OK;
 }
 
-css_error node_is_first_child(void *pw, void *n, bool *match)
+css_error node_has_attribute_prefix(void *pw, void *n,
+		lwc_string *name,
+		lwc_string *value,
+		bool *match)
 {
 	node *node = n;
-
+	uint32_t i;
 	UNUSED(pw);
 
-	*match = (node->parent != NULL && node->parent->children == node);
+	*match = false;
+	
+	for (i = 0; i < node->n_attrs; i++) {
+		assert(lwc_string_caseless_isequal(
+				node->attrs[i].name, name, match) == 
+				lwc_error_ok);
+		if (*match == true)
+			break;
+	}
+	
+	if (*match == true) {
+		size_t len = lwc_string_length(node->attrs[i].value);
+		const char *data = lwc_string_data(node->attrs[i].value);
+
+		size_t vlen = lwc_string_length(value);
+		const char *vdata = lwc_string_data(value);
+
+		if (len < vlen)
+			*match = false;
+		else
+			*match = (strncasecmp(data, vdata, vlen) == 0);
+	}
+	
+	return CSS_OK;
+}
+
+css_error node_has_attribute_suffix(void *pw, void *n,
+		lwc_string *name,
+		lwc_string *value,
+		bool *match)
+{
+	node *node = n;
+	uint32_t i;
+	UNUSED(pw);
+
+	*match = false;
+	
+	for (i = 0; i < node->n_attrs; i++) {
+		assert(lwc_string_caseless_isequal(
+				node->attrs[i].name, name, match) == 
+				lwc_error_ok);
+		if (*match == true)
+			break;
+	}
+	
+	if (*match == true) {
+		size_t len = lwc_string_length(node->attrs[i].value);
+		const char *data = lwc_string_data(node->attrs[i].value);
+
+		size_t vlen = lwc_string_length(value);
+		const char *vdata = lwc_string_data(value);
+
+		size_t suffix_start = len - vlen;
+
+		if (len < vlen)
+			*match = false;
+		else {
+			*match = (strncasecmp(data + suffix_start, 
+					vdata, vlen) == 0);
+		}
+	}
+
+	return CSS_OK;
+}
+
+css_error node_has_attribute_substring(void *pw, void *n,
+		lwc_string *name,
+		lwc_string *value,
+		bool *match)
+{
+	node *node = n;
+	uint32_t i;
+	UNUSED(pw);
+
+	*match = false;
+	
+	for (i = 0; i < node->n_attrs; i++) {
+		assert(lwc_string_caseless_isequal(
+				node->attrs[i].name, name, match) == 
+				lwc_error_ok);
+		if (*match == true)
+			break;
+	}
+	
+	if (*match == true) {
+		size_t len = lwc_string_length(node->attrs[i].value);
+		const char *data = lwc_string_data(node->attrs[i].value);
+
+		size_t vlen = lwc_string_length(value);
+		const char *vdata = lwc_string_data(value);
+
+		const char *last_start = data + len - vlen;
+
+		if (len < vlen)
+			*match = false;
+		else {
+			while (data <= last_start) {
+				if (strncasecmp(data, vdata, vlen) == 0) {
+					*match = true;
+					break;
+				}
+
+				data++;
+			}
+
+			if (data > last_start)
+				*match = false;
+		}
+	}
+
+	return CSS_OK;
+}
+
+css_error node_is_root(void *pw, void *n, bool *match)
+{
+	node *node = n;
+	UNUSED(pw);
+
+	*match = (node->parent == NULL);
+
+	return CSS_OK;
+}
+
+css_error node_count_siblings(void *pw, void *n,
+		bool same_name, bool after, int32_t *count)
+{
+	int32_t cnt = 0;
+	bool match = false;
+	node *node = n;
+	UNUSED(pw);
+
+	if (after) {
+		while (node->next != NULL) {
+			if (same_name) {
+				assert(lwc_string_caseless_isequal(
+					node->name, node->next->name, &match) ==
+					lwc_error_ok);
+
+				if (match)
+					cnt++;
+			} else {
+				cnt++;
+			}
+
+			node = node->next;
+		}
+	} else {
+		while (node->prev != NULL) {
+			if (same_name) {
+				assert(lwc_string_caseless_isequal(
+					node->name, node->prev->name, &match) ==
+					lwc_error_ok);
+
+				if (match)
+					cnt++;
+			} else {
+				cnt++;
+			}
+
+			node = node->prev;
+		}
+	}
+
+	*count = cnt;
+
+	return CSS_OK;
+}
+
+css_error node_is_empty(void *pw, void *n, bool *match)
+{
+	node *node = n;
+	UNUSED(pw);
+
+	*match = (node->children == NULL);
 
 	return CSS_OK;
 }
@@ -1169,6 +1397,54 @@ css_error node_is_active(void *pw, void *n, bool *match)
 }
 
 css_error node_is_focus(void *pw, void *n, bool *match)
+{
+	node *node = n;
+
+	UNUSED(pw);
+	UNUSED(node);
+
+	*match = false;
+
+	return CSS_OK;
+}
+
+css_error node_is_enabled(void *pw, void *n, bool *match)
+{
+	node *node = n;
+
+	UNUSED(pw);
+	UNUSED(node);
+
+	*match = false;
+
+	return CSS_OK;
+}
+
+css_error node_is_disabled(void *pw, void *n, bool *match)
+{
+	node *node = n;
+
+	UNUSED(pw);
+	UNUSED(node);
+
+	*match = false;
+
+	return CSS_OK;
+}
+
+css_error node_is_checked(void *pw, void *n, bool *match)
+{
+	node *node = n;
+
+	UNUSED(pw);
+	UNUSED(node);
+
+	*match = false;
+
+	return CSS_OK;
+}
+
+css_error node_is_target(void *pw, void *n, bool *match)
 {
 	node *node = n;
 

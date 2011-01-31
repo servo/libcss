@@ -455,6 +455,38 @@ cleanup:
                         lwc_string_unref(state.active);
                 if (state.focus != NULL)
                         lwc_string_unref(state.focus);
+		if (state.nth_child != NULL)
+			lwc_string_unref(state.nth_child);
+		if (state.nth_last_child != NULL)
+			lwc_string_unref(state.nth_last_child);
+		if (state.nth_of_type != NULL)
+			lwc_string_unref(state.nth_of_type);
+		if (state.nth_last_of_type != NULL)
+			lwc_string_unref(state.nth_last_of_type);
+		if (state.last_child != NULL)
+			lwc_string_unref(state.last_child);
+		if (state.first_of_type != NULL)
+			lwc_string_unref(state.first_of_type);
+		if (state.last_of_type != NULL)
+			lwc_string_unref(state.last_of_type);
+		if (state.only_child != NULL)
+			lwc_string_unref(state.only_child);
+		if (state.only_of_type != NULL)
+			lwc_string_unref(state.only_of_type);
+		if (state.root != NULL)
+			lwc_string_unref(state.root);
+		if (state.empty != NULL)
+			lwc_string_unref(state.empty);
+		if (state.target != NULL)
+			lwc_string_unref(state.target);
+		if (state.lang != NULL)
+			lwc_string_unref(state.lang);
+		if (state.enabled != NULL)
+			lwc_string_unref(state.enabled);
+		if (state.disabled != NULL)
+			lwc_string_unref(state.disabled);
+		if (state.checked != NULL)
+			lwc_string_unref(state.checked);
                 if (state.first_line != NULL)
                         lwc_string_unref(state.first_line);
                 if (state.first_letter != NULL)
@@ -693,6 +725,102 @@ css_error intern_strings_for_sheet(css_select_ctx *ctx,
 	error = lwc_intern_string(
 			"focus", SLEN("focus"), 
 			&state->focus);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"nth-child", SLEN("nth-child"),
+			&state->nth_child);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"nth-last-child", SLEN("nth-last-child"),
+			&state->nth_last_child);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"nth-of-type", SLEN("nth-of-type"),
+			&state->nth_of_type);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"nth-last-of-type", SLEN("nth-last-of-type"),
+			&state->nth_last_of_type);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"last-child", SLEN("last-child"),
+			&state->last_child);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"first-of-type", SLEN("first-of-type"),
+			&state->first_of_type);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"last-of-type", SLEN("last-of-type"),
+			&state->last_of_type);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"only-child", SLEN("only-child"),
+			&state->only_child);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"only-of-type", SLEN("only-of-type"),
+			&state->only_of_type);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"root", SLEN("root"),
+			&state->root);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"empty", SLEN("empty"),
+			&state->empty);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"target", SLEN("target"),
+			&state->target);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"lang", SLEN("lang"),
+			&state->lang);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"enabled", SLEN("enabled"),
+			&state->enabled);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"disabled", SLEN("disabled"),
+			&state->disabled);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"checked", SLEN("checked"),
+			&state->checked);
 	if (error != lwc_error_ok)
 		return css_error_from_lwc_error(error);
 
@@ -1075,6 +1203,11 @@ css_error match_named_combinator(css_select_ctx *ctx, css_combinator type,
 			if (error != CSS_OK)
 				return error;
 			break;
+		case CSS_COMBINATOR_GENERIC_SIBLING:
+			error = state->handler->named_generic_sibling_node(
+					state->pw, n, selector->data.name, &n);
+			if (error != CSS_OK)
+				return error;
 		case CSS_COMBINATOR_NONE:
 			break;
 		}
@@ -1124,6 +1257,7 @@ css_error match_universal_combinator(css_select_ctx *ctx, css_combinator type,
 				return error;
 			break;
 		case CSS_COMBINATOR_SIBLING:
+		case CSS_COMBINATOR_GENERIC_SIBLING:
 			error = state->handler->sibling_node(state->pw, n, &n);
 			if (error != CSS_OK)
 				return error;
@@ -1196,6 +1330,23 @@ css_error match_details(css_select_ctx *ctx, void *node,
 	return CSS_OK;
 }
 
+static inline bool match_nth(int32_t a, int32_t b, int32_t count)
+{
+	if (a == 0) {
+		return count == b;
+	} else {
+		const int32_t delta = count - b;
+
+		/* (count - b) / a is positive or (count - b) is 0 */
+		if (((delta > 0) == (a > 0)) || delta == 0) {
+			/* (count - b) / a is integer */
+			return (delta % a == 0);
+		}
+
+		return false;
+	}
+}
+
 css_error match_detail(css_select_ctx *ctx, void *node, 
 		const css_selector_detail *detail, css_select_state *state, 
 		bool *match, css_pseudo_element *pseudo_element)
@@ -1224,7 +1375,108 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 		break;
 	case CSS_SELECTOR_PSEUDO_CLASS:
 		if (detail->name == state->first_child) {
-			error = state->handler->node_is_first_child(state->pw, 
+			int32_t num_before = 0;
+
+			error = state->handler->node_count_siblings(state->pw, 
+					node, false, false, &num_before);
+			if (error == CSS_OK)
+				*match = (num_before == 0);
+		} else if (detail->name == state->nth_child) {
+			int32_t num_before = 0;
+
+			error = state->handler->node_count_siblings(state->pw, 
+					node, false, false, &num_before);
+			if (error == CSS_OK) {
+				int32_t a = detail->value.nth.a;
+				int32_t b = detail->value.nth.b;
+
+				*match = match_nth(a, b, num_before + 1);
+			}
+		} else if (detail->name == state->nth_last_child) {
+			int32_t num_after = 0;
+
+			error = state->handler->node_count_siblings(state->pw, 
+					node, false, true, &num_after);
+			if (error == CSS_OK) {
+				int32_t a = detail->value.nth.a;
+				int32_t b = detail->value.nth.b;
+
+				*match = match_nth(a, b, num_after + 1);
+			}
+		} else if (detail->name == state->nth_of_type) {
+			int32_t num_before = 0;
+
+			error = state->handler->node_count_siblings(state->pw, 
+					node, true, false, &num_before);
+			if (error == CSS_OK) {
+				int32_t a = detail->value.nth.a;
+				int32_t b = detail->value.nth.b;
+
+				*match = match_nth(a, b, num_before + 1);
+			}
+		} else if (detail->name == state->nth_last_of_type) {
+			int32_t num_after = 0;
+
+			error = state->handler->node_count_siblings(state->pw, 
+					node, true, true, &num_after);
+			if (error == CSS_OK) {
+				int32_t a = detail->value.nth.a;
+				int32_t b = detail->value.nth.b;
+
+				*match = match_nth(a, b, num_after + 1);
+			}
+		} else if (detail->name == state->last_child) {
+			int32_t num_after = 0;
+
+			error = state->handler->node_count_siblings(state->pw,
+					node, false, true, &num_after);
+			if (error == CSS_OK)
+				*match = (num_after == 0);
+		} else if (detail->name == state->first_of_type) {
+			int32_t num_before = 0;
+
+			error = state->handler->node_count_siblings(state->pw, 
+					node, true, false, &num_before);
+			if (error == CSS_OK)
+				*match = (num_before == 0);
+		} else if (detail->name == state->last_of_type) {
+			int32_t num_after = 0;
+
+			error = state->handler->node_count_siblings(state->pw, 
+					node, true, true, &num_after);
+			if (error == CSS_OK)
+				*match = (num_after == 0);
+		} else if (detail->name == state->only_child) {
+			int32_t num_before = 0, num_after = 0;
+
+			error = state->handler->node_count_siblings(state->pw, 
+					node, false, false, &num_before);
+			if (error == CSS_OK) {
+				error = state->handler->node_count_siblings(
+						state->pw, node, false, true,
+						&num_after);
+				if (error == CSS_OK)
+					*match = (num_before == 0) && 
+							(num_after == 0);
+			}
+		} else if (detail->name == state->only_of_type) {
+			int32_t num_before = 0, num_after = 0;
+
+			error = state->handler->node_count_siblings(state->pw, 
+					node, true, false, &num_before);
+			if (error == CSS_OK) {
+				error = state->handler->node_count_siblings(
+						state->pw, node, true, true,
+						&num_after);
+				if (error == CSS_OK)
+					*match = (num_before == 0) && 
+							(num_after == 0);
+			}
+		} else if (detail->name == state->root) {
+			error = state->handler->node_is_root(state->pw,
+					node, match);
+		} else if (detail->name == state->empty) {
+			error = state->handler->node_is_empty(state->pw,
 					node, match);
 		} else if (detail->name == state->link) {
 			error = state->handler->node_is_link(state->pw,
@@ -1240,6 +1492,21 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 					node, match);
 		} else if (detail->name == state->focus) {
 			error = state->handler->node_is_focus(state->pw,
+					node, match);
+		} else if (detail->name == state->target) {
+			error = state->handler->node_is_target(state->pw,
+					node, match);
+		} else if (detail->name == state->lang) {
+			error = state->handler->node_is_lang(state->pw,
+					node, detail->value.string, match);
+		} else if (detail->name == state->enabled) {
+			error = state->handler->node_is_enabled(state->pw,
+					node, match);
+		} else if (detail->name == state->disabled) {
+			error = state->handler->node_is_disabled(state->pw,
+					node, match);
+		} else if (detail->name == state->checked) {
+			error = state->handler->node_is_checked(state->pw,
 					node, match);
 		} else
 			*match = false;
@@ -1264,17 +1531,39 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_EQUAL:
 		error = state->handler->node_has_attribute_equal(state->pw, 
-				node, detail->name, detail->value, match);
+				node, detail->name, detail->value.string, 
+				match);
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_DASHMATCH:
 		error = state->handler->node_has_attribute_dashmatch(state->pw,
-				node, detail->name, detail->value, match);
+				node, detail->name, detail->value.string,
+				match);
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_INCLUDES:
 		error = state->handler->node_has_attribute_includes(state->pw, 
-				node, detail->name, detail->value, match);
+				node, detail->name, detail->value.string,
+				match);
+		break;
+	case CSS_SELECTOR_ATTRIBUTE_PREFIX:
+		error = state->handler->node_has_attribute_prefix(state->pw,
+				node, detail->name, detail->value.string,
+				match);
+		break;
+	case CSS_SELECTOR_ATTRIBUTE_SUFFIX:
+		error = state->handler->node_has_attribute_suffix(state->pw,
+				node, detail->name, detail->value.string,
+				match);
+		break;
+	case CSS_SELECTOR_ATTRIBUTE_SUBSTRING:
+		error = state->handler->node_has_attribute_substring(state->pw,
+				node, detail->name, detail->value.string,
+				match);
 		break;
 	}
+
+	/* Invert match, if the detail requests it */
+	if (error == CSS_OK && detail->negate != 0)
+		*match = !*match;
 
 	return error;
 }

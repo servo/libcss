@@ -619,11 +619,14 @@ void dump_selector_list(css_selector *list, char **ptr)
 		memcpy(*ptr, " + ", 3);
 		*ptr += 3;
 		break;
+	case CSS_COMBINATOR_GENERIC_SIBLING:
+		memcpy(*ptr, " ~ ", 3);
+		*ptr += 3;
+		break;
 	}
 
 	dump_selector(list, ptr);
 }
-
 
 void dump_selector(css_selector *selector, char **ptr)
 {
@@ -641,14 +644,17 @@ void dump_selector(css_selector *selector, char **ptr)
 
 void dump_selector_detail(css_selector_detail *detail, char **ptr)
 {
+	if (detail->negate)
+		*ptr += sprintf(*ptr, ":not(");
+
 	switch (detail->type) {
 	case CSS_SELECTOR_ELEMENT:
-		if (lwc_string_length(detail->name) == 1 && 
-				lwc_string_data(detail->name)[0] == '*' &&
+                if (lwc_string_length(detail->name) == 1 && 
+                    lwc_string_data(detail->name)[0] == '*' &&
 				detail->next == 0) {
 			dump_string(detail->name, ptr);
 		} else if (lwc_string_length(detail->name) != 1 ||
-			   lwc_string_data(detail->name)[0] != '*') {
+                           lwc_string_data(detail->name)[0] != '*') {
 			dump_string(detail->name, ptr);
 		}
 		break;
@@ -667,12 +673,18 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 		**ptr = ':';
 		*ptr += 1;
 		dump_string(detail->name, ptr);
-		if (detail->value != NULL) {
-			**ptr = '(';
-			*ptr += 1;
-			dump_string(detail->value, ptr);
-			**ptr = ')';
-			*ptr += 1;
+		if (detail->value_type == CSS_SELECTOR_DETAIL_VALUE_STRING) {
+			if (detail->value.string != NULL) {
+				**ptr = '(';
+				*ptr += 1;
+				dump_string(detail->value.string, ptr);
+				**ptr = ')';
+				*ptr += 1;
+			}
+		} else {
+			*ptr += sprintf(*ptr, "(%dn+%d)",
+					detail->value.nth.a,
+					detail->value.nth.b);
 		}
 		break;
 	case CSS_SELECTOR_ATTRIBUTE:
@@ -689,7 +701,7 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 		(*ptr)[0] = '=';
 		(*ptr)[1] = '"';
 		*ptr += 2;
-		dump_string(detail->value, ptr);
+		dump_string(detail->value.string, ptr);
 		(*ptr)[0] = '"';
 		(*ptr)[1] = ']';
 		*ptr += 2;
@@ -702,7 +714,7 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 		(*ptr)[1] = '=';
 		(*ptr)[2] = '"';
 		*ptr += 3;
-		dump_string(detail->value, ptr);
+		dump_string(detail->value.string, ptr);
 		(*ptr)[0] = '"';
 		(*ptr)[1] = ']';
 		*ptr += 2;
@@ -715,12 +727,54 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 		(*ptr)[1] = '=';
 		(*ptr)[2] = '"';
 		*ptr += 3;
-		dump_string(detail->value, ptr);
+		dump_string(detail->value.string, ptr);
+		(*ptr)[0] = '"';
+		(*ptr)[1] = ']';
+		*ptr += 2;
+		break;
+	case CSS_SELECTOR_ATTRIBUTE_PREFIX:
+		**ptr = '[';
+		*ptr += 1;
+		dump_string(detail->name, ptr);
+		(*ptr)[0] = '^';
+		(*ptr)[1] = '=';
+		(*ptr)[2] = '"';
+		*ptr += 3;
+		dump_string(detail->value.string, ptr);
+		(*ptr)[0] = '"';
+		(*ptr)[1] = ']';
+		*ptr += 2;
+		break;
+	case CSS_SELECTOR_ATTRIBUTE_SUFFIX:
+		**ptr = '[';
+		*ptr += 1;
+		dump_string(detail->name, ptr);
+		(*ptr)[0] = '$';
+		(*ptr)[1] = '=';
+		(*ptr)[2] = '"';
+		*ptr += 3;
+		dump_string(detail->value.string, ptr);
+		(*ptr)[0] = '"';
+		(*ptr)[1] = ']';
+		*ptr += 2;
+		break;
+	case CSS_SELECTOR_ATTRIBUTE_SUBSTRING:
+		**ptr = '[';
+		*ptr += 1;
+		dump_string(detail->name, ptr);
+		(*ptr)[0] = '*';
+		(*ptr)[1] = '=';
+		(*ptr)[2] = '"';
+		*ptr += 3;
+		dump_string(detail->value.string, ptr);
 		(*ptr)[0] = '"';
 		(*ptr)[1] = ']';
 		*ptr += 2;
 		break;
 	}
+
+	if (detail->negate)
+		*ptr += sprintf(*ptr, ")");
 }
 
 void dump_string(lwc_string *string, char **ptr)
@@ -728,4 +782,3 @@ void dump_string(lwc_string *string, char **ptr)
 	*ptr += sprintf(*ptr, "%.*s", (int) lwc_string_length(string), 
 			lwc_string_data(string));
 }
-

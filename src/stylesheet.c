@@ -800,7 +800,8 @@ css_error css__stylesheet_selector_create(css_stylesheet *sheet,
 
 	sel->data.type = CSS_SELECTOR_ELEMENT;
 	sel->data.name = lwc_string_ref(name);
-	sel->data.value = NULL;
+	sel->data.value.string = NULL;
+	sel->data.value_type = CSS_SELECTOR_DETAIL_VALUE_STRING;
 
 	if (sheet->inline_style) {
 		sel->specificity = CSS_SPECIFICITY_A;
@@ -846,8 +847,10 @@ css_error css__stylesheet_selector_destroy(css_stylesheet *sheet,
 		for (detail = &c->data; detail;) {
 			lwc_string_unref(detail->name);
 
-			if (detail->value != NULL) {
-				lwc_string_unref(detail->value);
+			if (detail->value_type == 
+					CSS_SELECTOR_DETAIL_VALUE_STRING && 
+					detail->value.string != NULL) {
+				lwc_string_unref(detail->value.string);
 			}
 
 			if (detail->next)
@@ -862,8 +865,9 @@ css_error css__stylesheet_selector_destroy(css_stylesheet *sheet,
 	for (detail = &selector->data; detail;) {
 		lwc_string_unref(detail->name);
 
-		if (detail->value != NULL) {
-			lwc_string_unref(detail->value);
+		if (detail->value_type == CSS_SELECTOR_DETAIL_VALUE_STRING && 
+				detail->value.string != NULL) {
+			lwc_string_unref(detail->value.string);
 		}
 
 		if (detail->next)
@@ -882,18 +886,21 @@ css_error css__stylesheet_selector_destroy(css_stylesheet *sheet,
 /**
  * Initialise a selector detail
  *
- * \param sheet	  The stylesheet context
- * \param type	  The type of selector to create
- * \param name	  Name of selector
- * \param value	  Value of selector, or NULL
- * \param detail  Pointer to detail object to initialise
+ * \param sheet	      The stylesheet context
+ * \param type	      The type of selector to create
+ * \param name	      Name of selector
+ * \param value	      Value of selector
+ * \param value_type  Type of \a value
+ * \param negate      Whether the detail match should be negated
+ * \param detail      Pointer to detail object to initialise
  * \return CSS_OK on success,
  *	   CSS_BADPARM on bad parameters
  */
 css_error css__stylesheet_selector_detail_init(css_stylesheet *sheet,
 		css_selector_type type, lwc_string *name, 
-		lwc_string *value, 
-		css_selector_detail *detail)
+		css_selector_detail_value value, 
+		css_selector_detail_value_type value_type,
+		bool negate, css_selector_detail *detail)
 {
 	if (sheet == NULL || name == NULL || detail == NULL)
 		return CSS_BADPARM;
@@ -903,6 +910,8 @@ css_error css__stylesheet_selector_detail_init(css_stylesheet *sheet,
 	detail->type = type;
 	detail->name = name;
 	detail->value = value;
+	detail->value_type = value_type;
+	detail->negate = negate;
 
 	return CSS_OK;
 }
@@ -948,8 +957,9 @@ css_error css__stylesheet_selector_append_specific(css_stylesheet *sheet,
 	
 	/* Ref the strings */
 	lwc_string_ref(detail->name);
-	if (detail->value != NULL)
-		lwc_string_ref(detail->value);
+	if (detail->value_type == CSS_SELECTOR_DETAIL_VALUE_STRING &&
+			detail->value.string != NULL)
+		lwc_string_ref(detail->value.string);
 	
 	(*parent) = temp;
 
