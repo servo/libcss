@@ -1299,13 +1299,14 @@ css_error node_count_siblings(void *pw, void *n,
 	int32_t cnt = 0;
 	bool match = false;
 	node *node = n;
+	lwc_string *name = node->name;
 	UNUSED(pw);
 
 	if (after) {
 		while (node->next != NULL) {
 			if (same_name) {
 				assert(lwc_string_caseless_isequal(
-					node->name, node->next->name, &match) ==
+					name, node->next->name, &match) ==
 					lwc_error_ok);
 
 				if (match)
@@ -1320,7 +1321,7 @@ css_error node_count_siblings(void *pw, void *n,
 		while (node->prev != NULL) {
 			if (same_name) {
 				assert(lwc_string_caseless_isequal(
-					node->name, node->prev->name, &match) ==
+					name, node->prev->name, &match) ==
 					lwc_error_ok);
 
 				if (match)
