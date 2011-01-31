@@ -1033,13 +1033,14 @@ css_error parseNth(css_language *c,
 				had_sign = true;
 
 				if (len - (++consumed) > 0) {
+					size_t bstart;
 					/* Reject additional sign */
 					if (data[consumed] == '-' ||
 							data[consumed] == '+')
 						return CSS_INVALID;
 
 					/* 2n-b */
-					size_t bstart = consumed;
+					bstart = consumed;
 
 					b = css__number_from_string(
 						(const uint8_t *) data + bstart,
