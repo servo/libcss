@@ -61,7 +61,7 @@ typedef css_error (*css_color_resolution_fn)(void *pw,
 		lwc_string *name, css_color *color);
 
 /** System font callback result data. */
-struct css_system_font {
+typedef struct css_system_font {
 	enum css_font_style_e style;
 	enum css_font_variant_e variant;
 	enum css_font_weight_e weight;
@@ -73,15 +73,16 @@ struct css_system_font {
 		css_fixed size;           
 		css_unit unit;
 	} line_height;
+	/* Note: must be a single family name only */
 	lwc_string *family;
-};
+} css_system_font;
 
 /**
  * Callback use to resolve system font names to font values
  *
- * \param pw     Client data
- * \param name   System colour name
- * \param color  Pointer to system font to be filled
+ * \param pw           Client data
+ * \param name         System font identifier
+ * \param system_font  Pointer to system font descriptor to be filled
  * \return CSS_OK       on success,
  *         CSS_INVALID  if the name is unknown.
  */
@@ -124,7 +125,7 @@ typedef struct css_stylesheet_params {
 
 	/** Font resolution function */
 	css_font_resolution_fn font;
-	/** Client private data for color */
+	/** Client private data for font */
 	void *font_pw;
 } css_stylesheet_params;
 
