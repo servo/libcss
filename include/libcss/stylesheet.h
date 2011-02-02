@@ -15,6 +15,7 @@ extern "C"
 
 #include <libcss/errors.h>
 #include <libcss/types.h>
+#include <libcss/properties.h>
 
 /**
  * Callback to resolve an URL
@@ -59,6 +60,34 @@ typedef css_error (*css_import_notification_fn)(void *pw,
 typedef css_error (*css_color_resolution_fn)(void *pw,
 		lwc_string *name, css_color *color);
 
+/** System font callback result data. */
+struct css_system_font {
+	enum css_font_style_e style;
+	enum css_font_variant_e variant;
+	enum css_font_weight_e weight;
+	struct {                  
+		css_fixed size;           
+		css_unit unit;
+	} size;
+	struct {                  
+		css_fixed size;           
+		css_unit unit;
+	} line_height;
+	lwc_string *family;
+};
+
+/**
+ * Callback use to resolve system font names to font values
+ *
+ * \param pw     Client data
+ * \param name   System colour name
+ * \param color  Pointer to system font to be filled
+ * \return CSS_OK       on success,
+ *         CSS_INVALID  if the name is unknown.
+ */
+typedef css_error (*css_font_resolution_fn)(void *pw,
+		lwc_string *name, css_system_font *system_font);
+
 /**
  * Parameter block for css_stylesheet_create()
  */
@@ -92,6 +121,11 @@ typedef struct css_stylesheet_params {
 	css_color_resolution_fn color;
 	/** Client private data for color */
 	void *color_pw;
+
+	/** Font resolution function */
+	css_font_resolution_fn font;
+	/** Client private data for color */
+	void *font_pw;
 } css_stylesheet_params;
 
 css_error css_stylesheet_create(css_stylesheet_params *params,

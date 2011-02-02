@@ -224,6 +224,9 @@ css_error css_stylesheet_create(css_stylesheet_params *params,
 	sheet->color = params->color;
 	sheet->color_pw = params->color_pw;
 
+	sheet->font = params->font;
+	sheet->font_pw = params->font_pw;
+
 	sheet->alloc = alloc;
 	sheet->pw = alloc_pw;
 

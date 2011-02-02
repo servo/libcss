@@ -106,6 +106,8 @@ typedef struct css_select_ctx css_select_ctx;
 
 typedef struct css_computed_style css_computed_style;
 
+typedef struct css_system_font css_system_font;
+
 #ifdef __cplusplus
 }
 #endif

@@ -13,6 +13,161 @@
 #include "parse/properties/properties.h"
 #include "parse/properties/utils.h"
 
+
+static css_error parse_system_font(css_language *c,
+		css_style *result, css_system_font *system_font) 
+{
+	css_error error;
+	bool match;
+
+	/* style */
+	switch (system_font->style) {
+	case CSS_FONT_STYLE_NORMAL:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_STYLE, 0, FONT_STYLE_NORMAL);
+		break;
+
+	case CSS_FONT_STYLE_ITALIC:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_STYLE, 0, FONT_STYLE_ITALIC);
+		break;
+
+	case CSS_FONT_STYLE_OBLIQUE:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_STYLE, 0, FONT_STYLE_OBLIQUE);
+		break;
+
+	default:
+		error = CSS_BADPARM;
+		break;
+	}
+	if (error != CSS_OK) 
+		return error;
+
+	/* variant */
+	switch (system_font->variant) {
+	case CSS_FONT_VARIANT_NORMAL:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_VARIANT, 0, FONT_VARIANT_NORMAL);
+		break;
+
+	case CSS_FONT_VARIANT_SMALL_CAPS:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_VARIANT, 0, FONT_VARIANT_SMALL_CAPS);
+		break;
+
+	default:
+		error = CSS_BADPARM;
+		break;
+	}
+	if (error != CSS_OK) 
+		return error;		
+
+	/* weight */
+	switch(system_font->weight) {
+	case CSS_FONT_WEIGHT_NORMAL:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_WEIGHT, 0, FONT_WEIGHT_NORMAL);
+		break;
+
+	case CSS_FONT_WEIGHT_BOLD:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_WEIGHT, 0, FONT_WEIGHT_BOLD);
+		break;
+
+	case CSS_FONT_WEIGHT_BOLDER:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_WEIGHT, 0, FONT_WEIGHT_BOLDER);
+		break;
+
+	case CSS_FONT_WEIGHT_LIGHTER:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_WEIGHT, 0, FONT_WEIGHT_LIGHTER);
+		break;
+
+	case CSS_FONT_WEIGHT_100:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_WEIGHT, 0, FONT_WEIGHT_100);
+		break;
+
+	case CSS_FONT_WEIGHT_200:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_WEIGHT, 0, FONT_WEIGHT_200);
+		break;
+
+	case CSS_FONT_WEIGHT_300:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_WEIGHT, 0, FONT_WEIGHT_300);
+		break;
+
+	case CSS_FONT_WEIGHT_400:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_WEIGHT, 0, FONT_WEIGHT_400);
+		break;
+
+	case CSS_FONT_WEIGHT_500:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_WEIGHT, 0, FONT_WEIGHT_500);
+		break;
+
+	case CSS_FONT_WEIGHT_600:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_WEIGHT, 0, FONT_WEIGHT_600);
+		break;
+
+	case CSS_FONT_WEIGHT_700:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_WEIGHT, 0, FONT_WEIGHT_700);
+		break;
+
+	case CSS_FONT_WEIGHT_800:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_WEIGHT, 0, FONT_WEIGHT_800);
+		break;
+
+	case CSS_FONT_WEIGHT_900:
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_WEIGHT, 0, FONT_WEIGHT_900);
+		break;
+
+	default:
+		error = CSS_BADPARM;
+		break;
+	}
+	if (error != CSS_OK) 
+		return error;
+
+	/* size */
+	error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_SIZE, 0,  FONT_SIZE_DIMENSION);
+	if (error != CSS_OK) 
+		return error;
+
+	error = css__stylesheet_style_vappend(result, 2, system_font->size.size, system_font->size.unit);
+	if (error != CSS_OK) 
+		return error;
+
+	/* line height */
+	error = css__stylesheet_style_appendOPV(result, CSS_PROP_LINE_HEIGHT, 0, LINE_HEIGHT_DIMENSION);
+	if (error != CSS_OK) 
+		return error;
+
+	error = css__stylesheet_style_vappend(result, 2, system_font->line_height.size, system_font->line_height.unit);
+	if (error != CSS_OK) 
+		return error;
+
+	/* font family */
+	if ((lwc_string_caseless_isequal(system_font->family, c->strings[SERIF], &match) == lwc_error_ok && match)) 
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_FAMILY, 0, FONT_FAMILY_SERIF);
+	else if ((lwc_string_caseless_isequal(system_font->family, c->strings[SANS_SERIF], &match) == lwc_error_ok && match))
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_FAMILY, 0, FONT_FAMILY_SANS_SERIF);
+	else if ((lwc_string_caseless_isequal(system_font->family, c->strings[CURSIVE], &match) == lwc_error_ok && match))
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_FAMILY, 0, FONT_FAMILY_CURSIVE);
+	else if ((lwc_string_caseless_isequal(system_font->family, c->strings[FANTASY], &match) == lwc_error_ok && match))
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_FAMILY, 0, FONT_FAMILY_FANTASY);
+	else if ((lwc_string_caseless_isequal(system_font->family, c->strings[MONOSPACE], &match) == lwc_error_ok && match))
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_FAMILY, 0, FONT_FAMILY_MONOSPACE);
+	else {
+		uint32_t snumber;
+
+		error = css__stylesheet_string_add(c->sheet, lwc_string_ref(system_font->family), &snumber);
+		if (error != CSS_OK)
+			return error;
+
+		error = css__stylesheet_style_appendOPV(result, CSS_PROP_FONT_FAMILY, 0, FONT_FAMILY_STRING);
+		if (error != CSS_OK)
+			return error;
+
+		error = css__stylesheet_style_append(result, snumber);
+		if (error != CSS_OK)
+			return error;
+	}
+	error = css__stylesheet_style_append(result, FONT_FAMILY_END);
+
+	return error;
+}
+
 /**
  * Parse font
  *
@@ -35,6 +190,8 @@ css_error css__parse_font(css_language *c,
 	css_error error;
 	int orig_ctx = *ctx;
 	int prev_ctx;
+	css_system_font system_font;
+
 	bool style = true;
 	bool variant = true;
 	bool weight = true;
@@ -81,6 +238,21 @@ css_error css__parse_font(css_language *c,
 
 		return error;
 	} 
+
+	/* Perhaps an unknown font name; ask the client */
+	if ((token->type == CSS_TOKEN_IDENT) && 
+	    (c->sheet->font != NULL) &&
+	    (c->sheet->font(c->sheet->font_pw, 
+			    token->idata, 
+			    &system_font) == CSS_OK)) {
+		
+		error = parse_system_font(c, result, &system_font);
+
+		if (error == CSS_OK) 
+			parserutils_vector_iterate(vector, ctx);
+
+		return error;
+	}
 
 
 	/* allocate styles */
