@@ -536,6 +536,8 @@ void css__parse_sheet(line_ctx *ctx, const char *data, size_t len)
 	params.import_pw = NULL;
 	params.color = NULL;
 	params.color_pw = NULL;
+	params.font = NULL;
+	params.font_pw = NULL;
 
 	/** \todo How are we going to handle @import? */
 	assert(css_stylesheet_create(&params, myrealloc, NULL, 

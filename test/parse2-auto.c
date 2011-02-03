@@ -208,6 +208,8 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 	params.import_pw = NULL;
 	params.color = NULL;
 	params.color_pw = NULL;
+	params.font = NULL;
+	params.font_pw = NULL;
 
 	assert(css_stylesheet_create(&params, myrealloc, NULL, 
 			&sheet) == CSS_OK);

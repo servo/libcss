@@ -60,6 +60,8 @@ int main(int argc, char **argv)
 	params.import_pw = NULL;
 	params.color = NULL;
 	params.color_pw = NULL;
+	params.font = NULL;
+	params.font_pw = NULL;
 
 	for (count = 0; count < ITERATIONS; count++) {
 
