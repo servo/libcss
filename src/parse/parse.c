@@ -24,9 +24,6 @@
 #undef DEBUG_STACK
 #undef DEBUG_EVENTS
 
-/** \todo The CSSOM expects us to preserve unknown rules. We currently discard 
- * all of their content, so the higher levels never see them. */
-
 #ifndef NDEBUG
 #include <stdio.h>
 extern void parserutils_stack_dump(parserutils_stack *stack, const char *prefix,
