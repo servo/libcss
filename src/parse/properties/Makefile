@@ -19,7 +19,7 @@
 # 	text_decoration.c 
 # 	voice_family.c 
 
-AUTOGEN_PARSERS=$(shell perl -pe'$$_="" unless /^([^\#][^:]+):/;$$_=$$1 . " "' $(DIR)properties.gen)
+AUTOGEN_PARSERS := $(shell $(PERL) -pe'$$_="" unless /^([^\#][^:]+):/;$$_=$$1 . " "' $(DIR)properties.gen)
 
 # Dodgy use of define/eval to bypass DIR changing
 define build_gen_parser
