@@ -19,6 +19,14 @@
 #include "parse/propstrings.h"
 
 /**
+ * CSS namespace mapping
+ */
+typedef struct css_namespace {
+	lwc_string *prefix;		/**< Namespace prefix */
+	lwc_string *uri;		/**< Namespace URI */
+} css_namespace;
+
+/**
  * Context for a CSS language parser
  */
 typedef struct css_language {
@@ -28,14 +36,19 @@ typedef struct css_language {
 	parserutils_stack *context;	/**< Context stack */
 
 	enum {
-		BEFORE_CHARSET,
-		BEFORE_RULES,
+		CHARSET_PERMITTED,
+		IMPORT_PERMITTED,
+		NAMESPACE_PERMITTED,
 		HAD_RULE
 	} state;			/**< State flag, for at-rule handling */
 
 	/** \todo These should be statically allocated */
 	/** Interned strings */
 	lwc_string *strings[LAST_KNOWN];
+
+	lwc_string *default_namespace;	/**< Default namespace URI */
+	css_namespace *namespaces;	/**< Array of namespace mappings */
+	uint32_t num_namespaces;	/**< Number of namespace mappings */
 
 	css_allocator_fn alloc;		/**< Memory (de)allocation function */
 	void *pw;			/**< Client's private data */

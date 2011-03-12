@@ -76,27 +76,27 @@ static void run_test(line_ctx *ctx, const char *exp, size_t explen);
 static void destroy_tree(node *root);
 
 static css_error node_name(void *pw, void *node,
-		lwc_string **name);
+		css_qname *qname);
 static css_error node_classes(void *pw, void *node,
 		lwc_string ***classes, uint32_t *n_classes);
 static css_error node_id(void *pw, void *node,
 		lwc_string **id);
 static css_error named_ancestor_node(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		void **ancestor);
 static css_error named_parent_node(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		void **parent);
 static css_error named_sibling_node(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		void **sibling);
 static css_error named_generic_sibling_node(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		void **sibling);
 static css_error parent_node(void *pw, void *node, void **parent);
 static css_error sibling_node(void *pw, void *node, void **sibling);
 static css_error node_has_name(void *pw, void *node, 
-		lwc_string *name, 
+		const css_qname *qname, 
 		bool *match);
 static css_error node_has_class(void *pw, void *node,
 		lwc_string *name,
@@ -105,30 +105,30 @@ static css_error node_has_id(void *pw, void *node,
 		lwc_string *name,
 		bool *match);
 static css_error node_has_attribute(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		bool *match);
 static css_error node_has_attribute_equal(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match);
 static css_error node_has_attribute_dashmatch(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match);
 static css_error node_has_attribute_includes(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match);
 static css_error node_has_attribute_prefix(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match);
 static css_error node_has_attribute_suffix(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match);
 static css_error node_has_attribute_substring(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match);
 static css_error node_is_root(void *pw, void *node, bool *match);
@@ -785,13 +785,13 @@ void destroy_tree(node *root)
 }
 
 
-css_error node_name(void *pw, void *n, lwc_string **name)
+css_error node_name(void *pw, void *n, css_qname *qname)
 {
 	node *node = n;
 
 	UNUSED(pw);
 	
-	*name = lwc_string_ref(node->name);
+	qname->name = lwc_string_ref(node->name);
 	
 	return CSS_OK;
 }
@@ -854,7 +854,7 @@ css_error node_id(void *pw, void *n,
 }
 
 css_error named_ancestor_node(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		void **ancestor)
 {
 	node *node = n;
@@ -863,7 +863,8 @@ css_error named_ancestor_node(void *pw, void *n,
 	for (node = node->parent; node != NULL; node = node->parent) {
 		bool match;
 		assert(lwc_string_caseless_isequal(
-				name, node->name, &match) == lwc_error_ok);
+				qname->name, node->name, 
+				&match) == lwc_error_ok);
 		if (match == true)
 			break;
 	}
@@ -874,7 +875,7 @@ css_error named_ancestor_node(void *pw, void *n,
 }
 
 css_error named_parent_node(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		void **parent)
 {
 	node *node = n;
@@ -884,7 +885,7 @@ css_error named_parent_node(void *pw, void *n,
 	if (node->parent != NULL) {
 		bool match;
 		assert(lwc_string_caseless_isequal(
-				name, node->parent->name, &match) == 
+				qname->name, node->parent->name, &match) == 
 				lwc_error_ok);
 		if (match == true)
 			*parent = (void *) node->parent;
@@ -894,7 +895,7 @@ css_error named_parent_node(void *pw, void *n,
 }
 
 css_error named_sibling_node(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		void **sibling)
 {
 	node *node = n;
@@ -904,7 +905,7 @@ css_error named_sibling_node(void *pw, void *n,
 	if (node->prev != NULL) {
 		bool match;
 		assert(lwc_string_caseless_isequal(
-				name, node->prev->name, &match) == 
+				qname->name, node->prev->name, &match) == 
 				lwc_error_ok);
 		if (match == true)
 			*sibling = (void *) node->prev;
@@ -914,7 +915,7 @@ css_error named_sibling_node(void *pw, void *n,
 }
 
 css_error named_generic_sibling_node(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		void **sibling)
 {
 	node *node = n;
@@ -923,7 +924,8 @@ css_error named_generic_sibling_node(void *pw, void *n,
 	for (node = node->prev; node != NULL; node = node->prev) {
 		bool match;
 		assert(lwc_string_caseless_isequal(
-				name, node->name, &match) == lwc_error_ok);
+				qname->name, node->name, 
+				&match) == lwc_error_ok);
 		if (match == true)
 			break;
 	}
@@ -956,14 +958,14 @@ css_error sibling_node(void *pw, void *n, void **sibling)
 }
 
 css_error node_has_name(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		bool *match)
 {
 	node *node = n;
 	UNUSED(pw);
 
 	assert(lwc_string_caseless_isequal(node->name, 
-			name, match) == lwc_error_ok);
+			qname->name, match) == lwc_error_ok);
 
 	return CSS_OK;
 }
@@ -1021,7 +1023,7 @@ css_error node_has_id(void *pw, void *n,
 }
 
 css_error node_has_attribute(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		bool *match)
 {
 	node *node = n;
@@ -1031,7 +1033,7 @@ css_error node_has_attribute(void *pw, void *n,
 	*match = false;
 	for (i = 0; i < node->n_attrs; i++) {
 		assert(lwc_string_caseless_isequal(
-				node->attrs[i].name, name, match) == 
+				node->attrs[i].name, qname->name, match) == 
 				lwc_error_ok);
 		if (*match == true)
 			break;
@@ -1041,7 +1043,7 @@ css_error node_has_attribute(void *pw, void *n,
 }
 
 css_error node_has_attribute_equal(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match)
 {
@@ -1053,7 +1055,7 @@ css_error node_has_attribute_equal(void *pw, void *n,
 	
 	for (i = 0; i < node->n_attrs; i++) {
 		assert(lwc_string_caseless_isequal(
-				node->attrs[i].name, name, match) == 
+				node->attrs[i].name, qname->name, match) == 
 				lwc_error_ok);
 		if (*match == true)
 			break;
@@ -1069,7 +1071,7 @@ css_error node_has_attribute_equal(void *pw, void *n,
 }
 
 css_error node_has_attribute_includes(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match)
 {
@@ -1082,7 +1084,7 @@ css_error node_has_attribute_includes(void *pw, void *n,
 	
 	for (i = 0; i < node->n_attrs; i++) {
 		assert(lwc_string_caseless_isequal(
-				node->attrs[i].name, name, match) == 
+				node->attrs[i].name, qname->name, match) == 
 				lwc_error_ok);
 		if (*match == true)
 			break;
@@ -1115,7 +1117,7 @@ css_error node_has_attribute_includes(void *pw, void *n,
 }
 
 css_error node_has_attribute_dashmatch(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match)
 {
@@ -1128,7 +1130,7 @@ css_error node_has_attribute_dashmatch(void *pw, void *n,
 	
 	for (i = 0; i < node->n_attrs; i++) {
 		assert(lwc_string_caseless_isequal(
-				node->attrs[i].name, name, match) == 
+				node->attrs[i].name, qname->name, match) == 
 				lwc_error_ok);
 		if (*match == true)
 			break;
@@ -1161,7 +1163,7 @@ css_error node_has_attribute_dashmatch(void *pw, void *n,
 }
 
 css_error node_has_attribute_prefix(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match)
 {
@@ -1173,7 +1175,7 @@ css_error node_has_attribute_prefix(void *pw, void *n,
 	
 	for (i = 0; i < node->n_attrs; i++) {
 		assert(lwc_string_caseless_isequal(
-				node->attrs[i].name, name, match) == 
+				node->attrs[i].name, qname->name, match) == 
 				lwc_error_ok);
 		if (*match == true)
 			break;
@@ -1196,7 +1198,7 @@ css_error node_has_attribute_prefix(void *pw, void *n,
 }
 
 css_error node_has_attribute_suffix(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match)
 {
@@ -1208,7 +1210,7 @@ css_error node_has_attribute_suffix(void *pw, void *n,
 	
 	for (i = 0; i < node->n_attrs; i++) {
 		assert(lwc_string_caseless_isequal(
-				node->attrs[i].name, name, match) == 
+				node->attrs[i].name, qname->name, match) == 
 				lwc_error_ok);
 		if (*match == true)
 			break;
@@ -1235,7 +1237,7 @@ css_error node_has_attribute_suffix(void *pw, void *n,
 }
 
 css_error node_has_attribute_substring(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match)
 {
@@ -1247,7 +1249,7 @@ css_error node_has_attribute_substring(void *pw, void *n,
 	
 	for (i = 0; i < node->n_attrs; i++) {
 		assert(lwc_string_caseless_isequal(
-				node->attrs[i].name, name, match) == 
+				node->attrs[i].name, qname->name, match) == 
 				lwc_error_ok);
 		if (*match == true)
 			break;

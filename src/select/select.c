@@ -929,7 +929,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		const css_stylesheet *sheet, css_select_state *state)
 {
 	static const css_selector *empty_selector = NULL;
-	lwc_string *element = NULL;
+	css_qname element = { NULL, NULL };
 	lwc_string *id = NULL;
 	lwc_string **classes = NULL;
 	uint32_t n_classes = 0, i = 0;
@@ -965,7 +965,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		goto cleanup;
 
 	/* Find hash chain that applies to current node */
-	error = css__selector_hash_find(sheet->selectors, element, 
+	error = css__selector_hash_find(sheet->selectors, &element, 
 			&node_iterator, &node_selectors);
 	if (error != CSS_OK)
                 goto cleanup;
@@ -1081,7 +1081,10 @@ cleanup:
 	if (id != NULL)
 		lwc_string_unref(id);
 
-        lwc_string_unref(element);
+	if (element.ns != NULL)
+		lwc_string_unref(element.ns);
+        lwc_string_unref(element.name);
+
         return error;
 }
 
@@ -1122,7 +1125,8 @@ css_error match_selector_chain(css_select_ctx *ctx,
 
 		/* Consider any combinator on this selector */
 		if (s->data.comb != CSS_COMBINATOR_NONE &&
-				s->combinator->data.name != state->universal) {
+				s->combinator->data.qname.name != 
+					state->universal) {
 			/* Named combinator */
 			error = match_named_combinator(ctx, s->data.comb, 
 					s->combinator, state, node, &next_node);
@@ -1133,7 +1137,8 @@ css_error match_selector_chain(css_select_ctx *ctx,
 			if (next_node == NULL)
 				return CSS_OK;
 		} else if (s->data.comb != CSS_COMBINATOR_NONE &&
-				s->combinator->data.name == state->universal) {
+				s->combinator->data.qname.name == 
+					state->universal) {
 			/* Universal combinator */
 			error = match_universal_combinator(ctx, s->data.comb, 
 					s->combinator, state, node, &next_node);
@@ -1187,25 +1192,26 @@ css_error match_named_combinator(css_select_ctx *ctx, css_combinator type,
 		switch (type) {
 		case CSS_COMBINATOR_ANCESTOR:
 			error = state->handler->named_ancestor_node(state->pw, 
-					n, selector->data.name, &n);
+					n, &selector->data.qname, &n);
 			if (error != CSS_OK)
 				return error;
 			break;
 		case CSS_COMBINATOR_PARENT:
 			error = state->handler->named_parent_node(state->pw, 
-					n, selector->data.name, &n);
+					n, &selector->data.qname, &n);
 			if (error != CSS_OK)
 				return error;
 			break;
 		case CSS_COMBINATOR_SIBLING:
 			error = state->handler->named_sibling_node(state->pw, 
-					n, selector->data.name, &n);
+					n, &selector->data.qname, &n);
 			if (error != CSS_OK)
 				return error;
 			break;
 		case CSS_COMBINATOR_GENERIC_SIBLING:
 			error = state->handler->named_generic_sibling_node(
-					state->pw, n, selector->data.name, &n);
+					state->pw, n, &selector->data.qname,
+					&n);
 			if (error != CSS_OK)
 				return error;
 		case CSS_COMBINATOR_NONE:
@@ -1358,28 +1364,24 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 
 	switch (detail->type) {
 	case CSS_SELECTOR_ELEMENT:
-		if (lwc_string_length(detail->name) == 1 &&
-				lwc_string_data(detail->name)[0] == '*') {
-			*match = true;
-		} else {
-			error = state->handler->node_has_name(state->pw, node,
-					detail->name, match);
-		}
+		error = state->handler->node_has_name(state->pw, node,
+				&detail->qname, match);
 		break;
 	case CSS_SELECTOR_CLASS:
 		error = state->handler->node_has_class(state->pw, node,
-				detail->name, match);
+				detail->qname.name, match);
 		break;
 	case CSS_SELECTOR_ID:
 		error = state->handler->node_has_id(state->pw, node,
-				detail->name, match);
+				detail->qname.name, match);
 		break;
 	case CSS_SELECTOR_PSEUDO_CLASS:
 		error = state->handler->node_is_root(state->pw, node, &is_root);
 		if (error != CSS_OK)
 			return error;
 
-		if (is_root == false && detail->name == state->first_child) {
+		if (is_root == false && 
+				detail->qname.name == state->first_child) {
 			int32_t num_before = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1387,7 +1389,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 			if (error == CSS_OK)
 				*match = (num_before == 0);
 		} else if (is_root == false && 
-				detail->name == state->nth_child) {
+				detail->qname.name == state->nth_child) {
 			int32_t num_before = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1399,7 +1401,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 				*match = match_nth(a, b, num_before + 1);
 			}
 		} else if (is_root == false && 
-				detail->name == state->nth_last_child) {
+				detail->qname.name == state->nth_last_child) {
 			int32_t num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1411,7 +1413,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 				*match = match_nth(a, b, num_after + 1);
 			}
 		} else if (is_root == false && 
-				detail->name == state->nth_of_type) {
+				detail->qname.name == state->nth_of_type) {
 			int32_t num_before = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1423,7 +1425,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 				*match = match_nth(a, b, num_before + 1);
 			}
 		} else if (is_root == false && 
-				detail->name == state->nth_last_of_type) {
+				detail->qname.name == state->nth_last_of_type) {
 			int32_t num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1435,7 +1437,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 				*match = match_nth(a, b, num_after + 1);
 			}
 		} else if (is_root == false &&
-				detail->name == state->last_child) {
+				detail->qname.name == state->last_child) {
 			int32_t num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw,
@@ -1443,7 +1445,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 			if (error == CSS_OK)
 				*match = (num_after == 0);
 		} else if (is_root == false &&
-				detail->name == state->first_of_type) {
+				detail->qname.name == state->first_of_type) {
 			int32_t num_before = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1451,7 +1453,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 			if (error == CSS_OK)
 				*match = (num_before == 0);
 		} else if (is_root == false &&
-				detail->name == state->last_of_type) {
+				detail->qname.name == state->last_of_type) {
 			int32_t num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1459,7 +1461,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 			if (error == CSS_OK)
 				*match = (num_after == 0);
 		} else if (is_root == false && 
-				detail->name == state->only_child) {
+				detail->qname.name == state->only_child) {
 			int32_t num_before = 0, num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1473,7 +1475,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 							(num_after == 0);
 			}
 		} else if (is_root == false && 
-				detail->name == state->only_of_type) {
+				detail->qname.name == state->only_of_type) {
 			int32_t num_before = 0, num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1486,39 +1488,39 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 					*match = (num_before == 0) && 
 							(num_after == 0);
 			}
-		} else if (detail->name == state->root) {
+		} else if (detail->qname.name == state->root) {
 			*match = is_root;
-		} else if (detail->name == state->empty) {
+		} else if (detail->qname.name == state->empty) {
 			error = state->handler->node_is_empty(state->pw,
 					node, match);
-		} else if (detail->name == state->link) {
+		} else if (detail->qname.name == state->link) {
 			error = state->handler->node_is_link(state->pw,
 					node, match);
-		} else if (detail->name == state->visited) {
+		} else if (detail->qname.name == state->visited) {
 			error = state->handler->node_is_visited(state->pw,
 					node, match);
-		} else if (detail->name == state->hover) {
+		} else if (detail->qname.name == state->hover) {
 			error = state->handler->node_is_hover(state->pw,
 					node, match);
-		} else if (detail->name == state->active) {
+		} else if (detail->qname.name == state->active) {
 			error = state->handler->node_is_active(state->pw,
 					node, match);
-		} else if (detail->name == state->focus) {
+		} else if (detail->qname.name == state->focus) {
 			error = state->handler->node_is_focus(state->pw,
 					node, match);
-		} else if (detail->name == state->target) {
+		} else if (detail->qname.name == state->target) {
 			error = state->handler->node_is_target(state->pw,
 					node, match);
-		} else if (detail->name == state->lang) {
+		} else if (detail->qname.name == state->lang) {
 			error = state->handler->node_is_lang(state->pw,
 					node, detail->value.string, match);
-		} else if (detail->name == state->enabled) {
+		} else if (detail->qname.name == state->enabled) {
 			error = state->handler->node_is_enabled(state->pw,
 					node, match);
-		} else if (detail->name == state->disabled) {
+		} else if (detail->qname.name == state->disabled) {
 			error = state->handler->node_is_disabled(state->pw,
 					node, match);
-		} else if (detail->name == state->checked) {
+		} else if (detail->qname.name == state->checked) {
 			error = state->handler->node_is_checked(state->pw,
 					node, match);
 		} else
@@ -1527,49 +1529,49 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 	case CSS_SELECTOR_PSEUDO_ELEMENT:
 		*match = true;
 
-		if (detail->name == state->first_line) {
+		if (detail->qname.name == state->first_line) {
 			*pseudo_element = CSS_PSEUDO_ELEMENT_FIRST_LINE;
-		} else if (detail->name == state->first_letter) {
+		} else if (detail->qname.name == state->first_letter) {
 			*pseudo_element = CSS_PSEUDO_ELEMENT_FIRST_LETTER;
-		} else if (detail->name == state->before) {
+		} else if (detail->qname.name == state->before) {
 			*pseudo_element = CSS_PSEUDO_ELEMENT_BEFORE;
-		} else if (detail->name == state->after) {
+		} else if (detail->qname.name == state->after) {
 			*pseudo_element = CSS_PSEUDO_ELEMENT_AFTER;
 		} else
 			*match = false;
 		break;
 	case CSS_SELECTOR_ATTRIBUTE:
 		error = state->handler->node_has_attribute(state->pw, node,
-				detail->name, match);
+				&detail->qname, match);
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_EQUAL:
 		error = state->handler->node_has_attribute_equal(state->pw, 
-				node, detail->name, detail->value.string, 
+				node, &detail->qname, detail->value.string, 
 				match);
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_DASHMATCH:
 		error = state->handler->node_has_attribute_dashmatch(state->pw,
-				node, detail->name, detail->value.string,
+				node, &detail->qname, detail->value.string,
 				match);
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_INCLUDES:
 		error = state->handler->node_has_attribute_includes(state->pw, 
-				node, detail->name, detail->value.string,
+				node, &detail->qname, detail->value.string,
 				match);
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_PREFIX:
 		error = state->handler->node_has_attribute_prefix(state->pw,
-				node, detail->name, detail->value.string,
+				node, &detail->qname, detail->value.string,
 				match);
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_SUFFIX:
 		error = state->handler->node_has_attribute_suffix(state->pw,
-				node, detail->name, detail->value.string,
+				node, &detail->qname, detail->value.string,
 				match);
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_SUBSTRING:
 		error = state->handler->node_has_attribute_substring(state->pw,
-				node, detail->name, detail->value.string,
+				node, &detail->qname, detail->value.string,
 				match);
 		break;
 	}

@@ -69,7 +69,7 @@ typedef union css_selector_detail_value {
 } css_selector_detail_value;
 
 typedef struct css_selector_detail {
-	lwc_string *name;			/**< Interned name */
+	css_qname qname;			/**< Interned name */
 	css_selector_detail_value value;	/**< Detail value */
 
 	unsigned int type       : 4,		/**< Type of selector */
@@ -240,12 +240,12 @@ static inline css_error css_stylesheet_style_inherit(css_style *style,
 }
 
 css_error css__stylesheet_selector_create(css_stylesheet *sheet,
-		lwc_string *name, css_selector **selector);
+		css_qname *qname, css_selector **selector);
 css_error css__stylesheet_selector_destroy(css_stylesheet *sheet,
 		css_selector *selector);
 
 css_error css__stylesheet_selector_detail_init(css_stylesheet *sheet,
-		css_selector_type type, lwc_string *name,
+		css_selector_type type, css_qname *qname,
 		css_selector_detail_value value, 
 		css_selector_detail_value_type value_type,
 		bool negate, css_selector_detail *detail);

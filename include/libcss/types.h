@@ -17,6 +17,8 @@ extern "C"
 #include <stdint.h>
 #include <stdlib.h>
 
+#include <libwapcaplet/libwapcaplet.h>
+
 #include <libcss/fpmath.h>
 
 /**
@@ -99,6 +101,25 @@ typedef enum css_unit {
 	CSS_UNIT_HZ                 = 0xe,
 	CSS_UNIT_KHZ                = 0xf
 } css_unit;
+
+/**
+ * Type of a qualified name
+ */
+typedef struct css_qname {
+	/**
+	 * Namespace URI:
+	 *
+	 * NULL for no namespace
+	 * '*' for any namespace (including none)
+	 * URI for a specific namespace
+	 */
+	lwc_string *ns;
+
+	/**
+	 * Local part of qualified name
+	 */
+	lwc_string *name;
+} css_qname;
 
 typedef struct css_stylesheet css_stylesheet;
 

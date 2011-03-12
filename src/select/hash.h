@@ -32,7 +32,7 @@ css_error css__selector_hash_remove(css_selector_hash *hash,
 		const struct css_selector *selector);
 
 css_error css__selector_hash_find(css_selector_hash *hash,
-		lwc_string *name,
+		css_qname *qname,
 		css_selector_hash_iterator *iterator,
 		const struct css_selector ***matched);
 css_error css__selector_hash_find_by_class(css_selector_hash *hash,

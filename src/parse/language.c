@@ -55,6 +55,10 @@ static css_error handleDeclaration(css_language *c,
 static css_error parseMediaList(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint64_t *media);
+static css_error addNamespace(css_language *c, 
+		lwc_string *prefix, lwc_string *uri);
+static css_error lookupNamespace(css_language *c, 
+		lwc_string *prefix, lwc_string **uri);
 
 /* Selector list parsing */
 static css_error parseClass(css_language *c,
@@ -78,6 +82,9 @@ static css_error parseAppendSpecific(css_language *c,
 static css_error parseSelectorSpecifics(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		css_selector **parent);
+static css_error parseTypeSelector(css_language *c, 
+		const parserutils_vector *vector, int *ctx, 
+		css_qname *qname);
 static css_error parseSimpleSelector(css_language *c, 
 		const parserutils_vector *vector, int *ctx, 
 		css_selector **result);
@@ -155,7 +162,10 @@ css_error css__language_create(css_stylesheet *sheet, css_parser *parser,
 	}
 
 	c->sheet = sheet;
-	c->state = BEFORE_CHARSET;
+	c->state = CHARSET_PERMITTED;
+	c->default_namespace = NULL;
+	c->namespaces = NULL;
+	c->num_namespaces = 0;
 	c->alloc = alloc;
 	c->pw = pw;
 
@@ -172,10 +182,22 @@ css_error css__language_create(css_stylesheet *sheet, css_parser *parser,
  */
 css_error css__language_destroy(css_language *language)
 {
-	int i;
+	uint32_t i;
 	
 	if (language == NULL)
 		return CSS_BADPARM;
+
+	if (language->default_namespace != NULL)
+		lwc_string_unref(language->default_namespace);
+
+	if (language->namespaces != NULL) {
+		for (i = 0; i < language->num_namespaces; i++) {
+			lwc_string_unref(language->namespaces[i].prefix);
+			lwc_string_unref(language->namespaces[i].uri);
+		}
+
+		language->alloc(language->namespaces, 0, language->pw);
+	}
 
 	parserutils_stack_destroy(language->context);
 	
@@ -315,8 +337,8 @@ css_error handleStartRuleset(css_language *c, const parserutils_vector *vector)
 		return error;
 	}
 
-	/* Flag that we've had a valid rule, so @import/@charset have 
-	 * no effect. */
+	/* Flag that we've had a valid rule, so @import/@namespace/@charset 
+	 * have no effect. */
 	c->state = HAD_RULE;
 
 	/* Rule is now owned by the sheet, so no need to destroy it */
@@ -370,7 +392,7 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 
 	if (lwc_string_caseless_isequal(atkeyword->idata, c->strings[CHARSET], 
 			&match) == lwc_error_ok && match) {
-		if (c->state == BEFORE_CHARSET) {
+		if (c->state == CHARSET_PERMITTED) {
 			const css_token *charset;
 
 			/* any0 = STRING */
@@ -407,14 +429,14 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 			/* Rule is now owned by the sheet, 
 			 * so no need to destroy it */
 
-			c->state = BEFORE_RULES;
+			c->state = IMPORT_PERMITTED;
 		} else {
 			return CSS_INVALID;
 		}
 	} else if (lwc_string_caseless_isequal(atkeyword->idata, 
 			c->strings[LIBCSS_IMPORT], &match) == lwc_error_ok && 
 			match) {
-		if (c->state != HAD_RULE) {
+		if (c->state <= IMPORT_PERMITTED) {
 			lwc_string *url;
 			uint64_t media = 0;
 
@@ -482,7 +504,43 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 			/* Rule is now owned by the sheet, 
 			 * so no need to destroy it */
 
-			c->state = BEFORE_RULES;
+			c->state = IMPORT_PERMITTED;
+		} else {
+			return CSS_INVALID;
+		}
+	} else if (lwc_string_caseless_isequal(atkeyword->idata, 
+			c->strings[NAMESPACE], &match) == lwc_error_ok && 
+			match) {
+		if (c->state <= NAMESPACE_PERMITTED) {
+			lwc_string *prefix = NULL;
+
+			/* any0 = (IDENT ws)? (STRING | URI) ws */
+
+			token = parserutils_vector_iterate(vector, &ctx);
+			if (token == NULL)
+				return CSS_INVALID;
+
+			if (token->type == CSS_TOKEN_IDENT) {
+				prefix = token->idata;
+
+				consumeWhitespace(vector, &ctx);
+
+				token = parserutils_vector_iterate(vector, 
+						&ctx);
+			}
+
+			if (token == NULL || (token->type != CSS_TOKEN_STRING &&
+					token->type != CSS_TOKEN_URI)) {
+				return CSS_INVALID;
+			}
+
+			consumeWhitespace(vector, &ctx);
+
+			error = addNamespace(c, prefix, token->idata);
+			if (error != CSS_OK)
+				return error;
+
+			c->state = NAMESPACE_PERMITTED;
 		} else {
 			return CSS_INVALID;
 		}
@@ -728,6 +786,7 @@ css_error handleDeclaration(css_language *c, const parserutils_vector *vector)
 /******************************************************************************
  * At-rule parsing functions						      *
  ******************************************************************************/
+
 css_error parseMediaList(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		uint64_t *media)
@@ -807,6 +866,101 @@ css_error parseMediaList(css_language *c,
 	return CSS_OK;
 }
 
+/**
+ * Add a namespace mapping
+ *
+ * \param c       Parsing context to add to
+ * \param prefix  Namespace prefix, or NULL for default namespace
+ * \param uri     Namespace URI
+ * \return CSS_OK on success, CSS_NOMEM on memory exhaustion.
+ */
+css_error addNamespace(css_language *c, lwc_string *prefix, lwc_string *uri)
+{
+	if (prefix == NULL) {
+		/* Replace default namespace */
+		if (c->default_namespace != NULL)
+			lwc_string_unref(c->default_namespace);
+
+		/* Special case: if new namespace uri is "", use NULL */
+		if (lwc_string_length(uri) == 0)
+			c->default_namespace = NULL;
+		else
+			c->default_namespace = lwc_string_ref(uri);
+	} else {
+		/* Replace, or add mapping */
+		bool match;
+		uint32_t idx;
+
+		for (idx = 0; idx < c->num_namespaces; idx++) {
+			if (lwc_string_isequal(c->namespaces[idx].prefix,
+					prefix, &match) == lwc_error_ok &&
+					match)
+				break;
+		}
+
+		if (idx == c->num_namespaces) {
+			/* Not found, create a new mapping */
+			css_namespace *ns = c->alloc(c->namespaces, 
+					sizeof(css_namespace) * 
+						(c->num_namespaces + 1), 
+					c->pw);
+
+			if (ns == NULL)
+				return CSS_NOMEM;
+
+			ns[idx].prefix = lwc_string_ref(prefix);
+			ns[idx].uri = NULL;
+
+			c->namespaces = ns;
+			c->num_namespaces++;
+		}
+
+		/* Replace namespace URI */
+		if (c->namespaces[idx].uri != NULL)
+			lwc_string_unref(c->namespaces[idx].uri);
+
+		/* Special case: if new namespace uri is "", use NULL */
+		if (lwc_string_length(uri) == 0)
+			c->namespaces[idx].uri = NULL;
+		else
+			c->namespaces[idx].uri = lwc_string_ref(uri);
+	}
+
+	return CSS_OK;
+}
+
+/**
+ * Look up a namespace prefix
+ *
+ * \param c       Language parser context
+ * \param prefix  Namespace prefix to find, or NULL for none
+ * \param uri     Pointer to location to receive namespace URI
+ * \return CSS_OK on success, CSS_INVALID if prefix is not found
+ */
+css_error lookupNamespace(css_language *c, lwc_string *prefix, lwc_string **uri)
+{
+	uint32_t idx;
+	bool match;
+
+	if (prefix == NULL) {
+		*uri = NULL;
+	} else {
+		for (idx = 0; idx < c->num_namespaces; idx++) {
+			if (lwc_string_isequal(c->namespaces[idx].prefix,
+					prefix, &match) == lwc_error_ok &&
+					match)
+				break;
+		}
+
+		if (idx == c->num_namespaces)
+			return CSS_INVALID;
+
+		*uri = c->namespaces[idx].uri;
+	}
+
+	return CSS_OK;
+}
+
 /******************************************************************************
  * Selector list parsing functions					      *
  ******************************************************************************/
@@ -814,6 +968,7 @@ css_error parseMediaList(css_language *c,
 css_error parseClass(css_language *c, const parserutils_vector *vector, 
 		int *ctx, css_selector_detail *specific)
 {
+	css_qname qname;
 	css_selector_detail_value detail_value;
 	const css_token *token;
 
@@ -828,19 +983,25 @@ css_error parseClass(css_language *c, const parserutils_vector *vector,
 
 	detail_value.string = NULL;
 
+	qname.ns = NULL;
+	qname.name = token->idata;
+
 	return css__stylesheet_selector_detail_init(c->sheet, 
-			CSS_SELECTOR_CLASS, token->idata, detail_value,
+			CSS_SELECTOR_CLASS, &qname, detail_value,
 			CSS_SELECTOR_DETAIL_VALUE_STRING, false, specific);
 }
 
 css_error parseAttrib(css_language *c, const parserutils_vector *vector, 
 		int *ctx, css_selector_detail *specific)
 {
+	css_qname qname;
 	css_selector_detail_value detail_value;
-	const css_token *token, *name, *value = NULL;
+	const css_token *token, *value = NULL;
 	css_selector_type type = CSS_SELECTOR_ATTRIBUTE;
+	css_error error;
+	lwc_string *prefix = NULL;
 
-	/* attrib    -> '[' ws IDENT ws [
+	/* attrib    -> '[' ws namespace_prefix? IDENT ws [
 	 *		       [ '=' | 
 	 *		         INCLUDES | 
 	 *		         DASHMATCH | 
@@ -849,6 +1010,7 @@ css_error parseAttrib(css_language *c, const parserutils_vector *vector,
 	 *		         SUBSTRINGMATCH 
 	 *		       ] ws
 	 *		       [ IDENT | STRING ] ws ]? ']'
+	 * namespace_prefix -> [ IDENT | '*' ]? '|'
 	 */
 	token = parserutils_vector_iterate(vector, ctx);
 	if (token == NULL || tokenIsChar(token, '[') == false)
@@ -857,10 +1019,34 @@ css_error parseAttrib(css_language *c, const parserutils_vector *vector,
 	consumeWhitespace(vector, ctx);
 
 	token = parserutils_vector_iterate(vector, ctx);
+	if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+			tokenIsChar(token, '*') == false &&
+			tokenIsChar(token, '|') == false))
+		return CSS_INVALID;
+
+	if (tokenIsChar(token, '|')) {
+		token = parserutils_vector_iterate(vector, ctx);
+	} else {
+		const css_token *temp;
+
+		temp = parserutils_vector_peek(vector, *ctx);
+		if (temp != NULL && tokenIsChar(temp, '|')) {
+			prefix = token->idata;
+
+			parserutils_vector_iterate(vector, ctx);
+
+			token = parserutils_vector_iterate(vector, ctx);
+		}
+	}
+
 	if (token == NULL || token->type != CSS_TOKEN_IDENT)
 		return CSS_INVALID;
 
-	name = token;
+	error = lookupNamespace(c, prefix, &qname.ns);
+	if (error != CSS_OK)
+		return error;
+
+	qname.name = token->idata;
 
 	consumeWhitespace(vector, ctx);
 
@@ -903,7 +1089,7 @@ css_error parseAttrib(css_language *c, const parserutils_vector *vector,
 	detail_value.string = value != NULL ? value->idata : NULL;
 
 	return css__stylesheet_selector_detail_init(c->sheet, type, 
-			name->idata, detail_value, 
+			&qname, detail_value, 
 			CSS_SELECTOR_DETAIL_VALUE_STRING, false, specific);
 }
 
@@ -1151,7 +1337,7 @@ css_error parsePseudo(css_language *c, const parserutils_vector *vector,
 	css_selector_detail_value detail_value;
 	css_selector_detail_value_type value_type = 
 			CSS_SELECTOR_DETAIL_VALUE_STRING;
-	lwc_string *name;
+	css_qname qname;
 	const css_token *token;
 	bool match = false, require_element = false, negate = false;
 	uint32_t lut_idx;
@@ -1181,11 +1367,12 @@ css_error parsePseudo(css_language *c, const parserutils_vector *vector,
 			token->type != CSS_TOKEN_FUNCTION))
 		return CSS_INVALID;
 
-	name = token->idata;
+	qname.ns = NULL;
+	qname.name = token->idata;
 
 	/* Search lut for selector type */
 	for (lut_idx = 0; lut_idx < N_ELEMENTS(pseudo_lut); lut_idx++) {
-		if ((lwc_string_caseless_isequal(name, 
+		if ((lwc_string_caseless_isequal(qname.name, 
 				c->strings[pseudo_lut[lut_idx].index],
 				&match) == lwc_error_ok) && match) {
 			type = pseudo_lut[lut_idx].type;
@@ -1232,22 +1419,24 @@ css_error parsePseudo(css_language *c, const parserutils_vector *vector,
 
 			value_type = CSS_SELECTOR_DETAIL_VALUE_NTH;
 		} else if (fun_type == NOT) {
-			/* element_name | specific */
+			/* type_selector | specific */
 			token = parserutils_vector_peek(vector, *ctx);
 			if (token == NULL)
 				return CSS_INVALID;
 
 			if (token->type == CSS_TOKEN_IDENT || 
-					tokenIsChar(token, '*')) {
-				/* Have element name */
-				name = token->idata;
+					tokenIsChar(token, '*') ||
+					tokenIsChar(token, '|')) {
+				/* Have type selector */
+				error = parseTypeSelector(c, vector, ctx, 
+						&qname);
+				if (error != CSS_OK)
+					return error;
 
 				type = CSS_SELECTOR_ELEMENT;
 
 				detail_value.string = NULL;
 				value_type = CSS_SELECTOR_DETAIL_VALUE_STRING;
-
-				parserutils_vector_iterate(vector, ctx);
 			} else {
 				/* specific */
 				css_selector_detail det;
@@ -1257,7 +1446,7 @@ css_error parsePseudo(css_language *c, const parserutils_vector *vector,
 				if (error != CSS_OK)
 					return error;
 
-				name = det.name;
+				qname = det.qname;
 				type = det.type;
 				detail_value = det.value;
 				value_type = det.value_type;
@@ -1274,7 +1463,8 @@ css_error parsePseudo(css_language *c, const parserutils_vector *vector,
 	}
 
 	return css__stylesheet_selector_detail_init(c->sheet, 
-			type, name, detail_value, value_type, negate, specific);
+			type, &qname, detail_value, value_type, 
+			negate, specific);
 }
 
 css_error parseSpecific(css_language *c,
@@ -1291,12 +1481,16 @@ css_error parseSpecific(css_language *c,
 		return CSS_INVALID;
 
 	if (token->type == CSS_TOKEN_HASH) {
+		css_qname qname;
 		css_selector_detail_value detail_value;
 
 		detail_value.string = NULL;
 
+		qname.ns = NULL;
+		qname.name = token->idata;
+
 		error = css__stylesheet_selector_detail_init(c->sheet,
-				CSS_SELECTOR_ID, token->idata, detail_value,
+				CSS_SELECTOR_ID, &qname, detail_value,
 				CSS_SELECTOR_DETAIL_VALUE_STRING, false, 
 				specific);
 		if (error != CSS_OK)
@@ -1359,35 +1553,105 @@ css_error parseSelectorSpecifics(css_language *c,
 	return CSS_OK;
 }
 
-css_error parseSimpleSelector(css_language *c, 
-		const parserutils_vector *vector, int *ctx, 
-		css_selector **result)
+css_error parseTypeSelector(css_language *c, const parserutils_vector *vector,
+		int *ctx, css_qname *qname)
 {
-	css_error error;
 	const css_token *token;
-	css_selector *selector;
+	css_error error;
+	lwc_string *prefix = NULL;
 
-	/* simple_selector -> element_name specifics
-	 *		   -> specific specifics
-	 * element_name	   -> IDENT | '*'
+	/* type_selector    -> namespace_prefix? element_name
+	 * namespace_prefix -> [ IDENT | '*' ]? '|'
+	 * element_name	    -> IDENT | '*'
 	 */
 
 	token = parserutils_vector_peek(vector, *ctx);
 	if (token == NULL)
 		return CSS_INVALID;
 
-	if (token->type == CSS_TOKEN_IDENT || tokenIsChar(token, '*')) {
-		/* Have element name */
-		error = css__stylesheet_selector_create(c->sheet,
-				token->idata, &selector);
+	if (tokenIsChar(token, '|') == false) {
+		prefix = token->idata;
+
+		parserutils_vector_iterate(vector, ctx);
+
+		token = parserutils_vector_peek(vector, *ctx);
+	}
+
+	if (token != NULL && tokenIsChar(token, '|')) {
+		/* Have namespace prefix */
+		parserutils_vector_iterate(vector, ctx);
+
+		/* Expect element_name */
+		token = parserutils_vector_iterate(vector, ctx);
+
+		if (token == NULL || (token->type != CSS_TOKEN_IDENT &&
+				tokenIsChar(token, '*') == false)) {
+			return CSS_INVALID;
+		}
+
+		error = lookupNamespace(c, prefix, &qname->ns);
 		if (error != CSS_OK)
 			return error;
 
-		parserutils_vector_iterate(vector, ctx);
+		qname->name = token->idata;
+	} else {
+		/* No namespace prefix */
+		if (c->default_namespace == NULL) {
+			qname->ns = c->strings[UNIVERSAL];
+		} else {
+			qname->ns = c->default_namespace;
+		}
+
+		qname->name = prefix;
+	}
+
+	return CSS_OK;
+}
+
+css_error parseSimpleSelector(css_language *c, 
+		const parserutils_vector *vector, int *ctx, 
+		css_selector **result)
+{
+	int orig_ctx = *ctx;
+	css_error error;
+	const css_token *token;
+	css_selector *selector;
+	css_qname qname;
+
+	/* simple_selector  -> type_selector specifics
+	 *		    -> specific specifics
+	 */
+
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+
+	if (token->type == CSS_TOKEN_IDENT || tokenIsChar(token, '*') ||
+			tokenIsChar(token, '|')) {
+		/* Have type selector */
+		error = parseTypeSelector(c, vector, ctx, &qname);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
+
+		error = css__stylesheet_selector_create(c->sheet,
+				&qname, &selector);
+		if (error != CSS_OK) {
+			*ctx = orig_ctx;
+			return error;
+		}
 	} else {
 		/* Universal selector */
+		if (c->default_namespace == NULL)
+			qname.ns = c->strings[UNIVERSAL];
+		else
+			qname.ns = c->default_namespace;
+
+		qname.name = c->strings[UNIVERSAL];
+
 		error = css__stylesheet_selector_create(c->sheet,
-				c->strings[UNIVERSAL], &selector);
+				&qname, &selector);
 		if (error != CSS_OK)
 			return error;
 

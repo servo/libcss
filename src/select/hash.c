@@ -202,11 +202,11 @@ css_error css__selector_hash_insert(css_selector_hash *hash,
 		return CSS_BADPARM;
 
 	/* Work out which hash to insert into */
-	if (lwc_string_length(selector->data.name) != 1 ||
-			lwc_string_data(selector->data.name)[0] != '*') {
+	if (lwc_string_length(selector->data.qname.name) != 1 ||
+			lwc_string_data(selector->data.qname.name)[0] != '*') {
 		/* Named element */
 		mask = hash->elements.n_slots - 1;
-		index = _hash_name(selector->data.name) & mask;
+		index = _hash_name(selector->data.qname.name) & mask;
 
 		error = _insert_into_chain(hash, &hash->elements.slots[index], 
 				selector);
@@ -250,11 +250,11 @@ css_error css__selector_hash_remove(css_selector_hash *hash,
 		return CSS_BADPARM;
 
 	/* Work out which hash to insert into */
-	if (lwc_string_length(selector->data.name) != 1 ||
-			lwc_string_data(selector->data.name)[0] != '*') {
+	if (lwc_string_length(selector->data.qname.name) != 1 ||
+			lwc_string_data(selector->data.qname.name)[0] != '*') {
 		/* Named element */
 		mask = hash->elements.n_slots - 1;
-		index = _hash_name(selector->data.name) & mask;
+		index = _hash_name(selector->data.qname.name) & mask;
 
 		error = _remove_from_chain(hash, &hash->elements.slots[index], 
 				selector);
@@ -284,7 +284,7 @@ css_error css__selector_hash_remove(css_selector_hash *hash,
  * Find the first selector that matches name
  *
  * \param hash      Hash to search
- * \param name      Name to match
+ * \param qname     Qualified name to match
  * \param iterator  Pointer to location to receive iterator function
  * \param matched   Pointer to location to receive selector
  * \return CSS_OK on success, appropriate error otherwise
@@ -292,19 +292,19 @@ css_error css__selector_hash_remove(css_selector_hash *hash,
  * If nothing matches, CSS_OK will be returned and **matched == NULL
  */
 css_error css__selector_hash_find(css_selector_hash *hash,
-		lwc_string *name, 
+		css_qname *qname, 
 		css_selector_hash_iterator *iterator,
 		const css_selector ***matched)
 {
 	uint32_t index, mask;
 	hash_entry *head;
 
-	if (hash == NULL || name == NULL || iterator == NULL || matched == NULL)
+	if (hash == NULL || qname == NULL || iterator == NULL || matched == NULL)
 		return CSS_BADPARM;
 
 	/* Find index */
 	mask = hash->elements.n_slots - 1;
-	index = _hash_name(name) & mask;
+	index = _hash_name(qname->name) & mask;
 
 	head = &hash->elements.slots[index];
 
@@ -315,7 +315,8 @@ css_error css__selector_hash_find(css_selector_hash *hash,
 			bool match = false;
 
 			lerror = lwc_string_caseless_isequal(
-					name, head->sel->data.name, &match);
+					qname->name, head->sel->data.qname.name,
+					&match);
 			if (lerror != lwc_error_ok)
 				return css_error_from_lwc_error(lerror);
 
@@ -538,7 +539,7 @@ lwc_string *_class_name(const css_selector *selector)
 	do {
 		/* Ignore :not(.class) */
 		if (detail->type == CSS_SELECTOR_CLASS && detail->negate == 0) {
-			name = detail->name;
+			name = detail->qname.name;
 			break;
 		}
 
@@ -565,7 +566,7 @@ lwc_string *_id_name(const css_selector *selector)
 	do {
 		/* Ignore :not(#id) */
 		if (detail->type == CSS_SELECTOR_ID && detail->negate == 0) {
-			name = detail->name;
+			name = detail->qname.name;
 			break;
 		}
 
@@ -701,7 +702,7 @@ css_error _iterate_elements(css_selector_hash *hash,
 	if (hash == NULL || current == NULL || next == NULL)
 		return CSS_BADPARM;
 
-	name = head->sel->data.name;
+	name = head->sel->data.qname.name;
 
 	/* Look for the next selector that matches the key */
 	for (head = head->next; head != NULL; head = head->next) {
@@ -709,7 +710,7 @@ css_error _iterate_elements(css_selector_hash *hash,
 		bool match = false;
 
 		lerror = lwc_string_caseless_isequal(
-				name, head->sel->data.name, &match);
+				name, head->sel->data.qname.name, &match);
 		if (lerror != lwc_error_ok)
 			return css_error_from_lwc_error(lerror);
 

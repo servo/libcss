@@ -13,8 +13,6 @@ extern "C"
 {
 #endif
 
-#include <libwapcaplet/libwapcaplet.h>
-
 #include <libcss/errors.h>
 #include <libcss/functypes.h>
 #include <libcss/hint.h>
@@ -50,7 +48,7 @@ typedef struct css_select_results {
 
 typedef struct css_select_handler {
 	css_error (*node_name)(void *pw, void *node,
-			lwc_string **name);
+			css_qname *qname);
 	css_error (*node_classes)(void *pw, void *node,
 			lwc_string ***classes,
 			uint32_t *n_classes);
@@ -58,42 +56,42 @@ typedef struct css_select_handler {
 			lwc_string **id);
 
 	css_error (*named_ancestor_node)(void *pw, void *node,
-			lwc_string *name, void **ancestor);
+			const css_qname *qname, void **ancestor);
 	css_error (*named_parent_node)(void *pw, void *node,
-			lwc_string *name, void **parent);
+			const css_qname *qname, void **parent);
 	css_error (*named_sibling_node)(void *pw, void *node,
-			lwc_string *name, void **sibling);
+			const css_qname *qname, void **sibling);
 	css_error (*named_generic_sibling_node)(void *pw, void *node,
-			lwc_string *name, void **sibling);
+			const css_qname *qname, void **sibling);
 
 	css_error (*parent_node)(void *pw, void *node, void **parent);
 	css_error (*sibling_node)(void *pw, void *node, void **sibling);
 
 	css_error (*node_has_name)(void *pw, void *node,
-			lwc_string *name, bool *match);
+			const css_qname *qname, bool *match);
 	css_error (*node_has_class)(void *pw, void *node,
 			lwc_string *name, bool *match);
 	css_error (*node_has_id)(void *pw, void *node,
 			lwc_string *name, bool *match);
 	css_error (*node_has_attribute)(void *pw, void *node,
-			lwc_string *name, bool *match);
+			const css_qname *qname, bool *match);
 	css_error (*node_has_attribute_equal)(void *pw, void *node,
-			lwc_string *name, lwc_string *value,
+			const css_qname *qname, lwc_string *value,
 			bool *match);
 	css_error (*node_has_attribute_dashmatch)(void *pw, void *node,
-			lwc_string *name, lwc_string *value,
+			const css_qname *qname, lwc_string *value,
 			bool *match);
 	css_error (*node_has_attribute_includes)(void *pw, void *node,
-			lwc_string *name, lwc_string *value,
+			const css_qname *qname, lwc_string *value,
 			bool *match);
 	css_error (*node_has_attribute_prefix)(void *pw, void *node,
-			lwc_string *name, lwc_string *value,
+			const css_qname *qname, lwc_string *value,
 			bool *match);
 	css_error (*node_has_attribute_suffix)(void *pw, void *node,
-			lwc_string *name, lwc_string *value,
+			const css_qname *qname, lwc_string *value,
 			bool *match);
 	css_error (*node_has_attribute_substring)(void *pw, void *node,
-			lwc_string *name, lwc_string *value,
+			const css_qname *qname, lwc_string *value,
 			bool *match);
 
 	css_error (*node_is_root)(void *pw, void *node, bool *match);

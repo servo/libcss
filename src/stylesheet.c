@@ -781,18 +781,19 @@ css_error css__stylesheet_style_destroy(css_style *style)
  * Create an element selector
  *
  * \param sheet	    The stylesheet context
- * \param name	    Name of selector
+ * \param qname	    Qualified name of selector
  * \param selector  Pointer to location to receive selector object
  * \return CSS_OK on success,
  *	   CSS_BADPARM on bad parameters,
  *	   CSS_NOMEM on memory exhaustion
  */
 css_error css__stylesheet_selector_create(css_stylesheet *sheet,
-		lwc_string *name, css_selector **selector)
+		css_qname *qname, css_selector **selector)
 {
 	css_selector *sel;
 
-	if (sheet == NULL || name == NULL || selector == NULL)
+	if (sheet == NULL || qname == NULL || qname->name == NULL || 
+			selector == NULL)
 		return CSS_BADPARM;
 
 	sel = sheet->alloc(NULL, sizeof(css_selector), sheet->pw);
@@ -802,7 +803,11 @@ css_error css__stylesheet_selector_create(css_stylesheet *sheet,
 	memset(sel, 0, sizeof(css_selector));
 
 	sel->data.type = CSS_SELECTOR_ELEMENT;
-	sel->data.name = lwc_string_ref(name);
+	if (qname->ns != NULL)
+		sel->data.qname.ns = lwc_string_ref(qname->ns);
+	else
+		sel->data.qname.ns = NULL;
+	sel->data.qname.name = lwc_string_ref(qname->name);
 	sel->data.value.string = NULL;
 	sel->data.value_type = CSS_SELECTOR_DETAIL_VALUE_STRING;
 
@@ -810,8 +815,8 @@ css_error css__stylesheet_selector_create(css_stylesheet *sheet,
 		sel->specificity = CSS_SPECIFICITY_A;
 	} else {
 		/* Initial specificity -- 1 for an element, 0 for universal */
-		if (lwc_string_length(name) != 1 || 
-				lwc_string_data(name)[0] != '*')
+		if (lwc_string_length(qname->name) != 1 || 
+				lwc_string_data(qname->name)[0] != '*')
 			sel->specificity = CSS_SPECIFICITY_D;
 		else
 			sel->specificity = 0;
@@ -848,7 +853,9 @@ css_error css__stylesheet_selector_destroy(css_stylesheet *sheet,
 		d = c->combinator;
 
 		for (detail = &c->data; detail;) {
-			lwc_string_unref(detail->name);
+			if (detail->qname.ns != NULL)
+				lwc_string_unref(detail->qname.ns);
+			lwc_string_unref(detail->qname.name);
 
 			if (detail->value_type == 
 					CSS_SELECTOR_DETAIL_VALUE_STRING && 
@@ -866,7 +873,9 @@ css_error css__stylesheet_selector_destroy(css_stylesheet *sheet,
 	}
 	
 	for (detail = &selector->data; detail;) {
-		lwc_string_unref(detail->name);
+		if (detail->qname.ns != NULL)
+			lwc_string_unref(detail->qname.ns);
+		lwc_string_unref(detail->qname.name);
 
 		if (detail->value_type == CSS_SELECTOR_DETAIL_VALUE_STRING && 
 				detail->value.string != NULL) {
@@ -891,27 +900,31 @@ css_error css__stylesheet_selector_destroy(css_stylesheet *sheet,
  *
  * \param sheet	      The stylesheet context
  * \param type	      The type of selector to create
- * \param name	      Name of selector
+ * \param qname	      Qualified name of selector
  * \param value	      Value of selector
  * \param value_type  Type of \a value
  * \param negate      Whether the detail match should be negated
  * \param detail      Pointer to detail object to initialise
  * \return CSS_OK on success,
  *	   CSS_BADPARM on bad parameters
+ *
+ * \note No strings are referenced at this point: they will be 
+ *       referenced when appending the detail to a selector.
  */
 css_error css__stylesheet_selector_detail_init(css_stylesheet *sheet,
-		css_selector_type type, lwc_string *name, 
+		css_selector_type type, css_qname *qname, 
 		css_selector_detail_value value, 
 		css_selector_detail_value_type value_type,
 		bool negate, css_selector_detail *detail)
 {
-	if (sheet == NULL || name == NULL || detail == NULL)
+	if (sheet == NULL || qname == NULL || qname->name == NULL || 
+			detail == NULL)
 		return CSS_BADPARM;
 
 	memset(detail, 0, sizeof(css_selector_detail));
 
 	detail->type = type;
-	detail->name = name;
+	detail->qname = *qname;
 	detail->value = value;
 	detail->value_type = value_type;
 	detail->negate = negate;
@@ -959,7 +972,9 @@ css_error css__stylesheet_selector_append_specific(css_stylesheet *sheet,
 	(&temp->data)[num_details].next = 1;
 	
 	/* Ref the strings */
-	lwc_string_ref(detail->name);
+	if (detail->qname.ns != NULL)
+		lwc_string_ref(detail->qname.ns);
+	lwc_string_ref(detail->qname.name);
 	if (detail->value_type == CSS_SELECTOR_DETAIL_VALUE_STRING &&
 			detail->value.string != NULL)
 		lwc_string_ref(detail->value.string);

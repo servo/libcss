@@ -651,30 +651,30 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 
 	switch (detail->type) {
 	case CSS_SELECTOR_ELEMENT:
-                if (lwc_string_length(detail->name) == 1 && 
-                    lwc_string_data(detail->name)[0] == '*' &&
+                if (lwc_string_length(detail->qname.name) == 1 && 
+                    lwc_string_data(detail->qname.name)[0] == '*' &&
 				detail->next == 0) {
-			dump_string(detail->name, ptr);
-		} else if (lwc_string_length(detail->name) != 1 ||
-                           lwc_string_data(detail->name)[0] != '*') {
-			dump_string(detail->name, ptr);
+			dump_string(detail->qname.name, ptr);
+		} else if (lwc_string_length(detail->qname.name) != 1 ||
+                           lwc_string_data(detail->qname.name)[0] != '*') {
+			dump_string(detail->qname.name, ptr);
 		}
 		break;
 	case CSS_SELECTOR_CLASS:
 		**ptr = '.';
 		*ptr += 1;
-		dump_string(detail->name, ptr);
+		dump_string(detail->qname.name, ptr);
 		break;
 	case CSS_SELECTOR_ID:
 		**ptr = '#';
 		*ptr += 1;
-		dump_string(detail->name, ptr);
+		dump_string(detail->qname.name, ptr);
 		break;
 	case CSS_SELECTOR_PSEUDO_CLASS:
 	case CSS_SELECTOR_PSEUDO_ELEMENT:
 		**ptr = ':';
 		*ptr += 1;
-		dump_string(detail->name, ptr);
+		dump_string(detail->qname.name, ptr);
 		if (detail->value_type == CSS_SELECTOR_DETAIL_VALUE_STRING) {
 			if (detail->value.string != NULL) {
 				**ptr = '(';
@@ -692,14 +692,14 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 	case CSS_SELECTOR_ATTRIBUTE:
 		**ptr = '[';
 		*ptr += 1;
-		dump_string(detail->name, ptr);
+		dump_string(detail->qname.name, ptr);
 		**ptr = ']';
 		*ptr += 1;
 		break;
 	case CSS_SELECTOR_ATTRIBUTE_EQUAL:
 		**ptr = '[';
 		*ptr += 1;
-		dump_string(detail->name, ptr);
+		dump_string(detail->qname.name, ptr);
 		(*ptr)[0] = '=';
 		(*ptr)[1] = '"';
 		*ptr += 2;
@@ -711,7 +711,7 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 	case CSS_SELECTOR_ATTRIBUTE_DASHMATCH:
 		**ptr = '[';
 		*ptr += 1;
-		dump_string(detail->name, ptr);
+		dump_string(detail->qname.name, ptr);
 		(*ptr)[0] = '|';
 		(*ptr)[1] = '=';
 		(*ptr)[2] = '"';
@@ -724,7 +724,7 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 	case CSS_SELECTOR_ATTRIBUTE_INCLUDES:
 		**ptr = '[';
 		*ptr += 1;
-		dump_string(detail->name, ptr);
+		dump_string(detail->qname.name, ptr);
 		(*ptr)[0] = '~';
 		(*ptr)[1] = '=';
 		(*ptr)[2] = '"';
@@ -737,7 +737,7 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 	case CSS_SELECTOR_ATTRIBUTE_PREFIX:
 		**ptr = '[';
 		*ptr += 1;
-		dump_string(detail->name, ptr);
+		dump_string(detail->qname.name, ptr);
 		(*ptr)[0] = '^';
 		(*ptr)[1] = '=';
 		(*ptr)[2] = '"';
@@ -750,7 +750,7 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 	case CSS_SELECTOR_ATTRIBUTE_SUFFIX:
 		**ptr = '[';
 		*ptr += 1;
-		dump_string(detail->name, ptr);
+		dump_string(detail->qname.name, ptr);
 		(*ptr)[0] = '$';
 		(*ptr)[1] = '=';
 		(*ptr)[2] = '"';
@@ -763,7 +763,7 @@ void dump_selector_detail(css_selector_detail *detail, char **ptr)
 	case CSS_SELECTOR_ATTRIBUTE_SUBSTRING:
 		**ptr = '[';
 		*ptr += 1;
-		dump_string(detail->name, ptr);
+		dump_string(detail->qname.name, ptr);
 		(*ptr)[0] = '*';
 		(*ptr)[1] = '=';
 		(*ptr)[2] = '"';

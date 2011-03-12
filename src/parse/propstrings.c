@@ -14,6 +14,7 @@ const stringmap_entry stringmap[LAST_KNOWN] = {
 	{ "charset", SLEN("charset") },
 	{ "import", SLEN("import") },
 	{ "media", SLEN("media") },
+	{ "namespace", SLEN("namespace") },
 	{ "page", SLEN("page") },
 
 	{ "aural", SLEN("aural") },
