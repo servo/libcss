@@ -311,10 +311,10 @@ static inline css_error set_clip(
 			((type & 0x3) << CLIP_SHIFT);
 
 	if (type == CSS_CLIP_RECT) {
-		*bits |= (rect->top_auto ? 0x20 : 0) |
+		*bits |= (((rect->top_auto ? 0x20 : 0) |
 				(rect->right_auto ? 0x10 : 0) |
 				(rect->bottom_auto ? 0x8 : 0) |
-				(rect->left_auto ? 0x4 : 0);
+				(rect->left_auto ? 0x4 : 0)) << CLIP_SHIFT);
 
 		bits = &style->uncommon->bits[CLIP_INDEX1];
 
