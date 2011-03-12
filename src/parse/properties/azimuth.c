@@ -198,17 +198,17 @@ css_error css__parse_azimuth(css_language *c,
 
 		/* Valid angles lie between -360 and 360 degrees */
 		if (unit == UNIT_DEG) {
-			if (length < FMULI(F_360, -1) || length > F_360) {
+			if ((length < -F_360) || (length > F_360)) {
 				*ctx = orig_ctx;
 				return CSS_INVALID;
 			}
 		} else if (unit == UNIT_GRAD) {
-			if (length < FMULI(F_400, -1) || length > F_400) {
+			if ((length < -F_400) || (length > F_400)) {
 				*ctx = orig_ctx;
 				return CSS_INVALID;
 			}
 		} else if (unit == UNIT_RAD) {
-			if (length < FMULI(F_2PI, -1) || length > F_2PI) {
+			if ((length < -F_2PI) || (length > F_2PI)) {
 				*ctx = orig_ctx;
 				return CSS_INVALID;
 			}

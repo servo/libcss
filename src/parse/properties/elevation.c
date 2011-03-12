@@ -98,17 +98,17 @@ css_error css__parse_elevation(css_language *c,
 
 		/* Valid angles lie between -90 and 90 degrees */
 		if (unit == UNIT_DEG) {
-			if (length < FMULI(F_90, -1) || length > F_90) {
+			if (length < -F_90 || length > F_90) {
 				*ctx = orig_ctx;
 				return CSS_INVALID;
 			}
 		} else if (unit == UNIT_GRAD) {
-			if (length < FMULI(F_100, -1) || length > F_100) {
+			if (length < -F_100 || length > F_100) {
 				*ctx = orig_ctx;
 				return CSS_INVALID;
 			}
 		} else if (unit == UNIT_RAD) {
-			if (length < FMULI(F_PI_2, -1) || length > F_PI_2) {
+			if (length < -F_PI_2 || length > F_PI_2) {
 				*ctx = orig_ctx;
 				return CSS_INVALID;
 			}

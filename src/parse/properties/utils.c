@@ -266,9 +266,9 @@ static void HSL_to_RGB(css_fixed hue, css_fixed sat, css_fixed lit, uint8_t *r, 
 	int sextant;
 
 #define ORGB(R, G, B) \
-	*r = FIXTOINT(FDIVI(FMULI((R), 255), 100)); \
-	*g = FIXTOINT(FDIVI(FMULI((G), 255), 100)); \
-	*b = FIXTOINT(FDIVI(FMULI((B), 255), 100))
+	*r = FIXTOINT(FDIV(FMUL((R), F_255), F_100)); \
+	*g = FIXTOINT(FDIV(FMUL((G), F_255), F_100)); \
+	*b = FIXTOINT(FDIV(FMUL((B), F_255), F_100))
 
 	/* If saturation is zero there is no hue and r = g = b = lit */
 	if (sat == INTTOFIX(0)) {
@@ -278,13 +278,13 @@ static void HSL_to_RGB(css_fixed hue, css_fixed sat, css_fixed lit, uint8_t *r, 
 
 	/* Compute max(r,g,b) */
 	if (lit <= INTTOFIX(50)) {
-		max_rgb = FDIVI(FMUL(lit, FADDI(sat, 100)), 100);
+		max_rgb = FDIV(FMUL(lit, FADD(sat, F_100)), F_100);
 	} else {
-		max_rgb = FDIVI(FSUB(FMULI(FADD(lit, sat), 100), FMUL(lit, sat)), 100);
+		max_rgb = FDIV(FSUB(FMUL(FADD(lit, sat), F_100), FMUL(lit, sat)), F_100);
 	}
 
 	/* Compute min(r,g,b) */
-	min_rgb = FSUB(FMULI(lit, 2), max_rgb);
+	min_rgb = FSUB(FMUL(lit, INTTOFIX(2)), max_rgb);
 
 	/* We know that the value of at least one of the components is 
 	 * max(r,g,b) and that the value of at least one of the other
@@ -310,11 +310,11 @@ static void HSL_to_RGB(css_fixed hue, css_fixed sat, css_fixed lit, uint8_t *r, 
 	chroma = FSUB(max_rgb, min_rgb);
 
 	/* Compute which sextant the hue lies in (truncates result) */
-	hue = FDIVI(FMULI(hue, 6), 360);
+	hue = FDIV(FMUL(hue, INTTOFIX(6)), F_360);
 	sextant = FIXTOINT(hue);
 
 	/* Compute offset of hue from start of sextant */
-	relative_hue = FSUBI(hue, sextant);
+	relative_hue = FSUB(hue, INTTOFIX(sextant));
 
 	/* Scale offset by chroma */
         scaled_hue = FMUL(relative_hue, chroma);
@@ -489,14 +489,14 @@ css_error css__parse_colour_specifier(css_language *c,
 					if (i == 3) {
 						/* alpha channel */
 						intval = FIXTOINT(
-							FMULI(num, 255));
+							FMUL(num, F_255));
 					} else {
 						/* colour channels */
 						intval = FIXTOINT(num);
 					}
 				} else {
 					intval = FIXTOINT(
-						FDIVI(FMULI(num, 255), 100));
+						FDIV(FMUL(num, F_255), F_100));
 				}
 
 				if (intval > 255)
@@ -544,10 +544,10 @@ css_error css__parse_colour_specifier(css_language *c,
 				goto invalid; /* failed to consume the whole string as a number */
 
 			/* Normalise hue to the range [0, 360) */
-			while (hue < INTTOFIX(0))
-				hue += INTTOFIX(360);
-			while (hue >= INTTOFIX(360))
-				hue -= INTTOFIX(360);
+			while (hue < 0)
+				hue += F_360;
+			while (hue >= F_360)
+				hue -= F_360;
 
 			consumeWhitespace(vector, ctx);
 
@@ -617,7 +617,7 @@ css_error css__parse_colour_specifier(css_language *c,
 				if (consumed != lwc_string_length(token->idata))
 					goto invalid; /* failed to consume the whole string as a number */
 				
-				alpha = FIXTOINT(FMULI(alpha, 255));
+				alpha = FIXTOINT(FMUL(alpha, F_255));
 
 				consumeWhitespace(vector, ctx);
 
