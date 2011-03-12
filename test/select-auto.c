@@ -964,7 +964,11 @@ css_error node_has_name(void *pw, void *n,
 	node *node = n;
 	UNUSED(pw);
 
-	assert(lwc_string_caseless_isequal(node->name, 
+	if (lwc_string_length(qname->name) == 1 &&
+			lwc_string_data(qname->name)[0] == '*')
+		*match = true;
+	else
+		assert(lwc_string_caseless_isequal(node->name, 
 			qname->name, match) == lwc_error_ok);
 
 	return CSS_OK;
