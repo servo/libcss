@@ -16,6 +16,29 @@
 /* Important: keep this file in sync with computed.h */
 /** \todo Is there a better way to ensure this happens? */
 
+static const css_computed_uncommon default_uncommon = {
+	{ (CSS_LETTER_SPACING_INHERIT << 2) | CSS_OUTLINE_COLOR_INVERT,
+	  (CSS_OUTLINE_WIDTH_MEDIUM << 1) | CSS_BORDER_SPACING_INHERIT,
+	  0,
+	  (CSS_WORD_SPACING_INHERIT << 2) | 
+		(CSS_COUNTER_INCREMENT_NONE << 1) | CSS_COUNTER_RESET_NONE,
+	  (CSS_CURSOR_INHERIT << 3) | 0,
+	  0,
+	  0,
+	  (CSS_CLIP_AUTO << 2) | CSS_CONTENT_NORMAL
+	},
+	{ 0, 0 },
+	{ 0, 0, 0, 0 },
+	0,
+	0,
+	0,
+	0,
+	NULL,
+	NULL,
+	NULL,
+	NULL
+};
+
 #define ENSURE_UNCOMMON do {						\
 	if (style->uncommon == NULL) {					\
 		style->uncommon = style->alloc(NULL, 			\
@@ -23,7 +46,7 @@
 		if (style->uncommon == NULL)				\
 			return CSS_NOMEM;				\
 									\
-		memset(style->uncommon, 0, 				\
+		memcpy(style->uncommon, &default_uncommon,		\
 				sizeof(css_computed_uncommon));		\
 	}								\
 } while(0)
