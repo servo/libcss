@@ -57,6 +57,7 @@ css_error css__cascade_clip(uint32_t opv, css_style *style,
 				rect.lunit = *((uint32_t *) style->bytecode);
 				advance_bytecode(style, sizeof(uint32_t));
 			}
+			value = CSS_CLIP_RECT;
 			break;
 		case CLIP_AUTO:
 			value = CSS_CLIP_AUTO;
