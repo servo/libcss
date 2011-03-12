@@ -719,13 +719,13 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	val = css_computed_caption_side(style);
 	switch (val) {
 	case CSS_CAPTION_SIDE_INHERIT:
-		wrote = snprintf(ptr, *len, "caption_side: inherit\n");
+		wrote = snprintf(ptr, *len, "caption-side: inherit\n");
 		break;
 	case CSS_CAPTION_SIDE_TOP:
-		wrote = snprintf(ptr, *len, "caption_side: top\n");
+		wrote = snprintf(ptr, *len, "caption-side: top\n");
 		break;
 	case CSS_CAPTION_SIDE_BOTTOM:
-		wrote = snprintf(ptr, *len, "caption_side: bottom\n");
+		wrote = snprintf(ptr, *len, "caption-side: bottom\n");
 		break;
 	default:
 		wrote = 0;
