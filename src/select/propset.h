@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include <libcss/computed.h>
+#include "computed.h"
 
 /* Important: keep this file in sync with computed.h */
 /** \todo Is there a better way to ensure this happens? */

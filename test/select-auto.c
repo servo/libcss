@@ -230,9 +230,6 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	printf("css_hint: %u\n", (int) sizeof(css_hint));
-	printf("computed: %u\n", (int) sizeof(css_computed_style));
-
 	memset(&ctx, 0, sizeof(ctx));
 
 
