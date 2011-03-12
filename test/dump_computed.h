@@ -156,6 +156,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* background-attachment */
 	val = css_computed_background_attachment(style);
 	switch (val) {
+	case CSS_BACKGROUND_ATTACHMENT_INHERIT:
+		wrote = snprintf(ptr, *len, "background-attachment: inherit\n");
+		break;
 	case CSS_BACKGROUND_ATTACHMENT_FIXED:
 		wrote = snprintf(ptr, *len, "background-attachment: fixed\n");
 		break;
@@ -172,6 +175,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* background-color */
 	val = css_computed_background_color(style, &color);
 	switch (val) {
+	case CSS_BACKGROUND_COLOR_INHERIT:
+		wrote = snprintf(ptr, *len, "background-color: inherit\n");
+		break;
 	case CSS_BACKGROUND_COLOR_COLOR:
 		wrote = snprintf(ptr, *len, "background-color: #%08x\n", color);
 		break;
@@ -184,7 +190,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 
 	/* background-image */
 	val = css_computed_background_image(style, &url);
-	if (val == CSS_BACKGROUND_IMAGE_IMAGE && url != NULL) {
+        if (val == CSS_BACKGROUND_IMAGE_INHERIT) {
+                wrote = snprintf(ptr, *len, "background-image: inherit\n");
+	} else if (val == CSS_BACKGROUND_IMAGE_IMAGE && url != NULL) {
 		wrote = snprintf(ptr, *len, "background-image: url('%.*s')\n",
 				(int) lwc_string_length(url), 
 				lwc_string_data(url));
@@ -199,7 +207,11 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* background-position */
 	val = css_computed_background_position(style, &len1, &unit1,
 			&len2, &unit2);
-	if (val == CSS_BACKGROUND_POSITION_SET) {
+	if (val == CSS_BACKGROUND_POSITION_INHERIT) {
+                wrote = snprintf(ptr, *len, "background-position: inherit\n");
+                ptr += wrote;
+                *len -= wrote;
+        } else if (val == CSS_BACKGROUND_POSITION_SET) {
 		wrote = snprintf(ptr, *len, "background-position: ");
 		ptr += wrote;
 		*len -= wrote;
@@ -224,6 +236,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* background-repeat */
 	val = css_computed_background_repeat(style);
 	switch (val) {
+	case CSS_BACKGROUND_REPEAT_INHERIT:
+		wrote = snprintf(ptr, *len, "background-repeat: inherit\n");
+		break;
 	case CSS_BACKGROUND_REPEAT_REPEAT_X:
 		wrote = snprintf(ptr, *len, "background-repeat: repeat-x\n");
 		break;
@@ -246,6 +261,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-collapse */
 	val = css_computed_border_collapse(style);
 	switch (val) {
+	case CSS_BORDER_COLLAPSE_INHERIT:
+		wrote = snprintf(ptr, *len, "border-collapse: inherit\n");
+		break;
 	case CSS_BORDER_COLLAPSE_SEPARATE:
 		wrote = snprintf(ptr, *len, "border-collapse: separate\n");
 		break;
@@ -261,7 +279,11 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 
 	/* border-spacing */
 	val = css_computed_border_spacing(style, &len1, &unit1, &len2, &unit2);
-	if (val == CSS_BORDER_SPACING_SET) {
+        if (val == CSS_BORDER_SPACING_INHERIT) {
+                wrote = snprintf(ptr, *len, "border-spacing: inherit\n");
+                ptr += wrote;
+                *len -= wrote;
+	} else if (val == CSS_BORDER_SPACING_SET) {
 		wrote = snprintf(ptr, *len, "border-spacing: ");
 		ptr += wrote;
 		*len -= wrote;
@@ -286,6 +308,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-top-color */
 	val = css_computed_border_top_color(style, &color);
 	switch (val) {
+	case CSS_BORDER_COLOR_INHERIT:
+		wrote = snprintf(ptr, *len, "border-top-color: inherit\n");
+		break;
 	case CSS_BORDER_COLOR_CURRENT_COLOR:
 		wrote = snprintf(ptr, *len, "border-top-color: currentColor\n");
 		break;
@@ -302,6 +327,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-right-color */
 	val = css_computed_border_right_color(style, &color);
 	switch (val) {
+	case CSS_BORDER_COLOR_INHERIT:
+		wrote = snprintf(ptr, *len, "border-right-color: inherit\n");
+		break;
 	case CSS_BORDER_COLOR_CURRENT_COLOR:
 		wrote = snprintf(ptr, *len, "border-right-color: currentColor\n");
 		break;
@@ -319,6 +347,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-bottom-color */
 	val = css_computed_border_bottom_color(style, &color);
 	switch (val) {
+	case CSS_BORDER_COLOR_INHERIT:
+		wrote = snprintf(ptr, *len, "border-bottom-color: inherit\n");
+		break;
 	case CSS_BORDER_COLOR_CURRENT_COLOR:
 		wrote = snprintf(ptr, *len, "border-bottom-color: currentColor\n");
 		break;
@@ -336,6 +367,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-left-color */
 	val = css_computed_border_left_color(style, &color);
 	switch (val) {
+	case CSS_BORDER_COLOR_INHERIT:
+		wrote = snprintf(ptr, *len, "border-left-color: inherit\n");
+		break;
 	case CSS_BORDER_COLOR_CURRENT_COLOR:
 		wrote = snprintf(ptr, *len, "border-left-color: currentColor\n");
 		break;
@@ -353,6 +387,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-top-style */
 	val = css_computed_border_top_style(style);
 	switch (val) {
+	case CSS_BORDER_STYLE_INHERIT:
+		wrote = snprintf(ptr, *len, "border-top-style: inherit\n");
+		break;
 	case CSS_BORDER_STYLE_NONE:
 		wrote = snprintf(ptr, *len, "border-top-style: none\n");
 		break;
@@ -393,6 +430,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-right-style */
 	val = css_computed_border_right_style(style);
 	switch (val) {
+	case CSS_BORDER_STYLE_INHERIT:
+		wrote = snprintf(ptr, *len, "border-right-style: inherit\n");
+		break;
 	case CSS_BORDER_STYLE_NONE:
 		wrote = snprintf(ptr, *len, "border-right-style: none\n");
 		break;
@@ -433,6 +473,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-bottom-style */
 	val = css_computed_border_bottom_style(style);
 	switch (val) {
+	case CSS_BORDER_STYLE_INHERIT:
+		wrote = snprintf(ptr, *len, "border-bottom-style: inherit\n");
+		break;
 	case CSS_BORDER_STYLE_NONE:
 		wrote = snprintf(ptr, *len, "border-bottom-style: none\n");
 		break;
@@ -473,6 +516,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-left-style */
 	val = css_computed_border_left_style(style);
 	switch (val) {
+	case CSS_BORDER_STYLE_INHERIT:
+		wrote = snprintf(ptr, *len, "border-left-style: inherit\n");
+		break;
 	case CSS_BORDER_STYLE_NONE:
 		wrote = snprintf(ptr, *len, "border-left-style: none\n");
 		break;
@@ -513,6 +559,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-top-width */
 	val = css_computed_border_top_width(style, &len1, &unit1);
 	switch (val) {
+	case CSS_BORDER_WIDTH_INHERIT:
+		wrote = snprintf(ptr, *len, "border-top-width: inherit\n");
+		break;
 	case CSS_BORDER_WIDTH_THIN:
 		wrote = snprintf(ptr, *len, "border-top-width: thin\n");
 		break;
@@ -543,6 +592,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-right-width */
 	val = css_computed_border_right_width(style, &len1, &unit1);
 	switch (val) {
+	case CSS_BORDER_WIDTH_INHERIT:
+		wrote = snprintf(ptr, *len, "border-right-width: inherit\n");
+		break;
 	case CSS_BORDER_WIDTH_THIN:
 		wrote = snprintf(ptr, *len, "border-right-width: thin\n");
 		break;
@@ -573,6 +625,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-bottom-width */
 	val = css_computed_border_bottom_width(style, &len1, &unit1);
 	switch (val) {
+	case CSS_BORDER_WIDTH_INHERIT:
+		wrote = snprintf(ptr, *len, "border-bottom-width: inherit\n");
+		break;
 	case CSS_BORDER_WIDTH_THIN:
 		wrote = snprintf(ptr, *len, "border-bottom-width: thin\n");
 		break;
@@ -603,6 +658,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* border-left-width */
 	val = css_computed_border_left_width(style, &len1, &unit1);
 	switch (val) {
+	case CSS_BORDER_WIDTH_INHERIT:
+		wrote = snprintf(ptr, *len, "border-left-width: inherit\n");
+		break;
 	case CSS_BORDER_WIDTH_THIN:
 		wrote = snprintf(ptr, *len, "border-left-width: thin\n");
 		break;
@@ -633,6 +691,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* bottom */
 	val = css_computed_bottom(style, &len1, &unit1);
 	switch (val) {
+	case CSS_BOTTOM_INHERIT:
+		wrote = snprintf(ptr, *len, "bottom: inherit\n");
+		break;
 	case CSS_BOTTOM_AUTO:
 		wrote = snprintf(ptr, *len, "bottom: auto\n");
 		break;
@@ -657,6 +718,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* caption-side */
 	val = css_computed_caption_side(style);
 	switch (val) {
+	case CSS_CAPTION_SIDE_INHERIT:
+		wrote = snprintf(ptr, *len, "caption_side: inherit\n");
+		break;
 	case CSS_CAPTION_SIDE_TOP:
 		wrote = snprintf(ptr, *len, "caption_side: top\n");
 		break;
@@ -673,6 +737,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* clear */
 	val = css_computed_clear(style);
 	switch (val) {
+	case CSS_CLEAR_INHERIT:
+		wrote = snprintf(ptr, *len, "clear: inherit\n");
+		break;
 	case CSS_CLEAR_NONE:
 		wrote = snprintf(ptr, *len, "clear: none\n");
 		break;
@@ -695,6 +762,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* clip */
 	val = css_computed_clip(style, &rect);
 	switch (val) {
+	case CSS_CLIP_INHERIT:
+		wrote = snprintf(ptr, *len, "clip: inherit\n");
+		break;
 	case CSS_CLIP_AUTO:
 		wrote = snprintf(ptr, *len, "clip: auto\n");
 		break;
@@ -746,15 +816,20 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 
 	/* color */
 	val = css_computed_color(style, &color);
-	if (val == CSS_COLOR_COLOR) {
+        if (val == CSS_COLOR_INHERIT) {
+                wrote = snprintf(ptr, *len, "color: inherit\n");
+	} else if (val == CSS_COLOR_COLOR) {
 		wrote = snprintf(ptr, *len, "color: #%08x\n", color);
-		ptr += wrote;
-		*len -= wrote;
 	}
+        ptr += wrote;
+        *len -= wrote;
 
 	/* content */
 	val = css_computed_content(style, &content);
 	switch (val) {
+	case CSS_CONTENT_INHERIT:
+		wrote = snprintf(ptr, *len, "content: inherit\n");
+		break;
 	case CSS_CONTENT_NONE:
 		wrote = snprintf(ptr, *len, "content: none\n");
 		break;
@@ -859,7 +934,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 
 	/* counter-increment */
 	val = css_computed_counter_increment(style, &counter);
-	if (counter == NULL) {
+        if (val == CSS_COUNTER_INCREMENT_INHERIT) {
+                wrote = snprintf(ptr, *len, "counter-increment: inherit\n");
+        } else if (counter == NULL) {
 		wrote = snprintf(ptr, *len, "counter-increment: none\n");
 	} else {
 		wrote = snprintf(ptr, *len, "counter-increment:");
@@ -887,7 +964,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 
 	/* counter-reset */
 	val = css_computed_counter_reset(style, &counter);
-	if (counter == NULL) {
+        if (val == CSS_COUNTER_RESET_INHERIT) {
+                wrote = snprintf(ptr, *len, "counter-reset: inherit\n");
+	} else if (counter == NULL) {
 		wrote = snprintf(ptr, *len, "counter-reset: none\n");
 	} else {
 		wrote = snprintf(ptr, *len, "counter-reset:");
@@ -931,6 +1010,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		}
 	}
 	switch (val) {
+	case CSS_CURSOR_INHERIT:
+		wrote = snprintf(ptr, *len, " inherit\n");
+		break;
 	case CSS_CURSOR_AUTO:
 		wrote = snprintf(ptr, *len, " auto\n");
 		break;
@@ -992,6 +1074,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* direction */
 	val = css_computed_direction(style);
 	switch (val) {
+	case CSS_DIRECTION_INHERIT:
+		wrote = snprintf(ptr, *len, "direction: inherit\n");
+		break;
 	case CSS_DIRECTION_LTR:
 		wrote = snprintf(ptr, *len, "direction: ltr\n");
 		break;
@@ -1008,6 +1093,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* display */
 	val = css_computed_display_static(style);
 	switch (val) {
+	case CSS_DISPLAY_INHERIT:
+		wrote = snprintf(ptr, *len, "display: inherit\n");
+		break;
 	case CSS_DISPLAY_INLINE:
 		wrote = snprintf(ptr, *len, "display: inline\n");
 		break;
@@ -1066,6 +1154,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* empty-cells */
 	val = css_computed_empty_cells(style);
 	switch (val) {
+	case CSS_EMPTY_CELLS_INHERIT:
+		wrote = snprintf(ptr, *len, "empty-cells: inherit\n");
+		break;
 	case CSS_EMPTY_CELLS_SHOW:
 		wrote = snprintf(ptr, *len, "empty-cells: show\n");
 		break;
@@ -1082,6 +1173,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* float */
 	val = css_computed_float(style);
 	switch (val) {
+	case CSS_FLOAT_INHERIT:
+		wrote = snprintf(ptr, *len, "float: inherit\n");
+		break;
 	case CSS_FLOAT_LEFT:
 		wrote = snprintf(ptr, *len, "float: left\n");
 		break;
@@ -1100,7 +1194,11 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 
 	/* font-family */
 	val = css_computed_font_family(style, &string_list);
-	if (val != CSS_FONT_FAMILY_INHERIT) {
+	if (val == CSS_FONT_FAMILY_INHERIT) {
+                wrote = snprintf(ptr, *len, "font-family: inherit\n");
+                ptr += wrote;
+                *len -= wrote;
+        } else {
 		wrote = snprintf(ptr, *len, "font-family:");
 		ptr += wrote;
 		*len -= wrote;
@@ -1140,6 +1238,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* font-size */
 	val = css_computed_font_size(style, &len1, &unit1);
 	switch (val) {
+	case CSS_FONT_SIZE_INHERIT:
+		wrote = snprintf(ptr, *len, "font-size: inherit\n");
+		break;
 	case CSS_FONT_SIZE_XX_SMALL:
 		wrote = snprintf(ptr, *len, "font-size: xx-small\n");
 		break;
@@ -1188,6 +1289,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* font-style */
 	val = css_computed_font_style(style);
 	switch (val) {
+	case CSS_FONT_STYLE_INHERIT:
+		wrote = snprintf(ptr, *len, "font-style: inherit\n");
+		break;
 	case CSS_FONT_STYLE_NORMAL:
 		wrote = snprintf(ptr, *len, "font-style: normal\n");
 		break;
@@ -1207,6 +1311,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* font-variant */
 	val = css_computed_font_variant(style);
 	switch (val) {
+	case CSS_FONT_VARIANT_INHERIT:
+		wrote = snprintf(ptr, *len, "font-variant: inherit\n");
+		break;
 	case CSS_FONT_VARIANT_NORMAL:
 		wrote = snprintf(ptr, *len, "font-variant: normal\n");
 		break;
@@ -1223,6 +1330,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* font-weight */
 	val = css_computed_font_weight(style);
 	switch (val) {
+	case CSS_FONT_WEIGHT_INHERIT:
+		wrote = snprintf(ptr, *len, "font-weight: inherit\n");
+		break;
 	case CSS_FONT_WEIGHT_NORMAL:
 		wrote = snprintf(ptr, *len, "font-weight: normal\n");
 		break;
@@ -1272,6 +1382,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* height */
 	val = css_computed_height(style, &len1, &unit1);
 	switch (val) {
+	case CSS_HEIGHT_INHERIT:
+		wrote = snprintf(ptr, *len, "height: inherit\n");
+		break;
 	case CSS_HEIGHT_AUTO:
 		wrote = snprintf(ptr, *len, "height: auto\n");
 		break;
@@ -1296,6 +1409,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* left */
 	val = css_computed_left(style, &len1, &unit1);
 	switch (val) {
+	case CSS_LEFT_INHERIT:
+		wrote = snprintf(ptr, *len, "left: inherit\n");
+		break;
 	case CSS_LEFT_AUTO:
 		wrote = snprintf(ptr, *len, "left: auto\n");
 		break;
@@ -1320,6 +1436,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* letter-spacing */
 	val = css_computed_letter_spacing(style, &len1, &unit1);
 	switch (val) {
+	case CSS_LETTER_SPACING_INHERIT:
+		wrote = snprintf(ptr, *len, "letter-spacing: inherit\n");
+		break;
 	case CSS_LETTER_SPACING_NORMAL:
 		wrote = snprintf(ptr, *len, "letter-spacing: normal\n");
 		break;
@@ -1344,6 +1463,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* line-height */
 	val = css_computed_line_height(style, &len1, &unit1);
 	switch (val) {
+	case CSS_LINE_HEIGHT_INHERIT:
+		wrote = snprintf(ptr, *len, "line-height: inherit\n");
+		break;
 	case CSS_LINE_HEIGHT_NORMAL:
 		wrote = snprintf(ptr, *len, "line-height: normal\n");
 		break;
@@ -1378,7 +1500,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 
 	/* list-style-image */
 	val = css_computed_list_style_image(style, &url);
-	if (url != NULL) {
+        if (val == CSS_LIST_STYLE_IMAGE_INHERIT) {
+                wrote = snprintf(ptr, *len, "list-style-image: inherit\n");
+	} else if (url != NULL) {
 		wrote = snprintf(ptr, *len, "list-style-image: url('%.*s')\n",
 				(int) lwc_string_length(url), 
 				lwc_string_data(url));
@@ -1393,6 +1517,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* list-style-position */
 	val = css_computed_list_style_position(style);
 	switch (val) {
+	case CSS_LIST_STYLE_POSITION_INHERIT:
+		wrote = snprintf(ptr, *len, "list-style-position: inherit\n");
+		break;
 	case CSS_LIST_STYLE_POSITION_INSIDE:
 		wrote = snprintf(ptr, *len, "list-style-position: inside\n");
 		break;
@@ -1409,6 +1536,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* list-style-type */
 	val = css_computed_list_style_type(style);
 	switch (val) {
+	case CSS_LIST_STYLE_TYPE_INHERIT:
+		wrote = snprintf(ptr, *len, "list-style-type: inherit\n");
+		break;
 	case CSS_LIST_STYLE_TYPE_DISC:
 		wrote = snprintf(ptr, *len, "list-style-type: disc\n");
 		break;
@@ -1465,6 +1595,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* margin-top */
 	val = css_computed_margin_top(style, &len1, &unit1);
 	switch (val) {
+	case CSS_MARGIN_INHERIT:
+		wrote = snprintf(ptr, *len, "margin-top: inherit\n");
+		break;
 	case CSS_MARGIN_AUTO:
 		wrote = snprintf(ptr, *len, "margin-top: auto\n");
 		break;
@@ -1489,6 +1622,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* margin-right */
 	val = css_computed_margin_right(style, &len1, &unit1);
 	switch (val) {
+	case CSS_MARGIN_INHERIT:
+		wrote = snprintf(ptr, *len, "margin-right: inherit\n");
+		break;
 	case CSS_MARGIN_AUTO:
 		wrote = snprintf(ptr, *len, "margin-right: auto\n");
 		break;
@@ -1513,6 +1649,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* margin-bottom */
 	val = css_computed_margin_bottom(style, &len1, &unit1);
 	switch (val) {
+	case CSS_MARGIN_INHERIT:
+		wrote = snprintf(ptr, *len, "margin-bottom: inherit\n");
+		break;
 	case CSS_MARGIN_AUTO:
 		wrote = snprintf(ptr, *len, "margin-bottom: auto\n");
 		break;
@@ -1537,6 +1676,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* margin-left */
 	val = css_computed_margin_left(style, &len1, &unit1);
 	switch (val) {
+	case CSS_MARGIN_INHERIT:
+		wrote = snprintf(ptr, *len, "margin-left: inherit\n");
+		break;
 	case CSS_MARGIN_AUTO:
 		wrote = snprintf(ptr, *len, "margin-left: auto\n");
 		break;
@@ -1561,6 +1703,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* max-height */
 	val = css_computed_max_height(style, &len1, &unit1);
 	switch (val) {
+	case CSS_MAX_HEIGHT_INHERIT:
+		wrote = snprintf(ptr, *len, "max-height: inherit\n");
+		break;
 	case CSS_MAX_HEIGHT_NONE:
 		wrote = snprintf(ptr, *len, "max-height: none\n");
 		break;
@@ -1585,6 +1730,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* max-width */
 	val = css_computed_max_width(style, &len1, &unit1);
 	switch (val) {
+	case CSS_MAX_WIDTH_INHERIT:
+		wrote = snprintf(ptr, *len, "max-width: inherit\n");
+		break;
 	case CSS_MAX_WIDTH_NONE:
 		wrote = snprintf(ptr, *len, "max-width: none\n");
 		break;
@@ -1609,6 +1757,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* min-height */
 	val = css_computed_min_height(style, &len1, &unit1);
 	switch (val) {
+	case CSS_MIN_HEIGHT_INHERIT:
+		wrote = snprintf(ptr, *len, "min-height: inherit\n");
+                break;
 	case CSS_MIN_HEIGHT_SET:
 		wrote = snprintf(ptr, *len, "min-height: ");
 		ptr += wrote;
@@ -1630,6 +1781,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* min-width */
 	val = css_computed_min_width(style, &len1, &unit1);
 	switch (val) {
+        case CSS_MIN_WIDTH_INHERIT:
+                wrote = snprintf(ptr, *len, "min-width: inherit\n");
+                break;
 	case CSS_MIN_WIDTH_SET:
 		wrote = snprintf(ptr, *len, "min-width: ");
 		ptr += wrote;
@@ -1651,6 +1805,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* opacity */
 	val = css_computed_opacity(style, &len1);
 	switch (val) {
+        case CSS_OPACITY_INHERIT:
+                wrote = snprintf(ptr, *len, "opacity: inherit\n");
+                break;
 	case CSS_OPACITY_SET:
 		wrote = snprintf(ptr, *len, "opacity: ");
 		ptr += wrote;
@@ -1672,6 +1829,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* outline-color */
 	val = css_computed_outline_color(style, &color);
 	switch (val) {
+	case CSS_OUTLINE_COLOR_INHERIT:
+		wrote = snprintf(ptr, *len, "outline-color: inherit\n");
+		break;
 	case CSS_OUTLINE_COLOR_INVERT:
 		wrote = snprintf(ptr, *len, "outline-color: invert\n");
 		break;
@@ -1688,6 +1848,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* outline-style */
 	val = css_computed_outline_style(style);
 	switch (val) {
+	case CSS_OUTLINE_STYLE_INHERIT:
+		wrote = snprintf(ptr, *len, "outline-style: inherit\n");
+		break;
 	case CSS_OUTLINE_STYLE_NONE:
 		wrote = snprintf(ptr, *len, "outline-style: none\n");
 		break;
@@ -1725,6 +1888,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* outline-width */
 	val = css_computed_outline_width(style, &len1, &unit1);
 	switch (val) {
+	case CSS_OUTLINE_WIDTH_INHERIT:
+		wrote = snprintf(ptr, *len, "outline-width: inherit\n");
+		break;
 	case CSS_OUTLINE_WIDTH_THIN:
 		wrote = snprintf(ptr, *len, "outline-width: thin\n");
 		break;
@@ -1755,6 +1921,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* overflow */
 	val = css_computed_overflow(style);
 	switch (val) {
+	case CSS_OVERFLOW_INHERIT:
+		wrote = snprintf(ptr, *len, "overflow: inherit\n");
+		break;
 	case CSS_OVERFLOW_VISIBLE:
 		wrote = snprintf(ptr, *len, "overflow: visible\n");
 		break;
@@ -1777,6 +1946,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* padding-top */
 	val = css_computed_padding_top(style, &len1, &unit1);
 	switch (val) {
+        case CSS_PADDING_INHERIT:
+                wrote = snprintf(ptr, *len, "padding-top: inherit\n");
+                break;
 	case CSS_PADDING_SET:
 		wrote = snprintf(ptr, *len, "padding-top: ");
 		ptr += wrote;
@@ -1798,6 +1970,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* padding-right */
 	val = css_computed_padding_right(style, &len1, &unit1);
 	switch (val) {
+        case CSS_PADDING_INHERIT:
+                wrote = snprintf(ptr, *len, "padding-right: inherit\n");
+                break;
 	case CSS_PADDING_SET:
 		wrote = snprintf(ptr, *len, "padding-right: ");
 		ptr += wrote;
@@ -1819,6 +1994,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* padding-bottom */
 	val = css_computed_padding_bottom(style, &len1, &unit1);
 	switch (val) {
+        case CSS_PADDING_INHERIT:
+                wrote = snprintf(ptr, *len, "padding-bottom: inherit\n");
+                break;
 	case CSS_PADDING_SET:
 		wrote = snprintf(ptr, *len, "padding-bottom: ");
 		ptr += wrote;
@@ -1840,6 +2018,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* padding-left */
 	val = css_computed_padding_left(style, &len1, &unit1);
 	switch (val) {
+        case CSS_PADDING_INHERIT:
+                wrote = snprintf(ptr, *len, "padding-left: inherit\n");
+                break;
 	case CSS_PADDING_SET:
 		wrote = snprintf(ptr, *len, "padding-left: ");
 		ptr += wrote;
@@ -1861,6 +2042,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* position */
 	val = css_computed_position(style);
 	switch (val) {
+	case CSS_POSITION_INHERIT:
+		wrote = snprintf(ptr, *len, "position: inherit\n");
+		break;
 	case CSS_POSITION_STATIC:
 		wrote = snprintf(ptr, *len, "position: static\n");
 		break;
@@ -1900,6 +2084,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 		wrote = snprintf(ptr, *len, "\n");
 	} else {
 		switch (val) {
+		case CSS_QUOTES_INHERIT:
+			wrote = snprintf(ptr, *len, "quotes: inherit\n");
+			break;
 		case CSS_QUOTES_NONE:
 			wrote = snprintf(ptr, *len, "quotes: none\n");
 			break;
@@ -1914,6 +2101,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* right */
 	val = css_computed_right(style, &len1, &unit1);
 	switch (val) {
+	case CSS_RIGHT_INHERIT:
+		wrote = snprintf(ptr, *len, "right: inherit\n");
+		break;
 	case CSS_RIGHT_AUTO:
 		wrote = snprintf(ptr, *len, "right: auto\n");
 		break;
@@ -1938,6 +2128,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* table-layout */
 	val = css_computed_table_layout(style);
 	switch (val) {
+	case CSS_TABLE_LAYOUT_INHERIT:
+		wrote = snprintf(ptr, *len, "table-layout: inherit\n");
+		break;
 	case CSS_TABLE_LAYOUT_AUTO:
 		wrote = snprintf(ptr, *len, "table-layout: auto\n");
 		break;
@@ -1954,6 +2147,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* text-align */
 	val = css_computed_text_align(style);
 	switch (val) {
+	case CSS_TEXT_ALIGN_INHERIT:
+		wrote = snprintf(ptr, *len, "text-align: inherit\n");
+		break;
 	case CSS_TEXT_ALIGN_LEFT:
 		wrote = snprintf(ptr, *len, "text-align: left\n");
 		break;
@@ -1987,7 +2183,11 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 
 	/* text-decoration */
 	val = css_computed_text_decoration(style);
-	if (val == CSS_TEXT_DECORATION_NONE) {
+        if (val == CSS_TEXT_DECORATION_INHERIT) {
+                wrote = snprintf(ptr, *len, "text-decoration: inherit\n");
+		ptr += wrote;
+		*len -= wrote;
+	} else if (val == CSS_TEXT_DECORATION_NONE) {
 		wrote = snprintf(ptr, *len, "text-decoration: none\n");
 		ptr += wrote;
 		*len -= wrote;
@@ -2025,6 +2225,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* text-indent */
 	val = css_computed_text_indent(style, &len1, &unit1);
 	switch (val) {
+        case CSS_TEXT_INDENT_INHERIT:
+                wrote = snprintf(ptr, *len, "text-indent: inherit\n");
+                break;
 	case CSS_TEXT_INDENT_SET:
 		wrote = snprintf(ptr, *len, "text-indent: ");
 		ptr += wrote;
@@ -2046,6 +2249,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* text-transform */
 	val = css_computed_text_transform(style);
 	switch (val) {
+	case CSS_TEXT_TRANSFORM_INHERIT:
+		wrote = snprintf(ptr, *len, "text-transform: inherit\n");
+		break;
 	case CSS_TEXT_TRANSFORM_CAPITALIZE:
 		wrote = snprintf(ptr, *len, "text-transform: capitalize\n");
 		break;
@@ -2068,6 +2274,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* top */
 	val = css_computed_top(style, &len1, &unit1);
 	switch (val) {
+	case CSS_TOP_INHERIT:
+		wrote = snprintf(ptr, *len, "top: inherit\n");
+		break;
 	case CSS_TOP_AUTO:
 		wrote = snprintf(ptr, *len, "top: auto\n");
 		break;
@@ -2092,6 +2301,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* unicode-bidi */
 	val = css_computed_unicode_bidi(style);
 	switch (val) {
+	case CSS_UNICODE_BIDI_INHERIT:
+		wrote = snprintf(ptr, *len, "unicode-bidi: inherit\n");
+		break;
 	case CSS_UNICODE_BIDI_NORMAL:
 		wrote = snprintf(ptr, *len, "unicode-bidi: normal\n");
 		break;
@@ -2111,6 +2323,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* vertical-align */
 	val = css_computed_vertical_align(style, &len1, &unit1);
 	switch (val) {
+	case CSS_VERTICAL_ALIGN_INHERIT:
+		wrote = snprintf(ptr, *len, "vertical-align: inherit\n");
+		break;
 	case CSS_VERTICAL_ALIGN_BASELINE:
 		wrote = snprintf(ptr, *len, "vertical-align: baseline\n");
 		break;
@@ -2156,6 +2371,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* visibility */
 	val = css_computed_visibility(style);
 	switch (val) {
+	case CSS_VISIBILITY_INHERIT:
+		wrote = snprintf(ptr, *len, "visibility: inherit\n");
+		break;
 	case CSS_VISIBILITY_VISIBLE:
 		wrote = snprintf(ptr, *len, "visibility: visible\n");
 		break;
@@ -2175,6 +2393,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* white-space */
 	val = css_computed_white_space(style);
 	switch (val) {
+	case CSS_WHITE_SPACE_INHERIT:
+		wrote = snprintf(ptr, *len, "white-space: inherit\n");
+		break;
 	case CSS_WHITE_SPACE_NORMAL:
 		wrote = snprintf(ptr, *len, "white-space: normal\n");
 		break;
@@ -2200,6 +2421,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* width */
 	val = css_computed_width(style, &len1, &unit1);
 	switch (val) {
+	case CSS_WIDTH_INHERIT:
+		wrote = snprintf(ptr, *len, "width: inherit\n");
+		break;
 	case CSS_WIDTH_AUTO:
 		wrote = snprintf(ptr, *len, "width: auto\n");
 		break;
@@ -2224,6 +2448,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* word-spacing */
 	val = css_computed_word_spacing(style, &len1, &unit1);
 	switch (val) {
+	case CSS_WORD_SPACING_INHERIT:
+		wrote = snprintf(ptr, *len, "word-spacing: inherit\n");
+		break;
 	case CSS_WORD_SPACING_NORMAL:
 		wrote = snprintf(ptr, *len, "word-spacing: normal\n");
 		break;
@@ -2248,6 +2475,9 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 	/* z-index */
 	val = css_computed_z_index(style, &zindex);
 	switch (val) {
+	case CSS_Z_INDEX_INHERIT:
+		wrote = snprintf(ptr, *len, "z-index: inherit\n");
+		break;
 	case CSS_Z_INDEX_AUTO:
 		wrote = snprintf(ptr, *len, "z-index: auto\n");
 		break;
