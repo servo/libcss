@@ -89,10 +89,17 @@ typedef struct css_system_font {
 typedef css_error (*css_font_resolution_fn)(void *pw,
 		lwc_string *name, css_system_font *system_font);
 
+typedef enum css_stylesheet_params_version {
+	CSS_STYLESHEET_PARAMS_VERSION_1 = 1
+} css_stylesheet_params_version;
+
 /**
  * Parameter block for css_stylesheet_create()
  */
 typedef struct css_stylesheet_params {
+	/** ABI version of this structure */
+	uint32_t params_version;
+
 	/** The language level of the stylesheet */
 	css_language_level level;
 

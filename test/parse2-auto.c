@@ -196,6 +196,7 @@ void run_test(const uint8_t *data, size_t len, const char *exp, size_t explen)
 	}
 	buflen = 2 * explen;
 	
+	params.params_version = CSS_STYLESHEET_PARAMS_VERSION_1;
 	params.level = CSS_LEVEL_21;
 	params.charset = "UTF-8";
 	params.url = "foo";

@@ -154,6 +154,8 @@ static css_error compute_font_size(void *pw, const css_hint *parent,
 		css_hint *size);
 
 static css_select_handler select_handler = {
+	CSS_SELECT_HANDLER_VERSION_1,
+
 	node_name,
 	node_classes,
 	node_id,
@@ -521,6 +523,7 @@ void css__parse_sheet(line_ctx *ctx, const char *data, size_t len)
 		css__parse_media_list(&p, &ignored, &media);
 	}
 
+	params.params_version = CSS_STYLESHEET_PARAMS_VERSION_1;
 	params.level = CSS_LEVEL_21;
 	params.charset = "UTF-8";
 	params.url = "foo";

@@ -300,7 +300,9 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	css_select_state state;
 	void *parent = NULL;
 
-	if (ctx == NULL || node == NULL || result == NULL || handler == NULL)
+	if (ctx == NULL || node == NULL || result == NULL || handler == NULL ||
+			handler->handler_version != 
+					CSS_SELECT_HANDLER_VERSION_1)
 		return CSS_BADPARM;
 
 	/* Set up the selection state */

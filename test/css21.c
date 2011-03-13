@@ -48,6 +48,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	params.params_version = CSS_STYLESHEET_PARAMS_VERSION_1;
 	params.level = CSS_LEVEL_21;
 	params.charset = "UTF-8";
 	params.url = argv[1];

@@ -46,7 +46,14 @@ typedef struct css_select_results {
 	css_computed_style *styles[CSS_PSEUDO_ELEMENT_COUNT];
 } css_select_results;
 
+typedef enum css_select_handler_version {
+	CSS_SELECT_HANDLER_VERSION_1 = 1
+} css_select_handler_version;
+
 typedef struct css_select_handler {
+	/** ABI version of this structure */
+	uint32_t handler_version;
+
 	css_error (*node_name)(void *pw, void *node,
 			css_qname *qname);
 	css_error (*node_classes)(void *pw, void *node,

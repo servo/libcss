@@ -129,7 +129,9 @@ css_error css_stylesheet_create(css_stylesheet_params *params,
 	css_stylesheet *sheet;
 	size_t len;
 
-	if (params == NULL || params->url == NULL || alloc == NULL || 
+	if (params == NULL || params->params_version != 
+				CSS_STYLESHEET_PARAMS_VERSION_1 ||
+			params->url == NULL || alloc == NULL || 
 			params->resolve == NULL || stylesheet == NULL)
 		return CSS_BADPARM;
 
