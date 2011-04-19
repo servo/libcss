@@ -29,12 +29,14 @@ else
 endif
 
 # Parserutils & wapcaplet
-ifneq ($(PKGCONFIG),)
-  CFLAGS := $(CFLAGS) $(shell $(PKGCONFIG) libparserutils libwapcaplet --cflags)
-  LDFLAGS := $(LDFLAGS) $(shell $(PKGCONFIG) libparserutils libwapcaplet --libs)
-else
-  CFLAGS := $(CFLAGS) -I$(PREFIX)/include
-  LDFLAGS := $(LDFLAGS) -lparserutils -lwapcaplet
+ifneq ($(findstring clean,$(MAKECMDGOALS)),clean)
+  ifneq ($(PKGCONFIG),)
+    CFLAGS := $(CFLAGS) $(shell $(PKGCONFIG) libparserutils libwapcaplet --cflags)
+    LDFLAGS := $(LDFLAGS) $(shell $(PKGCONFIG) libparserutils libwapcaplet --libs)
+  else
+    CFLAGS := $(CFLAGS) -I$(PREFIX)/include
+    LDFLAGS := $(LDFLAGS) -lparserutils -lwapcaplet
+  endif
 endif
 
 include build/makefiles/Makefile.top
