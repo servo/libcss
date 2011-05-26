@@ -107,7 +107,8 @@ void run_test(const uint8_t *data, size_t len, char *expected)
 	css_charset_source source = CSS_CHARSET_DEFAULT;
 	static int testnum;
 
-	assert(css__charset_extract(data, len, &mibenum, &source) == CSS_OK);
+	assert(css__charset_extract(data, len, &mibenum, &source) ==
+			PARSERUTILS_OK);
 
 	assert(mibenum != 0);
 
