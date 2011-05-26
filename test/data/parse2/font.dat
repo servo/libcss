@@ -52,6 +52,39 @@
 #reset
 
 #data
+* { font: oblique 10pt serif; }
+#errors
+#expected
+| *
+|  font-style: oblique
+|  font-variant: normal
+|  font-weight: normal
+|  font-size: 10pt
+|  line-height: normal
+|  font-family: serif
+#reset
+
+#data
+* { font: 12pt serif; }
+#errors
+#expected
+| *
+|  font-style: normal
+|  font-variant: normal
+|  font-weight: normal
+|  font-size: 12pt
+|  line-height: normal
+|  font-family: serif
+#reset
+
+#data
+* { font: serif 12pt; }
+#errors
+#expected
+| *
+#reset
+
+#data
 * { font: small-caps 10pt serif; }
 #errors
 #expected
