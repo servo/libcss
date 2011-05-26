@@ -777,11 +777,14 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 			case CSS_PROP_BORDER_BOTTOM_COLOR:
 			case CSS_PROP_BORDER_LEFT_COLOR:
 			case CSS_PROP_BACKGROUND_COLOR:
-				assert(BACKGROUND_COLOR_TRANSPARENT == 
+				assert(BACKGROUND_COLOR_TRANSPARENT ==
+						(enum op_background_color)
 						BORDER_COLOR_TRANSPARENT);
 				assert(BACKGROUND_COLOR_CURRENT_COLOR ==
+						(enum op_background_color)
 						BORDER_COLOR_CURRENT_COLOR);
 				assert(BACKGROUND_COLOR_SET ==
+						(enum op_background_color)
 						BORDER_COLOR_SET);
 
 				switch (value) {
@@ -805,13 +808,23 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 			case CSS_PROP_CUE_AFTER:
 			case CSS_PROP_CUE_BEFORE:
 			case CSS_PROP_LIST_STYLE_IMAGE:
-				assert(BACKGROUND_IMAGE_NONE == CUE_AFTER_NONE);
-				assert(BACKGROUND_IMAGE_URI == CUE_AFTER_URI);
-				assert(BACKGROUND_IMAGE_NONE == CUE_BEFORE_NONE);
-				assert(BACKGROUND_IMAGE_URI == CUE_BEFORE_URI);
 				assert(BACKGROUND_IMAGE_NONE ==
+						(enum op_background_image)
+						CUE_AFTER_NONE);
+				assert(BACKGROUND_IMAGE_URI ==
+						(enum op_background_image)
+						CUE_AFTER_URI);
+				assert(BACKGROUND_IMAGE_NONE ==
+						(enum op_background_image)
+						CUE_BEFORE_NONE);
+				assert(BACKGROUND_IMAGE_URI ==
+						(enum op_background_image)
+						CUE_BEFORE_URI);
+				assert(BACKGROUND_IMAGE_NONE ==
+						(enum op_background_image)
 						LIST_STYLE_IMAGE_NONE);
 				assert(BACKGROUND_IMAGE_URI ==
+						(enum op_background_image)
 						LIST_STYLE_IMAGE_URI);
 
 				switch (value) {
@@ -928,24 +941,35 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 			case CSS_PROP_BORDER_BOTTOM_STYLE:
 			case CSS_PROP_BORDER_LEFT_STYLE:
 			case CSS_PROP_OUTLINE_STYLE:
-				assert(BORDER_STYLE_NONE == OUTLINE_STYLE_NONE);
-				assert(BORDER_STYLE_HIDDEN == 
+				assert(BORDER_STYLE_NONE ==
+						(enum op_border_style)
+						OUTLINE_STYLE_NONE);
+				assert(BORDER_STYLE_HIDDEN ==
+						(enum op_border_style)
 						OUTLINE_STYLE_HIDDEN);
 				assert(BORDER_STYLE_DOTTED ==
+						(enum op_border_style)
 						OUTLINE_STYLE_DOTTED);
 				assert(BORDER_STYLE_DASHED ==
+						(enum op_border_style)
 						OUTLINE_STYLE_DASHED);
 				assert(BORDER_STYLE_SOLID ==
+						(enum op_border_style)
 						OUTLINE_STYLE_SOLID);
 				assert(BORDER_STYLE_DOUBLE ==
+						(enum op_border_style)
 						OUTLINE_STYLE_DOUBLE);
 				assert(BORDER_STYLE_GROOVE ==
+						(enum op_border_style)
 						OUTLINE_STYLE_GROOVE);
 				assert(BORDER_STYLE_RIDGE ==
+						(enum op_border_style)
 						OUTLINE_STYLE_RIDGE);
 				assert(BORDER_STYLE_INSET ==
+						(enum op_border_style)
 						OUTLINE_STYLE_INSET);
 				assert(BORDER_STYLE_OUTSET ==
+						(enum op_border_style)
 						OUTLINE_STYLE_OUTSET);
 
 				switch (value) {
@@ -986,11 +1010,17 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 			case CSS_PROP_BORDER_BOTTOM_WIDTH:
 			case CSS_PROP_BORDER_LEFT_WIDTH:
 			case CSS_PROP_OUTLINE_WIDTH:
-				assert(BORDER_WIDTH_SET == OUTLINE_WIDTH_SET);
-				assert(BORDER_WIDTH_THIN == OUTLINE_WIDTH_THIN);
+				assert(BORDER_WIDTH_SET ==
+						(enum op_border_width)
+						OUTLINE_WIDTH_SET);
+				assert(BORDER_WIDTH_THIN ==
+						(enum op_border_width)
+						OUTLINE_WIDTH_THIN);
 				assert(BORDER_WIDTH_MEDIUM ==
+						(enum op_border_width)
 						OUTLINE_WIDTH_MEDIUM);
 				assert(BORDER_WIDTH_THICK ==
+						(enum op_border_width)
 						OUTLINE_WIDTH_THICK);
 
 				switch (value) {
@@ -1025,18 +1055,30 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 			case CSS_PROP_TOP:
 			case CSS_PROP_HEIGHT:
 			case CSS_PROP_WIDTH:
-				assert(BOTTOM_SET == LEFT_SET);
-				assert(BOTTOM_AUTO == LEFT_AUTO);
-				assert(BOTTOM_SET == RIGHT_SET);
-				assert(BOTTOM_AUTO == RIGHT_AUTO);
-				assert(BOTTOM_SET == TOP_SET);
-				assert(BOTTOM_AUTO == TOP_AUTO);
-				assert(BOTTOM_SET == HEIGHT_SET);
-				assert(BOTTOM_AUTO == HEIGHT_AUTO);
-				assert(BOTTOM_SET == MARGIN_SET);
-				assert(BOTTOM_AUTO == MARGIN_AUTO);
-				assert(BOTTOM_SET == WIDTH_SET);
-				assert(BOTTOM_AUTO == WIDTH_AUTO);
+				assert(BOTTOM_SET ==
+						(enum op_bottom) LEFT_SET);
+				assert(BOTTOM_AUTO ==
+						(enum op_bottom) LEFT_AUTO);
+				assert(BOTTOM_SET ==
+						(enum op_bottom) RIGHT_SET);
+				assert(BOTTOM_AUTO ==
+						(enum op_bottom) RIGHT_AUTO);
+				assert(BOTTOM_SET ==
+						(enum op_bottom) TOP_SET);
+				assert(BOTTOM_AUTO ==
+						(enum op_bottom) TOP_AUTO);
+				assert(BOTTOM_SET ==
+						(enum op_bottom) HEIGHT_SET);
+				assert(BOTTOM_AUTO ==
+						(enum op_bottom) HEIGHT_AUTO);
+				assert(BOTTOM_SET ==
+						(enum op_bottom) MARGIN_SET);
+				assert(BOTTOM_AUTO ==
+						(enum op_bottom) MARGIN_AUTO);
+				assert(BOTTOM_SET ==
+						(enum op_bottom) WIDTH_SET);
+				assert(BOTTOM_AUTO ==
+						(enum op_bottom) WIDTH_AUTO);
 
 				switch (value) {
 				case BOTTOM_SET:
@@ -1233,9 +1275,11 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 				break;
 			case CSS_PROP_COUNTER_INCREMENT:
 			case CSS_PROP_COUNTER_RESET:
-				assert(COUNTER_INCREMENT_NONE == 
+				assert(COUNTER_INCREMENT_NONE ==
+						(enum op_counter_increment)
 						COUNTER_RESET_NONE);
 				assert(COUNTER_INCREMENT_NAMED ==
+						(enum op_counter_increment)
 						COUNTER_RESET_NAMED);
 
 				switch (value) {
@@ -1599,8 +1643,11 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 				break;
 			case CSS_PROP_LETTER_SPACING:
 			case CSS_PROP_WORD_SPACING:
-				assert(LETTER_SPACING_SET == WORD_SPACING_SET);
+				assert(LETTER_SPACING_SET ==
+						(enum op_letter_spacing)
+						WORD_SPACING_SET);
 				assert(LETTER_SPACING_NORMAL ==
+						(enum op_letter_spacing)
 						WORD_SPACING_NORMAL);
 
 				switch (value) {
@@ -1704,8 +1751,12 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 				break;
 			case CSS_PROP_MAX_HEIGHT:
 			case CSS_PROP_MAX_WIDTH:
-				assert(MAX_HEIGHT_SET == MAX_WIDTH_SET);
-				assert(MAX_HEIGHT_NONE == MAX_WIDTH_NONE);
+				assert(MAX_HEIGHT_SET ==
+						(enum op_max_height)
+						MAX_WIDTH_SET);
+				assert(MAX_HEIGHT_NONE ==
+						(enum op_max_height)
+						MAX_WIDTH_NONE);
 
 				switch (value) {
 				case MAX_HEIGHT_SET:
@@ -1743,11 +1794,21 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 			case CSS_PROP_PAUSE_AFTER:
 			case CSS_PROP_PAUSE_BEFORE:
 			case CSS_PROP_TEXT_INDENT:
-				assert(MIN_HEIGHT_SET == MIN_WIDTH_SET);
-				assert(MIN_HEIGHT_SET == PADDING_SET);
-				assert(MIN_HEIGHT_SET == PAUSE_AFTER_SET);
-				assert(MIN_HEIGHT_SET == PAUSE_BEFORE_SET);
-				assert(MIN_HEIGHT_SET == TEXT_INDENT_SET);
+				assert(MIN_HEIGHT_SET ==
+						(enum op_min_height)
+						MIN_WIDTH_SET);
+				assert(MIN_HEIGHT_SET ==
+						(enum op_min_height)
+						PADDING_SET);
+				assert(MIN_HEIGHT_SET ==
+						(enum op_min_height)
+						PAUSE_AFTER_SET);
+				assert(MIN_HEIGHT_SET ==
+						(enum op_min_height)
+						PAUSE_BEFORE_SET);
+				assert(MIN_HEIGHT_SET ==
+						(enum op_min_height)
+						TEXT_INDENT_SET);
 
 				switch (value) {
 				case MIN_HEIGHT_SET:
@@ -1767,10 +1828,18 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 			case CSS_PROP_RICHNESS:
 			case CSS_PROP_STRESS:
 			case CSS_PROP_WIDOWS:
-				assert(ORPHANS_SET == PITCH_RANGE_SET);
-				assert(ORPHANS_SET == RICHNESS_SET);
-				assert(ORPHANS_SET == STRESS_SET);
-				assert(ORPHANS_SET == WIDOWS_SET);
+				assert(ORPHANS_SET ==
+						(enum op_orphans)
+						PITCH_RANGE_SET);
+				assert(ORPHANS_SET ==
+						(enum op_orphans)
+						RICHNESS_SET);
+				assert(ORPHANS_SET ==
+						(enum op_orphans)
+						STRESS_SET);
+				assert(ORPHANS_SET ==
+						(enum op_orphans)
+						WIDOWS_SET);
 
 				switch (value) {
 				case ORPHANS_SET:
@@ -1821,15 +1890,20 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 				break;
 			case CSS_PROP_PAGE_BREAK_AFTER:
 			case CSS_PROP_PAGE_BREAK_BEFORE:
-				assert(PAGE_BREAK_AFTER_AUTO == 
+				assert(PAGE_BREAK_AFTER_AUTO ==
+						(enum op_page_break_after)
 						PAGE_BREAK_BEFORE_AUTO);
 				assert(PAGE_BREAK_AFTER_ALWAYS ==
+						(enum op_page_break_after)
 						PAGE_BREAK_BEFORE_ALWAYS);
 				assert(PAGE_BREAK_AFTER_AVOID ==
+						(enum op_page_break_after)
 						PAGE_BREAK_BEFORE_AVOID);
 				assert(PAGE_BREAK_AFTER_LEFT ==
+						(enum op_page_break_after)
 						PAGE_BREAK_BEFORE_LEFT);
 				assert(PAGE_BREAK_AFTER_RIGHT ==
+						(enum op_page_break_after)
 						PAGE_BREAK_BEFORE_RIGHT);
 
 				switch (value) {
