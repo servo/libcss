@@ -17,21 +17,16 @@
 css_error css__cascade_volume(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	uint16_t value = 0;
 	css_fixed val = 0;
 	uint32_t unit = UNIT_PCT;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
 		case VOLUME_NUMBER:
-			value = 0;
-
 			val = *((css_fixed *) style->bytecode);
 			advance_bytecode(style, sizeof(val));
 			break;
 		case VOLUME_DIMENSION:
-			value = 0;
-
 			val = *((css_fixed *) style->bytecode);
 			advance_bytecode(style, sizeof(val));
 			unit = *((uint32_t *) style->bytecode);

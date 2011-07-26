@@ -17,14 +17,11 @@
 css_error css__cascade_play_during(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	uint16_t value = 0;
 	lwc_string *uri = NULL;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
 		case PLAY_DURING_URI:
-			value = 0;
-
 			css__stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &uri);
 			advance_bytecode(style, sizeof(css_code_t));
 			break;

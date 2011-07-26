@@ -78,7 +78,7 @@ position.c \
 quotes.c \
 richness.c \
 right.c \
-speach_rate.c \
+speech_rate.c \
 speak.c \
 speak_header.c \
 speak_numeral.c \

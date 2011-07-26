@@ -378,7 +378,11 @@ css_error emitToken(css_lexer *lexer, css_token_type type,
 		error = parserutils_inputstream_peek(lexer->input, 0, 
 				&data, &clen);
 
+#ifndef NDEBUG
 		assert(type == CSS_TOKEN_EOF || error == PARSERUTILS_OK);
+#else
+		(void) error;
+#endif
 
 		t->data.data = (type == CSS_TOKEN_EOF) ? NULL : (uint8_t *) data;
 	}

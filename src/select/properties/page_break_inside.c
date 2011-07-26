@@ -17,8 +17,6 @@
 css_error css__cascade_page_break_inside(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	uint16_t value = 0;
-
 	UNUSED(style);
 
 	if (isInherit(opv) == false) {
@@ -26,7 +24,6 @@ css_error css__cascade_page_break_inside(uint32_t opv, css_style *style,
 		case PAGE_BREAK_INSIDE_AUTO:
 		case PAGE_BREAK_INSIDE_AVOID:
 			/** \todo convert to public values */
-			value = 0;
 			break;
 		}
 	}

@@ -15,15 +15,12 @@
 css_error css__cascade_azimuth(uint32_t opv, css_style *style,
 		 css_select_state *state)
 {
-	uint16_t value = 0;
 	css_fixed val = 0;
 	uint32_t unit = UNIT_DEG;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv) & ~AZIMUTH_BEHIND) {
 		case AZIMUTH_ANGLE:
-			value = 0;
-
 			val = *((css_fixed *) style->bytecode);
 			advance_bytecode(style, sizeof(val));
 			unit = *((uint32_t *) style->bytecode);

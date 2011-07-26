@@ -17,8 +17,6 @@
 css_error css__cascade_speak_numeral(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	uint16_t value = 0;
-
 	UNUSED(style);
 
 	if (isInherit(opv) == false) {
@@ -26,7 +24,6 @@ css_error css__cascade_speak_numeral(uint32_t opv, css_style *style,
 		case SPEAK_NUMERAL_DIGITS:
 		case SPEAK_NUMERAL_CONTINUOUS:
 			/** \todo convert to public values */
-			value = 0;
 			break;
 		}
 	}

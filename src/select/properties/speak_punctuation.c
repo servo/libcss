@@ -17,8 +17,6 @@
 css_error css__cascade_speak_punctuation( 
 		uint32_t opv, css_style *style, css_select_state *state)
 {
-	uint16_t value = 0;
-
 	UNUSED(style);
 
 	if (isInherit(opv) == false) {
@@ -26,7 +24,6 @@ css_error css__cascade_speak_punctuation(
 		case SPEAK_PUNCTUATION_CODE:
 		case SPEAK_PUNCTUATION_NONE:
 			/** \todo convert to public values */
-			value = 0;
 			break;
 		}
 	}

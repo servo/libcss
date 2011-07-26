@@ -17,14 +17,11 @@
 css_error css__cascade_speech_rate(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	uint16_t value = 0;
 	css_fixed rate = 0;
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
 		case SPEECH_RATE_SET:
-			value = 0;
-
 			rate = *((css_fixed *) style->bytecode);
 			advance_bytecode(style, sizeof(rate));
 			break;

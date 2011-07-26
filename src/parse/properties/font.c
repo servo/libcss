@@ -195,9 +195,7 @@ css_error css__parse_font(css_language *c,
 	bool style = true;
 	bool variant = true;
 	bool weight = true;
-	bool size = true;
 	bool line_height = true;
-	bool family = true;
 	css_style *style_style;
 	css_style *variant_style;
 	css_style *weight_style;
@@ -350,7 +348,6 @@ css_error css__parse_font(css_language *c,
 	error = css__parse_font_size(c, vector, ctx, size_style);
 	if (error != CSS_OK)
 		goto css__parse_font_cleanup;
-	size = false;
 
 	consumeWhitespace(vector, ctx);
 
@@ -388,12 +385,6 @@ css_error css__parse_font(css_language *c,
 	error = css__parse_font_family(c, vector, ctx, family_style);
 	if (error != CSS_OK)
 		goto css__parse_font_cleanup;
-	family = false;
-
-	/* Must have size and family */
-	assert(size != true);
-	assert(family != true);
-
 
 	/* defaults */
 	if (style) {
