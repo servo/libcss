@@ -85,6 +85,17 @@ typedef struct css_computed_uncommon {
 	css_computed_content_item *content;
 } css_computed_uncommon;
 
+typedef struct css_computed_page {
+/*
+ * page_break_after		  3
+ * page_break_before		  3
+ * page_break_inside		  2
+ * 				---
+ *				  8 bits
+ */
+    uint8_t bits[1];
+} css_computed_page;
+    
 struct css_computed_style {
 /*
  * background_attachment	  2
@@ -270,7 +281,7 @@ struct css_computed_style {
 
 	css_computed_uncommon *uncommon;/**< Uncommon properties */
 	void *aural;			/**< Aural properties */
-	void *page;			/**< Page properties */
+	css_computed_page *page;	/**< Page properties */
 
 	css_allocator_fn alloc;
 	void *pw;

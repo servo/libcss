@@ -356,22 +356,30 @@ css_error css__cascade_number(uint32_t opv, css_style *style,
 	return CSS_OK;
 }
 
-css_error css__cascade_page_break_after_before(uint32_t opv, css_style *style,
-		css_select_state *state,
+css_error css__cascade_page_break_after_before_inside(uint32_t opv, 
+		css_style *style, css_select_state *state,
 		css_error (*fun)(css_computed_style *, uint8_t))
 {
-	uint16_t value = 0;
+	uint16_t value = CSS_PAGE_BREAK_AFTER_INHERIT;
 
 	UNUSED(style);
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {
 		case PAGE_BREAK_AFTER_AUTO:
+			value = CSS_PAGE_BREAK_AFTER_AUTO;
+			break;
 		case PAGE_BREAK_AFTER_ALWAYS:
+			value = CSS_PAGE_BREAK_AFTER_ALWAYS;
+			break;
 		case PAGE_BREAK_AFTER_AVOID:
+			value = CSS_PAGE_BREAK_AFTER_AVOID;
+			break;
 		case PAGE_BREAK_AFTER_LEFT:
+			value = CSS_PAGE_BREAK_AFTER_LEFT;
+			break;
 		case PAGE_BREAK_AFTER_RIGHT:
-			/** \todo convert to public values */
+			value = CSS_PAGE_BREAK_AFTER_RIGHT;
 			break;
 		}
 	}

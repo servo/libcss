@@ -1744,4 +1744,67 @@ static inline uint8_t get_text_align(
 #undef TEXT_ALIGN_SHIFT
 #undef TEXT_ALIGN_INDEX
 
+#define PAGE_BREAK_AFTER_INDEX 0
+#define PAGE_BREAK_AFTER_SHIFT 0
+#define PAGE_BREAK_AFTER_MASK 0x7
+static inline uint8_t get_page_break_after(
+		const css_computed_style *style)
+{
+	if (style->page != NULL) {
+		uint8_t bits = style->page->bits[PAGE_BREAK_AFTER_INDEX];
+		bits &= PAGE_BREAK_AFTER_MASK;
+		bits >>= PAGE_BREAK_AFTER_SHIFT;
+
+		/* 3bits: type */
+		return bits;
+	}
+
+	return CSS_PAGE_BREAK_AFTER_AUTO;
+}
+#undef PAGE_BREAK_AFTER_MASK
+#undef PAGE_BREAK_AFTER_SHIFT
+#undef PAGE_BREAK_AFTER_INDEX
+ 
+#define PAGE_BREAK_BEFORE_INDEX 0
+#define PAGE_BREAK_BEFORE_SHIFT 3
+#define PAGE_BREAK_BEFORE_MASK 0x38
+static inline uint8_t get_page_break_before(
+		const css_computed_style *style)
+{
+	if (style->page != NULL) {
+		uint8_t bits = style->page->bits[PAGE_BREAK_BEFORE_INDEX];
+		bits &= PAGE_BREAK_BEFORE_MASK;
+		bits >>= PAGE_BREAK_BEFORE_SHIFT;
+
+		/* 3bits: type */
+		return bits;
+	}
+    
+	return CSS_PAGE_BREAK_BEFORE_AUTO;
+}
+#undef PAGE_BREAK_BEFORE_MASK
+#undef PAGE_BREAK_BEFORE_SHIFT
+#undef PAGE_BREAK_BEFORE_INDEX
+    
+#define PAGE_BREAK_INSIDE_INDEX 0
+#define PAGE_BREAK_INSIDE_SHIFT 6
+#define PAGE_BREAK_INSIDE_MASK 0xc0
+static inline uint8_t get_page_break_inside(
+	    const css_computed_style *style)
+{
+	if (style->page != NULL) {
+		uint8_t bits = style->page->bits[PAGE_BREAK_INSIDE_INDEX];
+		bits &= PAGE_BREAK_INSIDE_MASK;
+		bits >>= PAGE_BREAK_INSIDE_SHIFT;
+
+		/* 2bits: type */
+		return bits;
+	}
+
+	return CSS_PAGE_BREAK_INSIDE_AUTO;
+}
+#undef PAGE_BREAK_INSIDE_MASK
+#undef PAGE_BREAK_INSIDE_SHIFT
+#undef PAGE_BREAK_INSIDE_INDEX
+
 #endif

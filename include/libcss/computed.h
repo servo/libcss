@@ -379,6 +379,15 @@ uint8_t css_computed_list_style_position(
 uint8_t css_computed_text_align(
 		const css_computed_style *style);
 
+uint8_t css_computed_page_break_after(
+		const css_computed_style *style);
+
+uint8_t css_computed_page_break_before(
+		const css_computed_style *style);
+
+uint8_t css_computed_page_break_inside(
+		const css_computed_style *style);
+
 
 #ifdef __cplusplus
 }
