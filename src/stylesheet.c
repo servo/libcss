@@ -120,7 +120,7 @@ css_error css__stylesheet_string_get(css_stylesheet *sheet, uint32_t string_numb
  *	   CSS_BADPARM on bad parameters,
  *	   CSS_NOMEM on memory exhaustion
  */
-css_error css_stylesheet_create(css_stylesheet_params *params,
+css_error css_stylesheet_create(const css_stylesheet_params *params,
 		css_allocator_fn alloc, void *alloc_pw, 
 		css_stylesheet **stylesheet)
 {

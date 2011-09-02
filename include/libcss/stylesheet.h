@@ -136,7 +136,7 @@ typedef struct css_stylesheet_params {
 	void *font_pw;
 } css_stylesheet_params;
 
-css_error css_stylesheet_create(css_stylesheet_params *params,
+css_error css_stylesheet_create(const css_stylesheet_params *params,
 		css_allocator_fn alloc, void *alloc_pw,
 		css_stylesheet **stylesheet);
 css_error css_stylesheet_destroy(css_stylesheet *sheet);
