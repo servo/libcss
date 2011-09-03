@@ -1000,7 +1000,7 @@ static void dump_computed_style(const css_computed_style *style, char *buf,
 
 	if (string_list != NULL) {
 		while (*string_list != NULL) {
-			wrote = snprintf(ptr, *len, " url\"%.*s\")",
+			wrote = snprintf(ptr, *len, " url('%.*s')",
 					(int) lwc_string_length(*string_list),
 					lwc_string_data(*string_list));
 			ptr += wrote;
