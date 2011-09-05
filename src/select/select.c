@@ -396,10 +396,12 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	 * from those which apply to our current media requirements and
 	 * are not disabled */
 	for (i = 0; i < ctx->n_sheets; i++) {
-		if ((ctx->sheets[i].media & media) != 0 &&
-				ctx->sheets[i].sheet->disabled == false) {
-			error = select_from_sheet(ctx, ctx->sheets[i].sheet, 
-					ctx->sheets[i].origin, &state);
+		const css_select_sheet s = ctx->sheets[i];
+
+		if ((s.media & media) != 0 &&
+				s.sheet->disabled == false) {
+			error = select_from_sheet(ctx, s.sheet, 
+					s.origin, &state);
 			if (error != CSS_OK)
 				goto cleanup;
 		}
@@ -433,13 +435,16 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 
 	/* Take account of presentational hints and fix up any remaining
 	 * unset properties. */
-	for (i = 0; i < CSS_N_PROPERTIES; i++) {
-		for (j = 0; j < CSS_PSEUDO_ELEMENT_COUNT; j++) {
-			prop_state *prop = &state.props[i][j];
+	for (j = 0; j < CSS_PSEUDO_ELEMENT_COUNT; j++) {
+		state.current_pseudo = j;
+		state.computed = state.results->styles[j];
 
-			/* Skip non-existent pseudo elements */
-			if (state.results->styles[j] == NULL)
-				continue;
+		/* Skip non-existent pseudo elements */
+		if (state.computed == NULL)
+			continue;
+
+		for (i = 0; i < CSS_N_PROPERTIES; i++) {
+			prop_state *prop = &state.props[i][j];
 
 			/* Apply presentational hints if we're not selecting for
 			 * a pseudo element, and the property is unset or the 
@@ -449,9 +454,6 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 					(prop->set == false ||
 					(prop->origin != CSS_ORIGIN_AUTHOR &&
 					prop->important == false))) {
-				state.current_pseudo = j;
-				state.computed = state.results->styles[j];
-
 				error = set_hint(&state, i);
 				if (error != CSS_OK)
 					goto cleanup;
@@ -465,9 +467,6 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 					(j == CSS_PSEUDO_ELEMENT_NONE && 
 					parent == NULL && 
 					prop->inherit == true)) {
-				state.current_pseudo = j;
-				state.computed = state.results->styles[j];
-
 				error = set_initial(&state, i, j, parent);
 				if (error != CSS_OK)
 					goto cleanup;
