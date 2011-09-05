@@ -42,35 +42,6 @@ typedef struct css_select_state {
 	css_origin current_origin;	/* Origin of current sheet */
 	uint32_t current_specificity;	/* Specificity of current rule */
 
-	/* Useful interned strings */
-	lwc_string *universal;
-	lwc_string *first_child;
-	lwc_string *link;
-	lwc_string *visited;
-	lwc_string *hover;
-	lwc_string *active;
-	lwc_string *focus;
-	lwc_string *nth_child;
-	lwc_string *nth_last_child;
-	lwc_string *nth_of_type;
-	lwc_string *nth_last_of_type;
-	lwc_string *last_child;
-	lwc_string *first_of_type;
-	lwc_string *last_of_type;
-	lwc_string *only_child;
-	lwc_string *only_of_type;
-	lwc_string *root;
-	lwc_string *empty;
-	lwc_string *target;
-	lwc_string *lang;
-	lwc_string *enabled;
-	lwc_string *disabled;
-	lwc_string *checked;
-	lwc_string *first_line;
-	lwc_string *first_letter;
-	lwc_string *before;
-	lwc_string *after;
-
 	prop_state props[CSS_N_PROPERTIES][CSS_PSEUDO_ELEMENT_COUNT];
 } css_select_state;
 

@@ -43,6 +43,35 @@ struct css_select_ctx {
 
 	css_allocator_fn alloc;		/**< Allocation routine */
 	void *pw;			/**< Client-specific private data */
+
+	/* Useful interned strings */
+	lwc_string *universal;
+	lwc_string *first_child;
+	lwc_string *link;
+	lwc_string *visited;
+	lwc_string *hover;
+	lwc_string *active;
+	lwc_string *focus;
+	lwc_string *nth_child;
+	lwc_string *nth_last_child;
+	lwc_string *nth_of_type;
+	lwc_string *nth_last_of_type;
+	lwc_string *last_child;
+	lwc_string *first_of_type;
+	lwc_string *last_of_type;
+	lwc_string *only_child;
+	lwc_string *only_of_type;
+	lwc_string *root;
+	lwc_string *empty;
+	lwc_string *target;
+	lwc_string *lang;
+	lwc_string *enabled;
+	lwc_string *disabled;
+	lwc_string *checked;
+	lwc_string *first_line;
+	lwc_string *first_letter;
+	lwc_string *before;
+	lwc_string *after;
 };
 
 static css_error set_hint(css_select_state *state, uint32_t prop);
@@ -50,11 +79,12 @@ static css_error set_initial(css_select_state *state,
 		uint32_t prop, css_pseudo_element pseudo,
 		void *parent);
 
+static css_error intern_strings(css_select_ctx *ctx);
+static void destroy_strings(css_select_ctx *ctx);
+
 static css_error select_from_sheet(css_select_ctx *ctx, 
 		const css_stylesheet *sheet, css_origin origin,
 		css_select_state *state);
-static css_error intern_strings_for_sheet(css_select_ctx *ctx,
-		const css_stylesheet *sheet, css_select_state *state);
 static css_error match_selectors_in_sheet(css_select_ctx *ctx, 
 		const css_stylesheet *sheet, css_select_state *state);
 static css_error match_selector_chain(css_select_ctx *ctx, 
@@ -90,6 +120,7 @@ css_error css_select_ctx_create(css_allocator_fn alloc, void *pw,
 		css_select_ctx **result)
 {
 	css_select_ctx *c;
+	css_error error;
 
 	if (alloc == NULL || result == NULL)
 		return CSS_BADPARM;
@@ -98,8 +129,13 @@ css_error css_select_ctx_create(css_allocator_fn alloc, void *pw,
 	if (c == NULL)
 		return CSS_NOMEM;
 
-	c->n_sheets = 0;
-	c->sheets = NULL;
+	memset(c, 0, sizeof(css_select_ctx));
+
+	error = intern_strings(c);
+	if (error != CSS_OK) {
+		alloc(c, 0, pw);
+		return error;
+	}
 
 	c->alloc = alloc;
 	c->pw = pw;
@@ -119,6 +155,8 @@ css_error css_select_ctx_destroy(css_select_ctx *ctx)
 {
 	if (ctx == NULL)
 		return CSS_BADPARM;
+
+	destroy_strings(ctx);
 
 	if (ctx->sheets != NULL)
 		ctx->alloc(ctx->sheets, 0, ctx->pw);
@@ -344,7 +382,7 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 			error = select_from_sheet(ctx, ctx->sheets[i].sheet, 
 					ctx->sheets[i].origin, &state);
 			if (error != CSS_OK)
-                                goto cleanup;
+				goto cleanup;
 		}
 	}
 
@@ -442,64 +480,7 @@ cleanup:
 		css_select_results_destroy(state.results);
 	}
 
-        if (ctx->n_sheets > 0 && ctx->sheets[0].sheet != NULL) {
-                if (state.universal != NULL)
-                        lwc_string_unref(state.universal);
-                if (state.first_child != NULL)
-                        lwc_string_unref(state.first_child);
-                if (state.link != NULL)
-                        lwc_string_unref(state.link);
-                if (state.visited != NULL)
-                        lwc_string_unref(state.visited);
-                if (state.hover != NULL)
-                        lwc_string_unref(state.hover);
-                if (state.active != NULL)
-                        lwc_string_unref(state.active);
-                if (state.focus != NULL)
-                        lwc_string_unref(state.focus);
-		if (state.nth_child != NULL)
-			lwc_string_unref(state.nth_child);
-		if (state.nth_last_child != NULL)
-			lwc_string_unref(state.nth_last_child);
-		if (state.nth_of_type != NULL)
-			lwc_string_unref(state.nth_of_type);
-		if (state.nth_last_of_type != NULL)
-			lwc_string_unref(state.nth_last_of_type);
-		if (state.last_child != NULL)
-			lwc_string_unref(state.last_child);
-		if (state.first_of_type != NULL)
-			lwc_string_unref(state.first_of_type);
-		if (state.last_of_type != NULL)
-			lwc_string_unref(state.last_of_type);
-		if (state.only_child != NULL)
-			lwc_string_unref(state.only_child);
-		if (state.only_of_type != NULL)
-			lwc_string_unref(state.only_of_type);
-		if (state.root != NULL)
-			lwc_string_unref(state.root);
-		if (state.empty != NULL)
-			lwc_string_unref(state.empty);
-		if (state.target != NULL)
-			lwc_string_unref(state.target);
-		if (state.lang != NULL)
-			lwc_string_unref(state.lang);
-		if (state.enabled != NULL)
-			lwc_string_unref(state.enabled);
-		if (state.disabled != NULL)
-			lwc_string_unref(state.disabled);
-		if (state.checked != NULL)
-			lwc_string_unref(state.checked);
-                if (state.first_line != NULL)
-                        lwc_string_unref(state.first_line);
-                if (state.first_letter != NULL)
-                        lwc_string_unref(state.first_letter);
-                if (state.before != NULL)
-                        lwc_string_unref(state.before);
-                if (state.after != NULL)
-                        lwc_string_unref(state.after);
-        }
-
-        return error;
+	return error;
 }
 
 /**
@@ -530,6 +511,234 @@ css_error css_select_results_destroy(css_select_results *results)
 /******************************************************************************
  * Selection engine internals below here                                      *
  ******************************************************************************/
+
+css_error intern_strings(css_select_ctx *ctx)
+{
+	lwc_error error;
+
+	/* Universal selector */
+	error = lwc_intern_string("*", SLEN("*"), &ctx->universal);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	/* Pseudo classes */
+	error = lwc_intern_string(
+			"first-child", SLEN("first-child"), 
+			&ctx->first_child);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"link", SLEN("link"), 
+			&ctx->link);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"visited", SLEN("visited"), 
+			&ctx->visited);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"hover", SLEN("hover"), 
+			&ctx->hover);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"active", SLEN("active"), 
+			&ctx->active);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"focus", SLEN("focus"), 
+			&ctx->focus);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"nth-child", SLEN("nth-child"),
+			&ctx->nth_child);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"nth-last-child", SLEN("nth-last-child"),
+			&ctx->nth_last_child);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"nth-of-type", SLEN("nth-of-type"),
+			&ctx->nth_of_type);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"nth-last-of-type", SLEN("nth-last-of-type"),
+			&ctx->nth_last_of_type);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"last-child", SLEN("last-child"),
+			&ctx->last_child);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"first-of-type", SLEN("first-of-type"),
+			&ctx->first_of_type);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"last-of-type", SLEN("last-of-type"),
+			&ctx->last_of_type);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"only-child", SLEN("only-child"),
+			&ctx->only_child);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"only-of-type", SLEN("only-of-type"),
+			&ctx->only_of_type);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"root", SLEN("root"),
+			&ctx->root);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"empty", SLEN("empty"),
+			&ctx->empty);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"target", SLEN("target"),
+			&ctx->target);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"lang", SLEN("lang"),
+			&ctx->lang);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"enabled", SLEN("enabled"),
+			&ctx->enabled);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"disabled", SLEN("disabled"),
+			&ctx->disabled);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"checked", SLEN("checked"),
+			&ctx->checked);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	/* Pseudo elements */
+	error = lwc_intern_string(
+			"first-line", SLEN("first-line"), 
+			&ctx->first_line);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"first_letter", SLEN("first-letter"),
+			&ctx->first_letter);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"before", SLEN("before"), 
+			&ctx->before);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	error = lwc_intern_string(
+			"after", SLEN("after"), 
+			&ctx->after);
+	if (error != lwc_error_ok)
+		return css_error_from_lwc_error(error);
+
+	return CSS_OK;
+}
+
+void destroy_strings(css_select_ctx *ctx)
+{
+	if (ctx->universal != NULL)
+		lwc_string_unref(ctx->universal);
+	if (ctx->first_child != NULL)
+		lwc_string_unref(ctx->first_child);
+	if (ctx->link != NULL)
+		lwc_string_unref(ctx->link);
+	if (ctx->visited != NULL)
+		lwc_string_unref(ctx->visited);
+	if (ctx->hover != NULL)
+		lwc_string_unref(ctx->hover);
+	if (ctx->active != NULL)
+		lwc_string_unref(ctx->active);
+	if (ctx->focus != NULL)
+		lwc_string_unref(ctx->focus);
+	if (ctx->nth_child != NULL)
+		lwc_string_unref(ctx->nth_child);
+	if (ctx->nth_last_child != NULL)
+		lwc_string_unref(ctx->nth_last_child);
+	if (ctx->nth_of_type != NULL)
+		lwc_string_unref(ctx->nth_of_type);
+	if (ctx->nth_last_of_type != NULL)
+		lwc_string_unref(ctx->nth_last_of_type);
+	if (ctx->last_child != NULL)
+		lwc_string_unref(ctx->last_child);
+	if (ctx->first_of_type != NULL)
+		lwc_string_unref(ctx->first_of_type);
+	if (ctx->last_of_type != NULL)
+		lwc_string_unref(ctx->last_of_type);
+	if (ctx->only_child != NULL)
+		lwc_string_unref(ctx->only_child);
+	if (ctx->only_of_type != NULL)
+		lwc_string_unref(ctx->only_of_type);
+	if (ctx->root != NULL)
+		lwc_string_unref(ctx->root);
+	if (ctx->empty != NULL)
+		lwc_string_unref(ctx->empty);
+	if (ctx->target != NULL)
+		lwc_string_unref(ctx->target);
+	if (ctx->lang != NULL)
+		lwc_string_unref(ctx->lang);
+	if (ctx->enabled != NULL)
+		lwc_string_unref(ctx->enabled);
+	if (ctx->disabled != NULL)
+		lwc_string_unref(ctx->disabled);
+	if (ctx->checked != NULL)
+		lwc_string_unref(ctx->checked);
+	if (ctx->first_line != NULL)
+		lwc_string_unref(ctx->first_line);
+	if (ctx->first_letter != NULL)
+		lwc_string_unref(ctx->first_letter);
+	if (ctx->before != NULL)
+		lwc_string_unref(ctx->before);
+	if (ctx->after != NULL)
+		lwc_string_unref(ctx->after);
+}
 
 css_error set_hint(css_select_state *state, uint32_t prop)
 {
@@ -653,12 +862,6 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 			state->sheet = s;
 			state->current_origin = origin;
 
-			/** \todo This can be hoisted into css_select_style: 
-			 * the lwc context is global now */
-			error = intern_strings_for_sheet(ctx, s, state);
-			if (error != CSS_OK)
-				return error;
-
 			error = match_selectors_in_sheet(ctx, s, state);
 			if (error != CSS_OK)
 				return error;
@@ -673,183 +876,6 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 			}
 		}
 	} while (s != NULL);
-
-	return CSS_OK;
-}
-
-css_error intern_strings_for_sheet(css_select_ctx *ctx, 
-		const css_stylesheet *sheet, css_select_state *state)
-{
-	lwc_error error;
-
-	UNUSED(ctx);
-        UNUSED(sheet);
-
-	/* Universal selector */
-        if (state->universal != NULL)
-                return CSS_OK;
-
-	error = lwc_intern_string("*", SLEN("*"), &state->universal);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	/* Pseudo classes */
-	error = lwc_intern_string(
-			"first-child", SLEN("first-child"), 
-			&state->first_child);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"link", SLEN("link"), 
-			&state->link);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"visited", SLEN("visited"), 
-			&state->visited);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"hover", SLEN("hover"), 
-			&state->hover);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"active", SLEN("active"), 
-			&state->active);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"focus", SLEN("focus"), 
-			&state->focus);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"nth-child", SLEN("nth-child"),
-			&state->nth_child);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"nth-last-child", SLEN("nth-last-child"),
-			&state->nth_last_child);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"nth-of-type", SLEN("nth-of-type"),
-			&state->nth_of_type);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"nth-last-of-type", SLEN("nth-last-of-type"),
-			&state->nth_last_of_type);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"last-child", SLEN("last-child"),
-			&state->last_child);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"first-of-type", SLEN("first-of-type"),
-			&state->first_of_type);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"last-of-type", SLEN("last-of-type"),
-			&state->last_of_type);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"only-child", SLEN("only-child"),
-			&state->only_child);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"only-of-type", SLEN("only-of-type"),
-			&state->only_of_type);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"root", SLEN("root"),
-			&state->root);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"empty", SLEN("empty"),
-			&state->empty);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"target", SLEN("target"),
-			&state->target);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"lang", SLEN("lang"),
-			&state->lang);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"enabled", SLEN("enabled"),
-			&state->enabled);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"disabled", SLEN("disabled"),
-			&state->disabled);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"checked", SLEN("checked"),
-			&state->checked);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	/* Pseudo elements */
-	error = lwc_intern_string(
-			"first-line", SLEN("first-line"), 
-			&state->first_line);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"first_letter", SLEN("first-letter"),
-			&state->first_letter);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"before", SLEN("before"), 
-			&state->before);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
-
-	error = lwc_intern_string(
-			"after", SLEN("after"), 
-			&state->after);
-	if (error != lwc_error_ok)
-		return css_error_from_lwc_error(error);
 
 	return CSS_OK;
 }
@@ -970,7 +996,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 	error = css__selector_hash_find(sheet->selectors, &element, 
 			&node_iterator, &node_selectors);
 	if (error != CSS_OK)
-                goto cleanup;
+		goto cleanup;
 
 	if (classes != NULL && n_classes > 0) {
 		/* Find hash chains for node classes */
@@ -1068,7 +1094,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 			goto cleanup;
 	}
 
-        error = CSS_OK;
+	error = CSS_OK;
 cleanup:
 	if (class_selectors != NULL)
 		ctx->alloc(class_selectors, 0, ctx->pw);
@@ -1085,9 +1111,9 @@ cleanup:
 
 	if (element.ns != NULL)
 		lwc_string_unref(element.ns);
-        lwc_string_unref(element.name);
+	lwc_string_unref(element.name);
 
-        return error;
+	return error;
 }
 
 css_error match_selector_chain(css_select_ctx *ctx, 
@@ -1128,7 +1154,7 @@ css_error match_selector_chain(css_select_ctx *ctx,
 		/* Consider any combinator on this selector */
 		if (s->data.comb != CSS_COMBINATOR_NONE &&
 				s->combinator->data.qname.name != 
-					state->universal) {
+					ctx->universal) {
 			/* Named combinator */
 			error = match_named_combinator(ctx, s->data.comb, 
 					s->combinator, state, node, &next_node);
@@ -1140,7 +1166,7 @@ css_error match_selector_chain(css_select_ctx *ctx,
 				return CSS_OK;
 		} else if (s->data.comb != CSS_COMBINATOR_NONE &&
 				s->combinator->data.qname.name == 
-					state->universal) {
+					ctx->universal) {
 			/* Universal combinator */
 			error = match_universal_combinator(ctx, s->data.comb, 
 					s->combinator, state, node, &next_node);
@@ -1383,7 +1409,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 			return error;
 
 		if (is_root == false && 
-				detail->qname.name == state->first_child) {
+				detail->qname.name == ctx->first_child) {
 			int32_t num_before = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1391,7 +1417,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 			if (error == CSS_OK)
 				*match = (num_before == 0);
 		} else if (is_root == false && 
-				detail->qname.name == state->nth_child) {
+				detail->qname.name == ctx->nth_child) {
 			int32_t num_before = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1403,7 +1429,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 				*match = match_nth(a, b, num_before + 1);
 			}
 		} else if (is_root == false && 
-				detail->qname.name == state->nth_last_child) {
+				detail->qname.name == ctx->nth_last_child) {
 			int32_t num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1415,7 +1441,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 				*match = match_nth(a, b, num_after + 1);
 			}
 		} else if (is_root == false && 
-				detail->qname.name == state->nth_of_type) {
+				detail->qname.name == ctx->nth_of_type) {
 			int32_t num_before = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1427,7 +1453,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 				*match = match_nth(a, b, num_before + 1);
 			}
 		} else if (is_root == false && 
-				detail->qname.name == state->nth_last_of_type) {
+				detail->qname.name == ctx->nth_last_of_type) {
 			int32_t num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1439,7 +1465,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 				*match = match_nth(a, b, num_after + 1);
 			}
 		} else if (is_root == false &&
-				detail->qname.name == state->last_child) {
+				detail->qname.name == ctx->last_child) {
 			int32_t num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw,
@@ -1447,7 +1473,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 			if (error == CSS_OK)
 				*match = (num_after == 0);
 		} else if (is_root == false &&
-				detail->qname.name == state->first_of_type) {
+				detail->qname.name == ctx->first_of_type) {
 			int32_t num_before = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1455,7 +1481,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 			if (error == CSS_OK)
 				*match = (num_before == 0);
 		} else if (is_root == false &&
-				detail->qname.name == state->last_of_type) {
+				detail->qname.name == ctx->last_of_type) {
 			int32_t num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1463,7 +1489,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 			if (error == CSS_OK)
 				*match = (num_after == 0);
 		} else if (is_root == false && 
-				detail->qname.name == state->only_child) {
+				detail->qname.name == ctx->only_child) {
 			int32_t num_before = 0, num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1477,7 +1503,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 							(num_after == 0);
 			}
 		} else if (is_root == false && 
-				detail->qname.name == state->only_of_type) {
+				detail->qname.name == ctx->only_of_type) {
 			int32_t num_before = 0, num_after = 0;
 
 			error = state->handler->node_count_siblings(state->pw, 
@@ -1490,39 +1516,39 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 					*match = (num_before == 0) && 
 							(num_after == 0);
 			}
-		} else if (detail->qname.name == state->root) {
+		} else if (detail->qname.name == ctx->root) {
 			*match = is_root;
-		} else if (detail->qname.name == state->empty) {
+		} else if (detail->qname.name == ctx->empty) {
 			error = state->handler->node_is_empty(state->pw,
 					node, match);
-		} else if (detail->qname.name == state->link) {
+		} else if (detail->qname.name == ctx->link) {
 			error = state->handler->node_is_link(state->pw,
 					node, match);
-		} else if (detail->qname.name == state->visited) {
+		} else if (detail->qname.name == ctx->visited) {
 			error = state->handler->node_is_visited(state->pw,
 					node, match);
-		} else if (detail->qname.name == state->hover) {
+		} else if (detail->qname.name == ctx->hover) {
 			error = state->handler->node_is_hover(state->pw,
 					node, match);
-		} else if (detail->qname.name == state->active) {
+		} else if (detail->qname.name == ctx->active) {
 			error = state->handler->node_is_active(state->pw,
 					node, match);
-		} else if (detail->qname.name == state->focus) {
+		} else if (detail->qname.name == ctx->focus) {
 			error = state->handler->node_is_focus(state->pw,
 					node, match);
-		} else if (detail->qname.name == state->target) {
+		} else if (detail->qname.name == ctx->target) {
 			error = state->handler->node_is_target(state->pw,
 					node, match);
-		} else if (detail->qname.name == state->lang) {
+		} else if (detail->qname.name == ctx->lang) {
 			error = state->handler->node_is_lang(state->pw,
 					node, detail->value.string, match);
-		} else if (detail->qname.name == state->enabled) {
+		} else if (detail->qname.name == ctx->enabled) {
 			error = state->handler->node_is_enabled(state->pw,
 					node, match);
-		} else if (detail->qname.name == state->disabled) {
+		} else if (detail->qname.name == ctx->disabled) {
 			error = state->handler->node_is_disabled(state->pw,
 					node, match);
-		} else if (detail->qname.name == state->checked) {
+		} else if (detail->qname.name == ctx->checked) {
 			error = state->handler->node_is_checked(state->pw,
 					node, match);
 		} else
@@ -1531,13 +1557,13 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 	case CSS_SELECTOR_PSEUDO_ELEMENT:
 		*match = true;
 
-		if (detail->qname.name == state->first_line) {
+		if (detail->qname.name == ctx->first_line) {
 			*pseudo_element = CSS_PSEUDO_ELEMENT_FIRST_LINE;
-		} else if (detail->qname.name == state->first_letter) {
+		} else if (detail->qname.name == ctx->first_letter) {
 			*pseudo_element = CSS_PSEUDO_ELEMENT_FIRST_LETTER;
-		} else if (detail->qname.name == state->before) {
+		} else if (detail->qname.name == ctx->before) {
 			*pseudo_element = CSS_PSEUDO_ELEMENT_BEFORE;
-		} else if (detail->qname.name == state->after) {
+		} else if (detail->qname.name == ctx->after) {
 			*pseudo_element = CSS_PSEUDO_ELEMENT_AFTER;
 		} else
 			*match = false;
