@@ -42,6 +42,11 @@ typedef struct css_select_state {
 	css_origin current_origin;	/* Origin of current sheet */
 	uint32_t current_specificity;	/* Specificity of current rule */
 
+	css_qname element;		/* Element we're selecting for */
+	lwc_string *id;			/* Node id, if any */
+	lwc_string **classes;		/* Node classes, if any */
+	uint32_t n_classes;		/* Number of classes */
+
 	prop_state props[CSS_N_PROPERTIES][CSS_PSEUDO_ELEMENT_COUNT];
 } css_select_state;
 

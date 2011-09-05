@@ -373,6 +373,25 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	if (error != CSS_OK)
 		goto cleanup;
 
+	/* Get node's name */
+	error = handler->node_name(pw, node, &state.element);
+	if (error != CSS_OK)
+		return error;
+
+	/* Get node's ID, if any */
+	error = handler->node_id(pw, node, &state.id);
+	if (error != CSS_OK)
+		goto cleanup;
+
+	/* Get node's classes, if any */
+	/** \todo Do we really want to force the client to allocate a new array 
+	 * every time we call this? It seems hugely inefficient, given they can 
+	 * cache the data. */
+	error = handler->node_classes(pw, node,	
+			&state.classes, &state.n_classes);
+	if (error != CSS_OK)
+		goto cleanup;
+
 	/* Iterate through the top-level stylesheets, selecting styles
 	 * from those which apply to our current media requirements and
 	 * are not disabled */
@@ -479,6 +498,20 @@ cleanup:
 	if (error != CSS_OK && state.results != NULL) {
 		css_select_results_destroy(state.results);
 	}
+
+	if (state.classes != NULL) {
+		for (i = 0; i < state.n_classes; i++)
+			lwc_string_unref(state.classes[i]);
+
+		ctx->alloc(state.classes, 0, ctx->pw);
+	}
+
+	if (state.id != NULL)
+		lwc_string_unref(state.id);
+
+	if (state.element.ns != NULL)
+		lwc_string_unref(state.element.ns);
+	lwc_string_unref(state.element.name);
 
 	return error;
 }
@@ -957,10 +990,8 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		const css_stylesheet *sheet, css_select_state *state)
 {
 	static const css_selector *empty_selector = NULL;
-	css_qname element = { NULL, NULL };
-	lwc_string *id = NULL;
-	lwc_string **classes = NULL;
-	uint32_t n_classes = 0, i = 0;
+	const uint32_t n_classes = state->n_classes;
+	uint32_t i = 0;
 	const css_selector **node_selectors = &empty_selector;
 	css_selector_hash_iterator node_iterator;
 	const css_selector **id_selectors = &empty_selector;
@@ -971,37 +1002,18 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 	css_selector_hash_iterator univ_iterator;
 	css_error error;
 
-	/* Get node's name */
-	error = state->handler->node_name(state->pw, state->node, 
-			&element);
-	if (error != CSS_OK)
-		return error;
-
-	/* Get node's ID, if any */
-	error = state->handler->node_id(state->pw, state->node,
-			&id);
-	if (error != CSS_OK)
-		goto cleanup;
-
-	/* Get node's classes, if any */
-	/** \todo Do we really want to force the client to allocate a new array 
-	 * every time we call this? It seems hugely inefficient, given they can 
-	 * cache the data. */
-	error = state->handler->node_classes(state->pw, state->node,
-			&classes, &n_classes);
-	if (error != CSS_OK)
-		goto cleanup;
-
 	/* Find hash chain that applies to current node */
-	error = css__selector_hash_find(sheet->selectors, &element, 
-			&node_iterator, &node_selectors);
+	error = css__selector_hash_find(sheet->selectors, 
+			&state->element, &node_iterator, 
+			&node_selectors);
 	if (error != CSS_OK)
 		goto cleanup;
 
-	if (classes != NULL && n_classes > 0) {
+	if (state->classes != NULL && n_classes > 0) {
 		/* Find hash chains for node classes */
 		class_selectors = ctx->alloc(NULL, 
-				n_classes * sizeof(css_selector **), ctx->pw);
+				n_classes * sizeof(css_selector **), 
+				ctx->pw);
 		if (class_selectors == NULL) {
 			error = CSS_NOMEM;
 			goto cleanup;
@@ -1009,23 +1021,23 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 
 		for (i = 0; i < n_classes; i++) {
 			error = css__selector_hash_find_by_class(
-					sheet->selectors, classes[i],
+					sheet->selectors, state->classes[i],
 					&class_iterator, &class_selectors[i]);
 			if (error != CSS_OK)
 				goto cleanup;
 		}
 	}
 
-	if (id != NULL) {
+	if (state->id != NULL) {
 		/* Find hash chain for node ID */
-		error = css__selector_hash_find_by_id(sheet->selectors, id,
-				&id_iterator, &id_selectors);
+		error = css__selector_hash_find_by_id(sheet->selectors, 
+				state->id, &id_iterator, &id_selectors);
 		if (error != CSS_OK)
 			goto cleanup;
 	}
 
 	/* Find hash chain for universal selector */
-	error = css__selector_hash_find_universal(sheet->selectors,  
+	error = css__selector_hash_find_universal(sheet->selectors,
 			&univ_iterator, &univ_selectors);
 	if (error != CSS_OK)
 		goto cleanup;
@@ -1098,20 +1110,6 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 cleanup:
 	if (class_selectors != NULL)
 		ctx->alloc(class_selectors, 0, ctx->pw);
-
-	if (classes != NULL) {
-		for (i = 0; i < n_classes; i++)
-			lwc_string_unref(classes[i]);
-
-		ctx->alloc(classes, 0, ctx->pw);
-	}
-
-	if (id != NULL)
-		lwc_string_unref(id);
-
-	if (element.ns != NULL)
-		lwc_string_unref(element.ns);
-	lwc_string_unref(element.name);
 
 	return error;
 }
