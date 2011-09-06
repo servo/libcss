@@ -435,7 +435,40 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 
 	/* Take account of presentational hints and fix up any remaining
 	 * unset properties. */
-	for (j = 0; j < CSS_PSEUDO_ELEMENT_COUNT; j++) {
+
+	/* Base element */
+	state.current_pseudo = CSS_PSEUDO_ELEMENT_NONE;
+	state.computed = state.results->styles[CSS_PSEUDO_ELEMENT_NONE];
+	for (i = 0; i < CSS_N_PROPERTIES; i++) {
+		const prop_state *prop = 
+				&state.props[i][CSS_PSEUDO_ELEMENT_NONE];
+
+		/* Apply presentational hints if the property is unset or 
+		 * the existing property value did not come from an author 
+		 * stylesheet or a user sheet using !important. */
+		if (prop->set == false ||
+				(prop->origin != CSS_ORIGIN_AUTHOR &&
+				prop->important == false)) {
+			error = set_hint(&state, i);
+			if (error != CSS_OK)
+				goto cleanup;
+		}
+
+		/* If the property is still unset or it's set to inherit 
+		 * and we're the root element, then set it to its initial 
+		 * value. */
+		if (prop->set == false || 
+				(parent == NULL && 
+				prop->inherit == true)) {
+			error = set_initial(&state, i, 
+					CSS_PSEUDO_ELEMENT_NONE, parent);
+			if (error != CSS_OK)
+				goto cleanup;
+		}
+	}
+
+	/* Pseudo elements, if any */
+	for (j = CSS_PSEUDO_ELEMENT_NONE + 1; j < CSS_PSEUDO_ELEMENT_COUNT; j++) {
 		state.current_pseudo = j;
 		state.computed = state.results->styles[j];
 
@@ -444,29 +477,11 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 			continue;
 
 		for (i = 0; i < CSS_N_PROPERTIES; i++) {
-			prop_state *prop = &state.props[i][j];
+			const prop_state *prop = &state.props[i][j];
 
-			/* Apply presentational hints if we're not selecting for
-			 * a pseudo element, and the property is unset or the 
-			 * existing property value did not come from an author 
-			 * stylesheet or a user sheet using !important. */
-			if (j == CSS_PSEUDO_ELEMENT_NONE &&
-					(prop->set == false ||
-					(prop->origin != CSS_ORIGIN_AUTHOR &&
-					prop->important == false))) {
-				error = set_hint(&state, i);
-				if (error != CSS_OK)
-					goto cleanup;
-			}
-
-			/* If the property is still unset or we're not selecting
-			 * for a pseudo element and it's set to inherit and 
-			 * we're the root element, then set it to its initial 
-			 * value. */
-			if (prop->set == false || 
-					(j == CSS_PSEUDO_ELEMENT_NONE && 
-					parent == NULL && 
-					prop->inherit == true)) {
+			/* If the property is still unset then set it 
+			 * to its initial value. */
+			if (prop->set == false) {
 				error = set_initial(&state, i, j, parent);
 				if (error != CSS_OK)
 					goto cleanup;
@@ -816,6 +831,8 @@ css_error set_initial(css_select_state *state,
 	 */
 	if (prop_dispatch[prop].inherited == false || 
 			(pseudo == CSS_PSEUDO_ELEMENT_NONE && parent == NULL)) {
+		enum prop_group group = prop_dispatch[prop].group;
+
 		/* Remaining properties are neither inherited nor 
 		 * already set. Thus, we set them to their initial 
 		 * values here. Except, however, if the property in 
@@ -825,21 +842,21 @@ css_error set_initial(css_select_state *state,
 		 * accessors to return the initial values for the 
 		 * property.
 		 */
-		if (prop_dispatch[prop].group == GROUP_NORMAL) {
+		if (group == GROUP_NORMAL) {
 			error = prop_dispatch[prop].initial(state);
 			if (error != CSS_OK)
 				return error;
-		} else if (prop_dispatch[prop].group == GROUP_UNCOMMON &&
+		} else if (group == GROUP_UNCOMMON &&
 				state->computed->uncommon != NULL) {
 			error = prop_dispatch[prop].initial(state);
 			if (error != CSS_OK)
 				return error;
-		} else if (prop_dispatch[prop].group == GROUP_PAGE &&
+		} else if (group == GROUP_PAGE &&
 				state->computed->page != NULL) {
 			error = prop_dispatch[prop].initial(state);
 			if (error != CSS_OK)
 				return error;
-		} else if (prop_dispatch[prop].group == GROUP_AURAL &&
+		} else if (group == GROUP_AURAL &&
 				state->computed->aural != NULL) {
 			error = prop_dispatch[prop].initial(state);
 			if (error != CSS_OK)
@@ -862,10 +879,8 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 	do {
 		/* Find first non-charset rule, if we're at the list head */
 		if (rule == s->rule_list) {
-			for (; rule != NULL; rule = rule->next) {
-				if (rule->type != CSS_RULE_CHARSET)
-					break;
-			}
+			while (rule != NULL && rule->type == CSS_RULE_CHARSET)
+				rule = rule->next;
 		}
 
 		if (rule != NULL && rule->type == CSS_RULE_IMPORT) {
@@ -912,7 +927,7 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 	return CSS_OK;
 }
 
-static bool _selectors_pending(const css_selector **node,
+static inline bool _selectors_pending(const css_selector **node,
 		const css_selector **id, const css_selector ***classes,
 		uint32_t n_classes, const css_selector **univ)
 {
@@ -1082,18 +1097,18 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		/* Advance to next selector in whichever chain we extracted 
 		 * the processed selector from. */
 		if (selector == *node_selectors) {
-			error = node_iterator(sheet->selectors, 
+			error = node_iterator(
 					node_selectors,	&node_selectors);
 		} else if (selector == *id_selectors) {
-			error = id_iterator(sheet->selectors,
+			error = id_iterator(
 					id_selectors, &id_selectors);
 		} else if (selector == *univ_selectors) {
-			error = univ_iterator(sheet->selectors,
+			error = univ_iterator(
 					univ_selectors, &univ_selectors);
 		} else {
 			for (i = 0; i < n_classes; i++) {
 				if (selector == *(class_selectors[i])) {
-					error = class_iterator(sheet->selectors,
+					error = class_iterator(
 							class_selectors[i], 
 							&class_selectors[i]);
 					break;
@@ -1384,8 +1399,6 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 {
 	bool is_root = false;
 	css_error error = CSS_OK;
-
-	UNUSED(ctx);
 
 	switch (detail->type) {
 	case CSS_SELECTOR_ELEMENT:

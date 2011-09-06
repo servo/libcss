@@ -18,7 +18,7 @@ struct css_selector;
 
 typedef struct css_selector_hash css_selector_hash;
 
-typedef css_error (*css_selector_hash_iterator)(css_selector_hash *hash,
+typedef css_error (*css_selector_hash_iterator)(
 		const struct css_selector **current,
 		const struct css_selector ***next);
 

@@ -49,17 +49,13 @@ static css_error _insert_into_chain(css_selector_hash *ctx, hash_entry *head,
 static css_error _remove_from_chain(css_selector_hash *ctx, hash_entry *head,
 		const css_selector *selector);
 
-static css_error _iterate_elements(css_selector_hash *hash, 
-		const css_selector **current,
+static css_error _iterate_elements(const css_selector **current,
 		const css_selector ***next);
-static css_error _iterate_classes(css_selector_hash *hash, 
-		const css_selector **current,
+static css_error _iterate_classes(const css_selector **current,
 		const css_selector ***next);
-static css_error _iterate_ids(css_selector_hash *hash, 
-		const css_selector **current,
+static css_error _iterate_ids(const css_selector **current,
 		const css_selector ***next);
-static css_error _iterate_universal(css_selector_hash *hash, 
-		const css_selector **current,
+static css_error _iterate_universal(const css_selector **current,
 		const css_selector ***next);
 
 /**
@@ -510,16 +506,14 @@ css_error css__selector_hash_size(css_selector_hash *hash, size_t *size)
 uint32_t _hash_name(lwc_string *name)
 {
 	uint32_t z = 0x811c9dc5;
-	size_t len = lwc_string_length(name);
 	const char *data = lwc_string_data(name);
+	const char *end = data + lwc_string_length(name);
 
-	while (len > 0) {
+	while (data != end) {
 		const char c = *data++;
 
 		z *= 0x01000193;
-		z ^= ('A' <= c && c <= 'Z') ? (c + 'a' - 'A') : c;
-
-		len--;
+		z ^= c & ~0x20;
 	}
 
 	return z;
@@ -685,37 +679,28 @@ css_error _remove_from_chain(css_selector_hash *ctx, hash_entry *head,
 /**
  * Find the next selector that matches
  *
- * \param hash     Hash to search
  * \param current  Current item
  * \param next     Pointer to location to receive next item
  * \return CSS_OK on success, appropriate error otherwise
  *
  * If nothing further matches, CSS_OK will be returned and **next == NULL
  */
-css_error _iterate_elements(css_selector_hash *hash,
-		const css_selector **current,
+css_error _iterate_elements(const css_selector **current,
 		const css_selector ***next)
 {
 	const hash_entry *head = (const hash_entry *) current;
+	bool match = false;
+	lwc_error lerror = lwc_error_ok;
 	lwc_string *name;
-
-	if (hash == NULL || current == NULL || next == NULL)
-		return CSS_BADPARM;
 
 	name = head->sel->data.qname.name;
 
 	/* Look for the next selector that matches the key */
-	for (head = head->next; head != NULL; head = head->next) {
-		lwc_error lerror = lwc_error_ok;
-		bool match = false;
-
+	while (match == false && (head = head->next) != NULL) {
 		lerror = lwc_string_caseless_isequal(
 				name, head->sel->data.qname.name, &match);
 		if (lerror != lwc_error_ok)
 			return css_error_from_lwc_error(lerror);
-
-		if (match)
-			break;
 	}
 
 	if (head == NULL)
@@ -729,31 +714,24 @@ css_error _iterate_elements(css_selector_hash *hash,
 /**
  * Find the next selector that matches
  *
- * \param hash     Hash to search
  * \param current  Current item
  * \param next     Pointer to location to receive next item
  * \return CSS_OK on success, appropriate error otherwise
  *
  * If nothing further matches, CSS_OK will be returned and **next == NULL
  */
-css_error _iterate_classes(css_selector_hash *hash,
-		const css_selector **current,
+css_error _iterate_classes(const css_selector **current,
 		const css_selector ***next)
 {
 	const hash_entry *head = (const hash_entry *) current;
-	lwc_string *ref;
-
-	if (hash == NULL || current == NULL || next == NULL)
-		return CSS_BADPARM;
+	bool match = false;
+	lwc_error lerror = lwc_error_ok;
+	lwc_string *name, *ref;
 
 	ref = _class_name(head->sel);
 
 	/* Look for the next selector that matches the key */
-	for (head = head->next; head != NULL; head = head->next) {
-		lwc_error lerror = lwc_error_ok;
-		lwc_string *name;
-		bool match = false;
-
+	while (match == false && (head = head->next) != NULL) {
 		name = _class_name(head->sel);
 		if (name == NULL)
 			continue;
@@ -762,9 +740,6 @@ css_error _iterate_classes(css_selector_hash *hash,
 				ref, name, &match);
 		if (lerror != lwc_error_ok)
 			return css_error_from_lwc_error(lerror);
-
-		if (match)
-			break;
 	}
 
 	if (head == NULL)
@@ -778,31 +753,24 @@ css_error _iterate_classes(css_selector_hash *hash,
 /**
  * Find the next selector that matches
  *
- * \param hash     Hash to search
  * \param current  Current item
  * \param next     Pointer to location to receive next item
  * \return CSS_OK on success, appropriate error otherwise
  *
  * If nothing further matches, CSS_OK will be returned and **next == NULL
  */
-css_error _iterate_ids(css_selector_hash *hash,
-		const css_selector **current,
+css_error _iterate_ids(const css_selector **current,
 		const css_selector ***next)
 {
 	const hash_entry *head = (const hash_entry *) current;
-	lwc_string *ref;
-
-	if (hash == NULL || current == NULL || next == NULL)
-		return CSS_BADPARM;
+	bool match = false;
+	lwc_error lerror = lwc_error_ok;
+	lwc_string *name, *ref;
 
 	ref = _id_name(head->sel);
 
 	/* Look for the next selector that matches the key */
-	for (head = head->next; head != NULL; head = head->next) {
-		lwc_error lerror = lwc_error_ok;
-		lwc_string *name;
-		bool match = false;
-
+	while (match == false && (head = head->next) != NULL) {
 		name = _id_name(head->sel);
 		if (name == NULL)
 			continue;
@@ -811,9 +779,6 @@ css_error _iterate_ids(css_selector_hash *hash,
 				ref, name, &match);
 		if (lerror != lwc_error_ok)
 			return css_error_from_lwc_error(lerror);
-
-		if (match)
-			break;
 	}
 
 	if (head == NULL)
@@ -827,21 +792,16 @@ css_error _iterate_ids(css_selector_hash *hash,
 /**
  * Find the next selector that matches
  *
- * \param hash     Hash to search
  * \param current  Current item
  * \param next     Pointer to location to receive next item
  * \return CSS_OK on success, appropriate error otherwise
  *
  * If nothing further matches, CSS_OK will be returned and **next == NULL
  */
-css_error _iterate_universal(css_selector_hash *hash,
-		const css_selector **current,
+css_error _iterate_universal(const css_selector **current,
 		const css_selector ***next)
 {
 	const hash_entry *head = (const hash_entry *) current;
-
-	if (hash == NULL || current == NULL || next == NULL)
-		return CSS_BADPARM;
 
 	if (head->next == NULL)
 		head = &empty_slot;
