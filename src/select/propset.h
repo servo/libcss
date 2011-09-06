@@ -1860,9 +1860,11 @@ static inline uint8_t set_text_align(
 static inline css_error set_page_break_after(
 		css_computed_style *style, uint8_t type)
 {
+	uint8_t *bits;
+
 	ENSURE_PAGE;
 
-	uint8_t *bits = &style->page->bits[PAGE_BREAK_AFTER_INDEX];
+	bits = &style->page->bits[PAGE_BREAK_AFTER_INDEX];
 
 	/* 3bits: type */
 	*bits = (*bits & ~PAGE_BREAK_AFTER_MASK) |
@@ -1880,9 +1882,11 @@ static inline css_error set_page_break_after(
 static inline css_error set_page_break_before(
 		css_computed_style *style, uint8_t type)
 {
+	uint8_t *bits;
+
 	ENSURE_PAGE;
 	
-	uint8_t *bits = &style->page->bits[PAGE_BREAK_BEFORE_INDEX];
+	bits = &style->page->bits[PAGE_BREAK_BEFORE_INDEX];
 
 	/* 3bits: type */
 	*bits = (*bits & ~PAGE_BREAK_BEFORE_MASK) |
@@ -1900,9 +1904,11 @@ static inline css_error set_page_break_before(
 static inline css_error set_page_break_inside(
 		css_computed_style *style, uint8_t type)
 {
+	uint8_t *bits;
+
 	ENSURE_PAGE;
 
-	uint8_t *bits = &style->page->bits[PAGE_BREAK_INSIDE_INDEX];
+	bits = &style->page->bits[PAGE_BREAK_INSIDE_INDEX];
 
 	/* 2bits: type */
 	*bits = (*bits & ~PAGE_BREAK_INSIDE_MASK) |
