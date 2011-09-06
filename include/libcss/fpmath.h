@@ -104,7 +104,7 @@ css_float_to_fixed(const float a) {
 	if (xx > INT_MAX)
 		xx = INT_MAX;
 	
-	return xx;
+	return (css_fixed) xx;
 }
 
 /* Add two fixed point values */
