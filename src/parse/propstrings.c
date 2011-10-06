@@ -6,6 +6,18 @@
  */
 
 #include "parse/propstrings.h"
+#include "stylesheet.h"
+
+#include <assert.h>
+
+typedef struct css__propstrings_ctx {
+	uint32_t count;
+	lwc_string *strings[LAST_KNOWN];
+} css__propstings_ctx;
+
+css__propstings_ctx css__propstrings = {
+	.count = 0
+};
 
 /* Must be synchronised with enum in propstrings.h */
 const stringmap_entry stringmap[LAST_KNOWN] = {
@@ -509,5 +521,59 @@ const stringmap_entry stringmap[LAST_KNOWN] = {
 	{ "yellow", SLEN("yellow") },
 	{ "yellowgreen", SLEN("yellowgreen") }
 };
+
+
+/**
+ * Obtain pointer to interned propstring list
+ *
+ * \param sheet	    Returns pointer to propstring table
+ * \return CSS_OK on success,
+ *	   CSS_NOMEM on memory exhaustion
+ *
+ * The propstring list is generated with the first call to this function and
+ * destroyed when it has no more users.  Call css__propstrings_unref() when
+ * finished with the propstring list.
+ */
+css_error css__propstrings_get(lwc_string ***strings)
+{
+	if (css__propstrings.count > 0) {
+		css__propstrings.count++;
+	} else {
+		int i;
+		lwc_error lerror;
+
+		/* Intern all known strings */
+		for (i = 0; i < LAST_KNOWN; i++) {
+			lerror = lwc_intern_string(stringmap[i].data,
+					stringmap[i].len,
+					&css__propstrings.strings[i]);
+
+			if (lerror != lwc_error_ok)
+				return CSS_NOMEM;
+		}
+		css__propstrings.count++;
+	}
+
+	*strings = css__propstrings.strings;
+
+	return CSS_OK;
+}
+
+/**
+ * Reduce reference count for propstring list by one.
+ *
+ * When count hits zero, the list is destroyed.
+ */
+void css__propstrings_unref(void)
+{
+	css__propstrings.count--;
+
+	if (css__propstrings.count == 0) {
+		int i;
+
+		for (i = 0; i < LAST_KNOWN; i++)
+			lwc_string_unref(css__propstrings.strings[i]);
+	}
+}
 
 

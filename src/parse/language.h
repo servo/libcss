@@ -44,7 +44,7 @@ typedef struct css_language {
 
 	/** \todo These should be statically allocated */
 	/** Interned strings */
-	lwc_string *strings[LAST_KNOWN];
+	lwc_string **strings;
 
 	lwc_string *default_namespace;	/**< Default namespace URI */
 	css_namespace *namespaces;	/**< Array of namespace mappings */

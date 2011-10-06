@@ -120,9 +120,7 @@ css_error css__language_create(css_stylesheet *sheet, css_parser *parser,
 	css_language *c;
 	css_parser_optparams params;
 	parserutils_error perror;
-	lwc_error lerror;
 	css_error error;
-	int i;
 
 	if (sheet == NULL || parser == NULL || alloc == NULL || 
 			language == NULL)
@@ -141,15 +139,11 @@ css_error css__language_create(css_stylesheet *sheet, css_parser *parser,
 	}
 
 	/* Intern all known strings */
-	for (i = 0; i < LAST_KNOWN; i++) {
-		lerror = lwc_intern_string(stringmap[i].data,
-					    stringmap[i].len,
-					    &(c->strings[i]));
-		if (lerror != lwc_error_ok) {
-			parserutils_stack_destroy(c->context);
-			alloc(c, 0, pw);
-			return CSS_NOMEM;
-		}
+	error = css__propstrings_get(&c->strings);
+	if (error != CSS_OK) {
+		parserutils_stack_destroy(c->context);
+		alloc(c, 0, pw);
+		return error;
 	}
 
 	params.event_handler.handler = language_handle_event;
@@ -201,9 +195,7 @@ css_error css__language_destroy(css_language *language)
 
 	parserutils_stack_destroy(language->context);
 	
-	for (i = 0; i < LAST_KNOWN; ++i) {
-		lwc_string_unref(language->strings[i]);
-	}
+	css__propstrings_unref();
 	
 	language->alloc(language, 0, language->pw);
 
