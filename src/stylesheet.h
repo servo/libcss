@@ -182,6 +182,7 @@ struct css_stylesheet {
 	css_language_level level;		/**< Language level of sheet */
 	css_parser *parser;			/**< Core parser for sheet */
 	void *parser_frontend;			/**< Frontend parser */
+	lwc_string **propstrings;		/**< Property strings, for parser */
 
 	bool quirks_allowed;			/**< Quirks permitted */
 	bool quirks_used;			/**< Quirks actually used */

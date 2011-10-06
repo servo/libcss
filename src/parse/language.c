@@ -138,13 +138,6 @@ css_error css__language_create(css_stylesheet *sheet, css_parser *parser,
 		return css_error_from_parserutils_error(perror);
 	}
 
-	error = css__propstrings_get(&c->strings);
-	if (error != CSS_OK) {
-		parserutils_stack_destroy(c->context);
-		alloc(c, 0, pw);
-		return error;
-	}
-
 	params.event_handler.handler = language_handle_event;
 	params.event_handler.pw = c;
 	error = css__parser_setopt(parser, CSS_PARSER_EVENT_HANDLER, &params);
@@ -159,6 +152,7 @@ css_error css__language_create(css_stylesheet *sheet, css_parser *parser,
 	c->default_namespace = NULL;
 	c->namespaces = NULL;
 	c->num_namespaces = 0;
+	c->strings = sheet->propstrings;
 	c->alloc = alloc;
 	c->pw = pw;
 
@@ -193,8 +187,6 @@ css_error css__language_destroy(css_language *language)
 	}
 
 	parserutils_stack_destroy(language->context);
-	
-	css__propstrings_unref();
 	
 	language->alloc(language, 0, language->pw);
 

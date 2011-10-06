@@ -140,6 +140,12 @@ css_error css_stylesheet_create(const css_stylesheet_params *params,
 		return CSS_NOMEM;
 
 	memset(sheet, 0, sizeof(css_stylesheet));
+
+	error = css__propstrings_get(&sheet->propstrings);
+	if (error != CSS_OK) {
+		alloc(sheet, 0, alloc_pw);
+		return error;
+	}
 	
 	sheet->inline_style = params->inline_style;
 
@@ -156,6 +162,7 @@ css_error css_stylesheet_create(const css_stylesheet_params *params,
 	}
 
 	if (error != CSS_OK) {
+		css__propstrings_unref();
 		alloc(sheet, 0, alloc_pw);
 		return error;
 	}
@@ -169,6 +176,7 @@ css_error css_stylesheet_create(const css_stylesheet_params *params,
 				&optparams);
 		if (error != CSS_OK) {
 			css__parser_destroy(sheet->parser);
+			css__propstrings_unref();
 			alloc(sheet, 0, alloc_pw);
 			return error;
 		}
@@ -179,6 +187,7 @@ css_error css_stylesheet_create(const css_stylesheet_params *params,
 			&sheet->parser_frontend);
 	if (error != CSS_OK) {
 		css__parser_destroy(sheet->parser);
+		css__propstrings_unref();
 		alloc(sheet, 0, alloc_pw);
 		return error;
 	}
@@ -188,6 +197,7 @@ css_error css_stylesheet_create(const css_stylesheet_params *params,
 	if (error != CSS_OK) {
 		css__language_destroy(sheet->parser_frontend);
 		css__parser_destroy(sheet->parser);
+		css__propstrings_unref();
 		alloc(sheet, 0, alloc_pw);
 		return error;
 	}
@@ -198,6 +208,7 @@ css_error css_stylesheet_create(const css_stylesheet_params *params,
 		css__selector_hash_destroy(sheet->selectors);
 		css__language_destroy(sheet->parser_frontend);
 		css__parser_destroy(sheet->parser);
+		css__propstrings_unref();
 		alloc(sheet, 0, alloc_pw);
 		return CSS_NOMEM;
 	}
@@ -211,6 +222,7 @@ css_error css_stylesheet_create(const css_stylesheet_params *params,
 			css__selector_hash_destroy(sheet->selectors);
 			css__language_destroy(sheet->parser_frontend);
 			css__parser_destroy(sheet->parser);
+			css__propstrings_unref();
 			alloc(sheet, 0, alloc_pw);
 			return CSS_NOMEM;
 		}
@@ -292,6 +304,8 @@ css_error css_stylesheet_destroy(css_stylesheet *sheet)
 
 	if (sheet->string_vector != NULL)
 		sheet->alloc(sheet->string_vector, 0, sheet->pw);
+
+	css__propstrings_unref();
 
 	sheet->alloc(sheet, 0, sheet->pw);
 
