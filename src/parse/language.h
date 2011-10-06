@@ -42,7 +42,6 @@ typedef struct css_language {
 		HAD_RULE
 	} state;			/**< State flag, for at-rule handling */
 
-	/** \todo These should be statically allocated */
 	/** Interned strings */
 	lwc_string **strings;
 

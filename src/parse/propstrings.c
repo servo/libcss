@@ -10,14 +10,17 @@
 
 #include <assert.h>
 
+typedef struct stringmap_entry {
+	const char *data;
+	size_t len;
+} stringmap_entry;
+
 typedef struct css__propstrings_ctx {
 	uint32_t count;
 	lwc_string *strings[LAST_KNOWN];
-} css__propstings_ctx;
+} css__propstrings_ctx;
 
-css__propstings_ctx css__propstrings = {
-	.count = 0
-};
+static css__propstrings_ctx css__propstrings;
 
 /* Must be synchronised with enum in propstrings.h */
 const stringmap_entry stringmap[LAST_KNOWN] = {

@@ -138,7 +138,6 @@ css_error css__language_create(css_stylesheet *sheet, css_parser *parser,
 		return css_error_from_parserutils_error(perror);
 	}
 
-	/* Intern all known strings */
 	error = css__propstrings_get(&c->strings);
 	if (error != CSS_OK) {
 		parserutils_stack_destroy(c->context);

@@ -124,13 +124,6 @@ enum {
 	LAST_KNOWN
 };
 
-typedef struct stringmap_entry {
-	const char *data;
-	size_t len;
-} stringmap_entry;
-
-extern const stringmap_entry stringmap[LAST_KNOWN];
-
 css_error css__propstrings_get(lwc_string ***strings);
 void css__propstrings_unref(void);
 
