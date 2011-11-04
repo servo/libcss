@@ -1438,13 +1438,19 @@ css_error match_details(css_select_ctx *ctx, void *node,
 	 * can be avoided unless absolutely necessary)? */
 
 	do {
-		error = match_detail(ctx, node, detail, state, match, &pseudo);
-		if (error != CSS_OK)
-			return error;
+		/* Named elements are handled by match_named_combinator, so
+		 * the element selector detail always matches here. */
+		if (detail->type != CSS_SELECTOR_ELEMENT) {
 
-		/* Detail doesn't match, so reject selector chain */
-		if (*match == false)
-			return CSS_OK;
+			error = match_detail(ctx, node, detail, state,
+					match, &pseudo);
+			if (error != CSS_OK)
+				return error;
+
+			/* Detail doesn't match, so reject selector chain */
+			if (*match == false)
+				return CSS_OK;
+		}
 
 		if (detail->next)
 			detail++;
@@ -1485,8 +1491,7 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 
 	switch (detail->type) {
 	case CSS_SELECTOR_ELEMENT:
-		error = state->handler->node_has_name(state->pw, node,
-				&detail->qname, match);
+		/* Never any need to match this detail type. */
 		break;
 	case CSS_SELECTOR_CLASS:
 		error = state->handler->node_has_class(state->pw, node,
