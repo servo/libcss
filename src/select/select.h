@@ -15,6 +15,14 @@
 
 #include "stylesheet.h"
 
+/**
+ * Item in the reject cache (only class and id types are valid)
+ */
+typedef struct reject_item {
+	lwc_string *value;
+	css_selector_type type;
+} reject_item;
+
 typedef struct prop_state {
 	uint32_t specificity;		/* Specificity of property in result */
 	unsigned int set       : 1,	/* Whether property is set in result */
@@ -46,6 +54,9 @@ typedef struct css_select_state {
 	lwc_string *id;			/* Node id, if any */
 	lwc_string **classes;		/* Node classes, if any */
 	uint32_t n_classes;		/* Number of classes */
+
+	reject_item reject_cache[128];	/* Reject cache */
+	reject_item *next_reject;	/* Next free slot in reject cache */
 
 	prop_state props[CSS_N_PROPERTIES][CSS_PSEUDO_ELEMENT_COUNT];
 } css_select_state;
