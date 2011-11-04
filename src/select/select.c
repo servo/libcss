@@ -1427,7 +1427,15 @@ css_error match_details(css_select_ctx *ctx, void *node,
 	css_error error;
 	css_pseudo_element pseudo = CSS_PSEUDO_ELEMENT_NONE;
 
-	/* We match by default (if there are no details than the element
+	/* Skip the element selector detail, which is always first.
+	 * (Named elements are handled by match_named_combinator, so the
+	 * element selector detail always matches here.) */
+	if (detail->next)
+		detail++;
+	else
+		detail = NULL;
+
+	/* We match by default (if there are no details other than the element
 	 * selector, then we must match) */
 	*match = true;
 
@@ -1437,26 +1445,20 @@ css_error match_details(css_select_ctx *ctx, void *node,
 	 * simpler details come first (and thus the expensive match routines 
 	 * can be avoided unless absolutely necessary)? */
 
-	do {
-		/* Named elements are handled by match_named_combinator, so
-		 * the element selector detail always matches here. */
-		if (detail->type != CSS_SELECTOR_ELEMENT) {
+	while (detail != NULL) {
+		error = match_detail(ctx, node, detail, state, match, &pseudo);
+		if (error != CSS_OK)
+			return error;
 
-			error = match_detail(ctx, node, detail, state,
-					match, &pseudo);
-			if (error != CSS_OK)
-				return error;
-
-			/* Detail doesn't match, so reject selector chain */
-			if (*match == false)
-				return CSS_OK;
-		}
+		/* Detail doesn't match, so reject selector chain */
+		if (*match == false)
+			return CSS_OK;
 
 		if (detail->next)
 			detail++;
 		else
 			detail = NULL;
-	} while (detail != NULL);
+	}
 
 	/* Return the applicable pseudo element, if required */
 	if (pseudo_element != NULL)
