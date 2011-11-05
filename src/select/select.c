@@ -1145,6 +1145,7 @@ static void update_reject_cache(css_select_state *state,
 				N_ELEMENTS(state->reject_cache) ||
 			comb != CSS_COMBINATOR_ANCESTOR ||
 			next_detail == NULL ||
+			next_detail->next != 0 ||
 			(next_detail->type != CSS_SELECTOR_CLASS &&
 			 next_detail->type != CSS_SELECTOR_ID))
 		return;
