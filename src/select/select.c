@@ -95,7 +95,7 @@ static css_error match_named_combinator(css_select_ctx *ctx,
 static css_error match_universal_combinator(css_select_ctx *ctx, 
 		css_combinator type, const css_selector *selector, 
 		css_select_state *state, void *node, bool may_optimise,
-		void **next_node);
+		bool *rejected_by_cache, void **next_node);
 static css_error match_details(css_select_ctx *ctx, void *node, 
 		const css_selector_detail *detail, css_select_state *state, 
 		bool *match, css_pseudo_element *pseudo_element);
@@ -1135,8 +1135,6 @@ static void update_reject_cache(css_select_state *state,
 {
 	const css_selector_detail *detail = &s->data;
 	const css_selector_detail *next_detail = NULL;
-	reject_item *reject = state->reject_cache;
-	bool match = false;
 
 	if (detail->next)
 		next_detail = detail + 1;
@@ -1150,24 +1148,10 @@ static void update_reject_cache(css_select_state *state,
 			 next_detail->type != CSS_SELECTOR_ID))
 		return;
 
-	/* Search cache for matching entry */
-	while (reject != state->next_reject) {
-		if (reject->type == next_detail->type &&
-				lwc_string_isequal(reject->value,
-						next_detail->qname.name,
-						&match) == lwc_error_ok &&
-				match)
-			break;
-
-		reject++;
-	}
-
-	/* None found: insert */
-	if (reject == state->next_reject) {
-		state->next_reject->type = next_detail->type;
-		state->next_reject->value = next_detail->qname.name;
-		state->next_reject++;
-	}
+	/* Insert */
+	state->next_reject->type = next_detail->type;
+	state->next_reject->value = next_detail->qname.name;
+	state->next_reject++;
 }
 
 css_error match_selector_chain(css_select_ctx *ctx, 
@@ -1177,6 +1161,7 @@ css_error match_selector_chain(css_select_ctx *ctx,
 	void *node = state->node;
 	const css_selector_detail *detail = &s->data;
 	bool match = false, may_optimise = true;
+	bool rejected_by_cache;
 	css_pseudo_element pseudo;
 	css_error error;
 
@@ -1230,13 +1215,15 @@ css_error match_selector_chain(css_select_ctx *ctx,
 
 			error = match_universal_combinator(ctx, s->data.comb, 
 					s->combinator, state, node, 
-					may_optimise, &next_node);
+					may_optimise, &rejected_by_cache,
+					&next_node);
 			if (error != CSS_OK)
 				return error;
 
 			/* No match for combinator, so reject selector chain */
 			if (next_node == NULL) {
-				if (may_optimise && s == selector) {
+				if (may_optimise && s == selector &&
+							!rejected_by_cache) {
 					update_reject_cache(state, s->data.comb,
 							s->combinator);
 				}
@@ -1340,7 +1327,8 @@ css_error match_named_combinator(css_select_ctx *ctx, css_combinator type,
 
 css_error match_universal_combinator(css_select_ctx *ctx, css_combinator type,
 		const css_selector *selector, css_select_state *state,
-		void *node, bool may_optimise, void **next_node)
+		void *node, bool may_optimise, bool *rejected_by_cache,
+		void **next_node)
 {
 	const css_selector_detail *detail = &selector->data;
 	const css_selector_detail *next_detail = NULL;
@@ -1349,6 +1337,8 @@ css_error match_universal_combinator(css_select_ctx *ctx, css_combinator type,
 
 	if (detail->next)
 		next_detail = detail + 1;
+
+	*rejected_by_cache = false;
 
 	/* Consult reject cache first */
 	if (may_optimise && (type == CSS_COMBINATOR_ANCESTOR || 
@@ -1368,6 +1358,7 @@ css_error match_universal_combinator(css_select_ctx *ctx, css_combinator type,
 				 	match) {
 				/* Found it: can't match */
 				*next_node = NULL;
+				*rejected_by_cache = true;
 				return CSS_OK;
 			}
 
