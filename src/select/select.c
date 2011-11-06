@@ -1223,7 +1223,7 @@ css_error match_selector_chain(css_select_ctx *ctx,
 			/* No match for combinator, so reject selector chain */
 			if (next_node == NULL) {
 				if (may_optimise && s == selector &&
-							!rejected_by_cache) {
+						rejected_by_cache == false) {
 					update_reject_cache(state, s->data.comb,
 							s->combinator);
 				}
