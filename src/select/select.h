@@ -55,7 +55,7 @@ typedef struct css_select_state {
 	lwc_string **classes;		/* Node classes, if any */
 	uint32_t n_classes;		/* Number of classes */
 
-	reject_item reject_cache[128];	/* Reject cache */
+	reject_item reject_cache[128];	/* Reject cache (filled from end) */
 	reject_item *next_reject;	/* Next free slot in reject cache */
 
 	prop_state props[CSS_N_PROPERTIES][CSS_PSEUDO_ELEMENT_COUNT];

@@ -350,7 +350,8 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 	state.media = media;
 	state.handler = handler;
 	state.pw = pw;
-	state.next_reject = state.reject_cache;
+	state.next_reject = state.reject_cache +
+			(N_ELEMENTS(state.reject_cache) - 1);
 
 	/* Allocate the result set */
 	state.results = ctx->alloc(NULL, sizeof(css_select_results), ctx->pw);
@@ -1139,8 +1140,7 @@ static void update_reject_cache(css_select_state *state,
 	if (detail->next)
 		next_detail = detail + 1;
 
-	if (state->next_reject >= state->reject_cache + 
-				N_ELEMENTS(state->reject_cache) ||
+	if (state->next_reject < state->reject_cache ||
 			comb != CSS_COMBINATOR_ANCESTOR ||
 			next_detail == NULL ||
 			next_detail->next != 0 ||
@@ -1151,7 +1151,7 @@ static void update_reject_cache(css_select_state *state,
 	/* Insert */
 	state->next_reject->type = next_detail->type;
 	state->next_reject->value = next_detail->qname.name;
-	state->next_reject++;
+	state->next_reject--;
 }
 
 css_error match_selector_chain(css_select_ctx *ctx, 
@@ -1346,10 +1346,11 @@ css_error match_universal_combinator(css_select_ctx *ctx, css_combinator type,
 			next_detail != NULL &&
 			(next_detail->type == CSS_SELECTOR_CLASS || 
 			 next_detail->type == CSS_SELECTOR_ID)) {
-		reject_item *reject = state->reject_cache;
+		reject_item *reject = state->next_reject + 1;
 		bool match = false;
 
-		while (reject != state->next_reject) {
+		while (reject < state->reject_cache +
+				N_ELEMENTS(state->reject_cache)) {
 			/* Perform pessimistic matching (may hurt quirks) */
 			if (reject->type == next_detail->type &&
 					lwc_string_isequal(reject->value, 
