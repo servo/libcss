@@ -1347,10 +1347,11 @@ css_error match_universal_combinator(css_select_ctx *ctx, css_combinator type,
 			(next_detail->type == CSS_SELECTOR_CLASS || 
 			 next_detail->type == CSS_SELECTOR_ID)) {
 		reject_item *reject = state->next_reject + 1;
+		reject_item *last = state->reject_cache +
+				N_ELEMENTS(state->reject_cache) - 1;
 		bool match = false;
 
-		while (reject < state->reject_cache +
-				N_ELEMENTS(state->reject_cache)) {
+		while (reject <= last) {
 			/* Perform pessimistic matching (may hurt quirks) */
 			if (reject->type == next_detail->type &&
 					lwc_string_isequal(reject->value, 
