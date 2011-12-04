@@ -12,6 +12,7 @@
 
 #include "stylesheet.h"
 #include "lex/lex.h"
+#include "parse/font_face.h"
 #include "parse/important.h"
 #include "parse/language.h"
 #include "parse/parse.h"
@@ -558,6 +559,26 @@ css_error handleStartAtRule(css_language *c, const parserutils_vector *vector)
 		 * so no need to destroy it */
 
 		c->state = HAD_RULE;
+	} else if (lwc_string_caseless_isequal(atkeyword->idata, 
+			c->strings[FONT_FACE], &match) == lwc_error_ok && 
+			match) {
+		error = css__stylesheet_rule_create(c->sheet,
+				CSS_RULE_FONT_FACE, &rule);
+		if (error != CSS_OK)
+			return error;
+		
+		consumeWhitespace(vector, &ctx);
+
+		error = css__stylesheet_add_rule(c->sheet, rule, NULL);
+		if (error != CSS_OK) {
+			css__stylesheet_rule_destroy(c->sheet, rule);
+			return error;
+		}
+
+		/* Rule is now owned by the sheet, 
+		 * so no need to destroy it */
+
+		c->state = HAD_RULE;
 	} else if (lwc_string_caseless_isequal(atkeyword->idata, c->strings[PAGE], 
 			&match) == lwc_error_ok && match) {
 		const css_token *token;
@@ -693,9 +714,9 @@ css_error handleBlockContent(css_language *c, const parserutils_vector *vector)
 	context_entry *entry;
 	css_rule *rule;
 
-	/* In CSS 2.1, block content comprises either declarations (if the 
-	 * current block is associated with @page or a selector), or rulesets 
-	 * (if the current block is associated with @media). */
+	/* Block content comprises either declarations (if the current block is
+	 * associated with @page, @font-face or a selector), or rulesets (if the
+	 * current block is associated with @media). */
 
 	entry = parserutils_stack_get_current(c->context);
 	if (entry == NULL || entry->data == NULL)
@@ -704,7 +725,8 @@ css_error handleBlockContent(css_language *c, const parserutils_vector *vector)
 	rule = entry->data;
 	if (rule == NULL || (rule->type != CSS_RULE_SELECTOR && 
 			rule->type != CSS_RULE_PAGE &&
-			rule->type != CSS_RULE_MEDIA))
+			rule->type != CSS_RULE_MEDIA && 
+			rule->type != CSS_RULE_FONT_FACE))
 		return CSS_INVALID;
 
 	if (rule->type == CSS_RULE_MEDIA) {
@@ -729,6 +751,7 @@ css_error handleDeclaration(css_language *c, const parserutils_vector *vector)
 	/* Locations where declarations are permitted:
 	 *
 	 * + In @page
+	 * + In @font-face
 	 * + In ruleset
 	 */
 	entry = parserutils_stack_get_current(c->context);
@@ -737,7 +760,8 @@ css_error handleDeclaration(css_language *c, const parserutils_vector *vector)
 
 	rule = entry->data;
 	if (rule == NULL || (rule->type != CSS_RULE_SELECTOR && 
-			rule->type != CSS_RULE_PAGE))
+				rule->type != CSS_RULE_PAGE && 
+				rule->type != CSS_RULE_FONT_FACE))
 		return CSS_INVALID;
 
 	/* Strip any leading whitespace (can happen if in nested block) */
@@ -759,7 +783,13 @@ css_error handleDeclaration(css_language *c, const parserutils_vector *vector)
 
 	consumeWhitespace(vector, &ctx);
 
-	error = parseProperty(c, ident, vector, &ctx, rule);
+	if (rule->type == CSS_RULE_FONT_FACE) {
+		css_rule_font_face * ff_rule = (css_rule_font_face *) rule;
+		error = css__parse_font_descriptor(
+				c, ident, vector, &ctx, ff_rule);
+	} else {
+		error = parseProperty(c, ident, vector, &ctx, rule);
+	}
 	if (error != CSS_OK)
 		return error;
 

@@ -15,6 +15,7 @@
 #include "utils/parserutilserror.h"
 #include "utils/utils.h"
 #include "select/dispatch.h"
+#include "select/font_face.h"
 
 static css_error _add_selectors(css_stylesheet *sheet, css_rule *rule);
 static css_error _remove_selectors(css_stylesheet *sheet, css_rule *rule);
@@ -261,7 +262,7 @@ css_error css_stylesheet_create(const css_stylesheet_params *params,
  */
 css_error css_stylesheet_destroy(css_stylesheet *sheet)
 {
-	uint32_t string_index;
+	uint32_t index;
 	css_rule *r, *s;
 
 	if (sheet == NULL)
@@ -296,17 +297,17 @@ css_error css_stylesheet_destroy(css_stylesheet *sheet)
 		css__stylesheet_style_destroy(sheet->cached_style);
 
 	/* destroy string vector */
-	for (string_index = 0;
-	     string_index < sheet->string_vector_c;
-	     string_index++) {
-		lwc_string_unref(sheet->string_vector[string_index]);		
+	for (index = 0;
+	     index < sheet->string_vector_c;
+	     index++) {
+		lwc_string_unref(sheet->string_vector[index]);		
 	}
 
 	if (sheet->string_vector != NULL)
 		sheet->alloc(sheet->string_vector, 0, sheet->pw);
 
 	css__propstrings_unref();
-
+	
 	sheet->alloc(sheet, 0, sheet->pw);
 
 	return CSS_OK;
@@ -625,7 +626,7 @@ css_error css_stylesheet_size(css_stylesheet *sheet, size_t *size)
 
 		bytes += hash_size;
 	}
-
+	
 	*size = bytes;
 
 	return CSS_OK;
@@ -1194,10 +1195,10 @@ css_error css__stylesheet_rule_destroy(css_stylesheet *sheet, css_rule *rule)
 		break;
 	case CSS_RULE_FONT_FACE:
 	{
-		css_rule_font_face *font_face = (css_rule_font_face *) rule;
+		css_rule_font_face *font_face_r = (css_rule_font_face *) rule;
 
-		if (font_face->style != NULL)
-			css__stylesheet_style_destroy(font_face->style);
+		if (font_face_r->font_face != NULL)
+			css__font_face_destroy(font_face_r->font_face);
 	}
 		break;
 	case CSS_RULE_PAGE:
@@ -1705,8 +1706,8 @@ size_t _rule_size(const css_rule *r)
 
 		bytes += sizeof(css_rule_font_face);
 
-		if (rf->style != NULL)
-			bytes += (rf->style->used * sizeof(css_code_t));
+		if (rf->font_face != NULL)
+			bytes += sizeof(css_font_face);
 	} else if (r->type == CSS_RULE_PAGE) {
 		const css_rule_page *rp = (const css_rule_page *) r;
 		const css_selector *s = rp->selector;
@@ -1731,4 +1732,3 @@ size_t _rule_size(const css_rule *r)
 
 	return bytes;
 }
-

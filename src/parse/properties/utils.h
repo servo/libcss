@@ -181,10 +181,22 @@ css_error css__parse_unit_specifier(css_language *c,
 css_error css__parse_unit_keyword(const char *ptr, size_t len, 
 		css_unit *unit);
 
+css_error css__ident_list_or_string_to_string(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		bool (*reserved)(css_language *c, const css_token *ident),
+		lwc_string **result);
+
+css_error css__ident_list_to_string(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		bool (*reserved)(css_language *c, const css_token *ident),
+		lwc_string **result);
+
 css_error css__comma_list_to_style(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		bool (*reserved)(css_language *c, const css_token *ident),
-		css_code_t (*get_value)(css_language *c, const css_token *token, bool first),
+		css_code_t (*get_value)(css_language *c,
+				const css_token *token, 
+				bool first),
 		css_style *result);
 
 #endif

@@ -141,7 +141,7 @@ typedef struct css_rule_media {
 typedef struct css_rule_font_face {
 	css_rule base;
 
-	css_style *style;
+	css_font_face *font_face;
 } css_rule_font_face;
 
 typedef struct css_rule_page {

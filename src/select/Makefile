@@ -1,4 +1,4 @@
 # Sources
-DIR_SOURCES := computed.c dispatch.c hash.c select.c
+DIR_SOURCES := computed.c dispatch.c hash.c select.c font_face.c
 
 include build/makefiles/Makefile.subdir

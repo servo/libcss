@@ -8,6 +8,7 @@
 #include "stylesheet.h"
 #include "bytecode/bytecode.h"
 #include "bytecode/opcodes.h"
+#include "select/font_face.h"
 
 #include "testutils.h"
 
@@ -18,11 +19,14 @@ static void dump_rule_charset(css_rule_charset *s, char **buf, size_t *buflen);
 static void dump_rule_import(css_rule_import *s, char **buf, size_t *buflen);
 static void dump_rule_media(css_rule_media *s, char **buf, size_t *buflen);
 static void dump_rule_page(css_rule_page *s, char **buf, size_t *buflen);
+static void dump_rule_font_face(css_rule_font_face *s, 
+		char **buf, size_t *buflen);
 static void dump_selector_list(css_selector *list, char **ptr);
 static void dump_selector(css_selector *selector, char **ptr);
 static void dump_selector_detail(css_selector_detail *detail, char **ptr);
 static void dump_bytecode(css_style *style, char **ptr, uint32_t depth);
 static void dump_string(lwc_string *string, char **ptr);
+static void dump_font_face(css_font_face *font_face, char**ptr);
 
 void dump_sheet(css_stylesheet *sheet, char *buf, size_t *buflen)
 {
@@ -48,6 +52,10 @@ void dump_sheet(css_stylesheet *sheet, char *buf, size_t *buflen)
 			break;
 		case CSS_RULE_PAGE:
 			dump_rule_page((css_rule_page *) rule,
+				&buf, buflen);
+			break;
+		case CSS_RULE_FONT_FACE:
+			dump_rule_font_face((css_rule_font_face *) rule,
 				&buf, buflen);
 			break;
 		default:
@@ -152,6 +160,22 @@ void dump_rule_page(css_rule_page *s, char **buf, size_t *buflen)
 
 	if (s->style != NULL)
 		dump_bytecode(s->style, &ptr, 2);
+
+	*buflen -= ptr - *buf;
+	*buf = ptr;
+}
+
+void dump_rule_font_face(css_rule_font_face *s, char **buf, size_t *buflen)
+{
+	char *ptr = *buf;
+
+	ptr += sprintf(ptr, "| @font-face ");
+
+	if (s->font_face != NULL) {
+		dump_font_face(s->font_face, &ptr);
+	}
+	
+	*ptr++ = '\n';
 
 	*buflen -= ptr - *buf;
 	*buf = ptr;
@@ -833,7 +857,8 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 					break;
 				case BACKGROUND_IMAGE_URI:
 				{
-					uint32_t snum = *((uint32_t *) bytecode);					lwc_string *he;
+					uint32_t snum = *((uint32_t *) bytecode);
+					lwc_string *he;
 					css__stylesheet_string_get(style->sheet, 
 								  snum, 
 								  &he);
@@ -2017,9 +2042,7 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
                                                                 (int) lwc_string_length(he), 
                                                                 lwc_string_data(he));
 
-						he = 
-						*((lwc_string **) 
-						bytecode);
+						css__stylesheet_string_get(style->sheet, snum, &he);
 						ADVANCE(sizeof(he));
 						*ptr += sprintf(*ptr, " '%.*s' ", 
                                                                 (int) lwc_string_length(he), 
@@ -2363,6 +2386,139 @@ void dump_string(lwc_string *string, char **ptr)
 	*ptr += sprintf(*ptr, "%.*s", 
                         (int) lwc_string_length(string),
                         lwc_string_data(string));
+}
+
+void dump_font_face(css_font_face *font_face, char **ptr)
+{
+	uint8_t style, weight;
+
+	if (font_face->font_family != NULL) {
+		*(*ptr)++ = '\n';
+		*ptr += sprintf(*ptr, "|  font-family: %.*s",
+				(int) lwc_string_length(font_face->font_family),
+				lwc_string_data(font_face->font_family));
+	}
+	
+	*ptr += sprintf(*ptr, "\n|  font-style: ");
+	style = css_font_face_font_style(font_face);
+	switch (style) {
+	case CSS_FONT_STYLE_INHERIT:
+		*ptr += sprintf(*ptr, "unspecified");
+		break;
+	case CSS_FONT_STYLE_NORMAL:
+		*ptr += sprintf(*ptr, "normal");
+		break;
+	case CSS_FONT_STYLE_ITALIC:
+		*ptr += sprintf(*ptr, "italic");
+		break;
+	case CSS_FONT_STYLE_OBLIQUE:
+		*ptr += sprintf(*ptr, "oblique");
+		break;
+	}
+
+	*ptr += sprintf(*ptr, "\n|  font-weight: ");
+	weight = css_font_face_font_weight(font_face);
+	switch (weight) {
+	case CSS_FONT_WEIGHT_INHERIT:
+		*ptr += sprintf(*ptr, "unspecified");
+		break;
+	case CSS_FONT_WEIGHT_NORMAL:
+		*ptr += sprintf(*ptr, "normal");
+		break;
+	case CSS_FONT_WEIGHT_BOLD:
+		*ptr += sprintf(*ptr, "bold");
+		break;
+	case CSS_FONT_WEIGHT_100:
+		*ptr += sprintf(*ptr, "100");
+		break;
+	case CSS_FONT_WEIGHT_200:
+		*ptr += sprintf(*ptr, "200");
+		break;
+	case CSS_FONT_WEIGHT_300:
+		*ptr += sprintf(*ptr, "300");
+		break;
+	case CSS_FONT_WEIGHT_400:
+		*ptr += sprintf(*ptr, "400");
+		break;
+	case CSS_FONT_WEIGHT_500:
+		*ptr += sprintf(*ptr, "500");
+		break;
+	case CSS_FONT_WEIGHT_600:
+		*ptr += sprintf(*ptr, "600");
+		break;
+	case CSS_FONT_WEIGHT_700:
+		*ptr += sprintf(*ptr, "700");
+		break;
+	case CSS_FONT_WEIGHT_800:
+		*ptr += sprintf(*ptr, "800");
+		break;
+	case CSS_FONT_WEIGHT_900:
+		*ptr += sprintf(*ptr, "900");
+		break;
+	default:
+		*ptr += sprintf(*ptr, "Unhandled weight %d\n", (int)weight);
+		break;
+	}
+
+	
+	if (font_face->srcs != NULL) {
+		uint32_t i;
+		css_font_face_src *srcs = font_face->srcs;
+		for (i = 0; i < font_face->n_srcs; ++i) {
+			*ptr += sprintf(*ptr, "\n|  src: ");
+			
+			css_font_face_format format = 
+					css_font_face_src_format(&srcs[i]);
+			
+			*ptr += sprintf(*ptr, "\n|   format: ");
+			
+			switch (format) {
+			case CSS_FONT_FACE_FORMAT_UNSPECIFIED:
+				*ptr += sprintf(*ptr, "unspecified");
+				break;
+			case CSS_FONT_FACE_FORMAT_WOFF:
+				*ptr += sprintf(*ptr, "WOFF");
+				break;
+			case CSS_FONT_FACE_FORMAT_OPENTYPE:
+				*ptr += sprintf(*ptr, "OTF");
+				break;
+			case CSS_FONT_FACE_FORMAT_EMBEDDED_OPENTYPE:
+				*ptr += sprintf(*ptr, "EOTF");
+				break;
+			case CSS_FONT_FACE_FORMAT_SVG:
+				*ptr += sprintf(*ptr, "SVG");
+				break;
+			case CSS_FONT_FACE_FORMAT_UNKNOWN:
+				*ptr += sprintf(*ptr, "unknown");
+				break;
+			default:
+				*ptr += sprintf(*ptr, "UNEXPECTED");
+				break;
+			}
+
+			if (srcs[i].location != NULL) {
+				*ptr += sprintf(*ptr, "\n|   location: ");
+
+				switch (css_font_face_src_location_type(
+						&srcs[i])) {
+				case CSS_FONT_FACE_LOCATION_TYPE_LOCAL:
+					*ptr += sprintf(*ptr, "local");
+					break;
+				case CSS_FONT_FACE_LOCATION_TYPE_URI:
+					*ptr += sprintf(*ptr, "url");
+					break;
+				default:
+					*ptr += sprintf(*ptr, "UNKNOWN");
+					break;
+				}
+				
+				*ptr += sprintf(*ptr, "(%.*s)",
+					(int) lwc_string_length(
+							srcs[i].location), 
+					lwc_string_data(srcs[i].location));
+			}
+		}
+	}
 }
 
 #endif

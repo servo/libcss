@@ -22,6 +22,7 @@ extern "C"
 #include <libcss/properties.h>
 #include <libcss/select.h>
 #include <libcss/stylesheet.h>
+#include <libcss/font_face.h>
 
 #ifdef __cplusplus
 }

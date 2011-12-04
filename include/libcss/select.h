@@ -130,6 +130,20 @@ typedef struct css_select_handler {
 			css_hint *size);
 } css_select_handler;
 
+/**
+ * Font face selection result set
+ */
+typedef struct css_select_font_faces_results {
+	css_allocator_fn alloc;
+	void *pw;
+	
+	/**
+	 * Array of pointers to computed font faces. 
+	 */
+	css_font_face **font_faces;
+	uint32_t n_font_faces;
+} css_select_font_faces_results;
+
 css_error css_select_ctx_create(css_allocator_fn alloc, void *pw,
 		css_select_ctx **result);
 css_error css_select_ctx_destroy(css_select_ctx *ctx);
@@ -151,8 +165,13 @@ css_error css_select_style(css_select_ctx *ctx, void *node,
 		uint64_t media, const css_stylesheet *inline_style,
 		css_select_handler *handler, void *pw,
 		css_select_results **result);
+css_error css_select_results_destroy(css_select_results *results);    
 
-css_error css_select_results_destroy(css_select_results *results);
+css_error css_select_font_faces(css_select_ctx *ctx,
+		uint64_t media, lwc_string *font_family,
+		css_select_font_faces_results **result);
+css_error css_select_font_faces_results_destroy(
+		css_select_font_faces_results *results);	
 
 #ifdef __cplusplus
 }

@@ -1044,6 +1044,45 @@ css_error css__parse_unit_keyword(const char *ptr, size_t len, css_unit *unit)
 }
 
 /**
+ * Create a string from a list of IDENT/S tokens if the next token is IDENT
+ * or references the next token's string if it is a STRING
+ *
+ * \param c          Parsing context
+ * \param vector     Vector containing tokens
+ * \param ctx        Vector iteration context
+ * \param reserved   Callback to determine if an identifier is reserved
+ * \param result     Pointer to location to receive resulting string
+ * \return CSS_OK on success, appropriate error otherwise.
+ *
+ * Post condition: \a *ctx is updated with the next token to process
+ *                 If the input is invalid, then \a *ctx remains unchanged.
+ *
+ *                 The resulting string's reference is passed to the caller
+ */
+css_error css__ident_list_or_string_to_string(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		bool (*reserved)(css_language *c, const css_token *ident),
+		lwc_string **result)
+{
+	const css_token *token;
+	
+	token = parserutils_vector_peek(vector, *ctx);
+	if (token == NULL)
+		return CSS_INVALID;
+	
+	if (token->type == CSS_TOKEN_STRING) {
+		token = parserutils_vector_iterate(vector, ctx);
+		*result = lwc_string_ref(token->idata);
+		return CSS_OK;
+	} else 	if(token->type == CSS_TOKEN_IDENT) {
+		return css__ident_list_to_string(c, vector, ctx, reserved,
+				result);
+	}
+	
+	return CSS_INVALID;
+}
+
+/**
  * Create a string from a list of IDENT/S tokens
  *
  * \param c          Parsing context
@@ -1058,7 +1097,7 @@ css_error css__parse_unit_keyword(const char *ptr, size_t len, css_unit *unit)
  *
  *                 The resulting string's reference is passed to the caller
  */
-static css_error ident_list_to_string(css_language *c,
+css_error css__ident_list_to_string(css_language *c,
 		const parserutils_vector *vector, int *ctx,
 		bool (*reserved)(css_language *c, const css_token *ident),
 		lwc_string **result)
@@ -1084,7 +1123,7 @@ static css_error ident_list_to_string(css_language *c,
 			token->type == CSS_TOKEN_S)) {
 		if (token->type == CSS_TOKEN_IDENT) {
 			/* IDENT -- if reserved, reject style */
-			if (reserved(c, token)) {
+			if (reserved != NULL && reserved(c, token)) {
 				error = CSS_INVALID;
 				goto cleanup;
 			}
@@ -1175,7 +1214,7 @@ css_error css__comma_list_to_style(css_language *c,
 
 				*ctx = prev_ctx;
 
-				error = ident_list_to_string(c, vector, ctx,
+				error = css__ident_list_to_string(c, vector, ctx,
 						reserved, &str);
 				if (error != CSS_OK)
 					goto cleanup;

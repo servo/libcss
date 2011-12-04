@@ -8,6 +8,8 @@
 #include <assert.h>
 #include <string.h>
 
+#include <libwapcaplet/libwapcaplet.h>
+
 #include <libcss/select.h>
 
 #include "bytecode/bytecode.h"
@@ -17,6 +19,7 @@
 #include "select/dispatch.h"
 #include "select/hash.h"
 #include "select/propset.h"
+#include "select/font_face.h"
 #include "select/select.h"
 #include "utils/parserutilserror.h"
 #include "utils/utils.h"
@@ -74,6 +77,27 @@ struct css_select_ctx {
 	lwc_string *after;
 };
 
+/**
+ * Container for selected font faces
+ */
+typedef struct css_select_font_faces_list {
+	const css_font_face **font_faces;
+	size_t count;
+} css_select_font_faces_list;
+
+/**
+ * Font face selection state
+ */
+typedef struct css_select_font_faces_state {
+	lwc_string *font_family;
+	uint64_t media;
+
+	css_select_font_faces_list ua_font_faces;
+	css_select_font_faces_list user_font_faces;
+	css_select_font_faces_list author_font_faces;
+} css_select_font_faces_state;
+
+
 static css_error set_hint(css_select_state *state, uint32_t prop);
 static css_error set_initial(css_select_state *state, 
 		uint32_t prop, css_pseudo_element pseudo,
@@ -103,6 +127,11 @@ static css_error match_detail(css_select_ctx *ctx, void *node,
 		const css_selector_detail *detail, css_select_state *state, 
 		bool *match, css_pseudo_element *pseudo_element);
 static css_error cascade_style(const css_style *style, css_select_state *state);
+
+static css_error select_font_faces_from_sheet(css_select_ctx *ctx, 
+		const css_stylesheet *sheet, 
+		css_origin origin, 
+		css_select_font_faces_state *state);
 
 #ifdef DEBUG_CHAIN_MATCHING
 static void dump_chain(const css_selector *selector);
@@ -558,6 +587,144 @@ css_error css_select_results_destroy(css_select_results *results)
 	return CSS_OK;
 }
 
+/**
+ * Search a selection context for defined font faces
+ *
+ * \param ctx          Selection context
+ * \param media        Currently active media types
+ * \param font_family  Font family to search for
+ * \param result       Pointer to location to receive result
+ * \return CSS_OK on success, appropriate error otherwise.
+ */
+css_error css_select_font_faces(css_select_ctx *ctx,
+		uint64_t media, lwc_string *font_family,
+		css_select_font_faces_results **result)
+{
+	uint32_t i;
+	css_error error;
+	css_select_font_faces_state state;
+	uint32_t n_font_faces;
+	
+	if (ctx == NULL || font_family == NULL || result == NULL)
+		return CSS_BADPARM;
+
+	memset(&state, 0, sizeof(css_select_font_faces_state));
+	state.font_family = font_family;
+	state.media = media;
+	
+	/* Iterate through the top-level stylesheets, selecting font-faces
+	 * from those which apply to our current media requirements and
+	 * are not disabled */
+	for (i = 0; i < ctx->n_sheets; i++) {
+		const css_select_sheet s = ctx->sheets[i];
+		
+		if ((s.media & media) != 0 &&
+				s.sheet->disabled == false) {
+			error = select_font_faces_from_sheet(ctx, s.sheet,
+					s.origin, &state);
+			if (error != CSS_OK)
+				goto cleanup;
+		}
+	}
+	
+	n_font_faces = state.ua_font_faces.count + 
+			state.user_font_faces.count +
+			state.author_font_faces.count;
+				
+	
+	if (n_font_faces > 0) {
+		/* We found some matching faces.  Make a results structure with
+		 * the font faces in priority order. */
+		css_select_font_faces_results *results;
+		
+		results = ctx->alloc(NULL, 
+				sizeof(css_select_font_faces_results),
+				ctx->pw);
+		if (results == NULL) {
+			error = CSS_NOMEM;
+			goto cleanup;
+		}
+		
+		results->alloc = ctx->alloc;
+		results->pw = ctx->pw;
+		
+		results->font_faces = ctx->alloc(NULL, 
+				n_font_faces * sizeof(css_font_face *),
+				ctx->pw);
+		if (results->font_faces == NULL) {
+			ctx->alloc(results, 0, ctx->pw);
+			error = CSS_NOMEM;
+			goto cleanup;
+		}
+
+		results->n_font_faces = n_font_faces;
+		
+		i = 0;
+		if (state.ua_font_faces.count != 0) {
+			memcpy(results->font_faces, 
+					state.ua_font_faces.font_faces,
+					sizeof(css_font_face *) * 
+						state.ua_font_faces.count);
+			
+			i += state.ua_font_faces.count;
+		}
+				
+		if (state.user_font_faces.count != 0) {
+			memcpy(results->font_faces + i, 
+					state.user_font_faces.font_faces,
+					sizeof(css_font_face *) * 
+						state.user_font_faces.count);
+			i += state.user_font_faces.count;
+		}
+		
+		if (state.author_font_faces.count != 0) {
+			memcpy(results->font_faces + i, 
+					state.author_font_faces.font_faces,
+					sizeof(css_font_face *) * 
+						state.author_font_faces.count);
+		}
+
+		*result = results;
+	}
+	
+	error = CSS_OK;
+	
+cleanup:
+	if (state.ua_font_faces.count != 0) 
+		ctx->alloc(state.ua_font_faces.font_faces, 0, ctx->pw);
+
+	if (state.user_font_faces.count != 0) 
+		ctx->alloc(state.user_font_faces.font_faces, 0, ctx->pw);
+	
+	if (state.author_font_faces.count != 0) 
+		ctx->alloc(state.author_font_faces.font_faces, 0, ctx->pw);
+	
+	return error;
+}
+
+/**
+ * Destroy a font-face result set
+ *
+ * \param results  Result set to destroy
+ * \return CSS_OK on success, appropriate error otherwise
+ */
+css_error css_select_font_faces_results_destroy(
+		css_select_font_faces_results *results)
+{
+	if (results == NULL)
+		return CSS_BADPARM;
+	
+	if (results->font_faces != NULL) {
+		/* Don't destroy the individual css_font_faces, they're owned
+		   by their respective sheets */
+		results->alloc(results->font_faces, 0, results->pw);
+	}
+	
+	results->alloc(results, 0, results->pw);
+	
+	return CSS_OK;
+}
+
 /******************************************************************************
  * Selection engine internals below here                                      *
  ******************************************************************************/
@@ -870,13 +1037,14 @@ css_error set_initial(css_select_state *state,
 	return CSS_OK;
 }
 
+#define IMPORT_STACK_SIZE 256
+
 css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet, 
 		css_origin origin, css_select_state *state)
 {
 	const css_stylesheet *s = sheet;
 	const css_rule *rule = s->rule_list;
 	uint32_t sp = 0;
-#define IMPORT_STACK_SIZE 256
 	const css_rule *import_stack[IMPORT_STACK_SIZE];
 
 	do {
@@ -894,7 +1062,8 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 			if (import->sheet != NULL &&
 					(import->media & state->media) != 0) {
 				/* It's applicable, so process it */
-				assert(sp < IMPORT_STACK_SIZE - 1);
+				if (sp >= IMPORT_STACK_SIZE)
+					return CSS_NOMEM;
 
 				import_stack[sp++] = rule;
 
@@ -929,6 +1098,144 @@ css_error select_from_sheet(css_select_ctx *ctx, const css_stylesheet *sheet,
 
 	return CSS_OK;
 }
+
+static inline bool _rule_applies_to_media(const css_rule *rule, uint64_t media)
+{
+	bool applies = true;
+	const css_rule *ancestor = rule;
+
+	while (ancestor != NULL) {
+		const css_rule_media *m = (const css_rule_media *) ancestor;
+
+		if (ancestor->type == CSS_RULE_MEDIA && 
+				(m->media & media) == 0) {
+			applies = false;
+			break;
+		}
+
+		if (ancestor->ptype != CSS_RULE_PARENT_STYLESHEET)
+			ancestor = ancestor->parent;
+		else
+			ancestor = NULL;
+	}
+
+	return applies;
+}
+
+static css_error _select_font_face_from_rule(css_select_ctx *ctx, 
+		const css_rule_font_face *rule, css_origin origin,
+		css_select_font_faces_state *state)
+{
+	if (_rule_applies_to_media((const css_rule *) rule, state->media)) {
+		bool correct_family = false;
+
+		if (lwc_string_isequal(
+				rule->font_face->font_family,
+				state->font_family, 
+				&correct_family) == lwc_error_ok &&
+				correct_family) {
+			css_select_font_faces_list *faces = NULL;
+			const css_font_face **new_faces;
+			uint32_t index;
+			size_t new_size;
+
+			switch (origin) {
+				case CSS_ORIGIN_UA:
+					faces = &state->ua_font_faces;
+					break;
+				case CSS_ORIGIN_USER:
+					faces = &state->user_font_faces;
+					break;
+				case CSS_ORIGIN_AUTHOR:
+					faces = &state->author_font_faces;
+					break;
+			}
+			
+			index = faces->count++;			
+			new_size = faces->count * sizeof(css_font_face *);
+			
+			new_faces = ctx->alloc(faces->font_faces, 
+					new_size, ctx->pw);
+			if (new_faces == NULL) {
+				faces->count = 0;
+				return CSS_NOMEM;
+			}
+			faces->font_faces = new_faces;
+			
+			faces->font_faces[index] = rule->font_face;
+		}
+	}
+
+	return CSS_OK;
+}
+
+static css_error select_font_faces_from_sheet(css_select_ctx *ctx, 
+		const css_stylesheet *sheet, 
+		css_origin origin, 
+		css_select_font_faces_state *state)
+{
+	const css_stylesheet *s = sheet;
+	const css_rule *rule = s->rule_list;
+	uint32_t sp = 0;
+	const css_rule *import_stack[IMPORT_STACK_SIZE];
+	
+	do {
+		/* Find first non-charset rule, if we're at the list head */
+		if (rule == s->rule_list) {
+			while (rule != NULL && rule->type == CSS_RULE_CHARSET)
+				rule = rule->next;
+		}
+		
+		if (rule != NULL && rule->type == CSS_RULE_IMPORT) {
+			/* Current rule is an import */
+			const css_rule_import *import = 
+					(const css_rule_import *) rule;
+			
+			if (import->sheet != NULL &&
+					(import->media & state->media) != 0) {
+				/* It's applicable, so process it */
+				if (sp >= IMPORT_STACK_SIZE)
+					return CSS_NOMEM;
+				
+				import_stack[sp++] = rule;
+				
+				s = import->sheet;
+				rule = s->rule_list;
+			} else {
+				/* Not applicable; skip over it */
+				rule = rule->next;
+			}
+		} else if (rule != NULL && rule->type == CSS_RULE_FONT_FACE) {
+			css_error error;
+			
+			error = _select_font_face_from_rule(
+					ctx, 
+					(const css_rule_font_face *) rule,
+					origin,
+					state);
+			
+			if (error != CSS_OK)
+				return error;
+			
+			rule = rule->next;
+		} else if (rule == NULL) {
+			/* Find next sheet to process */
+			if (sp > 0) {
+				sp--;
+				rule = import_stack[sp]->next;
+				s = import_stack[sp]->parent;
+			} else {
+				s = NULL;
+			}
+		} else {
+			rule = rule->next;
+		}
+	} while (s != NULL);
+	
+	return CSS_OK;
+}
+
+#undef IMPORT_STACK_SIZE
 
 static inline bool _selectors_pending(const css_selector **node,
 		const css_selector **id, const css_selector ***classes,
@@ -1063,8 +1370,6 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 	while (_selectors_pending(node_selectors, id_selectors, 
 			class_selectors, n_classes, univ_selectors)) {
 		const css_selector *selector;
-		css_rule *rule, *parent;
-		bool process = true;
 
 		/* Selectors must be matched in ascending order of specificity
 		 * and rule index. (c.f. css__outranks_existing())
@@ -1077,21 +1382,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		/* Ignore any selectors contained in rules which are a child 
 		 * of an @media block that doesn't match the current media 
 		 * requirements. */
-		for (rule = selector->rule; rule != NULL; rule = parent) {
-			if (rule->type == CSS_RULE_MEDIA && 
-					(((css_rule_media *) rule)->media & 
-					state->media) == 0) {
-				process = false;
-				break;
-			}
-
-			if (rule->ptype != CSS_RULE_PARENT_STYLESHEET)
-				parent = rule->parent;
-			else
-				parent = NULL;
-		}
-
-		if (process) {
+		if (_rule_applies_to_media(selector->rule, state->media)) {
 			error = match_selector_chain(ctx, selector, state);
 			if (error != CSS_OK)
 				goto cleanup;

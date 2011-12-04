@@ -30,6 +30,7 @@ const stringmap_entry stringmap[LAST_KNOWN] = {
 	{ "import", SLEN("import") },
 	{ "media", SLEN("media") },
 	{ "namespace", SLEN("namespace") },
+	{ "font-face", SLEN("font-face") },
 	{ "page", SLEN("page") },
 
 	{ "aural", SLEN("aural") },
@@ -372,6 +373,15 @@ const stringmap_entry stringmap[LAST_KNOWN] = {
 	{ "currentColor", SLEN("currentColor") },
 	{ "odd", SLEN("odd") },
 	{ "even", SLEN("even") },
+	{ "src", SLEN("src") },
+	{ "local", SLEN("local") },
+	{ "initial", SLEN("initial") },
+	{ "format", SLEN("format") },
+	{ "woff", SLEN("woff") },
+	{ "truetype", SLEN("truetype") },
+	{ "opentype", SLEN("opentype") },
+	{ "embedded-opentype", SLEN("embedded-opentype") },
+	{ "svg", SLEN("svg") },
 
 	{ "aliceblue", SLEN("aliceblue") },
 	{ "antiquewhite", SLEN("antiquewhite") },
