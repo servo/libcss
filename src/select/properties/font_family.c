@@ -31,7 +31,9 @@ css_error css__cascade_font_family(uint32_t opv, css_style *style,
 			switch (v) {
 			case FONT_FAMILY_STRING:
 			case FONT_FAMILY_IDENT_LIST:
-				css__stylesheet_string_get(style->sheet, *((css_code_t *) style->bytecode), &font);
+				css__stylesheet_string_get(style->sheet, 
+					*((css_code_t *) style->bytecode), 
+					&font);
 				advance_bytecode(style, sizeof(css_code_t));
 				break;
 			case FONT_FAMILY_SERIF:
@@ -99,6 +101,42 @@ css_error css__cascade_font_family(uint32_t opv, css_style *style,
 		fonts = temp;
 
 		fonts[n_fonts] = NULL;
+		
+		if (value == CSS_FONT_FAMILY_INHERIT) {
+			/* The stylesheet doesn't specify a generic family,
+			 * but it has specified named fonts.
+			 * Fall back to the user agent's default family.
+			 * We don't want to inherit, because that will 
+			 * incorrectly overwrite the named fonts list too.
+			 */
+			css_hint hint;
+			css_error error;
+			
+			error = state->handler->ua_default_for_property(
+					state->pw, CSS_PROP_FONT_FAMILY, &hint);
+			if (error == CSS_OK) {
+				lwc_string **item;
+
+				value = hint.status;
+		
+				for (item = hint.data.strings; 
+						item != NULL && (*item) != NULL;
+						item++) {
+					lwc_string_unref(*item);
+				}
+
+				if (hint.data.strings != NULL) {
+					state->computed->alloc(
+							hint.data.strings, 
+							0, state->computed->pw);
+				}
+			}
+
+			if (value == CSS_FONT_FAMILY_INHERIT) {
+				/* No sane UA default: assume sans-serif */
+				value = CSS_FONT_FAMILY_SANS_SERIF;
+			}
+		}
 	}
 
 	if (css__outranks_existing(getOpcode(opv), isImportant(opv), state,
@@ -155,29 +193,29 @@ css_error css__compose_font_family(const css_computed_style *parent,
 		css_computed_style *result)
 {
 	css_error error;
-	lwc_string **urls = NULL;
-	uint8_t type = get_font_family(child, &urls);
+	lwc_string **names = NULL;
+	uint8_t type = get_font_family(child, &names);
 
 	if (type == CSS_FONT_FAMILY_INHERIT || result != child) {
-		size_t n_urls = 0;
+		size_t n_names = 0;
 		lwc_string **copy = NULL;
 
 		if (type == CSS_FONT_FAMILY_INHERIT)
-			type = get_font_family(parent, &urls);
+			type = get_font_family(parent, &names);
 
-		if (urls != NULL) {
+		if (names != NULL) {
 			lwc_string **i;
 
-			for (i = urls; (*i) != NULL; i++)
-				n_urls++;
+			for (i = names; (*i) != NULL; i++)
+				n_names++;
 
-			copy = result->alloc(NULL, (n_urls + 1) * 
+			copy = result->alloc(NULL, (n_names + 1) * 
 					sizeof(lwc_string *),
 					result->pw);
 			if (copy == NULL)
 				return CSS_NOMEM;
 
-			memcpy(copy, urls, (n_urls + 1) * 
+			memcpy(copy, names, (n_names + 1) * 
 					sizeof(lwc_string *));
 		}
 
