@@ -25,6 +25,15 @@ static void font_faces_srcs_destroy(css_font_face *font_face)
 	font_face->srcs = NULL;
 }
 
+static const css_font_face default_font_face = {
+	NULL,
+	NULL,
+	0,
+	{ (CSS_FONT_WEIGHT_NORMAL << 2) | CSS_FONT_STYLE_NORMAL },
+	NULL,
+	NULL
+};
+
 /**
  * Create a font-face
  *
@@ -47,7 +56,7 @@ css_error css__font_face_create(css_allocator_fn alloc, void *pw,
 	if (f == NULL)
 		return CSS_NOMEM;
 	
-	memset(f, 0, sizeof(css_font_face));
+	memcpy(f, &default_font_face, sizeof(css_font_face));
 	
 	f->alloc = alloc;
 	f->pw = pw;
