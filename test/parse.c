@@ -78,7 +78,7 @@ int main(int argc, char **argv)
 	css_parser_optparams params;
 	css_parser *parser;
 	FILE *fp;
-	size_t len, origlen;
+	size_t len;
 #define CHUNK_SIZE (4096)
 	uint8_t buf[CHUNK_SIZE];
 	css_error error;
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 		}
 
 		fseek(fp, 0, SEEK_END);
-		origlen = len = ftell(fp);
+		len = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
 
 		while (len >= CHUNK_SIZE) {
