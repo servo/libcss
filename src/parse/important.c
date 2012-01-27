@@ -306,6 +306,11 @@ void css__make_style_important(css_style *style)
 					offset += 2; /* length + units */
 				break;
 
+			case CSS_PROP_OPACITY:
+				if (value == OPACITY_SET)
+					offset++; /* value */
+				break;
+
 			case CSS_PROP_ORPHANS:
 			case CSS_PROP_PITCH_RANGE:
 			case CSS_PROP_RICHNESS:

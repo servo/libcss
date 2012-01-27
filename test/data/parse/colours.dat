@@ -72,6 +72,30 @@
 |   0x02000063 0x000000e1
 #reset
 
+#data
+* { opacity: 0.22 !important }
+#errors
+#expected
+| 1 *
+|   0x02000463 0x000000e1
+#reset
+
+#data
+* { opacity: inherit }
+#errors
+#expected
+| 1 *
+|   0x00000863
+#reset
+
+#data
+* { opacity: inherit !important }
+#errors
+#expected
+| 1 *
+|   0x00000c63
+#reset
+
 ## Out-of-range rgb() parameters
 
 #data
