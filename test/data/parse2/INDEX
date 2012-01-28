@@ -18,3 +18,4 @@ list.dat			List property tests
 margin.dat			Margin property tests
 outline.dat			Outline property tests
 padding.dat			Padding property tests
+multicol.dat			Multi-column layout property tests

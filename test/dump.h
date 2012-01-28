@@ -465,6 +465,17 @@ static const char *opcode_names[] = {
 	"word-spacing",
 	"z-index",
 	"opacity",
+	"break-after",
+	"break-before",
+	"break-inside",
+	"column-count",
+	"column-fill",
+	"column-gap",
+	"column-rule-color",
+	"column-rule-style",
+	"column-rule-width",
+	"column-span",
+	"column-width",
 };
 
 static void dump_css_fixed(css_fixed f, char **ptr)
@@ -801,6 +812,7 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 			case CSS_PROP_BORDER_BOTTOM_COLOR:
 			case CSS_PROP_BORDER_LEFT_COLOR:
 			case CSS_PROP_BACKGROUND_COLOR:
+			case CSS_PROP_COLUMN_RULE_COLOR:
 				assert(BACKGROUND_COLOR_TRANSPARENT ==
 						(enum op_background_color)
 						BORDER_COLOR_TRANSPARENT);
@@ -965,37 +977,68 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 			case CSS_PROP_BORDER_RIGHT_STYLE:
 			case CSS_PROP_BORDER_BOTTOM_STYLE:
 			case CSS_PROP_BORDER_LEFT_STYLE:
+			case CSS_PROP_COLUMN_RULE_STYLE:
 			case CSS_PROP_OUTLINE_STYLE:
 				assert(BORDER_STYLE_NONE ==
 						(enum op_border_style)
 						OUTLINE_STYLE_NONE);
+				assert(BORDER_STYLE_NONE ==
+						(enum op_border_style)
+						COLUMN_RULE_STYLE_NONE);
 				assert(BORDER_STYLE_HIDDEN ==
 						(enum op_border_style)
 						OUTLINE_STYLE_HIDDEN);
+				assert(BORDER_STYLE_HIDDEN ==
+						(enum op_border_style)
+						COLUMN_RULE_STYLE_HIDDEN);
 				assert(BORDER_STYLE_DOTTED ==
 						(enum op_border_style)
 						OUTLINE_STYLE_DOTTED);
+				assert(BORDER_STYLE_DOTTED ==
+						(enum op_border_style)
+						COLUMN_RULE_STYLE_DOTTED);
 				assert(BORDER_STYLE_DASHED ==
 						(enum op_border_style)
 						OUTLINE_STYLE_DASHED);
+				assert(BORDER_STYLE_DASHED ==
+						(enum op_border_style)
+						COLUMN_RULE_STYLE_DASHED);
 				assert(BORDER_STYLE_SOLID ==
 						(enum op_border_style)
 						OUTLINE_STYLE_SOLID);
+				assert(BORDER_STYLE_SOLID ==
+						(enum op_border_style)
+						COLUMN_RULE_STYLE_SOLID);
 				assert(BORDER_STYLE_DOUBLE ==
 						(enum op_border_style)
 						OUTLINE_STYLE_DOUBLE);
+				assert(BORDER_STYLE_DOUBLE ==
+						(enum op_border_style)
+						COLUMN_RULE_STYLE_DOUBLE);
 				assert(BORDER_STYLE_GROOVE ==
 						(enum op_border_style)
 						OUTLINE_STYLE_GROOVE);
+				assert(BORDER_STYLE_GROOVE ==
+						(enum op_border_style)
+						COLUMN_RULE_STYLE_GROOVE);
 				assert(BORDER_STYLE_RIDGE ==
 						(enum op_border_style)
 						OUTLINE_STYLE_RIDGE);
+				assert(BORDER_STYLE_RIDGE ==
+						(enum op_border_style)
+						COLUMN_RULE_STYLE_RIDGE);
 				assert(BORDER_STYLE_INSET ==
 						(enum op_border_style)
 						OUTLINE_STYLE_INSET);
+				assert(BORDER_STYLE_INSET ==
+						(enum op_border_style)
+						COLUMN_RULE_STYLE_INSET);
 				assert(BORDER_STYLE_OUTSET ==
 						(enum op_border_style)
 						OUTLINE_STYLE_OUTSET);
+				assert(BORDER_STYLE_OUTSET ==
+						(enum op_border_style)
+						COLUMN_RULE_STYLE_OUTSET);
 
 				switch (value) {
 				case BORDER_STYLE_NONE:
@@ -1034,6 +1077,7 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 			case CSS_PROP_BORDER_RIGHT_WIDTH:
 			case CSS_PROP_BORDER_BOTTOM_WIDTH:
 			case CSS_PROP_BORDER_LEFT_WIDTH:
+			case CSS_PROP_COLUMN_RULE_WIDTH:
 			case CSS_PROP_OUTLINE_WIDTH:
 				assert(BORDER_WIDTH_SET ==
 						(enum op_border_width)
@@ -1080,6 +1124,7 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 			case CSS_PROP_TOP:
 			case CSS_PROP_HEIGHT:
 			case CSS_PROP_WIDTH:
+			case CSS_PROP_COLUMN_WIDTH:
 				assert(BOTTOM_SET ==
 						(enum op_bottom) LEFT_SET);
 				assert(BOTTOM_AUTO ==
@@ -1104,6 +1149,12 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 						(enum op_bottom) WIDTH_SET);
 				assert(BOTTOM_AUTO ==
 						(enum op_bottom) WIDTH_AUTO);
+				assert(BOTTOM_SET ==
+						(enum op_bottom)
+							COLUMN_WIDTH_SET);
+				assert(BOTTOM_AUTO ==
+						(enum op_bottom)
+							COLUMN_WIDTH_AUTO);
 
 				switch (value) {
 				case BOTTOM_SET:
@@ -1118,6 +1169,82 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 					break;
 				case BOTTOM_AUTO:
 					*ptr += sprintf(*ptr, "auto");
+					break;
+				}
+				break;
+			case CSS_PROP_BREAK_AFTER:
+			case CSS_PROP_BREAK_BEFORE:
+				assert(BREAK_AFTER_AUTO ==
+						(enum op_break_after)
+						BREAK_BEFORE_AUTO);
+				assert(BREAK_AFTER_ALWAYS ==
+						(enum op_break_after)
+						BREAK_BEFORE_ALWAYS);
+				assert(BREAK_AFTER_AVOID ==
+						(enum op_break_after)
+						BREAK_BEFORE_AVOID);
+				assert(BREAK_AFTER_LEFT ==
+						(enum op_break_after)
+						BREAK_BEFORE_LEFT);
+				assert(BREAK_AFTER_RIGHT ==
+						(enum op_break_after)
+						BREAK_BEFORE_RIGHT);
+				assert(BREAK_AFTER_PAGE ==
+						(enum op_break_after)
+						BREAK_BEFORE_PAGE);
+				assert(BREAK_AFTER_COLUMN ==
+						(enum op_break_after)
+						BREAK_BEFORE_COLUMN);
+				assert(BREAK_AFTER_AVOID_PAGE ==
+						(enum op_break_after)
+						BREAK_BEFORE_AVOID_PAGE);
+				assert(BREAK_AFTER_AVOID_COLUMN ==
+						(enum op_break_after)
+						BREAK_BEFORE_AVOID_COLUMN);
+
+				switch (value) {
+				case BREAK_AFTER_AUTO:
+					*ptr += sprintf(*ptr, "auto");
+					break;
+				case BREAK_AFTER_ALWAYS:
+					*ptr += sprintf(*ptr, "always");
+					break;
+				case BREAK_AFTER_AVOID:
+					*ptr += sprintf(*ptr, "avoid");
+					break;
+				case BREAK_AFTER_LEFT:
+					*ptr += sprintf(*ptr, "left");
+					break;
+				case BREAK_AFTER_RIGHT:
+					*ptr += sprintf(*ptr, "right");
+					break;
+				case BREAK_AFTER_PAGE:
+					*ptr += sprintf(*ptr, "page");
+					break;
+				case BREAK_AFTER_COLUMN:
+					*ptr += sprintf(*ptr, "column");
+					break;
+				case BREAK_AFTER_AVOID_PAGE:
+					*ptr += sprintf(*ptr, "avoid-page");
+					break;
+				case BREAK_AFTER_AVOID_COLUMN:
+					*ptr += sprintf(*ptr, "avoid-column");
+					break;
+				}
+				break;
+			case CSS_PROP_BREAK_INSIDE:
+				switch (value) {
+				case BREAK_INSIDE_AUTO:
+					*ptr += sprintf(*ptr, "auto");
+					break;
+				case BREAK_INSIDE_AVOID:
+					*ptr += sprintf(*ptr, "avoid");
+					break;
+				case BREAK_INSIDE_AVOID_PAGE:
+					*ptr += sprintf(*ptr, "avoid-page");
+					break;
+				case BREAK_INSIDE_AVOID_COLUMN:
+					*ptr += sprintf(*ptr, "avoid-column");
 					break;
 				}
 				break;
@@ -1217,6 +1344,57 @@ void dump_bytecode(css_style *style, char **ptr, uint32_t depth)
 					ADVANCE(sizeof(colour));
 					*ptr += sprintf(*ptr, "#%08x", colour);
 				}	
+					break;
+				}
+				break;
+			case CSS_PROP_COLUMN_COUNT:
+				switch (value) {
+				case COLUMN_COUNT_SET:
+				{
+					css_fixed val = *((css_fixed *) bytecode);
+					ADVANCE(sizeof(val));
+					dump_number(val, ptr);
+				}
+					break;
+				case COLUMN_COUNT_AUTO:
+					*ptr += sprintf(*ptr, "auto");
+					break;
+				}
+				break;
+			case CSS_PROP_COLUMN_FILL:
+				switch (value) {
+				case COLUMN_FILL_BALANCE:
+					*ptr += sprintf(*ptr, "balance");
+					break;
+				case COLUMN_FILL_AUTO:
+					*ptr += sprintf(*ptr, "auto");
+					break;
+				}
+				break;
+			case CSS_PROP_COLUMN_GAP:
+				switch (value) {
+				case COLUMN_GAP_SET:
+				{
+					uint32_t unit;
+					css_fixed val = *((css_fixed *) bytecode);
+					ADVANCE(sizeof(val));
+					unit = *((uint32_t *) bytecode);
+					ADVANCE(sizeof(unit));
+					dump_unit(val, unit, ptr);
+				}
+					break;
+				case COLUMN_GAP_NORMAL:
+					*ptr += sprintf(*ptr, "normal");
+					break;
+				}
+				break;
+			case CSS_PROP_COLUMN_SPAN:
+				switch (value) {
+				case COLUMN_SPAN_NONE:
+					*ptr += sprintf(*ptr, "none");
+					break;
+				case COLUMN_SPAN_ALL:
+					*ptr += sprintf(*ptr, "all");
 					break;
 				}
 				break;

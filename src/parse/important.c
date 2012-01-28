@@ -99,8 +99,11 @@ void css__make_style_important(css_style *style)
 			case CSS_PROP_BORDER_BOTTOM_COLOR:
 			case CSS_PROP_BORDER_LEFT_COLOR:
 			case CSS_PROP_BACKGROUND_COLOR:
+			case CSS_PROP_COLUMN_RULE_COLOR:
 				assert(BACKGROUND_COLOR_SET == 
 						BORDER_COLOR_SET);
+				assert(BACKGROUND_COLOR_SET == 
+						COLUMN_RULE_COLOR_SET);
 
 				if (value == BACKGROUND_COLOR_SET)
 					offset++; /* colour */
@@ -137,7 +140,10 @@ void css__make_style_important(css_style *style)
 			case CSS_PROP_BORDER_BOTTOM_WIDTH:
 			case CSS_PROP_BORDER_LEFT_WIDTH:
 			case CSS_PROP_OUTLINE_WIDTH:
+			case CSS_PROP_COLUMN_RULE_WIDTH:
 				assert(BORDER_WIDTH_SET == OUTLINE_WIDTH_SET);
+				assert(BORDER_WIDTH_SET ==
+						COLUMN_RULE_WIDTH_SET);
 
 				if (value == BORDER_WIDTH_SET)
 					offset += 2; /* length + units */
@@ -153,12 +159,16 @@ void css__make_style_important(css_style *style)
 			case CSS_PROP_TOP:
 			case CSS_PROP_HEIGHT:
 			case CSS_PROP_WIDTH:
+			case CSS_PROP_COLUMN_WIDTH:
+			case CSS_PROP_COLUMN_GAP:
 				assert(BOTTOM_SET == LEFT_SET);
 				assert(BOTTOM_SET == RIGHT_SET);
 				assert(BOTTOM_SET == TOP_SET);
 				assert(BOTTOM_SET == HEIGHT_SET);
 				assert(BOTTOM_SET == MARGIN_SET);
 				assert(BOTTOM_SET == WIDTH_SET);
+				assert(BOTTOM_SET == COLUMN_WIDTH_SET);
+				assert(BOTTOM_SET == COLUMN_GAP_SET);
 
 				if (value == BOTTOM_SET) 
 					offset += 2; /* length + units */
@@ -183,6 +193,11 @@ void css__make_style_important(css_style *style)
 
 			case CSS_PROP_COLOR:
 				if (value == COLOR_SET)
+					offset++; /* colour */
+				break;
+
+			case CSS_PROP_COLUMN_COUNT:
+				if (value == COLUMN_COUNT_SET)
 					offset++; /* colour */
 				break;
 

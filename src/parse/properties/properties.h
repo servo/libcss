@@ -112,6 +112,15 @@ css_error css__parse_border_width(css_language *c,
 css_error css__parse_bottom(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result);
+css_error css__parse_break_after(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		css_style *result);
+css_error css__parse_break_before(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		css_style *result);
+css_error css__parse_break_inside(css_language *c,
+		const parserutils_vector *vector, int *ctx,
+		css_style *result);
 css_error css__parse_caption_side(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result);
@@ -122,6 +131,30 @@ css_error css__parse_clip(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result);
 css_error css__parse_color(css_language *c,
+		const parserutils_vector *vector, int *ctx, 
+		css_style *result);
+css_error css__parse_column_count(css_language *c,
+		const parserutils_vector *vector, int *ctx, 
+		css_style *result);
+css_error css__parse_column_fill(css_language *c,
+		const parserutils_vector *vector, int *ctx, 
+		css_style *result);
+css_error css__parse_column_gap(css_language *c,
+		const parserutils_vector *vector, int *ctx, 
+		css_style *result);
+css_error css__parse_column_rule_color(css_language *c,
+		const parserutils_vector *vector, int *ctx, 
+		css_style *result);
+css_error css__parse_column_rule_style(css_language *c,
+		const parserutils_vector *vector, int *ctx, 
+		css_style *result);
+css_error css__parse_column_rule_width(css_language *c,
+		const parserutils_vector *vector, int *ctx, 
+		css_style *result);
+css_error css__parse_column_span(css_language *c,
+		const parserutils_vector *vector, int *ctx, 
+		css_style *result);
+css_error css__parse_column_width(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result);
 css_error css__parse_content(css_language *c,

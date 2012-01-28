@@ -1115,5 +1115,128 @@ Opcodes
 			bit 7 clear => Reserved for future expansion
 				bits 0-6: MBZ
 
-64-3ff - Reserved for future expansion.
+64 - break-after
+	<value> (14bits) :
+		bits 8-13: MBZ
+		bits 0-7 :
+			00000000 => auto,
+			00000001 => always,
+			00000010 => avoid,
+			00000011 => left,
+			00000100 => right,
+			00000101 => page,
+			00000110 => column,
+			00000111 => avoid-page,
+			00001000 => avoid-column,
+			other    => Reserved for future expansion.
+
+65 - break-before
+	<value> (14bits) :
+		bits 8-13: MBZ
+		bits 0-7 :
+			00000000 => auto,
+			00000001 => always,
+			00000010 => avoid,
+			00000011 => left,
+			00000100 => right,
+			00000101 => page,
+			00000110 => column,
+			00000111 => avoid-page,
+			00001000 => avoid-column,
+			other    => Reserved for future expansion.
+
+66 - break-inside
+	<value> (14bits) :
+		bits 8-13: MBZ
+		bits 0-7 :
+			00000000 => auto,
+			00000001 => avoid,
+			00000010 => avoid-page,
+			00000011 => avoid-column,
+			other    => Reserved for future expansion.
+
+67 - column-count
+	<value> (14bits) :
+		bits 8-13: MBZ
+		bits 0-7 :
+			bit 7 set => integer follows
+				bits 0-6: MBZ
+			bit 7 clear => keywords:
+				bits 0-6: 0000000 => auto,
+					  other   => rffe.
+
+68 - column-fill
+	<value> (14bits) :
+		bits 8-13: MBZ
+		bits 0-7 :
+			00000000 => balance,
+			00000001 => auto,
+			other    => Reserved for future expansion.
+
+69 - column-gap
+	<value> (14bits) :
+		bits 8-13: MBZ
+		bits 0-7 :
+			bit 7 set => length follows
+				bits 0-6: MBZ
+			bit 7 clear => keywords:
+				bits 0-6: 0000000 => normal,
+					  other   => rffe.
+
+6a - column-rule-color
+	<value> (14bits) :
+		bits 8-13: MBZ
+		bit 7 set => colour follows.
+			bits 0-6: MBZ
+		bit 7 clear => Reserved for future expansion
+			bits 0-6: MBZ
+
+6b - column-rule-style
+	<value> (14bits) :
+		bits 8-13: MBZ
+		bits 0-7 :
+			00000000 => none,
+			00000001 => hidden,
+			00000010 => dotted,
+			00000011 => dashed,
+			00000100 => solid,
+			00000101 => double,
+			00000110 => groove,
+			00000111 => ridge,
+			00001000 => inset,
+			00001001 => outset,
+			other    => Reserved for future expansion.
+
+6c - column-rule-width
+	<value> (14bits) :
+		bits 8-13: MBZ
+		bits 0-7 :
+			bit 7 set => length follows
+				bits 0-6: MBZ
+			bit 7 clear => keywords:
+				bits 0-6: 0000000 => thin,
+					  0000001 => medium,
+					  0000010 => thick,
+					  other   => rffe.
+
+6d - column-span
+	<value> (14bits) :
+		bits 8-13: MBZ
+		bits 0-7 :
+			00000000 => none,
+			00000001 => all,
+			other    => Reserved for future expansion.
+
+6e - column-width
+	<value> (14bits) :
+		bits 8-13: MBZ
+		bits 0-7 :
+			bit 7 set => length follows
+				bits 0-6: MBZ
+			bit 7 clear => keywords:
+				bits 0-6: 0000000 => auto,
+					  other   => rffe.
+
+
+6f-3ff - Reserved for future expansion.
 
