@@ -235,6 +235,14 @@
 #reset
 
 #data
+* { background-color: red !important; }
+#errors
+#expected
+| *
+|  background-color: #ffff0000 !important
+#reset
+
+#data
 * { background-attachment: inherit; }
 #errors
 #expected

@@ -1731,6 +1731,13 @@
 | *
 #reset
 
+#data
+* { border-bottom-color: red !important; }
+#errors
+#expected
+| *
+|  border-bottom-color: #ffff0000 !important
+#reset
 
 
 

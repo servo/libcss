@@ -722,6 +722,13 @@
 | *
 #reset
 
+#data
+* { outline-color: red !important; }
+#errors
+#expected
+| *
+|  outline-color: #ffff0000 !important
+#reset
 
 
 
