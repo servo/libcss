@@ -54,7 +54,8 @@ DIR_SOURCES := azimuth.c text_decoration.c background.c			\
 	font_family.c list_style.c padding.c cursor.c			\
 	list_style_type.c pause.c border.c border_width.c margin.c	\
 	play_during.c clip.c properties.c border_color.c content.c	\
-	elevation.c font_weight.c quotes.c utils.c opacity.c
+	elevation.c font_weight.c quotes.c utils.c opacity.c columns.c	\
+	column_rule.c
 
 DIR_SOURCES := $(DIR_SOURCES) $(AUTOGEN_SOURCES)
 

@@ -133,6 +133,9 @@ css_error css__parse_clip(css_language *c,
 css_error css__parse_color(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result);
+css_error css__parse_columns(css_language *c,
+		const parserutils_vector *vector, int *ctx, 
+		css_style *result);
 css_error css__parse_column_count(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result);
@@ -140,6 +143,9 @@ css_error css__parse_column_fill(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result);
 css_error css__parse_column_gap(css_language *c,
+		const parserutils_vector *vector, int *ctx, 
+		css_style *result);
+css_error css__parse_column_rule(css_language *c,
 		const parserutils_vector *vector, int *ctx, 
 		css_style *result);
 css_error css__parse_column_rule_color(css_language *c,
