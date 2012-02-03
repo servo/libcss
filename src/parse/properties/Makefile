@@ -1,23 +1,4 @@
 # Sources
-#	background.c 
-#	border.c 
-#	border_color.c 
-# 	border_style.c 
-# 	border_width.c 
-# 	content.c 
-# 	cue.c 
-#	cursor.c 
-# 	font.c 
-#	font_family.c 
-# 	list_style.c 
-# 	margin.c 
-# 	outline.c 
-#	padding.c 
-#	pause.c 
-# 	play_during.c 
-#	quotes.c 
-# 	text_decoration.c 
-# 	voice_family.c 
 
 AUTOGEN_PARSERS := $(shell $(PERL) -pe'$$_="" unless /^([^\#][^:]+):/;$$_=$$1 . " "' $(DIR)properties.gen)
 
@@ -48,14 +29,38 @@ $(eval $(foreach PROP,$(AUTOGEN_PARSERS),$(call gen_prop_parser,$(PROP))))
 
 
 
-DIR_SOURCES := azimuth.c text_decoration.c background.c			\
-	background_position.c border_spacing.c font.c outline.c		\
-	voice_family.c border_style.c cue.c				\
-	font_family.c list_style.c padding.c cursor.c			\
-	list_style_type.c pause.c border.c border_width.c margin.c	\
-	play_during.c clip.c properties.c border_color.c content.c	\
-	elevation.c font_weight.c quotes.c utils.c opacity.c columns.c	\
-	column_rule.c
+DIR_SOURCES :=				\
+	azimuth.c			\
+	background.c			\
+	background_position.c		\
+	border.c			\
+	border_color.c			\
+	border_spacing.c		\
+	border_style.c			\
+	border_width.c			\
+	clip.c				\
+	columns.c			\
+	column_rule.c			\
+	content.c			\
+	cue.c				\
+	cursor.c			\
+	elevation.c			\
+	font.c				\
+	font_family.c			\
+	font_weight.c			\
+	list_style.c			\
+	list_style_type.c		\
+	margin.c			\
+	opacity.c			\
+	outline.c			\
+	padding.c			\
+	pause.c				\
+	play_during.c			\
+	properties.c			\
+	quotes.c			\
+	text_decoration.c		\
+	utils.c				\
+	voice_family.c
 
 DIR_SOURCES := $(DIR_SOURCES) $(AUTOGEN_SOURCES)
 
