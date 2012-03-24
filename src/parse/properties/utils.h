@@ -179,7 +179,7 @@ css_error css__parse_unit_specifier(css_language *c,
 		css_fixed *length, uint32_t *unit);
 
 css_error css__parse_unit_keyword(const char *ptr, size_t len, 
-		css_unit *unit);
+		uint32_t *unit);
 
 css_error css__ident_list_or_string_to_string(css_language *c,
 		const parserutils_vector *vector, int *ctx,

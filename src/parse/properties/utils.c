@@ -993,7 +993,7 @@ css_error css__parse_unit_specifier(css_language *c,
  * \return CSS_OK      on success,
  *         CSS_INVALID on encountering an unknown keyword
  */
-css_error css__parse_unit_keyword(const char *ptr, size_t len, css_unit *unit)
+css_error css__parse_unit_keyword(const char *ptr, size_t len, uint32_t *unit)
 {
 	if (len == 4) {
 		if (strncasecmp(ptr, "grad", 4) == 0)
