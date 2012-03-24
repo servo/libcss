@@ -126,7 +126,9 @@ void output_token_type_check(FILE *outputf, bool do_token_check, struct keyval_l
 		"	const css_token *token;\n"
 		"	bool match;\n\n"
 		"	token = parserutils_vector_iterate(vector, ctx);\n"
-		"	if ((token == NULL)");
+		"	if (%stoken == NULL%s",
+		do_token_check ? "(" : "",
+		do_token_check ? ")" : "");
 
 	if (do_token_check) {
 		bool prev = false; /* there was a previous check - add && */
