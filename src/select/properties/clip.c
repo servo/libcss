@@ -19,7 +19,7 @@ css_error css__cascade_clip(uint32_t opv, css_style *style,
 {
 	uint16_t value = CSS_CLIP_INHERIT;
 	css_computed_clip_rect rect = { 0, 0, 0, 0, 
-			UNIT_PX, UNIT_PX, UNIT_PX, UNIT_PX,
+			CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX, CSS_UNIT_PX,
 			false, false, false, false };
 
 	if (isInherit(opv) == false) {
