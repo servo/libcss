@@ -26,6 +26,13 @@ static css__propstrings_ctx css__propstrings;
 const stringmap_entry stringmap[LAST_KNOWN] = {
 	{ "*", SLEN("*") },
 
+	{ ":", SLEN(":") },
+	{ ",", SLEN(",") },
+	{ ";", SLEN(";") },
+	{ "{", SLEN("{") },
+	{ "}", SLEN("}") },
+	{ "0", SLEN("0") },
+
 	{ "charset", SLEN("charset") },
 	{ "import", SLEN("import") },
 	{ "media", SLEN("media") },

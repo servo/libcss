@@ -14,6 +14,10 @@ enum {
 	/* Universal selector */
 	UNIVERSAL,
 
+	/* Common tokens */
+	COLON, COMMA, SEMICOLON, OPEN_CURLY_BRACE, CLOSE_CURLY_BRACE,
+	ZERO_VALUE,
+
 	/* At-rules */
 	CHARSET, LIBCSS_IMPORT, MEDIA, NAMESPACE, FONT_FACE, PAGE,
 
