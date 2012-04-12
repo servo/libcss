@@ -23,25 +23,29 @@ static void *myrealloc(void *ptr, size_t len, void *pw);
 static css_error resolve_url(void *pw,
 		const char *base, lwc_string *rel, lwc_string **abs);
 static void die(const char *text, css_error code);
+
 static css_error node_name(void *pw, void *node,
-		lwc_string **name);
+		css_qname *qname);
 static css_error node_classes(void *pw, void *node,
 		lwc_string ***classes, uint32_t *n_classes);
 static css_error node_id(void *pw, void *node,
 		lwc_string **id);
 static css_error named_ancestor_node(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		void **ancestor);
 static css_error named_parent_node(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		void **parent);
 static css_error named_sibling_node(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
+		void **sibling);
+static css_error named_generic_sibling_node(void *pw, void *node,
+		const css_qname *qname,
 		void **sibling);
 static css_error parent_node(void *pw, void *node, void **parent);
 static css_error sibling_node(void *pw, void *node, void **sibling);
 static css_error node_has_name(void *pw, void *node, 
-		lwc_string *name, 
+		const css_qname *qname, 
 		bool *match);
 static css_error node_has_class(void *pw, void *node,
 		lwc_string *name,
@@ -50,26 +54,45 @@ static css_error node_has_id(void *pw, void *node,
 		lwc_string *name,
 		bool *match);
 static css_error node_has_attribute(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		bool *match);
 static css_error node_has_attribute_equal(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match);
 static css_error node_has_attribute_dashmatch(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match);
 static css_error node_has_attribute_includes(void *pw, void *node,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match);
-static css_error node_is_first_child(void *pw, void *node, bool *match);
+static css_error node_has_attribute_prefix(void *pw, void *node,
+		const css_qname *qname,
+		lwc_string *value,
+		bool *match);
+static css_error node_has_attribute_suffix(void *pw, void *node,
+		const css_qname *qname,
+		lwc_string *value,
+		bool *match);
+static css_error node_has_attribute_substring(void *pw, void *node,
+		const css_qname *qname,
+		lwc_string *value,
+		bool *match);
+static css_error node_is_root(void *pw, void *node, bool *match);
+static css_error node_count_siblings(void *pw, void *node,
+		bool same_name, bool after, int32_t *count);
+static css_error node_is_empty(void *pw, void *node, bool *match);
 static css_error node_is_link(void *pw, void *node, bool *match);
 static css_error node_is_visited(void *pw, void *node, bool *match);
 static css_error node_is_hover(void *pw, void *node, bool *match);
 static css_error node_is_active(void *pw, void *node, bool *match);
 static css_error node_is_focus(void *pw, void *node, bool *match);
+static css_error node_is_enabled(void *pw, void *node, bool *match);
+static css_error node_is_disabled(void *pw, void *node, bool *match);
+static css_error node_is_checked(void *pw, void *node, bool *match);
+static css_error node_is_target(void *pw, void *node, bool *match);
 static css_error node_is_lang(void *pw, void *node,
 		lwc_string *lang, bool *match);
 static css_error node_presentational_hint(void *pw, void *node,
@@ -81,12 +104,15 @@ static css_error compute_font_size(void *pw, const css_hint *parent,
 
 /* Table of function pointers for the LibCSS Select API. */
 static css_select_handler select_handler = {
+	CSS_SELECT_HANDLER_VERSION_1,
+
 	node_name,
 	node_classes,
 	node_id,
 	named_ancestor_node,
 	named_parent_node,
 	named_sibling_node,
+	named_generic_sibling_node,
 	parent_node,
 	sibling_node,
 	node_has_name,
@@ -96,12 +122,21 @@ static css_select_handler select_handler = {
 	node_has_attribute_equal,
 	node_has_attribute_dashmatch,
 	node_has_attribute_includes,
-	node_is_first_child,
+	node_has_attribute_prefix,
+	node_has_attribute_suffix,
+	node_has_attribute_substring,
+	node_is_root,
+	node_count_siblings,
+	node_is_empty,
 	node_is_link,
 	node_is_visited,
 	node_is_hover,
 	node_is_active,
 	node_is_focus,
+	node_is_enabled,
+	node_is_disabled,
+	node_is_checked,
+	node_is_target,
 	node_is_lang,
 	node_presentational_hint,
 	ua_default_for_property,
@@ -120,14 +155,29 @@ int main(int argc, char **argv)
 	css_select_ctx *select_ctx;
 	uint32_t count;
 	unsigned int hh;
+	css_stylesheet_params params;
 
 	UNUSED(argc);
 	UNUSED(argv);
 
+	params.params_version = CSS_STYLESHEET_PARAMS_VERSION_1;
+	params.level = CSS_LEVEL_21;
+	params.charset = "UTF-8";
+	params.url = "foo";
+	params.title = "foo";
+	params.allow_quirks = false;
+	params.inline_style = false;
+	params.resolve = resolve_url;
+	params.resolve_pw = NULL;
+	params.import = NULL;
+	params.import_pw = NULL;
+	params.color = NULL;
+	params.color_pw = NULL;
+	params.font = NULL;
+	params.font_pw = NULL;
+
 	/* create a stylesheet */
-	code = css_stylesheet_create(CSS_LEVEL_DEFAULT, "UTF-8", "", NULL,
-			false, false, myrealloc, 0, resolve_url, 0, NULL, NULL,
-			&sheet);
+	code = css_stylesheet_create(&params, myrealloc, NULL, &sheet);
 	if (code != CSS_OK)
 		die("css_stylesheet_create", code);
 	code = css_stylesheet_size(sheet, &size);
@@ -248,11 +298,14 @@ void die(const char *text, css_error code)
  * a libwapcaplet string containing the element name. Therefore all the
  * functions below except those getting or testing the element name return empty
  * data or false attributes. */
-css_error node_name(void *pw, void *n, lwc_string **name)
+css_error node_name(void *pw, void *n, css_qname *qname)
 {
 	lwc_string *node = n;
+
 	UNUSED(pw);
-	*name = lwc_string_ref(node);
+	
+	qname->name = lwc_string_ref(node);
+	
 	return CSS_OK;
 }
 
@@ -275,34 +328,45 @@ css_error node_id(void *pw, void *n, lwc_string **id)
 }
 
 css_error named_ancestor_node(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		void **ancestor)
 {
 	UNUSED(pw);
 	UNUSED(n);
-	UNUSED(name);
+	UNUSED(qname);
 	*ancestor = NULL;
 	return CSS_OK;
 }
 
 css_error named_parent_node(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		void **parent)
 {
 	UNUSED(pw);
 	UNUSED(n);
-	UNUSED(name);
+	UNUSED(qname);
 	*parent = NULL;
 	return CSS_OK;
 }
 
-css_error named_sibling_node(void *pw, void *n,
-		lwc_string *name,
+css_error named_generic_sibling_node(void *pw, void *n,
+		const css_qname *qname,
 		void **sibling)
 {
 	UNUSED(pw);
 	UNUSED(n);
-	UNUSED(name);
+	UNUSED(qname);
+	*sibling = NULL;
+	return CSS_OK;
+}
+
+css_error named_sibling_node(void *pw, void *n,
+		const css_qname *qname,
+		void **sibling)
+{
+	UNUSED(pw);
+	UNUSED(n);
+	UNUSED(qname);
 	*sibling = NULL;
 	return CSS_OK;
 }
@@ -324,12 +388,13 @@ css_error sibling_node(void *pw, void *n, void **sibling)
 }
 
 css_error node_has_name(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		bool *match)
 {
 	lwc_string *node = n;
 	UNUSED(pw);
-	assert(lwc_string_caseless_isequal(node, name, match) == lwc_error_ok);
+	assert(lwc_string_caseless_isequal(node, qname->name, match) ==
+			lwc_error_ok);
 	return CSS_OK;
 }
 
@@ -356,56 +421,122 @@ css_error node_has_id(void *pw, void *n,
 }
 
 css_error node_has_attribute(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		bool *match)
 {
 	UNUSED(pw);
 	UNUSED(n);
-	UNUSED(name);
+	UNUSED(qname);
 	*match = false;
 	return CSS_OK;
 }
 
 css_error node_has_attribute_equal(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match)
 {
 	UNUSED(pw);
 	UNUSED(n);
-	UNUSED(name);
+	UNUSED(qname);
 	UNUSED(value);
 	*match = false;
 	return CSS_OK;
 }
 
 css_error node_has_attribute_dashmatch(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match)
 {
 	UNUSED(pw);
 	UNUSED(n);
-	UNUSED(name);
+	UNUSED(qname);
 	UNUSED(value);
 	*match = false;
 	return CSS_OK;
 }
 
 css_error node_has_attribute_includes(void *pw, void *n,
-		lwc_string *name,
+		const css_qname *qname,
 		lwc_string *value,
 		bool *match)
 {
 	UNUSED(pw);
 	UNUSED(n);
-	UNUSED(name);
+	UNUSED(qname);
+	UNUSED(value);
+	*match = false;
+	return CSS_OK;
+}
+
+css_error node_has_attribute_prefix(void *pw, void *n,
+		const css_qname *qname,
+		lwc_string *value,
+		bool *match)
+{
+	UNUSED(pw);
+	UNUSED(n);
+	UNUSED(qname);
+	UNUSED(value);
+	*match = false;
+	return CSS_OK;
+}
+
+css_error node_has_attribute_suffix(void *pw, void *n,
+		const css_qname *qname,
+		lwc_string *value,
+		bool *match)
+{
+	UNUSED(pw);
+	UNUSED(n);
+	UNUSED(qname);
+	UNUSED(value);
+	*match = false;
+	return CSS_OK;
+}
+
+css_error node_has_attribute_substring(void *pw, void *n,
+		const css_qname *qname,
+		lwc_string *value,
+		bool *match)
+{
+	UNUSED(pw);
+	UNUSED(n);
+	UNUSED(qname);
 	UNUSED(value);
 	*match = false;
 	return CSS_OK;
 }
 
 css_error node_is_first_child(void *pw, void *n, bool *match)
+{
+	UNUSED(pw);
+	UNUSED(n);
+	*match = false;
+	return CSS_OK;
+}
+
+css_error node_is_root(void *pw, void *n, bool *match)
+{
+	UNUSED(pw);
+	UNUSED(n);
+	*match = false;
+	return CSS_OK;
+}
+
+css_error node_count_siblings(void *pw, void *n,
+		bool same_name, bool after, int32_t *count)
+{
+	UNUSED(pw);
+	UNUSED(n);
+	UNUSED(same_name);
+	UNUSED(after);
+	*count = 1;
+	return CSS_OK;
+}
+
+css_error node_is_empty(void *pw, void *n, bool *match)
 {
 	UNUSED(pw);
 	UNUSED(n);
@@ -452,6 +583,39 @@ css_error node_is_focus(void *pw, void *n, bool *match)
 	*match = false;
 	return CSS_OK;
 }
+
+css_error node_is_enabled(void *pw, void *n, bool *match)
+{
+	UNUSED(pw);
+	UNUSED(n);
+	*match = false;
+	return CSS_OK;
+}
+
+css_error node_is_disabled(void *pw, void *n, bool *match)
+{
+	UNUSED(pw);
+	UNUSED(n);
+	*match = false;
+	return CSS_OK;
+}
+
+css_error node_is_checked(void *pw, void *n, bool *match)
+{
+	UNUSED(pw);
+	UNUSED(n);
+	*match = false;
+	return CSS_OK;
+}
+
+css_error node_is_target(void *pw, void *n, bool *match)
+{
+	UNUSED(pw);
+	UNUSED(n);
+	*match = false;
+	return CSS_OK;
+}
+
 
 css_error node_is_lang(void *pw, void *n,
 		lwc_string *lang,
