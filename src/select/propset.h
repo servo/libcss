@@ -52,10 +52,15 @@ static const css_computed_uncommon default_uncommon = {
 } while(0)
 
 static const css_computed_page default_page = {
-    { (CSS_PAGE_BREAK_INSIDE_AUTO <<  6) | 
-        	(CSS_PAGE_BREAK_BEFORE_AUTO << 3) |
-        	CSS_PAGE_BREAK_AFTER_AUTO
-    }
+	{	
+		(CSS_PAGE_BREAK_INSIDE_AUTO <<  6) | 
+			(CSS_PAGE_BREAK_BEFORE_AUTO << 3) |
+			CSS_PAGE_BREAK_AFTER_AUTO,
+		(CSS_WIDOWS_SET << 1) | 
+			CSS_ORPHANS_SET
+	},
+	2 << CSS_RADIX_POINT, 
+	2 << CSS_RADIX_POINT
 };
 
 #define ENSURE_PAGE do {						\
@@ -1862,6 +1867,12 @@ static inline css_error set_page_break_after(
 {
 	uint8_t *bits;
 
+	if (style->page == NULL) {
+		if (type == CSS_PAGE_BREAK_AFTER_AUTO) {
+			return CSS_OK;
+		}
+	}
+
 	ENSURE_PAGE;
 
 	bits = &style->page->bits[PAGE_BREAK_AFTER_INDEX];
@@ -1884,6 +1895,12 @@ static inline css_error set_page_break_before(
 {
 	uint8_t *bits;
 
+	if (style->page == NULL) {
+		if (type == CSS_PAGE_BREAK_BEFORE_AUTO) {
+			return CSS_OK;
+		}
+	}
+	
 	ENSURE_PAGE;
 	
 	bits = &style->page->bits[PAGE_BREAK_BEFORE_INDEX];
@@ -1906,6 +1923,12 @@ static inline css_error set_page_break_inside(
 {
 	uint8_t *bits;
 
+	if (style->page == NULL) {
+		if (type == CSS_PAGE_BREAK_INSIDE_AUTO) {
+			return CSS_OK;
+		}
+	}
+	
 	ENSURE_PAGE;
 
 	bits = &style->page->bits[PAGE_BREAK_INSIDE_INDEX];
@@ -1919,5 +1942,63 @@ static inline css_error set_page_break_inside(
 #undef PAGE_BREAK_INSIDE_INDEX
 #undef PAGE_BREAK_INSIDE_SHIFT
 #undef PAGE_BREAK_INSIDE_MASK
+
+#define ORPHANS_INDEX 1
+#define ORPHANS_SHIFT 0
+#define ORPHANS_MASK 0x1
+static inline css_error set_orphans(
+		css_computed_style *style, uint8_t type, css_fixed count)
+{
+	uint8_t *bits;
+	
+	if (style->page == NULL) {
+		if (type == CSS_ORPHANS_SET && count == INTTOFIX(2)) {
+			return CSS_OK;
+		}
+	}
+
+	ENSURE_PAGE;
+	
+	bits = &style->page->bits[ORPHANS_INDEX];
+	
+	/* 1bit: type */
+	*bits = (*bits & ~ORPHANS_MASK) | ((type & 0x1) << ORPHANS_SHIFT);
+	
+	style->page->orphans = count;
+	
+	return CSS_OK;
+}
+#undef ORPHANS_INDEX
+#undef ORPHANS_SHIFT
+#undef ORPHANS_MASK
+
+#define WIDOWS_INDEX 1
+#define WIDOWS_SHIFT 1
+#define WIDOWS_MASK 0x2
+static inline css_error set_widows(
+		css_computed_style *style, uint8_t type, css_fixed count)
+{
+	uint8_t *bits;
+	
+	if (style->page == NULL) {
+		if (type == CSS_WIDOWS_SET && count == INTTOFIX(2)) {
+			return CSS_OK;
+		}
+	}
+	
+	ENSURE_PAGE;
+	
+	bits = &style->page->bits[WIDOWS_INDEX];
+	
+	/* 1bit: type */
+	*bits = (*bits & ~WIDOWS_MASK) | ((type & 0x1) << WIDOWS_SHIFT);
+	
+	style->page->widows = count;
+	
+	return CSS_OK;
+}
+#undef WIDOWS_INDEX
+#undef WIDOWS_SHIFT
+#undef WIDOWS_MASK
 
 #endif

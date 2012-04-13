@@ -17,34 +17,31 @@
 css_error css__cascade_widows(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	/** \todo widows */
-	return css__cascade_number(opv, style, state, NULL);
+	return css__cascade_number(opv, style, state, set_widows);
 }
 
 css_error css__set_widows_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
-	UNUSED(hint);
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_widows(style, hint->status, hint->data.fixed);
 }
 
 css_error css__initial_widows(css_select_state *state)
 {
-	UNUSED(state);
-
-	return CSS_OK;
+	return set_widows(state->computed, CSS_WIDOWS_SET, INTTOFIX(2));
 }
 
 css_error css__compose_widows(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	UNUSED(parent);
-	UNUSED(child);
-	UNUSED(result);
-
-	return CSS_OK;
+	css_fixed count = 0;
+	uint8_t type = get_widows(child, &count);
+	
+	if (type == CSS_WIDOWS_INHERIT) {
+		type = get_widows(parent, &count);
+	}
+	
+	return set_widows(result, type, count);
 }
 

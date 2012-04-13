@@ -2223,6 +2223,59 @@ uint8_t css_computed_page_break_inside(
 #undef CSS_PAGE_BREAK_INSIDE_SHIFT
 #undef CSS_PAGE_BREAK_INSIDE_INDEX
 
+#define CSS_ORPHANS_INDEX 1
+#define CSS_ORPHANS_SHIFT 0
+#define CSS_ORPHANS_MASK  0x1
+uint8_t css_computed_orphans(
+		const css_computed_style *style, 
+		int32_t *orphans)
+{
+	if (style->page != NULL) {
+		uint8_t bits = style->page->bits[CSS_ORPHANS_INDEX];
+		bits &= CSS_ORPHANS_MASK;
+		bits >>= CSS_ORPHANS_SHIFT;
+
+		*orphans = FIXTOINT(style->page->orphans);;
+
+		/* 1bit: type */
+		return bits;
+	}
+
+	/* Use initial value */
+	*orphans = 2;
+
+	return CSS_ORPHANS_SET;
+}
+#undef CSS_ORPHANS_MASK
+#undef CSS_ORPHANS_SHIFT
+#undef CSS_ORPHANS_INDEX
+
+#define CSS_WIDOWS_INDEX 1
+#define CSS_WIDOWS_SHIFT 1
+#define CSS_WIDOWS_MASK  0x2
+uint8_t css_computed_widows(
+		const css_computed_style *style, 
+		int32_t *widows)
+{
+	if (style->page != NULL) {
+		uint8_t bits = style->page->bits[CSS_WIDOWS_INDEX];
+		bits &= CSS_WIDOWS_MASK;
+		bits >>= CSS_WIDOWS_SHIFT;
+
+		*widows = FIXTOINT(style->page->widows);
+
+		/* 1bit: type */
+		return bits;
+	}
+
+	/* Use initial value */
+	*widows = 2;
+
+	return CSS_WIDOWS_SET;
+}
+#undef CSS_WIDOWS_MASK
+#undef CSS_WIDOWS_SHIFT
+#undef CSS_WIDOWS_INDEX
 
 
 /******************************************************************************

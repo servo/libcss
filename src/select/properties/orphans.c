@@ -17,34 +17,31 @@
 css_error css__cascade_orphans(uint32_t opv, css_style *style, 
 		css_select_state *state)
 {
-	/** \todo orphans */
-	return css__cascade_number(opv, style, state, NULL);
+	return css__cascade_number(opv, style, state, set_orphans);
 }
 
 css_error css__set_orphans_from_hint(const css_hint *hint,
 		css_computed_style *style)
 {
-	UNUSED(hint);
-	UNUSED(style);
-
-	return CSS_OK;
+	return set_orphans(style, hint->status, hint->data.fixed);
 }
 
 css_error css__initial_orphans(css_select_state *state)
 {
-	UNUSED(state);
-
-	return CSS_OK;
+	return set_orphans(state->computed, CSS_ORPHANS_SET, INTTOFIX(2));
 }
 
 css_error css__compose_orphans(const css_computed_style *parent,
 		const css_computed_style *child,
 		css_computed_style *result)
 {
-	UNUSED(parent);
-	UNUSED(child);
-	UNUSED(result);
-
-	return CSS_OK;
+	css_fixed count = 0;
+	uint8_t type = get_orphans(child, &count);
+	
+	if (type == CSS_ORPHANS_INHERIT) {
+		type = get_orphans(parent, &count);
+	}
+	
+	return set_orphans(result, type, count);
 }
 

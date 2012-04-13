@@ -87,13 +87,16 @@ typedef struct css_computed_uncommon {
 
 typedef struct css_computed_page {
 /*
- * page_break_after		  3
- * page_break_before		  3
- * page_break_inside		  2
- * 				---
- *				  8 bits
+ * Bit allocations:
+ *
+ *    76543210
+ *  1 aaabbbii	page_break_after | page_break_before | page_break_inside
+ *  2 ......wo	widows  | orphans
  */
-    uint8_t bits[1];
+	uint8_t bits[2];
+	
+	css_fixed widows;
+	css_fixed orphans;
 } css_computed_page;
     
 struct css_computed_style {

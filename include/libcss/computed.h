@@ -388,6 +388,13 @@ uint8_t css_computed_page_break_before(
 uint8_t css_computed_page_break_inside(
 		const css_computed_style *style);
 
+uint8_t css_computed_orphans(
+		const css_computed_style *style, 
+		int32_t *orphans);
+
+uint8_t css_computed_widows(
+		const css_computed_style *style, 
+		int32_t *widows);
 
 #ifdef __cplusplus
 }

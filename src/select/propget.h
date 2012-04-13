@@ -1807,4 +1807,54 @@ static inline uint8_t get_page_break_inside(
 #undef PAGE_BREAK_INSIDE_SHIFT
 #undef PAGE_BREAK_INSIDE_INDEX
 
+#define ORPHANS_INDEX 1
+#define ORPHANS_SHIFT 0
+#define ORPHANS_MASK 0x1
+static inline uint8_t get_orphans(
+		const css_computed_style *style,
+		css_fixed *count)
+{
+	if (style->page != NULL) {
+		uint8_t bits = style->page->bits[ORPHANS_INDEX];
+		bits &= ORPHANS_MASK;
+		bits >>= ORPHANS_SHIFT;
+		
+		*count = style->page->orphans;
+		
+		/* 1bit: type */
+		return bits;
+	}
+	
+	*count = INTTOFIX(2);
+	return CSS_ORPHANS_SET;
+}
+#undef ORPHANS_MASK
+#undef ORPHANS_SHIFT
+#undef ORPHANS_INDEX
+
+#define WIDOWS_INDEX 1
+#define WIDOWS_SHIFT 1
+#define WIDOWS_MASK 0x2
+static inline uint8_t get_widows(
+		const css_computed_style *style,
+		css_fixed *count)
+{
+	if (style->page != NULL) {
+		uint8_t bits = style->page->bits[WIDOWS_INDEX];
+		bits &= WIDOWS_MASK;
+		bits >>= WIDOWS_SHIFT;
+		
+		*count = style->page->orphans;
+		
+		/* 1bit: type */
+		return bits;
+	}
+	
+	*count = INTTOFIX(2);
+	return CSS_WIDOWS_SET;
+}
+#undef WIDOWS_MASK
+#undef WIDOWS_SHIFT
+#undef WIDOWS_INDEX
+
 #endif
