@@ -52,12 +52,12 @@ css_error css__cascade_bg_border_color(uint32_t opv, css_style *style,
 	uint16_t value = CSS_BACKGROUND_COLOR_INHERIT;
 	css_color color = 0;
 
-	assert((uint16_t)CSS_BACKGROUND_COLOR_INHERIT ==
-			(uint16_t)CSS_BORDER_COLOR_INHERIT);
-	assert((uint16_t)CSS_BACKGROUND_COLOR_COLOR ==
-			(uint16_t)CSS_BORDER_COLOR_COLOR);
-	assert((uint16_t)CSS_BACKGROUND_COLOR_CURRENT_COLOR == 
-			(uint16_t)CSS_BORDER_COLOR_CURRENT_COLOR);
+	assert(CSS_BACKGROUND_COLOR_INHERIT == 
+	       (enum css_background_color_e)CSS_BORDER_COLOR_INHERIT);
+	assert(CSS_BACKGROUND_COLOR_COLOR == 
+	       (enum css_background_color_e)CSS_BORDER_COLOR_COLOR);
+	assert(CSS_BACKGROUND_COLOR_CURRENT_COLOR == 
+	       (enum css_background_color_e)CSS_BORDER_COLOR_CURRENT_COLOR);
 
 	if (isInherit(opv) == false) {
 		switch (getValue(opv)) {

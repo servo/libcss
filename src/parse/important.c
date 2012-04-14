@@ -100,10 +100,10 @@ void css__make_style_important(css_style *style)
 			case CSS_PROP_BORDER_LEFT_COLOR:
 			case CSS_PROP_BACKGROUND_COLOR:
 			case CSS_PROP_COLUMN_RULE_COLOR:
-				assert((uint32_t)BACKGROUND_COLOR_SET == 
-						(uint32_t)BORDER_COLOR_SET);
-				assert((uint32_t)BACKGROUND_COLOR_SET == 
-						(uint32_t)COLUMN_RULE_COLOR_SET);
+				assert(BACKGROUND_COLOR_SET == 
+				       (enum op_background_color)BORDER_COLOR_SET);
+				assert(BACKGROUND_COLOR_SET == 
+				       (enum op_background_color)COLUMN_RULE_COLOR_SET);
 
 				if (value == BACKGROUND_COLOR_SET)
 					offset++; /* colour */
@@ -113,12 +113,12 @@ void css__make_style_important(css_style *style)
 			case CSS_PROP_CUE_AFTER:
 			case CSS_PROP_CUE_BEFORE:
 			case CSS_PROP_LIST_STYLE_IMAGE:
-				assert((uint32_t)BACKGROUND_IMAGE_URI ==
-						(uint32_t)CUE_AFTER_URI);
-				assert((uint32_t)BACKGROUND_IMAGE_URI ==
-						(uint32_t)CUE_BEFORE_URI);
-				assert((uint32_t)BACKGROUND_IMAGE_URI ==
-						(uint32_t)LIST_STYLE_IMAGE_URI);
+				assert(BACKGROUND_IMAGE_URI == 
+				       (enum op_background_image)CUE_AFTER_URI);
+				assert(BACKGROUND_IMAGE_URI == 
+				       (enum op_background_image)CUE_BEFORE_URI);
+				assert(BACKGROUND_IMAGE_URI ==
+				       (enum op_background_image)LIST_STYLE_IMAGE_URI);
 
 				if (value == BACKGROUND_IMAGE_URI) 
 					offset++; /* string table entry */
@@ -143,10 +143,10 @@ void css__make_style_important(css_style *style)
 			case CSS_PROP_BORDER_LEFT_WIDTH:
 			case CSS_PROP_OUTLINE_WIDTH:
 			case CSS_PROP_COLUMN_RULE_WIDTH:
-				assert((uint32_t)BORDER_WIDTH_SET ==
-						(uint32_t)OUTLINE_WIDTH_SET);
-				assert((uint32_t)BORDER_WIDTH_SET ==
-						(uint32_t)COLUMN_RULE_WIDTH_SET);
+				assert(BORDER_WIDTH_SET == 
+				       (enum op_border_width)OUTLINE_WIDTH_SET);
+				assert(BORDER_WIDTH_SET ==
+				       (enum op_border_width)COLUMN_RULE_WIDTH_SET);
 
 				if (value == BORDER_WIDTH_SET)
 					offset += 2; /* length + units */
@@ -164,14 +164,14 @@ void css__make_style_important(css_style *style)
 			case CSS_PROP_WIDTH:
 			case CSS_PROP_COLUMN_WIDTH:
 			case CSS_PROP_COLUMN_GAP:
-				assert((uint32_t)BOTTOM_SET == (uint32_t)LEFT_SET);
-				assert((uint32_t)BOTTOM_SET == (uint32_t)RIGHT_SET);
-				assert((uint32_t)BOTTOM_SET == (uint32_t)TOP_SET);
-				assert((uint32_t)BOTTOM_SET == (uint32_t)HEIGHT_SET);
-				assert((uint32_t)BOTTOM_SET == (uint32_t)MARGIN_SET);
-				assert((uint32_t)BOTTOM_SET == (uint32_t)WIDTH_SET);
-				assert((uint32_t)BOTTOM_SET == (uint32_t)COLUMN_WIDTH_SET);
-				assert((uint32_t)BOTTOM_SET == (uint32_t)COLUMN_GAP_SET);
+				assert(BOTTOM_SET == (enum op_bottom)LEFT_SET);
+				assert(BOTTOM_SET == (enum op_bottom)RIGHT_SET);
+				assert(BOTTOM_SET == (enum op_bottom)TOP_SET);
+				assert(BOTTOM_SET == (enum op_bottom)HEIGHT_SET);
+				assert(BOTTOM_SET == (enum op_bottom)MARGIN_SET);
+				assert(BOTTOM_SET == (enum op_bottom)WIDTH_SET);
+				assert(BOTTOM_SET == (enum op_bottom)COLUMN_WIDTH_SET);
+				assert(BOTTOM_SET == (enum op_bottom)COLUMN_GAP_SET);
 
 				if (value == BOTTOM_SET) 
 					offset += 2; /* length + units */
@@ -233,8 +233,8 @@ void css__make_style_important(css_style *style)
 
 			case CSS_PROP_COUNTER_INCREMENT:
 			case CSS_PROP_COUNTER_RESET:
-				assert((uint32_t)COUNTER_INCREMENT_NONE == 
-						(uint32_t)COUNTER_RESET_NONE);
+				assert(COUNTER_INCREMENT_NONE == 
+				       (enum op_counter_increment)COUNTER_RESET_NONE);
 
 				while (value != COUNTER_INCREMENT_NONE) {
 					offset+=2; /* string + integer */
@@ -279,8 +279,8 @@ void css__make_style_important(css_style *style)
 
 			case CSS_PROP_LETTER_SPACING:
 			case CSS_PROP_WORD_SPACING:
-				assert((uint32_t)LETTER_SPACING_SET ==
-					(uint32_t)WORD_SPACING_SET);
+				assert(LETTER_SPACING_SET == 
+				       (enum op_letter_spacing)WORD_SPACING_SET);
 
 				if (value == LETTER_SPACING_SET)
 					offset += 2; /* length + units */
@@ -300,7 +300,8 @@ void css__make_style_important(css_style *style)
 
 			case CSS_PROP_MAX_HEIGHT:
 			case CSS_PROP_MAX_WIDTH:
-				assert((uint32_t)MAX_HEIGHT_SET == (uint32_t)MAX_WIDTH_SET);
+				assert(MAX_HEIGHT_SET == 
+				       (enum op_max_height)MAX_WIDTH_SET);
 
 				if (value == MAX_HEIGHT_SET)
 					offset += 2; /* length + units */
@@ -315,11 +316,11 @@ void css__make_style_important(css_style *style)
 			case CSS_PROP_PAUSE_AFTER:
 			case CSS_PROP_PAUSE_BEFORE:
 			case CSS_PROP_TEXT_INDENT:
-				assert((uint32_t)MIN_HEIGHT_SET == (uint32_t)MIN_WIDTH_SET);
-				assert((uint32_t)MIN_HEIGHT_SET == (uint32_t)PADDING_SET);
-				assert((uint32_t)MIN_HEIGHT_SET == (uint32_t)PAUSE_AFTER_SET);
-				assert((uint32_t)MIN_HEIGHT_SET == (uint32_t)PAUSE_BEFORE_SET);
-				assert((uint32_t)MIN_HEIGHT_SET == (uint32_t)TEXT_INDENT_SET);
+				assert(MIN_HEIGHT_SET == (enum op_min_height)MIN_WIDTH_SET);
+				assert(MIN_HEIGHT_SET == (enum op_min_height)PADDING_SET);
+				assert(MIN_HEIGHT_SET == (enum op_min_height)PAUSE_AFTER_SET);
+				assert(MIN_HEIGHT_SET == (enum op_min_height)PAUSE_BEFORE_SET);
+				assert(MIN_HEIGHT_SET == (enum op_min_height)TEXT_INDENT_SET);
 
 				if (value == MIN_HEIGHT_SET)
 					offset += 2; /* length + units */
@@ -335,10 +336,10 @@ void css__make_style_important(css_style *style)
 			case CSS_PROP_RICHNESS:
 			case CSS_PROP_STRESS:
 			case CSS_PROP_WIDOWS:
-				assert((uint32_t)ORPHANS_SET == (uint32_t)PITCH_RANGE_SET);
-				assert((uint32_t)ORPHANS_SET == (uint32_t)RICHNESS_SET);
-				assert((uint32_t)ORPHANS_SET == (uint32_t)STRESS_SET);
-				assert((uint32_t)ORPHANS_SET == (uint32_t)WIDOWS_SET);
+				assert(ORPHANS_SET == (enum op_orphans)PITCH_RANGE_SET);
+				assert(ORPHANS_SET == (enum op_orphans)RICHNESS_SET);
+				assert(ORPHANS_SET == (enum op_orphans)STRESS_SET);
+				assert(ORPHANS_SET == (enum op_orphans)WIDOWS_SET);
 
 				if (value == ORPHANS_SET)
 					offset++; /* value */
