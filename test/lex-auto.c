@@ -206,11 +206,11 @@ const char *string_from_type(css_token_type type)
 {
 	const char *names[] =
 	{
-		"IDENT", "ATKEYWORD", "STRING", "INVALID", "HASH", "NUMBER",
-		"PERCENTAGE", "DIMENSION", "URI", "UNICODE-RANGE", "CDO",
-		"CDC", "S", "COMMENT", "FUNCTION", "INCLUDES",
-		"DASHMATCH", "PREFIXMATCH", "SUFFIXMATCH", "SUBSTRINGMATCH",
-		"CHAR", "EOF"
+		"IDENT", "ATKEYWORD", "HASH", "FUNCTION", "STRING", "INVALID",
+		"URI", "UNICODE-RANGE", "CHAR", "NUMBER", "PERCENTAGE",
+		"DIMENSION", "last_intern", "CDO", "CDC", "S", "COMMENT", 
+		"INCLUDES", "DASHMATCH", "PREFIXMATCH", "SUFFIXMATCH",
+		"SUBSTRINGMATCH", "EOF"
 	};
 
 	return names[type];
