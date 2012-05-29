@@ -27,8 +27,8 @@ All numeric values are stored in a 32bit wide field. This field contains
 a fixed point value with 22 bits assigned to the integer part and 10 bits
 assigned to the fractional part.
 
-Strings are stored as a pointer to an interned string.
-The pointer's width is the native width of a pointer on the platform.
+Strings are stored as a 32bit index into a table of interned string pointers.
+The table is found in the stylesheet object.
 
 CSS dimensions are stored as two 32bit values: <length, units>. 
 Length is a 32bit numeric value (as described above) and unit is as follows:
@@ -71,12 +71,7 @@ Length is a 32bit numeric value (as described above) and unit is as follows:
 			00000000 => Hz
 			00000001 => kHz
 
-CSS colours are stored as one 32bit value:
-
-	bits 24-31: Alpha component
-	bits 16-23: Red component
-	bits 8-15 : Green component
-	bits 0-7  : Blue component
+CSS colours are stored as one 32bit value. See "Colour" for their format.
 
 Shorthand properties
 --------------------
