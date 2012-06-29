@@ -112,4 +112,4 @@ windows.c \
 word_spacing.c \
 z_index.c
 
-include build/makefiles/Makefile.subdir
+include $(NSBUILD)/Makefile.subdir

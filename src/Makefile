@@ -1,4 +1,4 @@
 # Sources
 DIR_SOURCES := stylesheet.c
 
-include build/makefiles/Makefile.subdir
+include $(NSBUILD)/Makefile.subdir
