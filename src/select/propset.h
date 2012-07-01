@@ -235,7 +235,7 @@ static inline css_error set_counter_increment(
 			((type & 0x1) << COUNTER_INCREMENT_SHIFT);
 
 	for (c = counters; c != NULL && c->name != NULL; c++)
-		lwc_string_ref(c->name);
+		c->name = lwc_string_ref(c->name);
 
 	style->uncommon->counter_increment = counters;
 
@@ -275,7 +275,7 @@ static inline css_error set_counter_reset(
 			((type & 0x1) << COUNTER_RESET_SHIFT);
 
 	for (c = counters; c != NULL && c->name != NULL; c++)
-		lwc_string_ref(c->name);
+		c->name = lwc_string_ref(c->name);
 
 	style->uncommon->counter_reset = counters;
 
@@ -315,7 +315,7 @@ static inline css_error set_cursor(
 			((type & 0x1f) << CURSOR_SHIFT);
 
 	for (s = urls; s != NULL && *s != NULL; s++)
-		lwc_string_ref(*s);
+		*s = lwc_string_ref(*s);
 
 	style->uncommon->cursor = urls;
 
@@ -417,20 +417,23 @@ static inline css_error set_content(
 			c->type != CSS_COMPUTED_CONTENT_NONE; c++) {
 		switch (c->type) {
 		case CSS_COMPUTED_CONTENT_STRING:
-			lwc_string_ref(c->data.string);
+			c->data.string = lwc_string_ref(c->data.string);
 			break;
 		case CSS_COMPUTED_CONTENT_URI:
-			lwc_string_ref(c->data.uri);
+			c->data.uri = lwc_string_ref(c->data.uri);
 			break;
 		case CSS_COMPUTED_CONTENT_ATTR:
-			lwc_string_ref(c->data.attr);
+			c->data.attr = lwc_string_ref(c->data.attr);
 			break;
 		case CSS_COMPUTED_CONTENT_COUNTER:
-			lwc_string_ref(c->data.counter.name);
+			c->data.counter.name =
+				lwc_string_ref(c->data.counter.name);
 			break;
 		case CSS_COMPUTED_CONTENT_COUNTERS:
-			lwc_string_ref(c->data.counters.name);
-			lwc_string_ref(c->data.counters.sep);
+			c->data.counters.name = 
+				lwc_string_ref(c->data.counters.name);
+			c->data.counters.sep = 
+				lwc_string_ref(c->data.counters.sep);
 			break;
 		default:
 			break;
@@ -697,7 +700,7 @@ static inline css_error set_quotes(
 			((type & 0x1) << QUOTES_SHIFT);
 
 	for (s = quotes; s != NULL && *s != NULL; s++)
-		lwc_string_ref(*s);
+		*s = lwc_string_ref(*s);
 
 	style->quotes = quotes;
 
@@ -1624,7 +1627,7 @@ static inline css_error set_font_family(
 			((type & 0x7) << FONT_FAMILY_SHIFT);
 
 	for (s = names; s != NULL && *s != NULL; s++)
-		lwc_string_ref(*s);
+		*s = lwc_string_ref(*s);
 
 	style->font_family = names;
 
