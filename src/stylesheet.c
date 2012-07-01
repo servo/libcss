@@ -984,17 +984,17 @@ css_error css__stylesheet_selector_append_specific(css_stylesheet *sheet,
 		return CSS_NOMEM;
 
 	/* Copy detail into empty block */
-	(&temp->data)[num_details + 1] = *detail;
+	*(d = &(&temp->data)[num_details + 1]) = *detail;
 	/* Flag that there's another block */
 	(&temp->data)[num_details].next = 1;
 	
 	/* Ref the strings */
 	if (detail->qname.ns != NULL)
-		lwc_string_ref(detail->qname.ns);
-	lwc_string_ref(detail->qname.name);
+		d->qname.ns = lwc_string_ref(detail->qname.ns);
+	d->qname.name = lwc_string_ref(detail->qname.name);
 	if (detail->value_type == CSS_SELECTOR_DETAIL_VALUE_STRING &&
 			detail->value.string != NULL)
-		lwc_string_ref(detail->value.string);
+		d->value.string = lwc_string_ref(detail->value.string);
 	
 	(*parent) = temp;
 
