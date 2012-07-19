@@ -807,7 +807,7 @@ css_error node_classes(void *pw, void *n,
 	line_ctx *lc = pw;
 
 	for (i = 0; i < node->n_attrs; i++) {
-		bool amatch;
+		bool amatch = false;
 		assert(lwc_string_caseless_isequal(
 				node->attrs[i].name, lc->attr_class, &amatch) ==
 				lwc_error_ok);
@@ -840,7 +840,7 @@ css_error node_id(void *pw, void *n,
 	line_ctx *lc = pw;
 
 	for (i = 0; i < node->n_attrs; i++) {
-		bool amatch;
+		bool amatch = false;
 		assert(lwc_string_caseless_isequal(
 				node->attrs[i].name, lc->attr_id, &amatch) == 
 				lwc_error_ok);
@@ -864,7 +864,7 @@ css_error named_ancestor_node(void *pw, void *n,
 	UNUSED(pw);
 
 	for (node = node->parent; node != NULL; node = node->parent) {
-		bool match;
+		bool match = false;
 		assert(lwc_string_caseless_isequal(
 				qname->name, node->name, 
 				&match) == lwc_error_ok);
@@ -886,7 +886,7 @@ css_error named_parent_node(void *pw, void *n,
 
 	*parent = NULL;
 	if (node->parent != NULL) {
-		bool match;
+		bool match = false;
 		assert(lwc_string_caseless_isequal(
 				qname->name, node->parent->name, &match) == 
 				lwc_error_ok);
@@ -906,7 +906,7 @@ css_error named_sibling_node(void *pw, void *n,
 
 	*sibling = NULL;
 	if (node->prev != NULL) {
-		bool match;
+		bool match = false;
 		assert(lwc_string_caseless_isequal(
 				qname->name, node->prev->name, &match) == 
 				lwc_error_ok);
@@ -925,7 +925,7 @@ css_error named_generic_sibling_node(void *pw, void *n,
 	UNUSED(pw);
 
 	for (node = node->prev; node != NULL; node = node->prev) {
-		bool match;
+		bool match = false;
 		assert(lwc_string_caseless_isequal(
 				qname->name, node->name, 
 				&match) == lwc_error_ok);
@@ -986,7 +986,7 @@ css_error node_has_class(void *pw, void *n,
 	line_ctx *ctx = pw;
 
 	for (i = 0; i < node->n_attrs; i++) {
-		bool amatch;
+		bool amatch = false;
 		assert(lwc_string_caseless_isequal(
 				node->attrs[i].name, ctx->attr_class, 
 				&amatch) == lwc_error_ok);
@@ -1012,7 +1012,7 @@ css_error node_has_id(void *pw, void *n,
 	line_ctx *ctx = pw;
 
 	for (i = 0; i < node->n_attrs; i++) {
-		bool amatch;
+		bool amatch = false;
 		assert(lwc_string_caseless_isequal(
 				node->attrs[i].name, ctx->attr_id, &amatch) == 
 				lwc_error_ok);
