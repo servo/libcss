@@ -685,8 +685,6 @@ css_error handleEndBlock(css_language *c, const parserutils_vector *vector)
 	context_entry *entry;
 	css_rule *rule;
 
-	UNUSED(vector);
-
 	entry = parserutils_stack_get_current(c->context);
 	if (entry == NULL || entry->type != CSS_PARSER_START_BLOCK)
 		return CSS_INVALID;
