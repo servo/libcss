@@ -1778,7 +1778,13 @@ css_error match_detail(css_select_ctx *ctx, void *node,
 
 	switch (detail->type) {
 	case CSS_SELECTOR_ELEMENT:
-		/* Never any need to match this detail type. */
+		if (detail->negate != 0) {
+			/* Only need to test this inside not(), since
+			 * it will have been considered as a named node
+			 * otherwise. */
+			error = state->handler->node_has_name(state->pw, node,
+					&detail->qname, match);
+		}
 		break;
 	case CSS_SELECTOR_CLASS:
 		error = state->handler->node_has_class(state->pw, node,
