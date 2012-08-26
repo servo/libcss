@@ -1379,13 +1379,19 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		selector = _selector_next(node_selectors, id_selectors,
 				class_selectors, n_classes, univ_selectors);
 
-		/* Ignore any selectors contained in rules which are a child 
-		 * of an @media block that doesn't match the current media 
-		 * requirements. */
-		if (_rule_applies_to_media(selector->rule, state->media)) {
-			error = match_selector_chain(ctx, selector, state);
-			if (error != CSS_OK)
-				goto cleanup;
+		/* No bytecode if rule body is empty or wholly invalid --
+		 * Only interested in rules with bytecode */
+		if (((css_rule_selector *) selector->rule)->style != NULL) {
+			/* Ignore any selectors contained in rules which are a
+			 * child of an @media block that doesn't match the
+			 * current media requirements. */
+			if (_rule_applies_to_media(selector->rule,
+					state->media)) {
+				error = match_selector_chain(ctx, selector,
+						state);
+				if (error != CSS_OK)
+					goto cleanup;
+			}
 		}
 
 		/* Advance to next selector in whichever chain we extracted 
@@ -1530,10 +1536,6 @@ css_error match_selector_chain(css_select_ctx *ctx,
 
 	/* If we got here, then the entire selector chain matched, so cascade */
 	state->current_specificity = selector->specificity;
-
-	/* No bytecode if rule body is empty or wholly invalid */
-	if (((css_rule_selector *) selector->rule)->style == NULL)
-		return CSS_OK;
 
 	/* Ensure that the appropriate computed style exists */
 	if (state->results->styles[pseudo] == NULL) {
