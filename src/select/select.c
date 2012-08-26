@@ -97,6 +97,19 @@ typedef struct css_select_font_faces_state {
 	css_select_font_faces_list author_font_faces;
 } css_select_font_faces_state;
 
+/**
+ * CSS rule source
+ */
+typedef struct css_select_rule_source {
+	enum {
+		CSS_SELECT_RULE_SRC_ELEMENT,
+		CSS_SELECT_RULE_SRC_CLASS,
+		CSS_SELECT_RULE_SRC_ID,
+		CSS_SELECT_RULE_SRC_UNIVERSAL
+	} source;
+	uint32_t class;
+} css_select_rule_source;
+
 
 static css_error set_hint(css_select_state *state, uint32_t prop);
 static css_error set_initial(css_select_state *state, 
@@ -1285,29 +1298,64 @@ static inline bool _selector_less_specific(const css_selector *ref,
 
 static const css_selector *_selector_next(const css_selector **node,
 		const css_selector **id, const css_selector ***classes,
-		uint32_t n_classes, const css_selector **univ)
+		uint32_t n_classes, const css_selector **univ,
+		css_select_rule_source *src)
 {
 	const css_selector *ret = NULL;
 
-	if (_selector_less_specific(ret, *node))
+	if (_selector_less_specific(ret, *node)) {
 		ret = *node;
+		src->source = CSS_SELECT_RULE_SRC_ELEMENT;
+	}
 
-	if (_selector_less_specific(ret, *id))
+	if (_selector_less_specific(ret, *id)) {
 		ret = *id;
+		src->source = CSS_SELECT_RULE_SRC_ID;
+	}
 
-	if (_selector_less_specific(ret, *univ))
+	if (_selector_less_specific(ret, *univ)) {
 		ret = *univ;
+		src->source = CSS_SELECT_RULE_SRC_UNIVERSAL;
+	}
 
 	if (classes != NULL && n_classes > 0) {
 		uint32_t i;
 
 		for (i = 0; i < n_classes; i++) {
-			if (_selector_less_specific(ret, *(classes[i])))
+			if (_selector_less_specific(ret, *(classes[i]))) {
 				ret = *(classes[i]);
+				src->source = CSS_SELECT_RULE_SRC_CLASS;
+				src->class = i;
+			}
 		}
 	}
 
 	return ret;
+}
+
+static bool _rule_good_for_element_name(const css_selector *selector,
+		css_select_rule_source *src, css_select_state *state)
+{
+	/* If source of rule is element or universal hash, we know the
+	 * element name is a match.  If it comes from the class or id hash,
+	 * we have to test for a match */
+	if (src->source == CSS_SELECT_RULE_SRC_ID ||
+			src->source == CSS_SELECT_RULE_SRC_CLASS) {
+		if (lwc_string_length(selector->data.qname.name) != 1 ||
+				lwc_string_data(
+					selector->data.qname.name)[0] != '*') {
+			bool match;
+			if (lwc_string_caseless_isequal(
+					selector->data.qname.name,
+					state->element.name,
+					&match) == lwc_error_ok &&
+					match == false) {
+				return false;
+			}
+		}
+	}
+
+	return true;
 }
 
 css_error match_selectors_in_sheet(css_select_ctx *ctx, 
@@ -1324,6 +1372,7 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 	css_selector_hash_iterator class_iterator;
 	const css_selector **univ_selectors = &empty_selector;
 	css_selector_hash_iterator univ_iterator;
+	css_select_rule_source src = { CSS_SELECT_RULE_SRC_ELEMENT, 0 };
 	css_error error;
 
 	/* Find hash chain that applies to current node */
@@ -1377,7 +1426,12 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 		 * Pick the least specific/earliest occurring selector.
 		 */
 		selector = _selector_next(node_selectors, id_selectors,
-				class_selectors, n_classes, univ_selectors);
+				class_selectors, n_classes, univ_selectors,
+				&src);
+
+		/* We know there are selectors pending, so should have a
+		 * selector here */
+		assert(selector != NULL);
 
 		/* No bytecode if rule body is empty or wholly invalid --
 		 * Only interested in rules with bytecode */
@@ -1387,33 +1441,40 @@ css_error match_selectors_in_sheet(css_select_ctx *ctx,
 			 * current media requirements. */
 			if (_rule_applies_to_media(selector->rule,
 					state->media)) {
-				error = match_selector_chain(ctx, selector,
-						state);
-				if (error != CSS_OK)
-					goto cleanup;
+				if (_rule_good_for_element_name(selector, &src,
+						state)) {
+					error = match_selector_chain(
+							ctx, selector,
+							state);
+					if (error != CSS_OK)
+						goto cleanup;
+				}
 			}
 		}
 
 		/* Advance to next selector in whichever chain we extracted 
 		 * the processed selector from. */
-		if (selector == *node_selectors) {
+		switch (src.source) {
+		case CSS_SELECT_RULE_SRC_ELEMENT:
 			error = node_iterator(
 					node_selectors,	&node_selectors);
-		} else if (selector == *id_selectors) {
+			break;
+
+		case CSS_SELECT_RULE_SRC_ID:
 			error = id_iterator(
 					id_selectors, &id_selectors);
-		} else if (selector == *univ_selectors) {
+			break;
+
+		case CSS_SELECT_RULE_SRC_UNIVERSAL:
 			error = univ_iterator(
 					univ_selectors, &univ_selectors);
-		} else {
-			for (i = 0; i < n_classes; i++) {
-				if (selector == *(class_selectors[i])) {
-					error = class_iterator(
-							class_selectors[i], 
-							&class_selectors[i]);
-					break;
-				}
-			}
+			break;
+
+		case CSS_SELECT_RULE_SRC_CLASS:
+			error = class_iterator(
+					class_selectors[src.class],
+					&class_selectors[src.class]);
+			break;
 		}
 
 		if (error != CSS_OK)

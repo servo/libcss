@@ -198,27 +198,27 @@ css_error css__selector_hash_insert(css_selector_hash *hash,
 		return CSS_BADPARM;
 
 	/* Work out which hash to insert into */
-	if (lwc_string_length(selector->data.qname.name) != 1 ||
-			lwc_string_data(selector->data.qname.name)[0] != '*') {
-		/* Named element */
-		mask = hash->elements.n_slots - 1;
-		index = _hash_name(selector->data.qname.name) & mask;
+	if ((name = _id_name(selector)) != NULL) {
+		/* Named ID */
+		mask = hash->ids.n_slots - 1;
+		index = _hash_name(name) & mask;
 
-		error = _insert_into_chain(hash, &hash->elements.slots[index], 
+		error = _insert_into_chain(hash, &hash->ids.slots[index],
 				selector);
 	} else if ((name = _class_name(selector)) != NULL) {
 		/* Named class */
 		mask = hash->classes.n_slots - 1;
 		index = _hash_name(name) & mask;
 
-		error = _insert_into_chain(hash, &hash->classes.slots[index], 
+		error = _insert_into_chain(hash, &hash->classes.slots[index],
 				selector);
-	} else if ((name = _id_name(selector)) != NULL) {
-		/* Named ID */
-		mask = hash->ids.n_slots - 1;
-		index = _hash_name(name) & mask;
+	} else if (lwc_string_length(selector->data.qname.name) != 1 ||
+			lwc_string_data(selector->data.qname.name)[0] != '*') {
+		/* Named element */
+		mask = hash->elements.n_slots - 1;
+		index = _hash_name(selector->data.qname.name) & mask;
 
-		error = _insert_into_chain(hash, &hash->ids.slots[index], 
+		error = _insert_into_chain(hash, &hash->elements.slots[index],
 				selector);
 	} else {
 		/* Universal chain */
@@ -245,28 +245,28 @@ css_error css__selector_hash_remove(css_selector_hash *hash,
 	if (hash == NULL || selector == NULL)
 		return CSS_BADPARM;
 
-	/* Work out which hash to insert into */
-	if (lwc_string_length(selector->data.qname.name) != 1 ||
-			lwc_string_data(selector->data.qname.name)[0] != '*') {
-		/* Named element */
-		mask = hash->elements.n_slots - 1;
-		index = _hash_name(selector->data.qname.name) & mask;
+	/* Work out which hash to remove from */
+	if ((name = _id_name(selector)) != NULL) {
+		/* Named ID */
+		mask = hash->ids.n_slots - 1;
+		index = _hash_name(name) & mask;
 
-		error = _remove_from_chain(hash, &hash->elements.slots[index], 
+		error = _remove_from_chain(hash, &hash->ids.slots[index],
 				selector);
 	} else if ((name = _class_name(selector)) != NULL) {
 		/* Named class */
 		mask = hash->classes.n_slots - 1;
 		index = _hash_name(name) & mask;
 
-		error = _remove_from_chain(hash, &hash->classes.slots[index], 
+		error = _remove_from_chain(hash, &hash->classes.slots[index],
 				selector);
-	} else if ((name = _id_name(selector)) != NULL) {
-		/* Named ID */
-		mask = hash->ids.n_slots - 1;
-		index = _hash_name(name) & mask;
+	} else if (lwc_string_length(selector->data.qname.name) != 1 ||
+			lwc_string_data(selector->data.qname.name)[0] != '*') {
+		/* Named element */
+		mask = hash->elements.n_slots - 1;
+		index = _hash_name(selector->data.qname.name) & mask;
 
-		error = _remove_from_chain(hash, &hash->ids.slots[index], 
+		error = _remove_from_chain(hash, &hash->elements.slots[index],
 				selector);
 	} else {
 		/* Universal chain */
