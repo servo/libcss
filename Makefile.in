@@ -9,6 +9,10 @@ ifeq ($(UNAME),Linux)
     OSTYPE=linux
 endif
 
+PROPERTY_PARSER_GEN_C_SRC= \
+	src/parse/properties/css_property_parser_gen.c \
+	$(NULL)
+
 C_SRC= \
 	src/charset/detect.c \
 	src/lex/lex.c \
@@ -28,7 +32,6 @@ C_SRC= \
 	src/parse/properties/column_rule.c \
 	src/parse/properties/columns.c \
 	src/parse/properties/content.c \
-	src/parse/properties/css_property_parser_gen.c \
 	src/parse/properties/cue.c \
 	src/parse/properties/cursor.c \
 	src/parse/properties/elevation.c \
@@ -177,8 +180,24 @@ CFLAGS += -I$(VPATH)/src -I$(VPATH)/include -I$(VPATH)/../libwapcaplet/include -
 .PHONY: all
 all: libcss.dummy
 
-libcss.a: $(C_OBJS)
-	$(AR) rcs $@ $^
+PROPERTY_PARSER_GEN_OBJS = $(patsubst %.c,%.o,$(PROPERTY_PARSER_GEN_C_SRC))
+
+css_property_parser_gen: $(PROPERTY_PARSER_GEN_OBJS)
+	$(CC) $(CFLAGS) -o $@ $<
+
+gen_properties.dummy: css_property_parser_gen src/parse/properties/properties.gen
+	i=0; \
+	while read line; do \
+		if [[ $$line =~ ^[a-zA-Z] ]]; then \
+			$(realpath $<) -o gen_properties_$$i.c "$$line" && \
+			$(CC) $(CFLAGS) -o gen_properties_$$i.o -c gen_properties_$$i.c && \
+			i=$$((i+1)); \
+		fi; \
+	done < $(VPATH)/src/parse/properties/properties.gen
+	touch $@
+
+libcss.a: $(C_OBJS) gen_properties.dummy
+	$(AR) rcs $@ $(C_OBJS) gen_properties_*.o
 
 %.o: %.c
 	mkdir -p `dirname $@` && $(CC) $(CFLAGS) -o $@ -c $<
