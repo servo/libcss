@@ -210,6 +210,9 @@ libcss.a: $(C_OBJS) gen_properties.dummy
 libcss.dummy: libcss.a
 	touch $@
 
+.PHONY: check
+check:
+
 .PHONY: clean
 clean:
 	rm -f *.so *.dylib *.dll *.dummy src/*.o
