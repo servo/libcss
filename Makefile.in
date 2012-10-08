@@ -1,5 +1,8 @@
 VPATH=%VPATH%
 
+# FIXME: We specificially need bash for one of the build rules
+SHELL=/bin/bash
+
 UNAME=$(shell uname)
 
 ifeq ($(UNAME),Darwin)
@@ -184,6 +187,8 @@ PROPERTY_PARSER_GEN_OBJS = $(patsubst %.c,%.o,$(PROPERTY_PARSER_GEN_C_SRC))
 
 css_property_parser_gen: $(PROPERTY_PARSER_GEN_OBJS)
 	$(CC) $(CFLAGS) -o $@ $<
+
+
 
 gen_properties.dummy: css_property_parser_gen src/parse/properties/properties.gen
 	i=0; \
