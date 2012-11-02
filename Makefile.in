@@ -215,6 +215,6 @@ check:
 
 .PHONY: clean
 clean:
-	rm -f *.so *.dylib *.dll *.dummy src/*.o
+	rm -f *.so *.a *.dylib *.dll *.dummy gen_prop*.o css_property_parser_gen gen_prop*.c src/*.o src/*/*.o
 
 
