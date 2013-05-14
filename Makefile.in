@@ -178,7 +178,7 @@ C_SRC= \
 	$(NULL)
 
 C_OBJS = $(patsubst %.c,%.o,$(C_SRC))
-CFLAGS += -I$(VPATH)/src -I$(VPATH)/include -I$(VPATH)/../libwapcaplet/include -I$(VPATH)/../libparserutils/include -fPIC
+CFLAGS += -I$(VPATH)/src -I$(VPATH)/include -I$(VPATH)/../../wapcaplet/libwapcaplet/include -I$(VPATH)/../../libparserutils/libparserutils/include -fPIC
 
 .PHONY: all
 all: libcss.dummy
