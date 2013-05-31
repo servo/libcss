@@ -2209,83 +2209,83 @@ void dump_chain(const css_selector *selector)
 	do {
 		switch (detail->type) {
 		case CSS_SELECTOR_ELEMENT:
-			if (lwc_string_length(detail->name) == 1 && 
-				lwc_string_data(detail->name)[0] == '*' &&
+			if (lwc_string_length(detail->qname.name) == 1 && 
+				lwc_string_data(detail->qname.name)[0] == '*' &&
 					detail->next == 1) {
 				break;
 			}
 			fprintf(stderr, "%.*s",
-					(int) lwc_string_length(detail->name),
-					lwc_string_data(detail->name));
+					(int) lwc_string_length(detail->qname.name),
+					lwc_string_data(detail->qname.name));
 			break;
 		case CSS_SELECTOR_CLASS:
 			fprintf(stderr, ".%.*s",
-					(int) lwc_string_length(detail->name),
-					lwc_string_data(detail->name));
+					(int) lwc_string_length(detail->qname.name),
+					lwc_string_data(detail->qname.name));
 			break;
 		case CSS_SELECTOR_ID:
 			fprintf(stderr, "#%.*s",
-					(int) lwc_string_length(detail->name),
-					lwc_string_data(detail->name));
+					(int) lwc_string_length(detail->qname.name),
+					lwc_string_data(detail->qname.name));
 			break;
 		case CSS_SELECTOR_PSEUDO_CLASS:
 		case CSS_SELECTOR_PSEUDO_ELEMENT:
 			fprintf(stderr, ":%.*s",
-					(int) lwc_string_length(detail->name),
-					lwc_string_data(detail->name));
+					(int) lwc_string_length(detail->qname.name),
+					lwc_string_data(detail->qname.name));
 
-			if (detail->value != NULL) {
+			if (detail->value.string != NULL) {
 				fprintf(stderr, "(%.*s)",
-					(int) lwc_string_length(detail->value),
-					lwc_string_data(detail->value));
+					(int) lwc_string_length(detail->value.string),
+					lwc_string_data(detail->value.string));
 			}
 			break;
 		case CSS_SELECTOR_ATTRIBUTE:
 			fprintf(stderr, "[%.*s]",
-					(int) lwc_string_length(detail->name),
-					lwc_string_data(detail->name));
+					(int) lwc_string_length(detail->qname.name),
+					lwc_string_data(detail->qname.name));
 			break;
 		case CSS_SELECTOR_ATTRIBUTE_EQUAL:
 			fprintf(stderr, "[%.*s=\"%.*s\"]",
-					(int) lwc_string_length(detail->name),
-					lwc_string_data(detail->name),
-					(int) lwc_string_length(detail->value),
-					lwc_string_data(detail->value));
+					(int) lwc_string_length(detail->qname.name),
+					lwc_string_data(detail->qname.name),
+					(int) lwc_string_length(detail->value.string),
+					lwc_string_data(detail->value.string));
 			break;
 		case CSS_SELECTOR_ATTRIBUTE_DASHMATCH:
 			fprintf(stderr, "[%.*s|=\"%.*s\"]",
-					(int) lwc_string_length(detail->name),
-					lwc_string_data(detail->name),
-					(int) lwc_string_length(detail->value),
-					lwc_string_data(detail->value));
+					(int) lwc_string_length(detail->qname.name),
+					lwc_string_data(detail->qname.name),
+					(int) lwc_string_length(detail->value.string),
+					lwc_string_data(detail->value.string));
 			break;
 		case CSS_SELECTOR_ATTRIBUTE_INCLUDES:
 			fprintf(stderr, "[%.*s~=\"%.*s\"]",
-					(int) lwc_string_length(detail->name),
-					lwc_string_data(detail->name),
-					(int) lwc_string_length(detail->value),
-					lwc_string_data(detail->value));
+					(int) lwc_string_length(detail->qname.name),
+					lwc_string_data(detail->qname.name),
+					(int) lwc_string_length(detail->value.string),
+					lwc_string_data(detail->value.string));
 			break;
 		case CSS_SELECTOR_ATTRIBUTE_PREFIX:
 			fprintf(stderr, "[%.*s^=\"%.*s\"]",
-					(int) lwc_string_length(detail->name),
-					lwc_string_data(detail->name),
-					(int) lwc_string_length(detail->value),
-					lwc_string_data(detail->value));
+					(int) lwc_string_length(detail->qname.name),
+					lwc_string_data(detail->qname.name),
+					(int) lwc_string_length(detail->value.string),
+					lwc_string_data(detail->value.string));
 			break;
 		case CSS_SELECTOR_ATTRIBUTE_SUFFIX:
 			fprintf(stderr, "[%.*s$=\"%.*s\"]",
-					(int) lwc_string_length(detail->name),
-					lwc_string_data(detail->name),
-					(int) lwc_string_length(detail->value),
-					lwc_string_data(detail->value));
+					(int) lwc_string_length(detail->qname.name),
+					lwc_string_data(detail->qname.name),
+					(int) lwc_string_length(detail->value.string),
+					lwc_string_data(detail->value.string));
 			break;
 		case CSS_SELECTOR_ATTRIBUTE_SUBSTRING:
 			fprintf(stderr, "[%.*s*=\"%.*s\"]",
-					(int) lwc_string_length(detail->name),
-					lwc_string_data(detail->name),
-					(int) lwc_string_length(detail->value),
-					lwc_string_data(detail->value));
+					(int) lwc_string_length(detail->qname.name),
+					lwc_string_data(detail->qname.name),
+					(int) lwc_string_length(detail->value.string),
+					lwc_string_data(detail->value.string));
 			break;
 		}
 
