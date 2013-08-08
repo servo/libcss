@@ -11,6 +11,11 @@ endif
 ifeq ($(UNAME),Linux)
     OSTYPE=linux
 endif
+ifeq ($(CFG_OSTYPE),linux-androideabi)
+    OSTYPE=android
+endif
+
+HOST_CC ?= gcc
 
 PROPERTY_PARSER_GEN_C_SRC= \
 	src/parse/properties/css_property_parser_gen.c \
@@ -183,10 +188,10 @@ CFLAGS += -I$(VPATH)/src -I$(VPATH)/include -I$(VPATH)/../../wapcaplet/libwapcap
 .PHONY: all
 all: libcss.dummy
 
-PROPERTY_PARSER_GEN_OBJS = $(patsubst %.c,%.o,$(PROPERTY_PARSER_GEN_C_SRC))
+PROPERTY_PARSER_GEN_OBJS = $(patsubst %.c,%.o_sys,$(PROPERTY_PARSER_GEN_C_SRC))
 
 css_property_parser_gen: $(PROPERTY_PARSER_GEN_OBJS)
-	$(CC) $(CFLAGS) -o $@ $<
+	$(HOST_CC) $(CFLAGS) -o $@ $<
 
 
 
@@ -207,6 +212,9 @@ libcss.a: $(C_OBJS) gen_properties.dummy
 %.o: %.c
 	mkdir -p `dirname $@` && $(CC) $(CFLAGS) -o $@ -c $<
 
+%.o_sys: %.c
+	mkdir -p `dirname $@` && $(HOST_CC) $(CFLAGS) -o $@ -c $<
+
 libcss.dummy: libcss.a
 	touch $@
 
@@ -215,6 +223,6 @@ check:
 
 .PHONY: clean
 clean:
-	rm -f *.so *.a *.dylib *.dll *.dummy gen_prop*.o css_property_parser_gen gen_prop*.c src/*.o src/*/*.o src/*/*/*.o
+	rm -f *.so *.a *.dylib *.dll *.dummy gen_prop*.o css_property_parser_gen gen_prop*.c src/*.o src/*/*.o src/*/*/*.o src/*.o_sys src/*/*.o_sys src/*/*/*.o_sys
 
 
